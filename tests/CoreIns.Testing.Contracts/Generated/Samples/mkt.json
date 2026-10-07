@@ -23,9 +23,19 @@
           "final": true,
           "mergeTrace": [
             "unspecified"
-          ]
+          ],
+          "legalStatus": "NotRegulatory",
+          "legalSourceRef": "sample",
+          "motorPath": true,
+          "provisional": true,
+          "packId": "sample",
+          "timeBasis": "sample"
         }
-      ]
+      ],
+      "missingKeys": [
+        "SAMPLE_CODE"
+      ],
+      "hasProvisionalValues": true
     },
     "mkt.CrossBorder.check": {
       "authorised": true,
@@ -75,7 +85,15 @@
         "currency": "EUR"
       },
       "ruleId": "0192a18a-6ba6-7418-8c03-601a9ca75854",
-      "residual": "unspecified"
+      "residual": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ruleKey": "SAMPLE_CODE",
+      "mode": "HALF_UP",
+      "scale": 1,
+      "legalStatus": "sample",
+      "provisional": true
     },
     "mkt.Spi.bind": {
       "implementationHandle": "unspecified",
@@ -189,9 +207,19 @@
           "final": true,
           "mergeTrace": [
             "unspecified"
-          ]
+          ],
+          "legalStatus": "NotRegulatory",
+          "legalSourceRef": "sample",
+          "motorPath": true,
+          "provisional": true,
+          "packId": "sample",
+          "timeBasis": "sample"
         }
-      ]
+      ],
+      "missingKeys": [
+        "SAMPLE_CODE"
+      ],
+      "hasProvisionalValues": true
     },
     "CrossBorderBasisResponse": {
       "authorised": true,
@@ -325,8 +353,12 @@
         "currency": "EUR"
       },
       "currency": "EUR",
-      "purpose": "unspecified",
-      "context": "unspecified"
+      "purpose": "SAMPLE_CODE",
+      "context": {
+        "legalEntity": "SAMPLE_CODE",
+        "taxClass": "SAMPLE_CODE",
+        "validAt": "2026-10-07"
+      }
     },
     "RoundingApplyResponse": {
       "amountAfterRounding": {
@@ -334,7 +366,15 @@
         "currency": "EUR"
       },
       "ruleId": "0192ea34-547c-784e-8413-5a81424293df",
-      "residual": "unspecified"
+      "residual": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ruleKey": "SAMPLE_CODE",
+      "mode": "HALF_UP",
+      "scale": 1,
+      "legalStatus": "sample",
+      "provisional": true
     },
     "SpiBindRequest": {
       "entity": "unspecified",

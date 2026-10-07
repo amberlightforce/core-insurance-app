@@ -16,6 +16,14 @@ public sealed record ConfigurationResolveResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("values")]
     public required global::System.Collections.Generic.IReadOnlyList<ValueItem> Values { get; init; }
 
+    /// <summary>Registered keys that have no value for the context. Empty keys fail closed (D-REG-01): callers must not substitute a default.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("missingKeys")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> MissingKeys { get; init; }
+
+    /// <summary>At least one returned value is not Settled (non-production environments only)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hasProvisionalValues")]
+    public required bool HasProvisionalValues { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record ValueItem
@@ -58,5 +66,71 @@ public sealed record ConfigurationResolveResponse
         [global::System.Text.Json.Serialization.JsonPropertyName("mergeTrace")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? MergeTrace { get; init; }
+
+        /// <summary>Legal status of the value (REQ-MKT-343, D-REG-01). Anything but Settled or NotRegulatory is refused when the environment is Production (D-REG-02).</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+        public required LegalStatusValue LegalStatus { get; init; }
+
+        /// <summary>Source of the value: PRD id and section, plus the law where the PRD cites it (D-REG-01)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("legalSourceRef")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? LegalSourceRef { get; init; }
+
+        /// <summary>The value sits on the motor path (REQ-MKT-343)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("motorPath")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public bool? MotorPath { get; init; }
+
+        /// <summary>Visible flag (REQ-MKT-343): true when the value is not Settled and was served in a non-production environment</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+        public required bool Provisional { get; init; }
+
+        /// <summary>Pack that supplied the value; absent for core defaults</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("packId")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? PackId { get; init; }
+
+        /// <summary>Time basis the value was resolved on (REQ-MKT-043)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("timeBasis")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? TimeBasis { get; init; }
+
+        /// <summary>Legal status of the value (REQ-MKT-343, D-REG-01). Anything but Settled or NotRegulatory is refused when the environment is Production (D-REG-02).</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<LegalStatusValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum LegalStatusValue
+        {
+            /// <summary><c>NotRegulatory</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NotRegulatory")]
+            NotRegulatory,
+
+            /// <summary><c>Settled</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Settled")]
+            Settled,
+
+            /// <summary><c>PendingOpinion</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PendingOpinion")]
+            PendingOpinion,
+
+            /// <summary><c>Verify</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Verify")]
+            Verify,
+
+            /// <summary><c>Unverified</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Unverified")]
+            Unverified,
+
+            /// <summary><c>Uncertain</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Uncertain")]
+            Uncertain,
+
+            /// <summary><c>MarketPractice</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MarketPractice")]
+            MarketPractice,
+
+            /// <summary><c>Draft</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Draft")]
+            Draft,
+        }
     }
 }

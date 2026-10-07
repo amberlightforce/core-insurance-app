@@ -78,6 +78,21 @@ public enum LegalStatus
     Settled,
     Unverified,
     Draft,
+
+    /// <summary>Not a statutory, tax or clock rule (core defaults, currency roles); servable in Production.</summary>
+    NotRegulatory,
+
+    /// <summary>Awaiting the D2 tax and legal opinion (PRD-17 index: Pending opinion, OI-MKT-19).</summary>
+    PendingOpinion,
+
+    /// <summary>Source to be verified (PRD-17 index: Verify).</summary>
+    Verify,
+
+    /// <summary>Applicability uncertain (PRD-17 index: Uncertain).</summary>
+    Uncertain,
+
+    /// <summary>Market practice, no legal source (PRD-17 index: Market practice).</summary>
+    MarketPractice,
 }
 
 /// <summary>A money amount in a currency (ISO 4217). Money is always decimal (ADR §2 rule 2).</summary>
