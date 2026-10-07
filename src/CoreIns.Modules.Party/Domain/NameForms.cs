@@ -136,6 +136,17 @@ internal sealed class NameForms(INameTransliterator transliterator, ILanguageRul
     public static string PersonDisplay(string? given, string? family) =>
         string.Join(' ', new[] { given, family }.Where(part => !string.IsNullOrWhiteSpace(part)).Select(part => part!.Trim()));
 
+    /// <summary>Shortest value whose last three characters may be shown; shorter values are masked completely.</summary>
+    public const int MinimumLengthForSuffix = 7;
+
+    /// <summary>The characters kept for masked display: the last three, or none for short values (REQ-PTY-044).</summary>
+    public static string MaskSuffix(string normalised) =>
+        normalised.Length >= MinimumLengthForSuffix ? normalised[^3..] : string.Empty;
+
+    /// <summary>Escapes LIKE wildcards (backslash is PostgreSQL's default LIKE escape).</summary>
+    public static string EscapeLike(string value) =>
+        value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal);
+
     /// <summary>Last characters of a value for masked display (REQ-PTY-044).</summary>
     public static string Mask(string suffix) => string.Create(CultureInfo.InvariantCulture, $"******{suffix}");
 }

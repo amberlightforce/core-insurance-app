@@ -60,9 +60,8 @@ public interface IPartyPartyService
     /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    /// <param name="name">Person or organisation name in any script; accent-, case- and script-insensitive (REQ-PTY-001, REQ-PTY-065..067)</param>
     /// <param name="partyNumber">Exact party number</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage> SearchAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, string? name = null, string? partyNumber = null, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage> SearchAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, string? partyNumber = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Search parties (POST form, criteria in the body)</summary>
     /// <remarks>
