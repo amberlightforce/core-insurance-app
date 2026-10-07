@@ -163,3 +163,45 @@ co-signing access (OI-UW-04, OI-DOC-05) · BoG DORA channel (OI-CMP-09) · SMS s
 | D-ARC-07a | **Refines D-ARC-07.** Gotenberg is used only for its Chromium route (`generateTaggedPdf`, `failOnConsoleExceptions`, `failOnResourceLoadingFailed`, `preferCssPageSize`). Its `pdfa`/`pdfua`/`metadata`/`embeds` options are NOT used for archive copies. An in-house .NET ArchiveFinaliser (no PDF library) produces PDF/A-3a + PDF/UA-1, embeds the payload, normalises bytes deterministically and applies the PAdES seal. Headers and footers use CSS `@page` margin boxes, not Chromium header templates. Glyph gates: a pre-render cmap check, a Gotenberg image with declared fonts only, and a post-render PdfPig font check. Documents over ~150 pages render in chunks (the merge is still to be built in W2-DOC). veraPDF runs in CI | Spike evidence: veraPDF 3a/3b/3u/UA-1 pass; identical SHA-256 across 9 renders | Made |
 | D-ARC-07b | Approved dependencies: PdfPig 0.1.11 (Apache-2.0), System.Security.Cryptography.Pkcs (MIT), BouncyCastle.Cryptography (MIT, for LTV), the official ICC sRGB profile, Noto Sans 2.015 (OFL), veraPDF CLI (CI only, external process), EU DSS (LGPL sidecar, optional, validation). iText excluded | ADR rule 11 | Made |
 | D-ARC-07c | Infra delta: the 2 GiB Gotenberg container cannot render 500+ page documents in one call (Chromium peaked at 5.6 GiB). Use chunking by default; a large-document Gotenberg pool is a Stage-2 option | Measured | Made |
+
+## M. Rule engine (F-1f c)
+
+| ID | Decision | Reason | Status |
+|---|---|---|---|
+| D-ARC-10a | The rule language is a CEL subset with decimal-only numbers (no double, uint or bytes), date functions, explicit `round(x, places, mode)`, and decision tables (UNIQUE/FIRST/PRIORITY with explicit integer priority/COLLECT). The decision-table content hash is SHA-256 over canonical S-expression text (separate from the RFC 8785 configuration hash in D-ARC-12). Persistence, approval workflow and DMN import/export belong to W1-PLT-04 | Builder design, accepted pending review | Made |
+| OQ-ORC-01 | `ageAt` for a 29 February birthday in a common year counts the birthday on 28 February. Legal and actuarial teams to confirm whether Greek practice uses 1 March. Not stated in any PRD | Never invent | Open |
+
+## N. API contract rulings (F-1c apis)
+
+| ID | Decision | Reason | Status |
+|---|---|---|---|
+| D-API-01 | Error codes follow the contract format `<MOD>-ERR-<NNN or NAME>`. PLAN §4.2's `<MOD>-<NNN>` is superseded | Contract wins | Made |
+| D-API-02 | Time-travel query parameters are `validAt` (valid time) and `knownAt` (transaction time), per the contract. PLAN's `asOf` is superseded and must not appear as a second name | One name per concept | Made |
+| D-API-03 | Operation names are the owner PRD §9.1 names (R-87). Superseded names are recorded in `x-superseded-names` (e.g. `pol.Submission.create` + `pol.Job.quote`, not `pol.Quote.create`; `uw.Rules.evaluate`; `pfc.ProductVersion.resolve`) | Owner is canonical | Made |
+| D-API-04 | 65 `Resource.*` operation families and 220 minimal operations are completed (members, I/O, authority types, exposure) by the owning WP, which may add operations within its family without a contract change request. Renaming or removing a published operation needs an orchestrator ruling | Interface-first, owner completes | Made |
+| D-API-05 | Problem Details carries `traceId` (W3C trace, = contract `correlation_id`); lineage lives in business keys (D5) | D-CON-01 | Made |
+
+## O. Scaffold review (F-1a)
+
+| ID | Decision | Reason | Status |
+|---|---|---|---|
+| D-FE-10 | MSAL React and OIDC cookie sign-in (incl. browser access to the Hangfire dashboard) are deferred to the W1-PLT identity WP | They belong with the identity work; the scaffold stays bearer-only | Made |
+| D-ARC-17 | Floating-point ban is enforced by the in-repo Roslyn analyser COREINS001 (tools/CoreIns.Analyzers), not BannedApiAnalyzers, which does not catch `double`/`float` keywords or literals. This is a doc delta to ADR §2 rule 2 | Builder evidence, reviewer verified | Made |
+| D-ARC-18 | Tests run on xunit.v3 + Microsoft.Testing.Platform with central package management. All test projects (including the rule engine) conform | Scaffold standard | Made |
+| D-ARC-19 | Azure DB bootstrap (roles, ownership, extensions) is one idempotent SQL script shared by local pg-init and an Azure bootstrap step. The infra spec §6 delta is recorded in the repo docs | Review D1 | Made |
+| D-ARC-10b | Rule engine: silent decimal precision loss is forbidden. `+ - *` that would exceed decimal precision raise RULE-PRECISION-LOSS. Division rounds to 28 significant digits and money must pass through an explicit `round()` | ADR rule 2 (explicit rounding) | Made |
+| D-ARC-10c | Rule engine: expected result types are non-null unless declared nullable; a null result raises RULE-NULL-VALUE at run time | Money amounts must never be null | Made |
+| D-ARC-10d | Rule engine: the evaluation cost budget is proportional to the work done, with an allocation cap and a wall-clock deadline. Rule and table hashes cover the input schema and host-function signatures, and the canonical text is injective | Review F-1f(c) D1–D3 | Made |
+| D-API-06 | **Contract maturity.** A published v1 operation counts as *pre-release* until the first consumer WP that calls it merges. Until then, its owner may tighten it: type `Unspecified` members, add required inputs and enums, split fields. After that, the normal rule applies (additive within a major; breaking means a new major). Critical-chain anchor operations (PLAN §2) are fully typed now in F-1c | Resolves the conflict between interface-first and owner-completes (review D-4) | Made |
+| D-API-07 | Dry-run is required where the PRD requires it, and also on every channel facade that wraps an operation offering dry-run (e.g. `chn.PartnerQuote.bind` mirrors `pol.Job.bind`) | Contract §3.5.3 read with PRD silence | Made |
+| D-API-08 | "One name per concept" covers parameters and body fields: the valid-time instant is always `validAt`, the transaction-time instant always `knownAt`. PRD spellings (`asAt`, `asOf`, `date`, `versionOrAsAt`) are kept only in `x-prd-name`. Operation names from the PRDs (`dat.Query.asOf`, `doc.Document.renderAsOf`, `DOC-ERR-ASOF-UNSUPPORTED`) stay, under D-API-03 | Review D-2/D-11 | Made |
+| D-API-09 | Each time-travel input appears exactly once, as a query parameter, never duplicated in the body | Contract §3.5.5 | Made |
+| D-API-10 | There is no separate `pol.Job.issue`. Issuance happens inside `pol.Job.bind` (the `holdIssuance` flag plus the PRE_ISSUE UW checkpoint), as PRD-05 §9.1 defines. My brief's mention of `pol.Job.issue` is withdrawn | Owner PRD is canonical | Made |
+| D-API-11 | `cmp.FiscalDocument.request.sourceType` stays an open code (pre-release, D-API-06) until W5-CMP settles one value list between REQ-CMP-030 and integration review XRF-001 | Owner WP decides within pre-release | Made |
+| D-ARC-10e | Rule engine: the effective RuleLimits are part of the environment fingerprint and hash. RULE-TIMEOUT/RULE-CANCELLED are operational, fail-closed and retryable, never a business outcome. Values crossing the engine boundary are bounded in weight | Re-review F-1f N1/M2 | Made |
+| D-FE-11 | App rail selected state uses the v3 mockup's 3 px indicator bar (open item M6 closed) | v3 is approved | Made |
+| D-FE-12 | Abbreviated numbers keep Intl's no-break space before «χιλ./εκ./δισ.» | Typographic norm | Made |
+| D-FE-13 | Amount in words below 1 € reads «πενήντα λεπτά» (no «μηδέν ευρώ»); exactly 0 reads «μηδέν ευρώ» | Natural reading | Made |
+| D-FE-14 | Greek status labels use the contract glossary; any other label is flagged `glossary: pending` for business sign-off (non-blocking) | Language of record | Made |
+| D-PRG-15 | Builder agents must not spawn their own sub-agents (the concurrency cap of 4 covers all agents) | Keep the user's limit | Made |
+| D-PRG-16 | While GitHub CI cannot run (the active account lacks the `workflow` scope), a WP that passes independent review with the full local suite green (Docker-only tests excepted) is merged into **local** main as "merged, CI pending". The first CI run after pushing is enabled confirms it, and any failure is fixed forward with top priority | Unblocks dependent waves; the Docker/CI gap is environmental | Made |

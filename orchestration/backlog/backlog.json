@@ -127,12 +127,11 @@
    "mustCount": 0,
    "points": null,
    "dependsOn": [],
-   "status": "in review",
-   "owner": "reviewer agent",
-   "reviewAttempts": 0,
+   "status": "merged",
+   "owner": "merged locally (CI pending)",
+   "reviewAttempts": 2,
    "blockers": [
-    "GitHub push needs 'workflow' token scope (user: gh auth refresh -s workflow)",
-    "Integration tests unrun locally: Docker Desktop broken"
+    "CI not yet run: GitHub 'workflow' scope missing on active account"
    ]
   },
   {
@@ -149,8 +148,8 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "not started",
-   "owner": null,
+   "status": "building",
+   "owner": "builder: shared kernel + platform primitives",
    "reviewAttempts": 0,
    "blockers": []
   },
@@ -168,9 +167,9 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "building",
-   "owner": "events MERGED; builder: OpenAPI contracts (worktree); C# records after F-1a",
-   "reviewAttempts": 1,
+   "status": "in review",
+   "owner": "reviewer: API contracts (attempt 2)",
+   "reviewAttempts": 2,
    "blockers": []
   },
   {
@@ -188,7 +187,7 @@
     "F-1a"
    ],
    "status": "building",
-   "owner": "builder: design system (worktree)",
+   "owner": "builder: finishing components + patterns",
    "reviewAttempts": 0,
    "blockers": []
   },
@@ -225,9 +224,9 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "building",
-   "owner": "builders: CEL engine + Gotenberg spike (worktrees)",
-   "reviewAttempts": 0,
+   "status": "failed",
+   "owner": "builder: final fix attempt (bounded outputs)",
+   "reviewAttempts": 2,
    "blockers": []
   },
   {
