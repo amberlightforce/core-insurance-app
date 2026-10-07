@@ -54,9 +54,13 @@ describe('amountInWords (Greek, EUR)', () => {
     expect(amountInWords(input)).toBe(expected);
   });
 
-  it('accepts numbers without float drift', () => {
-    expect(amountInWords(0.1 + 0.2)).toBe('τριάντα λεπτά');
+  it('accepts exact numbers but rejects float noise instead of rounding it', () => {
     expect(amountInWords(6480)).toBe('έξι χιλιάδες τετρακόσια ογδόντα ευρώ');
+    expect(amountInWords(19.99)).toBe('δεκαεννέα ευρώ και ενενήντα εννέα λεπτά');
+    expect(() => amountInWords(0.1 + 0.2)).toThrow(RangeError);
+    expect(() => amountInWords(1.005)).toThrow(RangeError);
+    expect(() => amountInWords(Number.NaN)).toThrow(RangeError);
+    expect(() => amountInWords(1e21)).toThrow(RangeError);
   });
 
   it('capitalises on request', () => {

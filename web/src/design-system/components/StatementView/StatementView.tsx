@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { Icon } from '../../icons';
 import { useRegionFormat } from '../../preferences/context';
 import { cx, defined } from '../../utils/cx';
-import { formatDate, formatMoney } from '../KpiTile/format';
+import { formatDate } from '../../../format/dates';
+import { formatMoney } from '../../../format/numbers';
 import { ErrorState, SkeletonBlock } from '../States';
 import { Heading, type HeadingLevel } from '../States/Heading';
 import styles from './StatementView.module.css';
@@ -125,7 +126,7 @@ export function StatementView({
       >
         {rows.map(({ line, running: after }) => {
           const adverse = isAdverseLine(line, adverseRule);
-          const amountText = formatMoney(line.amount, region, currency);
+          const amountText = formatMoney(line.amount, { region, currency });
           const meta = [
             line.date ? formatDate(line.date, region) : null,
             line.reference ?? null,
@@ -174,7 +175,7 @@ export function StatementView({
                       <span className="ds-visually-hidden">
                         {t('statementView.runningBalance')}
                       </span>
-                      {formatMoney(after, region, currency)}
+                      {formatMoney(after, { region, currency })}
                     </>
                   )}
                 </span>
@@ -199,7 +200,7 @@ export function StatementView({
         ) : state === 'error' ? null : (
           <>
             <span className={styles.balance}>
-              {formatMoney(direction === 'settled' ? 0 : Math.abs(balance), region, currency)}
+              {formatMoney(direction === 'settled' ? 0 : Math.abs(balance), { region, currency })}
             </span>
             <span className={styles.direction} data-direction={direction}>
               {directionLabel}

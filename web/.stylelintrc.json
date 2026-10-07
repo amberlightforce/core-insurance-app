@@ -39,8 +39,8 @@
     ],
     "declaration-property-value-disallowed-list": [
       {
-        "/^(margin|padding|gap|row-gap|column-gap|inset)(-.*)?$/": [
-          "/(^|[\\s(,])-?(?!0(px)?\\b)\\d*\\.?\\d+(px|rem|em)\\b/"
+        "/^(margin|padding|gap|row-gap|column-gap|inset|top|right|bottom|left)(-.*)?$/": [
+          "/(^|[\\s(,])-?(?!0(?:px|rem|em)?(?![.\\d]))\\d*\\.?\\d+(px|rem|em)\\b/"
         ],
         "/^border(-[a-z]+)*-radius$/": ["/\\d+(px|rem|em)\\b/"],
         "z-index": ["/^-?\\d+$/"],
@@ -52,10 +52,14 @@
         "/^transition(-property)?$/": [
           "/(^|[\\s,])(all|width|height|top|left|right|bottom|margin|padding|max-height|min-height|inset)([\\s,]|$)/"
         ],
-        "/^(font|font-size|line-height)$/": ["/\\d+px/"]
+        "/^(font-size|line-height|letter-spacing)$/": [
+          "/(^|[\\s(,])-?(?!0(?![.\\d\\w%]))\\d*\\.?\\d+/"
+        ],
+        "font": ["/(^|[\\s,/])\\d*\\.?\\d+(px|rem|em|%)?(?![\\w-])/"],
+        "box-shadow": ["/(^|[\\s(,])-?(?!0(?:px|rem|em)?(?![.\\d]))\\d*\\.?\\d+(px|rem|em)\\b/"]
       },
       {
-        "message": "Off-token value: use space/radius/z/motion/type tokens; animate transform and opacity only (rules 1, 10)"
+        "message": "Off-token value: use space/size/radius/z/motion/type/elevation tokens; animate transform and opacity only (rules 1, 10)"
       }
     ],
     "declaration-no-important": null,

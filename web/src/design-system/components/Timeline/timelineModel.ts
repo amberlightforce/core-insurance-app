@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 
+import { formatDate, formatDateTime } from '../../../format/dates';
 import type { RegionFormat } from '../../preferences';
 import type { StatusFamily } from '../../tokens';
 
@@ -136,26 +137,12 @@ export function relativeTime(
   if (abs < 3600) return rtf.format(Math.round(seconds / 60), 'minute');
   if (abs < 86_400) return rtf.format(Math.round(seconds / 3600), 'hour');
   if (abs < 7 * 86_400) return rtf.format(Math.round(seconds / 86_400), 'day');
-  return new Intl.DateTimeFormat(region, {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(at);
+  return formatDate(at, region);
 }
 
 /** Absolute «05/10/2026 14:32» (Part 4 §8.2 date-time: no comma between date and time). */
 export function absoluteTime(at: Date, region: RegionFormat): string {
-  const date = new Intl.DateTimeFormat(region, {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(at);
-  const time = new Intl.DateTimeFormat(region, {
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).format(at);
-  return `${date} ${time}`;
+  return formatDateTime(at, region);
 }
 
 /** «Σήμερα», «Χθες» or «Δευτέρα 5 Οκτωβρίου» (year added when not the current year). */
@@ -186,9 +173,5 @@ export function avatarIndex(id: string): number {
   return (hash % 8) + 1;
 }
 
-export function initialsOf(name: string): string {
-  const parts = name.split(/\s+/u).filter(Boolean);
-  const first = parts[0]?.[0] ?? '';
-  const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : '';
-  return (first + last).toLocaleUpperCase('el-GR');
-}
+/** Initials come from the Avatar component (toGreekUpper: no tonos on «Ά», «Έ»). */
+export { initialsOf } from '../Avatar/avatarColor';

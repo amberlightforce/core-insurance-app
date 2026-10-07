@@ -7,7 +7,7 @@ import { announce } from '../../a11y/announce';
 import { Icon } from '../../icons';
 import { useRegionFormat } from '../../preferences/context';
 import { cx } from '../../utils/cx';
-import { formatBytes } from '../KpiTile/format';
+import { formatBytes } from '../../../format/numbers';
 import { FileRow, type UploadFile, type UploadStatus } from './FileRow';
 import styles from './FileUpload.module.css';
 import {

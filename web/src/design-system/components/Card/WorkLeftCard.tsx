@@ -7,6 +7,7 @@ import { Icon } from '../../icons';
 import { useRegionFormat } from '../../preferences/context';
 import type { StatusFamily } from '../../tokens';
 import { cx, defined } from '../../utils/cx';
+import { formatInteger } from '../../../format/numbers';
 import type { HeadingLevel } from '../States/Heading';
 import { Card, type CardState } from './Card';
 import styles from './Card.module.css';
@@ -52,9 +53,7 @@ export function WorkLeftCard({
 }: WorkLeftCardProps) {
   const { t } = useTranslation('ds');
   const region = useRegionFormat();
-  const formattedCount = new Intl.NumberFormat(region, {
-    useGrouping: 'always',
-  }).format(count);
+  const formattedCount = formatInteger(count, region);
   const canContinue = continueHref !== undefined || onContinue !== undefined;
 
   return (

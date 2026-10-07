@@ -19,7 +19,7 @@ import { Icon } from '../../icons';
 import { useRegionFormat } from '../../preferences/context';
 import { cx } from '../../utils/cx';
 import { Button } from '../Button';
-import { formatBytes, formatPercent } from '../KpiTile/format';
+import { formatBytes, formatPercent } from '../../../format/numbers';
 import { extensionOf, middleTruncate } from './fileValidation';
 import styles from './FileUpload.module.css';
 
@@ -78,7 +78,7 @@ export function FileRow({ file, isReadOnly, onRemove, onRetry, onPreview }: File
           value={progress}
           aria-label={t('fileUpload.uploadingName', { name: file.name })}
           valueLabel={t('fileUpload.uploading', {
-            percent: formatPercent(progress, region, { fractionDigits: 0 }),
+            percent: formatPercent(progress, { region, fractionDigits: 0 }),
           })}
         >
           {({ valueText }) => (
@@ -140,7 +140,8 @@ export function FileRow({ file, isReadOnly, onRemove, onRetry, onPreview }: File
                 ? file.classification.label
                 : t('fileUpload.classification', {
                     label: file.classification.label,
-                    confidence: formatPercent(file.classification.confidence, region, {
+                    confidence: formatPercent(file.classification.confidence, {
+                      region,
                       fractionDigits: 0,
                     }),
                   })}

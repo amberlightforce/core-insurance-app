@@ -36,7 +36,7 @@ import { Icon } from '../../icons';
 import { useRegionFormat } from '../../preferences/context';
 import { cx } from '../../utils/cx';
 import { Button } from '../Button';
-import { formatBytes } from '../KpiTile/format';
+import { formatBytes } from '../../../format/numbers';
 import { Spinner } from '../Spinner';
 import { ErrorState } from '../States';
 import styles from './DocumentViewer.module.css';

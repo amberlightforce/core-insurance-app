@@ -38,19 +38,21 @@ Versions are pinned exactly (`.npmrc` sets `save-exact`) and updated weekly by D
 
 ### Added by F-1d (Aegean design system, app shell, i18n, formatters)
 
-Approved in `orchestration/DECISIONS.md` D-FE-01. Versions are exact.
+Approved in `orchestration/DECISIONS.md` D-FE-01 (TanStack Table + Virtual, Motion, lucide-react, Storybook,
+Stylelint, @axe-core/playwright) and D-FE-01a (react-aria-components, @internationalized/date, axe-core,
+@testing-library/user-event). Versions are exact.
 
-| Package                                                             | Version | Reason                                                                                                                                         |
-| ------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `react-aria-components`                                             | 1.21.1  | React Aria's component layer (same release train as `react-aria` 3.52.1): the single primitive library for every design-system control         |
-| `@tanstack/react-table`                                             | 8.21.3  | Data table sorting, column pinning, grouping and resizing, which React Aria's Table lacks; v8 is the version the design guide specifies        |
-| `@tanstack/react-virtual`                                           | 3.14.13 | Virtualised queues and tables (100k rows at 60 fps)                                                                                            |
-| `lucide-react`                                                      | 1.52.0  | Icon set named by the guide's status map and module icons (ISC)                                                                                |
-| `motion`                                                            | 14.0.0  | Motion for React: spring-based enter/exit with interruption (bulk action bar MI-24, springs §2.8.3); CSS covers the rest                       |
-| `@internationalized/date`                                           | 3.12.4  | Calendar dates for the date pickers and the `+30`/«σήμερα» accelerators; React Aria's own date library, pinned explicitly because we import it |
-| `storybook`, `@storybook/react-vite`, `@storybook/addon-a11y` (dev) | 10.6.1  | Component workbench; axe runs on every story; light/dark, el/en and density toolbars                                                           |
-| `@testing-library/user-event` (dev)                                 | 14.6.7  | Realistic keyboard and pointer interaction in component tests                                                                                  |
-| `axe-core` (dev)                                                    | 4.14.0  | Accessibility assertions in Vitest (`src/test/axe.ts`)                                                                                         |
+| Package                                                             | Version | Reason                                                                                                                                           |
+| ------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `react-aria-components`                                             | 1.21.1  | D-FE-01a. React Aria's component layer (same release train as `react-aria` 3.52.1): the single primitive library for every design-system control |
+| `@tanstack/react-table`                                             | 8.21.3  | Data table sorting, column pinning, grouping and resizing, which React Aria's Table lacks; v8 is the version the design guide specifies          |
+| `@tanstack/react-virtual`                                           | 3.14.13 | Virtualised queues and tables (100k rows at 60 fps)                                                                                              |
+| `lucide-react`                                                      | 1.52.0  | Icon set named by the guide's status map and module icons (ISC)                                                                                  |
+| `motion`                                                            | 14.0.0  | Motion for React: spring-based enter/exit with interruption (bulk action bar MI-24, springs §2.8.3); CSS covers the rest                         |
+| `@internationalized/date`                                           | 3.12.4  | D-FE-01a. Calendar dates for the date pickers and the `+30`/«σήμερα» accelerators; React Aria's own date library, pinned because we import it    |
+| `storybook`, `@storybook/react-vite`, `@storybook/addon-a11y` (dev) | 10.6.1  | Component workbench; axe runs on every story; light/dark, el/en and density toolbars                                                             |
+| `@testing-library/user-event` (dev)                                 | 14.6.7  | D-FE-01a. Realistic keyboard and pointer interaction in component tests                                                                          |
+| `axe-core` (dev)                                                    | 4.14.0  | D-FE-01a. Accessibility assertions in Vitest (`src/test/axe.ts`)                                                                                 |
 
 Fonts are not npm dependencies: Inter, Noto Sans and JetBrains Mono WOFF2 subsets (SIL OFL 1.1, from the
 Fontsource 5.3.0 builds) are vendored in `src/design-system/fonts/` with their licence files, so nothing is

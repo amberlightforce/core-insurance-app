@@ -75,13 +75,14 @@ describe('greekToGreeklish (ELOT 743)', () => {
     // μπ / ντ
     ['Μπάμπης', 'Bampis'],
     ['ΜΠΑΜΠΗΣ', 'BAMPIS'],
-    ['Ντίνος', 'Dinos'],
+    ['Ντίνος', 'Ntinos'],
     ['Αντώνης', 'Antonis'],
     ['κοντά', 'konta'],
+    ['Κολόμπ', 'Kolob'],
     // γγ / γκ / γξ / γχ
     ['Άγγελος', 'Angelos'],
-    ['Γκίκας', 'Gikas'],
-    ['Άγκυρα', 'Ankyra'],
+    ['Γκίκας', 'Gkikas'],
+    ['Άγκυρα', 'Agkyra'],
     ['σφίγξ', 'sfinx'],
     ['Μελαγχολία', 'Melancholia'],
     // mixed and non-Greek text
@@ -90,6 +91,25 @@ describe('greekToGreeklish (ELOT 743)', () => {
     ['Γ. Παπαδόπουλος', 'G. Papadopoulos'],
     ['ΑΣΦ-2026-004471', 'ASF-2026-004471'],
     ['', ''],
+  ])('%s → %s', (input, expected) => {
+    expect(greekToGreeklish(input)).toBe(expected);
+  });
+});
+
+// D-FE-25: the ELOT 743 vectors of PRD-17/PRD-01, mirrored from the backend ElotTransliterator tests.
+describe('greekToGreeklish matches the backend ELOT 743 vectors', () => {
+  it.each([
+    ['Γεώργιος Παπαδόπουλος', 'Georgios Papadopoulos'],
+    ['Χρήστος', 'Christos'],
+    ['Ευθυμίου', 'Efthymiou'],
+    ['Αυγερινός', 'Avgerinos'],
+    ['Αγγελόπουλος', 'Angelopoulos'],
+    ['Μπακογιάννης', 'Bakogiannis'],
+    ['Καμπάνης', 'Kampanis'],
+    ['Ντόκος', 'Ntokos'],
+    ['Χατζηδάκης', 'Chatzidakis'],
+    ['Ψαρρός', 'Psarros'],
+    ['Γεωργίου', 'Georgiou'],
   ])('%s → %s', (input, expected) => {
     expect(greekToGreeklish(input)).toBe(expected);
   });

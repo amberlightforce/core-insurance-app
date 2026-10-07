@@ -39,19 +39,33 @@ function withTrueMinus(parts: Intl.NumberFormatPart[]): string {
   return parts.map((p) => (p.type === 'minusSign' ? MINUS_SIGN : p.value)).join('');
 }
 
+/**
+ * Sign display. The default everywhere is `negative`: a minus only for values below zero, so a value that
+ * rounds to zero never shows «−0,00 €» (negative zero).
+ */
+export type SignDisplay = 'auto' | 'always' | 'exceptZero' | 'never' | 'negative';
+
 export interface MoneyOptions {
   currency?: string;
   region?: RegionFormat;
   /** `always` shows «+» on positive values (deltas). */
-  signDisplay?: 'auto' | 'always' | 'exceptZero' | 'never';
+  signDisplay?: SignDisplay;
   /** Show the currency symbol (default) or only the number (table cells with the unit in the header). */
   showCurrency?: boolean;
+  /** Display rounding for abbreviated contexts (KPI tiles under 10.000 show no decimals). Defaults to
+   * the currency's minor-unit precision; never use it on approval or transaction amounts. */
+  fractionDigits?: number;
 }
 
 /** «1.234,56 €» / «−1.234,56 €» / en-GB «€1,234.56». Precision comes from the currency. */
 export function formatMoney(value: Numeric, options: MoneyOptions = {}): string {
-  const { currency = 'EUR', region = 'el-GR', signDisplay = 'auto', showCurrency = true } = options;
-  const digits = currencyFractionDigits(currency);
+  const {
+    currency = 'EUR',
+    region = 'el-GR',
+    signDisplay = 'negative',
+    showCurrency = true,
+  } = options;
+  const digits = options.fractionDigits ?? currencyFractionDigits(currency);
   const formatter = new Intl.NumberFormat(region, {
     ...(showCurrency ? { style: 'currency', currency } : {}),
     minimumFractionDigits: digits,
@@ -65,7 +79,7 @@ export interface NumberOptions {
   region?: RegionFormat;
   minimumFractionDigits?: number;
   maximumFractionDigits?: number;
-  signDisplay?: 'auto' | 'always' | 'exceptZero' | 'never';
+  signDisplay?: SignDisplay;
 }
 
 /** «1.234.567,89» / en-GB «1,234,567.89», with U+2212 for negatives. */
@@ -74,12 +88,12 @@ export function formatNumber(value: Numeric, options: NumberOptions = {}): strin
     region = 'el-GR',
     minimumFractionDigits = 0,
     maximumFractionDigits = 2,
-    signDisplay,
+    signDisplay = 'negative',
   } = options;
   const formatter = new Intl.NumberFormat(region, {
     minimumFractionDigits,
     maximumFractionDigits: Math.max(minimumFractionDigits, maximumFractionDigits),
-    ...(signDisplay ? { signDisplay } : {}),
+    signDisplay,
   });
   return withTrueMinus(formatter.formatToParts(asIntlValue(value)));
 }
@@ -93,7 +107,7 @@ export interface PercentOptions {
   region?: RegionFormat;
   /** Fixed decimals (2 by default; 4 for rating). */
   fractionDigits?: number;
-  signDisplay?: 'auto' | 'always' | 'exceptZero';
+  signDisplay?: SignDisplay;
 }
 
 function unitSuffix(region: RegionFormat, symbol: string): string {
@@ -126,7 +140,7 @@ export function formatPerMille(perMille: Numeric, options: PercentOptions = {}):
   return `${number}${unitSuffix(region, '‰')}`;
 }
 
-/** Percentage points for deltas between percentages: «+1,50 π.μ.» / «+1.50 pp». */
+/** Percentage points for deltas between percentages (guide §6.4, D-FE-25): «+1,50 μ.» / «+1.50 pp». */
 export function formatPercentagePoints(points: Numeric, options: PercentOptions = {}): string {
   const { region = 'el-GR', fractionDigits = 2, signDisplay = 'exceptZero' } = options;
   const number = formatNumber(points, {
@@ -135,7 +149,7 @@ export function formatPercentagePoints(points: Numeric, options: PercentOptions 
     maximumFractionDigits: fractionDigits,
     signDisplay,
   });
-  return region === 'el-GR' ? `${number}${NBSP}π.μ.` : `${number}${NBSP}pp`;
+  return region === 'el-GR' ? `${number}${NBSP}μ.` : `${number}${NBSP}pp`;
 }
 
 export interface CompactOptions {
@@ -160,4 +174,21 @@ export function formatCompact(value: number, options: CompactOptions = {}): stri
       .formatToParts(0)
       .find((p) => p.type === 'currency')?.value ?? currency;
   return region === 'el-GR' ? `${number}${NBSP}${symbol}` : `${symbol}${number}`;
+}
+
+/** File sizes in binary units: «820 kB», «2,4 MB» (Intl unit names per region). */
+export function formatBytes(bytes: number, region: RegionFormat = 'el-GR'): string {
+  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
+  let value = bytes;
+  let index = 0;
+  while (value >= 1024 && index < units.length - 1) {
+    value /= 1024;
+    index += 1;
+  }
+  return new Intl.NumberFormat(region, {
+    style: 'unit',
+    unit: units[index],
+    unitDisplay: 'short',
+    maximumFractionDigits: index >= 2 ? 1 : 0,
+  }).format(value);
 }

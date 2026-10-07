@@ -240,7 +240,6 @@
   font: var(--type-caption);
   font-weight: 600;
   font-variant-numeric: tabular-nums lining-nums;
-  line-height: 1;
 }
 
 .badge[data-tone='attention'] {

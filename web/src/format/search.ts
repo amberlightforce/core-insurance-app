@@ -79,6 +79,9 @@ function normalizeMapped(text: string): Mapped {
 /**
  * Search normalisation: NFD, strip combining marks U+0300–U+036F, `toLocaleLowerCase('el')`, ς → σ, collapse
  * and trim whitespace. «Γεώργιος  ΠΑΠΑΔΌΠΟΥΛΟΣ» → «γεωργιοσ παπαδοπουλοσ».
+ *
+ * Client-side only (in-memory lists, palette, table search). It keeps punctuation, so it is NOT the backend
+ * search key (`NameTransliterator.searchVariants`); never send it to the server as an index key.
  */
 export function normalizeForSearch(text: string): string {
   return normalizeMapped(text).text;
@@ -176,6 +179,11 @@ function isWordStart(units: Unit[], i: number): boolean {
   return !prev?.letter;
 }
 
+function isWordEnd(units: Unit[], i: number): boolean {
+  const next = units[i + 1];
+  return !next?.letter;
+}
+
 function transliterateUnits(units: Unit[]): Segment[] {
   const segments: Segment[] = [];
   for (let i = 0; i < units.length;) {
@@ -209,20 +217,21 @@ function transliterateUnits(units: Unit[]): Segment[] {
       }
     }
 
-    const wordStart = isWordStart(units, i);
+    // ELOT 743 (D-FE-25, same vectors as the backend ElotTransliterator): μπ → b at the start or end of a
+    // word and mp inside; ντ → nt; γκ → gk; γγ → ng; γξ → nx; γχ → nch.
     let digraph: string | null = null;
     switch (pair) {
       case 'μπ':
-        digraph = wordStart ? 'b' : 'mp';
+        digraph = isWordStart(units, i) || isWordEnd(units, i + 1) ? 'b' : 'mp';
         break;
       case 'ντ':
-        digraph = wordStart ? 'd' : 'nt';
+        digraph = 'nt';
         break;
       case 'γγ':
         digraph = 'ng';
         break;
       case 'γκ':
-        digraph = wordStart ? 'g' : 'nk';
+        digraph = 'gk';
         break;
       case 'γξ':
         digraph = 'nx';
@@ -267,7 +276,9 @@ function wordAllCaps(units: Unit[], i: number): boolean {
  *
  * - αυ/ευ/ηυ → av/ev/iv before vowels and voiced consonants, af/ef/if before voiceless consonants and at the
  *   end of a word; ου → ou (a dialytika breaks the diphthong: «αϋπνία» → «aypnia»).
- * - μπ → b at the start of a word, mp inside; ντ → d / nt; γκ → g / nk; γγ → ng; γξ → nx; γχ → nch.
+ * - μπ → b at the start or end of a word, mp inside; ντ → nt; γκ → gk; γγ → ng; γξ → nx; γχ → nch.
+ * These match the backend `ElotTransliterator` vectors (D-FE-25); the loose matcher below still accepts
+ * informal spellings (d for ντ, g for γκ, …) when searching.
  * - θ → th, χ → ch, ψ → ps, η → i, υ → y, ω → o, ξ → x, φ → f, β → v.
  */
 export function greekToGreeklish(text: string): string {

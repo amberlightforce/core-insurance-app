@@ -4,8 +4,11 @@ import { afterEach, beforeEach } from 'vitest';
 
 import i18n from '../i18n';
 
+// Most tests run in jsdom; a few (Stylelint fixtures) run in the node environment without a DOM.
+const hasDom = typeof window !== 'undefined';
+
 // jsdom lacks these browser APIs; components feature-detect them, tests get inert stand-ins.
-if (typeof window.matchMedia !== 'function') {
+if (hasDom && typeof window.matchMedia !== 'function') {
   window.matchMedia = (query: string): MediaQueryList =>
     ({
       matches: false,
@@ -19,7 +22,7 @@ if (typeof window.matchMedia !== 'function') {
     }) as MediaQueryList;
 }
 
-if (typeof globalThis.ResizeObserver === 'undefined') {
+if (hasDom && typeof globalThis.ResizeObserver === 'undefined') {
   globalThis.ResizeObserver = class {
     observe() {
       return undefined;
@@ -34,11 +37,11 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
 }
 
 // React Aria's SelectionIndicator and exit animations ask for running animations.
-if (typeof Element.prototype.getAnimations !== 'function') {
+if (hasDom && typeof Element.prototype.getAnimations !== 'function') {
   Element.prototype.getAnimations = () => [];
 }
 
-if (typeof Element.prototype.scrollIntoView !== 'function') {
+if (hasDom && typeof Element.prototype.scrollIntoView !== 'function') {
   Element.prototype.scrollIntoView = () => undefined;
 }
 
@@ -47,6 +50,7 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
+  if (!hasDom) return;
   cleanup();
   localStorage.clear();
   document.documentElement.removeAttribute('data-theme');

@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { FileCheck } from 'lucide-react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { formatDateTime } from '../../../format/dates';
 import i18n from '../../../i18n';
 import { expectNoA11yViolations } from '../../../test/axe';
 import { renderWithDs } from '../../../test/render';
@@ -97,7 +98,10 @@ describe('Timeline', () => {
     ).toHaveAttribute('href', '/policies/0412');
     expect(screen.getByText('Ημερομηνία λήξης: από 31/12/2026 σε 30/06/2027')).toBeInTheDocument();
     expect(screen.getByText('πριν από 5 λεπτά')).toBeInTheDocument();
-    expect(screen.getAllByText('07/10/2026 14:25').length).toBeGreaterThan(0);
+    // Absolute times are Europe/Athens (staff time), whatever the machine's zone.
+    expect(
+      screen.getAllByText(formatDateTime(new Date(2026, 9, 7, 14, 25))).length,
+    ).toBeGreaterThan(0);
     expect(screen.getByText('Σύστημα')).toBeInTheDocument();
     expect(screen.getByText('Πράκτορας ΤΝ για Μ. Π.')).toBeInTheDocument();
   });

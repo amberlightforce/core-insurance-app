@@ -4,17 +4,9 @@ import { describe, expect, it } from 'vitest';
 import i18n from '../../../i18n';
 import { expectNoA11yViolations } from '../../../test/axe';
 import { renderWithDs } from '../../../test/render';
-import { formatPercent } from './formatPercent';
 import { ProgressBar, ProgressRing } from './Progress';
 
 const NARROW_NBSP = String.fromCharCode(0x202f);
-
-describe('formatPercent', () => {
-  it('puts a narrow no-break space before % in Greek only', () => {
-    expect(formatPercent(0.62, 'el-GR')).toBe(`62${NARROW_NBSP}%`);
-    expect(formatPercent(0.62, 'en-GB')).toBe('62%');
-  });
-});
 
 describe('ProgressBar', () => {
   it('exposes progressbar semantics with value, range and value text', () => {

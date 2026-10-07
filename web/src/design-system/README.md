@@ -4,7 +4,8 @@
 control, never overrides component CSS, and never introduces colours, sizes, radii, z-indexes or durations.
 If something is missing, ask for it (or add it here, with tests and a story) instead of building a local
 variant. The approved visual reference is the v3 mockup (`core-insurance-prds/design-guide/mockups/aegean-screens-v3.html`);
-the binding rulings are `orchestration/DECISIONS.md` §C (D-FE-01…09).
+the binding rulings are `orchestration/DECISIONS.md` §C and later front-end rulings (D-FE-01, D-FE-01a,
+D-FE-02 … D-FE-25).
 
 ## Using it
 
@@ -50,7 +51,8 @@ import { formatMoney, formatDate, toGreekUpper } from '../../format';
 8. **Glass only on chrome and overlays.** Tables, forms, record bodies and charts sit on opaque sheets.
    Do not set `data-material` in feature code.
 9. **Accessibility is part of done.** WCAG 2.2 AA: labels above fields, error summary on submit, full keyboard
-   support, visible focus, `announce()` for status changes, every test file runs `expectNoA11yViolations`.
+   support, visible focus, `announce()` for status changes, every component and pattern test file runs
+   `expectNoA11yViolations` (pure formatter and parser tests have no UI to check).
    Single-key shortcuts must check `usePreferences().preferences.singleKeyShortcuts` and ignore text inputs.
 10. **Motion:** feedback ≤ 150 ms, transitions 200–400 ms, transform/opacity only; JS motion checks
     `useReducedMotion()` (the in-app setting wins over the OS). Signature moments are not part of this slice.
@@ -85,10 +87,12 @@ import { formatMoney, formatDate, toGreekUpper } from '../../format';
   SM-01…08 are outside this slice.
 - **Other**: GlassBudget service and device-tier probe (popovers inside modals are not yet forced solid),
   async ΑΦΜ/ΔΟΥ lookup, combobox «Αναζήτηση σε όλο το σύστημα» link, read-only copy button on the advanced
-  inputs, relationship graph (visx), charts (visx), web-vitals RUM.
+  inputs, charts (visx), web-vitals RUM.
 
-- **Built by the first feature work package that needs them (D-FE-24):** the relationship graph (visx),
-  the AI agent-plan panel and streaming-draft surfaces, and pdf.js rendering in DocumentViewer.
+- **Built by the first feature work package that needs them (D-FE-24):** the relationship graph (§4.38,
+  visx), the AI surfaces beyond the suggestion card / approve-the-diff / explain-why — the agent plan panel
+  (IB-06/31), the streaming draft (IB-10) and the bulk self-enriching banner (IB-27) — and pdf.js rendering
+  plus the extraction overlay in DocumentViewer.
 - **Bundle (D-FE-23):** no code-splitting yet; module work packages lazy-load their routes from W1.
 
 ## Locale split (D-FE-22)

@@ -7,7 +7,7 @@ import { renderWithDs } from '../../../test/render';
 import { Button } from '../Button';
 import { ModalDepthContext } from '../Dialog/modalContext';
 import { ExplainWhy } from './ExplainWhy';
-import { formatSigned } from './formatSigned';
+import { formatNumber } from '../../../format/numbers';
 import { HoverCard } from './HoverCard';
 import { Popover } from './Popover';
 
@@ -176,9 +176,11 @@ describe('ExplainWhy', () => {
     { label: 'Απαλλαγή', value: -320 },
   ];
 
-  it('formats signed values with a true minus', () => {
-    expect(formatSigned(-320, 'el-GR')).toBe(`${String.fromCharCode(0x2212)}320`);
-    expect(formatSigned(2600, 'el-GR')).toBe('+2.600');
+  it('formats signed factor values through src/format with a true minus', () => {
+    expect(formatNumber(-320, { signDisplay: 'exceptZero' })).toBe(
+      `${String.fromCharCode(0x2212)}320`,
+    );
+    expect(formatNumber(2600, { signDisplay: 'exceptZero' })).toBe('+2.600');
   });
 
   it('explains a figure with factor rows, sources and the full sheet link', async () => {

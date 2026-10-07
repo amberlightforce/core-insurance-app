@@ -4,13 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import i18n from '../../../i18n';
 import { expectNoA11yViolations } from '../../../test/axe';
 import { renderWithDs } from '../../../test/render';
-import {
-  formatCompactMoney,
-  formatDelta,
-  formatMoney,
-  formatNumber,
-  formatPercent,
-} from './format';
+import { formatCompactMoney, formatDelta, formatKpiValue } from './format';
 import { HeroMetric, KpiTile } from './index';
 
 /** Matches an accessible name, treating NBSP and narrow NBSP as spaces. */
@@ -28,15 +22,15 @@ describe('KPI formatting (Part 3 §6.4)', () => {
   });
 
   it('uses U+2212 for negatives and always groups', () => {
-    expect(formatMoney(-1234.5, 'el-GR')).toBe('\u22121.234,50\u00A0€');
-    expect(formatNumber(4812, 'el-GR')).toBe('4.812');
+    expect(formatKpiValue(-1234.5, 'money', 'el-GR').full).toBe('\u22121.234,50\u00A0€');
+    expect(formatKpiValue(4812, 'count', 'el-GR').full).toBe('4.812');
   });
 
   it('shows the sign on deltas and a narrow space before % in el-GR', () => {
     expect(formatDelta(4.2, 'percent', 'el-GR')).toBe('+4,2\u202F%');
     expect(formatDelta(-1.8, 'percent', 'el-GR')).toBe('\u22121,8\u202F%');
     expect(formatDelta(2.1, 'points', 'el-GR')).toBe('+2,1\u00A0μ.');
-    expect(formatPercent(68.4, 'en-GB')).toBe('68.4%');
+    expect(formatKpiValue(68.4, 'percent', 'en-GB').short).toBe('68.4%');
   });
 });
 

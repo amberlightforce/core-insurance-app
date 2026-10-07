@@ -1,0 +1,28 @@
+/* Token-only declarations: the token gate must report nothing here (tokens.stylelint.test.ts). */
+.clean {
+  margin: 0;
+  margin-block: var(--space-2) var(--space-0);
+  padding: var(--space-1_5) calc(var(--space-2) + var(--space-0_5));
+  gap: var(--space-stack-field);
+  inset: 0;
+  inset-inline-start: calc(var(--space-2) * -1);
+  top: 0;
+  left: 50%;
+  border-radius: var(--radius-md);
+  z-index: var(--z-dropdown);
+  font: var(--type-body-compact);
+  font-size: inherit;
+  line-height: 0;
+  letter-spacing: var(--type-heading-1-tracking);
+  color: var(--color-text-primary);
+  background-color: color-mix(in srgb, var(--color-surface-sheet) 60%, transparent);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-border-subtle);
+  transition:
+    transform var(--motion-duration-feedback-sm) var(--motion-ease-standard),
+    opacity var(--motion-duration-feedback-sm) var(--motion-ease-standard);
+  animation: spin var(--motion-duration-spinner) var(--motion-ease-linear) infinite;
+}
+
+.cleanRaised {
+  box-shadow: var(--elevation-2);
+}

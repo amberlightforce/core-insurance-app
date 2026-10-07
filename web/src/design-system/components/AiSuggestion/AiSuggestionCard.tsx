@@ -15,7 +15,7 @@ import { Icon } from '../../icons';
 import { useRegionFormat } from '../../preferences/context';
 import { cx } from '../../utils/cx';
 import { Button } from '../Button';
-import { formatNumber } from '../KpiTile/format';
+import { formatNumber } from '../../../format/numbers';
 import { Heading, type HeadingLevel } from '../States/Heading';
 import { Tooltip } from '../Tooltip';
 import styles from './AiSuggestion.module.css';
@@ -156,7 +156,10 @@ export function AiSuggestionCard({
   }
 
   const level = confidence === undefined ? null : confidenceLevel(confidence);
-  const confidenceValue = confidence === undefined ? '' : formatNumber(confidence, region, 2);
+  const confidenceValue =
+    confidence === undefined
+      ? ''
+      : formatNumber(confidence, { region, minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const confidenceText =
     level === 'high'
       ? t('aiSuggestion.confidenceHigh', { value: confidenceValue })

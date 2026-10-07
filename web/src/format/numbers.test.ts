@@ -49,6 +49,16 @@ describe('formatMoney', () => {
     expect(formatMoney(1234, { currency: 'JPY' })).toMatch(/^1\.234/);
   });
 
+  it('never shows negative zero', () => {
+    expect(formatMoney(-0)).toBe(`0,00${NBSP}€`);
+    expect(formatMoney('-0.00')).toBe(`0,00${NBSP}€`);
+    expect(formatMoney('-0.004')).toBe(`0,00${NBSP}€`);
+    expect(formatMoney(-0.001, { region: 'en-GB' })).toBe('€0.00');
+    expect(formatNumber(-0)).toBe('0');
+    expect(formatNumber('-0.001')).toBe('0');
+    expect(formatMoney('-0.01')).toBe(`${MINUS_SIGN}0,01${NBSP}€`);
+  });
+
   it('rejects non-numeric strings', () => {
     expect(() => formatMoney('12,50')).toThrow(RangeError);
   });
@@ -79,7 +89,7 @@ describe('percent and per mille', () => {
   });
 
   it('formats percentage points', () => {
-    expect(formatPercentagePoints(1.5)).toBe(`+1,50${NBSP}π.μ.`);
+    expect(formatPercentagePoints(1.5)).toBe(`+1,50${NBSP}μ.`);
     expect(formatPercentagePoints(-0.25, { region: 'en-GB' })).toBe(`${MINUS_SIGN}0.25${NBSP}pp`);
   });
 });

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useRegionFormat } from '../../preferences/context';
 import { cx } from '../../utils/cx';
-import { formatPercent } from './formatPercent';
+import { formatPercent } from '../../../format/numbers';
 import styles from './Progress.module.css';
 
 export type ProgressSize = 'sm' | 'md' | 'lg';
@@ -59,7 +59,11 @@ export function ProgressBar({
   const fraction = fractionOf(value, maxValue);
   const complete = !isIndeterminate && fraction >= 1;
   const count = t('progress.count', { value, max: maxValue });
-  const text = valueText ?? (showCount ? count : formatPercent(fraction, locale));
+  const text =
+    valueText ??
+    (showCount
+      ? count
+      : formatPercent(Math.round(fraction * 100), { region: locale, fractionDigits: 0 }));
   const fillStyle = { '--_fraction': String(fraction) } as CSSProperties;
 
   return (
@@ -78,7 +82,7 @@ export function ProgressBar({
           {label ? <Label className={styles.label}>{label}</Label> : <span />}
           {showValue && !isIndeterminate ? (
             <span className={cx(styles.value, 'ds-num')} aria-hidden="true">
-              {formatPercent(fraction, locale)}
+              {formatPercent(Math.round(fraction * 100), { region: locale, fractionDigits: 0 })}
             </span>
           ) : null}
         </span>
@@ -134,7 +138,7 @@ export function ProgressRing({
   const stroke = ringStroke[size];
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
-  const percent = formatPercent(fraction, locale);
+  const percent = formatPercent(Math.round(fraction * 100), { region: locale, fractionDigits: 0 });
   const showCentre = size >= 40;
 
   return (

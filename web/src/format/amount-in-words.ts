@@ -255,8 +255,12 @@ export function integerToEnglishWords(value: bigint): string {
 
 /** Parses a decimal string/number into integer minor units, rejecting extra precision (never rounds). */
 export function toMinorUnits(value: number | string, minorDigits: number): bigint {
-  const text =
-    typeof value === 'number' ? value.toFixed(minorDigits) : value.trim().replace('−', '-');
+  // Numbers use their shortest exact decimal form (String), never toFixed(): 0.1 + 0.2 is
+  // 0.30000000000000004 and is rejected rather than silently rounded. Prefer decimal strings.
+  if (typeof value === 'number' && !Number.isFinite(value)) {
+    throw new RangeError(`Not a decimal amount: ${String(value)}`);
+  }
+  const text = typeof value === 'number' ? String(value) : value.trim().replace('−', '-');
   const match = /^([+-])?(\d+)(?:\.(\d+))?$/.exec(text);
   if (!match) throw new RangeError(`Not a decimal amount: ${String(value)}`);
   const [, sign, whole = '0', fraction = ''] = match;

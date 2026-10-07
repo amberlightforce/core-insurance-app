@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useRegionFormat } from '../../preferences/context';
 import { cx, defined } from '../../utils/cx';
 import { Button } from '../Button';
-import { formatSigned } from './formatSigned';
+import { formatNumber } from '../../../format/numbers';
 import { Popover, type PopoverStatus } from './Popover';
 import styles from './Popover.module.css';
 
@@ -103,7 +103,8 @@ export function ExplainWhy({
                 />
               </span>
               <span className={cx(styles.factorValue, 'ds-num')}>
-                {factor.display ?? formatSigned(factor.value, locale)}
+                {factor.display ??
+                  formatNumber(factor.value, { region: locale, signDisplay: 'exceptZero' })}
               </span>
             </li>
           );
