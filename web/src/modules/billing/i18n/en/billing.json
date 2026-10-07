@@ -1,0 +1,149 @@
+{
+  "overline": "Billing",
+  "home": {
+    "title": "Billing and collections",
+    "recent": "Recently opened",
+    "emptyTitle": "No recent records",
+    "emptyBody": "Open a policy and choose one of its invoices, or enter a record id below.",
+    "recentInvoice": "Invoice {number}",
+    "recentAccount": "Billing account {number}",
+    "openById": "Open by id",
+    "kind": "Record type",
+    "kindInvoice": "Invoice",
+    "kindAccount": "Billing account",
+    "id": "Id (UUID)",
+    "idInvalid": "Enter a valid UUID.",
+    "open": "Open"
+  },
+  "invoice": {
+    "columns": {
+      "number": "Number",
+      "state": "Status",
+      "issueDate": "Issued",
+      "dueDate": "Due",
+      "total": "Total",
+      "open": "Open balance",
+      "fiscal": "Fiscal document"
+    },
+    "emptyTitle": "No invoices",
+    "emptyBody": "Billing issues the invoice after binding. Refresh in a moment.",
+    "title": "Invoice {number}",
+    "kind": {
+      "INVOICE": "Invoice",
+      "CREDIT_NOTE": "Credit note"
+    },
+    "openAccount": "Billing account",
+    "openPolicy": "Policy",
+    "totals": "Totals",
+    "paid": "Collected",
+    "category": "{category} total",
+    "notFound": "Invoice not found"
+  },
+  "fiscal": {
+    "title": "Fiscal document",
+    "stub": "Stub",
+    "stubTitle": "Stub fiscal document",
+    "stubBody": "At this stage the document comes from a simulation and has not been transmitted to the tax authority (AADE). Its number and registration mark (MARK) have no fiscal effect.",
+    "statusLabel": "Status",
+    "series": "Series",
+    "number": "Number",
+    "mark": "MARK",
+    "uid": "UID",
+    "status": {
+      "NOT_REQUESTED": "Not requested",
+      "PENDING": "Pending",
+      "REGISTERED": "Registered",
+      "REJECTED": "Rejected",
+      "REQUEST_FAILED": "Request failed"
+    }
+  },
+  "lines": {
+    "title": "Invoice lines",
+    "columns": {
+      "coverage": "Cover",
+      "charge": "Charge",
+      "category": "Category",
+      "from": "From",
+      "amount": "Amount",
+      "open": "Open",
+      "state": "Status"
+    }
+  },
+  "allocations": {
+    "title": "Payment allocations",
+    "none": "No payment has been allocated to this invoice.",
+    "columns": {
+      "date": "Date",
+      "amount": "Amount",
+      "source": "Source",
+      "rule": "Rule"
+    },
+    "source": {
+      "RULE": "Automatic",
+      "MANUAL": "Manual"
+    }
+  },
+  "payment": {
+    "title": "Record payment",
+    "amount": "Amount",
+    "method": "Payment method",
+    "methods": {
+      "BANK_TRANSFER": "Bank transfer",
+      "CASHIER": "Cashier"
+    },
+    "valueDate": "Value date",
+    "reference": "Bank reference",
+    "autoAllocate": "Allocate automatically to open invoices",
+    "failed": "The payment could not be recorded",
+    "recorded": "Receipt {number} recorded",
+    "outcome": "Amount {amount}. Allocation: {outcome}.",
+    "allocation": {
+      "ALLOCATED": "allocated",
+      "SUSPENSE": "held in suspense",
+      "NOT_REQUESTED": "not requested"
+    },
+    "submit": "Record payment",
+    "forInvoice": "Payment for invoice {number}. Open balance: {open}.",
+    "nothingOpen": "There is no open balance to pay.",
+    "errors": {
+      "amount": "Enter an amount greater than zero.",
+      "overOpen": "The amount exceeds the open balance ({open}).",
+      "method": "Choose a payment method.",
+      "reference": "Enter the bank reference of the transfer."
+    }
+  },
+  "account": {
+    "title": "Billing account {number}",
+    "status": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "CLOSING": "Closing",
+      "CLOSED": "Closed"
+    },
+    "balances": "Balances by state",
+    "balance": {
+      "writtenUnbilled": "Written, not yet billed",
+      "billed": "Billed",
+      "overdue": "Overdue",
+      "collected": "Collected",
+      "unapplied": "Unapplied",
+      "credit": "Credit"
+    },
+    "termsTitle": "Policy terms",
+    "noTerms": "No policy terms are billed on this account.",
+    "notFound": "Billing account not found",
+    "invoices": "Invoices",
+    "terms": {
+      "policy": "Policy",
+      "product": "Product",
+      "plan": "Plan",
+      "mode": "Bill mode",
+      "from": "From",
+      "to": "To"
+    },
+    "billMode": {
+      "DIRECT_BILL": "Direct bill",
+      "AGENCY_BILL": "Agency bill"
+    }
+  }
+}

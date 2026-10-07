@@ -1,0 +1,37 @@
+{
+  "overline": "Finance",
+  "title": "Journal entries of policy {number}",
+  "readOnly": "Read only",
+  "another": "Another policy",
+  "emptyTitle": "No journal entries",
+  "emptyBody": "Entries are created from Billing events. If the policy was bound just now, refresh in a moment.",
+  "loadMore": "More entries",
+  "home": {
+    "title": "Journal entries",
+    "byPolicy": "Look up by policy",
+    "policyNumber": "Policy number",
+    "help": "The number shown on the policy.",
+    "invalid": "Enter a valid policy number.",
+    "open": "Show entries"
+  },
+  "journal": {
+    "title": "Entry {number}",
+    "event": "Event",
+    "book": "Book",
+    "accountingDate": "Accounting date",
+    "period": "Period",
+    "reverses": "Reverses entry",
+    "reversedBy": "Reversed by entry",
+    "linesLabel": "Lines of entry {number}",
+    "balanced": "Balanced",
+    "unbalanced": "Unbalanced",
+    "totals": "Debit {debit} · Credit {credit}"
+  },
+  "lines": {
+    "no": "Line",
+    "account": "Account",
+    "debit": "Debit",
+    "credit": "Credit",
+    "rule": "Rule"
+  }
+}

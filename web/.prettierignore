@@ -3,6 +3,7 @@ coverage
 node_modules
 package-lock.json
 src/api/schema.d.ts
+src/api/generated
 src/design-system/tokens/aegean.css
 src/design-system/tokens/aegean.tokens.json
 src/design-system/tokens/token-names.ts
