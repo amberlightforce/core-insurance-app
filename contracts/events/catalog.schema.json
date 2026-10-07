@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/catalog.schema.json",
+  "title": "Event catalogue file",
+  "description": "Shape of contracts/events/catalog.json.",
+  "type": "object",
+  "required": ["title", "catalogueOfRecord", "consumerRule", "eventCount", "events", "consumerChanges"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "title": { "type": "string" },
+    "catalogueOfRecord": { "type": "string" },
+    "consumerRule": { "type": "string" },
+    "generatedFrom": { "type": "array", "items": { "type": "string" } },
+    "eventCount": { "type": "integer", "minimum": 0 },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Event" }
+    },
+    "consumerChanges": {
+      "type": "object",
+      "required": ["removed", "keptBecauseHandlerExists", "addedVsPrd18"],
+      "additionalProperties": false,
+      "properties": {
+        "removed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["event", "module", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "event": { "type": "string" },
+              "module": { "$ref": "#/$defs/Module" },
+              "reason": { "type": "string" }
+            }
+          }
+        },
+        "keptBecauseHandlerExists": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["event", "module", "listedAs", "keptBecause"],
+            "additionalProperties": false,
+            "properties": {
+              "event": { "type": "string" },
+              "module": { "$ref": "#/$defs/Module" },
+              "listedAs": { "type": "string" },
+              "keptBecause": { "type": "string" }
+            }
+          }
+        },
+        "addedVsPrd18": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["event", "module", "handler"],
+            "additionalProperties": false,
+            "properties": {
+              "event": { "type": "string" },
+              "module": { "$ref": "#/$defs/Module" },
+              "handler": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "Module": {
+      "type": "string",
+      "enum": ["PTY", "PFC", "RAT", "UW", "POL", "BIL", "CLM", "RI", "FIN", "DOC", "CMP", "CHN", "WRK", "PLT", "DAT", "MIG", "MKT"]
+    },
+    "Event": {
+      "type": "object",
+      "required": ["name", "version", "producer", "topic", "registryName", "schema", "orderingKey", "aggregateType", "trigger", "source", "status", "dataClassification", "personalDataFields", "setCompleteness", "consumers"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Z][A-Za-z0-9]+$" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+        "producer": { "$ref": "#/$defs/Module" },
+        "topic": { "type": "string", "pattern": "^[a-z]+\\.events\\.v\\d+$" },
+        "registryName": { "type": "string", "pattern": "^[a-z]+\\.[A-Z][A-Za-z0-9]+$" },
+        "schema": { "type": "string" },
+        "orderingKey": { "type": "string" },
+        "aggregateType": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "trigger": { "type": "string", "minLength": 1 },
+        "source": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "status": { "enum": ["full", "minimal"] },
+        "dataClassification": { "enum": ["P0", "P1", "P2", "P3"] },
+        "personalDataFields": { "type": "array", "items": { "type": "string" } },
+        "setCompleteness": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "consumers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["module", "handler", "reaction"],
+            "additionalProperties": false,
+            "properties": {
+              "module": { "$ref": "#/$defs/Module" },
+              "handler": { "type": "string", "pattern": "^PRD-\\d{2} §8\\.\\d+$" },
+              "reaction": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

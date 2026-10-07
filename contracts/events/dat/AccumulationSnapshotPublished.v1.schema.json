@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/dat/AccumulationSnapshotPublished.v1.schema.json",
+  "title": "AccumulationSnapshotPublished v1",
+  "description": "Exposure snapshot complete (REQ-DAT-189). Detail is read through dat.Accumulation.snapshot.",
+  "x-event-type": "AccumulationSnapshotPublished",
+  "x-registry-name": "dat.AccumulationSnapshotPublished",
+  "x-producer": "DAT",
+  "x-topic": "dat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "snapshot_id",
+  "x-aggregate-type": [
+    "AccumulationSnapshot"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-15 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "AccumulationSnapshotPublished"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DAT"
+    },
+    "aggregateType": {
+      "const": "AccumulationSnapshot"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshotId",
+        "asAt",
+        "schemeVersions",
+        "totals"
+      ],
+      "properties": {
+        "snapshotId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "asAt": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "schemeVersions": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Text"
+          },
+          "x-classification": "P0"
+        },
+        "totals": {
+          "$ref": "../common.schema.json#/$defs/OpenObject",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

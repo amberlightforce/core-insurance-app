@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/clm/ReserveChanged.v1.schema.json",
+  "title": "ReserveChanged v1",
+  "description": "approved reserve or recovery-reserve change per line",
+  "x-event-type": "ReserveChanged",
+  "x-registry-name": "clm.ReserveChanged",
+  "x-producer": "CLM",
+  "x-topic": "clm.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "claim_id",
+  "x-aggregate-type": [
+    "Claim"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-07 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ReserveChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CLM"
+    },
+    "aggregateType": {
+      "const": "Claim"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exposureId",
+        "reserveLine",
+        "kind",
+        "delta",
+        "newOpenAmount",
+        "setId",
+        "accidentDate",
+        "policyTermId",
+        "productCode",
+        "siiLob",
+        "handlingSegment"
+      ],
+      "properties": {
+        "exposureId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "reserveLine": {
+          "$ref": "../common.schema.json#/$defs/ReserveLineKey",
+          "x-classification": "P0"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "RESERVE",
+            "RECOVERY_RESERVE"
+          ],
+          "x-classification": "P0"
+        },
+        "delta": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency3",
+          "x-classification": "P0"
+        },
+        "newOpenAmount": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency3",
+          "x-classification": "P0"
+        },
+        "setId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "accidentDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "policyTermId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "productCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "siiLob": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "ifrs17GroupRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "catCode": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "handlingSegment": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

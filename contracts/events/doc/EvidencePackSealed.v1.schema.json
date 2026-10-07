@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/doc/EvidencePackSealed.v1.schema.json",
+  "title": "EvidencePackSealed v1",
+  "description": "Evidence pack sealed or supplemented",
+  "x-event-type": "EvidencePackSealed",
+  "x-registry-name": "doc.EvidencePackSealed",
+  "x-producer": "DOC",
+  "x-topic": "doc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "document_id",
+  "x-aggregate-type": [
+    "Document"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-10 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "EvidencePackSealed"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DOC"
+    },
+    "aggregateType": {
+      "const": "Document"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packId",
+        "deliveryIds",
+        "notificationDate",
+        "supplement"
+      ],
+      "properties": {
+        "packId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "deliveryIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "notificationDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "supplement": {
+          "type": "boolean",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

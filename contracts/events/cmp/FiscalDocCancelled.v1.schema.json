@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/FiscalDocCancelled.v1.schema.json",
+  "title": "FiscalDocCancelled v1",
+  "description": "Registered → Cancelled",
+  "x-event-type": "FiscalDocCancelled",
+  "x-registry-name": "cmp.FiscalDocCancelled",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "fiscal_document_id",
+  "x-aggregate-type": [
+    "FiscalDocument"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "FiscalDocCancelled"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "FiscalDocument"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cancellationMark",
+        "reason"
+      ],
+      "properties": {
+        "cancellationMark": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "reason": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

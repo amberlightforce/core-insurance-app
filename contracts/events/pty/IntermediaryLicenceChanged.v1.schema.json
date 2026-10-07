@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pty/IntermediaryLicenceChanged.v1.schema.json",
+  "title": "IntermediaryLicenceChanged v1",
+  "description": "Register, authorisation, licence, PI or CPD status change",
+  "x-event-type": "IntermediaryLicenceChanged",
+  "x-registry-name": "pty.IntermediaryLicenceChanged",
+  "x-producer": "PTY",
+  "x-topic": "pty.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "intermediary_id",
+  "x-aggregate-type": [
+    "Intermediary"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-01 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "IntermediaryLicenceChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PTY"
+    },
+    "aggregateType": {
+      "const": "Intermediary"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intermediaryId",
+        "statusKind",
+        "newStatus"
+      ],
+      "properties": {
+        "intermediaryId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "statusKind": {
+          "type": "string",
+          "enum": [
+            "REGISTER",
+            "AUTHORISATION",
+            "LICENCE",
+            "PI",
+            "CPD"
+          ],
+          "x-classification": "P0"
+        },
+        "newStatus": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "expiry": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/LocalDate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/mig/MigrationWaveStatusChanged.v1.schema.json",
+  "title": "MigrationWaveStatusChanged v1",
+  "description": "Wave state transition (§7.3.1)",
+  "x-event-type": "MigrationWaveStatusChanged",
+  "x-registry-name": "mig.MigrationWaveStatusChanged",
+  "x-producer": "MIG",
+  "x-topic": "mig.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "wave_id",
+  "x-aggregate-type": [
+    "MigrationWave"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-16 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "MigrationWaveStatusChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "MIG"
+    },
+    "aggregateType": {
+      "const": "MigrationWave"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "waveId",
+        "waveCode",
+        "scenario",
+        "oldState",
+        "newState",
+        "scopeSummary",
+        "effectiveAt"
+      ],
+      "properties": {
+        "waveId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "waveCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "scenario": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "oldState": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "newState": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "scopeSummary": {
+          "$ref": "../common.schema.json#/$defs/OpenObject",
+          "x-classification": "P0"
+        },
+        "effectiveAt": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

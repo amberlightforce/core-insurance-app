@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/RIContractActivated.v1.schema.json",
+  "title": "RIContractActivated v1",
+  "description": "Approved version reaches period start (REQ-RI-058)",
+  "x-event-type": "RIContractActivated",
+  "x-registry-name": "ri.RIContractActivated",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "ri_contract_id",
+  "x-aggregate-type": [
+    "RiContract"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RIContractActivated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "RiContract"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "riContractId",
+        "contractNumber",
+        "stableTreatyId",
+        "year",
+        "version",
+        "contractType",
+        "period",
+        "currency",
+        "sectionsAndLayers",
+        "participants"
+      ],
+      "properties": {
+        "riContractId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "contractNumber": {
+          "$ref": "../common.schema.json#/$defs/BusinessNumber",
+          "x-classification": "P0"
+        },
+        "stableTreatyId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "year": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "contractType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "period": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        },
+        "currency": {
+          "$ref": "../common.schema.json#/$defs/CurrencyCode",
+          "x-classification": "P0"
+        },
+        "sectionsAndLayers": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/OpenObject"
+          },
+          "x-classification": "P0"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Participant"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

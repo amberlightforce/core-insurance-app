@@ -1,0 +1,954 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/common.schema.json",
+  "title": "Common event payload types",
+  "description": "Shared value types for event payloads (contracts/events). Referenced as ../common.schema.json#/$defs/<Name>.",
+  "$defs": {
+    "Uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case."
+    },
+    "Code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Code value from a configured code list. Values are owned by configuration, not by this schema."
+    },
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "BusinessNumber": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Business number issued through PLT numbering (NumberingScheme); format is configuration."
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12)."
+    },
+    "LocalDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "Instant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?Z$",
+      "description": "RFC 3339 timestamp in UTC (suffix Z)."
+    },
+    "Decimal": {
+      "type": "string",
+      "pattern": "^-?(0|[1-9]\\d*)(\\.\\d+)?$",
+      "description": "Decimal number as a string (no binary floating point for money or rates)."
+    },
+    "NonNegativeInt": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "CurrencyCode": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217 alphabetic code."
+    },
+    "CountryCode": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "ISO 3166-1 alpha-2 code."
+    },
+    "LanguageCode": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$",
+      "description": "BCP 47 language tag (el, en, el-GR)."
+    },
+    "Money": {
+      "type": "object",
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Decimal"
+        },
+        "currency": {
+          "$ref": "#/$defs/CurrencyCode"
+        }
+      },
+      "description": "Amount as a decimal string plus ISO 4217 currency."
+    },
+    "MoneyByCurrency3": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "transaction": {
+          "$ref": "#/$defs/Money"
+        },
+        "functional": {
+          "$ref": "#/$defs/Money"
+        },
+        "group": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "transaction",
+        "functional",
+        "group"
+      ],
+      "description": "Amount in transaction (original), functional and group currency (contract three-currency rule)."
+    },
+    "MoneyByCurrency4": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "transaction": {
+          "$ref": "#/$defs/Money"
+        },
+        "functional": {
+          "$ref": "#/$defs/Money"
+        },
+        "group": {
+          "$ref": "#/$defs/Money"
+        },
+        "contract": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "transaction",
+        "functional",
+        "group",
+        "contract"
+      ],
+      "description": "RI amounts: transaction, functional, group and contract currency (PRD-08 §8)."
+    },
+    "ModuleCode": {
+      "type": "string",
+      "enum": [
+        "PTY",
+        "PFC",
+        "RAT",
+        "UW",
+        "POL",
+        "BIL",
+        "CLM",
+        "RI",
+        "FIN",
+        "DOC",
+        "CMP",
+        "CHN",
+        "WRK",
+        "PLT",
+        "DAT",
+        "MIG",
+        "MKT"
+      ],
+      "description": "Module code (contract §3.6.1)."
+    },
+    "ObjectRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "module": {
+          "$ref": "#/$defs/ModuleCode"
+        },
+        "type": {
+          "$ref": "#/$defs/Code"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "module",
+        "type",
+        "id"
+      ],
+      "description": "Reference to a business object owned by a module."
+    },
+    "DatePeriod": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/LocalDate"
+        },
+        "to": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/LocalDate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "description": "Date period; `to` is null when open-ended."
+    },
+    "TimeWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/Instant"
+        },
+        "to": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Instant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "description": "Time window [from, to); `to` is null when open-ended."
+    },
+    "Duration": {
+      "type": "string",
+      "pattern": "^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+(\\.\\d+)?S)?)?$",
+      "description": "ISO 8601 duration."
+    },
+    "ClockCode": {
+      "type": "string",
+      "pattern": "^[A-Z]{2,3}_[A-Z0-9_]+$",
+      "description": "Statutory or business clock code `<MOD>_<NAME>` (contract §3.6.1, R-28)."
+    },
+    "EventTypeName": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]+$",
+      "description": "Catalogued event name (PascalCase, past tense)."
+    },
+    "ProductVersionNumber": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Product version `major.minor` (contract §3.2.3)."
+    },
+    "VersionLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "AiFeatureId": {
+      "type": "string",
+      "pattern": "^AI-[A-Z]{2,3}-\\d{2,}$",
+      "description": "AI feature id `AI-<MOD>-<NN>` (contract §3.6.1)."
+    },
+    "RetentionClassCode": {
+      "type": "string",
+      "pattern": "^RC-[A-Z0-9-]+$",
+      "description": "Retention class `RC-…` (contract §3.2.1)."
+    },
+    "ObligationCode": {
+      "type": "string",
+      "pattern": "^OBL-[A-Z0-9-]+$",
+      "description": "Obligation id `OBL-<CODE>` (contract §3.6.1)."
+    },
+    "DataContractId": {
+      "type": "string",
+      "pattern": "^dc\\.[a-z]+\\.[a-z0-9_.-]+\\.v\\d+$",
+      "description": "Data contract name `dc.<mod>.<entity>.v<major>` (PRD-15 §8.3)."
+    },
+    "OpenObject": {
+      "type": "object",
+      "additionalProperties": true,
+      "x-open-structure": true,
+      "description": "Structure not specified by the owning PRD; consumers must not rely on members until the producer defines them in a minor version."
+    },
+    "Counts": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/NonNegativeInt"
+      },
+      "description": "Named counts (e.g. by outcome or status)."
+    },
+    "BlockingPoint": {
+      "type": "string",
+      "enum": [
+        "PRE_QUOTE",
+        "PRE_BIND",
+        "PRE_ISSUE",
+        "NON_BLOCKING"
+      ],
+      "description": "Contract §3.3 blocking point."
+    },
+    "DisbursementSourceType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "examples": [
+        "BIL",
+        "CLM",
+        "RI_SETTLEMENT",
+        "FS_CLEARING",
+        "CMP_REDRESS",
+        "TAX_REMITTANCE"
+      ],
+      "description": "Disbursement source (contract D1/D4, D-CON-21): refund (BIL), claim payment (CLM), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change."
+    },
+    "Actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "USER",
+            "SERVICE",
+            "AI_AGENT"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "description": "Who acted: user, service or AI agent id (contract §3.4.1 actor)."
+    },
+    "RepointMap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reference": {
+            "$ref": "#/$defs/ObjectRef"
+          },
+          "from": {
+            "type": "string",
+            "minLength": 1
+          },
+          "to": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "description": "One re-pointing: old id → new id, optionally for one referencing object."
+      }
+    },
+    "RatingSlotDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "algorithmCode": {
+          "$ref": "#/$defs/Code"
+        },
+        "inputSchemaVersion": {
+          "$ref": "#/$defs/VersionLabel"
+        },
+        "bindingMode": {
+          "type": "string",
+          "enum": [
+            "PINNED",
+            "FLOATING"
+          ]
+        },
+        "compatibleArtefactRange": {
+          "$ref": "#/$defs/Text"
+        }
+      },
+      "required": [
+        "algorithmCode",
+        "inputSchemaVersion",
+        "bindingMode",
+        "compatibleArtefactRange"
+      ],
+      "description": "Rating-slot declaration (PRD-02 §8, R-27, REQ-PFC-245)."
+    },
+    "Approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/Code"
+        },
+        "decidedAt": {
+          "$ref": "#/$defs/Instant"
+        }
+      },
+      "required": [
+        "role",
+        "decidedAt"
+      ]
+    },
+    "ProductVersionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "productCode": {
+          "$ref": "#/$defs/Code"
+        },
+        "version": {
+          "$ref": "#/$defs/ProductVersionNumber"
+        },
+        "artefactHash": {
+          "$ref": "#/$defs/Sha256"
+        }
+      },
+      "required": [
+        "productCode",
+        "version"
+      ]
+    },
+    "HoldScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Code"
+          }
+        },
+        "jobTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Code"
+          }
+        },
+        "regionCodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Code"
+          }
+        }
+      },
+      "required": [
+        "lines",
+        "jobTypes",
+        "regionCodes"
+      ],
+      "description": "Hold scope summary (PRD-04 §8.1)."
+    },
+    "PremiumSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "premium": {
+          "$ref": "#/$defs/Money"
+        },
+        "taxes": {
+          "$ref": "#/$defs/Money"
+        },
+        "total": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "premium",
+        "taxes",
+        "total"
+      ],
+      "description": "PRD-05 §8.1: premium, taxes, total."
+    },
+    "ChangedElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "locator": {
+          "$ref": "#/$defs/Text"
+        },
+        "elementType": {
+          "$ref": "#/$defs/Code"
+        }
+      },
+      "required": [
+        "locator",
+        "elementType"
+      ]
+    },
+    "VehicleCoverFacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "added": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          }
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          }
+        },
+        "suspended": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          }
+        },
+        "reactivated": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          }
+        }
+      },
+      "required": [
+        "added",
+        "removed",
+        "suspended",
+        "reactivated"
+      ],
+      "description": "Element locators of vehicles whose cover was added, removed, suspended or reactivated."
+    },
+    "CoverGap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "PERIOD"
+          ]
+        },
+        "period": {
+          "$ref": "#/$defs/TimeWindow"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "CategoryTotal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "$ref": "#/$defs/Code"
+        },
+        "amount": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "category",
+        "amount"
+      ]
+    },
+    "KindTotal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/Code"
+        },
+        "amount": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "kind",
+        "amount"
+      ]
+    },
+    "Allocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "itemId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "termId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "amount": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "itemId",
+        "termId",
+        "amount"
+      ]
+    },
+    "TermArrearsFlag": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "termId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "arrearsCleared": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "termId",
+        "arrearsCleared"
+      ]
+    },
+    "ScheduledItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "itemId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PLANNED",
+            "BILLED"
+          ]
+        }
+      },
+      "required": [
+        "itemId",
+        "status"
+      ]
+    },
+    "LedgerLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "$ref": "#/$defs/Code"
+        },
+        "side": {
+          "type": "string",
+          "enum": [
+            "DEBIT",
+            "CREDIT"
+          ]
+        },
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "dimensions": {
+          "$ref": "#/$defs/OpenObject"
+        }
+      },
+      "required": [
+        "account",
+        "side",
+        "amount",
+        "dimensions"
+      ]
+    },
+    "PartyRole": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "partyId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "role": {
+          "$ref": "#/$defs/Code"
+        }
+      },
+      "required": [
+        "partyId",
+        "role"
+      ]
+    },
+    "ReserveLineKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "costType": {
+          "$ref": "#/$defs/Code"
+        },
+        "category": {
+          "$ref": "#/$defs/Code"
+        }
+      },
+      "required": [
+        "costType",
+        "category"
+      ]
+    },
+    "LineAmount": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lineKey": {
+          "$ref": "#/$defs/Text"
+        },
+        "amount": {
+          "$ref": "#/$defs/MoneyByCurrency3"
+        }
+      },
+      "required": [
+        "lineKey",
+        "amount"
+      ]
+    },
+    "Participant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reinsurerPartyId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "signedLine": {
+          "$ref": "#/$defs/Decimal"
+        }
+      },
+      "required": [
+        "reinsurerPartyId",
+        "signedLine"
+      ]
+    },
+    "ParticipantTotal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "participantPartyId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "amount": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "participantPartyId",
+        "amount"
+      ]
+    },
+    "ItemAmount": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "itemId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "amount": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "itemId",
+        "amount"
+      ]
+    },
+    "JournalRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "journalId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "journalNumber": {
+          "$ref": "#/$defs/BusinessNumber"
+        }
+      },
+      "required": [
+        "journalId",
+        "journalNumber"
+      ]
+    },
+    "BookLobTotal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "book": {
+          "$ref": "#/$defs/Code"
+        },
+        "lob": {
+          "$ref": "#/$defs/Code"
+        },
+        "amount": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "book",
+        "lob",
+        "amount"
+      ]
+    },
+    "Recipient": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/Code"
+        },
+        "partyId": {
+          "$ref": "#/$defs/Uuid"
+        }
+      },
+      "required": [
+        "role"
+      ]
+    },
+    "SignedDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "documentId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "signedArchiveId": {
+          "$ref": "#/$defs/Text"
+        }
+      },
+      "required": [
+        "documentId",
+        "signedArchiveId"
+      ]
+    },
+    "PresentedDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "documentId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "version": {
+          "$ref": "#/$defs/VersionLabel"
+        },
+        "contentHash": {
+          "$ref": "#/$defs/Sha256"
+        }
+      },
+      "required": [
+        "documentId",
+        "version",
+        "contentHash"
+      ]
+    },
+    "Assignee": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "userId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "groupId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "queueId": {
+          "$ref": "#/$defs/Uuid"
+        }
+      },
+      "required": [],
+      "minProperties": 1
+    },
+    "TimerDue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timer": {
+          "$ref": "#/$defs/Code"
+        },
+        "dueAt": {
+          "$ref": "#/$defs/Instant"
+        }
+      },
+      "required": [
+        "timer",
+        "dueAt"
+      ]
+    },
+    "PurgeCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "due": {
+          "$ref": "#/$defs/NonNegativeInt"
+        },
+        "purged": {
+          "$ref": "#/$defs/NonNegativeInt"
+        },
+        "held": {
+          "$ref": "#/$defs/NonNegativeInt"
+        },
+        "failed": {
+          "$ref": "#/$defs/NonNegativeInt"
+        }
+      },
+      "required": [
+        "due",
+        "purged",
+        "held",
+        "failed"
+      ]
+    },
+    "ConfidenceInterval": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lower": {
+          "$ref": "#/$defs/Decimal"
+        },
+        "upper": {
+          "$ref": "#/$defs/Decimal"
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ]
+    },
+    "ChangedKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/Text"
+        },
+        "layerNodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Text"
+          }
+        },
+        "validity": {
+          "$ref": "#/$defs/DatePeriod"
+        }
+      },
+      "required": [
+        "key",
+        "layerNodes",
+        "validity"
+      ]
+    },
+    "ClockValueFlag": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "clockCode": {
+          "$ref": "#/$defs/ClockCode"
+        },
+        "appliesToRunning": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "clockCode",
+        "appliesToRunning"
+      ]
+    }
+  }
+}

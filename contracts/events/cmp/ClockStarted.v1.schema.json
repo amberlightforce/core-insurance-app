@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/ClockStarted.v1.schema.json",
+  "title": "ClockStarted v1",
+  "description": "Instance transitions (Breached only for DEADLINE, Elapsed only for WAITING_PERIOD; ClockElapsed per R-78). Consumers correlate by subject.",
+  "x-event-type": "ClockStarted",
+  "x-registry-name": "cmp.ClockStarted",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "clock_instance_id",
+  "x-aggregate-type": [
+    "ClockInstance"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ClockStarted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "ClockInstance"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clockCode",
+        "subject"
+      ],
+      "properties": {
+        "clockCode": {
+          "$ref": "../common.schema.json#/$defs/ClockCode",
+          "x-classification": "P0"
+        },
+        "subject": {
+          "$ref": "../common.schema.json#/$defs/ObjectRef",
+          "x-classification": "P0"
+        },
+        "deadline": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Instant"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Absent for clocks without a deadline at start",
+          "x-classification": "P0"
+        },
+        "lateEmission": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "REQ-CMP-262",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

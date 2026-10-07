@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/ReinstatementPremiumDue.v1.schema.json",
+  "title": "ReinstatementPremiumDue v1",
+  "description": "Reinstatement premium delta (REQ-RI-146)",
+  "x-event-type": "ReinstatementPremiumDue",
+  "x-registry-name": "ri.ReinstatementPremiumDue",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "ri_contract_id",
+  "x-aggregate-type": [
+    "RiContract"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ReinstatementPremiumDue"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "RiContract"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reinstatementId",
+        "layerId",
+        "occurrence",
+        "reinstatementNumber",
+        "amountReinstated",
+        "rate",
+        "timeFactor",
+        "premium"
+      ],
+      "properties": {
+        "reinstatementId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "layerId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "occurrence": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "reinstatementNumber": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "amountReinstated": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "rate": {
+          "$ref": "../common.schema.json#/$defs/Decimal",
+          "x-classification": "P0"
+        },
+        "timeFactor": {
+          "$ref": "../common.schema.json#/$defs/Decimal",
+          "x-classification": "P0"
+        },
+        "premium": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency4",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

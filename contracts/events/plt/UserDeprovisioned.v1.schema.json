@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/plt/UserDeprovisioned.v1.schema.json",
+  "title": "UserDeprovisioned v1",
+  "description": "User Disabled",
+  "x-event-type": "UserDeprovisioned",
+  "x-registry-name": "plt.UserDeprovisioned",
+  "x-producer": "PLT",
+  "x-topic": "plt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "user_id",
+  "x-aggregate-type": [
+    "User"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-14 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "UserDeprovisioned"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PLT"
+    },
+    "aggregateType": {
+      "const": "User"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "userId",
+        "reasonClass",
+        "effectiveAt"
+      ],
+      "properties": {
+        "userId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "reasonClass": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "effectiveAt": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

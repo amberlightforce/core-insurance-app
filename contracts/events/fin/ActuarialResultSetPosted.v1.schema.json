@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/fin/ActuarialResultSetPosted.v1.schema.json",
+  "title": "ActuarialResultSetPosted v1",
+  "description": "Result set Posted or Rejected",
+  "x-event-type": "ActuarialResultSetPosted",
+  "x-registry-name": "fin.ActuarialResultSetPosted",
+  "x-producer": "FIN",
+  "x-topic": "fin.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "legal_entity_id",
+  "x-aggregate-type": [
+    "LegalEntity"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-09 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ActuarialResultSetPosted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "FIN"
+    },
+    "aggregateType": {
+      "const": "LegalEntity"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resultSetId",
+        "runId",
+        "status",
+        "findingsCount"
+      ],
+      "properties": {
+        "resultSetId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "runId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "POSTED",
+            "REJECTED"
+          ],
+          "x-classification": "P0"
+        },
+        "findingsCount": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

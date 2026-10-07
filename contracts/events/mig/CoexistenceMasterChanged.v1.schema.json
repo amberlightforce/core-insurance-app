@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/mig/CoexistenceMasterChanged.v1.schema.json",
+  "title": "CoexistenceMasterChanged v1",
+  "description": "Route state transition (§7.3.6). Cache feed only; mig.Routing.resolve is authoritative (R-96).",
+  "x-event-type": "CoexistenceMasterChanged",
+  "x-registry-name": "mig.CoexistenceMasterChanged",
+  "x-producer": "MIG",
+  "x-topic": "mig.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "route_id",
+  "x-aggregate-type": [
+    "CoexistenceRoute"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-16 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "CoexistenceMasterChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "MIG"
+    },
+    "aggregateType": {
+      "const": "CoexistenceRoute"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "routeId",
+        "objectType",
+        "legacyKey",
+        "newMasterState",
+        "effectiveFrom",
+        "reason"
+      ],
+      "properties": {
+        "routeId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "objectType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "coreId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "legacyKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "oldMasterState": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "newMasterState": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "termSplit": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/OpenObject"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "effectiveFrom": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "reason": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/rat/RatingArtifactPublished.v1.schema.json",
+  "title": "RatingArtifactPublished v1",
+  "description": "Artefact Approved and stored in the runtime store",
+  "x-event-type": "RatingArtifactPublished",
+  "x-registry-name": "rat.RatingArtifactPublished",
+  "x-producer": "RAT",
+  "x-topic": "rat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "rating_slot_id",
+  "x-aggregate-type": [
+    "RatingSlot"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-03 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RatingArtifactPublished"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RAT"
+    },
+    "aggregateType": {
+      "const": "RatingSlot"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artefactHash",
+        "label",
+        "slots",
+        "compatibleProductVersions",
+        "inputSchemaVersion",
+        "approvalRefs",
+        "state"
+      ],
+      "properties": {
+        "artefactHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "label": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "compatibleProductVersions": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ProductVersionRef"
+          },
+          "x-classification": "P0"
+        },
+        "inputSchemaVersion": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "approvalRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "state": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

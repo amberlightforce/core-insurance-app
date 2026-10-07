@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/wrk/DocumentLinked.v1.schema.json",
+  "title": "DocumentLinked v1",
+  "description": "Verification or re-link",
+  "x-event-type": "DocumentLinked",
+  "x-registry-name": "wrk.DocumentLinked",
+  "x-producer": "WRK",
+  "x-topic": "wrk.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "inbound_document_id",
+  "x-aggregate-type": [
+    "InboundDocument"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-13 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DocumentLinked"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "WRK"
+    },
+    "aggregateType": {
+      "const": "InboundDocument"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objectRefs",
+        "classCode",
+        "classConfidence",
+        "verifiedBy"
+      ],
+      "properties": {
+        "objectRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ObjectRef"
+          },
+          "x-classification": "P0"
+        },
+        "classCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "classConfidence": {
+          "$ref": "../common.schema.json#/$defs/Decimal",
+          "x-classification": "P0"
+        },
+        "verifiedBy": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "previousLink": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "../common.schema.json#/$defs/ObjectRef"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Set on re-link",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

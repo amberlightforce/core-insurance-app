@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/mkt/PackDeprecated.v1.schema.json",
+  "title": "PackDeprecated v1",
+  "description": "A pack version is deprecated",
+  "x-event-type": "PackDeprecated",
+  "x-registry-name": "mkt.PackDeprecated",
+  "x-producer": "MKT",
+  "x-topic": "mkt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "pack_id",
+  "x-aggregate-type": [
+    "Pack"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-17 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PackDeprecated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "MKT"
+    },
+    "aggregateType": {
+      "const": "Pack"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packId",
+        "version",
+        "removalEarliestDate"
+      ],
+      "properties": {
+        "packId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "removalEarliestDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/RecoveryCalculated.v1.schema.json",
+  "title": "RecoveryCalculated v1",
+  "description": "Recovery deltas booked in a batch (REQ-RI-003, REQ-RI-118)",
+  "x-event-type": "RecoveryCalculated",
+  "x-registry-name": "ri.RecoveryCalculated",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "ri_contract_id",
+  "x-aggregate-type": [
+    "RiContract"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RecoveryCalculated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "RiContract"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "batchId",
+        "recoveryIds",
+        "occurrence",
+        "claimIds",
+        "riContractId",
+        "layerId",
+        "participantPartyId",
+        "incurredDelta",
+        "paidDelta",
+        "outstandingDelta",
+        "claimLevelTotals",
+        "postingKey",
+        "siiLob",
+        "ifrs17Refs"
+      ],
+      "properties": {
+        "batchId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "recoveryIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "occurrence": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "claimIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "riContractId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "layerId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "participantPartyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "incurredDelta": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency4",
+          "x-classification": "P0"
+        },
+        "paidDelta": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency4",
+          "x-classification": "P0"
+        },
+        "outstandingDelta": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency4",
+          "x-classification": "P0"
+        },
+        "claimLevelTotals": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/OpenObject"
+          },
+          "x-classification": "P0"
+        },
+        "postingKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "siiLob": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "ifrs17Refs": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Text"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

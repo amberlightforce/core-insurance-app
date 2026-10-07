@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/clm/FraudScoreReceived.v1.schema.json",
+  "title": "FraudScoreReceived v1",
+  "description": "rules or model scoring stored. Score band only; model features are never carried.",
+  "x-event-type": "FraudScoreReceived",
+  "x-registry-name": "clm.FraudScoreReceived",
+  "x-producer": "CLM",
+  "x-topic": "clm.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "claim_id",
+  "x-aggregate-type": [
+    "Claim"
+  ],
+  "x-data-classification": "P2",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-07 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "FraudScoreReceived"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CLM"
+    },
+    "aggregateType": {
+      "const": "Claim"
+    },
+    "dataClassification": {
+      "const": "P2"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "band",
+        "source",
+        "checkpoint"
+      ],
+      "properties": {
+        "band": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P2",
+          "x-personal-data": true
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "RULES",
+            "MODEL"
+          ],
+          "x-classification": "P0"
+        },
+        "modelVersion": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/VersionLabel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "checkpoint": {
+          "type": "string",
+          "enum": [
+            "FNOL",
+            "PRE_PAYMENT"
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

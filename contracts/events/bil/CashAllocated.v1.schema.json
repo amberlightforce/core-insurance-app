@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/bil/CashAllocated.v1.schema.json",
+  "title": "CashAllocated v1",
+  "description": "Allocation batch committed",
+  "x-event-type": "CashAllocated",
+  "x-registry-name": "bil.CashAllocated",
+  "x-producer": "BIL",
+  "x-topic": "bil.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "billing_account_id",
+  "x-aggregate-type": [
+    "BillingAccount"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-06 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "CashAllocated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "BIL"
+    },
+    "aggregateType": {
+      "const": "BillingAccount"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receiptId",
+        "allocations",
+        "arrearsCleared",
+        "downPayment"
+      ],
+      "properties": {
+        "receiptId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "allocations": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Allocation"
+          },
+          "x-classification": "P0"
+        },
+        "arrearsCleared": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/TermArrearsFlag"
+          },
+          "description": "arrears_cleared per term",
+          "x-classification": "P0"
+        },
+        "downPayment": {
+          "type": "boolean",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

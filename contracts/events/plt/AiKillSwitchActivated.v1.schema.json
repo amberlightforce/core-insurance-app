@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/plt/AiKillSwitchActivated.v1.schema.json",
+  "title": "AiKillSwitchActivated v1",
+  "description": "Global or per-feature kill switch. Keyed on the feature id, or GLOBAL.",
+  "x-event-type": "AiKillSwitchActivated",
+  "x-registry-name": "plt.AiKillSwitchActivated",
+  "x-producer": "PLT",
+  "x-topic": "plt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "feature_id",
+  "x-aggregate-type": [
+    "AiFeature",
+    "AiGlobal"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-14 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "AiKillSwitchActivated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PLT"
+    },
+    "aggregateType": {
+      "enum": [
+        "AiFeature",
+        "AiGlobal"
+      ]
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "actor",
+        "reason",
+        "activatedAt"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "description": "GLOBAL or an AI feature id",
+          "x-classification": "P0"
+        },
+        "actor": {
+          "$ref": "../common.schema.json#/$defs/Actor",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "reason": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "activatedAt": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/chn/WithdrawalRequestClosed.v1.schema.json",
+  "title": "WithdrawalRequestClosed v1",
+  "description": "Processed or Rejected",
+  "x-event-type": "WithdrawalRequestClosed",
+  "x-registry-name": "chn.WithdrawalRequestClosed",
+  "x-producer": "CHN",
+  "x-topic": "chn.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "withdrawal_request_id",
+  "x-aggregate-type": [
+    "WithdrawalRequest"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-12 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "WithdrawalRequestClosed"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CHN"
+    },
+    "aggregateType": {
+      "const": "WithdrawalRequest"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "withdrawalRequestId",
+        "outcome"
+      ],
+      "properties": {
+        "withdrawalRequestId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "PROCESSED",
+            "REJECTED"
+          ],
+          "x-classification": "P0"
+        },
+        "decisionMakerUserId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "When rejected",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "policyId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

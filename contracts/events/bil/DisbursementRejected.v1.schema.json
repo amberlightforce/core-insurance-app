@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/bil/DisbursementRejected.v1.schema.json",
+  "title": "DisbursementRejected v1",
+  "description": "Disbursement enters Rejected (approver, evidence check or bank pain.002). Decided addition (contract D4, D-CON-21).",
+  "x-event-type": "DisbursementRejected",
+  "x-registry-name": "bil.DisbursementRejected",
+  "x-producer": "BIL",
+  "x-topic": "bil.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "disbursement_id",
+  "x-aggregate-type": [
+    "Disbursement"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-06 §8.1",
+    "contract D4; D-CON-21"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DisbursementRejected"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "BIL"
+    },
+    "aggregateType": {
+      "const": "Disbursement"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "disbursementId",
+        "sourceType",
+        "sourceId",
+        "reasonCode",
+        "rejectingParty"
+      ],
+      "properties": {
+        "disbursementId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "sourceType": {
+          "$ref": "../common.schema.json#/$defs/DisbursementSourceType",
+          "x-classification": "P0"
+        },
+        "sourceId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "reasonCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "rejectingParty": {
+          "type": "string",
+          "enum": [
+            "APPROVER",
+            "EVIDENCE_CHECK",
+            "BANK"
+          ],
+          "description": "Approver, evidence check or bank pain.002",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

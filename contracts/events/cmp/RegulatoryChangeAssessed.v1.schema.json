@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/RegulatoryChangeAssessed.v1.schema.json",
+  "title": "RegulatoryChangeAssessed v1",
+  "description": "Assessment approved. PRD-11 names impacts without structure.",
+  "x-event-type": "RegulatoryChangeAssessed",
+  "x-registry-name": "cmp.RegulatoryChangeAssessed",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "change_id",
+  "x-aggregate-type": [
+    "RegulatoryChange"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "minimal",
+  "x-payload-note": "PRD-11 names impacts without structure.",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RegulatoryChangeAssessed"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "RegulatoryChange"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changeId",
+        "impacts",
+        "modules"
+      ],
+      "properties": {
+        "changeId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "impacts": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/OpenObject"
+          },
+          "x-classification": "P0"
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ModuleCode"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

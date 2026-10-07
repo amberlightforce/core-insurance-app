@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pol/PolicyBound.v1.schema.json",
+  "title": "PolicyBound v1",
+  "description": "Submission bound",
+  "x-event-type": "PolicyBound",
+  "x-registry-name": "pol.PolicyBound",
+  "x-producer": "POL",
+  "x-topic": "pol.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "policy_id",
+  "x-aggregate-type": [
+    "Policy"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-05 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PolicyBound"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "POL"
+    },
+    "aggregateType": {
+      "const": "Policy"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyId",
+        "policyNumber",
+        "termId",
+        "termNumber",
+        "transactionId",
+        "effectivePeriod",
+        "productCode",
+        "productVersion",
+        "artefactHash",
+        "resolutionHash",
+        "configurationHash",
+        "producerOfRecord",
+        "accountId",
+        "payerPartyId",
+        "paymentPlanRef",
+        "ifrs17Tags",
+        "motor"
+      ],
+      "properties": {
+        "policyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "policyNumber": {
+          "$ref": "../common.schema.json#/$defs/BusinessNumber",
+          "x-classification": "P0"
+        },
+        "termId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "termNumber": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "transactionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "effectivePeriod": {
+          "$ref": "../common.schema.json#/$defs/TimeWindow",
+          "x-classification": "P0"
+        },
+        "productCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "productVersion": {
+          "$ref": "../common.schema.json#/$defs/ProductVersionNumber",
+          "x-classification": "P0"
+        },
+        "artefactHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "resolutionHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "configurationHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "producerOfRecord": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "description": "Producer code of record",
+          "x-classification": "P0"
+        },
+        "accountId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "payerPartyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "paymentPlanRef": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "ifrs17Tags": {
+          "$ref": "../common.schema.json#/$defs/OpenObject",
+          "description": "IFRS 17 proposals (portfolio, cohort, group); FIN assigns (R-52)",
+          "x-classification": "P0"
+        },
+        "motor": {
+          "type": "boolean",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

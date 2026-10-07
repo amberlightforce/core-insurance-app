@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/bil/BillingEntryPosted.v1.schema.json",
+  "title": "BillingEntryPosted v1",
+  "description": "Every ledger entry. FIN's sole posting source for BIL facts (REQ-FIN-036). Keyed on legal_entity_id for non-account entries.",
+  "x-event-type": "BillingEntryPosted",
+  "x-registry-name": "bil.BillingEntryPosted",
+  "x-producer": "BIL",
+  "x-topic": "bil.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "billing_account_id",
+  "x-aggregate-type": [
+    "BillingAccount",
+    "LegalEntity"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-06 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "BillingEntryPosted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "BIL"
+    },
+    "aggregateType": {
+      "enum": [
+        "BillingAccount",
+        "LegalEntity"
+      ]
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entryId",
+        "eventType",
+        "accountingDate",
+        "businessDate",
+        "lines"
+      ],
+      "properties": {
+        "entryId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "eventType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "accountingDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "businessDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/LedgerLine"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

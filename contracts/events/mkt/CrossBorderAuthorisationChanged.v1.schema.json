@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/mkt/CrossBorderAuthorisationChanged.v1.schema.json",
+  "title": "CrossBorderAuthorisationChanged v1",
+  "description": "Authorisation created, amended or ended",
+  "x-event-type": "CrossBorderAuthorisationChanged",
+  "x-registry-name": "mkt.CrossBorderAuthorisationChanged",
+  "x-producer": "MKT",
+  "x-topic": "mkt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "stamp_id",
+  "x-aggregate-type": [
+    "Stamp"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-17 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "CrossBorderAuthorisationChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "MKT"
+    },
+    "aggregateType": {
+      "const": "Stamp"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "legalEntity",
+        "hostState",
+        "basis",
+        "classes",
+        "validPeriod"
+      ],
+      "properties": {
+        "legalEntity": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "hostState": {
+          "$ref": "../common.schema.json#/$defs/CountryCode",
+          "x-classification": "P0"
+        },
+        "basis": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "classes": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "validPeriod": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

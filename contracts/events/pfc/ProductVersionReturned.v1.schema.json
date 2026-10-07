@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pfc/ProductVersionReturned.v1.schema.json",
+  "title": "ProductVersionReturned v1",
+  "description": "Submitted or Approved version returned to Draft",
+  "x-event-type": "ProductVersionReturned",
+  "x-registry-name": "pfc.ProductVersionReturned",
+  "x-producer": "PFC",
+  "x-topic": "pfc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "product_id",
+  "x-aggregate-type": [
+    "Product"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-02 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ProductVersionReturned"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PFC"
+    },
+    "aggregateType": {
+      "const": "Product"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "productCode",
+        "version",
+        "returnedByRole",
+        "reasonCategory",
+        "ratingSlotDeclaration"
+      ],
+      "properties": {
+        "productCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/ProductVersionNumber",
+          "x-classification": "P0"
+        },
+        "returnedByRole": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "reasonCategory": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "ratingSlotDeclaration": {
+          "$ref": "../common.schema.json#/$defs/RatingSlotDeclaration",
+          "description": "Rating-slot declaration carried by every ProductVersion* event (contract R-27, REQ-PFC-245)",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

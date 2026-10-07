@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/dat/LakehouseErasureCompleted.v1.schema.json",
+  "title": "LakehouseErasureCompleted v1",
+  "description": "Erasure or restriction task finished (REQ-DAT-275). Audit evidence only (R-97). Name kept per D-ARC-06.",
+  "x-event-type": "LakehouseErasureCompleted",
+  "x-registry-name": "dat.LakehouseErasureCompleted",
+  "x-producer": "DAT",
+  "x-topic": "dat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "task_id",
+  "x-aggregate-type": [
+    "ErasureTask"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-15 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "LakehouseErasureCompleted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DAT"
+    },
+    "aggregateType": {
+      "const": "ErasureTask"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dsarId",
+        "outcome",
+        "layers",
+        "counts"
+      ],
+      "properties": {
+        "dsarId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "ERASED",
+            "RESTRICTED"
+          ],
+          "x-classification": "P0"
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "description": "Report-store layers (rpt_raw/rpt_conformed/rpt_mart, D-ARC-06)",
+          "x-classification": "P0"
+        },
+        "counts": {
+          "$ref": "../common.schema.json#/$defs/Counts",
+          "x-classification": "P0"
+        },
+        "reason": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

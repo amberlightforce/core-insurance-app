@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/plt/ChangeDeployed.v1.schema.json",
+  "title": "ChangeDeployed v1",
+  "description": "Production deployment completed or rolled back",
+  "x-event-type": "ChangeDeployed",
+  "x-registry-name": "plt.ChangeDeployed",
+  "x-producer": "PLT",
+  "x-topic": "plt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "change_id",
+  "x-aggregate-type": [
+    "Change"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-14 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ChangeDeployed"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PLT"
+    },
+    "aggregateType": {
+      "const": "Change"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changeId",
+        "modules",
+        "versions",
+        "outcome"
+      ],
+      "properties": {
+        "changeId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ModuleCode"
+          },
+          "x-classification": "P0"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Text"
+          },
+          "x-classification": "P0"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "COMPLETED",
+            "ROLLED_BACK"
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

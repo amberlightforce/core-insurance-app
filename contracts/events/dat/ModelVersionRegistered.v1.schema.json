@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/dat/ModelVersionRegistered.v1.schema.json",
+  "title": "ModelVersionRegistered v1",
+  "description": "A model version is created in the registry (REQ-DAT-202)",
+  "x-event-type": "ModelVersionRegistered",
+  "x-registry-name": "dat.ModelVersionRegistered",
+  "x-producer": "DAT",
+  "x-topic": "dat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "model_id",
+  "x-aggregate-type": [
+    "Model"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-15 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ModelVersionRegistered"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DAT"
+    },
+    "aggregateType": {
+      "const": "Model"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modelId",
+        "version",
+        "owningModule",
+        "aiFeatureIds",
+        "artefactHash",
+        "status"
+      ],
+      "properties": {
+        "modelId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "owningModule": {
+          "$ref": "../common.schema.json#/$defs/ModuleCode",
+          "x-classification": "P0"
+        },
+        "aiFeatureIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/AiFeatureId"
+          },
+          "x-classification": "P0"
+        },
+        "artefactHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "status": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

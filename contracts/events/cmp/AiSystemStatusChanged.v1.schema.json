@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/AiSystemStatusChanged.v1.schema.json",
+  "title": "AiSystemStatusChanged v1",
+  "description": "Register status change. Decided addition (D-CON-09); PLT disables Suspended or Retired features within 60 s (D4).",
+  "x-event-type": "AiSystemStatusChanged",
+  "x-registry-name": "cmp.AiSystemStatusChanged",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "feature_id",
+  "x-aggregate-type": [
+    "AiFeature"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2",
+    "D-CON-09"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "AiSystemStatusChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "AiFeature"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "featureId",
+        "oldStatus",
+        "newStatus",
+        "aiActClass"
+      ],
+      "properties": {
+        "featureId": {
+          "$ref": "../common.schema.json#/$defs/AiFeatureId",
+          "x-classification": "P0"
+        },
+        "oldStatus": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "newStatus": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "description": "E.g. Approved, Suspended, Retired (REQ-CMP-242, -246)",
+          "x-classification": "P0"
+        },
+        "aiActClass": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

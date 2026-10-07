@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pfc/ProductRegulatoryAlertRaised.v1.schema.json",
+  "title": "ProductRegulatoryAlertRaised v1",
+  "description": "Final or code-list change makes versions non-compliant",
+  "x-event-type": "ProductRegulatoryAlertRaised",
+  "x-registry-name": "pfc.ProductRegulatoryAlertRaised",
+  "x-producer": "PFC",
+  "x-topic": "pfc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "product_id",
+  "x-aggregate-type": [
+    "Product"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-02 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ProductRegulatoryAlertRaised"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PFC"
+    },
+    "aggregateType": {
+      "const": "Product"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "productCode",
+        "versions",
+        "keyOrCodeList",
+        "effectiveDate",
+        "violationCount"
+      ],
+      "properties": {
+        "productCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ProductVersionNumber"
+          },
+          "x-classification": "P0"
+        },
+        "keyOrCodeList": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "effectiveDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "violationCount": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pfc/ProductVersionPublished.v1.schema.json",
+  "title": "ProductVersionPublished v1",
+  "description": "Version Locked and artefact published at activation",
+  "x-event-type": "ProductVersionPublished",
+  "x-registry-name": "pfc.ProductVersionPublished",
+  "x-producer": "PFC",
+  "x-topic": "pfc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "product_id",
+  "x-aggregate-type": [
+    "Product"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-02 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ProductVersionPublished"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PFC"
+    },
+    "aggregateType": {
+      "const": "Product"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "productCode",
+        "version",
+        "artefactHash",
+        "newBusinessWindow",
+        "renewalWindow",
+        "jurisdiction",
+        "legalEntity",
+        "channels",
+        "ipidChanged",
+        "changedAreas",
+        "ratingSlotDeclaration"
+      ],
+      "properties": {
+        "productCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/ProductVersionNumber",
+          "x-classification": "P0"
+        },
+        "artefactHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "newBusinessWindow": {
+          "$ref": "../common.schema.json#/$defs/TimeWindow",
+          "x-classification": "P0"
+        },
+        "renewalWindow": {
+          "$ref": "../common.schema.json#/$defs/TimeWindow",
+          "x-classification": "P0"
+        },
+        "jurisdiction": {
+          "$ref": "../common.schema.json#/$defs/CountryCode",
+          "x-classification": "P0"
+        },
+        "legalEntity": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "ipidChanged": {
+          "type": "boolean",
+          "x-classification": "P0"
+        },
+        "changedAreas": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "ratingSlotDeclaration": {
+          "$ref": "../common.schema.json#/$defs/RatingSlotDeclaration",
+          "description": "Rating-slot declaration carried by every ProductVersion* event (contract R-27, REQ-PFC-245)",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}
