@@ -66,7 +66,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <!-- YAML reader for tools/CoreIns.ContractGen: the OpenAPI 3.1 contracts in contracts/openapi are YAML and .NET has
          no YAML parser (F-1c part 3, D-PRG-07). Build tool only; never referenced by src or shipped in the image. -->
-    <PackageVersion Include="YamlDotNet" Version="16.3.0" />
+    <PackageVersion Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
 
   <!-- Test packages -->
