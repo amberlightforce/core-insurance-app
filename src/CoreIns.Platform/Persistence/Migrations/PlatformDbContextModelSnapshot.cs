@@ -241,6 +241,59 @@ namespace CoreIns.Platform.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Platform.Persistence.DataKeyRow", b =>
+                {
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("integer")
+                        .HasColumnName("purpose");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DemotedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("demoted_at");
+
+                    b.Property<string>("KeyEncryptionKeyId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kek_id");
+
+                    b.Property<DateTime?>("RetiringAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("retiring_at");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<byte[]>("WrappedKey")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("wrapped_key");
+
+                    b.HasKey("LegalEntityId", "Purpose", "Version")
+                        .HasName("pk_data_key");
+
+                    b.ToTable("data_key", "plt", t =>
+                        {
+                            t.HasCheckConstraint("ck_data_key_purpose", "purpose IN (1, 2)");
+
+                            t.HasCheckConstraint("ck_data_key_status", "status IN (1, 2, 3, 4)");
+
+                            t.HasCheckConstraint("ck_data_key_version", "version >= 1");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.DeadLetterRow", b =>
                 {
                     b.Property<Guid>("DeadLetterId")
@@ -541,6 +594,41 @@ namespace CoreIns.Platform.Persistence.Migrations
                             t.HasCheckConstraint("ck_idempotency_record_hash", "request_hash ~ '^[0-9a-f]{64}$'");
 
                             t.HasCheckConstraint("ck_idempotency_record_status", "status IN ('InProgress', 'Completed')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Platform.Persistence.NumberSeriesRow", b =>
+                {
+                    b.Property<string>("LegalEntity")
+                        .HasColumnType("text")
+                        .HasColumnName("legal_entity");
+
+                    b.Property<string>("IdentifierType")
+                        .HasColumnType("text")
+                        .HasColumnName("identifier_type");
+
+                    b.Property<string>("SeriesId")
+                        .HasColumnType("text")
+                        .HasColumnName("series_id");
+
+                    b.Property<long>("MaxValue")
+                        .HasColumnType("bigint")
+                        .HasColumnName("max_value");
+
+                    b.Property<long>("NextValue")
+                        .HasColumnType("bigint")
+                        .HasColumnName("next_value");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("LegalEntity", "IdentifierType", "SeriesId")
+                        .HasName("pk_number_series");
+
+                    b.ToTable("number_series", "plt", t =>
+                        {
+                            t.HasCheckConstraint("ck_number_series_range", "next_value >= 1 AND max_value >= 1 AND next_value <= max_value + 1");
                         });
                 });
 

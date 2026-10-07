@@ -7,7 +7,7 @@ namespace CoreIns.Host.Database;
 /// <summary>
 /// The bootstrap phase of <c>APP_ROLE=migrate</c> (<c>Migrate__Bootstrap=true</c>): with the server administrator
 /// credential it creates the application database if missing and runs <c>infra/database/bootstrap.sql</c>
-/// (roles <c>app</c> and <c>migrator</c>, database privileges, extensions). Idempotent; run before every migration
+/// (roles <c>app</c> and <c>migrator</c>, database privileges, extensions), then <c>infra/database/greek-search.sql</c>. Idempotent; run before every migration
 /// on Azure. Locally, pg-init runs the same script.
 /// </summary>
 internal sealed partial class DatabaseBootstrapper(IConfiguration configuration, ILogger<DatabaseBootstrapper> logger)
@@ -19,6 +19,9 @@ internal sealed partial class DatabaseBootstrapper(IConfiguration configuration,
     public const string DefaultDatabaseName = "coreins";
 
     private const string ScriptResource = "CoreIns.Host.Database.bootstrap.sql";
+
+    /// <summary>Embedded copy of infra/database/greek-search.sql.</summary>
+    public const string GreekSearchResource = "CoreIns.Host.Database.greek-search.sql";
 
     /// <summary>Runs the bootstrap and returns the process exit code.</summary>
     public async Task<int> RunAsync(CancellationToken cancellationToken)
@@ -79,6 +82,9 @@ internal sealed partial class DatabaseBootstrapper(IConfiguration configuration,
         }
 
         await ExecuteAsync(session, ReadScript(), cancellationToken).ConfigureAwait(false);
+
+        // Greek search key function, collation and text-search configuration (idempotent; schema public needs the administrator).
+        await ExecuteAsync(session, ReadScript(GreekSearchResource), cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Empty stays empty (the script then refuses to run); anything else becomes a SCRAM verifier.</summary>
@@ -86,10 +92,13 @@ internal sealed partial class DatabaseBootstrapper(IConfiguration configuration,
         string.IsNullOrEmpty(password) || ScramVerifier.IsVerifier(password) ? password : ScramVerifier.Create(password);
 
     /// <summary>The embedded copy of infra/database/bootstrap.sql.</summary>
-    public static string ReadScript()
+    public static string ReadScript() => ReadScript(ScriptResource);
+
+    /// <summary>An embedded database script.</summary>
+    public static string ReadScript(string resource)
     {
-        using var stream = typeof(DatabaseBootstrapper).Assembly.GetManifestResourceStream(ScriptResource)
-            ?? throw new InvalidOperationException($"Embedded resource {ScriptResource} is missing.");
+        using var stream = typeof(DatabaseBootstrapper).Assembly.GetManifestResourceStream(resource)
+            ?? throw new InvalidOperationException($"Embedded resource {resource} is missing.");
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }

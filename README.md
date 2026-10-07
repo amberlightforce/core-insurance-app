@@ -30,8 +30,10 @@ Greek-first, EU-ready P&C core insurance system (modular monolith, .NET 10 + Rea
 ```bash
 # 1. Local services: PostgreSQL 17, Azurite, Gotenberg, Mailpit, WireMock, Aspire Dashboard (all on 127.0.0.1)
 cp infra/local/.env.example infra/local/.env        # set the three passwords (and repeat them in the connection strings)
-docker compose -f infra/local/compose.yaml up -d --build
+docker compose -f infra/local/compose.yaml up -d --build   # postgres → bootstrap → migrate → api + worker
 #    api: http://localhost:5000  ·  telemetry: http://localhost:18888  ·  mail: http://localhost:8025
+infra/local/smoke.sh                                 # dev sign-in, create + search + get a party with curl
+#    details, ports and the dev sign-in: infra/local/README.md
 
 # 2. Or run the Host from source against the Compose database
 docker compose -f infra/local/compose.yaml up -d postgres
@@ -46,7 +48,12 @@ cd web && npm ci && npm run dev                                   # http://local
 ```
 
 Auth sign-in (MSAL React, OIDC cookie sign-in for the Hangfire dashboard): W1-PLT identity WP (ruling D-FE-10).
-Until then the API accepts Entra ID bearer tokens only.
+The API accepts Entra ID bearer tokens. In **Development only**, DevAuthentication__Enabled=true adds a local sign-in
+(POST /api/plt/v1/dev/sign-in, web page /dev/sign-in, D-SLC-03); with that flag in any other environment the Host
+refuses to start.
+
+How a module is built (persistence, migrations, commands, events, controllers, tests): [docs/module-pattern.md](docs/module-pattern.md),
+with the Party module as the reference.
 
 Health probes on every container: `/health/live` (process up) and `/health/ready` (PostgreSQL reachable).
 Migrations never run at application start-up; only `APP_ROLE=migrate` changes the schema.

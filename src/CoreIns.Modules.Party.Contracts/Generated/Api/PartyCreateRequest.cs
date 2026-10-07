@@ -4,23 +4,42 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Party.create request. PRD inputs: "party data, reason"</summary>
+/// <summary>pty.Party.create request. Typed by SL-0 from REQ-PTY-001, REQ-PTY-012, REQ-PTY-030..032. Exactly one of person / organisation, matching partyType.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PartyCreateRequest
 {
-    /// <summary>PRD: "party data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("partyData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PartyData { get; init; }
+    /// <summary>Contract member 'partyType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyType")]
+    public required global::CoreIns.Modules.Party.Contracts.Api.PartyType PartyType { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    /// <summary>Contract member 'person'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("person")]
+    public global::CoreIns.Modules.Party.Contracts.Api.PersonInput? Person { get; init; }
+
+    /// <summary>Contract member 'organisation'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("organisation")]
+    public global::CoreIns.Modules.Party.Contracts.Api.OrganisationInput? Organisation { get; init; }
+
+    /// <summary>Default from the jurisdiction (REQ-PTY-041)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("preferredLanguage")]
+    public string? PreferredLanguage { get; init; }
+
+    /// <summary>Contract member 'identifiers'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("identifiers")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.IdentifierInput>? Identifiers { get; init; }
+
+    /// <summary>Contract member 'addresses'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("addresses")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.AddressInput>? Addresses { get; init; }
+
+    /// <summary>Contract member 'contactPoints'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contactPoints")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.ContactPointInput>? ContactPoints { get; init; }
+
+    /// <summary>Change reason code (REQ-PTY-038)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public string? Reason { get; init; }
 }
