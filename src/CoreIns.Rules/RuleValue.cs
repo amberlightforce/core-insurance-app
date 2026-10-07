@@ -29,6 +29,9 @@ public abstract class RuleValue : IEquatable<RuleValue>
     /// </summary>
     internal virtual long Weight => 1;
 
+    /// <summary>Nesting depth of the value tree (1 for scalars), computed once at construction.</summary>
+    internal virtual int Depth => 1;
+
     internal static long AddWeight(long total, long add) => add >= long.MaxValue - total ? long.MaxValue : total + add;
 
     /// <summary>Wraps an int.</summary>
@@ -398,6 +401,7 @@ public sealed class ListValue : RuleValue
 {
     private readonly RuleValue[] _items;
     private readonly long _weight;
+    private readonly int _depth;
 
     internal ListValue(RuleValue[] items)
     {
@@ -406,13 +410,17 @@ public sealed class ListValue : RuleValue
         {
             ArgumentNullException.ThrowIfNull(item, nameof(items));
             weight = AddWeight(weight, item.Weight);
+            _depth = Math.Max(_depth, item.Depth);
         }
 
         _items = items;
         _weight = weight;
+        _depth = _depth == int.MaxValue ? int.MaxValue : _depth + 1;
     }
 
     internal override long Weight => _weight;
+
+    internal override int Depth => _depth;
 
     /// <summary>The elements.</summary>
     public IReadOnlyList<RuleValue> Items => _items;
@@ -459,6 +467,7 @@ public sealed class MapValue : RuleValue
     private readonly Dictionary<RuleValue, RuleValue> _lookup;
 
     private readonly long _weight;
+    private readonly int _depth;
 
     internal MapValue(KeyValuePair<RuleValue, RuleValue>[] entries)
     {
@@ -469,12 +478,16 @@ public sealed class MapValue : RuleValue
         {
             _lookup[e.Key] = e.Value;
             weight = AddWeight(AddWeight(weight, e.Key.Weight), e.Value.Weight);
+            _depth = Math.Max(_depth, Math.Max(e.Key.Depth, e.Value.Depth));
         }
 
         _weight = weight;
+        _depth = _depth == int.MaxValue ? int.MaxValue : _depth + 1;
     }
 
     internal override long Weight => _weight;
+
+    internal override int Depth => _depth;
 
     /// <summary>The entries in insertion order.</summary>
     public IReadOnlyList<KeyValuePair<RuleValue, RuleValue>> Entries => _entries;
@@ -543,6 +556,7 @@ public sealed class ObjectValue : RuleValue
     private readonly RuleValue[] _fields;
 
     private readonly long _weight;
+    private readonly int _depth;
 
     internal ObjectValue(ObjectSchema schema, RuleValue[] fields)
     {
@@ -552,12 +566,16 @@ public sealed class ObjectValue : RuleValue
         foreach (var f in fields)
         {
             weight = AddWeight(weight, f.Weight);
+            _depth = Math.Max(_depth, f.Depth);
         }
 
         _weight = weight;
+        _depth = _depth == int.MaxValue ? int.MaxValue : _depth + 1;
     }
 
     internal override long Weight => _weight;
+
+    internal override int Depth => _depth;
 
     /// <summary>The schema.</summary>
     public ObjectSchema Schema { get; }
@@ -709,84 +727,116 @@ internal static class ValueAlgorithms
 
     /// <summary>
     /// Deep equality that remembers pairs of composite nodes already proven equal, so values built by sharing are
-    /// compared in time proportional to their distinct nodes, not their (possibly exponential) tree size.
+    /// compared in time proportional to their distinct nodes, not their (possibly exponential) tree size. Iterative
+    /// (explicit stack), so arbitrarily deep values cannot exhaust the call stack.
     /// </summary>
     public static bool DeepEquals(RuleValue a, RuleValue b)
     {
         HashSet<(RuleValue, RuleValue)>? memo = null;
-        return DeepEquals(a, b, ref memo);
+        switch (Shallow(a, b, memo))
+        {
+            case Verdict.Equal:
+                return true;
+            case Verdict.Different:
+                return false;
+        }
+
+        var stack = new Stack<Frame>();
+        stack.Push(new Frame(a, b));
+        while (stack.Count > 0)
+        {
+            var frame = stack.Peek();
+            if (frame.Next >= ChildCount(frame.A))
+            {
+                stack.Pop();
+                (memo ??= new HashSet<(RuleValue, RuleValue)>(PairByReference.Instance)).Add((frame.A, frame.B));
+                continue;
+            }
+
+            int index = frame.Next++;
+            RuleValue left, right;
+            switch (frame.A)
+            {
+                case ListValue l:
+                    left = l.Array[index];
+                    right = ((ListValue)frame.B).Array[index];
+                    break;
+                case MapValue m:
+                    var entry = m.Entries[index];
+                    if (!((MapValue)frame.B).TryGetValue(entry.Key, out right))
+                    {
+                        return false;
+                    }
+
+                    left = entry.Value;
+                    break;
+                default:
+                    left = ((ObjectValue)frame.A).GetByOrdinal(index);
+                    right = ((ObjectValue)frame.B).GetByOrdinal(index);
+                    break;
+            }
+
+            switch (Shallow(left, right, memo))
+            {
+                case Verdict.Different:
+                    return false;
+                case Verdict.Descend:
+                    stack.Push(new Frame(left, right));
+                    break;
+            }
+        }
+
+        return true;
     }
 
-    private static bool DeepEquals(RuleValue a, RuleValue b, ref HashSet<(RuleValue, RuleValue)>? memo)
+    private enum Verdict
+    {
+        Equal,
+        Different,
+        Descend,
+    }
+
+    private sealed class Frame(RuleValue a, RuleValue b)
+    {
+        public RuleValue A { get; } = a;
+
+        public RuleValue B { get; } = b;
+
+        public int Next { get; set; }
+    }
+
+    private static int ChildCount(RuleValue v) => v switch
+    {
+        ListValue l => l.Array.Length,
+        MapValue m => m.Count,
+        ObjectValue o => o.FieldCount,
+        _ => 0,
+    };
+
+    /// <summary>Decides a pair without looking at children when possible.</summary>
+    private static Verdict Shallow(RuleValue a, RuleValue b, HashSet<(RuleValue, RuleValue)>? memo)
     {
         if (ReferenceEquals(a, b))
         {
-            return true;
+            return Verdict.Equal;
         }
 
         if (a is not (ListValue or MapValue or ObjectValue))
         {
-            return a.Equals(b);
+            return a.Equals(b) ? Verdict.Equal : Verdict.Different;
         }
 
-        if (a.Weight != b.Weight || a.Kind != b.Kind)
+        if (a.Weight != b.Weight || a.Kind != b.Kind || ChildCount(a) != ChildCount(b))
         {
-            return false;
+            return Verdict.Different;
         }
 
-        if (memo is not null && memo.Contains((a, b)))
+        if (a is ObjectValue oa && !ReferenceEquals(oa.Schema, ((ObjectValue)b).Schema))
         {
-            return true;
+            return Verdict.Different;
         }
 
-        bool equal;
-        switch (a)
-        {
-            case ListValue l:
-            {
-                var r = (ListValue)b;
-                equal = l.Array.Length == r.Array.Length;
-                for (int i = 0; equal && i < l.Array.Length; i++)
-                {
-                    equal = DeepEquals(l.Array[i], r.Array[i], ref memo);
-                }
-
-                break;
-            }
-
-            case MapValue m:
-            {
-                var r = (MapValue)b;
-                equal = m.Count == r.Count;
-                for (int i = 0; equal && i < m.Count; i++)
-                {
-                    var e = m.Entries[i];
-                    equal = r.TryGetValue(e.Key, out var v) && DeepEquals(e.Value, v, ref memo);
-                }
-
-                break;
-            }
-
-            default:
-            {
-                var o = (ObjectValue)a;
-                var r = (ObjectValue)b;
-                equal = ReferenceEquals(o.Schema, r.Schema);
-                for (int i = 0; equal && i < o.FieldCount; i++)
-                {
-                    equal = DeepEquals(o.GetByOrdinal(i), r.GetByOrdinal(i), ref memo);
-                }
-
-                break;
-            }
-        }
-
-        if (equal)
-        {
-            (memo ??= new HashSet<(RuleValue, RuleValue)>(PairByReference.Instance)).Add((a, b));
-        }
-
-        return equal;
+        return memo is not null && memo.Contains((a, b)) ? Verdict.Equal : Verdict.Descend;
     }
 
     private sealed class PairByReference : IEqualityComparer<(RuleValue, RuleValue)>

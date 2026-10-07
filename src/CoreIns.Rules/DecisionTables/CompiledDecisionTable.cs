@@ -461,7 +461,18 @@ public sealed class CompiledDecisionTable
                     return Failed(error);
                 }
 
-                values[o] = new NamedValue(d.Outputs[o].Name, value!);
+                // Every output value counts against the table evaluation's allocation budget, so the aggregate size
+                // of all matches (for example COLLECT over many rules returning a large shared input) is bounded.
+                try
+                {
+                    state.Allocate(value!.Weight);
+                }
+                catch (EvalFailure f)
+                {
+                    return Failed(new RuleEvaluationError(f.Code, f.Message, null, $"rule '{rule.RuleId}' output '{d.Outputs[o].Name}'"));
+                }
+
+                values[o] = new NamedValue(d.Outputs[o].Name, value);
             }
 
             matches.Add(new DecisionMatch(rule.RuleId, r, values));

@@ -338,6 +338,14 @@ public sealed class CompiledExpression
     {
         for (int i = 0; i < schema.Variables.Count; i++)
         {
+            if (slots[i].Depth > limits.MaxInputDepth)
+            {
+                return new RuleEvaluationError(
+                    RuleErrorCode.LimitExceeded,
+                    string.Create(CultureInfo.InvariantCulture, $"input '{schema.Variables[i].Name}' is nested {slots[i].Depth} levels deep, above the maximum of {limits.MaxInputDepth}"),
+                    null);
+            }
+
             if (slots[i].Weight > limits.MaxAllocatedElements)
             {
                 return new RuleEvaluationError(

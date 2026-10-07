@@ -46,6 +46,12 @@ public sealed record RuleLimits
     /// <summary>Maximum number of trace entries recorded per evaluation (further entries are dropped and the trace is marked truncated).</summary>
     public int MaxTraceEntries { get; init; } = 10_000;
 
+    /// <summary>Maximum nesting depth of an input value or host-function result (deeper values are refused).</summary>
+    public int MaxInputDepth { get; init; } = 64;
+
+    /// <summary>Upper bound on the nesting depth of any value accepted when inputs are built.</summary>
+    public const int InputDepthCeiling = 1_000;
+
     /// <summary>Largest value weight recorded in a trace; heavier values appear as an <see cref="ElidedValue"/>.</summary>
     public long MaxTraceValueWeight { get; init; } = 1_000;
 
@@ -55,15 +61,20 @@ public sealed record RuleLimits
     /// </summary>
     public string Fingerprint() => string.Create(
         CultureInfo.InvariantCulture,
-        $"limits{{length={MaxExpressionLength};depth={MaxAstDepth};steps={MaxEvaluationSteps};alloc={MaxAllocatedElements};time={MaxEvaluationTime.Ticks};collection={MaxCollectionSize};string={MaxStringLength};regexLength={MaxRegexPatternLength};regexTime={RegexTimeout.Ticks};traceEntries={MaxTraceEntries};traceWeight={MaxTraceValueWeight}}}");
+        $"limits{{length={MaxExpressionLength};depth={MaxAstDepth};steps={MaxEvaluationSteps};alloc={MaxAllocatedElements};time={MaxEvaluationTime.Ticks};collection={MaxCollectionSize};string={MaxStringLength};regexLength={MaxRegexPatternLength};regexTime={RegexTimeout.Ticks};traceEntries={MaxTraceEntries};traceWeight={MaxTraceValueWeight};inputDepth={MaxInputDepth}}}");
 
     internal void Validate()
     {
         if (MaxExpressionLength <= 0 || MaxAstDepth <= 0 || MaxEvaluationSteps <= 0 || MaxCollectionSize <= 0
             || MaxStringLength <= 0 || MaxRegexPatternLength <= 0 || RegexTimeout <= TimeSpan.Zero || MaxTraceEntries < 0
-            || MaxAllocatedElements <= 0 || MaxEvaluationTime <= TimeSpan.Zero || MaxTraceValueWeight <= 0)
+            || MaxAllocatedElements <= 0 || MaxEvaluationTime <= TimeSpan.Zero || MaxTraceValueWeight <= 0 || MaxInputDepth <= 0)
         {
             throw new ArgumentException("rule limits must be positive");
+        }
+
+        if (MaxInputDepth > InputDepthCeiling)
+        {
+            throw new ArgumentException(string.Create(CultureInfo.InvariantCulture, $"MaxInputDepth must not exceed {InputDepthCeiling}"));
         }
 
         if (MaxAstDepth > AstDepthCeiling)

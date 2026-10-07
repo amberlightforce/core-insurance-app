@@ -935,6 +935,10 @@ internal sealed class Binder
         if (result is not null)
         {
             state.Allocate(result.Weight);
+            if (result.Depth > state.Limits.MaxInputDepth)
+            {
+                throw Ops.Fail(RuleErrorCode.LimitExceeded, $"function '{host.Name}' returned a value nested deeper than {state.Limits.MaxInputDepth} levels");
+            }
         }
 
         if (result is null || !ValueConformance.Matches(result, host.ReturnType))

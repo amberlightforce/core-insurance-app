@@ -52,11 +52,19 @@ public class ReviewAttempt2Tests
         return v;
     }
 
+    /// <summary>Runs the action twice and returns the faster run (excludes JIT warm-up from the bound).</summary>
     private static TimeSpan Time(Action action)
     {
-        long start = Stopwatch.GetTimestamp();
-        action();
-        return Stopwatch.GetElapsedTime(start);
+        var best = TimeSpan.MaxValue;
+        for (int i = 0; i < 2; i++)
+        {
+            long start = Stopwatch.GetTimestamp();
+            action();
+            var elapsed = Stopwatch.GetElapsedTime(start);
+            best = elapsed < best ? elapsed : best;
+        }
+
+        return best;
     }
 
     // ---------------------------------------------------------------- N1

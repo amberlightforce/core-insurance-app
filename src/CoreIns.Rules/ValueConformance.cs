@@ -14,6 +14,11 @@ internal static class ValueConformance
     /// <summary>Validates a top-level input or field value: refuses oversized values before traversing them.</summary>
     public static RuleValue ConformInput(RuleValue value, RuleType type, bool nullable, string path)
     {
+        if (value.Depth > RuleLimits.InputDepthCeiling)
+        {
+            throw new RuleInputException(path, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"value nesting depth {value.Depth} exceeds the maximum of {RuleLimits.InputDepthCeiling}"));
+        }
+
         if (value.Weight > MaxInputWeight)
         {
             throw new RuleInputException(path, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"value weight {value.Weight} exceeds the maximum of {MaxInputWeight}"));
