@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pfc/ProductVersionScheduled.v1.schema.json",
+  "title": "ProductVersionScheduled v1",
+  "description": "Activation scheduled, rescheduled or cancelled, or a Locked version's windows change",
+  "x-event-type": "ProductVersionScheduled",
+  "x-registry-name": "pfc.ProductVersionScheduled",
+  "x-producer": "PFC",
+  "x-topic": "pfc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "product_id",
+  "x-aggregate-type": [
+    "Product"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "productId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-02 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ProductVersionScheduled"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PFC"
+    },
+    "aggregateType": {
+      "const": "Product"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "productId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "productCode",
+        "version",
+        "artefactHash",
+        "environment",
+        "ratingSlotDeclaration"
+      ],
+      "properties": {
+        "productCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/ProductVersionNumber",
+          "x-classification": "P0"
+        },
+        "artefactHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "environment": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "activationTime": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Instant"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Absent when the activation is cancelled",
+          "x-classification": "P0"
+        },
+        "newBusinessWindow": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/TimeWindow"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "renewalWindow": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/TimeWindow"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "reason": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "ratingSlotDeclaration": {
+          "$ref": "../common.schema.json#/$defs/RatingSlotDeclaration",
+          "description": "Rating-slot declaration carried by every ProductVersion* event (contract R-27, REQ-PFC-245)",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

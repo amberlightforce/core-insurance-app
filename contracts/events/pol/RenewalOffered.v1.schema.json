@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pol/RenewalOffered.v1.schema.json",
+  "title": "RenewalOffered v1",
+  "description": "Renewal offered (sub-state Offered)",
+  "x-event-type": "RenewalOffered",
+  "x-registry-name": "pol.RenewalOffered",
+  "x-producer": "POL",
+  "x-topic": "pol.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "policy_id",
+  "x-aggregate-type": [
+    "Policy"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "policyId",
+    "jobId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-05 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RenewalOffered"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "POL"
+    },
+    "aggregateType": {
+      "const": "Policy"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyId",
+        "jobId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jobId",
+        "offerVersion",
+        "premiumSummary",
+        "acceptanceMode",
+        "deadline"
+      ],
+      "properties": {
+        "jobId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "offerVersion": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "premiumSummary": {
+          "$ref": "../common.schema.json#/$defs/PremiumSummary",
+          "x-classification": "P0"
+        },
+        "acceptanceMode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "deadline": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

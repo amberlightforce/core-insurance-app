@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/DSARTaskOverdue.v1.schema.json",
+  "title": "DSARTaskOverdue v1",
+  "description": "DSAR transitions",
+  "x-event-type": "DSARTaskOverdue",
+  "x-registry-name": "cmp.DSARTaskOverdue",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "dsar_id",
+  "x-aggregate-type": [
+    "Dsar"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "dsarId",
+    "taskId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DSARTaskOverdue"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "Dsar"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "dsarId",
+        "taskId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dsarId",
+        "module",
+        "taskId"
+      ],
+      "properties": {
+        "dsarId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "module": {
+          "$ref": "../common.schema.json#/$defs/ModuleCode",
+          "x-classification": "P0"
+        },
+        "taskId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

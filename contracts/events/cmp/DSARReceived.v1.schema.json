@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/DSARReceived.v1.schema.json",
+  "title": "DSARReceived v1",
+  "description": "DSAR transitions. Fan-out to data-holding modules is synchronous; the event is preparation only.",
+  "x-event-type": "DSARReceived",
+  "x-registry-name": "cmp.DSARReceived",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "dsar_id",
+  "x-aggregate-type": [
+    "Dsar"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "dsarId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DSARReceived"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "Dsar"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "dsarId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dsarId",
+        "requestType",
+        "subjectPartyIds",
+        "scope",
+        "deadline"
+      ],
+      "properties": {
+        "dsarId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "requestType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "subjectPartyIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "scope": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "deadline": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

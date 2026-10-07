@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/ObligationChanged.v1.schema.json",
+  "title": "ObligationChanged v1",
+  "description": "Register changes. PRD-11 gives only code and change.",
+  "x-event-type": "ObligationChanged",
+  "x-registry-name": "cmp.ObligationChanged",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "obligation_code",
+  "x-aggregate-type": [
+    "Obligation"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "obligationCode"
+  ],
+  "x-payload-status": "minimal",
+  "x-payload-note": "PRD-11 gives only code and change.",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ObligationChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "Obligation"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "obligationCode"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "obligationCode",
+        "change"
+      ],
+      "properties": {
+        "obligationCode": {
+          "$ref": "../common.schema.json#/$defs/ObligationCode",
+          "x-classification": "P0"
+        },
+        "change": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/rat/PricingModificationDecided.v1.schema.json",
+  "title": "PricingModificationDecided v1",
+  "description": "Modification Approved, Rejected or Invalidated",
+  "x-event-type": "PricingModificationDecided",
+  "x-registry-name": "rat.PricingModificationDecided",
+  "x-producer": "RAT",
+  "x-topic": "rat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "job_id",
+  "x-aggregate-type": [
+    "Job"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "jobId",
+    "modificationId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-03 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PricingModificationDecided"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RAT"
+    },
+    "aggregateType": {
+      "const": "Job"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "jobId",
+        "modificationId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modificationId",
+        "jobId",
+        "quoteVersion",
+        "value",
+        "status"
+      ],
+      "properties": {
+        "modificationId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "jobId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "quoteVersion": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "value": {
+          "$ref": "../common.schema.json#/$defs/Decimal",
+          "x-classification": "P0"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "APPROVED",
+            "REJECTED",
+            "INVALIDATED"
+          ],
+          "x-classification": "P0"
+        },
+        "decidedBy": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P1",
+          "x-personal-data": true
+        }
+      }
+    }
+  }
+}

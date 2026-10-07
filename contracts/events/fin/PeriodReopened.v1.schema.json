@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/fin/PeriodReopened.v1.schema.json",
+  "title": "PeriodReopened v1",
+  "description": "Period Reopened",
+  "x-event-type": "PeriodReopened",
+  "x-registry-name": "fin.PeriodReopened",
+  "x-producer": "FIN",
+  "x-topic": "fin.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "legal_entity_id",
+  "x-aggregate-type": [
+    "LegalEntity"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "periodId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-09 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PeriodReopened"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "FIN"
+    },
+    "aggregateType": {
+      "const": "LegalEntity"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "periodId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "periodId",
+        "reason",
+        "approverUserIds",
+        "impactSummary"
+      ],
+      "properties": {
+        "periodId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "reason": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "approverUserIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "impactSummary": {
+          "$ref": "../common.schema.json#/$defs/OpenObject",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

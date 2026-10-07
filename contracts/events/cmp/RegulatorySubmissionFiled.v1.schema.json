@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/RegulatorySubmissionFiled.v1.schema.json",
+  "title": "RegulatorySubmissionFiled v1",
+  "description": "Regulatory submission transitions",
+  "x-event-type": "RegulatorySubmissionFiled",
+  "x-registry-name": "cmp.RegulatorySubmissionFiled",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "submission_id",
+  "x-aggregate-type": [
+    "RegulatorySubmission"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "submissionId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RegulatorySubmissionFiled"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "RegulatorySubmission"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "submissionId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "submissionId",
+        "submissionType",
+        "period",
+        "receipt"
+      ],
+      "properties": {
+        "submissionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "submissionType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "period": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        },
+        "receipt": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

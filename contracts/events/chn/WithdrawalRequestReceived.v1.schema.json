@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/chn/WithdrawalRequestReceived.v1.schema.json",
+  "title": "WithdrawalRequestReceived v1",
+  "description": "Confirmation of a withdrawal declaration. Decided addition (D-CON-09). POL backup trigger is idempotent on withdrawalRequestId (R-89).",
+  "x-event-type": "WithdrawalRequestReceived",
+  "x-registry-name": "chn.WithdrawalRequestReceived",
+  "x-producer": "CHN",
+  "x-topic": "chn.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "withdrawal_request_id",
+  "x-aggregate-type": [
+    "WithdrawalRequest"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "withdrawalRequestId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-12 §8.1",
+    "PRD-18 §8.2",
+    "D-CON-09"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "WithdrawalRequestReceived"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CHN"
+    },
+    "aggregateType": {
+      "const": "WithdrawalRequest"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "withdrawalRequestId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "withdrawalRequestId",
+        "requestNumber",
+        "confirmedAt",
+        "channel"
+      ],
+      "properties": {
+        "withdrawalRequestId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "requestNumber": {
+          "$ref": "../common.schema.json#/$defs/BusinessNumber",
+          "x-classification": "P0"
+        },
+        "confirmedAt": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "matchedPolicyId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "channel": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

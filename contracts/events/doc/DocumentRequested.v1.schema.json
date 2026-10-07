@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/doc/DocumentRequested.v1.schema.json",
+  "title": "DocumentRequested v1",
+  "description": "Request accepted",
+  "x-event-type": "DocumentRequested",
+  "x-registry-name": "doc.DocumentRequested",
+  "x-producer": "DOC",
+  "x-topic": "doc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "document_id",
+  "x-aggregate-type": [
+    "Document"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "documentId",
+    "requestId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-10 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DocumentRequested"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DOC"
+    },
+    "aggregateType": {
+      "const": "Document"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "documentId",
+        "requestId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "documentType",
+        "subjectRef",
+        "requesterType"
+      ],
+      "properties": {
+        "requestId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "documentType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "subjectRef": {
+          "$ref": "../common.schema.json#/$defs/ObjectRef",
+          "x-classification": "P0"
+        },
+        "requesterType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "batchId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "heldReason": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

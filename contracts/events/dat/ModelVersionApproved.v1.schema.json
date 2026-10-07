@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/dat/ModelVersionApproved.v1.schema.json",
+  "title": "ModelVersionApproved v1",
+  "description": "Version approved for production (REQ-DAT-202)",
+  "x-event-type": "ModelVersionApproved",
+  "x-registry-name": "dat.ModelVersionApproved",
+  "x-producer": "DAT",
+  "x-topic": "dat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "model_id",
+  "x-aggregate-type": [
+    "Model"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "modelId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-15 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ModelVersionApproved"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DAT"
+    },
+    "aggregateType": {
+      "const": "Model"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "modelId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modelId",
+        "version",
+        "approverUserIds",
+        "effectiveDate"
+      ],
+      "properties": {
+        "modelId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "approverUserIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "effectiveDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

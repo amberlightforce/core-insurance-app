@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/FiscalDocRejected.v1.schema.json",
+  "title": "FiscalDocRejected v1",
+  "description": "Document Rejected",
+  "x-event-type": "FiscalDocRejected",
+  "x-registry-name": "cmp.FiscalDocRejected",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "fiscal_document_id",
+  "x-aggregate-type": [
+    "FiscalDocument"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "fiscalDocumentId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "FiscalDocRejected"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "FiscalDocument"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "fiscalDocumentId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceType",
+        "sourceId",
+        "causeGroup",
+        "codes"
+      ],
+      "properties": {
+        "sourceType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "sourceId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "causeGroup": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "codes": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

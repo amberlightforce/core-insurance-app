@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/bil/AccountCurrentIssued.v1.schema.json",
+  "title": "AccountCurrentIssued v1",
+  "description": "Account current issued",
+  "x-event-type": "AccountCurrentIssued",
+  "x-registry-name": "bil.AccountCurrentIssued",
+  "x-producer": "BIL",
+  "x-topic": "bil.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "intermediary_id",
+  "x-aggregate-type": [
+    "Intermediary"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "intermediaryId",
+    "statementId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-06 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "AccountCurrentIssued"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "BIL"
+    },
+    "aggregateType": {
+      "const": "Intermediary"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "intermediaryId",
+        "statementId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statementId",
+        "period",
+        "netDue",
+        "dueDate"
+      ],
+      "properties": {
+        "statementId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "period": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        },
+        "netDue": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "dueDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

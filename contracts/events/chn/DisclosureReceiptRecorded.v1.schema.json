@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/chn/DisclosureReceiptRecorded.v1.schema.json",
+  "title": "DisclosureReceiptRecorded v1",
+  "description": "Pre-contractual pack presented and provided on a durable medium in a journey (REQ-CHN-316). R-95, REQ-CHN-316.",
+  "x-event-type": "DisclosureReceiptRecorded",
+  "x-registry-name": "chn.DisclosureReceiptRecorded",
+  "x-producer": "CHN",
+  "x-topic": "chn.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "job_id",
+  "x-aggregate-type": [
+    "Job"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "jobId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-12 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DisclosureReceiptRecorded"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CHN"
+    },
+    "aggregateType": {
+      "const": "Job"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "jobId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jobId",
+        "documents",
+        "presentedAt",
+        "channel"
+      ],
+      "properties": {
+        "jobId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/PresentedDocument"
+          },
+          "x-classification": "P0"
+        },
+        "presentedAt": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "acknowledgedAt": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Instant"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "channel": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

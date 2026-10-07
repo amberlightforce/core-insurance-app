@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/plt/UserAccessChanged.v1.schema.json",
+  "title": "UserAccessChanged v1",
+  "description": "Role, scope or status change",
+  "x-event-type": "UserAccessChanged",
+  "x-registry-name": "plt.UserAccessChanged",
+  "x-producer": "PLT",
+  "x-topic": "plt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "user_id",
+  "x-aggregate-type": [
+    "User"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "userId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-14 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "UserAccessChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PLT"
+    },
+    "aggregateType": {
+      "const": "User"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "userId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "userId",
+        "changeType",
+        "rolesAdded",
+        "rolesRemoved"
+      ],
+      "properties": {
+        "userId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "changeType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "rolesAdded": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "rolesRemoved": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "newStatus": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

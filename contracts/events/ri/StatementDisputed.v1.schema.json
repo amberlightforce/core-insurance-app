@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/StatementDisputed.v1.schema.json",
+  "title": "StatementDisputed v1",
+  "description": "Counterparty response recorded",
+  "x-event-type": "StatementDisputed",
+  "x-registry-name": "ri.StatementDisputed",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "statement_id",
+  "x-aggregate-type": [
+    "RiStatement"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "statementId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "StatementDisputed"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "RiStatement"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "statementId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statementId",
+        "response",
+        "disputedItemIds"
+      ],
+      "properties": {
+        "statementId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "response": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "disputedItemIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

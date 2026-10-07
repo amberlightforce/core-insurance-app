@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/StatementIssued.v1.schema.json",
+  "title": "StatementIssued v1",
+  "description": "Statement issued (REQ-RI-178). RI statement of account (ambiguous name, XMR-F-121; registry name ri.StatementIssued).",
+  "x-event-type": "StatementIssued",
+  "x-registry-name": "ri.StatementIssued",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "statement_id",
+  "x-aggregate-type": [
+    "RiStatement"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "statementId",
+    "riContractId",
+    "counterpartyPartyId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "StatementIssued"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "RiStatement"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "statementId",
+        "riContractId",
+        "counterpartyPartyId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statementId",
+        "version",
+        "riContractId",
+        "counterpartyPartyId",
+        "period",
+        "balance",
+        "direction",
+        "itemIds"
+      ],
+      "properties": {
+        "statementId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "riContractId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "counterpartyPartyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "period": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        },
+        "balance": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "direction": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "itemIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

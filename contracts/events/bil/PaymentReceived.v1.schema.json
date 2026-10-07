@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/bil/PaymentReceived.v1.schema.json",
+  "title": "PaymentReceived v1",
+  "description": "Receipt created against an account (or recognised intermediary collection)",
+  "x-event-type": "PaymentReceived",
+  "x-registry-name": "bil.PaymentReceived",
+  "x-producer": "BIL",
+  "x-topic": "bil.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "billing_account_id",
+  "x-aggregate-type": [
+    "BillingAccount"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "billingAccountId",
+    "receiptId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-06 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PaymentReceived"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "BIL"
+    },
+    "aggregateType": {
+      "const": "BillingAccount"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "billingAccountId",
+        "receiptId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receiptId",
+        "receiptNumber",
+        "channel",
+        "method",
+        "amount",
+        "valueDate",
+        "accountingDate"
+      ],
+      "properties": {
+        "receiptId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "receiptNumber": {
+          "$ref": "../common.schema.json#/$defs/BusinessNumber",
+          "x-classification": "P0"
+        },
+        "channel": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "method": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "amount": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "valueDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "accountingDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "intermediaryId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Agency collections",
+          "x-classification": "P0"
+        },
+        "riSettlementRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/clm/ClaimsHistoryCertificateIssued.v1.schema.json",
+  "title": "ClaimsHistoryCertificateIssued v1",
+  "description": "certificate issued. Keyed on certificate_id (PRD-07 per R-100); PRD-18 table shows requester party_id.",
+  "x-event-type": "ClaimsHistoryCertificateIssued",
+  "x-registry-name": "clm.ClaimsHistoryCertificateIssued",
+  "x-producer": "CLM",
+  "x-topic": "clm.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "certificate_id",
+  "x-aggregate-type": [
+    "ClaimsHistoryCertificate"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "certificateId",
+    "documentId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-07 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ClaimsHistoryCertificateIssued"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CLM"
+    },
+    "aggregateType": {
+      "const": "ClaimsHistoryCertificate"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "certificateId",
+        "documentId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "certificateId",
+        "certificateNumber",
+        "requesterPartyId",
+        "period",
+        "documentId"
+      ],
+      "properties": {
+        "certificateId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "certificateNumber": {
+          "$ref": "../common.schema.json#/$defs/BusinessNumber",
+          "x-classification": "P0"
+        },
+        "requesterPartyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "period": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        },
+        "documentId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

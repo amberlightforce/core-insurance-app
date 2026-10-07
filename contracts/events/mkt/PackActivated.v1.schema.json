@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/mkt/PackActivated.v1.schema.json",
+  "title": "PackActivated v1",
+  "description": "A PackActivation of kind ACTIVATE reaches its instant",
+  "x-event-type": "PackActivated",
+  "x-registry-name": "mkt.PackActivated",
+  "x-producer": "MKT",
+  "x-topic": "mkt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "stamp_id",
+  "x-aggregate-type": [
+    "Stamp"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "stampId",
+    "packId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-17 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PackActivated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "MKT"
+    },
+    "aggregateType": {
+      "const": "Stamp"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "stampId",
+        "packId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packId",
+        "version",
+        "legalEntity",
+        "activationInstant",
+        "newHash",
+        "spisRebound"
+      ],
+      "properties": {
+        "packId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "legalEntity": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "activationInstant": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "previousVersion": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/VersionLabel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "newHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "spisRebound": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

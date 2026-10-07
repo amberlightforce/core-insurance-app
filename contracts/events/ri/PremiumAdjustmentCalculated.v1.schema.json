@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/PremiumAdjustmentCalculated.v1.schema.json",
+  "title": "PremiumAdjustmentCalculated v1",
+  "description": "Adjustment approved (REQ-RI-156, REQ-RI-161). PRD-08 names an inputs summary without structure.",
+  "x-event-type": "PremiumAdjustmentCalculated",
+  "x-registry-name": "ri.PremiumAdjustmentCalculated",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "ri_contract_id",
+  "x-aggregate-type": [
+    "RiContract"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "riContractId"
+  ],
+  "x-payload-status": "minimal",
+  "x-payload-note": "PRD-08 names an inputs summary without structure.",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PremiumAdjustmentCalculated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "RiContract"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "riContractId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "inputsSummary",
+        "delta",
+        "postingKey"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "inputsSummary": {
+          "$ref": "../common.schema.json#/$defs/OpenObject",
+          "x-classification": "P0"
+        },
+        "delta": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency4",
+          "x-classification": "P0"
+        },
+        "postingKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/wrk/RequestAnswered.v1.schema.json",
+  "title": "RequestAnswered v1",
+  "description": "Reply marked final",
+  "x-event-type": "RequestAnswered",
+  "x-registry-name": "wrk.RequestAnswered",
+  "x-producer": "WRK",
+  "x-topic": "wrk.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "request_id",
+  "x-aggregate-type": [
+    "Request"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "requestId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-13 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RequestAnswered"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "WRK"
+    },
+    "aggregateType": {
+      "const": "Request"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "requestId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestNumber",
+        "requestType",
+        "requesterRealm",
+        "requesterRef",
+        "objectRef",
+        "answeredAt",
+        "slaStatus"
+      ],
+      "properties": {
+        "requestNumber": {
+          "$ref": "../common.schema.json#/$defs/BusinessNumber",
+          "x-classification": "P0"
+        },
+        "requestType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "requesterRealm": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "requesterRef": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "objectRef": {
+          "$ref": "../common.schema.json#/$defs/ObjectRef",
+          "x-classification": "P0"
+        },
+        "answeredAt": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "slaStatus": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

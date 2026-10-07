@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pty/ProducerOfRecordChanged.v1.schema.json",
+  "title": "ProducerOfRecordChanged v1",
+  "description": "PoR row created by change or transfer",
+  "x-event-type": "ProducerOfRecordChanged",
+  "x-registry-name": "pty.ProducerOfRecordChanged",
+  "x-producer": "PTY",
+  "x-topic": "pty.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "policy_term_ref",
+  "x-aggregate-type": [
+    "PolicyTerm"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "policyTermId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-01 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ProducerOfRecordChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PTY"
+    },
+    "aggregateType": {
+      "const": "PolicyTerm"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyTermId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyTermRef",
+        "policyRef",
+        "newProducerCode",
+        "effectiveDate",
+        "reason",
+        "commissionConsequence"
+      ],
+      "properties": {
+        "policyTermRef": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "policyRef": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "oldProducerCode": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "newProducerCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "effectiveDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "reason": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "commissionConsequence": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "splitShare": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Decimal"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "transferId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

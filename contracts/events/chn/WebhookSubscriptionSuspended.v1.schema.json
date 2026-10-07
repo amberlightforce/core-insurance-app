@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/chn/WebhookSubscriptionSuspended.v1.schema.json",
+  "title": "WebhookSubscriptionSuspended v1",
+  "description": "Failure threshold",
+  "x-event-type": "WebhookSubscriptionSuspended",
+  "x-registry-name": "chn.WebhookSubscriptionSuspended",
+  "x-producer": "CHN",
+  "x-topic": "chn.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "subscription_id",
+  "x-aggregate-type": [
+    "WebhookSubscription"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "subscriptionId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-12 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "WebhookSubscriptionSuspended"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CHN"
+    },
+    "aggregateType": {
+      "const": "WebhookSubscription"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "subscriptionId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subscriptionId",
+        "clientId",
+        "endpointHost",
+        "failureCount"
+      ],
+      "properties": {
+        "subscriptionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "clientId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "endpointHost": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "failureCount": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

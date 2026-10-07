@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/clm/StatutoryOfferBreached.v1.schema.json",
+  "title": "StatutoryOfferBreached v1",
+  "description": "clock warned / breached for an offer clock (claim facts only; staff warnings come from WRK's trigger table on CMP clock events, XMR-F-105). Claim fact only; staff work comes from CMP clock events (XMR-F-105).",
+  "x-event-type": "StatutoryOfferBreached",
+  "x-registry-name": "clm.StatutoryOfferBreached",
+  "x-producer": "CLM",
+  "x-topic": "clm.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "claim_id",
+  "x-aggregate-type": [
+    "Claim"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "claimId",
+    "exposureId",
+    "clockInstanceId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-07 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "StatutoryOfferBreached"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CLM"
+    },
+    "aggregateType": {
+      "const": "Claim"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "claimId",
+        "exposureId",
+        "clockInstanceId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exposureId",
+        "claimantPartyId",
+        "clockInstanceId",
+        "deadline"
+      ],
+      "properties": {
+        "exposureId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "claimantPartyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "clockInstanceId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "deadline": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

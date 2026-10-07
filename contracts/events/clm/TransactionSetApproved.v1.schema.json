@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/clm/TransactionSetApproved.v1.schema.json",
+  "title": "TransactionSetApproved v1",
+  "description": "set approved",
+  "x-event-type": "TransactionSetApproved",
+  "x-registry-name": "clm.TransactionSetApproved",
+  "x-producer": "CLM",
+  "x-topic": "clm.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "claim_id",
+  "x-aggregate-type": [
+    "Claim"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "claimId",
+    "setId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-07 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "TransactionSetApproved"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CLM"
+    },
+    "aggregateType": {
+      "const": "Claim"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "claimId",
+        "setId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "setId",
+        "transactionIds",
+        "totalsByKind",
+        "approverUserIds",
+        "authorityCheckIds",
+        "fourEyes"
+      ],
+      "properties": {
+        "setId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "transactionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "totalsByKind": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/KindTotal"
+          },
+          "x-classification": "P0"
+        },
+        "approverUserIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "authorityCheckIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "fourEyes": {
+          "type": "boolean",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

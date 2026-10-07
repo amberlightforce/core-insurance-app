@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/wrk/ParticipantChanged.v1.schema.json",
+  "title": "ParticipantChanged v1",
+  "description": "Participant added, changed, ended",
+  "x-event-type": "ParticipantChanged",
+  "x-registry-name": "wrk.ParticipantChanged",
+  "x-producer": "WRK",
+  "x-topic": "wrk.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "object_id",
+  "x-aggregate-type": [
+    "BusinessObject"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "objectId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-13 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ParticipantChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "WRK"
+    },
+    "aggregateType": {
+      "const": "BusinessObject"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "objectId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objectRef",
+        "role",
+        "method"
+      ],
+      "properties": {
+        "objectRef": {
+          "$ref": "../common.schema.json#/$defs/ObjectRef",
+          "x-classification": "P0"
+        },
+        "role": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "oldParticipant": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Assignee"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "newParticipant": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Assignee"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "method": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/DepositPremiumDue.v1.schema.json",
+  "title": "DepositPremiumDue v1",
+  "description": "Instalment due (REQ-RI-154)",
+  "x-event-type": "DepositPremiumDue",
+  "x-registry-name": "ri.DepositPremiumDue",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "ri_contract_id",
+  "x-aggregate-type": [
+    "RiContract"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "riContractId",
+    "instalmentId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DepositPremiumDue"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "RiContract"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "riContractId",
+        "instalmentId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "instalmentId",
+        "amount",
+        "postingKey",
+        "sourceCorrelationKey"
+      ],
+      "properties": {
+        "instalmentId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "amount": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency4",
+          "x-classification": "P0"
+        },
+        "postingKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "sourceCorrelationKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

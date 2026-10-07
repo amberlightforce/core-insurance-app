@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pty/AccountMerged.v1.schema.json",
+  "title": "AccountMerged v1",
+  "description": "Account merge executed or reversed. Keyed on the target account_id.",
+  "x-event-type": "AccountMerged",
+  "x-registry-name": "pty.AccountMerged",
+  "x-producer": "PTY",
+  "x-topic": "pty.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "account_id",
+  "x-aggregate-type": [
+    "Account"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "accountId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-01 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "AccountMerged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PTY"
+    },
+    "aggregateType": {
+      "const": "Account"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "accountId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAccountId",
+        "targetAccountId",
+        "policyIds",
+        "reversal"
+      ],
+      "properties": {
+        "sourceAccountId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "targetAccountId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "policyIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "reversal": {
+          "type": "boolean",
+          "description": "True when emitted by unmerge (R-15)",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

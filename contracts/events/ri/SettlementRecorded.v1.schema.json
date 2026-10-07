@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/SettlementRecorded.v1.schema.json",
+  "title": "SettlementRecorded v1",
+  "description": "Settlement completed, partial or manual (REQ-RI-195)",
+  "x-event-type": "SettlementRecorded",
+  "x-registry-name": "ri.SettlementRecorded",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "counterparty_party_id",
+  "x-aggregate-type": [
+    "Counterparty"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "counterpartyPartyId",
+    "settlementId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "SettlementRecorded"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "Counterparty"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "counterpartyPartyId",
+        "settlementId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "settlementId",
+        "items",
+        "currency",
+        "fxDifference",
+        "bilReference"
+      ],
+      "properties": {
+        "settlementId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ItemAmount"
+          },
+          "x-classification": "P0"
+        },
+        "currency": {
+          "$ref": "../common.schema.json#/$defs/CurrencyCode",
+          "x-classification": "P0"
+        },
+        "fxDifference": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "bilReference": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

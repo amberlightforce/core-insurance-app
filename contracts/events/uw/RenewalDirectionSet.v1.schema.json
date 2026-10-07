@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/uw/RenewalDirectionSet.v1.schema.json",
+  "title": "RenewalDirectionSet v1",
+  "description": "Renewal direction set or changed",
+  "x-event-type": "RenewalDirectionSet",
+  "x-registry-name": "uw.RenewalDirectionSet",
+  "x-producer": "UW",
+  "x-topic": "uw.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "term_id",
+  "x-aggregate-type": [
+    "PolicyTerm"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "policyTermId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-04 §8.2",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RenewalDirectionSet"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "UW"
+    },
+    "aggregateType": {
+      "const": "PolicyTerm"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyTermId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "termId",
+        "direction",
+        "reasonCode",
+        "changeCodes"
+      ],
+      "properties": {
+        "termId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "direction": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "reasonCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "changeCodes": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

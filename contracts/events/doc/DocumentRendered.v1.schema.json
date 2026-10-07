@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/doc/DocumentRendered.v1.schema.json",
+  "title": "DocumentRendered v1",
+  "description": "Rendered and archived",
+  "x-event-type": "DocumentRendered",
+  "x-registry-name": "doc.DocumentRendered",
+  "x-producer": "DOC",
+  "x-topic": "doc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "document_id",
+  "x-aggregate-type": [
+    "Document"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "documentId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-10 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DocumentRendered"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DOC"
+    },
+    "aggregateType": {
+      "const": "Document"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "documentId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "documentNumber",
+        "documentType",
+        "subjectRef",
+        "language",
+        "binding",
+        "contentHash",
+        "archiveId",
+        "recipients"
+      ],
+      "properties": {
+        "documentNumber": {
+          "$ref": "../common.schema.json#/$defs/BusinessNumber",
+          "x-classification": "P0"
+        },
+        "documentType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "subjectRef": {
+          "$ref": "../common.schema.json#/$defs/ObjectRef",
+          "x-classification": "P0"
+        },
+        "language": {
+          "$ref": "../common.schema.json#/$defs/LanguageCode",
+          "x-classification": "P0"
+        },
+        "binding": {
+          "type": "boolean",
+          "x-classification": "P0"
+        },
+        "contentHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "archiveId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Recipient"
+          },
+          "x-classification": "P1",
+          "x-personal-data": true
+        }
+      }
+    }
+  }
+}

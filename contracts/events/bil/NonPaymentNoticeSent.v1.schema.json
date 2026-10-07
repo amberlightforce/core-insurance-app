@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/bil/NonPaymentNoticeSent.v1.schema.json",
+  "title": "NonPaymentNoticeSent v1",
+  "description": "Notice delivered with proof and clock started",
+  "x-event-type": "NonPaymentNoticeSent",
+  "x-registry-name": "bil.NonPaymentNoticeSent",
+  "x-producer": "BIL",
+  "x-topic": "bil.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "billing_account_id",
+  "x-aggregate-type": [
+    "BillingAccount"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "billingAccountId",
+    "policyTermId",
+    "documentId",
+    "clockInstanceId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-06 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "NonPaymentNoticeSent"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "BIL"
+    },
+    "aggregateType": {
+      "const": "BillingAccount"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "billingAccountId",
+        "policyTermId",
+        "documentId",
+        "clockInstanceId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "termId",
+        "overdueAmount",
+        "documentId",
+        "proofRef",
+        "clockInstanceId",
+        "deadline"
+      ],
+      "properties": {
+        "termId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "overdueAmount": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "documentId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "proofRef": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "clockInstanceId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "deadline": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

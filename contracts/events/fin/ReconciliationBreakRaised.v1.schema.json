@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/fin/ReconciliationBreakRaised.v1.schema.json",
+  "title": "ReconciliationBreakRaised v1",
+  "description": "New break",
+  "x-event-type": "ReconciliationBreakRaised",
+  "x-registry-name": "fin.ReconciliationBreakRaised",
+  "x-producer": "FIN",
+  "x-topic": "fin.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "legal_entity_id",
+  "x-aggregate-type": [
+    "LegalEntity"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "breakId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-09 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ReconciliationBreakRaised"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "FIN"
+    },
+    "aggregateType": {
+      "const": "LegalEntity"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "breakId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "breakId",
+        "leg",
+        "breakType",
+        "amount",
+        "ownerModule",
+        "severity",
+        "references"
+      ],
+      "properties": {
+        "breakId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "leg": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "breakType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "amount": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "ownerModule": {
+          "$ref": "../common.schema.json#/$defs/ModuleCode",
+          "x-classification": "P0"
+        },
+        "severity": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Text"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

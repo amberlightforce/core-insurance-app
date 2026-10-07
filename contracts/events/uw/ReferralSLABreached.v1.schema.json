@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/uw/ReferralSLABreached.v1.schema.json",
+  "title": "ReferralSLABreached v1",
+  "description": "WRK reports breach on referral activity",
+  "x-event-type": "ReferralSLABreached",
+  "x-registry-name": "uw.ReferralSLABreached",
+  "x-producer": "UW",
+  "x-topic": "uw.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "job_id",
+  "x-aggregate-type": [
+    "Job"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "jobId",
+    "referralId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-04 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ReferralSLABreached"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "UW"
+    },
+    "aggregateType": {
+      "const": "Job"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "jobId",
+        "referralId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "referralId",
+        "jobId",
+        "slaTarget",
+        "breachMinutes"
+      ],
+      "properties": {
+        "referralId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "jobId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "slaTarget": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "breachMinutes": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

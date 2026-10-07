@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/FiscalDocRegistered.v1.schema.json",
+  "title": "FiscalDocRegistered v1",
+  "description": "Document Registered",
+  "x-event-type": "FiscalDocRegistered",
+  "x-registry-name": "cmp.FiscalDocRegistered",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "fiscal_document_id",
+  "x-aggregate-type": [
+    "FiscalDocument"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "fiscalDocumentId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "FiscalDocRegistered"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "FiscalDocument"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "fiscalDocumentId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceType",
+        "sourceId",
+        "documentType",
+        "mark",
+        "uid",
+        "qrPayloadRef"
+      ],
+      "properties": {
+        "sourceType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "sourceId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "documentType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "mark": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "description": "AADE MARK",
+          "x-classification": "P0"
+        },
+        "uid": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "description": "AADE UID",
+          "x-classification": "P0"
+        },
+        "qrPayloadRef": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "correlatedMark": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

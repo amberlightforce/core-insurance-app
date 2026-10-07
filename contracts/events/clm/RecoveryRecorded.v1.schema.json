@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/clm/RecoveryRecorded.v1.schema.json",
+  "title": "RecoveryRecorded v1",
+  "description": "recovery received and approved",
+  "x-event-type": "RecoveryRecorded",
+  "x-registry-name": "clm.RecoveryRecorded",
+  "x-producer": "CLM",
+  "x-topic": "clm.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "claim_id",
+  "x-aggregate-type": [
+    "Claim"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "claimId",
+    "recoveryId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-07 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RecoveryRecorded"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CLM"
+    },
+    "aggregateType": {
+      "const": "Claim"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "claimId",
+        "recoveryId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recoveryId",
+        "recoveryType",
+        "counterpartyPartyId",
+        "amount",
+        "allocationByLine"
+      ],
+      "properties": {
+        "recoveryId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "recoveryType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "counterpartyPartyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "amount": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency3",
+          "x-classification": "P0"
+        },
+        "allocationByLine": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/LineAmount"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

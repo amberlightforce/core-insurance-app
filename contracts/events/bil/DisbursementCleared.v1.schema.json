@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/bil/DisbursementCleared.v1.schema.json",
+  "title": "DisbursementCleared v1",
+  "description": "Statement debit matched",
+  "x-event-type": "DisbursementCleared",
+  "x-registry-name": "bil.DisbursementCleared",
+  "x-producer": "BIL",
+  "x-topic": "bil.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "disbursement_id",
+  "x-aggregate-type": [
+    "Disbursement"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "disbursementId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-06 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DisbursementCleared"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "BIL"
+    },
+    "aggregateType": {
+      "const": "Disbursement"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "disbursementId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "disbursementId",
+        "sourceType",
+        "sourceId",
+        "valueDate"
+      ],
+      "properties": {
+        "disbursementId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "sourceType": {
+          "$ref": "../common.schema.json#/$defs/DisbursementSourceType",
+          "x-classification": "P0"
+        },
+        "sourceId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "valueDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

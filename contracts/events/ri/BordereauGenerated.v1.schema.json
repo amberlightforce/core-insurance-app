@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/BordereauGenerated.v1.schema.json",
+  "title": "BordereauGenerated v1",
+  "description": "Bordereau approved (REQ-RI-180)",
+  "x-event-type": "BordereauGenerated",
+  "x-registry-name": "ri.BordereauGenerated",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "ri_contract_id",
+  "x-aggregate-type": [
+    "RiContract"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "riContractId",
+    "bordereauId",
+    "documentId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "BordereauGenerated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "RiContract"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "riContractId",
+        "bordereauId",
+        "documentId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bordereauId",
+        "bordereauType",
+        "period",
+        "totals",
+        "documentId"
+      ],
+      "properties": {
+        "bordereauId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "bordereauType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "period": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        },
+        "totals": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ParticipantTotal"
+          },
+          "x-classification": "P0"
+        },
+        "documentId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

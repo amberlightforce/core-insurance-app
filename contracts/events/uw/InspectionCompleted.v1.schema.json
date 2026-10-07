@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/uw/InspectionCompleted.v1.schema.json",
+  "title": "InspectionCompleted v1",
+  "description": "Inspection completed",
+  "x-event-type": "InspectionCompleted",
+  "x-registry-name": "uw.InspectionCompleted",
+  "x-producer": "UW",
+  "x-topic": "uw.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "job_id",
+  "x-aggregate-type": [
+    "Job"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "jobId",
+    "inspectionId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-04 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "InspectionCompleted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "UW"
+    },
+    "aggregateType": {
+      "const": "Job"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "jobId",
+        "inspectionId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inspectionId",
+        "conditionRatingCode",
+        "resultRef"
+      ],
+      "properties": {
+        "inspectionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "jobId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "termId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "conditionRatingCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "resultRef": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

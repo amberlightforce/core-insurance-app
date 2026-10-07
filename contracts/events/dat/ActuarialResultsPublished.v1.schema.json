@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/dat/ActuarialResultsPublished.v1.schema.json",
+  "title": "ActuarialResultsPublished v1",
+  "description": "Result set submitted to FIN and later posted (REQ-DAT-152)",
+  "x-event-type": "ActuarialResultsPublished",
+  "x-registry-name": "dat.ActuarialResultsPublished",
+  "x-producer": "DAT",
+  "x-topic": "dat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "run_id",
+  "x-aggregate-type": [
+    "ActuarialRun"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "runId",
+    "resultSetId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-15 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ActuarialResultsPublished"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DAT"
+    },
+    "aggregateType": {
+      "const": "ActuarialRun"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "runId",
+        "resultSetId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "resultSetId",
+        "books",
+        "valuationDate",
+        "modelVersion",
+        "status"
+      ],
+      "properties": {
+        "runId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "resultSetId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "books": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "valuationDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "modelVersion": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "status": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "journalEventRefs": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "../common.schema.json#/$defs/Text"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "When posted",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

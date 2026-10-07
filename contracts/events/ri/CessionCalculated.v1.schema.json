@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/ri/CessionCalculated.v1.schema.json",
+  "title": "CessionCalculated v1",
+  "description": "Cession deltas booked for a delta or recomputation (REQ-RI-002). Keyed on policy_id so cessions keep POL's delta order.",
+  "x-event-type": "CessionCalculated",
+  "x-registry-name": "ri.CessionCalculated",
+  "x-producer": "RI",
+  "x-topic": "ri.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "policy_id",
+  "x-aggregate-type": [
+    "Policy"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "policyId",
+    "policyTermId",
+    "riContractId",
+    "participantPartyId",
+    "deltaSetId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-08 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "CessionCalculated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RI"
+    },
+    "aggregateType": {
+      "const": "Policy"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyId",
+        "policyTermId",
+        "riContractId",
+        "participantPartyId",
+        "deltaSetId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cessionIds",
+        "sourceChargeIds",
+        "termId",
+        "riskKey",
+        "interval",
+        "riContractId",
+        "sectionId",
+        "participantPartyId",
+        "cededAmount",
+        "commissionAmount",
+        "share",
+        "postingKey",
+        "siiLob",
+        "sourceCorrelationKey",
+        "deltaSetId"
+      ],
+      "properties": {
+        "cessionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "sourceChargeIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "termId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "riskKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "interval": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        },
+        "riContractId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "sectionId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "participantPartyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "cededAmount": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency4",
+          "x-classification": "P0"
+        },
+        "commissionAmount": {
+          "$ref": "../common.schema.json#/$defs/MoneyByCurrency4",
+          "x-classification": "P0"
+        },
+        "share": {
+          "$ref": "../common.schema.json#/$defs/Decimal",
+          "x-classification": "P0"
+        },
+        "postingKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "siiLob": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "underlyingIfrs17GroupRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "riHeldGroupRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "sourceCorrelationKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "deltaSetId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

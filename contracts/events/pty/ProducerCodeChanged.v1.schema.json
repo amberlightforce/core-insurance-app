@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pty/ProducerCodeChanged.v1.schema.json",
+  "title": "ProducerCodeChanged v1",
+  "description": "Code status, authorities or hierarchy change",
+  "x-event-type": "ProducerCodeChanged",
+  "x-registry-name": "pty.ProducerCodeChanged",
+  "x-producer": "PTY",
+  "x-topic": "pty.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "intermediary_id",
+  "x-aggregate-type": [
+    "Intermediary"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "intermediaryId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-01 §8.2",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ProducerCodeChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PTY"
+    },
+    "aggregateType": {
+      "const": "Intermediary"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "intermediaryId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intermediaryId",
+        "producerCode",
+        "status",
+        "authoritiesSummary"
+      ],
+      "properties": {
+        "intermediaryId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "producerCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "status": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "authoritiesSummary": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "parentProducerCode": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}
