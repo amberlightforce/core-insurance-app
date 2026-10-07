@@ -27,10 +27,10 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | SL-POL | **fixing** (review 1 FAIL: M1 retroactive record-close = hidden delete; M2 Policy.get status null outside term; 9 minors) | opus | 634cfa5 wired to real RAT/UW: integration 234/234 incl. real-module E2E-01 path; D-SLC-13..17 |
 | SL-MKT | **merged** (ca3c127) | sonnet | light review PASS; D-REG-06a split removed; full gate green (10 suites) |
 | SL-PFC | **merged** (ae022f0) | sonnet | light review PASS; full gate green (integration 135, arch 196) |
-| SL-RAT-UW | **fixing** (review 1 FAIL: M1 IPT legalStatus ignores motor class + fail-open default; 9 minors) | sonnet | money verified by hand (430.00 + IPT 64.51 = 494.51); re-check light per D-USR-09; also D-SLC-11 |
+| SL-RAT-UW | **merged** (77a6947) | sonnet | review 1 FAIL (M1 IPT legalStatus/fail-open) → fixed 0060a00, orchestrator re-check; gate green: integration 237, all suites |
 | SL-BIL | building | opus | started early against contracts/fakes (POL still building) |
 | SL-FIN | building | opus | started early against contracts/fakes |
-| SL-UI | not started | sonnet | next free slot |
+| SL-UI | building | sonnet | staff screens |
 | SL-E2E | not started | | after S2 |
 
 ## Module status (feature waves)
