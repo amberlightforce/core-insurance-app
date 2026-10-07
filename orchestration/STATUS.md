@@ -26,7 +26,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | SL-FIX-WEB | **merged** | sonnet | 1109/1109 native |
 | SL-POL | building | opus | based on SL-0 branch (started before SL-0 review ends, to save time) |
 | SL-MKT | **merged** (ca3c127) | sonnet | light review PASS; D-REG-06a split removed; full gate green (10 suites) |
-| SL-PFC | building | sonnet | based on SL-0 branch |
+| SL-PFC | **in review** (light) | sonnet | built 83a5d1a: MOTOR-GR 1.0, 17 tests; typed pfc contract shapes (POL/RAT notified) |
 | SL-RAT-UW | building | sonnet | based on SL-0 branch |
 | SL-BIL, SL-FIN, SL-UI | not started | | after S1 |
 | SL-E2E | not started | | after S2 |
