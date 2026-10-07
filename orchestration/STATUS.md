@@ -22,12 +22,12 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 
 | WP | Status | Owner | Notes |
 |---|---|---|---|
-| SL-0 platform wiring + Party | **in review** (deep) | opus | built 2927240: integration 82/82, arch 196/196, web 1112; compose + smoke OK. Follow-ups D-SLC-05/06 done at 86b9973 |
+| SL-0 platform wiring + Party | **fixing** (review 1 FAIL: M1 plaintext P2 in idempotency store + 7 minors; re-check = light Sonnet per D-USR-09) | opus | built 2927240: integration 82/82, arch 196/196, web 1112; compose + smoke OK. Follow-ups D-SLC-05/06 done at 86b9973 |
 | SL-FIX-WEB | **merged** | sonnet | 1109/1109 native |
 | SL-POL | building | opus | based on SL-0 branch (started before SL-0 review ends, to save time) |
 | SL-MKT | building | sonnet | based on SL-0 branch |
 | SL-PFC | building | sonnet | based on SL-0 branch |
-| SL-RAT-UW | queued | sonnet | starts when the SL-0 reviewer frees a slot (max 4) |
+| SL-RAT-UW | building | sonnet | based on SL-0 branch |
 | SL-BIL, SL-FIN, SL-UI | not started | | after S1 |
 | SL-E2E | not started | | after S2 |
 
