@@ -24,7 +24,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 |---|---|---|---|
 | SL-0 platform wiring + Party | **merged** (5720b79) | opus | review 1 FAIL (M1 plaintext P2 in idempotency store) → fixed 4e849b4, orchestrator-verified; main: build clean, integration 83, arch 196, platform 47, host 18 |
 | SL-FIX-WEB | **merged** | sonnet | 1109/1109 native |
-| SL-POL | building | opus | based on SL-0 branch (started before SL-0 review ends, to save time) |
+| SL-POL | **in review** (deep, opus, 1st round) | opus | built d60d87c: integration 149/149; bitemporal + exclusion constraints; RAT/UW faked; D-SLC-11 alignment at merge |
 | SL-MKT | **merged** (ca3c127) | sonnet | light review PASS; D-REG-06a split removed; full gate green (10 suites) |
 | SL-PFC | **merged** (ae022f0) | sonnet | light review PASS; full gate green (integration 135, arch 196) |
 | SL-RAT-UW | **in review** (deep, opus, 1st round) | sonnet | built 9924d68: integration 218/218; IPT only (no AuxFund, D-REG-06a); illustrative tariff |
