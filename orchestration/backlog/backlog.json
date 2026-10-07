@@ -203,8 +203,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "failed",
-   "owner": "builder: final fix attempt (sync-path key staleness)",
+   "status": "merged",
+   "owner": "merged (review PASS attempt 3)",
    "reviewAttempts": 2,
    "blockers": []
   },
