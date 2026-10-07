@@ -127,9 +127,9 @@
    "mustCount": 0,
    "points": null,
    "dependsOn": [],
-   "status": "building",
-   "owner": "builder agent (worktree)",
-   "reviewAttempts": 0,
+   "status": "merged",
+   "owner": "merged; CI green (run 37625282113)",
+   "reviewAttempts": 2,
    "blockers": []
   },
   {
@@ -146,8 +146,8 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "not started",
-   "owner": null,
+   "status": "building",
+   "owner": "builder: shared kernel + platform primitives",
    "reviewAttempts": 0,
    "blockers": []
   },
@@ -166,8 +166,8 @@
     "F-1b"
    ],
    "status": "building",
-   "owner": "events MERGED; builder: OpenAPI contracts (worktree); C# records after F-1a",
-   "reviewAttempts": 1,
+   "owner": "events + OpenAPI MERGED; C# contract records after F-1b",
+   "reviewAttempts": 2,
    "blockers": []
   },
   {
@@ -184,9 +184,9 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "not started",
-   "owner": null,
-   "reviewAttempts": 0,
+   "status": "failed",
+   "owner": "builder: fixing review 1 defects",
+   "reviewAttempts": 1,
    "blockers": []
   },
   {
@@ -203,9 +203,9 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "not started",
-   "owner": null,
-   "reviewAttempts": 0,
+   "status": "failed",
+   "owner": "builder: final fix attempt (sync-path key staleness)",
+   "reviewAttempts": 2,
    "blockers": []
   },
   {
@@ -223,8 +223,8 @@
     "F-1b"
    ],
    "status": "building",
-   "owner": "builders: CEL engine + Gotenberg spike (worktrees)",
-   "reviewAttempts": 0,
+   "owner": "rule engine + PDF/A spike MERGED; outbox throughput inside F-1b",
+   "reviewAttempts": 2,
    "blockers": []
   },
   {

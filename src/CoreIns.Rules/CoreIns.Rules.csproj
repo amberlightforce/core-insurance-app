@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    CoreIns.Rules: the in-house CEL-subset rule-expression language and decision-table runtime
+    (decision D10 / D-ARC-10). Deliberately has NO package references (ADR rule 11).
+    Shared build settings (net10.0, nullable, warnings as errors, latest-recommended analysis, COREINS001) come from
+    Directory.Build.props.
+  -->
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.Rules.Tests" />
+  </ItemGroup>
+
+</Project>

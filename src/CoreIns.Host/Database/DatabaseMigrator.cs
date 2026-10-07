@@ -48,6 +48,8 @@ internal sealed partial class DatabaseMigrator(IConfiguration configuration, ILo
         await using var dataSource = NpgsqlDataSource.Create(connectionString);
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
 
+        await VerifyExtensionsAsync(connection, cancellationToken).ConfigureAwait(false);
+
         var appRoleExists = await RoleExistsAsync(connection, appRole, cancellationToken).ConfigureAwait(false);
         foreach (var schema in schemas)
         {
@@ -74,6 +76,31 @@ internal sealed partial class DatabaseMigrator(IConfiguration configuration, ILo
         }
 
         LogMigrationCompleted(logger, schemas.Length);
+    }
+
+    /// <summary>Extensions every environment must have (INFRASTRUCTURE §4 rule 3); created by infra/database/bootstrap.sql.</summary>
+    public static IReadOnlyList<string> RequiredExtensions { get; } = ["pg_trgm", "unaccent", "pgcrypto", "btree_gist", "pg_stat_statements"];
+
+    /// <summary>Fails with the list of missing extensions; the migrator role cannot create them itself.</summary>
+    private static async Task VerifyExtensionsAsync(NpgsqlConnection connection, CancellationToken cancellationToken)
+    {
+        var installed = new HashSet<string>(StringComparer.Ordinal);
+        await using (var command = new NpgsqlCommand("SELECT extname FROM pg_extension", connection))
+        await using (var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
+        {
+            while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            {
+                installed.Add(reader.GetString(0));
+            }
+        }
+
+        var missing = RequiredExtensions.Where(extension => !installed.Contains(extension)).ToList();
+        if (missing.Count > 0)
+        {
+            throw new InvalidOperationException(
+                $"PostgreSQL extensions missing: {string.Join(", ", missing)}. Run the database bootstrap first "
+                + "(locally infra/local/pg-init; on Azure the `bootstrap` job: APP_ROLE=migrate, Migrate__Bootstrap=true).");
+        }
     }
 
     private static async Task<bool> RoleExistsAsync(NpgsqlConnection connection, string role, CancellationToken cancellationToken)

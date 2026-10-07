@@ -1,4 +1,5 @@
-// Container Apps job `migrate`: manual trigger from the pipeline, same image with APP_ROLE=migrate (INFRASTRUCTURE §1).
+// Manually triggered Container Apps job running the application image with APP_ROLE=migrate (INFRASTRUCTURE §1):
+// `bootstrap` (server administrator: roles, privileges, extensions) and `migrate` (schemas, as `migrator`).
 
 param location string
 param name string
@@ -36,7 +37,7 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
     template: {
       containers: [
         {
-          name: 'migrate'
+          name: name
           image: image
           env: env
           resources: { cpu: json('0.5'), memory: '1Gi' }

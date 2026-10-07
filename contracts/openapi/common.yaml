@@ -1,0 +1,361 @@
+# Shared OpenAPI 3.1 components for every module document in contracts/openapi.
+# Sources: contract §3.5 (00-system-contract digest §F), PLAN §4.2/§4.4, DECISIONS D-ARC-03, D-ARC-16, D-CON-01.
+# Value types re-use contracts/events/common.schema.json (the event payload types) so that APIs and events share
+# one definition of Money, ids, dates and codes.
+openapi: 3.1.0
+info:
+  title: Core insurance — shared API components
+  version: 1.0.0
+  description: |
+    Shared parameters, headers, error model, pagination envelope, value types and security schemes. Module
+    documents (`<module>.yaml`) reference these with `common.yaml#/components/...`. Nothing here is module-specific.
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+paths: {}
+components:
+  securitySchemes:
+    entra:
+      type: oauth2
+      description: |
+        Staff (and service) access through Microsoft Entra ID (D-ARC-03). Bearer access tokens; the API validates
+        issuer, audience and signature. Authorisation is RBAC from Entra **app roles** plus ABAC attributes (legal entity,
+        channel, producer hierarchy, data class) evaluated by the owning module (`plt.Policy.evaluate`, contract §3.5.6).
+        App roles map to permissions in PLT (`REQ-PLT-076`, `REQ-PLT-079`); the permission of an operation is named in
+        its `x-permission` (by convention equal to the operationId). Authority-limited decisions additionally call
+        `plt.Authority.check` (`x-authority-types` lists the types the PRD names). Service-to-service callers outside the
+        process (worker jobs, test harnesses) use the client-credentials flow with application roles.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token
+          scopes:
+            api://core-insurance/user_impersonation: Act as the signed-in staff user (app roles carry the permissions)
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token
+          scopes:
+            api://core-insurance/.default: Application permissions (app roles assigned to the client)
+    entraExternal:
+      type: oauth2
+      description: |
+        Customers, brokers and agents (and later bank staff) through Microsoft Entra External ID (D-ARC-03,
+        `REQ-PLT-015`). Used by CHN portal and partner-facing operations. Partner API scopes from PRD-12 §9.1.2
+        (`product.read`, `motor.quote`, `motor.bind`, `uw.referral`, `policy.read`, `policy.change`,
+        `policy.cancel.request`, `billing.read`, `billing.collect`, `commission.read`, `claim.report`, `claim.read`,
+        `vendor.service`, `vendor.invoice`, `webhook.manage`, `book.sync`) are exposed as delegated scopes.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://{tenantSubdomain}.ciamlogin.com/{tenantId}/oauth2/v2.0/authorize
+          tokenUrl: https://{tenantSubdomain}.ciamlogin.com/{tenantId}/oauth2/v2.0/token
+          scopes:
+            product.read: Product information
+            motor.quote: Motor quotes (incl. dry-run)
+            motor.bind: Motor bind
+            uw.referral: Request underwriting referral
+            policy.read: Read policies and documents
+            policy.change: Submit policy changes
+            policy.change.preview: Preview policy changes (MCP)
+            policy.cancel.request: Request cancellation
+            billing.read: Read billing accounts, invoices, account current
+            billing.collect: Collection reports and payment links
+            billing.pay: Create payment links (MCP)
+            commission.read: Commission statements
+            claim.report: Report claims and upload documents
+            claim.read: Claim tracking
+            document.read: Read documents (MCP)
+            request.submit: Submit back-office requests (MCP)
+            search: Global search (staff agents, MCP)
+            vendor.service: Vendor service assignments
+            vendor.invoice: Vendor invoices
+            webhook.manage: Webhook subscriptions
+            book.sync: Book synchronisation
+    partnerClientCredentials:
+      type: oauth2
+      description: |
+        Partner systems (broker software, aggregators, vendors, AI agent clients) use the OAuth client-credentials
+        flow with **certificate** client authentication on Entra (D-ARC-03 deviation: no DPoP/FAPI/PAR, no RFC 8693
+        token exchange; agent "act-as" is an application permission plus an audited delegation record).
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token
+          scopes:
+            product.read: Product information
+            motor.quote: Motor quotes (incl. dry-run)
+            motor.bind: Motor bind
+            uw.referral: Request underwriting referral
+            policy.read: Read policies and documents
+            policy.change: Submit policy changes
+            policy.cancel.request: Request cancellation
+            billing.read: Read billing data
+            billing.collect: Collection reports and payment links
+            commission.read: Commission statements
+            claim.report: Report claims
+            claim.read: Claim tracking
+            vendor.service: Vendor service assignments
+            vendor.invoice: Vendor invoices
+            aggregator.quote: Aggregator dry-run quotes
+            webhook.manage: Webhook subscriptions
+            book.sync: Book synchronisation
+    providerSignature:
+      type: apiKey
+      in: header
+      name: X-Provider-Signature
+      description: |
+        Inbound provider callbacks (email, SMS, e-signature providers; PRD-10 §9.1) are authenticated by the provider's
+        payload signature, verified against the provider's registered key. Invalid signature → 401.
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: |
+        Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+        stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+        a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+      schema:
+        $ref: '../events/common.schema.json#/$defs/Uuid'
+    IdempotencyKeyOptional:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Optional idempotency key on a side-effect-free operation whose PRD allows one (for example `rat.Rate.rate`).
+      schema:
+        $ref: '../events/common.schema.json#/$defs/Uuid'
+    Traceparent:
+      name: traceparent
+      in: header
+      required: false
+      description: |
+        W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+        (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+      schema:
+        type: string
+        pattern: '^[0-9a-f]{2}-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$'
+    AcceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      description: UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337).
+      schema:
+        type: string
+        examples: [el, en]
+    ValidAt:
+      name: validAt
+      in: query
+      required: false
+      description: |
+        Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+        including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+        as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+      schema:
+        anyOf:
+          - $ref: '../events/common.schema.json#/$defs/LocalDate'
+          - $ref: '../events/common.schema.json#/$defs/Instant'
+    KnownAt:
+      name: knownAt
+      in: query
+      required: false
+      description: |
+        Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+        PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
+      schema:
+        $ref: '../events/common.schema.json#/$defs/Instant'
+    DryRun:
+      name: dryRun
+      in: query
+      required: false
+      description: |
+        Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+        that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+        dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+      schema:
+        type: boolean
+        default: false
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Page size, at most 200 (contract §3.5.5).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+
+  headers:
+    Traceparent:
+      description: W3C trace context of the response.
+      schema:
+        type: string
+
+  schemas:
+    Problem:
+      type: object
+      description: |
+        RFC 9457 Problem Details (`application/problem+json`), contract §3.5.4. Business-rule outcomes that are not
+        errors (for example UW issues) are returned as structured results, never as Problem Details.
+      required: [type, title, status, code, traceId]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: Stable URI per error code (for example `https://errors.coreinsurance.example/pty/PTY-ERR-NOT-FOUND`).
+        title:
+          type: string
+          description: Short, localised title (language from `Accept-Language`, GR/EN).
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        code:
+          type: string
+          description: |
+            Stable error code `<MOD>-ERR-<NNN>` or a named code `<MOD>-ERR-<NAME>` (contract §3.5.4, §3.6.1). An
+            operation may also return codes of a module it calls (for example `PLT-ERR-SOD`); its `x-error-codes` lists them.
+          pattern: '^(PTY|PFC|RAT|UW|POL|BIL|CLM|RI|FIN|DOC|CMP|CHN|WRK|PLT|DAT|MIG|MKT)-ERR-[A-Z0-9]+(-[A-Z0-9]+)*$'
+        traceId:
+          type: string
+          description: |
+            W3C trace id of the request (the contract's `correlation_id`; technical tracing only, never a business key,
+            D-CON-01).
+          pattern: '^[0-9a-f]{32}$'
+        retryable:
+          type: boolean
+          description: True when the same request may succeed later (for example a provider is unavailable).
+        errors:
+          type: array
+          description: Field-level errors.
+          items:
+            $ref: '#/components/schemas/ProblemFieldError'
+    ProblemFieldError:
+      type: object
+      required: [path, code]
+      properties:
+        path:
+          type: string
+          description: JSON pointer or dotted path of the field.
+        code:
+          type: string
+        messageKey:
+          type: string
+          description: Translation key of the message.
+        message:
+          type: object
+          description: Localised message in Greek and English.
+          properties:
+            el:
+              type: string
+            en:
+              type: string
+    PageEnvelope:
+      type: object
+      description: Cursor page (contract §3.5.5). Lists are filtered by the caller's legal entity and ABAC scope.
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          items: {}
+        nextCursor:
+          type: [string, 'null']
+          description: Cursor of the next page, or null on the last page.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+    Unspecified:
+      description: |
+        Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
+        minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
+        members until then.
+    Money:
+      $ref: '../events/common.schema.json#/$defs/Money'
+    Uuid:
+      $ref: '../events/common.schema.json#/$defs/Uuid'
+    Code:
+      $ref: '../events/common.schema.json#/$defs/Code'
+    BusinessNumber:
+      $ref: '../events/common.schema.json#/$defs/BusinessNumber'
+    LocalDate:
+      $ref: '../events/common.schema.json#/$defs/LocalDate'
+    Instant:
+      $ref: '../events/common.schema.json#/$defs/Instant'
+    Sha256:
+      $ref: '../events/common.schema.json#/$defs/Sha256'
+    CurrencyCode:
+      $ref: '../events/common.schema.json#/$defs/CurrencyCode'
+    LanguageCode:
+      $ref: '../events/common.schema.json#/$defs/LanguageCode'
+    ObjectRef:
+      $ref: '../events/common.schema.json#/$defs/ObjectRef'
+    DatePeriod:
+      $ref: '../events/common.schema.json#/$defs/DatePeriod'
+
+  responses:
+    BadRequest:
+      description: Malformed request or failed schema validation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: Missing or invalid access token.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: Permission, ABAC scope, authority or segregation-of-duties failure.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Object not found in the caller's scope.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: Idempotency mismatch (`<MOD>-ERR-IDEMPOTENCY-MISMATCH`), stale version, lock or state conflict.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnprocessableContent:
+      description: A typed precondition or business validation failed; the command had no effect (never partial).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    TooManyRequests:
+      description: Throttled (partner quotas, REQ-CHN-001).
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InternalError:
+      description: Unexpected error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ServiceUnavailable:
+      description: A dependency (registry, provider, adapter) is unavailable; `retryable` is true.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'

@@ -6,6 +6,7 @@ generated or written from these files later; when they disagree, these files win
 | Folder | What it holds |
 |---|---|
 | `events/` | The cross-module event catalogue (F-1c events): envelope, shared types, one JSON Schema per event, `catalog.json`, and the validator |
+| `openapi/` | The cross-module API contracts (F-1c apis): one OpenAPI 3.1 document per module, shared components, the SPI catalogue, the operation index, and the validator |
 
 ## Event contracts (`contracts/events`)
 
@@ -170,3 +171,124 @@ amount; a PINNED rating slot without `pinnedArtefactHash`. Without `jsonschema` 
 
 `--instance FILE...` additionally validates concrete events (one event or a JSON array), for example test fixtures or
 captured outbox rows, against their schema and the semantic rules above.
+
+## APIs (`contracts/openapi`)
+
+### Layout
+
+```
+contracts/openapi/
+  common.yaml          shared components: Problem Details, parameters (Idempotency-Key, traceparent, validAt,
+                       knownAt, dryRun, cursor/limit), page envelope, value types ($ref to ../events/common.schema.json),
+                       security schemes (Entra ID, Entra External ID, partner client credentials, provider signature)
+  <module>.yaml        one OpenAPI 3.1 document per module (pty … mkt): every operation of the module PRD §9.1
+  anchors.yaml         the 174 contract anchors (contract §3.6.3) and how operations cover them
+  spi.md               the 40 country-pack SPIs (REQ-MKT-002, PRD-17 §9.4): C# interfaces, not HTTP
+  INDEX.md             generated table of every operation with consumers, wave and status
+  validate.py          CI check (+ requirements.txt with pinned versions)
+```
+
+Sources: each module PRD §9.1 "Inbound operations owned" (the owner's names are canonical, R-87), the callers'
+§9.2 "Outbound calls" (consumers), PRD-12 §9.1.3/§9.1.4 (partner resources and MCP tools), PRD-18 §8.4 (interface
+register), the integration review §3.1 (superseded names) and `orchestration/backlog/backlog.json` (waves).
+
+### One contract, two transports (D-ARC-16)
+
+Modules call each other **in-process** through `CoreIns.<Module>.Contracts` interfaces whose methods carry the same
+operation names (`pol.Job.bind` → `IPolJobs.BindAsync`, for example). The OpenAPI document is the contract source for
+both: the request/response schemas, error codes, idempotency and dry-run rules apply to the in-process call too. HTTP
+serves the UI, partners and tests only; one module never calls another over HTTP or reads its tables.
+
+### Operation conventions
+
+- **operationId** `<module>.<Resource>.<verb>`, exactly the PRD §9.1 name. PRD names with four parts are folded into
+  the resource (`ri.Security.rules.set` → `ri.SecurityRules.set`; the PRD spelling is kept in `x-prd-name`). Names other
+  modules or older texts used for the same operation are listed in `x-superseded-names` and must not be used.
+- **Path** `/api/<module>/v1/<resources>` (kebab-case, plural): `get` → `GET …/{id}`, `list` → `GET …`,
+  `create` → `POST …`, `update` → `PATCH …/{id}`, other reads → `GET …/<verb>`, every other operation →
+  `POST …/<verb>` with identifiers in the body (command/query style, contract §3.5.1).
+- **Commands and queries** (`x-operation-kind`). Every command requires the `Idempotency-Key` header (UUID, kept ≥ 7
+  days, replay returns the original result, a different payload → 409 `<MOD>-ERR-IDEMPOTENCY-MISMATCH`). Queries may be
+  `POST` when they compute (`rat.Rate.rate`, `plt.Authority.check`) and are side-effect free. Commands fail with a typed
+  error and never partially.
+- **Dry-run** (`x-dry-run: true`) adds the `dryRun` query parameter (header `X-Dry-Run: true` is equivalent): full result,
+  no side effects. `x-dry-run-note` quotes the PRD's idempotency/dry-run cell.
+- **Errors**: RFC 9457 `application/problem+json` with `type`, localised `title`, `status`, `detail`, `code`
+  (`<MOD>-ERR-<NNN>` or `<MOD>-ERR-<NAME>`, contract §3.5.4), `traceId` (the contract's `correlation_id`, W3C trace id,
+  never a business key), `retryable` and field `errors[]`. `x-error-codes` lists the codes the PRD names with the HTTP
+  status they map to (not found 404; stale/lock/duplicate 409; permission/authority/SoD 403; unavailable 503; other
+  business preconditions 422). Business-rule outcomes that are not errors (UW issues) are results, not errors.
+- **Time travel** (D-API-02, D-API-08, D-API-09): the valid-time instant is always `validAt` and the transaction-time
+  instant always `knownAt`, contract §3.5.5. PRD spellings (`asOf`, `asAt`, `date`, "as of record time") are recorded
+  only in the operation's `x-prd-param-names`; operation and error names from the PRDs (`dat.Query.asOf`,
+  `doc.Document.renderAsOf`, `DOC-ERR-ASOF-UNSUPPORTED`) stay (D-API-03). Each time-travel input appears exactly once,
+  as a query parameter, never in the request body.
+- **Lists**: every list-style query (`list*`, `search`, `query`, `history`, …) uses cursor pagination (`cursor`,
+  `limit` ≤ 200) and the shared page envelope, filtered by the caller's legal entity and ABAC scope; a list with a
+  PRD-stated natural bound carries `x-bounded` with the reason instead.
+- **Security**: Entra ID bearer tokens (staff), Entra External ID (customers, intermediaries), client credentials with
+  certificate for partners (D-ARC-03). `x-permission` names the permission (by convention the operationId) that app
+  roles map to; `x-authority-types` lists the authority types the PRD associates with the operation's requirements
+  (checked through `plt.Authority.check`, `x-authority-source` cites the PRD lines). Every call carries `traceparent`.
+- **Traceability**: `x-requirement` (REQ ids; anchors first; `REQ-X-NNN..REQ-X-MMM` = a range the PRD cites),
+  `x-anchor` / `x-anchor-mapped` (contract anchors; *mapped* = attached by the contract builder because the PRD row
+  cites detailed requirements), `x-wave` (earliest build wave of the operation's Must-P1 requirements in the backlog;
+  `unscheduled` = no Must-P1 requirement, built only when a P1 Must needs it), `x-work-packages`, `x-source` (PRD
+  section and line).
+- **Exposure**: `x-in-process: true` + `x-exposure: [internal]` = called only module-to-module (the HTTP route exists for
+  tests); otherwise `x-exposure` lists `ui` and/or `partner` (reachable through the CHN partner API or MCP facade,
+  `x-partner-routes`). `x-consumers` lists the modules that call the operation.
+- **Status**: `x-status: full` = inputs and outputs are taken from the PRD row (field names from the PRD; types only where
+  the name makes them unambiguous: ids, dates, instants, hashes, Money, currency, language, flags; otherwise
+  `Unspecified`); `minimal` = the PRD row gives only names ("as named", "per operation"). `x-io-shared: N` = the PRD row
+  states one input/output list for N operations; the owning work package narrows it per operation. PRD fields that
+  join two concepts are split (`source type and id` → `sourceType` + `sourceId`; `product or hash` → `product` |
+  `hash` with a `oneOf` rule). `x-typed` marks the operations fully typed now under D-API-06 as narrowed by
+  **D-API-06a**: the **quote, bind, money and claims** critical chains of PLAN §2 (required lists, PRD-stated enums,
+  booleans, Money, ids with patterns; `x-typed` cites the requirements used). The **lifecycle chain**
+  (`pol.Cancellation.*`, `cmp.Clock.*`, `bil.Refund.*`, `bil.Delinquency.*`, `mkt.StatutoryClockSet.*`) and the
+  remaining `ri.Recovery.*` operations are typed by their owning WPs (W2-CMP, W5-BIL, W6-POL, W1-MKT, W7-RI) while
+  still pre-release. `x-todo-owner` marks a field whose shape a named WP still has to type (D-API-13).
+  `x-operation-families` lists `Resource.*` families whose members the PRD does not name; they are completed by the
+  owning work package. No business rule is invented in either case.
+- `x-excluded` records PRD rows deliberately not modelled (OIDC endpoints and SCIM under D-ARC-03; the PLT-internal
+  configuration operations, XMR-F-102; CLM's removed payee-account API; the `TaxCalculator` SPI, which is in `spi.md`).
+- `x-deviation` records where the infrastructure decisions change the meaning of a PRD operation (D-ARC-01/03/04).
+
+### Partner API and MCP
+
+The external partner resources of PRD-12 §9.1.3 are CHN operations `chn.Partner<Resource>.<verb>` with the PRD's method
+and path; their names are derived (`x-name-derived: true`), `x-delegates-to` lists the owner operations CHN composes, and
+`x-partner-scopes` the PRD-12 §9.1.2 scopes. The MCP agent facade is one JSON-RPC operation `chn.Agent.mcp` carrying
+`tools/list`, `tools/call` and `resources/read`; `x-mcp-tools` reproduces the PRD-12 §9.1.4 tool catalogue.
+
+### Versioning and maturity (D-API-06)
+
+Every operation carries `x-maturity`. **`pre-release`** (all operations today): the published v1 operation may still
+be tightened by its owner until the first consumer work package that calls it merges: typing `Unspecified` members,
+adding required inputs and enums, splitting fields. When that consumer merges, the owner sets **`stable`** and the
+normal rule applies. Critical-chain anchor operations are already fully typed (`x-typed`) so their consumers build
+against the final shape.
+
+The major version is in the path (`/v1/`). For `stable` operations, changes within a major are additive: new operations, new optional request
+fields, new response fields, new error codes, defining an `Unspecified` member or expanding a family. Removing or
+renaming an operation or field, making a field required, or changing semantics needs a new major served in parallel;
+deprecation notice ≥ 6 months for external (partner) operations and ≥ 1 release internally (contract §3.5.2).
+
+### Validation
+
+```
+pip install -r contracts/openapi/requirements.txt
+python contracts/openapi/validate.py --require-spec-validator
+python contracts/openapi/validate.py --write-index      # after changing a module document
+```
+
+It validates every document against the OpenAPI 3.1 schema (`openapi-spec-validator`), resolves every `$ref`
+(including into `contracts/events/common.schema.json`), and checks: unique `<module>.<Resource>.<verb>` operationIds;
+`x-requirement` on every operation and family; every state-changing operation is a command with a required
+`Idempotency-Key` and lists `<MOD>-ERR-IDEMPOTENCY-MISMATCH`; dry-run operations declare `dryRun`; every operation
+declares `traceparent`; every 4xx/5xx response is Problem Details; error-code format; exposure consistency; declared
+security schemes and path parameters; `x-maturity`; no parameter or property named `asOf` / `asAt` and no
+time-travel input repeated in the body (D-API-08/09); pagination or `x-bounded` on list queries; anchor coverage
+(`anchors.yaml`); the 40 SPIs in `spi.md`; and that `INDEX.md` is current. It warns about property names that join two
+concepts with `And` / `Or`.

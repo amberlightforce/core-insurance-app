@@ -13,6 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The one bootstrap script shared with infra/local/pg-init and the integration tests. -->
+    <EmbeddedResource Include="..\..\infra\database\bootstrap.sql" LogicalName="CoreIns.Host.Database.bootstrap.sql" Link="Database\bootstrap.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.Host.Tests" />
     <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
     <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
   </ItemGroup>

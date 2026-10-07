@@ -7,6 +7,8 @@ internal static class RepositoryPaths
 
     public static string PgInit => Path.Combine(Root, "infra", "local", "pg-init");
 
+    public static string DatabaseScripts => Path.Combine(Root, "infra", "database");
+
     private static string FindRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

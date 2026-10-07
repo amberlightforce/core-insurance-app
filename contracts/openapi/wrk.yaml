@@ -1,0 +1,5007 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: WRK — Work management API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by WRK (PRD-13 §9.1)
+  description: 'Contract of the operations WRK exposes (PRD-13 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: WRK
+  x-prd: PRD-13
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: Activity
+- name: Assignment
+- name: Queue
+- name: Team
+- name: Export
+- name: Request
+- name: Note
+- name: InboundDocument
+- name: Participant
+- name: Desktop
+- name: Search
+- name: Palette
+- name: RecentItem
+- name: CommandRegistry
+- name: DataSubject
+- name: Import
+paths:
+  /api/wrk/v1/activities:
+    post:
+      operationId: wrk.Activity.create
+      summary: Create from pattern
+      description: |-
+        Create from pattern
+
+        PRD inputs: pattern code, primary object, secondary objects, overrides, cause ref, suggested assignee, amount band
+        PRD outputs: activity id, number, dates, assignment
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-001
+      - REQ-WRK-185
+      x-anchor:
+      - REQ-WRK-001
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-WRK-001, REQ-WRK-185
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes (returns dates and assignment)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CLM
+      - CMP
+      - DOC
+      - FIN
+      - MIG
+      - MKT
+      - PFC
+      - PLT
+      - POL
+      - PTY
+      - RAT
+      - RI
+      - UW
+      x-permission: wrk.Activity.create
+      x-error-codes:
+      - code: WRK-ERR-PATTERN-NOT-APPLICABLE
+        status: 422
+      - code: WRK-ERR-OBJECT-ACCESS
+        status: 403
+      - code: WRK-ERR-DUPLICATE
+        note: returns existing
+        status: 409
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2102
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    get:
+      operationId: wrk.Activity.list
+      summary: Read
+      description: |-
+        Read
+
+        PRD inputs: id / filters (`REQ-WRK-068`)
+        PRD outputs: activity / page
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-001
+      x-anchor:
+      - REQ-WRK-001
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: wrk.Activity.list
+      x-error-codes: []
+      x-source:
+      - PRD-13 §9.1 l.2103
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: id
+        in: query
+        required: false
+        description: 'PRD: "id"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters (`REQ-WRK-068`)"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/activities/{id}:
+    get:
+      operationId: wrk.Activity.get
+      summary: Read
+      description: |-
+        Read
+
+        PRD inputs: id / filters (`REQ-WRK-068`)
+        PRD outputs: activity / page
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-001
+      x-anchor:
+      - REQ-WRK-001
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: wrk.Activity.get
+      x-error-codes: []
+      x-source:
+      - PRD-13 §9.1 l.2103
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Activity (PRD input: "id")'
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters (`REQ-WRK-068`)"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityGetPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    patch:
+      operationId: wrk.Activity.update
+      summary: Edit fields, dates, sub-state
+      description: |-
+        Edit fields, dates, sub-state
+
+        PRD inputs: id, fields, reason, record_version
+        PRD outputs: activity
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-056
+      - REQ-WRK-066
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Activity.update
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-PERMISSION
+        status: 403
+      - code: WRK-ERR-CLOCK-READ-ONLY
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2104
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Activity
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/activities/assign:
+    post:
+      operationId: wrk.Activity.assign
+      summary: Assign/reassign/claim/release
+      description: |-
+        Assign/reassign/claim/release
+
+        PRD inputs: id, target or "rules" or "me", reason
+        PRD outputs: assignment
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-129
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-exposure:
+      - ui
+      x-permission: wrk.Activity.assign
+      x-error-codes:
+      - code: WRK-ERR-TARGET-INELIGIBLE
+        note: reason
+        status: 422
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2105
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityAssignRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityAssignResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/activities/complete:
+    post:
+      operationId: wrk.Activity.complete
+      summary: Close
+      description: |-
+        Close
+
+        PRD inputs: id, outcome, note, reason
+        PRD outputs: activity
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-057..REQ-WRK-059
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CMP
+      - FIN
+      - PTY
+      - UW
+      x-permission: wrk.Activity.complete
+      x-error-codes:
+      - code: WRK-ERR-OUTCOME-REQUIRED
+        status: 422
+      - code: WRK-ERR-NOTE-REQUIRED
+        status: 422
+      - code: WRK-ERR-CHECKLIST
+        status: 422
+      - code: WRK-ERR-MANDATORY
+        status: 422
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2106
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityCompleteRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityCompleteResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/activities/skip:
+    post:
+      operationId: wrk.Activity.skip
+      summary: Close
+      description: |-
+        Close
+
+        PRD inputs: id, outcome, note, reason
+        PRD outputs: activity
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-057..REQ-WRK-059
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: wrk.Activity.skip
+      x-error-codes:
+      - code: WRK-ERR-OUTCOME-REQUIRED
+        status: 422
+      - code: WRK-ERR-NOTE-REQUIRED
+        status: 422
+      - code: WRK-ERR-CHECKLIST
+        status: 422
+      - code: WRK-ERR-MANDATORY
+        status: 422
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2106
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivitySkipRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivitySkipResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/activities/cancel:
+    post:
+      operationId: wrk.Activity.cancel
+      summary: Close
+      description: |-
+        Close
+
+        PRD inputs: id, outcome, note, reason
+        PRD outputs: activity
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-057..REQ-WRK-059
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: wrk.Activity.cancel
+      x-error-codes:
+      - code: WRK-ERR-OUTCOME-REQUIRED
+        status: 422
+      - code: WRK-ERR-NOTE-REQUIRED
+        status: 422
+      - code: WRK-ERR-CHECKLIST
+        status: 422
+      - code: WRK-ERR-MANDATORY
+        status: 422
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2106
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityCancelRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityCancelResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/activities/bulk-reassign:
+    post:
+      operationId: wrk.Activity.bulkReassign
+      summary: Bulk job
+      description: |-
+        Bulk job
+
+        PRD inputs: selection (filter or ids), target or rules, include participants, reason
+        PRD outputs: job id; preview when dry-run
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-132
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-exposure:
+      - ui
+      x-permission: wrk.Activity.bulkReassign
+      x-error-codes:
+      - code: WRK-ERR-LIMIT-EXCEEDED
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2107
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityBulkReassignRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityBulkReassignResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/activities/blocking-status:
+    get:
+      operationId: wrk.Activity.blockingStatus
+      summary: Gate query
+      description: |-
+        Gate query
+
+        PRD inputs: object ref
+        PRD outputs: open gate-blocking activities
+      tags:
+      - Activity
+      x-requirement:
+      - REQ-WRK-069
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - POL
+      x-permission: wrk.Activity.blockingStatus
+      x-error-codes: []
+      x-source:
+      - PRD-13 §9.1 l.2108
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: objectRef
+        in: query
+        required: false
+        description: 'PRD: "object ref"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityBlockingStatusResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/assignments/simulate:
+    post:
+      operationId: wrk.Assignment.simulate
+      summary: Explain routing
+      description: |-
+        Explain routing
+
+        PRD inputs: draft activity
+        PRD outputs: target, rule path, rejected candidates
+      tags:
+      - Assignment
+      x-requirement:
+      - REQ-WRK-131
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: Is dry-run'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Assignment.simulate
+      x-error-codes: []
+      x-source:
+      - PRD-13 §9.1 l.2109
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentSimulateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentSimulateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/queues/get-next:
+    post:
+      operationId: wrk.Queue.getNext
+      summary: Pull next item
+      description: |-
+        Pull next item
+
+        PRD inputs: queue id
+        PRD outputs: assigned activity
+      tags:
+      - Queue
+      x-requirement:
+      - REQ-WRK-126
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: wrk.Queue.getNext
+      x-error-codes:
+      - code: WRK-ERR-QUEUE-EMPTY
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2110
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueueGetNextRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueGetNextResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/teams/summary:
+    get:
+      operationId: wrk.Team.summary
+      summary: Supervisor view
+      description: |-
+        Supervisor view
+
+        PRD inputs: groups, grouping
+        PRD outputs: counts
+      tags:
+      - Team
+      x-requirement:
+      - REQ-WRK-165
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: wrk.Team.summary
+      x-error-codes: []
+      x-source:
+      - PRD-13 §9.1 l.2115
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: groups
+        in: query
+        required: false
+        description: 'PRD: "groups"'
+        schema:
+          type: string
+      - name: grouping
+        in: query
+        required: false
+        description: 'PRD: "grouping"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamSummaryResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/exports:
+    post:
+      operationId: wrk.Export.create
+      summary: List export
+      description: |-
+        List export
+
+        PRD inputs: list query, format
+        PRD outputs: file ref (DOC archive, short retention)
+      tags:
+      - Export
+      x-requirement:
+      - REQ-WRK-167
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: wrk.Export.create
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2116
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/requests/submit:
+    post:
+      operationId: wrk.Request.submit
+      summary: Back-office requests
+      description: |-
+        Back-office requests
+
+        PRD inputs: per operation
+        PRD outputs: request
+      tags:
+      - Request
+      x-requirement:
+      - REQ-WRK-008
+      - REQ-WRK-210..REQ-WRK-226
+      x-anchor:
+      - REQ-WRK-008
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: submit dry-run (validation only)'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - UW
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/policies/{no}/cancellation-requests
+      - MCP tool cancellation_request
+      - MCP tool policy_change_submit
+      - MCP tool request_submit
+      x-permission: wrk.Request.submit
+      x-error-codes:
+      - code: WRK-ERR-OBJECT-ACCESS
+        status: 403
+      - code: WRK-ERR-VALIDATION
+        status: 422
+      - code: WRK-ERR-CAPABILITY-OFF
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2117
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/requests/{id}:
+    get:
+      operationId: wrk.Request.get
+      summary: Back-office requests
+      description: |-
+        Back-office requests
+
+        PRD inputs: per operation
+        PRD outputs: request
+      tags:
+      - Request
+      x-requirement:
+      - REQ-WRK-008
+      - REQ-WRK-210..REQ-WRK-226
+      x-anchor:
+      - REQ-WRK-008
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: submit dry-run (validation only)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - UW
+      x-permission: wrk.Request.get
+      x-error-codes:
+      - code: WRK-ERR-OBJECT-ACCESS
+        status: 403
+      - code: WRK-ERR-VALIDATION
+        status: 422
+      - code: WRK-ERR-CAPABILITY-OFF
+        status: 422
+      x-source:
+      - PRD-13 §9.1 l.2117
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Request
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/requests:
+    get:
+      operationId: wrk.Request.list
+      summary: Back-office requests
+      description: |-
+        Back-office requests
+
+        PRD inputs: per operation
+        PRD outputs: request
+      tags:
+      - Request
+      x-requirement:
+      - REQ-WRK-008
+      - REQ-WRK-210..REQ-WRK-226
+      x-anchor:
+      - REQ-WRK-008
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: submit dry-run (validation only)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - UW
+      x-permission: wrk.Request.list
+      x-error-codes:
+      - code: WRK-ERR-OBJECT-ACCESS
+        status: 403
+      - code: WRK-ERR-VALIDATION
+        status: 422
+      - code: WRK-ERR-CAPABILITY-OFF
+        status: 422
+      x-source:
+      - PRD-13 §9.1 l.2117
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/requests/reply:
+    post:
+      operationId: wrk.Request.reply
+      summary: Back-office requests
+      description: |-
+        Back-office requests
+
+        PRD inputs: per operation
+        PRD outputs: request
+      tags:
+      - Request
+      x-requirement:
+      - REQ-WRK-008
+      - REQ-WRK-210..REQ-WRK-226
+      x-anchor:
+      - REQ-WRK-008
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: submit dry-run (validation only)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Request.reply
+      x-error-codes:
+      - code: WRK-ERR-OBJECT-ACCESS
+        status: 403
+      - code: WRK-ERR-VALIDATION
+        status: 422
+      - code: WRK-ERR-CAPABILITY-OFF
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2117
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReplyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestReplyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/requests/request-info:
+    post:
+      operationId: wrk.Request.requestInfo
+      summary: Back-office requests
+      description: |-
+        Back-office requests
+
+        PRD inputs: per operation
+        PRD outputs: request
+      tags:
+      - Request
+      x-requirement:
+      - REQ-WRK-008
+      - REQ-WRK-210..REQ-WRK-226
+      x-anchor:
+      - REQ-WRK-008
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: submit dry-run (validation only)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Request.requestInfo
+      x-error-codes:
+      - code: WRK-ERR-OBJECT-ACCESS
+        status: 403
+      - code: WRK-ERR-VALIDATION
+        status: 422
+      - code: WRK-ERR-CAPABILITY-OFF
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2117
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestRequestInfoRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestRequestInfoResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/requests/withdraw:
+    post:
+      operationId: wrk.Request.withdraw
+      summary: Back-office requests
+      description: |-
+        Back-office requests
+
+        PRD inputs: per operation
+        PRD outputs: request
+      tags:
+      - Request
+      x-requirement:
+      - REQ-WRK-008
+      - REQ-WRK-210..REQ-WRK-226
+      x-anchor:
+      - REQ-WRK-008
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: submit dry-run (validation only)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Request.withdraw
+      x-error-codes:
+      - code: WRK-ERR-OBJECT-ACCESS
+        status: 403
+      - code: WRK-ERR-VALIDATION
+        status: 422
+      - code: WRK-ERR-CAPABILITY-OFF
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2117
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestWithdrawRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestWithdrawResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/requests/close:
+    post:
+      operationId: wrk.Request.close
+      summary: Back-office requests
+      description: |-
+        Back-office requests
+
+        PRD inputs: per operation
+        PRD outputs: request
+      tags:
+      - Request
+      x-requirement:
+      - REQ-WRK-008
+      - REQ-WRK-210..REQ-WRK-226
+      x-anchor:
+      - REQ-WRK-008
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: submit dry-run (validation only)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Request.close
+      x-error-codes:
+      - code: WRK-ERR-OBJECT-ACCESS
+        status: 403
+      - code: WRK-ERR-VALIDATION
+        status: 422
+      - code: WRK-ERR-CAPABILITY-OFF
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2117
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestCloseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestCloseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/requests/to-complaint:
+    post:
+      operationId: wrk.Request.toComplaint
+      summary: Back-office requests
+      description: |-
+        Back-office requests
+
+        PRD inputs: per operation
+        PRD outputs: request
+      tags:
+      - Request
+      x-requirement:
+      - REQ-WRK-008
+      - REQ-WRK-210..REQ-WRK-226
+      x-anchor:
+      - REQ-WRK-008
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: submit dry-run (validation only)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Request.toComplaint
+      x-error-codes:
+      - code: WRK-ERR-OBJECT-ACCESS
+        status: 403
+      - code: WRK-ERR-VALIDATION
+        status: 422
+      - code: WRK-ERR-CAPABILITY-OFF
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2117
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestToComplaintRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestToComplaintResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/notes:
+    post:
+      operationId: wrk.Note.create
+      summary: Notes
+      description: |-
+        Notes
+
+        PRD inputs: per operation
+        PRD outputs: note(s)
+      tags:
+      - Note
+      x-requirement:
+      - REQ-WRK-004
+      - REQ-WRK-230..REQ-WRK-252
+      x-anchor:
+      - REQ-WRK-004
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CLM
+      - UW
+      x-permission: wrk.Note.create
+      x-error-codes:
+      - code: WRK-ERR-EDIT-WINDOW
+        status: 422
+      - code: WRK-ERR-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2118
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    get:
+      operationId: wrk.Note.list
+      summary: Notes
+      description: |-
+        Notes
+
+        PRD inputs: per operation
+        PRD outputs: note(s)
+      tags:
+      - Note
+      x-requirement:
+      - REQ-WRK-004
+      - REQ-WRK-230..REQ-WRK-252
+      x-anchor:
+      - REQ-WRK-004
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - CLM
+      - UW
+      x-permission: wrk.Note.list
+      x-error-codes:
+      - code: WRK-ERR-EDIT-WINDOW
+        status: 422
+      - code: WRK-ERR-PERMISSION
+        status: 403
+      x-source:
+      - PRD-13 §9.1 l.2118
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/notes/{id}:
+    get:
+      operationId: wrk.Note.get
+      summary: Notes
+      description: |-
+        Notes
+
+        PRD inputs: per operation
+        PRD outputs: note(s)
+      tags:
+      - Note
+      x-requirement:
+      - REQ-WRK-004
+      - REQ-WRK-230..REQ-WRK-252
+      x-anchor:
+      - REQ-WRK-004
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.Note.get
+      x-error-codes:
+      - code: WRK-ERR-EDIT-WINDOW
+        status: 422
+      - code: WRK-ERR-PERMISSION
+        status: 403
+      x-source:
+      - PRD-13 §9.1 l.2118
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Note
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/notes/search:
+    get:
+      operationId: wrk.Note.search
+      summary: Notes
+      description: |-
+        Notes
+
+        PRD inputs: per operation
+        PRD outputs: note(s)
+      tags:
+      - Note
+      x-requirement:
+      - REQ-WRK-004
+      - REQ-WRK-230..REQ-WRK-252
+      x-anchor:
+      - REQ-WRK-004
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.Note.search
+      x-error-codes:
+      - code: WRK-ERR-EDIT-WINDOW
+        status: 422
+      - code: WRK-ERR-PERMISSION
+        status: 403
+      x-source:
+      - PRD-13 §9.1 l.2118
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteSearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/notes/edit:
+    post:
+      operationId: wrk.Note.edit
+      summary: Notes
+      description: |-
+        Notes
+
+        PRD inputs: per operation
+        PRD outputs: note(s)
+      tags:
+      - Note
+      x-requirement:
+      - REQ-WRK-004
+      - REQ-WRK-230..REQ-WRK-252
+      x-anchor:
+      - REQ-WRK-004
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.Note.edit
+      x-error-codes:
+      - code: WRK-ERR-EDIT-WINDOW
+        status: 422
+      - code: WRK-ERR-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2118
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteEditRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteEditResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/notes/delete:
+    post:
+      operationId: wrk.Note.delete
+      summary: Notes
+      description: |-
+        Notes
+
+        PRD inputs: per operation
+        PRD outputs: note(s)
+      tags:
+      - Note
+      x-requirement:
+      - REQ-WRK-004
+      - REQ-WRK-230..REQ-WRK-252
+      x-anchor:
+      - REQ-WRK-004
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.Note.delete
+      x-error-codes:
+      - code: WRK-ERR-EDIT-WINDOW
+        status: 422
+      - code: WRK-ERR-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2118
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteDeleteRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteDeleteResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/notes/history:
+    get:
+      operationId: wrk.Note.history
+      summary: Notes
+      description: |-
+        Notes
+
+        PRD inputs: per operation
+        PRD outputs: note(s)
+      tags:
+      - Note
+      x-requirement:
+      - REQ-WRK-004
+      - REQ-WRK-230..REQ-WRK-252
+      x-anchor:
+      - REQ-WRK-004
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.Note.history
+      x-error-codes:
+      - code: WRK-ERR-EDIT-WINDOW
+        status: 422
+      - code: WRK-ERR-PERMISSION
+        status: 403
+      x-source:
+      - PRD-13 §9.1 l.2118
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteHistoryPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/notes/export:
+    post:
+      operationId: wrk.Note.export
+      summary: Notes
+      description: |-
+        Notes
+
+        PRD inputs: per operation
+        PRD outputs: note(s)
+      tags:
+      - Note
+      x-requirement:
+      - REQ-WRK-004
+      - REQ-WRK-230..REQ-WRK-252
+      x-anchor:
+      - REQ-WRK-004
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - CMP
+      - UW
+      x-permission: wrk.Note.export
+      x-error-codes:
+      - code: WRK-ERR-EDIT-WINDOW
+        status: 422
+      - code: WRK-ERR-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2118
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/submit:
+    post:
+      operationId: wrk.InboundDocument.submit
+      summary: Intake
+      description: |-
+        Intake
+
+        PRD inputs: envelope metadata, files (streamed), channel, sender, suggested class and link
+        PRD outputs: envelope id, document ids, inbound numbers
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-005
+      - REQ-WRK-260
+      x-anchor:
+      - REQ-WRK-005
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - CLM
+      - UW
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/documents
+      x-permission: wrk.InboundDocument.submit
+      x-error-codes:
+      - code: WRK-ERR-FILE-TYPE
+        status: 422
+      - code: WRK-ERR-FILE-SIZE
+        status: 422
+      - code: WRK-ERR-CAPABILITY-OFF
+        status: 422
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2119
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundDocumentSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/{id}:
+    get:
+      operationId: wrk.InboundDocument.get
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.InboundDocument.get
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      x-source:
+      - PRD-13 §9.1 l.2120
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the InboundDocument
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents:
+    get:
+      operationId: wrk.InboundDocument.list
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - DOC
+      - UW
+      x-permission: wrk.InboundDocument.list
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      x-source:
+      - PRD-13 §9.1 l.2120
+      x-superseded-names:
+      - wrk.InboundDocument.listForObject (XRF-004h)
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/verify:
+    post:
+      operationId: wrk.InboundDocument.verify
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.InboundDocument.verify
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2120
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundDocumentVerifyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentVerifyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/split:
+    post:
+      operationId: wrk.InboundDocument.split
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.InboundDocument.split
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2120
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundDocumentSplitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentSplitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/link:
+    post:
+      operationId: wrk.InboundDocument.link
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.InboundDocument.link
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2120
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundDocumentLinkRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentLinkResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/relink:
+    post:
+      operationId: wrk.InboundDocument.relink
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.InboundDocument.relink
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2120
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundDocumentRelinkRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentRelinkResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/reject:
+    post:
+      operationId: wrk.InboundDocument.reject
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.InboundDocument.reject
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2120
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundDocumentRejectRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentRejectResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/redact:
+    post:
+      operationId: wrk.InboundDocument.redact
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.InboundDocument.redact
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2120
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundDocumentRedactRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentRedactResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/reprocess:
+    post:
+      operationId: wrk.InboundDocument.reprocess
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - UW
+      x-permission: wrk.InboundDocument.reprocess
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2120
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundDocumentReprocessRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentReprocessResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/inbound-documents/export:
+    post:
+      operationId: wrk.InboundDocument.export
+      summary: Processing and verification
+      description: |-
+        Processing and verification
+
+        PRD inputs: per operation
+        PRD outputs: document(s)
+      tags:
+      - InboundDocument
+      x-requirement:
+      - REQ-WRK-268..REQ-WRK-298
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 10
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: verify dry-run (completeness)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - CMP
+      - UW
+      x-permission: wrk.InboundDocument.export
+      x-error-codes:
+      - code: WRK-ERR-STALE
+        status: 409
+      - code: WRK-ERR-REQUIRED-MISSING
+        status: 422
+      - code: WRK-ERR-P3-PERMISSION
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2120
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundDocumentExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboundDocumentExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/participants/assign-by-rules:
+    post:
+      operationId: wrk.Participant.assignByRules
+      summary: Participants
+      description: |-
+        Participants
+
+        PRD inputs: —
+        PRD outputs: —
+      tags:
+      - Participant
+      x-requirement:
+      - REQ-WRK-010
+      - REQ-WRK-300..REQ-WRK-308
+      x-anchor:
+      - REQ-WRK-010
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - POL
+      - UW
+      x-permission: wrk.Participant.assignByRules
+      x-error-codes:
+      - code: WRK-ERR-PARTICIPANT-ACCESS
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2121
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantAssignByRulesRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantAssignByRulesResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/participants:
+    get:
+      operationId: wrk.Participant.list
+      summary: Participants
+      description: |-
+        Participants
+
+        PRD inputs: —
+        PRD outputs: —
+      tags:
+      - Participant
+      x-requirement:
+      - REQ-WRK-010
+      - REQ-WRK-300..REQ-WRK-308
+      x-anchor:
+      - REQ-WRK-010
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Participant.list
+      x-error-codes:
+      - code: WRK-ERR-PARTICIPANT-ACCESS
+        status: 403
+      x-source:
+      - PRD-13 §9.1 l.2121
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/participants/objects-for:
+    get:
+      operationId: wrk.Participant.objectsFor
+      summary: Participants
+      description: |-
+        Participants
+
+        PRD inputs: —
+        PRD outputs: —
+      tags:
+      - Participant
+      x-requirement:
+      - REQ-WRK-010
+      - REQ-WRK-300..REQ-WRK-308
+      x-anchor:
+      - REQ-WRK-010
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Participant.objectsFor
+      x-error-codes:
+      - code: WRK-ERR-PARTICIPANT-ACCESS
+        status: 403
+      x-source:
+      - PRD-13 §9.1 l.2121
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantObjectsForResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/participants/change:
+    post:
+      operationId: wrk.Participant.change
+      summary: Participants
+      description: |-
+        Participants
+
+        PRD inputs: —
+        PRD outputs: —
+      tags:
+      - Participant
+      x-requirement:
+      - REQ-WRK-010
+      - REQ-WRK-300..REQ-WRK-308
+      x-anchor:
+      - REQ-WRK-010
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: wrk.Participant.change
+      x-error-codes:
+      - code: WRK-ERR-PARTICIPANT-ACCESS
+        status: 403
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2121
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantChangeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantChangeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/desktop/get:
+    get:
+      operationId: wrk.Desktop.get
+      summary: Desktop composition
+      description: |-
+        Desktop composition
+
+        PRD inputs: user context
+        PRD outputs: widgets, counters
+      tags:
+      - Desktop
+      x-requirement:
+      - REQ-WRK-310
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: wrk.Desktop.get
+      x-error-codes: []
+      x-source:
+      - PRD-13 §9.1 l.2122
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: userContext
+        in: query
+        required: false
+        description: 'PRD: "user context"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesktopGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/search/global:
+    post:
+      operationId: wrk.Search.global
+      summary: Navigation
+      description: |-
+        Navigation
+
+        PRD inputs: query, context
+        PRD outputs: grouped results
+      tags:
+      - Search
+      x-requirement:
+      - REQ-WRK-006
+      - REQ-WRK-325..REQ-WRK-340
+      x-anchor:
+      - REQ-WRK-006
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - MCP tool search` (staff agents only)
+      x-permission: wrk.Search.global
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2123
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchGlobalRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchGlobalResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/palette/query:
+    get:
+      operationId: wrk.Palette.query
+      summary: Navigation
+      description: |-
+        Navigation
+
+        PRD inputs: query, context
+        PRD outputs: grouped results
+      tags:
+      - Palette
+      x-requirement:
+      - REQ-WRK-006
+      - REQ-WRK-325..REQ-WRK-340
+      x-anchor:
+      - REQ-WRK-006
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - MKT
+      x-permission: wrk.Palette.query
+      x-error-codes: []
+      x-source:
+      - PRD-13 §9.1 l.2123
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaletteQueryPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/recent-items:
+    get:
+      operationId: wrk.RecentItem.list
+      summary: Navigation
+      description: |-
+        Navigation
+
+        PRD inputs: query, context
+        PRD outputs: grouped results
+      tags:
+      - RecentItem
+      x-requirement:
+      - REQ-WRK-006
+      - REQ-WRK-325..REQ-WRK-340
+      x-anchor:
+      - REQ-WRK-006
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-bounded: recent items of the current user (REQ-WRK-006)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: wrk.RecentItem.list
+      x-error-codes: []
+      x-source:
+      - PRD-13 §9.1 l.2123
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecentItemListResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/command-registries/register:
+    post:
+      operationId: wrk.CommandRegistry.register
+      summary: Navigation
+      description: |-
+        Navigation
+
+        PRD inputs: query, context
+        PRD outputs: grouped results
+      tags:
+      - CommandRegistry
+      x-requirement:
+      - REQ-WRK-006
+      - REQ-WRK-325..REQ-WRK-340
+      x-anchor:
+      - REQ-WRK-006
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: wrk.CommandRegistry.register
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2123
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommandRegistryRegisterRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandRegistryRegisterResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/data-subject/export:
+    post:
+      operationId: wrk.DataSubject.export
+      summary: DSAR fan-out targets
+      description: |-
+        DSAR fan-out targets
+
+        PRD inputs: party id, scope, DSAR id
+        PRD outputs: package / result with conflicts
+      tags:
+      - DataSubject
+      x-requirement:
+      - REQ-WRK-370
+      - REQ-WRK-371
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: erase dry-run'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: wrk.DataSubject.export
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2125
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataSubjectExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSubjectExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/data-subject/erase:
+    post:
+      operationId: wrk.DataSubject.erase
+      summary: DSAR fan-out targets
+      description: |-
+        DSAR fan-out targets
+
+        PRD inputs: party id, scope, DSAR id
+        PRD outputs: package / result with conflicts
+      tags:
+      - DataSubject
+      x-requirement:
+      - REQ-WRK-370
+      - REQ-WRK-371
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: erase dry-run'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: wrk.DataSubject.erase
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2125
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataSubjectEraseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSubjectEraseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/data-subject/restrict:
+    post:
+      operationId: wrk.DataSubject.restrict
+      summary: DSAR fan-out targets
+      description: |-
+        DSAR fan-out targets
+
+        PRD inputs: party id, scope, DSAR id
+        PRD outputs: package / result with conflicts
+      tags:
+      - DataSubject
+      x-requirement:
+      - REQ-WRK-370
+      - REQ-WRK-371
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: erase dry-run'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: wrk.DataSubject.restrict
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2125
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataSubjectRestrictRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSubjectRestrictResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/import/activities:
+    post:
+      operationId: wrk.Import.activities
+      summary: Migration
+      description: |-
+        Migration
+
+        PRD inputs: batch
+        PRD outputs: outcomes
+        PRD error notes: per row
+      tags:
+      - Import
+      x-requirement:
+      - REQ-WRK-386
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: wrk.Import.activities
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2126
+      x-prd-name:
+      - wrk.Import.*(activities)
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportActivitiesRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportActivitiesResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/import/notes:
+    post:
+      operationId: wrk.Import.notes
+      summary: Migration
+      description: |-
+        Migration
+
+        PRD inputs: batch
+        PRD outputs: outcomes
+        PRD error notes: per row
+      tags:
+      - Import
+      x-requirement:
+      - REQ-WRK-386
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: wrk.Import.notes
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2126
+      x-prd-name:
+      - wrk.Import.*(notes)
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportNotesRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportNotesResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/import/groups:
+    post:
+      operationId: wrk.Import.groups
+      summary: Migration
+      description: |-
+        Migration
+
+        PRD inputs: batch
+        PRD outputs: outcomes
+        PRD error notes: per row
+      tags:
+      - Import
+      x-requirement:
+      - REQ-WRK-386
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: wrk.Import.groups
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2126
+      x-prd-name:
+      - wrk.Import.*(groups)
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportGroupsRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportGroupsResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/import/participants:
+    post:
+      operationId: wrk.Import.participants
+      summary: Migration
+      description: |-
+        Migration
+
+        PRD inputs: batch
+        PRD outputs: outcomes
+        PRD error notes: per row
+      tags:
+      - Import
+      x-requirement:
+      - REQ-WRK-386
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: wrk.Import.participants
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2126
+      x-prd-name:
+      - wrk.Import.*(participants)
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportParticipantsRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportParticipantsResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/import/inbound-metadata:
+    post:
+      operationId: wrk.Import.inboundMetadata
+      summary: Migration
+      description: |-
+        Migration
+
+        PRD inputs: batch
+        PRD outputs: outcomes
+        PRD error notes: per row
+      tags:
+      - Import
+      x-requirement:
+      - REQ-WRK-386
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-05
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: wrk.Import.inboundMetadata
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-13 §9.1 l.2126
+      x-prd-name:
+      - wrk.Import.*(inbound metadata)
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportInboundMetadataRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportInboundMetadataResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+x-operation-families:
+- family: wrk.Queue.*
+  summary: Organisation admin and queries
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-003
+  - REQ-WRK-100..REQ-WRK-115
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2111
+- family: wrk.Group.*
+  summary: Organisation admin and queries
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-003
+  - REQ-WRK-100..REQ-WRK-115
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-consumers:
+  - PLT
+  x-source:
+  - PRD-13 §9.1 l.2111
+- family: wrk.Membership.*
+  summary: Organisation admin and queries
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-003
+  - REQ-WRK-100..REQ-WRK-115
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2111
+- family: wrk.Skill.*
+  summary: Organisation admin and queries
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-003
+  - REQ-WRK-100..REQ-WRK-115
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2111
+- family: wrk.ActivityPattern.*
+  summary: Catalogue
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-002
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2112
+- family: wrk.AssignmentRuleSet.*
+  summary: Configuration with maker-checker
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-135
+  - REQ-WRK-084
+  - REQ-WRK-187
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2113
+- family: wrk.SlaPolicy.*
+  summary: Configuration with maker-checker
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-009
+  - REQ-WRK-135
+  - REQ-WRK-084
+  - REQ-WRK-187
+  x-anchor-mapped:
+  - REQ-WRK-009
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2113
+- family: wrk.EventTrigger.*
+  summary: Configuration with maker-checker
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-135
+  - REQ-WRK-084
+  - REQ-WRK-187
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2113
+- family: wrk.Absence.*
+  summary: Availability
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-150..REQ-WRK-158
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2114
+- family: wrk.Delegation.*
+  summary: Availability
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-150..REQ-WRK-158
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2114
+- family: wrk.SavedSearch.*
+  summary: Navigation
+  inputs: query, context
+  outputs: grouped results
+  x-requirement:
+  - REQ-WRK-006
+  - REQ-WRK-325..REQ-WRK-340
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2123
+- family: wrk.Notification.*
+  summary: Notifications
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-007
+  - REQ-WRK-345..REQ-WRK-354
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2124
+- family: wrk.NotificationPreference.*
+  summary: Notifications
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-007
+  - REQ-WRK-345..REQ-WRK-354
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2124
+- family: wrk.Follow.*
+  summary: Notifications
+  inputs: —
+  outputs: —
+  x-requirement:
+  - REQ-WRK-007
+  - REQ-WRK-345..REQ-WRK-354
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-13 §9.1 l.2124
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+  schemas:
+    ActivityCreateRequest:
+      type: object
+      properties:
+        patternCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        primaryObject:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+        secondaryObjects:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/ObjectRef
+        overrides:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+        raisingModule:
+          $ref: ../events/common.schema.json#/$defs/ModuleCode
+        causeRef:
+          type: string
+          description: Event id or object state (REQ-WRK-185)
+        suggestedAssignee:
+          type: string
+        amountBand:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - patternCode
+      - primaryObject
+      - raisingModule
+      description: 'Typed from REQ-WRK-001, REQ-WRK-185. PRD inputs: "pattern code, primary object, secondary objects, overrides,
+        cause ref, suggested assignee, amount band"'
+    ActivityCreateResponse:
+      type: object
+      properties:
+        activityId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        number:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        targetAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        escalationAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        assignment:
+          type: object
+          properties:
+            assigneeType:
+              type: string
+              enum:
+              - USER
+              - GROUP
+              - QUEUE
+              description: REQ-WRK-001
+            assigneeId:
+              type: string
+          required:
+          - assigneeType
+          - assigneeId
+      required:
+      - activityId
+      - number
+      - assignment
+      description: 'Typed from REQ-WRK-001, REQ-WRK-185. PRD outputs: "activity id, number, dates, assignment"'
+    ActivityGetItem:
+      type: object
+      description: 'wrk.Activity.get result. PRD outputs: "activity / page"'
+      properties:
+        activity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activity"'
+        page:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "page"'
+    ActivityGetPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ActivityGetItem'
+      description: Page of wrk.Activity.get results (cursor pagination, contract §3.5.5)
+    ActivityListItem:
+      type: object
+      description: 'wrk.Activity.list result. PRD outputs: "activity / page"'
+      properties:
+        activity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activity"'
+        page:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "page"'
+    ActivityListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ActivityListItem'
+      description: Page of wrk.Activity.list results (cursor pagination, contract §3.5.5)
+    ActivityUpdateRequest:
+      type: object
+      description: 'wrk.Activity.update request. PRD inputs: "id, fields, reason, record_version"'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "id"'
+        fields:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "fields"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        recordVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "record_version"'
+    ActivityUpdateResponse:
+      type: object
+      description: 'wrk.Activity.update result. PRD outputs: "activity"'
+      properties:
+        activity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activity"'
+    ActivityAssignRequest:
+      type: object
+      description: 'wrk.Activity.assign request. PRD inputs: "id, target or "rules" or "me", reason"'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "id"'
+        target:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target or "rules" or "me"" (optional)'
+        rulesOrMe:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target or "rules" or "me"" (optional)'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+      oneOf:
+      - required:
+        - target
+      - required:
+        - rulesOrMe
+    ActivityAssignResponse:
+      type: object
+      description: 'wrk.Activity.assign result. PRD outputs: "assignment"'
+      properties:
+        assignment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "assignment"'
+    ActivityCompleteRequest:
+      type: object
+      description: 'wrk.Activity.complete request. PRD inputs: "id, outcome, note, reason"'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "id"'
+        outcome:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcome"'
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ActivityCompleteResponse:
+      type: object
+      description: 'wrk.Activity.complete result. PRD outputs: "activity"'
+      properties:
+        activity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activity"'
+    ActivitySkipRequest:
+      type: object
+      description: 'wrk.Activity.skip request. PRD inputs: "id, outcome, note, reason"'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "id"'
+        outcome:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcome"'
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ActivitySkipResponse:
+      type: object
+      description: 'wrk.Activity.skip result. PRD outputs: "activity"'
+      properties:
+        activity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activity"'
+    ActivityCancelRequest:
+      type: object
+      description: 'wrk.Activity.cancel request. PRD inputs: "id, outcome, note, reason"'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "id"'
+        outcome:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcome"'
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ActivityCancelResponse:
+      type: object
+      description: 'wrk.Activity.cancel result. PRD outputs: "activity"'
+      properties:
+        activity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activity"'
+    ActivityBulkReassignRequest:
+      type: object
+      description: 'wrk.Activity.bulkReassign request. PRD inputs: "selection (filter or ids), target or rules, include participants,
+        reason"'
+      properties:
+        selection:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "selection (filter or ids)"'
+        target:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target or rules" (optional)'
+        rules:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target or rules" (optional)'
+        includeParticipants:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "include participants"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+      oneOf:
+      - required:
+        - target
+      - required:
+        - rules
+    ActivityBulkReassignResponse:
+      type: object
+      description: 'wrk.Activity.bulkReassign result. PRD outputs: "job id; preview when dry-run"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "job id"'
+        previewWhenDryRun:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "preview when dry-run"'
+    ActivityBlockingStatusResponse:
+      type: object
+      description: 'wrk.Activity.blockingStatus result. PRD outputs: "open gate-blocking activities"'
+      properties:
+        openGateBlockingActivities:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "open gate-blocking activities"'
+    AssignmentSimulateRequest:
+      type: object
+      description: 'wrk.Assignment.simulate request. PRD inputs: "draft activity"'
+      properties:
+        draftActivity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "draft activity"'
+    AssignmentSimulateResponse:
+      type: object
+      description: 'wrk.Assignment.simulate result. PRD outputs: "target, rule path, rejected candidates"'
+      properties:
+        target:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target"'
+        rulePath:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rule path"'
+        rejectedCandidates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rejected candidates"'
+    QueueGetNextRequest:
+      type: object
+      description: 'wrk.Queue.getNext request. PRD inputs: "queue id"'
+      properties:
+        queueId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "queue id"'
+    QueueGetNextResponse:
+      type: object
+      description: 'wrk.Queue.getNext result. PRD outputs: "assigned activity"'
+      properties:
+        assignedActivity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "assigned activity"'
+    TeamSummaryResponse:
+      type: object
+      description: 'wrk.Team.summary result. PRD outputs: "counts"'
+      properties:
+        counts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "counts"'
+    ExportCreateRequest:
+      type: object
+      description: 'wrk.Export.create request. PRD inputs: "list query, format"'
+      properties:
+        listQuery:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "list query"'
+        format:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "format"'
+    ExportCreateResponse:
+      type: object
+      description: 'wrk.Export.create result. PRD outputs: "file ref (DOC archive, short retention)"'
+      properties:
+        fileRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file ref (DOC archive, short retention)"'
+    RequestSubmitRequest:
+      type: object
+      description: 'wrk.Request.submit request. PRD inputs: "per operation"'
+      x-status: minimal
+    RequestSubmitResponse:
+      type: object
+      description: 'wrk.Request.submit result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    RequestGetResponse:
+      type: object
+      description: 'wrk.Request.get result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    RequestListItem:
+      type: object
+      description: 'wrk.Request.list result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    RequestListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RequestListItem'
+      description: Page of wrk.Request.list results (cursor pagination, contract §3.5.5)
+    RequestReplyRequest:
+      type: object
+      description: 'wrk.Request.reply request. PRD inputs: "per operation"'
+      x-status: minimal
+    RequestReplyResponse:
+      type: object
+      description: 'wrk.Request.reply result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    RequestRequestInfoRequest:
+      type: object
+      description: 'wrk.Request.requestInfo request. PRD inputs: "per operation"'
+      x-status: minimal
+    RequestRequestInfoResponse:
+      type: object
+      description: 'wrk.Request.requestInfo result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    RequestWithdrawRequest:
+      type: object
+      description: 'wrk.Request.withdraw request. PRD inputs: "per operation"'
+      x-status: minimal
+    RequestWithdrawResponse:
+      type: object
+      description: 'wrk.Request.withdraw result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    RequestCloseRequest:
+      type: object
+      description: 'wrk.Request.close request. PRD inputs: "per operation"'
+      x-status: minimal
+    RequestCloseResponse:
+      type: object
+      description: 'wrk.Request.close result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    RequestToComplaintRequest:
+      type: object
+      description: 'wrk.Request.toComplaint request. PRD inputs: "per operation"'
+      x-status: minimal
+    RequestToComplaintResponse:
+      type: object
+      description: 'wrk.Request.toComplaint result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    NoteCreateRequest:
+      type: object
+      description: 'wrk.Note.create request. PRD inputs: "per operation"'
+      x-status: minimal
+    NoteCreateResponse:
+      type: object
+      description: 'wrk.Note.create result. PRD outputs: "note(s)"'
+      properties:
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note(s)"'
+    NoteGetResponse:
+      type: object
+      description: 'wrk.Note.get result. PRD outputs: "note(s)"'
+      properties:
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note(s)"'
+    NoteListItem:
+      type: object
+      description: 'wrk.Note.list result. PRD outputs: "note(s)"'
+      properties:
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note(s)"'
+    NoteListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/NoteListItem'
+      description: Page of wrk.Note.list results (cursor pagination, contract §3.5.5)
+    NoteSearchItem:
+      type: object
+      description: 'wrk.Note.search result. PRD outputs: "note(s)"'
+      properties:
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note(s)"'
+    NoteSearchPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/NoteSearchItem'
+      description: Page of wrk.Note.search results (cursor pagination, contract §3.5.5)
+    NoteEditRequest:
+      type: object
+      description: 'wrk.Note.edit request. PRD inputs: "per operation"'
+      x-status: minimal
+    NoteEditResponse:
+      type: object
+      description: 'wrk.Note.edit result. PRD outputs: "note(s)"'
+      properties:
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note(s)"'
+    NoteDeleteRequest:
+      type: object
+      description: 'wrk.Note.delete request. PRD inputs: "per operation"'
+      x-status: minimal
+    NoteDeleteResponse:
+      type: object
+      description: 'wrk.Note.delete result. PRD outputs: "note(s)"'
+      properties:
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note(s)"'
+    NoteHistoryItem:
+      type: object
+      description: 'wrk.Note.history result. PRD outputs: "note(s)"'
+      properties:
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note(s)"'
+    NoteHistoryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/NoteHistoryItem'
+      description: Page of wrk.Note.history results (cursor pagination, contract §3.5.5)
+    NoteExportRequest:
+      type: object
+      description: 'wrk.Note.export request. PRD inputs: "per operation"'
+      x-status: minimal
+    NoteExportResponse:
+      type: object
+      description: 'wrk.Note.export result. PRD outputs: "note(s)"'
+      properties:
+        note:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "note(s)"'
+    InboundDocumentSubmitRequest:
+      type: object
+      description: 'wrk.InboundDocument.submit request. PRD inputs: "envelope metadata, files (streamed), channel, sender,
+        suggested class and link"'
+      properties:
+        envelopeMetadata:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "envelope metadata"'
+        files:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "files (streamed)"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+        sender:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sender"'
+        suggestedClass:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "suggested class and link"'
+        link:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "suggested class and link"'
+    InboundDocumentSubmitResponse:
+      type: object
+      description: 'wrk.InboundDocument.submit result. PRD outputs: "envelope id, document ids, inbound numbers"'
+      properties:
+        envelopeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "envelope id"'
+        documentIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "document ids"'
+        inboundNumbers:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "inbound numbers"'
+    InboundDocumentGetResponse:
+      type: object
+      description: 'wrk.InboundDocument.get result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    InboundDocumentListItem:
+      type: object
+      description: 'wrk.InboundDocument.list result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    InboundDocumentListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/InboundDocumentListItem'
+      description: Page of wrk.InboundDocument.list results (cursor pagination, contract §3.5.5)
+    InboundDocumentVerifyRequest:
+      type: object
+      description: 'wrk.InboundDocument.verify request. PRD inputs: "per operation"'
+      x-status: minimal
+    InboundDocumentVerifyResponse:
+      type: object
+      description: 'wrk.InboundDocument.verify result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    InboundDocumentSplitRequest:
+      type: object
+      description: 'wrk.InboundDocument.split request. PRD inputs: "per operation"'
+      x-status: minimal
+    InboundDocumentSplitResponse:
+      type: object
+      description: 'wrk.InboundDocument.split result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    InboundDocumentLinkRequest:
+      type: object
+      description: 'wrk.InboundDocument.link request. PRD inputs: "per operation"'
+      x-status: minimal
+    InboundDocumentLinkResponse:
+      type: object
+      description: 'wrk.InboundDocument.link result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    InboundDocumentRelinkRequest:
+      type: object
+      description: 'wrk.InboundDocument.relink request. PRD inputs: "per operation"'
+      x-status: minimal
+    InboundDocumentRelinkResponse:
+      type: object
+      description: 'wrk.InboundDocument.relink result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    InboundDocumentRejectRequest:
+      type: object
+      description: 'wrk.InboundDocument.reject request. PRD inputs: "per operation"'
+      x-status: minimal
+    InboundDocumentRejectResponse:
+      type: object
+      description: 'wrk.InboundDocument.reject result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    InboundDocumentRedactRequest:
+      type: object
+      description: 'wrk.InboundDocument.redact request. PRD inputs: "per operation"'
+      x-status: minimal
+    InboundDocumentRedactResponse:
+      type: object
+      description: 'wrk.InboundDocument.redact result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    InboundDocumentReprocessRequest:
+      type: object
+      description: 'wrk.InboundDocument.reprocess request. PRD inputs: "per operation"'
+      x-status: minimal
+    InboundDocumentReprocessResponse:
+      type: object
+      description: 'wrk.InboundDocument.reprocess result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    InboundDocumentExportRequest:
+      type: object
+      description: 'wrk.InboundDocument.export request. PRD inputs: "per operation"'
+      x-status: minimal
+    InboundDocumentExportResponse:
+      type: object
+      description: 'wrk.InboundDocument.export result. PRD outputs: "document(s)"'
+      properties:
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document(s)"'
+    ParticipantAssignByRulesRequest:
+      type: object
+      description: 'wrk.Participant.assignByRules request. PRD inputs: "—"'
+      x-status: minimal
+    ParticipantAssignByRulesResponse:
+      type: object
+      description: 'wrk.Participant.assignByRules result. PRD outputs: "—"'
+      x-status: minimal
+    ParticipantListItem:
+      type: object
+      description: 'wrk.Participant.list result. PRD outputs: "—"'
+      x-status: minimal
+    ParticipantListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ParticipantListItem'
+      description: Page of wrk.Participant.list results (cursor pagination, contract §3.5.5)
+    ParticipantObjectsForResponse:
+      type: object
+      description: 'wrk.Participant.objectsFor result. PRD outputs: "—"'
+      x-status: minimal
+    ParticipantChangeRequest:
+      type: object
+      description: 'wrk.Participant.change request. PRD inputs: "—"'
+      x-status: minimal
+    ParticipantChangeResponse:
+      type: object
+      description: 'wrk.Participant.change result. PRD outputs: "—"'
+      x-status: minimal
+    DesktopGetResponse:
+      type: object
+      description: 'wrk.Desktop.get result. PRD outputs: "widgets, counters"'
+      properties:
+        widgets:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "widgets"'
+        counters:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "counters"'
+    SearchGlobalRequest:
+      type: object
+      description: 'wrk.Search.global request. PRD inputs: "query, context"'
+      properties:
+        query:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "query"'
+        context:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "context"'
+    SearchGlobalResponse:
+      type: object
+      description: 'wrk.Search.global result. PRD outputs: "grouped results"'
+      properties:
+        groupedResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grouped results"'
+    PaletteQueryItem:
+      type: object
+      description: 'wrk.Palette.query result. PRD outputs: "grouped results"'
+      properties:
+        groupedResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grouped results"'
+    PaletteQueryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaletteQueryItem'
+      description: Page of wrk.Palette.query results (cursor pagination, contract §3.5.5)
+    RecentItemListResponse:
+      type: object
+      description: 'wrk.RecentItem.list result. PRD outputs: "grouped results"'
+      properties:
+        groupedResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grouped results"'
+    CommandRegistryRegisterRequest:
+      type: object
+      description: 'wrk.CommandRegistry.register request. PRD inputs: "query, context"'
+      properties:
+        query:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "query"'
+        context:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "context"'
+    CommandRegistryRegisterResponse:
+      type: object
+      description: 'wrk.CommandRegistry.register result. PRD outputs: "grouped results"'
+      properties:
+        groupedResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grouped results"'
+    DataSubjectExportRequest:
+      type: object
+      description: 'wrk.DataSubject.export request. PRD inputs: "party id, scope, DSAR id"'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "party id"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+        dsarId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "DSAR id"'
+    DataSubjectExportResponse:
+      type: object
+      description: 'wrk.DataSubject.export result. PRD outputs: "package / result with conflicts"'
+      properties:
+        package:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "package"'
+        resultConflicts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result with conflicts"'
+    DataSubjectEraseRequest:
+      type: object
+      description: 'wrk.DataSubject.erase request. PRD inputs: "party id, scope, DSAR id"'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "party id"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+        dsarId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "DSAR id"'
+    DataSubjectEraseResponse:
+      type: object
+      description: 'wrk.DataSubject.erase result. PRD outputs: "package / result with conflicts"'
+      properties:
+        package:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "package"'
+        resultConflicts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result with conflicts"'
+    DataSubjectRestrictRequest:
+      type: object
+      description: 'wrk.DataSubject.restrict request. PRD inputs: "party id, scope, DSAR id"'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "party id"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+        dsarId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "DSAR id"'
+    DataSubjectRestrictResponse:
+      type: object
+      description: 'wrk.DataSubject.restrict result. PRD outputs: "package / result with conflicts"'
+      properties:
+        package:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "package"'
+        resultConflicts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result with conflicts"'
+    ImportActivitiesRequest:
+      type: object
+      description: 'wrk.Import.activities request. PRD inputs: "batch"'
+      properties:
+        batch:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch"'
+    ImportActivitiesResponse:
+      type: object
+      description: 'wrk.Import.activities result. PRD outputs: "outcomes"'
+      x-status: minimal
+    ImportNotesRequest:
+      type: object
+      description: 'wrk.Import.notes request. PRD inputs: "batch"'
+      properties:
+        batch:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch"'
+    ImportNotesResponse:
+      type: object
+      description: 'wrk.Import.notes result. PRD outputs: "outcomes"'
+      x-status: minimal
+    ImportGroupsRequest:
+      type: object
+      description: 'wrk.Import.groups request. PRD inputs: "batch"'
+      properties:
+        batch:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch"'
+    ImportGroupsResponse:
+      type: object
+      description: 'wrk.Import.groups result. PRD outputs: "outcomes"'
+      x-status: minimal
+    ImportParticipantsRequest:
+      type: object
+      description: 'wrk.Import.participants request. PRD inputs: "batch"'
+      properties:
+        batch:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch"'
+    ImportParticipantsResponse:
+      type: object
+      description: 'wrk.Import.participants result. PRD outputs: "outcomes"'
+      x-status: minimal
+    ImportInboundMetadataRequest:
+      type: object
+      description: 'wrk.Import.inboundMetadata request. PRD inputs: "batch"'
+      properties:
+        batch:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch"'
+    ImportInboundMetadataResponse:
+      type: object
+      description: 'wrk.Import.inboundMetadata result. PRD outputs: "outcomes"'
+      x-status: minimal

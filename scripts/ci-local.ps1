@@ -40,6 +40,15 @@ Step 'SBOM (.NET)'
 Run dotnet @('CycloneDX', 'src/CoreIns.Host/CoreIns.Host.csproj', '--exclude-test-projects',
     '--output', 'artifacts/sbom', '--filename', 'dotnet.cdx.json', '--output-format', 'Json')
 
+Step 'Bicep build + Key Vault least-privilege guard'
+if (Get-Command az -ErrorAction SilentlyContinue) {
+    New-Item -ItemType Directory -Force artifacts | Out-Null
+    Run az @('bicep', 'build', '--file', 'infra/azure/main.bicep', '--outfile', 'artifacts/main.json')
+    Run python @('scripts/check-keyvault-rbac.py', 'artifacts/main.json')
+} else {
+    Write-Host 'Azure CLI not found: skipped (runs in CI)'
+}
+
 Step 'Web'
 Push-Location web
 try {

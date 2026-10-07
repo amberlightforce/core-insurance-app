@@ -14,7 +14,8 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    // Maps are generated for error decoding but not referenced from the bundles; the Dockerfile drops them.
+    sourcemap: 'hidden',
   },
   test: {
     environment: 'jsdom',
