@@ -16,9 +16,18 @@ dotnet tool restore
 step "Build (warnings are errors)"
 dotnet build CoreIns.sln --configuration Release --no-restore
 
+step "Generated contract code is current and deterministic"
+dotnet run --project tools/CoreIns.ContractGen --configuration Release --no-build -- --check
+
+step "Contract schemas and generated samples are valid"
+python3 -m pip install --quiet -r contracts/openapi/requirements.txt
+python3 contracts/events/validate.py --require-jsonschema --instance tests/CoreIns.Contracts.Tests/Generated/Samples/events/*.json
+python3 tools/CoreIns.ContractGen/validate_samples.py
+
 step "Unit, analyser and architecture tests"
 for project in tests/*/*.csproj; do
-  case "$project" in *IntegrationTests*) continue ;; esac
+  # CoreIns.Testing.Contracts is a test-support library (sandbox doubles), not a test project.
+  case "$project" in *IntegrationTests*|*/CoreIns.Testing.*) continue ;; esac
   dotnet test --project "$project" --configuration Release --no-build
 done
 

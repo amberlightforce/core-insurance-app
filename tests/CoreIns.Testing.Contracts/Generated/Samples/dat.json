@@ -1,0 +1,380 @@
+{
+  "responses": {
+    "dat.BiasTest.run": {
+      "biasreportId": "0192559c-cfa3-7c79-8c62-1e311634fdb1",
+      "ratios": "unspecified"
+    },
+    "dat.Coverage.status": {
+      "governed": "unspecified",
+      "ungoverned": "unspecified",
+      "reasons": "unspecified"
+    },
+    "dat.DataContract.register": {
+      "version": "unspecified",
+      "compatibilityResult": "unspecified"
+    },
+    "dat.Erasure.execute": {
+      "evidence": "unspecified"
+    },
+    "dat.Kpi.get": {
+      "values": "unspecified",
+      "definitionVersion": "unspecified",
+      "as": "unspecified"
+    },
+    "dat.Model.register": {
+      "status": "unspecified"
+    },
+    "dat.Monitor.metrics": {
+      "acceptedCounts": "unspecified"
+    },
+    "dat.Population.aggregate": {
+      "rowsOrAggregates": "unspecified",
+      "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "dat.Population.sample": {
+      "rowsOrAggregates": "unspecified",
+      "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "dat.Restriction.apply": {
+      "evidence": "unspecified"
+    },
+    "dat.Subject.export": {
+      "evidence": "unspecified"
+    }
+  },
+  "schemas": {
+    "AccumulationFootprintResponse": {
+      "aggregates": "unspecified"
+    },
+    "AccumulationSnapshotResponse": {
+      "aggregates": "unspecified"
+    },
+    "AccumulationTrendResponse": {
+      "aggregates": "unspecified"
+    },
+    "ActuarialInputSetRequest": {
+      "valuationDate": "2026-10-07",
+      "modelVersion": "unspecified",
+      "attestation": "unspecified"
+    },
+    "ActuarialInputSetResponse": {
+      "status": "unspecified",
+      "finAck": "unspecified"
+    },
+    "ActuarialResultSetSubmitRequest": {
+      "valuationDate": "2026-10-07",
+      "modelVersion": "unspecified",
+      "attestation": "unspecified"
+    },
+    "ActuarialResultSetSubmitResponse": {
+      "status": "unspecified",
+      "finAck": "unspecified"
+    },
+    "ActuarialRunRequest": {
+      "valuationDate": "2026-10-07",
+      "modelVersion": "unspecified",
+      "attestation": "unspecified"
+    },
+    "ActuarialRunResponse": {
+      "status": "unspecified",
+      "finAck": "unspecified"
+    },
+    "ActuarialSupersedeRequest": {
+      "valuationDate": "2026-10-07",
+      "modelVersion": "unspecified",
+      "attestation": "unspecified"
+    },
+    "ActuarialSupersedeResponse": {
+      "status": "unspecified",
+      "finAck": "unspecified"
+    },
+    "AnalyticsAskRequest": {
+      "question": "unspecified",
+      "context": "unspecified"
+    },
+    "AnalyticsAskResponse": {
+      "proposedQuery": "unspecified",
+      "resultAfterUserRunsIt": "unspecified"
+    },
+    "BiasTestRunRequest": {
+      "feature": "unspecified",
+      "populationRef": "unspecified"
+    },
+    "BiasTestRunResponse": {
+      "biasreportId": "01924c92-de99-7c58-8788-f4c8e75ed0b1",
+      "ratios": "unspecified"
+    },
+    "CoverageStatusResponse": {
+      "governed": "unspecified",
+      "ungoverned": "unspecified",
+      "reasons": "unspecified"
+    },
+    "DataContractGetResponse": {
+      "contractVersions": "unspecified"
+    },
+    "DataContractListItem": {
+      "contractVersions": "unspecified"
+    },
+    "DataContractListPage": {
+      "items": [
+        {
+          "contractVersions": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DataContractRegisterRequest": {
+      "contractDocument": "unspecified"
+    },
+    "DataContractRegisterResponse": {
+      "version": "unspecified",
+      "compatibilityResult": "unspecified"
+    },
+    "ErasureExecuteRequest": {
+      "dsarRef": "unspecified",
+      "subjectToken": "unspecified",
+      "scope": "unspecified"
+    },
+    "ErasureExecuteResponse": {
+      "evidence": "unspecified"
+    },
+    "FeatureStoreBuildTrainingSetRequest": {
+      "entityKeys": "unspecified",
+      "featureList": "unspecified",
+      "as": "unspecified"
+    },
+    "FeatureStoreBuildTrainingSetResponse": {
+      "values": "unspecified",
+      "dataSetRef": "unspecified"
+    },
+    "FeatureStoreGetOnlineResponse": {
+      "values": "unspecified",
+      "dataSetRef": "unspecified"
+    },
+    "IngestionReplayRequest": {
+      "contract": "unspecified",
+      "from": "unspecified",
+      "to": "unspecified"
+    },
+    "IngestionReplayResponse": {
+      "jobId": "0192d575-519f-7be1-8910-8c728653f6e6",
+      "counts": "unspecified"
+    },
+    "KpiGetResponse": {
+      "values": "unspecified",
+      "definitionVersion": "unspecified",
+      "as": "unspecified"
+    },
+    "LineageTraceResponse": {
+      "graph": "unspecified",
+      "sourceRecordsRef": "unspecified"
+    },
+    "MartAdjustRequest": {
+      "figure": "unspecified",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "reason": "unspecified",
+      "evidence": "unspecified"
+    },
+    "MartAdjustResponse": {
+      "approvalRequest": "unspecified"
+    },
+    "MartCompareResponse": {
+      "figures": "unspecified",
+      "lineagePointer": "unspecified",
+      "diff": "unspecified"
+    },
+    "MartExportRequest": {
+      "runId": "01920b1f-eb28-79ae-856d-7b897012da4f"
+    },
+    "MartExportResponse": {
+      "packageRef": "unspecified",
+      "manifestHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "MartFigureResponse": {
+      "figures": "unspecified",
+      "lineagePointer": "unspecified",
+      "diff": "unspecified"
+    },
+    "MartGetResponse": {
+      "figures": "unspecified",
+      "lineagePointer": "unspecified",
+      "diff": "unspecified"
+    },
+    "MartRunRequest": {
+      "mart": "unspecified",
+      "entity": "unspecified",
+      "period": "unspecified",
+      "regime": "unspecified",
+      "taxonomyVersion": "unspecified"
+    },
+    "MartRunResponse": {
+      "runId": "01926bab-0e2e-7041-8a12-b384108ba828"
+    },
+    "MartSignOffRequest": {
+      "runId": "019250b1-eb11-7ebe-8614-1dac8d5b92a5",
+      "comment": "unspecified"
+    },
+    "MartSignOffResponse": {
+      "status": "unspecified"
+    },
+    "ModelApproveRequest": {
+      "modelCard": "unspecified",
+      "version": "unspecified"
+    },
+    "ModelApproveResponse": {
+      "status": "unspecified"
+    },
+    "ModelGetResponse": {
+      "status": "unspecified"
+    },
+    "ModelRecordValidationRequest": {
+      "modelCard": "unspecified",
+      "version": "unspecified"
+    },
+    "ModelRecordValidationResponse": {
+      "status": "unspecified"
+    },
+    "ModelRegisterRequest": {
+      "modelCard": "unspecified",
+      "version": "unspecified"
+    },
+    "ModelRegisterResponse": {
+      "status": "unspecified"
+    },
+    "ModelRetireRequest": {
+      "modelCard": "unspecified",
+      "version": "unspecified"
+    },
+    "ModelRetireResponse": {
+      "status": "unspecified"
+    },
+    "ModelSubmitValidationRequest": {
+      "modelCard": "unspecified",
+      "version": "unspecified"
+    },
+    "ModelSubmitValidationResponse": {
+      "status": "unspecified"
+    },
+    "MonitorMetricsRequest": {
+      "feature": "unspecified",
+      "version": "unspecified",
+      "metricRecords": "unspecified"
+    },
+    "MonitorMetricsResponse": {
+      "acceptedCounts": "unspecified"
+    },
+    "PopulationAggregateResponse": {
+      "rowsOrAggregates": "unspecified",
+      "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "PopulationSampleRequest": {
+      "productSlot": "unspecified",
+      "as": "unspecified",
+      "window": "unspecified",
+      "sampling": "unspecified"
+    },
+    "PopulationSampleResponse": {
+      "rowsOrAggregates": "unspecified",
+      "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "PurposeGrantDecideRequest": {
+      "purpose": "unspecified",
+      "dataSet": "unspecified",
+      "columns": "unspecified",
+      "grantee": "unspecified",
+      "expiry": "unspecified"
+    },
+    "PurposeGrantDecideResponse": {
+      "grant": "unspecified"
+    },
+    "PurposeGrantRequestRequest": {
+      "purpose": "unspecified",
+      "dataSet": "unspecified",
+      "columns": "unspecified",
+      "grantee": "unspecified",
+      "expiry": "unspecified"
+    },
+    "PurposeGrantRequestResponse": {
+      "grant": "unspecified"
+    },
+    "PurposeGrantRevokeRequest": {
+      "purpose": "unspecified",
+      "dataSet": "unspecified",
+      "columns": "unspecified",
+      "grantee": "unspecified",
+      "expiry": "unspecified"
+    },
+    "PurposeGrantRevokeResponse": {
+      "grant": "unspecified"
+    },
+    "QuarantineReleaseRequest": {
+      "ids": [
+        "01926f9a-87b4-7c4a-8f3b-992e0b75767d"
+      ]
+    },
+    "QuarantineReleaseResponse": {
+      "outcomePerRecord": "unspecified"
+    },
+    "QueryAsOfResponse": {
+      "rows": [
+        "unspecified"
+      ],
+      "asMetadata": "unspecified",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "RestrictionApplyRequest": {
+      "dsarRef": "unspecified",
+      "subjectToken": "unspecified",
+      "scope": "unspecified"
+    },
+    "RestrictionApplyResponse": {
+      "evidence": "unspecified"
+    },
+    "ScrResultsAcceptRequest": {
+      "entity": "unspecified",
+      "period": "unspecified",
+      "resultFile": "unspecified",
+      "preparerAttestation": "unspecified"
+    },
+    "ScrResultsAcceptResponse": {
+      "resultSetId": "0192ae6f-6026-7808-8c92-9d73f90de9fb",
+      "completenessFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "ScrResultsGetResponse": {
+      "resultSetId": "01925e88-0930-7053-8964-b195ce6de61d",
+      "completenessFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "ScrResultsSubmitRequest": {
+      "entity": "unspecified",
+      "period": "unspecified",
+      "resultFile": "unspecified",
+      "preparerAttestation": "unspecified"
+    },
+    "ScrResultsSubmitResponse": {
+      "resultSetId": "0192ebe4-ea1e-7fc8-85f7-2a4c17d94197",
+      "completenessFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "SubjectExportRequest": {
+      "dsarRef": "unspecified",
+      "subjectToken": "unspecified",
+      "scope": "unspecified"
+    },
+    "SubjectExportResponse": {
+      "evidence": "unspecified"
+    },
+    "SyntheticGenerateRequest": {
+      "spec": "unspecified"
+    },
+    "SyntheticGenerateResponse": {
+      "dataSetRef": "unspecified",
+      "privacyTestResults": "unspecified"
+    }
+  }
+}

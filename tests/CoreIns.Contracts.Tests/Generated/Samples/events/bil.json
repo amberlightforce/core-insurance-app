@@ -1,0 +1,2364 @@
+[
+  {
+    "eventId": "01927b84-235b-7bd0-89cd-881d32fefb7d",
+    "eventType": "AccountCurrentIssued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Intermediary",
+    "aggregateId": "01922c4f-92e0-75cb-86b7-fc9025dee210",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "intermediaryId": "01921e20-dc23-7a5c-8d68-8335a23dc29d",
+      "statementId": "01922fa0-c89e-751b-843f-9e4648e0c99f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "statementId": "0192478b-148d-7383-8e93-f6a9ecba55ed",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "netDue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "dueDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "01929ff7-8afb-7a61-8534-4faeb7bd50f2",
+    "eventType": "AccountCurrentIssued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Intermediary",
+    "aggregateId": "0192c36a-fe2e-7068-8d57-b6a83cbff537",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "intermediaryId": "0192c643-e2ff-71f6-8d1f-fae9895994a3",
+      "statementId": "0192c178-643b-7676-8d95-8fe4d5b31179"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "statementId": "0192a210-102b-7ef3-8711-518f60a65643",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "netDue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "dueDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "0192c27d-3e88-7b9d-888a-1444e2e1c656",
+    "eventType": "BillingAccountChanged",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192cf14-d524-7653-858c-2ac3f106195f",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192e953-dad6-7c76-878d-cddf9e2afa49"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "billingAccountId": "01928cec-a6f4-7406-8d32-a4096cbf7f42",
+      "accountNumber": "SAMPLE-000001",
+      "payerPartyId": "01925ab9-b630-71c7-89d8-b8df0c54b94a",
+      "changeKind": "SAMPLE_CODE",
+      "termIds": [
+        "0192ce16-d143-7fbf-8473-100f8697b0f6"
+      ]
+    }
+  },
+  {
+    "eventId": "01925567-5373-7d5b-8a55-4a2e92824fac",
+    "eventType": "BillingAccountChanged",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01921228-b981-799b-8df8-3e4c819c7b91",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192afc1-a182-77ec-8e51-d461b544a0db"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "billingAccountId": "01925215-0b4b-7ecd-8ada-23a01f98c76c",
+      "accountNumber": "SAMPLE-000001",
+      "payerPartyId": "0192cfc9-4426-7259-8798-0c42baa3c6be",
+      "changeKind": "SAMPLE_CODE",
+      "termIds": [
+        "019221df-d23a-7a15-8b43-ea93310334a9"
+      ]
+    }
+  },
+  {
+    "eventId": "01929c0e-ba11-799d-887e-641cb9d05fdb",
+    "eventType": "BillingEntryPosted",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192bf82-dd45-7872-8003-b7d1bb3eeee6",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "entryId": "01924b84-fa9b-753d-8d48-0e00572e7c08"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "entryId": "01924655-8897-7088-8506-5dbaee625022",
+      "eventType": "SAMPLE_CODE",
+      "accountingDate": "2026-10-07",
+      "businessDate": "2026-10-07",
+      "lines": [
+        {
+          "account": "SAMPLE_CODE",
+          "side": "DEBIT",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "dimensions": {
+            "note": "sample"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "eventId": "0192b20b-0c7a-7c64-868a-7b478cccb40d",
+    "eventType": "BillingEntryPosted",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192c0d8-330f-766d-839e-b3c97bcf9f0e",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "entryId": "0192cfb5-8ca1-7253-8f0f-3659b1b20a69"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "entryId": "019234b2-b8ff-7c62-89b9-00094f44611c",
+      "eventType": "SAMPLE_CODE",
+      "accountingDate": "2026-10-07",
+      "businessDate": "2026-10-07",
+      "lines": [
+        {
+          "account": "SAMPLE_CODE",
+          "side": "DEBIT",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "dimensions": {
+            "note": "sample"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "eventId": "019247b6-f7fe-78f4-86a2-3e1c276be403",
+    "eventType": "CancellationForNonPaymentRequested",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192907e-6e70-77d6-8509-b6a37df84f99",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192f50e-73df-7095-8c25-762f94ca5a11",
+      "requestId": "0192ee37-5360-77e4-8fcf-052b54b2e19b",
+      "policyTermId": "01927d0d-82de-777c-8be8-8c715b9e97bc",
+      "noticeDocumentId": "0192faf0-1fb8-7c1a-81db-a717a73d2852",
+      "clockInstanceId": "0192ff77-c2ab-7b84-8c17-d43f821faee7"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "requestId": "0192bbd7-a77f-7ac7-8033-6d4d5efc66e6",
+      "termId": "01928834-f0c7-7390-82fc-3b6109a0b80e",
+      "overdueAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "noticeDocumentId": "01920909-9ce3-751e-8a05-51e7358370d5",
+      "proofRef": "Sample text",
+      "clockInstanceId": "0192429d-920b-7f99-8772-1bd5a6474e80",
+      "requestedEffectiveDate": "2026-10-07",
+      "motor": true
+    }
+  },
+  {
+    "eventId": "01920dff-a882-78b2-833c-c6690ea949fc",
+    "eventType": "CancellationForNonPaymentRequested",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01923005-199e-72fa-89f7-bce6b38974a1",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "019273be-eae7-7c39-897e-4336f07dadd0",
+      "requestId": "019267ee-db39-71ec-8df7-20cc5cce8d15",
+      "policyTermId": "01928dd2-2897-796e-8dbe-f355f00a03e9",
+      "noticeDocumentId": "0192d1a6-ec10-79a5-83da-ca925b730fcc",
+      "clockInstanceId": "01920f32-5a2f-781a-8c41-e6d432651310"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "requestId": "019262c6-ed68-70a8-8a51-e11bd785f708",
+      "termId": "01925dd2-558e-7825-8b08-f952e45a4574",
+      "overdueAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "noticeDocumentId": "01928b3f-c343-7480-84fe-fa239d30514b",
+      "proofRef": "Sample text",
+      "clockInstanceId": "019207a4-315f-7997-844a-960ecf439a4a",
+      "requestedEffectiveDate": "2026-10-07",
+      "motor": true
+    }
+  },
+  {
+    "eventId": "0192db1b-62ad-755e-8de7-96729ff4d4e6",
+    "eventType": "CashAllocated",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192f1f6-38e8-75bf-8b31-9603372b4952",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01923b8a-d3c5-712d-8112-87fb17e4d0c4",
+      "receiptId": "0192f795-32ff-7aaf-8ad1-9c343fca2b39"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "receiptId": "01924a1c-2281-7347-8b2f-6690a728ce5f",
+      "allocations": [
+        {
+          "itemId": "01922bd3-53f8-736e-8295-6f981a746c40",
+          "termId": "01922fd0-1ec6-7fc4-81dd-8bcd45ae229c",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "arrearsCleared": [
+        {
+          "termId": "0192fc64-1b50-7465-84ed-2f4bf568c661",
+          "arrearsCleared": true
+        }
+      ],
+      "downPayment": true
+    }
+  },
+  {
+    "eventId": "0192f9ce-eee5-7df2-81b8-abaaaec59f63",
+    "eventType": "CashAllocated",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "019283ac-8b53-7fb2-815a-29c741b1ba19",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192eb7a-c4be-7592-838b-89bd8a6ef09e",
+      "receiptId": "0192d90c-6626-79c1-8a4d-1d4e327671eb"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "receiptId": "0192b2b0-0bc3-7a8e-8161-137a7c3d3b6c",
+      "allocations": [
+        {
+          "itemId": "0192d478-ce03-7010-8b73-33cdda5d37ca",
+          "termId": "0192cd0a-722b-7dde-8434-e48abd0f7b55",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "arrearsCleared": [
+        {
+          "termId": "019230e2-09eb-7375-8ee4-e98fa038a427",
+          "arrearsCleared": true
+        }
+      ],
+      "downPayment": true
+    }
+  },
+  {
+    "eventId": "019245e4-7576-7150-8c99-f25fc204685e",
+    "eventType": "ChargesScheduled",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01920d5c-3aa0-7663-89e2-9e4f04ddf180",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192c27c-ad0c-7bb2-8fad-1002112f486f",
+      "policyTermId": "0192c9ff-9b74-73c8-87b5-f19e086744ca",
+      "transactionId": "019280e5-c2ec-7280-852a-e92eedf9cee9"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "01925396-46f1-765d-85ff-2f9ae2980d73",
+      "transactionId": "0192a031-76db-77a9-8a6c-e3aeadf12b5d",
+      "chargeIds": [
+        "019243a2-f365-7be9-824c-3852fdda0c75"
+      ],
+      "items": [
+        {
+          "itemId": "01928a27-c9bb-7046-8abc-352ffab79bed",
+          "status": "PLANNED"
+        }
+      ]
+    }
+  },
+  {
+    "eventId": "0192596c-78f2-7037-8245-6e655bb6551f",
+    "eventType": "ChargesScheduled",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "019242cf-16a1-7ad9-8c0d-5b063d95e977",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01921d58-46f9-70fb-832f-28abf5d9b43a",
+      "policyTermId": "0192adcc-124d-7ec1-810f-bab2068b8b13",
+      "transactionId": "01920f39-8dd6-7ac8-8000-950dccc92994"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "019200d1-ea38-759a-8a4d-90182bf0d737",
+      "transactionId": "01923514-980f-7cc0-8f32-72c75c7cf252",
+      "chargeIds": [
+        "0192ec20-0dc2-7a3e-8991-05ad42fa4431"
+      ],
+      "items": [
+        {
+          "itemId": "0192310e-e1e2-7023-83b9-259b744c48b7",
+          "status": "PLANNED"
+        }
+      ]
+    }
+  },
+  {
+    "eventId": "01926747-3bd4-7fae-84d0-64e2b62901a2",
+    "eventType": "CommissionCalculated",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Intermediary",
+    "aggregateId": "01924337-9705-7df4-839d-815755e43bdc",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "intermediaryId": "0192fa44-ffc1-742c-8133-58f24befeb5c"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "intermediaryId": "01927094-f7ec-7e7b-8a0d-3a626fd85f51",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "totalsByKind": [
+        {
+          "kind": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "statementId": "0192edcb-5b45-78fc-8d72-6b7f523be167"
+    }
+  },
+  {
+    "eventId": "0192eefd-d322-773d-88cf-a50a0d7a0a60",
+    "eventType": "CommissionCalculated",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Intermediary",
+    "aggregateId": "0192e24f-d56a-7eed-8a29-f22cbf1b4357",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "intermediaryId": "01929b20-0ccd-7380-8908-bbfdbd99eafc"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "intermediaryId": "01921220-9daa-7341-8360-424d58959079",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "totalsByKind": [
+        {
+          "kind": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "statementId": null
+    }
+  },
+  {
+    "eventId": "01923c44-e760-7735-8c48-4340070fac9d",
+    "eventType": "CommissionPaid",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Intermediary",
+    "aggregateId": "0192c833-6239-78bf-8206-b6a3f73a2a0e",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "intermediaryId": "01921913-67b3-7037-8cbe-121a9f3fbb92"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "intermediaryId": "0192591e-5047-7227-83de-ac5c76226132",
+      "statementIds": [
+        "01925dc6-bd9a-7e30-8fc2-138ff11fd358"
+      ],
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "0192ebc6-be0f-70d8-822b-5270844280ac",
+    "eventType": "CommissionPaid",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Intermediary",
+    "aggregateId": "01926c55-4d88-735b-8d18-3d73eeddc118",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "intermediaryId": "01929e1e-3168-7361-84ff-b34b7aae22e3"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "intermediaryId": "01922c87-5504-72d1-8060-316b86069baf",
+      "statementIds": [
+        "01927ecd-f772-722b-8d8a-9ba56300e2ac"
+      ],
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "0192bf06-835f-774c-8e49-b59259db8db4",
+    "eventType": "CommissionStatementIssued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Intermediary",
+    "aggregateId": "0192b0ed-452a-7f73-8130-0fc28b03065f",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "intermediaryId": "019220d1-2403-79fe-8f8b-35edebef81fd",
+      "statementId": "019292e5-3f24-768e-8972-901ffa045dd8"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "statementId": "0192878e-c90e-7b22-8c09-f14553e0676f",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "netPayable": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "fiscalMode": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01923ccf-700e-7137-8cf9-f21194135ec0",
+    "eventType": "CommissionStatementIssued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Intermediary",
+    "aggregateId": "0192e098-e699-7099-85df-581ba1a9ce1a",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "intermediaryId": "0192e302-2495-7e61-88fb-d4016a1c24b8",
+      "statementId": "01927011-9ffc-70b6-8fef-fa8d4baa26be"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "statementId": "0192e848-feba-7a53-841c-1f86a090e4d0",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "netPayable": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "fiscalMode": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01921d71-5046-7aab-86b7-b671f5ede057",
+    "eventType": "DelinquencyResolved",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192ddca-d4bd-7ff7-88e0-e29351a6e316",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192f2ab-da34-7b17-8155-765dc4cc246b",
+      "processId": "0192485b-e888-7815-8f34-e95ba11c0f7a",
+      "policyTermId": "0192bee0-ad6d-7c8a-834b-62ca83066f74"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "processId": "0192451f-5937-7592-844f-868df505aa4f",
+      "termId": "0192f960-5c84-76dc-87ef-3289afdcd9d0",
+      "outcome": "PAID"
+    }
+  },
+  {
+    "eventId": "01923c85-5ca0-7acd-8be6-9ef3cfbd8faf",
+    "eventType": "DelinquencyResolved",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192b0a8-9b7a-7688-813a-30d1f35ba2a8",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192a621-5bff-79ec-8f24-71daf7963b01",
+      "processId": "0192ccb9-6477-79d4-8e85-44af3e6d875c",
+      "policyTermId": "0192bab4-bfd8-7f62-8e00-31e9c404bde8"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "processId": "01924021-5642-77b7-8c64-7f4a2dac7d27",
+      "termId": "01926206-f4cc-70dd-8899-633883cf49c1",
+      "outcome": "PAID"
+    }
+  },
+  {
+    "eventId": "019206bc-61ae-7ecd-8ea9-34f786d5b7d7",
+    "eventType": "DelinquencyStarted",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01921a83-0f36-7f7d-8f07-4b86370f65f0",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192b7dd-0c1c-7bf4-8d4a-ccf45b78ccc9",
+      "policyTermId": "01923e09-66d0-754c-872c-a93d6ad8ace3",
+      "processId": "0192ed2c-211e-7641-855f-28be565dffbd"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "01922f7d-fbda-7b36-82da-78f2df51eeb9",
+      "overdueAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "planCode": "SAMPLE_CODE",
+      "planVersion": "1",
+      "processId": "0192db84-4677-71d3-8540-913d376a8978"
+    }
+  },
+  {
+    "eventId": "01920b70-a3db-7e25-89c8-6d0b462cfd6e",
+    "eventType": "DelinquencyStarted",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192809d-f728-7b01-8dbd-9e4016ac7c7f",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192c30e-844b-7f1f-8494-7dc5a79a484b",
+      "policyTermId": "019203ef-786e-7fcb-8f7d-c3c9c0d8426f",
+      "processId": "019298d1-9b24-705d-89e1-9105742df52f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "0192952a-59da-7b52-8e35-c49ad4b225f8",
+      "overdueAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "planCode": "SAMPLE_CODE",
+      "planVersion": "1",
+      "processId": "01926297-e4d0-7cd9-8467-86973b7f40a8"
+    }
+  },
+  {
+    "eventId": "0192242b-b614-70a0-86b6-699de00fd329",
+    "eventType": "DisbursementCleared",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "0192b12a-2219-71a8-87f3-1dfdd34e60aa",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "01921127-22d9-7c61-8bc9-e0bf955ea842"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "0192ba77-116e-7f4f-8af8-ad7e2da349e5",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "valueDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "0192de3d-8316-71b3-84f8-781ee18350d4",
+    "eventType": "DisbursementCleared",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "01921a3b-97ba-7570-8d76-d50b6156b935",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "0192f2d2-f2e3-7eea-8834-ab488422a7f9"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "01924aa8-9bd7-7eb5-80a2-150c424283bc",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "valueDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "0192f175-2203-7a08-8282-026f021388db",
+    "eventType": "DisbursementIssued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "0192dc77-2ccc-7750-85e6-329eb19e8de0",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "0192e19a-94a5-7dc6-896a-08975fbbea04"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "019250d0-1701-7406-84c0-56af9f256f0e",
+      "sourceModule": "PTY",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07",
+      "method": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192d98f-c5a2-7b10-826d-4074d5810024",
+    "eventType": "DisbursementIssued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "0192bba6-a83e-7fb4-8249-b87aaa8fa7c2",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "01928132-1ee7-7e9b-83f5-5e9e18eef27e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "01927378-39fd-7084-8a9e-acb45831fff2",
+      "sourceModule": "PTY",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07",
+      "method": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01928865-785b-79c7-8fda-b7933e3cfda3",
+    "eventType": "DisbursementRejected",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "0192b930-b148-7621-82cc-ee47a9dc8fca",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "01921626-8038-76a8-83da-89ee11817dbe"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "01922d93-1a11-70ef-8f30-b697ab95e624",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "reasonCode": "SAMPLE_CODE",
+      "rejectingParty": "APPROVER"
+    }
+  },
+  {
+    "eventId": "01922d41-2ed0-7387-8b25-c0086ecff138",
+    "eventType": "DisbursementRejected",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "01927c0e-f04e-7fd1-8cc4-5fd60a72fd6e",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "0192546d-558b-7c64-81b0-519aad1f84e9"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "0192485f-0044-72be-861c-106144e26650",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "reasonCode": "SAMPLE_CODE",
+      "rejectingParty": "APPROVER"
+    }
+  },
+  {
+    "eventId": "01927179-bf69-7b90-8a4d-8141f7eb5a0e",
+    "eventType": "DisbursementReturned",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "0192ab03-c4fe-7919-83f5-59e5323c6514",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "01927753-857d-73a8-8407-72271e62114c"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "01926b40-6a71-7d23-84ed-4916c87ac170",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "reasonCode": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01929ed2-4f65-7483-851c-7583cafe2cb5",
+    "eventType": "DisbursementReturned",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "01926c8a-83c2-750f-8fdd-f7c116019b77",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "0192eac5-27fc-7ba4-8135-65b23ff7978a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "0192c8bd-6e0b-76d4-830b-4d43782ac5c8",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "reasonCode": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01922542-7d05-76f0-8a55-5cef518a9b18",
+    "eventType": "DisbursementStopped",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "0192bacd-35cb-763a-83bf-4cfae50ee3d8",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "0192a716-12a2-7c95-81fe-e426ca404a2a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "disbursementId": "019281c9-7b11-7466-8398-0746a9694e87",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "reasonCode": "SAMPLE_CODE",
+      "actor": "Sample text"
+    }
+  },
+  {
+    "eventId": "019234ab-6bf4-7d19-8bfc-95f103c20876",
+    "eventType": "DisbursementStopped",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "019284f2-3d6a-7d40-8c71-5045c70114d6",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "01922826-59da-7f75-8b99-5f832c7b5291"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "disbursementId": "01923f6c-52e0-79e7-8a0e-4e1486f3929a",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "reasonCode": "SAMPLE_CODE",
+      "actor": "Sample text"
+    }
+  },
+  {
+    "eventId": "0192e2e3-8d52-7656-833f-6d93a810508a",
+    "eventType": "DisbursementVoided",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "01928e0e-0a68-79a9-8a42-89aa96615abf",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "0192cd66-a2cd-78e2-8ab9-8ebb98d023c0"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "01925a24-d17f-794b-8aa1-c676e6462cc6",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192f23d-ef8c-79bd-8d67-6789fb989b9a",
+    "eventType": "DisbursementVoided",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "Disbursement",
+    "aggregateId": "01929116-d303-704b-8888-dbb270cc34b4",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "disbursementId": "019265f7-f3fb-784a-8397-c639e41c9d81"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "disbursementId": "01928c6f-c24b-784c-8d42-ea0099001a22",
+      "sourceType": "sample",
+      "sourceId": "Sample text",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "019276d1-a887-74f0-8af0-37be2a30630c",
+    "eventType": "DownPaymentCleared",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "019289f6-fbe1-78fa-80ad-eee8167a5d91",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192d086-7bc3-7166-842b-cf6734add6da",
+      "jobId": "0192a263-c023-7dde-875c-d367c9b2ae2c"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192b79b-df59-770c-837d-8cacf83a66c9",
+      "termId": "01927dda-d027-74aa-832a-54c72380756f",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "receiptIds": [
+        "0192e1d3-aaa1-7fd7-83ed-34d802bd10db"
+      ],
+      "mode": "CLEARED"
+    }
+  },
+  {
+    "eventId": "0192bac0-1c6e-75a4-87b3-b02ff8743524",
+    "eventType": "DownPaymentCleared",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01925de2-c634-7df5-8984-01e21b9e79db",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01921bf5-0d6d-75d4-852c-5bd0207d7c51",
+      "jobId": "019239e5-654d-7785-86e3-388619f0a32f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192cde0-9034-7fe7-8148-2d26833c53c9",
+      "termId": null,
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "receiptIds": [
+        "0192f9b5-7b15-756e-8efd-5238c1182a4c"
+      ],
+      "mode": "CLEARED"
+    }
+  },
+  {
+    "eventId": "01925e9f-f4bd-7d8d-82c2-f2604fd9b18d",
+    "eventType": "InvoiceIssued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192a2c7-431b-76b5-8292-20affb3ec93e",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "019262c6-94ca-7321-8da9-b4c0ba9e9e33",
+      "invoiceId": "01924640-436c-7b44-8997-aa1996e1b188"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "invoiceId": "01926816-8e2e-775e-8c05-14000998ef84",
+      "invoiceNumber": "SAMPLE-000001",
+      "kind": "INVOICE",
+      "termIds": [
+        "0192e15f-ebdc-7e1f-8384-8e728ca6bfb9"
+      ],
+      "totalsByCategory": [
+        {
+          "category": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "dueDate": "2026-10-07",
+      "method": "SAMPLE_CODE",
+      "fiscalTriggerRef": "Sample text"
+    }
+  },
+  {
+    "eventId": "019275e3-8c98-70d9-88ee-202929f97497",
+    "eventType": "InvoiceIssued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01921645-f3ea-74cc-8f26-be93fbbcc656",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192ff1a-0ad4-7ca7-8fb5-a14e6b5ee9fb",
+      "invoiceId": "01923483-1717-775f-8de8-7064987eb2ed"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "invoiceId": "0192c2cf-c30b-7457-89b5-8562166abf6f",
+      "invoiceNumber": "SAMPLE-000001",
+      "kind": "INVOICE",
+      "termIds": [
+        "0192abba-98c1-7eb3-84fa-5a92e116b170"
+      ],
+      "totalsByCategory": [
+        {
+          "category": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "dueDate": "2026-10-07",
+      "method": "SAMPLE_CODE",
+      "fiscalTriggerRef": null
+    }
+  },
+  {
+    "eventId": "0192f2c5-bef1-7697-82e4-49ba42325751",
+    "eventType": "LevyAccrued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "TaxLevyPeriod",
+    "aggregateId": "0192c9cf-459b-7cd0-8205-03cd59747141",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "levyPeriodId": "01927919-b0a8-7eb7-87e0-68cc5634c3b6"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "levyType": "SAMPLE_CODE",
+      "share": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "cumulative": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "final": true
+    }
+  },
+  {
+    "eventId": "0192544f-5eb6-772a-82ef-bd3b5a27ea3d",
+    "eventType": "LevyAccrued",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "TaxLevyPeriod",
+    "aggregateId": "01926135-9533-77c2-8cb8-548c45d94172",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "levyPeriodId": "0192733a-26e5-7dca-82af-34594581ff1e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "levyType": "SAMPLE_CODE",
+      "share": null,
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "cumulative": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "final": true
+    }
+  },
+  {
+    "eventId": "01920066-c248-7c12-8a91-78985b80ce3b",
+    "eventType": "LevyRemitted",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "TaxLevyPeriod",
+    "aggregateId": "01927266-cc25-75e6-88b1-2fd34bab32b5",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "levyPeriodId": "01921c79-21f5-793f-8e50-24d022a61897"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "levyType": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "0192d796-ad87-7f2a-8caf-4d27b5b54ace",
+    "eventType": "LevyRemitted",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "TaxLevyPeriod",
+    "aggregateId": "01926d4a-fb46-740e-85f9-e0b8b6368573",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "levyPeriodId": "01929e34-0424-7f27-84ca-df9a7c70cba1"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "levyType": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "019279bc-f7f0-74fd-8712-caaeeacaadfd",
+    "eventType": "MandateActivated",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192db83-ff3c-7e07-8696-864076c07c4b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192bbfc-0900-7a32-844b-2bb1d8d3e881",
+      "mandateId": "01921fb5-f962-7554-8288-3fa06f886967"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "mandateId": "01921639-b839-7fda-8149-6b2cbebb1299",
+      "mandateReference": "Sample text"
+    }
+  },
+  {
+    "eventId": "0192833e-4a15-7e0e-828e-b63a589925df",
+    "eventType": "MandateActivated",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192eecd-8b75-7919-8265-7f2f1b208566",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01928fe1-6ae1-709f-84a3-b8152a9d5ebf",
+      "mandateId": "0192c460-7ddb-72c3-8754-512aff19a14f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "mandateId": "019244ff-d7a6-736e-8153-110af7896513",
+      "mandateReference": "Sample text"
+    }
+  },
+  {
+    "eventId": "01922623-cd80-7203-8931-2d6d4d6b3ac3",
+    "eventType": "MandateCancelled",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "019295b0-502a-7eee-809f-764325ee8c65",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01926e3c-87e2-7bce-8417-e79966a41d31",
+      "mandateId": "0192f5ba-ea4c-7937-80f5-e3c5be8714aa"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "mandateId": "019233d0-e917-7337-85b0-58db9eebafa0",
+      "mandateReference": "Sample text",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01925741-c60f-7d11-85c9-60c140a24f40",
+    "eventType": "MandateCancelled",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01929de4-5ecf-7ebd-8819-b6df0c66ae47",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01928eb2-312c-7eed-8723-3ec892109fa8",
+      "mandateId": "01920599-6727-710c-8f51-941583fc43f7"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "mandateId": "0192afe4-3f2b-70af-8e7e-a527d0d25fac",
+      "mandateReference": "Sample text",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192bb48-108c-7bc2-8fa7-fe4c06a209ff",
+    "eventType": "NonPaymentNoticeSent",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "019247aa-4192-7bb1-8ca8-8d0a2f10801d",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01922000-f9ef-7363-83d4-ad621fb3c454",
+      "policyTermId": "01921965-7cac-7cef-850d-2ea30ee6c02f",
+      "documentId": "0192a5c4-7d22-7ece-8f74-9b8c800885bd",
+      "clockInstanceId": "0192d4a4-11b7-7af3-80ad-e470175bd76b"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "0192a38b-8eb7-73cf-845f-b7f83d54efda",
+      "overdueAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "documentId": "01922e15-0aa9-7ba7-8735-7aba544b48f4",
+      "proofRef": "Sample text",
+      "clockInstanceId": "0192c108-e874-738f-8ffd-4a4fd8318ac7",
+      "deadline": "2026-10-07T09:00:00Z"
+    }
+  },
+  {
+    "eventId": "01921410-a4c9-76a8-810f-53db0cb980a9",
+    "eventType": "NonPaymentNoticeSent",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01927352-d9b3-7546-84fe-fe095c68fe4c",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "019200b0-7c53-7990-81b0-d888c6a062ec",
+      "policyTermId": "01927cf0-2879-7997-8192-ba659f8e861c",
+      "documentId": "019277e6-1ef0-7089-8379-328ecf035e33",
+      "clockInstanceId": "01920f96-c284-7ac8-8670-166c78b4a4fc"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "0192923c-ab1c-7040-8c9f-f5fab7e7765b",
+      "overdueAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "documentId": "01925d30-6758-72b7-80c5-b139deac268f",
+      "proofRef": "Sample text",
+      "clockInstanceId": "019274c0-5035-736d-8bdc-d58c63193a2a",
+      "deadline": "2026-10-07T09:00:00Z"
+    }
+  },
+  {
+    "eventId": "019221aa-624c-7236-8093-097163b2babe",
+    "eventType": "PaymentPlanChanged",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "019257d3-3819-75f6-8e3c-0d5ed77f019c",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192637b-cb43-789f-80b4-756972edea6b",
+      "policyTermId": "019212ca-9d46-7a37-8c4b-ba8e1b94517e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "01926c97-38e7-7360-883d-13a44a04b339",
+      "oldPlan": "SAMPLE_CODE",
+      "newPlan": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "0192e31a-25c8-70a1-8402-3d9b5fde6f35",
+    "eventType": "PaymentPlanChanged",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "019244b6-2a34-78f6-8491-d5c6424be459",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192dc8d-29e1-735c-893d-16cc8a2d9416",
+      "policyTermId": "0192ff73-cd07-70b6-87d4-1ec15083c91d"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "01922aa5-cb42-7db8-89f2-ae8e8e109087",
+      "oldPlan": "SAMPLE_CODE",
+      "newPlan": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "019283c0-2061-742b-8269-d35fca1ac6d0",
+    "eventType": "PaymentReceived",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192514e-266f-70c4-8b2d-8e88332d8afb",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192037a-65b6-7663-8b6e-eda6014098a9",
+      "receiptId": "019235e7-78c9-78ce-8ccb-f57bbd213bed"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "receiptId": "01923b1d-70e6-7d3a-8b80-00d425dbc2d9",
+      "receiptNumber": "SAMPLE-000001",
+      "channel": "SAMPLE_CODE",
+      "method": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07",
+      "accountingDate": "2026-10-07",
+      "intermediaryId": "01928c3f-38f4-732d-82f2-4bd06bce0963",
+      "riSettlementRef": "Sample text"
+    }
+  },
+  {
+    "eventId": "01925fc8-8b3e-79b6-89e6-899075c205ff",
+    "eventType": "PaymentReceived",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192b208-daea-74a2-8750-b3b2c6bf8595",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192b8ca-300a-78ae-8b15-bbdb00b6edd6",
+      "receiptId": "0192f5c8-0566-7f70-86f1-d596026fa76e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "receiptId": "0192c8b3-3ea3-750e-808d-e6ddcd58909c",
+      "receiptNumber": "SAMPLE-000001",
+      "channel": "SAMPLE_CODE",
+      "method": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07",
+      "accountingDate": "2026-10-07",
+      "intermediaryId": null,
+      "riSettlementRef": null
+    }
+  },
+  {
+    "eventId": "0192aa62-ae71-7e6d-89de-571251b01a5f",
+    "eventType": "PaymentReversed",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01923c57-7774-71bf-8f06-5d934aa810b1",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192bd4d-fa48-791d-8efd-b49c7db79797",
+      "receiptId": "0192b8cd-63b7-7069-8efc-28fb83c028b4",
+      "reversalId": "01925b57-0139-7ffc-8944-1e81dc9d919e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "receiptId": "01928050-f1c3-7f95-880f-30028b7dcd6e",
+      "reversalId": "01925c06-e3ec-72d3-8a27-8b3f93bc0bfc",
+      "kind": "SAMPLE_CODE",
+      "reasonCategory": "SAMPLE_CODE",
+      "reasonCode": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "itemsReopened": [
+        "01920ec3-fb0e-7e6e-82bb-24223ea2a57d"
+      ],
+      "downPayment": true
+    }
+  },
+  {
+    "eventId": "0192f887-1b71-7527-822d-093247ca6ea9",
+    "eventType": "PaymentReversed",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192cd66-4a61-77c4-8736-d73fd5b6da1d",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192b636-8c33-7589-891b-65fa3fd868e1",
+      "receiptId": "0192af58-3f79-794b-8473-7b6109c5829a",
+      "reversalId": "0192419b-7c03-7da7-8901-71716392a37a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "receiptId": "0192a672-1765-7ff1-8bd1-df1e79102ca2",
+      "reversalId": "0192c9c7-6ded-74d8-8a84-87a68cec06fb",
+      "kind": "SAMPLE_CODE",
+      "reasonCategory": "SAMPLE_CODE",
+      "reasonCode": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "itemsReopened": [
+        "0192a9d6-f334-778a-8ad1-3f6e04b43f3f"
+      ],
+      "downPayment": true
+    }
+  },
+  {
+    "eventId": "0192b8a1-6fe5-7475-8b78-422172d8d3b9",
+    "eventType": "RefundApproved",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01923a87-e22a-7b64-8636-1375edab6c76",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "019244cb-561f-77ba-8624-bacc77350d32",
+      "refundId": "01925500-6636-7640-84be-f12224eccc61"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "refundId": "0192d914-f2fd-7b11-834b-85ddd81f71c8",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "payeePartyId": "0192051c-1654-7261-8e60-21e0319764cc",
+      "payoutMethod": "SAMPLE_CODE",
+      "sourceRefs": [
+        {
+          "module": "POL",
+          "type": "Policy",
+          "id": "0192d477-f083-7aa7-8a8b-0b30051492ce"
+        }
+      ],
+      "decisionMaker": "01925c9a-bc92-7d40-871e-e9149cf49cf5"
+    }
+  },
+  {
+    "eventId": "0192e96d-4eb7-74ef-82bc-26a6e01d511b",
+    "eventType": "RefundApproved",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192d0de-eef7-7e9a-88bb-3d3736b0e83e",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01928bf5-7622-7035-8952-edd9433501e9",
+      "refundId": "0192cb5b-0570-7517-8ba8-24f628a6720a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "refundId": "0192d2c7-fbe2-7641-8e04-b14cb36c34c3",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "payeePartyId": "019257d8-65b5-745e-82e8-68446011dad8",
+      "payoutMethod": "SAMPLE_CODE",
+      "sourceRefs": [
+        {
+          "module": "POL",
+          "type": "Policy",
+          "id": "0192e3c4-821c-772d-8614-4bab7b545483"
+        }
+      ],
+      "decisionMaker": "01927b7b-2e49-7268-8a45-fecdac8bfe95"
+    }
+  },
+  {
+    "eventId": "0192d57c-ce00-712f-81ab-f4f7cf2f6725",
+    "eventType": "RefundDisbursed",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "019226fe-c034-7bce-8ebc-8b40ddd216fb",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01927c32-9d34-7b7f-8384-24b22e9da295",
+      "refundId": "01926ead-cc02-78d8-8829-cac7e4ef7b9c",
+      "disbursementId": "01925d6a-c4a0-75f8-86ff-859cf6227573"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "refundId": "019208da-da9a-782a-8565-ea84e5455c71",
+      "disbursementId": "01928496-1490-741a-84c1-8c2cf8cb3184",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07",
+      "sourcePolicyIds": [
+        "0192f043-b414-770a-86d0-165b1c135582"
+      ]
+    }
+  },
+  {
+    "eventId": "01925ac1-2558-73b1-8ae4-405ffcf11b13",
+    "eventType": "RefundDisbursed",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192c0df-bfc9-7fe9-8c4b-48f9a10fd3fe",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "019255d3-ac84-70eb-82a9-e490b5c8c2c9",
+      "refundId": "0192da2f-35ef-7d75-89cb-0ac1612028d4",
+      "disbursementId": "0192e48f-0e0f-723e-8ba0-5d5d17d776f3"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "refundId": "0192c90c-adea-7b25-8371-52085591efad",
+      "disbursementId": "01920694-974f-731c-86b5-54c2bce60d04",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07",
+      "sourcePolicyIds": [
+        "0192e5d0-5bf4-797b-8a61-0b208301e7fc"
+      ]
+    }
+  },
+  {
+    "eventId": "0192572e-4298-7220-8d84-142e7885a5e5",
+    "eventType": "RefundRejected",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192b3c6-f368-70f3-83fa-c23d06539483",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "019201f7-9453-7098-81d1-02bd43830f6f",
+      "refundId": "0192a8db-020d-7110-89f0-b83c43c5a3de"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "refundId": "0192f29c-c47e-70bb-81d2-412c2a38aad5",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01927040-b6d9-7c91-8cd6-043e25002dc5",
+    "eventType": "RefundRejected",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01921314-9c56-7497-8545-5ab16ea86e2a",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192bf6d-5530-7bb3-8d13-0d4f0f4491b6",
+      "refundId": "01924332-0d21-7177-882e-764956b3b63c"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "refundId": "01926fed-3d9a-702a-828b-a45a86ebc357",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01926af6-1fd0-7b8a-8c99-eb6831cdc5c0",
+    "eventType": "WriteOffPosted",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "0192c9d9-ea18-7e04-83f3-56cb228d8ad1",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "01927da9-5722-7bc1-8122-eb7040a111f5",
+      "writeOffId": "0192aead-01bc-7e23-8770-c06a414eb334"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "writeOffId": "019229a4-ee21-7011-8153-2e44e02e8e17",
+      "type": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE",
+      "itemIds": [
+        "0192563a-8fdd-737c-8048-682585ff2256"
+      ],
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    }
+  },
+  {
+    "eventId": "019217b1-e726-7720-8157-01ae71ae2f68",
+    "eventType": "WriteOffPosted",
+    "schemaVersion": "1.0",
+    "producer": "BIL",
+    "aggregateType": "BillingAccount",
+    "aggregateId": "01923381-e818-714b-8e23-9f3b8262f5d3",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "billingAccountId": "0192ad3b-068f-7788-809f-bfac56768c85",
+      "writeOffId": "01921eaf-9b43-7f2c-8c67-7844cf5bc1bf"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "writeOffId": "01927cf8-27d1-74aa-876f-fbcb949138f5",
+      "type": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE",
+      "itemIds": [
+        "0192792c-4b3d-7147-8184-b54f5befad98"
+      ],
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    }
+  }
+]

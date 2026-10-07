@@ -1,0 +1,906 @@
+{
+  "responses": {
+    "cmp.AiSystem.get": {
+      "entry": "unspecified",
+      "status": "unspecified"
+    },
+    "cmp.AiSystem.register": {
+      "entry": "unspecified",
+      "status": "unspecified"
+    },
+    "cmp.Bureau.handover": {
+      "key": "value"
+    },
+    "cmp.Bureau.status": {
+      "latestFact": "unspecified",
+      "acknowledgement": "unspecified",
+      "lag": "unspecified"
+    },
+    "cmp.Clock.cancel": {
+      "instanceId": "019293b9-9f22-7058-889f-b2f8f72e8bae",
+      "deadline": "unspecified",
+      "valueVersion": "unspecified"
+    },
+    "cmp.Clock.get": {
+      "instances": "unspecified"
+    },
+    "cmp.Clock.import": {
+      "key": "value"
+    },
+    "cmp.Clock.pause": {
+      "instanceId": "019274a5-2b0d-72d8-8b6b-94523d5d9a4a",
+      "deadline": "unspecified",
+      "valueVersion": "unspecified"
+    },
+    "cmp.Clock.query": {
+      "items": [
+        {
+          "instances": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "cmp.Clock.resume": {
+      "instanceId": "01927ae0-517f-7a08-8e8c-e222734cc05c",
+      "deadline": "unspecified",
+      "valueVersion": "unspecified"
+    },
+    "cmp.Clock.start": {
+      "instanceId": "0192c6b9-dcb8-79a6-87bd-d1510aabba21",
+      "deadline": "unspecified",
+      "valueVersion": "unspecified"
+    },
+    "cmp.Clock.stop": {
+      "instanceState": "unspecified",
+      "metLateFlag": true
+    },
+    "cmp.ClockDef.list": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "cmp.Complaint.create": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "cmp.Complaint.import": {
+      "key": "value"
+    },
+    "cmp.Complaint.link": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "cmp.Dsar.approve": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "cmp.Dsar.create": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "cmp.Dsar.decideItem": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "cmp.Dsar.erase": {
+      "package": "unspecified",
+      "perItemOutcome": "unspecified"
+    },
+    "cmp.Dsar.export": {
+      "package": "unspecified",
+      "perItemOutcome": "unspecified"
+    },
+    "cmp.Dsar.extend": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "cmp.Dsar.get": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "cmp.Dsar.import": {
+      "key": "value"
+    },
+    "cmp.Dsar.query": {
+      "items": [
+        {
+          "request": "unspecified",
+          "tasks": "unspecified",
+          "package": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "cmp.Dsar.refuse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "cmp.Dsar.restrict": {
+      "package": "unspecified",
+      "perItemOutcome": "unspecified"
+    },
+    "cmp.Dsar.retryTask": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "cmp.Dsar.startFanOut": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "cmp.Dsar.verifyIdentity": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "cmp.EnfiaConfirmation.import": {
+      "confirmations": "unspecified"
+    },
+    "cmp.Evidence.submit": {
+      "records": "unspecified",
+      "file": "unspecified"
+    },
+    "cmp.FiscalDocument.get": {
+      "document": "unspecified",
+      "identifiers": "unspecified"
+    },
+    "cmp.FiscalDocument.import": {
+      "key": "value"
+    },
+    "cmp.FiscalDocument.listBySource": {
+      "items": [
+        {
+          "documents": [
+            "unspecified"
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "cmp.FiscalDocument.qrPayload": {
+      "document": "unspecified",
+      "identifiers": "unspecified"
+    },
+    "cmp.FiscalDocument.request": {
+      "fiscalDocumentId": "01926a84-c8c5-7d92-8cb3-8cc2f004d9db",
+      "status": "SAMPLE_CODE",
+      "documentType": "SAMPLE_CODE",
+      "classifications": [
+        "unspecified"
+      ]
+    },
+    "cmp.FiscalRule.certify": {
+      "passOrFailKeys": "unspecified"
+    },
+    "cmp.Submission.create": {
+      "regulatorySubmission": "unspecified"
+    },
+    "cmp.Submission.recordFiling": {
+      "regulatorySubmission": "unspecified"
+    },
+    "cmp.Taxonomy.import": {
+      "taxonomyVersion": "unspecified"
+    }
+  },
+  "schemas": {
+    "AiSystemApproveRequest": {
+      "featureId": "0192b199-6987-72d4-8634-cd6c37bc3261",
+      "entry": "unspecified"
+    },
+    "AiSystemApproveResponse": {
+      "entry": "unspecified",
+      "status": "unspecified"
+    },
+    "AiSystemGetResponse": {
+      "entry": "unspecified",
+      "status": "unspecified"
+    },
+    "AiSystemListItem": {
+      "entry": "unspecified",
+      "status": "unspecified"
+    },
+    "AiSystemListPage": {
+      "items": [
+        {
+          "entry": "unspecified",
+          "status": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "AiSystemRegisterRequest": {
+      "featureId": "01924754-8e62-7aba-8b4d-7e102664362e",
+      "entry": "unspecified"
+    },
+    "AiSystemRegisterResponse": {
+      "entry": "unspecified",
+      "status": "unspecified"
+    },
+    "AiSystemRetireRequest": {
+      "featureId": "0192264b-cc96-76e3-807a-a57e12e5fbc7",
+      "entry": "unspecified"
+    },
+    "AiSystemRetireResponse": {
+      "entry": "unspecified",
+      "status": "unspecified"
+    },
+    "AiSystemSubmitForReviewRequest": {
+      "featureId": "01925a35-4d6f-749a-85f3-1f6f3f9bde60",
+      "entry": "unspecified"
+    },
+    "AiSystemSubmitForReviewResponse": {
+      "entry": "unspecified",
+      "status": "unspecified"
+    },
+    "AiSystemSuspendRequest": {
+      "featureId": "01921e16-0445-7971-81c6-c0edd77df9b0",
+      "entry": "unspecified"
+    },
+    "AiSystemSuspendResponse": {
+      "entry": "unspecified",
+      "status": "unspecified"
+    },
+    "AnnualReturnAmendRequest": {
+      "type": "unspecified",
+      "period": "unspecified"
+    },
+    "AnnualReturnAmendResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "findings": "unspecified"
+    },
+    "AnnualReturnApproveRequest": {
+      "type": "unspecified",
+      "period": "unspecified"
+    },
+    "AnnualReturnApproveResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "findings": "unspecified"
+    },
+    "AnnualReturnGenerateRequest": {
+      "type": "unspecified",
+      "period": "unspecified"
+    },
+    "AnnualReturnGenerateResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "findings": "unspecified"
+    },
+    "AnnualReturnRecordReceiptRequest": {
+      "type": "unspecified",
+      "period": "unspecified"
+    },
+    "AnnualReturnRecordReceiptResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "findings": "unspecified"
+    },
+    "AnnualReturnSubmitRequest": {
+      "type": "unspecified",
+      "period": "unspecified"
+    },
+    "AnnualReturnSubmitResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "findings": "unspecified"
+    },
+    "AnnualReturnValidateRequest": {
+      "type": "unspecified",
+      "period": "unspecified"
+    },
+    "AnnualReturnValidateResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "findings": "unspecified"
+    },
+    "BureauHandoverRequest": {
+      "legacyRecords": "unspecified",
+      "handOverDates": "unspecified"
+    },
+    "BureauManualFileGenerateRequest": {
+      "factIds": [
+        "01928120-a4b0-7af5-86f7-0858cbb3de60"
+      ],
+      "file": "unspecified",
+      "evidence": "unspecified"
+    },
+    "BureauManualFileGenerateResponse": {
+      "submission": "unspecified",
+      "breaks": "unspecified"
+    },
+    "BureauManualFileRecordResponseRequest": {
+      "factIds": [
+        "019277a6-e706-7a5c-84bf-11aeddd8d84f"
+      ],
+      "file": "unspecified",
+      "evidence": "unspecified"
+    },
+    "BureauManualFileRecordResponseResponse": {
+      "submission": "unspecified",
+      "breaks": "unspecified"
+    },
+    "BureauReconcileRequest": {
+      "factIds": [
+        "0192a2bf-5980-7efa-8d44-18be86439bc3"
+      ],
+      "file": "unspecified",
+      "evidence": "unspecified"
+    },
+    "BureauReconcileResponse": {
+      "submission": "unspecified",
+      "breaks": "unspecified"
+    },
+    "BureauRetransmitRequest": {
+      "factIds": [
+        "01928866-4ab4-75d1-8f6e-85bb9ad377f1"
+      ],
+      "file": "unspecified",
+      "evidence": "unspecified"
+    },
+    "BureauRetransmitResponse": {
+      "submission": "unspecified",
+      "breaks": "unspecified"
+    },
+    "BureauStatusResponse": {
+      "latestFact": "unspecified",
+      "acknowledgement": "unspecified",
+      "lag": "unspecified"
+    },
+    "ClockCancelRequest": {
+      "clockCode": "unspecified",
+      "subjectRef": "unspecified",
+      "jurisdiction": "unspecified",
+      "startTime": "unspecified",
+      "variant": "unspecified",
+      "causationId": "0192ba4f-84d8-7c9f-8c67-deec97d077aa",
+      "reason": "unspecified"
+    },
+    "ClockCancelResponse": {
+      "instanceId": "01929cc3-7956-7dc2-80a7-87078528c54f",
+      "deadline": "unspecified",
+      "valueVersion": "unspecified"
+    },
+    "ClockDefListPage": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ClockDefProposeRequest": {
+      "jurisdiction": "unspecified",
+      "code": "unspecified"
+    },
+    "ClockExtendRequest": {
+      "clockCode": "unspecified",
+      "subjectRef": "unspecified",
+      "jurisdiction": "unspecified",
+      "startTime": "unspecified",
+      "variant": "unspecified",
+      "causationId": "0192acc1-b337-7416-8b8c-56b8a3ead938",
+      "reason": "unspecified"
+    },
+    "ClockExtendResponse": {
+      "instanceId": "01921fa1-9a76-7039-8df9-38cbbccd8fd5",
+      "deadline": "unspecified",
+      "valueVersion": "unspecified"
+    },
+    "ClockGetResponse": {
+      "instances": "unspecified"
+    },
+    "ClockImportRequest": {
+      "legacyRecords": "unspecified",
+      "handOverDates": "unspecified"
+    },
+    "ClockPauseRequest": {
+      "clockCode": "unspecified",
+      "subjectRef": "unspecified",
+      "jurisdiction": "unspecified",
+      "startTime": "unspecified",
+      "variant": "unspecified",
+      "causationId": "01923cab-efce-73b6-87fa-071ba36534a0",
+      "reason": "unspecified"
+    },
+    "ClockPauseResponse": {
+      "instanceId": "0192eaad-d277-7acd-8fb9-a456874f3ad0",
+      "deadline": "unspecified",
+      "valueVersion": "unspecified"
+    },
+    "ClockQueryItem": {
+      "instances": "unspecified"
+    },
+    "ClockQueryPage": {
+      "items": [
+        {
+          "instances": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ClockResumeRequest": {
+      "clockCode": "unspecified",
+      "subjectRef": "unspecified",
+      "jurisdiction": "unspecified",
+      "startTime": "unspecified",
+      "variant": "unspecified",
+      "causationId": "019296c8-9c3a-70fa-8c3b-1a88ad60ae9b",
+      "reason": "unspecified"
+    },
+    "ClockResumeResponse": {
+      "instanceId": "0192393f-2d57-7b8c-8931-267adf55f39b",
+      "deadline": "unspecified",
+      "valueVersion": "unspecified"
+    },
+    "ClockStartRequest": {
+      "clockCode": "unspecified",
+      "subjectRef": "unspecified",
+      "jurisdiction": "unspecified",
+      "startTime": "unspecified",
+      "variant": "unspecified",
+      "causationId": "01921c68-dab1-7558-8d8c-38ecab13c0dd",
+      "reason": "unspecified"
+    },
+    "ClockStartResponse": {
+      "instanceId": "01926eec-e476-7ac8-8e67-6277623918d0",
+      "deadline": "unspecified",
+      "valueVersion": "unspecified"
+    },
+    "ClockStopRequest": {
+      "instanceId": "0192f76b-6628-7c2d-8f41-e76c58a47e8e",
+      "outcome": "Met",
+      "stopTime": "2026-10-07T09:00:00Z"
+    },
+    "ClockStopResponse": {
+      "instanceState": "unspecified",
+      "metLateFlag": true
+    },
+    "ComplaintAcknowledgeResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintAddActionResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintApproveReplyResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintClassifyResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintCloseResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintCreateResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintEscalateResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintGetResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintImportRequest": {
+      "legacyRecords": "unspecified",
+      "handOverDates": "unspecified"
+    },
+    "ComplaintLinkResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintProcedureTextResponse": {
+      "text": "unspecified",
+      "version": "unspecified"
+    },
+    "ComplaintQueryItem": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "ComplaintQueryPage": {
+      "items": [
+        {
+          "complaint": "unspecified",
+          "number": "unspecified",
+          "deadlines": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ComplaintSubmitReplyResponse": {
+      "complaint": "unspecified",
+      "number": "unspecified",
+      "deadlines": "unspecified"
+    },
+    "DisclosureLogQueryItem": {
+      "entries": [
+        "unspecified"
+      ]
+    },
+    "DisclosureLogQueryPage": {
+      "items": [
+        {
+          "entries": [
+            "unspecified"
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DisclosureLogRecordRequest": {
+      "entry": "unspecified",
+      "subject": "unspecified"
+    },
+    "DisclosureLogRecordResponse": {
+      "entries": [
+        "unspecified"
+      ]
+    },
+    "DsarApproveResponse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "DsarCreateResponse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "DsarDecideItemResponse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "DsarEraseRequest": {
+      "partyId": "019299b7-16a5-7821-8bab-d7e7ae2c9410",
+      "scope": "unspecified"
+    },
+    "DsarEraseResponse": {
+      "package": "unspecified",
+      "perItemOutcome": "unspecified"
+    },
+    "DsarExportRequest": {
+      "partyId": "0192d509-1c95-7c62-8589-bfeeed57d497",
+      "scope": "unspecified"
+    },
+    "DsarExportResponse": {
+      "package": "unspecified",
+      "perItemOutcome": "unspecified"
+    },
+    "DsarExtendResponse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "DsarGetResponse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "DsarImportRequest": {
+      "legacyRecords": "unspecified",
+      "handOverDates": "unspecified"
+    },
+    "DsarQueryItem": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "DsarQueryPage": {
+      "items": [
+        {
+          "request": "unspecified",
+          "tasks": "unspecified",
+          "package": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DsarRefuseResponse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "DsarRestrictRequest": {
+      "partyId": "0192f3ac-cd90-75e3-8f0a-06f6a67203da",
+      "scope": "unspecified"
+    },
+    "DsarRestrictResponse": {
+      "package": "unspecified",
+      "perItemOutcome": "unspecified"
+    },
+    "DsarRetryTaskResponse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "DsarStartFanOutResponse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "DsarVerifyIdentityResponse": {
+      "request": "unspecified",
+      "tasks": "unspecified",
+      "package": "unspecified"
+    },
+    "EnfiaConfirmationDecideRequest": {
+      "file": "unspecified",
+      "ids": [
+        "01920fa3-034b-73e6-88fd-88205e573baa"
+      ],
+      "decisions": "unspecified"
+    },
+    "EnfiaConfirmationDecideResponse": {
+      "confirmations": "unspecified"
+    },
+    "EnfiaConfirmationImportRequest": {
+      "file": "unspecified",
+      "ids": [
+        "0192d4c7-a9b3-7ea5-81e2-e178e5feafe0"
+      ],
+      "decisions": "unspecified"
+    },
+    "EnfiaConfirmationImportResponse": {
+      "confirmations": "unspecified"
+    },
+    "EnfiaConfirmationProposeRequest": {
+      "file": "unspecified",
+      "ids": [
+        "0192e713-703e-74d3-8a8d-f29cd204813c"
+      ],
+      "decisions": "unspecified"
+    },
+    "EnfiaConfirmationProposeResponse": {
+      "confirmations": "unspecified"
+    },
+    "EnfiaConfirmationTransmitRequest": {
+      "file": "unspecified",
+      "ids": [
+        "01920be2-91df-74b6-810d-2949e461fc87"
+      ],
+      "decisions": "unspecified"
+    },
+    "EnfiaConfirmationTransmitResponse": {
+      "confirmations": "unspecified"
+    },
+    "EvidenceSubmitResponse": {
+      "records": "unspecified",
+      "file": "unspecified"
+    },
+    "FiscalDocumentBulkResubmitRequest": {
+      "ids": [
+        "019201a3-88d3-710c-856c-921d10371bf7"
+      ],
+      "corrections": "unspecified",
+      "reason": "unspecified"
+    },
+    "FiscalDocumentBulkResubmitResponse": {
+      "status": "unspecified"
+    },
+    "FiscalDocumentCancelRequest": {
+      "ids": [
+        "01922486-ebcb-729b-8962-a7990845de49"
+      ],
+      "corrections": "unspecified",
+      "reason": "unspecified"
+    },
+    "FiscalDocumentCancelResponse": {
+      "status": "unspecified"
+    },
+    "FiscalDocumentCorrectRequest": {
+      "ids": [
+        "0192b833-b6f7-7a48-84a4-53486f7bb102"
+      ],
+      "corrections": "unspecified",
+      "reason": "unspecified"
+    },
+    "FiscalDocumentCorrectResponse": {
+      "status": "unspecified"
+    },
+    "FiscalDocumentGetResponse": {
+      "document": "unspecified",
+      "identifiers": "unspecified"
+    },
+    "FiscalDocumentImportRequest": {
+      "legacyRecords": "unspecified",
+      "handOverDates": "unspecified"
+    },
+    "FiscalDocumentListBySourceItem": {
+      "documents": [
+        "unspecified"
+      ]
+    },
+    "FiscalDocumentListBySourcePage": {
+      "items": [
+        {
+          "documents": [
+            "unspecified"
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "FiscalDocumentQrPayloadResponse": {
+      "document": "unspecified",
+      "identifiers": "unspecified"
+    },
+    "FiscalDocumentRequestRequest": {
+      "sourceType": "SAMPLE_CODE",
+      "sourceId": "sample",
+      "role": "ISSUE",
+      "revision": 1,
+      "originalFiscalDocumentId": "0192769d-b697-7b54-8f1b-ba047af258ea",
+      "lines": [
+        {
+          "fiscalCategoryKey": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "chargeId": "0192015b-4e1c-70b1-81e6-5222c6a0cc73",
+          "paymentId": "01926d03-f0b4-73ba-818b-866465d5972d"
+        }
+      ],
+      "counterpartyPartyId": "0192417c-44ed-7603-837c-353148f7a8b1",
+      "issueDate": "2026-10-07"
+    },
+    "FiscalDocumentRequestResponse": {
+      "fiscalDocumentId": "01921f4e-04a0-7f60-82de-4ee96f841e24",
+      "status": "SAMPLE_CODE",
+      "documentType": "SAMPLE_CODE",
+      "classifications": [
+        "unspecified"
+      ]
+    },
+    "FiscalDocumentResubmitRequest": {
+      "ids": [
+        "01927fe8-2200-7b00-8f94-5a324d6b31e6"
+      ],
+      "corrections": "unspecified",
+      "reason": "unspecified"
+    },
+    "FiscalDocumentResubmitResponse": {
+      "status": "unspecified"
+    },
+    "FiscalReconciliationBreaksItem": {
+      "breaks": "unspecified"
+    },
+    "FiscalReconciliationBreaksPage": {
+      "items": [
+        {
+          "breaks": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "FiscalReconciliationRunRequest": {
+      "date": "2026-10-07",
+      "entity": "unspecified"
+    },
+    "FiscalReconciliationRunResponse": {
+      "breaks": "unspecified"
+    },
+    "FiscalRuleCertifyRequest": {
+      "packCandidate": "2026-10-07"
+    },
+    "FiscalRuleCertifyResponse": {
+      "passOrFailKeys": "unspecified"
+    },
+    "SubmissionApproveResponse": {
+      "regulatorySubmission": "unspecified"
+    },
+    "SubmissionAttachContentResponse": {
+      "regulatorySubmission": "unspecified"
+    },
+    "SubmissionCommentResponse": {
+      "regulatorySubmission": "unspecified"
+    },
+    "SubmissionCreateResponse": {
+      "regulatorySubmission": "unspecified"
+    },
+    "SubmissionEvidencePackResponse": {
+      "regulatorySubmission": "unspecified"
+    },
+    "SubmissionRecordFilingRequest": {
+      "submissionId": "01920667-bc40-7223-810e-d9e2f425fb7c",
+      "filingData": "unspecified",
+      "receipt": "unspecified"
+    },
+    "SubmissionRecordFilingResponse": {
+      "regulatorySubmission": "unspecified"
+    },
+    "SubmissionRecordResponseResponse": {
+      "regulatorySubmission": "unspecified"
+    },
+    "SubmissionRenderXbrlRequest": {
+      "submissionId": "01924e56-5a12-7a0f-8ff7-5672d26ed2b3"
+    },
+    "SubmissionRenderXbrlResponse": {
+      "instanceReference": "unspecified",
+      "instanceHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "validationReport": "unspecified"
+    },
+    "SubmissionValidateTaxonomyRequest": {
+      "submissionId": "01921677-a19b-7d3c-8c7d-92f9450e77ee"
+    },
+    "SubmissionValidateTaxonomyResponse": {
+      "instanceReference": "unspecified",
+      "instanceHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "validationReport": "unspecified"
+    },
+    "TaxonomyActivateRequest": {
+      "package": "unspecified",
+      "version": "unspecified",
+      "referencePeriods": "unspecified"
+    },
+    "TaxonomyActivateResponse": {
+      "taxonomyVersion": "unspecified"
+    },
+    "TaxonomyImportRequest": {
+      "package": "unspecified",
+      "version": "unspecified",
+      "referencePeriods": "unspecified"
+    },
+    "TaxonomyImportResponse": {
+      "taxonomyVersion": "unspecified"
+    },
+    "TaxonomyListItem": {
+      "taxonomyVersion": "unspecified"
+    },
+    "TaxonomyListPage": {
+      "items": [
+        {
+          "taxonomyVersion": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "TraceabilityExportResponse": {
+      "records": "unspecified",
+      "file": "unspecified"
+    }
+  }
+}

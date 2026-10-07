@@ -1,0 +1,210 @@
+{
+  "responses": {
+    "mig.Archive.erase": {
+      "perItemOutcomes": "unspecified"
+    },
+    "mig.Archive.rectificationNote": {
+      "perItemOutcomes": "unspecified"
+    },
+    "mig.Archive.restrict": {
+      "perItemOutcomes": "unspecified"
+    },
+    "mig.Archive.subjectExport": {
+      "perItemOutcomes": "unspecified"
+    },
+    "mig.Routing.resolve": {
+      "masterState": "LegacyMaster",
+      "routeId": "01925d0b-1087-7607-8506-aca85f0f9fa6",
+      "termSplit": {
+        "note": "sample"
+      },
+      "legacyKey": "sample",
+      "deepLink": "https://contracts.invalid/sample"
+    },
+    "mig.Xref.register": {
+      "xrefId": "0192a262-6fb3-775e-89c1-a6a66c7c0b9c"
+    }
+  },
+  "schemas": {
+    "ArchiveEraseRequest": {
+      "dsarId": "01928fd1-b254-7783-82d8-febe7e8965bf",
+      "taskId": "0192c7f3-6aee-757f-8422-22919df7d109",
+      "subjectIds": [
+        "0192cee3-ec41-7ecd-8eb8-cea83c846808"
+      ],
+      "scope": "unspecified"
+    },
+    "ArchiveEraseResponse": {
+      "perItemOutcomes": "unspecified"
+    },
+    "ArchiveGetResponse": {
+      "records": "unspecified"
+    },
+    "ArchiveRectificationNoteRequest": {
+      "dsarId": "0192cac4-138e-71bd-8af9-f9c69bb9d8a3",
+      "taskId": "019260db-482c-7a67-841b-4b7f63ad900b",
+      "subjectIds": [
+        "01923f1f-a015-7fbc-8ce8-c0b361eead07"
+      ],
+      "scope": "unspecified"
+    },
+    "ArchiveRectificationNoteResponse": {
+      "perItemOutcomes": "unspecified"
+    },
+    "ArchiveRestrictRequest": {
+      "dsarId": "0192bc2c-13bd-71ad-8b83-4a9c6b512a68",
+      "taskId": "0192a48e-f71f-7d10-8c99-e09a7b4022ea",
+      "subjectIds": [
+        "019254e2-50b6-7456-8e1f-448d76764254"
+      ],
+      "scope": "unspecified"
+    },
+    "ArchiveRestrictResponse": {
+      "perItemOutcomes": "unspecified"
+    },
+    "ArchiveSearchItem": {
+      "records": "unspecified"
+    },
+    "ArchiveSearchPage": {
+      "items": [
+        {
+          "records": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ArchiveSubjectExportRequest": {
+      "dsarId": "01922f64-3f98-7815-8cd1-d3c9b095c74c",
+      "taskId": "0192bb2b-d1b2-7675-8542-16f493931f78",
+      "subjectIds": [
+        "019211c9-a1b1-76ea-8dce-af148e40b54e"
+      ],
+      "scope": "unspecified"
+    },
+    "ArchiveSubjectExportResponse": {
+      "perItemOutcomes": "unspecified"
+    },
+    "BatchGetResponse": {
+      "status": "unspecified",
+      "outcomes": "unspecified"
+    },
+    "BatchOutcomesItem": {
+      "status": "unspecified",
+      "outcomes": "unspecified"
+    },
+    "BatchOutcomesPage": {
+      "items": [
+        {
+          "status": "unspecified",
+          "outcomes": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "BatchPauseRequest": {
+      "batchId": "019247b4-aca9-7c30-8791-fc4eafa1183b"
+    },
+    "BatchPauseResponse": {
+      "status": "unspecified",
+      "outcomes": "unspecified"
+    },
+    "BatchRedriveRequest": {
+      "batchId": "019254da-c18d-7d73-87f8-a47262a76aaf"
+    },
+    "BatchRedriveResponse": {
+      "status": "unspecified",
+      "outcomes": "unspecified"
+    },
+    "BatchResumeRequest": {
+      "batchId": "019201d5-f594-74db-8515-8650896f598b"
+    },
+    "BatchResumeResponse": {
+      "status": "unspecified",
+      "outcomes": "unspecified"
+    },
+    "BatchReverseRequest": {
+      "batchId": "01928d2a-9c8e-79f1-8ce5-70f7debe64ee"
+    },
+    "BatchReverseResponse": {
+      "status": "unspecified",
+      "outcomes": "unspecified"
+    },
+    "BatchStartRequest": {
+      "batchId": "0192dea9-fe42-7c53-8e24-b7cca8c8aa04"
+    },
+    "BatchStartResponse": {
+      "status": "unspecified",
+      "outcomes": "unspecified"
+    },
+    "EnquiryGetResponse": {
+      "summaryMasterMarks": "unspecified",
+      "freshness": "unspecified"
+    },
+    "ImportContractConformanceRequest": {
+      "module": "unspecified",
+      "operation": "unspecified"
+    },
+    "ImportContractConformanceResponse": {
+      "passFailPerContractElement": "unspecified"
+    },
+    "RoutingOverrideRequest": {
+      "object": "unspecified",
+      "targetState": "unspecified",
+      "reason": "unspecified",
+      "until": "unspecified"
+    },
+    "RoutingOverrideResponse": {
+      "route": "unspecified",
+      "approvalRef": "unspecified"
+    },
+    "RoutingResolveRequest": {
+      "objectType": "SAMPLE_CODE",
+      "key": "sample"
+    },
+    "RoutingResolveResponse": {
+      "masterState": "LegacyMaster",
+      "routeId": "01926803-2d41-7061-8cb3-4190425ee52d",
+      "termSplit": {
+        "note": "sample"
+      },
+      "legacyKey": "sample",
+      "deepLink": "https://contracts.invalid/sample"
+    },
+    "XrefListItem": {
+      "page": "unspecified"
+    },
+    "XrefListPage": {
+      "items": [
+        {
+          "page": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "XrefRegisterRequest": {
+      "source": "unspecified",
+      "objectType": "unspecified",
+      "legacyKey": "unspecified",
+      "coreIds": [
+        "0192a533-108b-7015-8eef-c7522ad7ba8e"
+      ],
+      "batch": "unspecified"
+    },
+    "XrefRegisterResponse": {
+      "xrefId": "0192f4ad-7d95-77f4-8f31-0312caa6987b"
+    },
+    "XrefResolveRequest": {
+      "key": "unspecified",
+      "direction": "unspecified"
+    },
+    "XrefResolveResponse": {
+      "ids": [
+        "0192c9c2-a0eb-7764-8cd2-c15068c44f08"
+      ],
+      "history": "unspecified"
+    }
+  }
+}

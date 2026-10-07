@@ -1,0 +1,777 @@
+{
+  "responses": {
+    "uw.Accumulation.check": {
+      "band": "unspecified",
+      "exposure": "unspecified",
+      "capacity": "unspecified",
+      "dataAs": "unspecified"
+    },
+    "uw.Contingency.list": {
+      "items": [
+        {
+          "contingencies": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "uw.DataSubject.erase": {
+      "resultPerRecordClassConflicts": "unspecified"
+    },
+    "uw.DataSubject.export": {
+      "package": "unspecified",
+      "resultConflicts": "unspecified"
+    },
+    "uw.DataSubject.restrict": {
+      "resultPerRecordClass": "unspecified"
+    },
+    "uw.Decline.create": {
+      "decline": "unspecified",
+      "refusalRequirement": "unspecified"
+    },
+    "uw.Decline.requestReview": {
+      "reviewReferralRef": "unspecified"
+    },
+    "uw.DisclosureFinding.get": {
+      "findingSInclDecision": "unspecified",
+      "reductionFactor": "unspecified"
+    },
+    "uw.DisclosureFinding.record": {
+      "findingSInclDecision": "unspecified",
+      "reductionFactor": "unspecified"
+    },
+    "uw.ExternalReport.order": {
+      "order": "unspecified"
+    },
+    "uw.Intake.create": {
+      "intake": "unspecified",
+      "jobRef": "unspecified"
+    },
+    "uw.Issue.blockingStatus": {
+      "blocked": true,
+      "issues": [
+        {
+          "issueId": "019218fb-4ba6-7b41-8320-140b348bf217",
+          "issueType": "SAMPLE_CODE",
+          "severity": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "issueKey": "sample",
+          "lane": "SAMPLE_CODE",
+          "explanationKeys": [
+            "sample"
+          ],
+          "approvalStatus": "SAMPLE_CODE"
+        }
+      ]
+    },
+    "uw.Issue.listForChannel": {
+      "items": [
+        {
+          "issues": [
+            "unspecified"
+          ],
+          "explanation": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "uw.PolicyHold.check": {
+      "holds": [
+        {
+          "holdId": "01924412-9e0c-781c-8410-786cfb86e88b",
+          "holdCode": "SAMPLE_CODE",
+          "description": "sample"
+        }
+      ],
+      "issueType": "SAMPLE_CODE"
+    },
+    "uw.Referral.request": {
+      "referral": "unspecified"
+    },
+    "uw.RenewalDirection.get": {
+      "direction": "unspecified"
+    },
+    "uw.Rules.evaluate": {
+      "evaluationId": "019203e6-1e51-7882-8156-8d829d61ab4c",
+      "lane": "SAMPLE_CODE",
+      "issues": [
+        {
+          "issueId": "01929e61-60f2-7216-897a-fba8c94bc4c4",
+          "issueType": "SAMPLE_CODE",
+          "severity": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "issueKey": "sample",
+          "lane": "SAMPLE_CODE",
+          "explanationKeys": [
+            "sample"
+          ],
+          "approvalStatus": "SAMPLE_CODE"
+        }
+      ]
+    }
+  },
+  "schemas": {
+    "AccumulationCheckRequest": {
+      "jobRef": "unspecified",
+      "peril": "unspecified"
+    },
+    "AccumulationCheckResponse": {
+      "band": "unspecified",
+      "exposure": "unspecified",
+      "capacity": "unspecified",
+      "dataAs": "unspecified"
+    },
+    "ApprovalHistoryItem": {
+      "rows": [
+        "unspecified"
+      ]
+    },
+    "ApprovalHistoryPage": {
+      "items": [
+        {
+          "rows": [
+            "unspecified"
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ContingencyApplyConsequenceResponse": {
+      "contingency": "unspecified"
+    },
+    "ContingencyCreateResponse": {
+      "contingency": "unspecified"
+    },
+    "ContingencyExtendResponse": {
+      "contingency": "unspecified"
+    },
+    "ContingencyListItem": {
+      "contingencies": "unspecified"
+    },
+    "ContingencyListPage": {
+      "items": [
+        {
+          "contingencies": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ContingencySatisfyResponse": {
+      "contingency": "unspecified"
+    },
+    "ContingencyUpdateResponse": {
+      "contingency": "unspecified"
+    },
+    "ContingencyWaiveResponse": {
+      "contingency": "unspecified"
+    },
+    "DataSubjectEraseRequest": {
+      "partyId": "0192f322-8ef8-7fec-8cb3-8306c2859cb7",
+      "requestRef": "unspecified"
+    },
+    "DataSubjectEraseResponse": {
+      "resultPerRecordClassConflicts": "unspecified"
+    },
+    "DataSubjectExportRequest": {
+      "partyId": "0192252d-8c04-793a-8037-abe17ca29060",
+      "scope": "unspecified"
+    },
+    "DataSubjectExportResponse": {
+      "package": "unspecified",
+      "resultConflicts": "unspecified"
+    },
+    "DataSubjectRestrictRequest": {
+      "partyId": "0192fe4e-9fc3-7ec4-841f-45235996e7c5",
+      "requestRef": "unspecified",
+      "scope": "unspecified"
+    },
+    "DataSubjectRestrictResponse": {
+      "resultPerRecordClass": "unspecified"
+    },
+    "DeclineCreateRequest": {
+      "jobRef": "unspecified",
+      "scope": "unspecified",
+      "reasons": "unspecified",
+      "pairs": "unspecified",
+      "wording": "unspecified"
+    },
+    "DeclineCreateResponse": {
+      "decline": "unspecified",
+      "refusalRequirement": "unspecified"
+    },
+    "DeclineDecideReviewRequest": {
+      "jobRef": "unspecified",
+      "scope": "unspecified",
+      "reasons": "unspecified",
+      "pairs": "unspecified",
+      "wording": "unspecified"
+    },
+    "DeclineDecideReviewResponse": {
+      "decline": "unspecified",
+      "refusalRequirement": "unspecified"
+    },
+    "DeclineGetResponse": {
+      "decline": "unspecified",
+      "refusalRequirement": "unspecified"
+    },
+    "DeclineRequestReviewRequest": {
+      "declineId": "01926be5-81a2-7ed4-8c0d-81576e1e9a4b",
+      "requester": "unspecified",
+      "statement": "unspecified"
+    },
+    "DeclineRequestReviewResponse": {
+      "reviewReferralRef": "unspecified"
+    },
+    "DisclosureFindingDecideRequest": {
+      "term": "unspecified",
+      "kind": "unspecified",
+      "evidence": "unspecified",
+      "decision": "unspecified",
+      "findingId": "01928184-fa82-74fd-8607-3b060b74eca2",
+      "termRef": "unspecified"
+    },
+    "DisclosureFindingDecideResponse": {
+      "findingSInclDecision": "unspecified",
+      "reductionFactor": "unspecified"
+    },
+    "DisclosureFindingGetResponse": {
+      "findingSInclDecision": "unspecified",
+      "reductionFactor": "unspecified"
+    },
+    "DisclosureFindingListItem": {
+      "findingSInclDecision": "unspecified",
+      "reductionFactor": "unspecified"
+    },
+    "DisclosureFindingListPage": {
+      "items": [
+        {
+          "findingSInclDecision": "unspecified",
+          "reductionFactor": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DisclosureFindingRecordRequest": {
+      "term": "unspecified",
+      "kind": "unspecified",
+      "evidence": "unspecified",
+      "decision": "unspecified",
+      "findingId": "0192c5d4-36d0-77a3-8a7f-56e6d9970e26",
+      "termRef": "unspecified"
+    },
+    "DisclosureFindingRecordResponse": {
+      "findingSInclDecision": "unspecified",
+      "reductionFactor": "unspecified"
+    },
+    "ExternalReportCancelRequest": {
+      "type": "unspecified",
+      "subject": "unspecified",
+      "provider": "unspecified",
+      "consentRef": "unspecified"
+    },
+    "ExternalReportCancelResponse": {
+      "order": "unspecified"
+    },
+    "ExternalReportGetResponse": {
+      "order": "unspecified"
+    },
+    "ExternalReportListItem": {
+      "order": "unspecified"
+    },
+    "ExternalReportListPage": {
+      "items": [
+        {
+          "order": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ExternalReportOrderRequest": {
+      "type": "unspecified",
+      "subject": "unspecified",
+      "provider": "unspecified",
+      "consentRef": "unspecified"
+    },
+    "ExternalReportOrderResponse": {
+      "order": "unspecified"
+    },
+    "ExternalReportReorderRequest": {
+      "type": "unspecified",
+      "subject": "unspecified",
+      "provider": "unspecified",
+      "consentRef": "unspecified"
+    },
+    "ExternalReportReorderResponse": {
+      "order": "unspecified"
+    },
+    "InspectionCompleteResponse": {
+      "inspection": "unspecified"
+    },
+    "InspectionGetResponse": {
+      "inspection": "unspecified"
+    },
+    "InspectionOrderResponse": {
+      "inspection": "unspecified"
+    },
+    "InspectionSubmitResultResponse": {
+      "inspection": "unspecified"
+    },
+    "IntakeAcceptRequest": {
+      "envelopeRef": "unspecified",
+      "valueDecisions": "unspecified"
+    },
+    "IntakeAcceptResponse": {
+      "intake": "unspecified",
+      "jobRef": "unspecified"
+    },
+    "IntakeClearRequest": {
+      "envelopeRef": "unspecified",
+      "valueDecisions": "unspecified"
+    },
+    "IntakeClearResponse": {
+      "intake": "unspecified",
+      "jobRef": "unspecified"
+    },
+    "IntakeCreateRequest": {
+      "envelopeRef": "unspecified",
+      "valueDecisions": "unspecified"
+    },
+    "IntakeCreateResponse": {
+      "intake": "unspecified",
+      "jobRef": "unspecified"
+    },
+    "IntakeGetResponse": {
+      "intake": "unspecified",
+      "jobRef": "unspecified"
+    },
+    "IntakeRejectRequest": {
+      "envelopeRef": "unspecified",
+      "valueDecisions": "unspecified"
+    },
+    "IntakeRejectResponse": {
+      "intake": "unspecified",
+      "jobRef": "unspecified"
+    },
+    "IntakeVerifyValueRequest": {
+      "envelopeRef": "unspecified",
+      "valueDecisions": "unspecified"
+    },
+    "IntakeVerifyValueResponse": {
+      "intake": "unspecified",
+      "jobRef": "unspecified"
+    },
+    "IssueAddManualRequest": {
+      "issueId": "01924603-7ebf-7d18-8a1a-31941f1a901f",
+      "jobRef": "unspecified",
+      "type": "unspecified",
+      "reason": "unspecified"
+    },
+    "IssueAddManualResponse": {
+      "issue": "unspecified"
+    },
+    "IssueBlockingStatusResponse": {
+      "blocked": true,
+      "issues": [
+        {
+          "issueId": "0192dce8-f766-7d18-8b98-fdee8b4b56af",
+          "issueType": "SAMPLE_CODE",
+          "severity": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "issueKey": "sample",
+          "lane": "SAMPLE_CODE",
+          "explanationKeys": [
+            "sample"
+          ],
+          "approvalStatus": "SAMPLE_CODE"
+        }
+      ]
+    },
+    "IssueCloseRequest": {
+      "issueId": "0192beba-5d9b-796f-8308-c628a3ab0c36",
+      "jobRef": "unspecified",
+      "type": "unspecified",
+      "reason": "unspecified"
+    },
+    "IssueCloseResponse": {
+      "issue": "unspecified"
+    },
+    "IssueDecideRequest": {
+      "issueIds": [
+        "019262ca-33aa-7930-856f-894677c676f1"
+      ],
+      "decision": "unspecified",
+      "scope": "unspecified",
+      "validity": "unspecified",
+      "tolerance": "unspecified",
+      "conditions": "unspecified",
+      "reason": "unspecified",
+      "message": "unspecified"
+    },
+    "IssueDecideResponse": {
+      "decisions": "unspecified",
+      "checkIds": [
+        "0192158b-f7c1-70ba-8f8d-d41390d5e86b"
+      ],
+      "pendingSecondApproval": "unspecified"
+    },
+    "IssueExplainResponse": {
+      "issues": [
+        "unspecified"
+      ],
+      "explanation": "unspecified"
+    },
+    "IssueGetResponse": {
+      "issues": [
+        "unspecified"
+      ],
+      "explanation": "unspecified"
+    },
+    "IssueListForChannelItem": {
+      "issues": [
+        "unspecified"
+      ],
+      "explanation": "unspecified"
+    },
+    "IssueListForChannelPage": {
+      "items": [
+        {
+          "issues": [
+            "unspecified"
+          ],
+          "explanation": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "IssueListItem": {
+      "issues": [
+        "unspecified"
+      ],
+      "explanation": "unspecified"
+    },
+    "IssueListPage": {
+      "items": [
+        {
+          "issues": [
+            "unspecified"
+          ],
+          "explanation": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "IssueReopenRequest": {
+      "issueId": "019254fc-0cbb-7555-8db3-d3792a1a215f",
+      "jobRef": "unspecified",
+      "type": "unspecified",
+      "reason": "unspecified"
+    },
+    "IssueReopenResponse": {
+      "issue": "unspecified"
+    },
+    "IssueTypeGetResponse": {
+      "types": "unspecified"
+    },
+    "IssueTypeSearchItem": {
+      "types": "unspecified"
+    },
+    "IssueTypeSearchPage": {
+      "items": [
+        {
+          "types": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "IssueTypeUpsertRequest": {
+      "name": "unspecified",
+      "description": "unspecified",
+      "code": "unspecified"
+    },
+    "IssueTypeUpsertResponse": {
+      "types": "unspecified"
+    },
+    "NatCatAssessRequest": {
+      "subject": "unspecified",
+      "revenue": "unspecified",
+      "values": "unspecified",
+      "sumsInsured": "unspecified"
+    },
+    "NatCatAssessResponse": {
+      "assessment": "unspecified"
+    },
+    "PolicyHoldActivateResponse": {
+      "hold": "unspecified",
+      "impactCounts": "unspecified"
+    },
+    "PolicyHoldCheckRequest": {
+      "jobType": "SAMPLE_CODE",
+      "product": "SAMPLE_CODE",
+      "lineOfBusiness": "SAMPLE_CODE",
+      "coverages": [
+        "SAMPLE_CODE"
+      ],
+      "riskLocations": [
+        "unspecified"
+      ],
+      "transactionDate": "2026-10-07",
+      "effectiveDate": "2026-10-07"
+    },
+    "PolicyHoldCheckResponse": {
+      "holds": [
+        {
+          "holdId": "01927602-6e4e-7ddd-84b6-4bb72babba93",
+          "holdCode": "SAMPLE_CODE",
+          "description": "sample"
+        }
+      ],
+      "issueType": "SAMPLE_CODE"
+    },
+    "PolicyHoldCopyResponse": {
+      "hold": "unspecified",
+      "impactCounts": "unspecified"
+    },
+    "PolicyHoldCreateResponse": {
+      "hold": "unspecified",
+      "impactCounts": "unspecified"
+    },
+    "PolicyHoldImpactResponse": {
+      "hold": "unspecified",
+      "impactCounts": "unspecified"
+    },
+    "PolicyHoldReleaseResponse": {
+      "hold": "unspecified",
+      "impactCounts": "unspecified"
+    },
+    "PolicyHoldUpdateResponse": {
+      "hold": "unspecified",
+      "impactCounts": "unspecified"
+    },
+    "ReferralGetResponse": {
+      "referral": "unspecified"
+    },
+    "ReferralListItem": {
+      "referral": "unspecified"
+    },
+    "ReferralListPage": {
+      "items": [
+        {
+          "referral": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ReferralReferUpRequest": {
+      "jobRef": "unspecified",
+      "issueIds": [
+        "0192d8d0-8799-77f7-8232-2eca0963f4af"
+      ],
+      "comment": "unspecified",
+      "attachments": "unspecified"
+    },
+    "ReferralReferUpResponse": {
+      "referral": "unspecified"
+    },
+    "ReferralRequestInformationRequest": {
+      "jobRef": "unspecified",
+      "issueIds": [
+        "0192290d-9baf-7746-855c-1dce63a2b452"
+      ],
+      "comment": "unspecified",
+      "attachments": "unspecified"
+    },
+    "ReferralRequestInformationResponse": {
+      "referral": "unspecified"
+    },
+    "ReferralRequestRequest": {
+      "jobRef": "unspecified",
+      "issueIds": [
+        "019299af-567b-70dd-8d90-b920363f388d"
+      ],
+      "comment": "unspecified",
+      "attachments": "unspecified"
+    },
+    "ReferralRequestResponse": {
+      "referral": "unspecified"
+    },
+    "ReferralWithdrawRequest": {
+      "jobRef": "unspecified",
+      "issueIds": [
+        "01928233-4183-7fe7-888b-92bb57f2d648"
+      ],
+      "comment": "unspecified",
+      "attachments": "unspecified"
+    },
+    "ReferralWithdrawResponse": {
+      "referral": "unspecified"
+    },
+    "RefusalRegisterExportRequest": {
+      "afm": "unspecified",
+      "period": "unspecified",
+      "filters": "unspecified",
+      "requester": "unspecified",
+      "purpose": "unspecified"
+    },
+    "RefusalRegisterExportResponse": {
+      "entries": [
+        "unspecified"
+      ],
+      "fileRef": "unspecified",
+      "manifest": "unspecified"
+    },
+    "RefusalRegisterQueryItem": {
+      "entries": [
+        "unspecified"
+      ],
+      "fileRef": "unspecified",
+      "manifest": "unspecified"
+    },
+    "RefusalRegisterQueryPage": {
+      "items": [
+        {
+          "entries": [
+            "unspecified"
+          ],
+          "fileRef": "unspecified",
+          "manifest": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "RenewalDirectionBulkSetRequest": {
+      "termRef": "unspecified",
+      "direction": "unspecified",
+      "changes": "unspecified",
+      "reason": "unspecified"
+    },
+    "RenewalDirectionBulkSetResponse": {
+      "direction": "unspecified"
+    },
+    "RenewalDirectionGetResponse": {
+      "direction": "unspecified"
+    },
+    "RenewalDirectionSetRequest": {
+      "termRef": "unspecified",
+      "direction": "unspecified",
+      "changes": "unspecified",
+      "reason": "unspecified"
+    },
+    "RenewalDirectionSetResponse": {
+      "direction": "unspecified"
+    },
+    "ReviewLockRequest": {
+      "jobRef": "unspecified"
+    },
+    "ReviewLockResponse": {
+      "lock": "unspecified"
+    },
+    "ReviewReleaseRequest": {
+      "jobRef": "unspecified"
+    },
+    "ReviewReleaseResponse": {
+      "lock": "unspecified"
+    },
+    "RuleSetApproveResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetCreateResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetDraftResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetEditResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetExportResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetImportResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetScheduleResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetSimulateResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetSubmitResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetTestResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RuleSetValidateResponse": {
+      "versions": "unspecified",
+      "reports": "unspecified"
+    },
+    "RulesEvaluateBatchRequest": {
+      "selection": "unspecified",
+      "checkpoint": "unspecified",
+      "ruleSet": "unspecified"
+    },
+    "RulesEvaluateBatchResponse": {
+      "jobId": "0192f345-40b8-7e74-8de9-cb4c3bb50c5c",
+      "results": "unspecified"
+    },
+    "RulesEvaluateRequest": {
+      "jobRef": "0192296d-8202-70d4-8d1f-7d4f4682f358",
+      "checkpoint": "PRE_QUOTE",
+      "snapshotRef": "sample",
+      "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "signals": [
+        "unspecified"
+      ]
+    },
+    "RulesEvaluateResponse": {
+      "evaluationId": "0192dc19-250e-7bef-832d-c7d6571eb739",
+      "lane": "SAMPLE_CODE",
+      "issues": [
+        {
+          "issueId": "01926ba9-fb34-73ab-8e89-a240fe02cc41",
+          "issueType": "SAMPLE_CODE",
+          "severity": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "issueKey": "sample",
+          "lane": "SAMPLE_CODE",
+          "explanationKeys": [
+            "sample"
+          ],
+          "approvalStatus": "SAMPLE_CODE"
+        }
+      ]
+    },
+    "ValuationComputeRequest": {
+      "subject": "unspecified",
+      "method": "unspecified",
+      "inputs": "unspecified"
+    },
+    "ValuationComputeResponse": {
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "tableVersion": "unspecified"
+    }
+  }
+}

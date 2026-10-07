@@ -1,0 +1,306 @@
+[
+  {
+    "eventId": "0192d820-53c3-7a86-866a-0bc2b485546f",
+    "eventType": "CoexistenceMasterChanged",
+    "schemaVersion": "1.0",
+    "producer": "MIG",
+    "aggregateType": "CoexistenceRoute",
+    "aggregateId": "01926532-d87a-74b2-81a6-df1dc2fe2e7b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "routeId": "0192d481-b4e7-759e-803c-0094ad791ae8"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "routeId": "0192af85-f3d6-707c-813c-f1e90718f0c3",
+      "objectType": "SAMPLE_CODE",
+      "coreId": "01921aaa-9a52-7b4c-83e0-446d2fa43227",
+      "legacyKey": "Sample text",
+      "oldMasterState": "SAMPLE_CODE",
+      "newMasterState": "SAMPLE_CODE",
+      "termSplit": {
+        "note": "sample"
+      },
+      "effectiveFrom": "2026-10-07T09:00:00Z",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192af98-4b5f-7901-8bce-9fb49b42aebd",
+    "eventType": "CoexistenceMasterChanged",
+    "schemaVersion": "1.0",
+    "producer": "MIG",
+    "aggregateType": "CoexistenceRoute",
+    "aggregateId": "0192a9d8-8b3b-7606-8956-58f058e164c2",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "routeId": "0192a362-d823-7a15-8b72-3503ed7f0c5f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "routeId": "0192db4d-b499-7171-8879-9ea44fe7cc80",
+      "objectType": "SAMPLE_CODE",
+      "coreId": null,
+      "legacyKey": "Sample text",
+      "oldMasterState": null,
+      "newMasterState": "SAMPLE_CODE",
+      "termSplit": null,
+      "effectiveFrom": "2026-10-07T09:00:00Z",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192a061-1da7-77b8-8fc5-2b9509884dc0",
+    "eventType": "MigrationBatchLoaded",
+    "schemaVersion": "1.0",
+    "producer": "MIG",
+    "aggregateType": "MigrationBatch",
+    "aggregateId": "01928f44-6a28-7ee2-8c24-a974d51fc8db",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "batchId": "01923b27-3396-7073-85ed-1ed7cbcaab9e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "batchId": "0192c990-bf66-72a9-8805-4327b1c31427",
+      "wave": "SAMPLE_CODE",
+      "cohort": "SAMPLE_CODE",
+      "module": "PTY",
+      "targetOperation": "Sample text",
+      "objectType": "SAMPLE_CODE",
+      "countsByOutcome": {
+        "total": 1
+      },
+      "mappingSpecVersion": "1",
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    }
+  },
+  {
+    "eventId": "019234bf-9890-769e-8feb-0d80abf5dbbd",
+    "eventType": "MigrationBatchLoaded",
+    "schemaVersion": "1.0",
+    "producer": "MIG",
+    "aggregateType": "MigrationBatch",
+    "aggregateId": "01920b10-3f48-703a-8968-42347eac4b90",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "batchId": "01921a54-9127-7289-8cf7-72dd274145a6"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "batchId": "019279f7-261a-7579-8ab2-65ebb8103990",
+      "wave": "SAMPLE_CODE",
+      "cohort": "SAMPLE_CODE",
+      "module": "PTY",
+      "targetOperation": "Sample text",
+      "objectType": "SAMPLE_CODE",
+      "countsByOutcome": {
+        "total": 1
+      },
+      "mappingSpecVersion": "1",
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    }
+  },
+  {
+    "eventId": "0192b5f1-62d1-73da-8b9c-8a71590f3c49",
+    "eventType": "MigrationBatchReconciled",
+    "schemaVersion": "1.0",
+    "producer": "MIG",
+    "aggregateType": "MigrationBatch",
+    "aggregateId": "0192555a-ef9b-7536-8f56-4b9a05447a07",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "batchId": "0192ef0e-dde7-7e12-8bc2-885eb629f2b4"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "batchId": "0192b774-71cf-71ab-8eaa-135f865c95f2",
+      "wave": "SAMPLE_CODE",
+      "matchStatus": "SAMPLE_CODE",
+      "breakCountsByMeasure": {
+        "total": 1
+      },
+      "signatories": [
+        "01929c1e-42e6-79fa-8979-8e04c5478c7f"
+      ],
+      "reportRef": "Sample text"
+    }
+  },
+  {
+    "eventId": "0192f4a9-865b-7882-800f-f914433187cc",
+    "eventType": "MigrationBatchReconciled",
+    "schemaVersion": "1.0",
+    "producer": "MIG",
+    "aggregateType": "MigrationBatch",
+    "aggregateId": "0192fc2f-6493-74da-8259-249f3ff1f413",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "batchId": "0192147e-b421-7a3f-8ba7-1c6c2aeb1433"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "batchId": "0192e344-400d-7400-86da-9b4cdcf6eed6",
+      "wave": "SAMPLE_CODE",
+      "matchStatus": "SAMPLE_CODE",
+      "breakCountsByMeasure": {
+        "total": 1
+      },
+      "signatories": [
+        "01927281-d2c3-7f0c-81ea-ff9d35ed6617"
+      ],
+      "reportRef": "Sample text"
+    }
+  },
+  {
+    "eventId": "01924145-bfa4-7267-8ede-02840e28e41a",
+    "eventType": "MigrationWaveStatusChanged",
+    "schemaVersion": "1.0",
+    "producer": "MIG",
+    "aggregateType": "MigrationWave",
+    "aggregateId": "0192888c-1ba6-7a1d-818d-59fb4ef5c4d5",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "waveId": "0192194b-85b8-741b-8603-2628b9abdd40"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "waveId": "0192bf7a-cd3b-7777-887a-78c27f332eca",
+      "waveCode": "SAMPLE_CODE",
+      "scenario": "SAMPLE_CODE",
+      "oldState": "SAMPLE_CODE",
+      "newState": "SAMPLE_CODE",
+      "scopeSummary": {
+        "note": "sample"
+      },
+      "effectiveAt": "2026-10-07T09:00:00Z"
+    }
+  },
+  {
+    "eventId": "01921c43-1ec2-7e19-8094-abb23bfb0a2d",
+    "eventType": "MigrationWaveStatusChanged",
+    "schemaVersion": "1.0",
+    "producer": "MIG",
+    "aggregateType": "MigrationWave",
+    "aggregateId": "01922b53-967d-7759-8a06-eb2d89a5cda0",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "waveId": "01920035-8f7b-78b1-8c88-bb3f2e56d734"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "waveId": "01928400-30ee-766c-84fe-cc420f38a395",
+      "waveCode": "SAMPLE_CODE",
+      "scenario": "SAMPLE_CODE",
+      "oldState": "SAMPLE_CODE",
+      "newState": "SAMPLE_CODE",
+      "scopeSummary": {
+        "note": "sample"
+      },
+      "effectiveAt": "2026-10-07T09:00:00Z"
+    }
+  }
+]

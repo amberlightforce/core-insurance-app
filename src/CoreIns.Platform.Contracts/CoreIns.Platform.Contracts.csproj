@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    PRD-14 Platform: public contract of PLT and the contract-level abstractions every module's *.Contracts project
+    shares (F-1c part 3): IEventPayload / EventContract, the common event value types generated from
+    contracts/events/common.schema.json, command options, and the generated PLT events, DTOs and in-process interfaces.
+    References only the SharedKernel (no Npgsql, no ASP.NET Core), so module contracts can reference it (D-ARC-24).
+    Generated/ is written by tools/CoreIns.ContractGen; never edit it by hand.
+  -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

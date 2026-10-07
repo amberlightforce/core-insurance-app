@@ -1,0 +1,605 @@
+{
+  "responses": {
+    "pty.Account.addMember": {
+      "key": "value"
+    },
+    "pty.Account.create": {
+      "key": "value"
+    },
+    "pty.Account.get": {
+      "key": "value"
+    },
+    "pty.Account.merge": {
+      "request": "unspecified"
+    },
+    "pty.Account.removeMember": {
+      "key": "value"
+    },
+    "pty.Account.requestPolicyMove": {
+      "request": "unspecified"
+    },
+    "pty.Account.search": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "pty.Account.setHolder": {
+      "key": "value"
+    },
+    "pty.Account.split": {
+      "request": "unspecified"
+    },
+    "pty.Account.withdraw": {
+      "key": "value"
+    },
+    "pty.CommissionAgreement.resolve": {
+      "key": "value"
+    },
+    "pty.CommunicationPreference.resolve": {
+      "channel": "unspecified",
+      "language": "el",
+      "medium": "unspecified",
+      "proof": "unspecified"
+    },
+    "pty.CommunicationPreference.set": {
+      "channel": "unspecified",
+      "language": "el",
+      "medium": "unspecified",
+      "proof": "unspecified"
+    },
+    "pty.Consent.query": {
+      "items": [
+        {
+          "state": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "pty.Consent.record": {
+      "consentState": "unspecified"
+    },
+    "pty.Consent.withdraw": {
+      "state": "unspecified"
+    },
+    "pty.Dsar.evaluateErasure": {
+      "erased": "unspecified",
+      "restrictedRetentionConflictAndObligation": "unspecified"
+    },
+    "pty.Dsar.export": {
+      "fileRef": "unspecified",
+      "outcome": "unspecified"
+    },
+    "pty.Dsar.liftRestriction": {
+      "fileRef": "unspecified",
+      "outcome": "unspecified"
+    },
+    "pty.Dsar.restrict": {
+      "statusRestricted": "unspecified"
+    },
+    "pty.Import.reverse": {
+      "perObjectOutcome": "unspecified"
+    },
+    "pty.Party.create": {
+      "party": "unspecified",
+      "duplicateSuggestions": "unspecified",
+      "missingData": "unspecified"
+    },
+    "pty.Party.get": {
+      "party": "unspecified"
+    },
+    "pty.Party.merge": {
+      "mergeRecord": "unspecified",
+      "approvalRequest": "unspecified"
+    },
+    "pty.Party.search": {
+      "items": [
+        {
+          "rankedResults": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "pty.Party.unmerge": {
+      "restoredParties": "unspecified",
+      "approvalRequest": "unspecified"
+    },
+    "pty.Party.update": {
+      "party": "unspecified",
+      "duplicateSuggestions": "unspecified",
+      "missingData": "unspecified"
+    },
+    "pty.PartyRole.assign": {
+      "role": "unspecified"
+    },
+    "pty.PartyRole.query": {
+      "items": [
+        {
+          "role": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "pty.ProducerCode.validate": {
+      "valid": true,
+      "reasons": [
+        "SAMPLE_CODE"
+      ],
+      "intermediaryType": "SAMPLE_CODE",
+      "registerNumber": "sample",
+      "registerStatus": "SAMPLE_CODE",
+      "licenceStatus": "SAMPLE_CODE",
+      "licenceExpiry": "2026-10-07",
+      "appointedForProduct": true,
+      "authorities": {
+        "collectPremium": true,
+        "issueCoverNotes": true,
+        "bindWithinAuthority": true,
+        "limits": {
+          "note": "sample"
+        }
+      },
+      "intermediaryData": {
+        "note": "sample"
+      }
+    },
+    "pty.ProducerOfRecord.bulkTransfer": {
+      "poR": "unspecified"
+    },
+    "pty.ProducerOfRecord.get": {
+      "poR": "unspecified"
+    },
+    "pty.Screening.bulk": {
+      "jobId": "01925415-d4d3-7447-8e03-da5c9c5d69cc",
+      "decisionCase": "unspecified"
+    },
+    "pty.Screening.screen": {
+      "result": "Clear",
+      "caseNumber": "SAMPLE-000001",
+      "listVersions": [
+        "SAMPLE_CODE"
+      ],
+      "paymentBlock": true
+    },
+    "pty.Vulnerability.query": {
+      "items": [
+        {
+          "flag": true,
+          "ruleCodes": "unspecified",
+          "trustedContacts": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    }
+  },
+  "schemas": {
+    "AccountMergeRequest": {
+      "source": "unspecified",
+      "target": "unspecified",
+      "policies": "unspecified"
+    },
+    "AccountMergeResponse": {
+      "request": "unspecified"
+    },
+    "AccountRequestPolicyMoveRequest": {
+      "source": "unspecified",
+      "target": "unspecified",
+      "policies": "unspecified"
+    },
+    "AccountRequestPolicyMoveResponse": {
+      "request": "unspecified"
+    },
+    "AccountSearchPage": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "AccountSplitRequest": {
+      "source": "unspecified",
+      "target": "unspecified",
+      "policies": "unspecified"
+    },
+    "AccountSplitResponse": {
+      "request": "unspecified"
+    },
+    "CommunicationPreferenceResolveRequest": {
+      "party": "unspecified",
+      "purpose": "unspecified"
+    },
+    "CommunicationPreferenceResolveResponse": {
+      "channel": "unspecified",
+      "language": "el",
+      "medium": "unspecified",
+      "proof": "unspecified"
+    },
+    "CommunicationPreferenceSetRequest": {
+      "party": "unspecified",
+      "purpose": "unspecified",
+      "date": "2026-10-07"
+    },
+    "CommunicationPreferenceSetResponse": {
+      "channel": "unspecified",
+      "language": "el",
+      "medium": "unspecified",
+      "proof": "unspecified"
+    },
+    "ConsentQueryItem": {
+      "state": "unspecified"
+    },
+    "ConsentQueryPage": {
+      "items": [
+        {
+          "state": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ConsentRecordRequest": {
+      "party": "unspecified",
+      "purpose": "unspecified",
+      "channel": "unspecified",
+      "kind": "unspecified",
+      "source": "unspecified",
+      "wordingVersion": "unspecified",
+      "proofRef": "unspecified"
+    },
+    "ConsentRecordResponse": {
+      "consentState": "unspecified"
+    },
+    "ConsentWithdrawRequest": {
+      "party": "unspecified",
+      "purpose": "unspecified",
+      "channel": "unspecified"
+    },
+    "ConsentWithdrawResponse": {
+      "state": "unspecified"
+    },
+    "DsarEvaluateErasureRequest": {
+      "party": "unspecified",
+      "requestId": "01927481-e3e3-7641-85e0-3ba24441a84d"
+    },
+    "DsarEvaluateErasureResponse": {
+      "erased": "unspecified",
+      "restrictedRetentionConflictAndObligation": "unspecified"
+    },
+    "DsarExportRequest": {
+      "party": "unspecified",
+      "requestId": "019205cb-6fbc-789b-8c14-a595d7723117"
+    },
+    "DsarExportResponse": {
+      "fileRef": "unspecified",
+      "outcome": "unspecified"
+    },
+    "DsarLiftRestrictionRequest": {
+      "party": "unspecified",
+      "requestId": "0192c1f7-78be-7dad-8dd4-9bb3eecd1947"
+    },
+    "DsarLiftRestrictionResponse": {
+      "fileRef": "unspecified",
+      "outcome": "unspecified"
+    },
+    "DsarRestrictRequest": {
+      "party": "unspecified",
+      "requestId": "0192a340-6559-7c34-8cd1-6ebc565cec4c"
+    },
+    "DsarRestrictResponse": {
+      "statusRestricted": "unspecified"
+    },
+    "IdentifierVerifyRequest": {
+      "partyId": "019208e5-33e1-7218-8289-80b49a54ffab",
+      "scheme": "unspecified"
+    },
+    "IdentifierVerifyResponse": {
+      "status": "unspecified",
+      "suggestions": "unspecified"
+    },
+    "ImportReverseRequest": {
+      "importBatchId": "0192c333-a46b-7a05-8239-0eb6b029d777"
+    },
+    "ImportReverseResponse": {
+      "perObjectOutcome": "unspecified"
+    },
+    "LifeEventCompleteRequest": {
+      "type": "unspecified",
+      "party": "unspecified",
+      "data": "unspecified"
+    },
+    "LifeEventCompleteResponse": {
+      "lifeEvent": "unspecified",
+      "createdActivities": "unspecified"
+    },
+    "LifeEventReverseRequest": {
+      "type": "unspecified",
+      "party": "unspecified",
+      "data": "unspecified"
+    },
+    "LifeEventReverseResponse": {
+      "lifeEvent": "unspecified",
+      "createdActivities": "unspecified"
+    },
+    "LifeEventStartRequest": {
+      "type": "unspecified",
+      "party": "unspecified",
+      "data": "unspecified"
+    },
+    "LifeEventStartResponse": {
+      "lifeEvent": "unspecified",
+      "createdActivities": "unspecified"
+    },
+    "LocationAddRequest": {
+      "location": "unspecified"
+    },
+    "LocationAddResponse": {
+      "location": "unspecified"
+    },
+    "LocationRemoveRequest": {
+      "location": "unspecified"
+    },
+    "LocationRemoveResponse": {
+      "location": "unspecified"
+    },
+    "LocationUpdateRequest": {
+      "location": "unspecified"
+    },
+    "LocationUpdateResponse": {
+      "location": "unspecified"
+    },
+    "PartyCreateRequest": {
+      "partyData": "unspecified",
+      "reason": "unspecified"
+    },
+    "PartyCreateResponse": {
+      "party": "unspecified",
+      "duplicateSuggestions": "unspecified",
+      "missingData": "unspecified"
+    },
+    "PartyGetResponse": {
+      "party": "unspecified"
+    },
+    "PartyMergeRequest": {
+      "candidates": "unspecified",
+      "survivorshipDecisions": "unspecified"
+    },
+    "PartyMergeResponse": {
+      "mergeRecord": "unspecified",
+      "approvalRequest": "unspecified"
+    },
+    "PartyRoleAssignRequest": {
+      "party": "unspecified",
+      "role": "unspecified",
+      "context": "unspecified",
+      "period": "unspecified"
+    },
+    "PartyRoleAssignResponse": {
+      "role": "unspecified"
+    },
+    "PartyRoleEndRequest": {
+      "party": "unspecified",
+      "role": "unspecified",
+      "context": "unspecified",
+      "period": "unspecified"
+    },
+    "PartyRoleEndResponse": {
+      "role": "unspecified"
+    },
+    "PartyRoleQueryItem": {
+      "role": "unspecified"
+    },
+    "PartyRoleQueryPage": {
+      "items": [
+        {
+          "role": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PartySearchItem": {
+      "rankedResults": "unspecified"
+    },
+    "PartySearchPage": {
+      "items": [
+        {
+          "rankedResults": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PartyUnmergeRequest": {
+      "mergeId": "0192133c-f22e-7bdc-8ddc-44095a479197",
+      "assignmentPostMergeChanges": "unspecified"
+    },
+    "PartyUnmergeResponse": {
+      "restoredParties": "unspecified",
+      "approvalRequest": "unspecified"
+    },
+    "PartyUpdateRequest": {
+      "partyData": "unspecified",
+      "reason": "unspecified"
+    },
+    "PartyUpdateResponse": {
+      "party": "unspecified",
+      "duplicateSuggestions": "unspecified",
+      "missingData": "unspecified"
+    },
+    "PartyValidateRequest": {
+      "partyData": "unspecified"
+    },
+    "PartyValidateResponse": {
+      "issues": [
+        "unspecified"
+      ],
+      "candidates": "unspecified"
+    },
+    "ProducerCodeSearchItem": {
+      "validity": "unspecified",
+      "reasons": "unspecified",
+      "intermediaryData": "unspecified"
+    },
+    "ProducerCodeSearchPage": {
+      "items": [
+        {
+          "validity": "unspecified",
+          "reasons": "unspecified",
+          "intermediaryData": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ProducerCodeValidateRequest": {
+      "producerCode": "SAMPLE_CODE",
+      "product": "SAMPLE_CODE",
+      "transactionType": "SAMPLE_CODE",
+      "actingPersonId": "0192dcba-c147-715b-8f71-c57e05ecfca6"
+    },
+    "ProducerCodeValidateResponse": {
+      "valid": true,
+      "reasons": [
+        "SAMPLE_CODE"
+      ],
+      "intermediaryType": "SAMPLE_CODE",
+      "registerNumber": "sample",
+      "registerStatus": "SAMPLE_CODE",
+      "licenceStatus": "SAMPLE_CODE",
+      "licenceExpiry": "2026-10-07",
+      "appointedForProduct": true,
+      "authorities": {
+        "collectPremium": true,
+        "issueCoverNotes": true,
+        "bindWithinAuthority": true,
+        "limits": {
+          "note": "sample"
+        }
+      },
+      "intermediaryData": {
+        "note": "sample"
+      }
+    },
+    "ProducerOfRecordBulkTransferRequest": {
+      "term": "unspecified",
+      "date": "2026-10-07",
+      "change": "unspecified"
+    },
+    "ProducerOfRecordBulkTransferResponse": {
+      "poR": "unspecified"
+    },
+    "ProducerOfRecordCancelRequest": {
+      "term": "unspecified",
+      "date": "2026-10-07",
+      "change": "unspecified"
+    },
+    "ProducerOfRecordCancelResponse": {
+      "poR": "unspecified"
+    },
+    "ProducerOfRecordChangeRequest": {
+      "term": "unspecified",
+      "date": "2026-10-07",
+      "change": "unspecified"
+    },
+    "ProducerOfRecordChangeResponse": {
+      "poR": "unspecified"
+    },
+    "ProducerOfRecordGetResponse": {
+      "poR": "unspecified"
+    },
+    "RelationshipAddRequest": {
+      "parties": "unspecified",
+      "type": "unspecified",
+      "period": "unspecified"
+    },
+    "RelationshipEndRequest": {
+      "parties": "unspecified",
+      "type": "unspecified",
+      "period": "unspecified"
+    },
+    "RelationshipQueryPage": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ScreeningBulkRequest": {
+      "list": "unspecified"
+    },
+    "ScreeningBulkResponse": {
+      "jobId": "01921f16-40a1-7c96-814f-31a055e72d40",
+      "decisionCase": "unspecified"
+    },
+    "ScreeningCaseDecideRequest": {
+      "list": "unspecified"
+    },
+    "ScreeningCaseDecideResponse": {
+      "jobId": "01929bdd-b007-796a-8c27-9d538546a6dc",
+      "decisionCase": "unspecified"
+    },
+    "ScreeningCaseGetResponse": {
+      "jobId": "0192ea53-964a-7c23-8abd-8c1871c65f93",
+      "decisionCase": "unspecified"
+    },
+    "ScreeningScreenRequest": {
+      "partyId": "01927a52-d759-757e-80c3-7b2cc2f16718",
+      "callerRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "019211b9-c58e-7cd7-8e2a-e1f03cf7221f"
+      }
+    },
+    "ScreeningScreenResponse": {
+      "result": "Clear",
+      "caseNumber": "SAMPLE-000001",
+      "listVersions": [
+        "SAMPLE_CODE"
+      ],
+      "paymentBlock": true
+    },
+    "VulnerabilityQueryItem": {
+      "flag": true,
+      "ruleCodes": "unspecified",
+      "trustedContacts": "unspecified"
+    },
+    "VulnerabilityQueryPage": {
+      "items": [
+        {
+          "flag": true,
+          "ruleCodes": "unspecified",
+          "trustedContacts": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "VulnerabilityRecordRequest": {
+      "party": "unspecified"
+    },
+    "VulnerabilityRecordResponse": {
+      "flag": true,
+      "ruleCodes": "unspecified",
+      "trustedContacts": "unspecified"
+    },
+    "VulnerabilityRemoveRequest": {
+      "party": "unspecified"
+    },
+    "VulnerabilityRemoveResponse": {
+      "flag": true,
+      "ruleCodes": "unspecified",
+      "trustedContacts": "unspecified"
+    }
+  }
+}

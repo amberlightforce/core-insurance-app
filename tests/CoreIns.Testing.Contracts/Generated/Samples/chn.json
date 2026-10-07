@@ -1,0 +1,612 @@
+{
+  "responses": {
+    "chn.Dsar.erase": {
+      "status": "unspecified",
+      "erasedAndRetainedCountsReasons": "unspecified"
+    },
+    "chn.Dsar.export": {
+      "exportPackageReference": "unspecified",
+      "status": "unspecified"
+    },
+    "chn.Dsar.restrict": {
+      "status": "unspecified",
+      "restrictedRecordCounts": "unspecified"
+    }
+  },
+  "schemas": {
+    "AgentLogExportRequest": {
+      "filters": "unspecified"
+    },
+    "AgentLogExportResponse": {
+      "logEntries": "unspecified",
+      "evidencePack": "unspecified"
+    },
+    "AgentLogQueryItem": {
+      "logEntries": "unspecified",
+      "evidencePack": "unspecified"
+    },
+    "AgentLogQueryPage": {
+      "items": [
+        {
+          "logEntries": "unspecified",
+          "evidencePack": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "AgentMcpRequest": {
+      "jsonrpc": "2.0",
+      "id": "sample",
+      "method": "tools/list",
+      "params": {
+        "key": "value"
+      }
+    },
+    "AggregatorQuoteRequest": {
+      "partnerPayload": "unspecified"
+    },
+    "AggregatorQuoteResponse": {
+      "price": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ipidLink": "unspecified",
+      "deepLink": "unspecified"
+    },
+    "ApiProductCreateRequest": {
+      "productDefinition": "unspecified"
+    },
+    "ApiProductCreateResponse": {
+      "product": "unspecified"
+    },
+    "ApiProductDeprecateRequest": {
+      "productDefinition": "unspecified"
+    },
+    "ApiProductDeprecateResponse": {
+      "product": "unspecified"
+    },
+    "ApiProductGetResponse": {
+      "product": "unspecified"
+    },
+    "ApiProductListItem": {
+      "product": "unspecified"
+    },
+    "ApiProductListPage": {
+      "items": [
+        {
+          "product": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ApiProductPublishRequest": {
+      "productDefinition": "unspecified"
+    },
+    "ApiProductPublishResponse": {
+      "product": "unspecified"
+    },
+    "ApiProductRetireRequest": {
+      "productDefinition": "unspecified"
+    },
+    "ApiProductRetireResponse": {
+      "product": "unspecified"
+    },
+    "ChangeConfirmRequest": {
+      "policy": "unspecified",
+      "intent": "unspecified",
+      "values": "unspecified",
+      "effectiveDate": "2026-10-07"
+    },
+    "ChangeConfirmResponse": {
+      "diff": "unspecified",
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "billingPreview": "unspecified",
+      "outcome": "unspecified",
+      "requestNumberWhenReferred": "unspecified"
+    },
+    "ChangePreviewRequest": {
+      "policy": "unspecified",
+      "intent": "unspecified",
+      "values": "unspecified",
+      "effectiveDate": "2026-10-07"
+    },
+    "ChangePreviewResponse": {
+      "diff": "unspecified",
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "billingPreview": "unspecified",
+      "outcome": "unspecified",
+      "requestNumberWhenReferred": "unspecified"
+    },
+    "ChangeReferRequest": {
+      "policy": "unspecified",
+      "intent": "unspecified",
+      "values": "unspecified",
+      "effectiveDate": "2026-10-07"
+    },
+    "ChangeReferResponse": {
+      "diff": "unspecified",
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "billingPreview": "unspecified",
+      "outcome": "unspecified",
+      "requestNumberWhenReferred": "unspecified"
+    },
+    "ClientApproveRequest": {
+      "organisation": "unspecified",
+      "checklist": "unspecified",
+      "keys": "unspecified"
+    },
+    "ClientApproveResponse": {
+      "client": "unspecified",
+      "status": "unspecified"
+    },
+    "ClientRequestRequest": {
+      "organisation": "unspecified",
+      "checklist": "unspecified",
+      "keys": "unspecified"
+    },
+    "ClientRequestResponse": {
+      "client": "unspecified",
+      "status": "unspecified"
+    },
+    "ClientRevokeRequest": {
+      "organisation": "unspecified",
+      "checklist": "unspecified",
+      "keys": "unspecified"
+    },
+    "ClientRevokeResponse": {
+      "client": "unspecified",
+      "status": "unspecified"
+    },
+    "ClientSuspendRequest": {
+      "organisation": "unspecified",
+      "checklist": "unspecified",
+      "keys": "unspecified"
+    },
+    "ClientSuspendResponse": {
+      "client": "unspecified",
+      "status": "unspecified"
+    },
+    "CoViewEndRequest": {
+      "consentCode": "unspecified"
+    },
+    "CoViewEndResponse": {
+      "readOnlySession": "unspecified"
+    },
+    "CoViewStartRequest": {
+      "consentCode": "unspecified"
+    },
+    "CoViewStartResponse": {
+      "readOnlySession": "unspecified"
+    },
+    "DeepLinkOpenRequest": {
+      "signedToken": "unspecified"
+    },
+    "DeepLinkOpenResponse": {
+      "submission": "unspecified",
+      "journey": "unspecified"
+    },
+    "DsarEraseRequest": {
+      "partyId": "01926906-0ce1-7123-837e-5c622103b1a1",
+      "identitySubject": "unspecified",
+      "dsarId": "019213c5-4b42-7491-8356-cf2fab9e21ac"
+    },
+    "DsarEraseResponse": {
+      "status": "unspecified",
+      "erasedAndRetainedCountsReasons": "unspecified"
+    },
+    "DsarExportRequest": {
+      "partyId": "0192f716-2886-7de6-85c3-3a4a1c4f539c",
+      "identitySubject": "unspecified",
+      "dsarId": "019248e6-b9e9-75fa-8431-357023f9aefa"
+    },
+    "DsarExportResponse": {
+      "exportPackageReference": "unspecified",
+      "status": "unspecified"
+    },
+    "DsarRestrictRequest": {
+      "partyId": "0192020e-d12e-7a31-8303-63d6a5176826",
+      "identitySubject": "unspecified",
+      "dsarId": "0192f217-7b0c-779d-8ac0-b69bcf66dbde"
+    },
+    "DsarRestrictResponse": {
+      "status": "unspecified",
+      "restrictedRecordCounts": "unspecified"
+    },
+    "JourneyAbandonRequest": {
+      "journeyType": "unspecified",
+      "context": "unspecified"
+    },
+    "JourneyAbandonResponse": {
+      "session": "unspecified",
+      "draftRefs": "unspecified"
+    },
+    "JourneyResumeRequest": {
+      "journeyType": "unspecified",
+      "context": "unspecified"
+    },
+    "JourneyResumeResponse": {
+      "session": "unspecified",
+      "draftRefs": "unspecified"
+    },
+    "JourneySaveRequest": {
+      "journeyType": "unspecified",
+      "context": "unspecified"
+    },
+    "JourneySaveResponse": {
+      "session": "unspecified",
+      "draftRefs": "unspecified"
+    },
+    "JourneyStartRequest": {
+      "journeyType": "unspecified",
+      "context": "unspecified"
+    },
+    "JourneyStartResponse": {
+      "session": "unspecified",
+      "draftRefs": "unspecified"
+    },
+    "LanguageGetResponse": {
+      "resolvedLanguage": "unspecified",
+      "source": "unspecified"
+    },
+    "LanguageSetRequest": {
+      "language": "el",
+      "regionFormat": "unspecified"
+    },
+    "LanguageSetResponse": {
+      "resolvedLanguage": "unspecified",
+      "source": "unspecified"
+    },
+    "MessageListItem": {
+      "thread": "unspecified"
+    },
+    "MessageListPage": {
+      "items": [
+        {
+          "thread": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "MessageSendRequest": {
+      "topic": "unspecified",
+      "object": "unspecified",
+      "text": "unspecified",
+      "files": "unspecified"
+    },
+    "MessageSendResponse": {
+      "thread": "unspecified"
+    },
+    "NotificationListItem": {
+      "items": [
+        "unspecified"
+      ]
+    },
+    "NotificationListPage": {
+      "items": [
+        {
+          "items": [
+            "unspecified"
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "NotificationMarkReadRequest": {
+      "identity": "unspecified",
+      "classes": "unspecified"
+    },
+    "NotificationMarkReadResponse": {
+      "items": [
+        "unspecified"
+      ]
+    },
+    "NotificationSubscriptionSetRequest": {
+      "identity": "unspecified",
+      "classes": "unspecified"
+    },
+    "NotificationSubscriptionSetResponse": {
+      "items": [
+        "unspecified"
+      ]
+    },
+    "PartnerBookChangesPage": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PartnerCommissionStatementListPage": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PartnerDocumentListForObjectPage": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PartnerRegisterRequest": {
+      "organisation": "unspecified",
+      "checklist": "unspecified",
+      "keys": "unspecified"
+    },
+    "PartnerRegisterResponse": {
+      "client": "unspecified",
+      "status": "unspecified"
+    },
+    "PermissionEvaluateRequest": {
+      "transactionType": "unspecified",
+      "channel": "unspecified",
+      "actor": "unspecified",
+      "onBehalfOf": "unspecified",
+      "objectRef": "unspecified",
+      "proposedValues": "unspecified"
+    },
+    "PermissionEvaluateResponse": {
+      "outcome": "unspecified",
+      "limits": "unspecified",
+      "entry": "unspecified",
+      "version": "unspecified",
+      "reasons": "unspecified",
+      "explanationKey": "unspecified"
+    },
+    "PermissionMatrixCreateDraftRequest": {
+      "version": "unspecified",
+      "entries": [
+        "unspecified"
+      ],
+      "scenarios": [
+        "unspecified"
+      ]
+    },
+    "PermissionMatrixCreateDraftResponse": {
+      "version": "unspecified",
+      "results": "unspecified",
+      "diff": "unspecified"
+    },
+    "PermissionMatrixDiffResponse": {
+      "version": "unspecified",
+      "results": "unspecified",
+      "diff": "unspecified"
+    },
+    "PermissionMatrixGetResponse": {
+      "version": "unspecified",
+      "results": "unspecified",
+      "diff": "unspecified"
+    },
+    "PermissionMatrixRunScenariosRequest": {
+      "version": "unspecified",
+      "entries": [
+        "unspecified"
+      ],
+      "scenarios": [
+        "unspecified"
+      ]
+    },
+    "PermissionMatrixRunScenariosResponse": {
+      "version": "unspecified",
+      "results": "unspecified",
+      "diff": "unspecified"
+    },
+    "PermissionMatrixScheduleRequest": {
+      "version": "unspecified",
+      "entries": [
+        "unspecified"
+      ],
+      "scenarios": [
+        "unspecified"
+      ]
+    },
+    "PermissionMatrixScheduleResponse": {
+      "version": "unspecified",
+      "results": "unspecified",
+      "diff": "unspecified"
+    },
+    "PermissionMatrixSubmitRequest": {
+      "version": "unspecified",
+      "entries": [
+        "unspecified"
+      ],
+      "scenarios": [
+        "unspecified"
+      ]
+    },
+    "PermissionMatrixSubmitResponse": {
+      "version": "unspecified",
+      "results": "unspecified",
+      "diff": "unspecified"
+    },
+    "PermissionMatrixUpdateEntryRequest": {
+      "version": "unspecified",
+      "entries": [
+        "unspecified"
+      ],
+      "scenarios": [
+        "unspecified"
+      ]
+    },
+    "PermissionMatrixUpdateEntryResponse": {
+      "version": "unspecified",
+      "results": "unspecified",
+      "diff": "unspecified"
+    },
+    "PurchaseConfirmRequest": {
+      "jobRef": "unspecified",
+      "version": "unspecified",
+      "plan": "unspecified",
+      "confirmation": "unspecified"
+    },
+    "PurchaseConfirmResponse": {
+      "policyNumber": "unspecified",
+      "coverNoteRef": "unspecified",
+      "gates": "unspecified"
+    },
+    "QuoteStartHomeRequest": {
+      "product": "unspecified",
+      "effectiveDate": "2026-10-07",
+      "minimumData": "unspecified"
+    },
+    "QuoteStartHomeResponse": {
+      "jobRef": "unspecified",
+      "describeModel": "unspecified",
+      "indicativePrice": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "QuoteStartMotorRequest": {
+      "product": "unspecified",
+      "effectiveDate": "2026-10-07",
+      "minimumData": "unspecified"
+    },
+    "QuoteStartMotorResponse": {
+      "jobRef": "unspecified",
+      "describeModel": "unspecified",
+      "indicativePrice": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "TicketApproveRequest": {
+      "ticketId": "0192229b-a1c8-77e2-8377-335e494dac16",
+      "stepUpProof": "unspecified"
+    },
+    "TicketApproveResponse": {
+      "decision": "unspecified",
+      "executedCommandRef": "unspecified"
+    },
+    "TicketGetResponse": {
+      "decision": "unspecified",
+      "executedCommandRef": "unspecified"
+    },
+    "TicketRejectRequest": {
+      "ticketId": "01922d51-643d-78c7-8d76-b6430d5bd289",
+      "stepUpProof": "unspecified"
+    },
+    "TicketRejectResponse": {
+      "decision": "unspecified",
+      "executedCommandRef": "unspecified"
+    },
+    "WalletCancelRequest": {
+      "afm": "unspecified",
+      "plate": "unspecified",
+      "jobRef": "unspecified"
+    },
+    "WalletCancelResponse": {
+      "consentStatus": "unspecified",
+      "preFilledFields": "unspecified"
+    },
+    "WalletStartRequest": {
+      "afm": "unspecified",
+      "plate": "unspecified",
+      "jobRef": "unspecified"
+    },
+    "WalletStartResponse": {
+      "consentStatus": "unspecified",
+      "preFilledFields": "unspecified"
+    },
+    "WalletStatusResponse": {
+      "consentStatus": "unspecified",
+      "preFilledFields": "unspecified"
+    },
+    "WebhookDeliveriesItem": {
+      "subscription": "unspecified",
+      "deliveries": "unspecified"
+    },
+    "WebhookDeliveriesPage": {
+      "items": [
+        {
+          "subscription": "unspecified",
+          "deliveries": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "WebhookPauseRequest": {
+      "endpoint": "unspecified",
+      "eventTypes": "unspecified"
+    },
+    "WebhookPauseResponse": {
+      "subscription": "unspecified",
+      "deliveries": "unspecified"
+    },
+    "WebhookReplayRequest": {
+      "endpoint": "unspecified",
+      "eventTypes": "unspecified"
+    },
+    "WebhookReplayResponse": {
+      "subscription": "unspecified",
+      "deliveries": "unspecified"
+    },
+    "WebhookSubscribeRequest": {
+      "endpoint": "unspecified",
+      "eventTypes": "unspecified"
+    },
+    "WebhookSubscribeResponse": {
+      "subscription": "unspecified",
+      "deliveries": "unspecified"
+    },
+    "WebhookVerifyRequest": {
+      "endpoint": "unspecified",
+      "eventTypes": "unspecified"
+    },
+    "WebhookVerifyResponse": {
+      "subscription": "unspecified",
+      "deliveries": "unspecified"
+    },
+    "WithdrawalDeclareRequest": {
+      "name": "unspecified",
+      "contractId": "0192fed8-00b6-7a22-8abf-f9d3d51cf0e5",
+      "eMail": "unspecified",
+      "reason": "unspecified"
+    },
+    "WithdrawalDeclareResponse": {
+      "requestNumber": "unspecified",
+      "confirmedAt": "2026-10-07T09:00:00Z",
+      "receipt": "unspecified"
+    },
+    "WithdrawalGetResponse": {
+      "status": "unspecified",
+      "refundStatus": "unspecified"
+    },
+    "WithdrawalListItem": {
+      "status": "unspecified",
+      "refundStatus": "unspecified"
+    },
+    "WithdrawalListPage": {
+      "items": [
+        {
+          "status": "unspecified",
+          "refundStatus": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    }
+  }
+}

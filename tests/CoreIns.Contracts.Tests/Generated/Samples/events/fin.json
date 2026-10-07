@@ -1,0 +1,1002 @@
+[
+  {
+    "eventId": "0192c949-0710-78a3-8bd3-ee9ac9a2bd0b",
+    "eventType": "ActuarialResultSetPosted",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192747b-cefb-7fe3-8c48-351ba05c8206",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "resultSetId": "01925d61-8371-7f50-832f-192cb726970b",
+      "runId": "0192701b-52f6-70c8-8cc5-f75e0ffe1251"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "resultSetId": "01926ed9-5f67-7cf6-857f-7e5d03e8c677",
+      "runId": "01924036-66ea-7607-82db-bef17e9ea03a",
+      "status": "POSTED",
+      "findingsCount": 1
+    }
+  },
+  {
+    "eventId": "0192cad5-6bb5-7241-838b-8886cd65c2a3",
+    "eventType": "ActuarialResultSetPosted",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192d767-310b-7ae9-8446-78e96375c66f",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "resultSetId": "01925161-6783-7487-88f9-6a6c2e8f70a5",
+      "runId": "0192578c-462b-72cd-8a39-ed8282cf85e5"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "resultSetId": "0192e201-45ca-7307-81ad-000b4f3c37a5",
+      "runId": "01926228-86cd-7e69-8a1d-2b7c71aa443d",
+      "status": "POSTED",
+      "findingsCount": 1
+    }
+  },
+  {
+    "eventId": "01922095-2d30-7302-82e7-dde6bd195d42",
+    "eventType": "BusinessEventSuspended",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "019211b3-2a59-712a-8f8c-e30611d8be9c",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "businessEventId": "0192d726-9650-7485-8035-80139a2b49ff"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "businessEventId": "01923dd3-b992-7771-8ddf-6bbb6f0a30fa",
+      "source": "Sample text",
+      "reason": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    }
+  },
+  {
+    "eventId": "01926e57-54ad-7537-813c-93e7d5dfc1c7",
+    "eventType": "BusinessEventSuspended",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01920af9-3c2b-77e7-864b-448998dfa1b4",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "businessEventId": "0192dfbf-6873-73f8-822b-1f46e0e201f0"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "businessEventId": "0192ff9b-1b57-75d1-852d-88ced224a0f8",
+      "source": "Sample text",
+      "reason": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    }
+  },
+  {
+    "eventId": "019206fb-0055-72fb-825c-1c81a7110688",
+    "eventType": "EarningRunCompleted",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01926172-6a78-70cb-86dc-404f59cb7189",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "runId": "0192b4f3-fae2-7eca-8823-6f881556fd04"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "01924513-b290-7f50-8b6d-f53a169a9973",
+      "asOfDate": "2026-10-07",
+      "mode": "SAMPLE_CODE",
+      "earnedTotals": [
+        {
+          "book": "SAMPLE_CODE",
+          "lob": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "exceptionCount": 1
+    }
+  },
+  {
+    "eventId": "0192bbb2-9b6a-76fc-871b-c989ddfeddcb",
+    "eventType": "EarningRunCompleted",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01922e01-edef-7dff-8c3a-28b090b0686b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "runId": "0192347c-11d7-7222-8461-67114cb626ad"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "0192cf37-87d1-74a7-856d-e57febc2aa15",
+      "asOfDate": "2026-10-07",
+      "mode": "SAMPLE_CODE",
+      "earnedTotals": [
+        {
+          "book": "SAMPLE_CODE",
+          "lob": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "exceptionCount": 1
+    }
+  },
+  {
+    "eventId": "0192225a-b9de-7a27-8308-5b1147eccb66",
+    "eventType": "FxRevaluationCompleted",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192da5a-dc79-762c-8d3f-f1e0dc320095",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "runId": "0192c023-0893-76c7-876c-b37aa3b116c6"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "01922a91-cd78-7f78-8593-e28d83e4a927",
+      "runType": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "totals": {
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
+    }
+  },
+  {
+    "eventId": "01925384-1270-7281-8b9b-206fe0afb8d6",
+    "eventType": "FxRevaluationCompleted",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01924450-72dc-7205-8ab9-15fa1c0a719c",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "runId": "01923d2b-2dfc-7ee1-8eb5-581d36c30b26"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "019298b9-dadb-7bbc-8b51-e13302d4cb25",
+      "runType": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "totals": {
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
+    }
+  },
+  {
+    "eventId": "01925133-9f6e-708e-8bc8-1d1a860c1c50",
+    "eventType": "GLExtractSent",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01929467-d770-7948-80cc-679718f6ba43",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "extractId": "019275e8-b726-7388-85f3-390a9b9bc005"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "extractId": "0192ef6e-a009-74f0-8b33-18c55f56a71c",
+      "target": "SAMPLE_CODE",
+      "book": "SAMPLE_CODE",
+      "range": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "totals": {
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    }
+  },
+  {
+    "eventId": "0192c065-d78b-77bd-8d3a-8cbaabb84a5a",
+    "eventType": "GLExtractSent",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192c0a3-0f55-76e7-8083-81001d0baa95",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "extractId": "0192d055-9a11-7777-8897-21e7a6b2c48b"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "extractId": "0192f227-2ae4-79f4-8ef1-c0f1fb306dca",
+      "target": "SAMPLE_CODE",
+      "book": "SAMPLE_CODE",
+      "range": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "totals": {
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    }
+  },
+  {
+    "eventId": "01927c4b-8b60-70b4-8552-55aec05fb774",
+    "eventType": "Ifrs17GroupAssigned",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "Ifrs17AssignmentSubject",
+    "aggregateId": "019256ee-4d78-7210-843d-a91355c65f2d",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "assignmentSubjectId": "019250f9-062b-769b-87c9-1dd632b67f96",
+      "groupId": "01923464-983a-78de-8a75-3a5128fa3e4e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "subjectKind": "TERM",
+      "termId": "0192d623-b888-795b-8fa4-c9fcc6d8209d",
+      "riContractId": "019276bf-983f-7b2f-8b9a-769822aed878",
+      "groupId": "01920aea-0db6-7935-8631-5568b3e1020d",
+      "groupCode": "SAMPLE_CODE",
+      "portfolio": "SAMPLE_CODE",
+      "cohort": "SAMPLE_CODE",
+      "profitabilityGroup": "SAMPLE_CODE",
+      "model": "SAMPLE_CODE",
+      "recognitionDate": "2026-10-07",
+      "version": 1
+    }
+  },
+  {
+    "eventId": "0192bed4-7fa1-74ad-8bd0-bddbf52c282f",
+    "eventType": "Ifrs17GroupAssigned",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "Ifrs17AssignmentSubject",
+    "aggregateId": "01925dee-82b9-7b6f-8011-76d38ecec66b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "assignmentSubjectId": "0192981e-4362-794b-8e07-3e6f3885e01c",
+      "groupId": "01928a27-ec71-7a99-894e-67cc97f4376e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "subjectKind": "TERM",
+      "termId": null,
+      "riContractId": null,
+      "groupId": "01920990-df82-73a9-864b-221c30d389c4",
+      "groupCode": "SAMPLE_CODE",
+      "portfolio": "SAMPLE_CODE",
+      "cohort": "SAMPLE_CODE",
+      "profitabilityGroup": "SAMPLE_CODE",
+      "model": "SAMPLE_CODE",
+      "recognitionDate": "2026-10-07",
+      "version": 1
+    }
+  },
+  {
+    "eventId": "0192a2e3-4673-7302-8f8c-7f43d104dcaa",
+    "eventType": "JournalPosted",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192b841-6ea7-78bd-8cf9-c8d3885ad330",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "journalId": "01928388-1241-71ec-8a2c-95285bee9f3d",
+      "periodId": "0192ff04-343b-743e-88fc-b404ae21cce3"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "journals": [
+        {
+          "journalId": "019287bb-4cd4-7fce-8925-e0c15be63fe2",
+          "journalNumber": "SAMPLE-000001"
+        }
+      ],
+      "book": "SAMPLE_CODE",
+      "accountingDate": "2026-10-07",
+      "periodId": "01921256-8f06-7203-8063-f8fa0c0b8226",
+      "sourceType": "SAMPLE_CODE",
+      "sourceRefs": [
+        "Sample text"
+      ],
+      "totalsPerCurrency": [
+        {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      ]
+    }
+  },
+  {
+    "eventId": "01924502-8de0-7dc1-88ee-e38d7d61e633",
+    "eventType": "JournalPosted",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01929960-fb8b-786c-84ca-39eb25c25489",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "journalId": "0192c31c-d602-742c-872c-7fb5b7ab8be5",
+      "periodId": "019263ed-942b-7538-8b3d-f82c81982c2a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "journals": [
+        {
+          "journalId": "0192d077-fb7f-7679-89be-12de2260962d",
+          "journalNumber": "SAMPLE-000001"
+        }
+      ],
+      "book": "SAMPLE_CODE",
+      "accountingDate": "2026-10-07",
+      "periodId": "0192eb0f-5d71-7441-8126-058d936cb2d2",
+      "sourceType": "SAMPLE_CODE",
+      "sourceRefs": [
+        "Sample text"
+      ],
+      "totalsPerCurrency": [
+        {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      ]
+    }
+  },
+  {
+    "eventId": "019299ca-ca18-784f-8198-d45c11eba612",
+    "eventType": "PeriodClosed",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192ca3f-879f-74a8-80a3-09c403f7b0d5",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "periodId": "0192f629-330e-76bd-8162-a9663c3444d8"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "periodId": "0192ac9f-d1f9-7658-86e7-552a438deacd",
+      "kind": "SAMPLE_CODE",
+      "books": [
+        "SAMPLE_CODE"
+      ],
+      "lockTime": "2026-10-07T09:00:00Z",
+      "keyTotals": {
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "relock": true
+    }
+  },
+  {
+    "eventId": "0192ad25-1970-71dc-87ee-1d014374b9ab",
+    "eventType": "PeriodClosed",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "019209e9-5b1e-7789-8b63-908cd5be0629",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "periodId": "0192aa5d-89f9-786b-85da-5ba0cd24b67d"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "periodId": "01924bd5-b524-7fc6-8edf-3d36b6398277",
+      "kind": "SAMPLE_CODE",
+      "books": [
+        "SAMPLE_CODE"
+      ],
+      "lockTime": "2026-10-07T09:00:00Z",
+      "keyTotals": {
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "relock": true
+    }
+  },
+  {
+    "eventId": "0192915e-78cb-76c9-8c29-638594078bcf",
+    "eventType": "PeriodReopened",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192aff6-e04b-7191-8495-356fb9570bce",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "periodId": "0192b52a-da4d-7e62-8747-30fd98c321ec"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "periodId": "0192d96f-4895-7faa-8a96-04d0e732ab03",
+      "reason": "SAMPLE_CODE",
+      "approverUserIds": [
+        "01923ad0-bf98-7a3a-82e4-7c3857f76ceb"
+      ],
+      "impactSummary": {
+        "note": "sample"
+      }
+    }
+  },
+  {
+    "eventId": "0192773e-850c-7392-8c9b-2a24159dec26",
+    "eventType": "PeriodReopened",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01928a61-f9a6-7dd5-80cd-ce5a3186a7e2",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "periodId": "019219c5-152e-793d-8885-c5a7c382028b"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "periodId": "0192ac97-e358-7eed-8b18-22da9964ba7e",
+      "reason": "SAMPLE_CODE",
+      "approverUserIds": [
+        "01924fd4-d924-7742-8c3b-58b7f066047f"
+      ],
+      "impactSummary": {
+        "note": "sample"
+      }
+    }
+  },
+  {
+    "eventId": "019291a0-5ac1-774c-8f26-783209e4f022",
+    "eventType": "PostingRuleSetActivated",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192be6d-4d96-7963-85d8-6388678c3c28",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "versionId": "0192ddf2-77bd-703f-86dc-57b7a1c2b7ce"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "versionId": "0192f524-d850-76be-8681-bfea3f173a71",
+      "book": "SAMPLE_CODE",
+      "effectiveFrom": "2026-10-07",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    }
+  },
+  {
+    "eventId": "0192c7b7-b7fc-74f2-82e9-da32cf0738e4",
+    "eventType": "PostingRuleSetActivated",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01921fb9-70fd-7f29-8809-ac8a4aa89534",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "versionId": "0192765d-2213-7a35-8b47-1ff9d4b66c12"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "versionId": "0192985b-1ef8-7f8d-8188-bd82cde6c328",
+      "book": "SAMPLE_CODE",
+      "effectiveFrom": "2026-10-07",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    }
+  },
+  {
+    "eventId": "0192ec01-e200-7e0b-8fee-44a4224c25aa",
+    "eventType": "ReconciliationBreakRaised",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01922048-1ed3-74b0-8a90-13cdd9c3baed",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "breakId": "019240be-1295-7cdf-8cb7-c80c14d69842"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "breakId": "019242f0-8035-7b62-8ec3-f3ee6bea980c",
+      "leg": "SAMPLE_CODE",
+      "breakType": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ownerModule": "PTY",
+      "severity": "SAMPLE_CODE",
+      "references": [
+        "Sample text"
+      ]
+    }
+  },
+  {
+    "eventId": "0192715f-80ae-7043-8f31-4ea7e6db17c0",
+    "eventType": "ReconciliationBreakRaised",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192db63-a757-7adf-8c35-9be3478ede94",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "breakId": "01927292-dfef-7d5f-8226-75ee6ffb0ca6"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "breakId": "0192dbb7-705b-71f5-8360-b78f71ee8383",
+      "leg": "SAMPLE_CODE",
+      "breakType": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ownerModule": "PTY",
+      "severity": "SAMPLE_CODE",
+      "references": [
+        "Sample text"
+      ]
+    }
+  },
+  {
+    "eventId": "0192bf0b-56ab-746a-8d1c-4e8d47c3d106",
+    "eventType": "ReconciliationBreakResolved",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192297f-773a-71d7-8d25-1bd700bbfc3c",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "breakId": "0192b308-0bba-798b-80f3-4cbadc56220e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "breakId": "01928727-23b3-7f4b-87fb-82b32a5dfe2e",
+      "resolution": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192b614-0869-7408-8e66-835ba1a7d102",
+    "eventType": "ReconciliationBreakResolved",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "019218a5-7380-756f-88bd-5360f8739140",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "breakId": "01927367-fe0d-7014-862c-c55e75597426"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "breakId": "01928339-f0ab-760e-8825-5e66a6b3ea86",
+      "resolution": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192f934-4e9c-7f88-80d5-ec4e5365ba3c",
+    "eventType": "TaxReturnFiled",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01927df4-d807-7641-8b60-3c50af0f8c56",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "returnId": "019219ed-378b-74f9-8d61-8d74b40280b4"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "returnId": "0192d657-54a3-7978-8daa-c85ec8412edb",
+      "taxCode": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "totals": {
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "filingReference": "Sample text"
+    }
+  },
+  {
+    "eventId": "01922c45-3045-7f93-8c04-543d9ba7a9a8",
+    "eventType": "TaxReturnFiled",
+    "schemaVersion": "1.0",
+    "producer": "FIN",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "0192b81a-606a-74fa-8004-352634ddb763",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "returnId": "01925892-6f56-729c-8e9f-ccd4b392b5b2"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "returnId": "019284dc-296e-7ed8-8178-3aaa7c8b8c7a",
+      "taxCode": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "totals": {
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "filingReference": "Sample text"
+    }
+  }
+]

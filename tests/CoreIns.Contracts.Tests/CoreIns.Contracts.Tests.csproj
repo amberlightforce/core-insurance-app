@@ -1,8 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- The canonical cross-module state models (contract §3.2.4, PRD-18 §9) declared in the modules' *.Contracts projects. -->
+  <!--
+    Contract tests: the canonical state models (contract §3.2.4, PRD-18 §9) and the generated contract types
+    (F-1c part 3): every catalogued event has a generated payload record that round-trips its schema samples, every
+    generated DTO round-trips its sample, every sandbox double answers, and the error-code catalogues are well formed.
+    The samples are generated from the schemas and validated in CI by contracts/events/validate.py and
+    tools/CoreIns.ContractGen/validate_samples.py.
+  -->
 
   <ItemGroup>
+    <ProjectReference Include="..\CoreIns.Testing.Contracts\CoreIns.Testing.Contracts.csproj" />
     <ProjectReference Include="..\..\src\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
     <ProjectReference Include="..\..\src\CoreIns.Modules.Billing.Contracts\CoreIns.Modules.Billing.Contracts.csproj" />
     <ProjectReference Include="..\..\src\CoreIns.Modules.Claims.Contracts\CoreIns.Modules.Claims.Contracts.csproj" />

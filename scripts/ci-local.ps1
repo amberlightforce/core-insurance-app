@@ -24,9 +24,19 @@ Run dotnet @('tool', 'restore')
 Step 'Build (warnings are errors)'
 Run dotnet @('build', 'CoreIns.sln', '--configuration', 'Release', '--no-restore')
 
+Step 'Generated contract code is current and deterministic'
+Run dotnet @('run', '--project', 'tools/CoreIns.ContractGen', '--configuration', 'Release', '--no-build', '--', '--check')
+
+Step 'Contract schemas and generated samples are valid'
+Run python @('-m', 'pip', 'install', '--quiet', '-r', 'contracts/openapi/requirements.txt')
+$eventSamples = @(Get-ChildItem tests/CoreIns.Contracts.Tests/Generated/Samples/events -Filter *.json | ForEach-Object { $_.FullName })
+Run python (@('contracts/events/validate.py', '--require-jsonschema', '--instance') + $eventSamples)
+Run python @('tools/CoreIns.ContractGen/validate_samples.py')
+
 Step 'Unit, analyser and architecture tests'
+# CoreIns.Testing.Contracts is a test-support library (sandbox doubles), not a test project.
 Get-ChildItem tests -Filter *.csproj -Recurse -Depth 1 |
-    Where-Object { $_.Name -notlike '*IntegrationTests*' } |
+    Where-Object { $_.Name -notlike '*IntegrationTests*' -and $_.Name -notlike 'CoreIns.Testing.*' } |
     ForEach-Object { Run dotnet @('test', '--project', $_.FullName, '--configuration', 'Release', '--no-build') }
 
 if ($SkipIntegration) {

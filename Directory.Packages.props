@@ -64,6 +64,9 @@
     <!-- Roslyn API for the in-repo analyser COREINS001 (no double/float in production code, ADR §2 rule 2).
          5.0.0 = the compiler of the minimum SDK in global.json (10.0.100), so the analyser loads in every allowed SDK. -->
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <!-- YAML reader for tools/CoreIns.ContractGen: the OpenAPI 3.1 contracts in contracts/openapi are YAML and .NET has
+         no YAML parser (F-1c part 3, D-PRG-07). Build tool only; never referenced by src or shipped in the image. -->
+    <PackageVersion Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
   <!-- Test packages -->

@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Test support (D-PRG-07, F-1c part 3): sandbox doubles of every in-process module interface (Fake<Module><Resource>Service,
+    generated) answering with schema-valid canned responses and recording calls, plus RecordingEventPublisher, an
+    IEventPublisher double that validates every envelope against its catalogue entry. A module in an earlier wave
+    builds and tests against a later module's interface with these. A library, not a test project.
+    Generated/ is written by tools/CoreIns.ContractGen; never edit it by hand.
+  -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- tests/Directory.Build.props adds xunit.v3 to every test project; this library does not run tests. -->
+    <PackageReference Remove="xunit.v3" />
+    <PackageReference Remove="Shouldly" />
+    <Using Remove="Xunit" />
+    <Using Remove="Shouldly" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Generated/Samples/*.json" LogicalName="CoreIns.Testing.Contracts.Samples.%(Filename).json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Platform\CoreIns.Platform.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Platform.Contracts\CoreIns.Platform.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Party.Contracts\CoreIns.Modules.Party.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Rating.Contracts\CoreIns.Modules.Rating.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Underwriting.Contracts\CoreIns.Modules.Underwriting.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Billing.Contracts\CoreIns.Modules.Billing.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Claims.Contracts\CoreIns.Modules.Claims.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Reinsurance.Contracts\CoreIns.Modules.Reinsurance.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Finance.Contracts\CoreIns.Modules.Finance.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Documents.Contracts\CoreIns.Modules.Documents.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Compliance.Contracts\CoreIns.Modules.Compliance.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Channels.Contracts\CoreIns.Modules.Channels.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Work.Contracts\CoreIns.Modules.Work.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Data.Contracts\CoreIns.Modules.Data.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Migration.Contracts\CoreIns.Modules.Migration.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
