@@ -1,5 +1,6 @@
 using CoreIns.CountryPacks.CY;
 using CoreIns.CountryPacks.GR.Addresses;
+using CoreIns.CountryPacks.GR.Configuration;
 using CoreIns.CountryPacks.GR.Identifiers;
 using CoreIns.CountryPacks.GR.Language;
 using CoreIns.CountryPacks.GR.Transliteration;
@@ -24,6 +25,7 @@ internal static class CountryPackBinding
             case GrPackCountry:
                 services.AddSingleton<IIdValidator>(sp => new GreekIdValidator(sp.GetRequiredService<TimeProvider>()));
                 services.AddSingleton<INameTransliterator, GreekNameTransliterator>();
+                services.AddSingleton<IPackConfigurationSource, GrPackConfiguration>();
                 break;
             case CyPack.Country:
                 services.AddSingleton<IIdValidator>(sp => new CyIdValidator(sp.GetRequiredService<TimeProvider>()));

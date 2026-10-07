@@ -1,8 +1,6 @@
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using CoreIns.Modules.Market.Contracts;
-using CoreIns.Modules.Market.Contracts.Api;
 using CoreIns.Modules.Product.Contracts;
 using CoreIns.Modules.Product.Contracts.Api;
 using CoreIns.Modules.Rating.Contracts;
@@ -13,7 +11,6 @@ using CoreIns.Platform.Contracts.Common;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Json;
-using CoreIns.Testing.Contracts.Fakes.Market;
 using CoreIns.Testing.Contracts.Fakes.Product;
 using CoreIns.Testing.Contracts.Fakes.Rating;
 using CoreIns.Testing.Contracts.Fakes.Underwriting;
@@ -25,7 +22,7 @@ using static CoreIns.IntegrationTests.Party.PartyApi;
 namespace CoreIns.IntegrationTests.Policy;
 
 /// <summary>
-/// The POL slice host: the real Host and database, with PFC, RAT, UW and MKT rounding replaced by their generated
+/// The POL slice host: the real Host and database (real PTY and MKT rounding), with PFC, RAT and UW replaced by their generated
 /// sandbox doubles (those modules are built in parallel, D-SLC-01). Every rate below is ILLUSTRATIVE TEST DATA
 /// (D-SLC-04): it is not a tariff, a tax rate or any regulatory value.
 /// </summary>
@@ -48,7 +45,6 @@ internal sealed class PolicySlice : IAsyncDisposable
             services.AddSingleton<IProductQuestionSetService>(QuestionSets);
             services.AddSingleton<IProductPolicyDraftService>(Drafts);
             services.AddSingleton<IRatingRateService>(Rating);
-            services.AddSingleton<IMarketRoundingService>(Rounding);
             services.AddSingleton<IUnderwritingRulesService>(Underwriting);
         }));
         Client = Factory.CreateClient();
@@ -66,13 +62,6 @@ internal sealed class PolicySlice : IAsyncDisposable
         QuestionSets.Setup("pfc.QuestionSet.evaluate", new QuestionSetEvaluateResponse { KnockOutFlags = false, ReferralFlags = false });
         Drafts.Setup("pfc.PolicyDraft.validate", new PolicyDraftValidateResponse { Errors = [] });
         Rating.Setup("rat.Rate.rate", call => Rate((RateRateRequest)call.Arguments[0]!));
-
-        // Test double of mkt.Rounding.apply: two decimals, half away from zero (the real rule is MKT configuration).
-        Rounding.Setup("mkt.Rounding.apply", call =>
-        {
-            var request = (RoundingApplyRequest)call.Arguments[0]!;
-            return new RoundingApplyResponse { AmountAfterRounding = request.Amount!.Value.Round(2, MidpointRounding.AwayFromZero) };
-        });
         AcceptAll();
     }
 
@@ -87,8 +76,6 @@ internal sealed class PolicySlice : IAsyncDisposable
     public FakeProductPolicyDraftService Drafts { get; } = new();
 
     public FakeRatingRateService Rating { get; } = new();
-
-    public FakeMarketRoundingService Rounding { get; } = new();
 
     public FakeUnderwritingRulesService Underwriting { get; } = new();
 

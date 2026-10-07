@@ -51,6 +51,7 @@ internal static class ModuleCatalog
     [
         .. PlatformModule.Databases,
         .. PartyModule.Databases,
+        .. MarketModule.Databases,
         .. PolicyModule.Databases,
     ];
 
@@ -58,6 +59,7 @@ internal static class ModuleCatalog
     public static IReadOnlyList<System.Reflection.Assembly> ApiAssemblies { get; } =
     [
         typeof(PartyModule).Assembly,
+        typeof(MarketModule).Assembly,
         typeof(PolicyModule).Assembly,
     ];
 

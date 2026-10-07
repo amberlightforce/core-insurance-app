@@ -297,13 +297,27 @@ internal sealed class QuoteJobHandler(
         var lines = new List<ChargeLine>();
         foreach (var draft in drafts.Value)
         {
-            var rounded = await roundingService.Value.ApplyAsync(
-                new RoundingApplyRequest
-                {
-                    Amount = draft.Unrounded, Currency = currency,
-                    Purpose = JsonSerializer.SerializeToElement("POL_CHARGE", SharedKernelJson.Options),
-                },
-                cancellationToken).ConfigureAwait(false);
+            // MKT rounding purposes (PRD-17 REQ-MKT-192/193): premium lines charge.line, tax and levy lines tax.line.
+            RoundingApplyResponse rounded;
+            try
+            {
+                rounded = await roundingService.Value.ApplyAsync(
+                    new RoundingApplyRequest
+                    {
+                        Amount = draft.Unrounded, Currency = currency,
+                        Purpose = draft.ChargeCategory == ChargeCategories.Premium ? "charge.line" : "tax.line",
+                        Context = new RoundingApplyRequest.ContextDetail
+                        {
+                            LegalEntity = context.LegalEntity!.Value.Value, ValidAt = job.EffectiveAt.ToBusinessDate(zone),
+                        },
+                    },
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (DomainException ex) when (ex.Error.Code.Module != ModuleCode.POL)
+            {
+                return DomainError.Of(ModuleCode.POL, "RATING", $"Rounding failed: {ex.Error.Code}.");
+            }
+
             if (rounded.AmountAfterRounding is not { } amount || amount.Currency != currency)
             {
                 return DomainError.Of(ModuleCode.POL, "RATING", $"MKT rounding returned no {currency} amount for {draft.ChargeType}.");

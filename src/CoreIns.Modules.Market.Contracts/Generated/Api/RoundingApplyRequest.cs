@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.Rounding.apply request. PRD inputs: "amount, currency, purpose, context"</summary>
+/// <summary>mkt.Rounding.apply request. PRD inputs: "amount, currency, purpose, context" (REQ-MKT-195). Precedence: tax-class rule, then purpose rule, then currency default (BR-MKT-027).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RoundingApplyRequest
 {
@@ -18,19 +18,32 @@ public sealed record RoundingApplyRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Currency? Currency { get; init; }
 
-    /// <summary>PRD: "purpose"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>PRD: "purpose", for example charge.line or tax.line (key cur.rounding.&lt;purpose&gt;)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Purpose { get; init; }
+    public string? Purpose { get; init; }
 
     /// <summary>PRD: "context"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("context")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Context { get; init; }
+    public ContextDetail? Context { get; init; }
+
+    /// <summary>PRD: "context"</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ContextDetail
+    {
+        /// <summary>Contract member 'legalEntity'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("legalEntity")]
+        public required string LegalEntity { get; init; }
+
+        /// <summary>Tax class whose rule overrides the purpose rule (key cur.rounding.tax.&lt;class&gt;, REQ-MKT-193)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("taxClass")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? TaxClass { get; init; }
+
+        /// <summary>Contract member 'validAt'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("validAt")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.BusinessDate? ValidAt { get; init; }
+    }
 }
