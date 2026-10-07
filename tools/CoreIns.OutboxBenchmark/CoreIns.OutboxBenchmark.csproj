@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    F-1f(b) outbox throughput benchmark (D8: >= 2,000 events/s): produces events through the real publisher and
+    commit path, then dispatches them with the real OutboxProcessor to in-process handlers, against PostgreSQL 17.
+    Not part of the runtime image.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Platform\CoreIns.Platform.csproj" />
+  </ItemGroup>
+
+</Project>

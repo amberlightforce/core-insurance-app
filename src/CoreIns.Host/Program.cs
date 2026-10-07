@@ -1,6 +1,9 @@
 using CoreIns.Host.Database;
 using CoreIns.Host.Health;
 using CoreIns.Host.Hosting;
+using CoreIns.Platform;
+using CoreIns.Platform.Errors;
+using CoreIns.Platform.Http;
 using Hangfire;
 using Serilog;
 
@@ -31,6 +34,12 @@ builder.Services.AddCoreInsDataSource(connectionString);
 builder.Services.AddCoreInsHealthChecks();
 builder.Services.AddCoreInsJobs(connectionString, role);
 
+if (role == AppRole.Worker)
+{
+    // Outbox dispatcher: in-process event handlers run in the worker only (D-ARC-02, INFRASTRUCTURE §1).
+    builder.Services.AddOutboxDispatcher();
+}
+
 if (role == AppRole.Api)
 {
     builder.Services.AddProblemDetails();
@@ -53,7 +62,11 @@ if (role == AppRole.Api)
     app.UseAuthentication();
     app.UseAuthorization();
 
+    // Request context (actor, language, trace, stamp, configuration hash) and HTTP idempotency (D-API-01).
+    app.UseCoreInsPlatform();
+
     app.MapCoreInsHealth();
+    app.MapCoreInsProblemPages();
     app.MapControllers();
 
     var openApi = app.MapOpenApi();

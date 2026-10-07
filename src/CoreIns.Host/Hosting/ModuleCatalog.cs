@@ -43,6 +43,15 @@ internal static class ModuleCatalog
         .. MarketModule.Schemas,
     ];
 
+    /// <summary>
+    /// Every module database the migrate job migrates (EF Core migrations, then application-role grants), in order.
+    /// Business modules add theirs when they get tables.
+    /// </summary>
+    public static IReadOnlyList<CoreIns.Platform.Persistence.ModuleDatabaseDefinition> Databases { get; } =
+    [
+        .. PlatformModule.Databases,
+    ];
+
     /// <summary>Calls every module's registration hook. The platform registers first.</summary>
     public static IServiceCollection AddCoreInsModules(this IServiceCollection services, IConfiguration configuration) =>
         services

@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using CoreIns.Host.Hosting;
 using Hangfire.PostgreSql;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace CoreIns.Host.Database;
@@ -62,6 +63,17 @@ internal sealed partial class DatabaseMigrator(IConfiguration configuration, ILo
 
         PostgreSqlObjectsInstaller.Install(connection, JobsExtensions.HangfireSchema);
 
+        // Module tables: each module's EF Core migrations (history table in its own schema), then its grants.
+        foreach (var database in ModuleCatalog.Databases)
+        {
+            await using (var context = database.CreateForMigration(connectionString))
+            {
+                await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            LogModuleMigrated(logger, database.Module, database.Schema);
+        }
+
         if (appRoleExists)
         {
             var hangfire = JobsExtensions.HangfireSchema;
@@ -69,6 +81,10 @@ internal sealed partial class DatabaseMigrator(IConfiguration configuration, ILo
                 .ConfigureAwait(false);
             await ExecuteAsync(connection, $"GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA {hangfire} TO {appRole}", cancellationToken)
                 .ConfigureAwait(false);
+            foreach (var statement in ModuleCatalog.Databases.SelectMany(database => database.GrantStatements(appRole)))
+            {
+                await ExecuteAsync(connection, statement, cancellationToken).ConfigureAwait(false);
+            }
         }
         else
         {
@@ -123,6 +139,9 @@ internal sealed partial class DatabaseMigrator(IConfiguration configuration, ILo
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Database migration completed: {SchemaCount} schemas ensured")]
     private static partial void LogMigrationCompleted(ILogger logger, int schemaCount);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Module {Module} migrated (schema {Schema})")]
+    private static partial void LogModuleMigrated(ILogger logger, CoreIns.SharedKernel.Identifiers.ModuleCode module, string schema);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Database role {AppRole} does not exist; privileges were not granted")]
     private static partial void LogAppRoleMissing(ILogger logger, string appRole);
