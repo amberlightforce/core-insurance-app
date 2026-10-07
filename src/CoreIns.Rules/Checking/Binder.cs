@@ -828,7 +828,7 @@ internal sealed class Binder
             };
             if (folded is null)
             {
-                throw Fail(arg.Syntax, RuleErrorCode.InvalidLiteral, $"invalid {type} literal {text}");
+                throw Fail(arg.Syntax, RuleErrorCode.InvalidLiteral, $"invalid {type} literal {Ops.Excerpt(text.ToString())}");
             }
 
             return new ConstNode(c, type, folded);

@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using System;
 
 namespace CoreIns.Rules;
@@ -44,11 +46,22 @@ public sealed record RuleLimits
     /// <summary>Maximum number of trace entries recorded per evaluation (further entries are dropped and the trace is marked truncated).</summary>
     public int MaxTraceEntries { get; init; } = 10_000;
 
+    /// <summary>Largest value weight recorded in a trace; heavier values appear as an <see cref="ElidedValue"/>.</summary>
+    public long MaxTraceValueWeight { get; init; } = 1_000;
+
+    /// <summary>
+    /// Canonical text of every budget value (ruling D-ARC-10e). Part of every content hash, so equal hashes mean
+    /// equal limits as well as equal logic.
+    /// </summary>
+    public string Fingerprint() => string.Create(
+        CultureInfo.InvariantCulture,
+        $"limits{{length={MaxExpressionLength};depth={MaxAstDepth};steps={MaxEvaluationSteps};alloc={MaxAllocatedElements};time={MaxEvaluationTime.Ticks};collection={MaxCollectionSize};string={MaxStringLength};regexLength={MaxRegexPatternLength};regexTime={RegexTimeout.Ticks};traceEntries={MaxTraceEntries};traceWeight={MaxTraceValueWeight}}}");
+
     internal void Validate()
     {
         if (MaxExpressionLength <= 0 || MaxAstDepth <= 0 || MaxEvaluationSteps <= 0 || MaxCollectionSize <= 0
             || MaxStringLength <= 0 || MaxRegexPatternLength <= 0 || RegexTimeout <= TimeSpan.Zero || MaxTraceEntries < 0
-            || MaxAllocatedElements <= 0 || MaxEvaluationTime <= TimeSpan.Zero)
+            || MaxAllocatedElements <= 0 || MaxEvaluationTime <= TimeSpan.Zero || MaxTraceValueWeight <= 0)
         {
             throw new ArgumentException("rule limits must be positive");
         }

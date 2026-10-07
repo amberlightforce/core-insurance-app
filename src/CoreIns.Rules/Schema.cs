@@ -104,7 +104,7 @@ public sealed class ObjectValueBuilder
             throw new RuleInputException(_schema.Name + "." + field, $"schema '{_schema.Name}' has no field '{field}'");
         }
 
-        _values[def.Ordinal] = ValueConformance.Conform(value, def.Type, def.Nullable, _schema.Name + "." + field);
+        _values[def.Ordinal] = ValueConformance.ConformInput(value, def.Type, def.Nullable, _schema.Name + "." + field);
         return this;
     }
 
@@ -292,7 +292,7 @@ public sealed class RuleInputs
                 throw new RuleInputException(name, "undeclared input");
             }
 
-            _values[def.Slot] = ValueConformance.Conform(value, def.Type, def.Nullable, name);
+            _values[def.Slot] = ValueConformance.ConformInput(value, def.Type, def.Nullable, name);
             return this;
         }
 

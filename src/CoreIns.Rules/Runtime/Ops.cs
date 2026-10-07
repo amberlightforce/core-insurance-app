@@ -17,6 +17,26 @@ internal static class Ops
 
     public static EvalFailure Fail(RuleErrorCode code, string message) => new(code, message);
 
+    /// <summary>Longest value excerpt an error message may contain.</summary>
+    public const int MaxEchoLength = 64;
+
+    /// <summary>
+    /// Describes a value for an error message without leaking data: string content (which may be personal data) is
+    /// never echoed, only its length; other values are shown up to 64 characters, then "...".
+    /// </summary>
+    public static string Describe(RuleValue value)
+    {
+        if (value is StringValue s)
+        {
+            return string.Create(CultureInfo.InvariantCulture, $"a string of length {s.Value.Length}");
+        }
+
+        return Excerpt(value.ToString());
+    }
+
+    /// <summary>Cuts display text to 64 characters plus "..." (for expression text written by rule authors).</summary>
+    public static string Excerpt(string text) => text.Length <= MaxEchoLength ? text : text[..MaxEchoLength] + "...";
+
     private static EvalFailure NoOverload(string op, RuleValue a)
         => a is NullValue
             ? Fail(RuleErrorCode.NullValue, $"'{op}' cannot be applied to null")
@@ -115,7 +135,7 @@ internal static class Ops
                     throw Fail(RuleErrorCode.LimitExceeded, "list concatenation exceeds the maximum collection size");
                 }
 
-                s.Allocate(la.Array.Length + lb.Array.Length);
+                s.Allocate(RuleValue.AddWeight(la.Weight, lb.Weight));
                 return new ListValue(la.Array.Concat(lb.Array).ToArray());
             case TimestampValue ta when b is DurationValue db:
                 return AddTimestamp(ta.Value, db.Value);
@@ -408,7 +428,7 @@ internal static class Ops
                     return v;
                 }
 
-                throw Fail(RuleErrorCode.NoSuchKey, $"no such key: {index}");
+                throw Fail(RuleErrorCode.NoSuchKey, "no such key: " + Describe(index));
             default:
                 throw NoOverload("[]", collection, index);
         }
@@ -502,7 +522,7 @@ internal static class Ops
                     return IntValue.Of(l);
                 }
 
-                throw Fail(RuleErrorCode.InvalidValue, $"cannot convert {str} to int");
+                throw Fail(RuleErrorCode.InvalidValue, "cannot convert " + Describe(str) + " to int");
             default:
                 throw NoOverload("int", v);
         }
@@ -514,7 +534,7 @@ internal static class Ops
         DecimalValue => v,
         StringValue str => DecimalText.TryParse(str.Value, out decimal d)
             ? new DecimalValue(d)
-            : throw Fail(RuleErrorCode.InvalidValue, $"cannot convert {str} to decimal"),
+            : throw Fail(RuleErrorCode.InvalidValue, "cannot convert " + Describe(str) + " to decimal"),
         _ => throw NoOverload("decimal", v),
     };
 
@@ -530,7 +550,7 @@ internal static class Ops
 
     public static RuleValue ToDate(RuleValue v, EvalState s) => v switch
     {
-        StringValue str => ParseDate(str.Value) ?? throw Fail(RuleErrorCode.InvalidValue, $"cannot convert {str} to date (expected yyyy-MM-dd)"),
+        StringValue str => ParseDate(str.Value) ?? throw Fail(RuleErrorCode.InvalidValue, "cannot convert " + Describe(str) + " to date (expected yyyy-MM-dd)"),
         TimestampValue t => new DateValue(DateOnly.FromDateTime(t.Value.UtcDateTime)),
         DateValue => v,
         _ => throw NoOverload("date", v),
@@ -538,14 +558,14 @@ internal static class Ops
 
     public static RuleValue ToTimestamp(RuleValue v, EvalState s) => v switch
     {
-        StringValue str => ParseTimestamp(str.Value) ?? throw Fail(RuleErrorCode.InvalidValue, $"cannot convert {str} to timestamp (expected RFC 3339)"),
+        StringValue str => ParseTimestamp(str.Value) ?? throw Fail(RuleErrorCode.InvalidValue, "cannot convert " + Describe(str) + " to timestamp (expected RFC 3339)"),
         TimestampValue => v,
         _ => throw NoOverload("timestamp", v),
     };
 
     public static RuleValue ToDuration(RuleValue v, EvalState s) => v switch
     {
-        StringValue str => ParseDuration(str.Value) ?? throw Fail(RuleErrorCode.InvalidValue, $"cannot convert {str} to duration (expected for example \"90s\", \"1h30m\")"),
+        StringValue str => ParseDuration(str.Value) ?? throw Fail(RuleErrorCode.InvalidValue, "cannot convert " + Describe(str) + " to duration (expected for example \"90s\", \"1h30m\")"),
         DurationValue => v,
         _ => throw NoOverload("duration", v),
     };
@@ -764,7 +784,7 @@ internal static class Ops
         var a = AsDate(asOf, "ageAt as-of date");
         if (a < b)
         {
-            throw Fail(RuleErrorCode.InvalidValue, $"ageAt: as-of date {DateValue.Format(a)} is before birth date {DateValue.Format(b)}");
+            throw Fail(RuleErrorCode.InvalidValue, "ageAt: the as-of date is before the birth date");
         }
 
         return IntValue.Of(WholeYears(b, a));

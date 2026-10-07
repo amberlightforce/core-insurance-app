@@ -92,8 +92,18 @@ public abstract class RuleValue : IEquatable<RuleValue>
     /// <inheritdoc />
     public abstract override int GetHashCode();
 
-    /// <summary>Invariant, unambiguous display text (strings are quoted), used in traces.</summary>
+    /// <summary>
+    /// Invariant, unambiguous display text (strings are quoted), used in traces and messages. Bounded: renderings
+    /// longer than 4 096 characters are cut and end in "...".
+    /// </summary>
     public abstract override string ToString();
+
+    /// <summary>Appends the display text; returns false once the rendering budget is exhausted.</summary>
+    internal virtual bool AppendTo(StringBuilder sb)
+    {
+        sb.Append(ToString());
+        return sb.Length <= ValueAlgorithms.MaxRenderLength;
+    }
 
     internal static string Quote(string s)
     {
@@ -210,7 +220,26 @@ public sealed class StringValue : RuleValue
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Value);
 
     /// <inheritdoc />
-    public override string ToString() => Quote(Value);
+    public override string ToString() => ValueAlgorithms.Render(this);
+
+    internal override bool AppendTo(StringBuilder sb)
+    {
+        int room = Math.Max(0, ValueAlgorithms.MaxRenderLength - sb.Length);
+        if (Value.Length <= room)
+        {
+            sb.Append(Quote(Value));
+            return sb.Length <= ValueAlgorithms.MaxRenderLength;
+        }
+
+        int cut = room;
+        if (cut > 0 && char.IsHighSurrogate(Value[cut - 1]))
+        {
+            cut--;
+        }
+
+        sb.Append(Quote(Value[..cut]));
+        return false;
+    }
 }
 
 /// <summary>Boolean value.</summary>
@@ -394,38 +423,33 @@ public sealed class ListValue : RuleValue
     internal RuleValue[] Array => _items;
 
     /// <inheritdoc />
-    public override bool Equals(RuleValue? other)
-    {
-        if (other is not ListValue l || l._items.Length != _items.Length)
-        {
-            return false;
-        }
+    public override bool Equals(RuleValue? other) => other is not null && ValueAlgorithms.DeepEquals(this, other);
 
+    /// <inheritdoc />
+    public override int GetHashCode() => ValueAlgorithms.BoundedHash(this, ValueAlgorithms.HashDepth);
+
+    /// <inheritdoc />
+    public override string ToString() => ValueAlgorithms.Render(this);
+
+    internal override bool AppendTo(StringBuilder sb)
+    {
+        sb.Append('[');
         for (int i = 0; i < _items.Length; i++)
         {
-            if (!_items[i].Equals(l._items[i]))
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+
+            if (sb.Length > ValueAlgorithms.MaxRenderLength || !_items[i].AppendTo(sb))
             {
                 return false;
             }
         }
 
-        return true;
+        sb.Append(']');
+        return sb.Length <= ValueAlgorithms.MaxRenderLength;
     }
-
-    /// <inheritdoc />
-    public override int GetHashCode()
-    {
-        var h = new HashCode();
-        foreach (var item in _items)
-        {
-            h.Add(item);
-        }
-
-        return h.ToHashCode();
-    }
-
-    /// <inheritdoc />
-    public override string ToString() => "[" + string.Join(", ", _items.Select(i => i.ToString())) + "]";
 }
 
 /// <summary>Immutable map value; preserves insertion order for deterministic iteration.</summary>
@@ -478,38 +502,39 @@ public sealed class MapValue : RuleValue
     public bool ContainsKey(RuleValue key) => _lookup.ContainsKey(key);
 
     /// <inheritdoc />
-    public override bool Equals(RuleValue? other)
-    {
-        if (other is not MapValue m || m._entries.Length != _entries.Length)
-        {
-            return false;
-        }
+    public override bool Equals(RuleValue? other) => other is not null && ValueAlgorithms.DeepEquals(this, other);
 
-        foreach (var e in _entries)
+    /// <inheritdoc />
+    public override int GetHashCode() => ValueAlgorithms.BoundedHash(this, ValueAlgorithms.HashDepth);
+
+    /// <inheritdoc />
+    public override string ToString() => ValueAlgorithms.Render(this);
+
+    internal override bool AppendTo(StringBuilder sb)
+    {
+        sb.Append('{');
+        for (int i = 0; i < _entries.Length; i++)
         {
-            if (!m._lookup.TryGetValue(e.Key, out var v) || !v.Equals(e.Value))
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+
+            if (sb.Length > ValueAlgorithms.MaxRenderLength || !_entries[i].Key.AppendTo(sb))
+            {
+                return false;
+            }
+
+            sb.Append(": ");
+            if (!_entries[i].Value.AppendTo(sb))
             {
                 return false;
             }
         }
 
-        return true;
+        sb.Append('}');
+        return sb.Length <= ValueAlgorithms.MaxRenderLength;
     }
-
-    /// <inheritdoc />
-    public override int GetHashCode()
-    {
-        int h = _entries.Length;
-        foreach (var e in _entries)
-        {
-            h ^= HashCode.Combine(e.Key, e.Value);
-        }
-
-        return h;
-    }
-
-    /// <inheritdoc />
-    public override string ToString() => "{" + string.Join(", ", _entries.Select(e => e.Key + ": " + e.Value)) + "}";
 }
 
 /// <summary>A value of an <see cref="ObjectSchema"/>. Create with <see cref="ObjectSchema.NewValue"/>.</summary>
@@ -548,39 +573,230 @@ public sealed class ObjectValue : RuleValue
 
     internal RuleValue GetByOrdinal(int ordinal) => _fields[ordinal];
 
-    /// <inheritdoc />
-    public override bool Equals(RuleValue? other)
-    {
-        if (other is not ObjectValue o || !ReferenceEquals(o.Schema, Schema))
-        {
-            return false;
-        }
+    internal int FieldCount => _fields.Length;
 
+    /// <inheritdoc />
+    public override bool Equals(RuleValue? other) => other is not null && ValueAlgorithms.DeepEquals(this, other);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => ValueAlgorithms.BoundedHash(this, ValueAlgorithms.HashDepth);
+
+    /// <inheritdoc />
+    public override string ToString() => ValueAlgorithms.Render(this);
+
+    internal override bool AppendTo(StringBuilder sb)
+    {
+        sb.Append(Schema.Name).Append('{');
         for (int i = 0; i < _fields.Length; i++)
         {
-            if (!_fields[i].Equals(o._fields[i]))
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+
+            sb.Append(Schema.Fields[i].Name).Append(": ");
+            if (sb.Length > ValueAlgorithms.MaxRenderLength || !_fields[i].AppendTo(sb))
             {
                 return false;
             }
         }
 
-        return true;
+        sb.Append('}');
+        return sb.Length <= ValueAlgorithms.MaxRenderLength;
     }
+}
+
+/// <summary>
+/// Stands in for a value in an evaluation trace when the value is too large to record
+/// (<see cref="RuleLimits.MaxTraceValueWeight"/>). It carries the kind and the size, never the content.
+/// </summary>
+public sealed class ElidedValue : RuleValue
+{
+    internal ElidedValue(RuleTypeKind kind, long originalWeight)
+    {
+        OriginalKind = kind;
+        OriginalWeight = originalWeight;
+    }
+
+    /// <summary>The kind of the value that was elided.</summary>
+    public RuleTypeKind OriginalKind { get; }
+
+    /// <summary>The weight (tree size) of the value that was elided.</summary>
+    public long OriginalWeight { get; }
+
+    /// <summary>Always <see cref="RuleTypeKind.Dyn"/>: an elided value is a placeholder, not a value of the language.</summary>
+    public override RuleTypeKind Kind => RuleTypeKind.Dyn;
 
     /// <inheritdoc />
-    public override int GetHashCode()
-    {
-        var h = new HashCode();
-        h.Add(Schema.Name, StringComparer.Ordinal);
-        foreach (var f in _fields)
-        {
-            h.Add(f);
-        }
+    public override bool Equals(RuleValue? other) => ReferenceEquals(this, other);
 
-        return h.ToHashCode();
-    }
+    /// <inheritdoc />
+    public override int GetHashCode() => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
 
     /// <inheritdoc />
     public override string ToString() =>
-        Schema.Name + "{" + string.Join(", ", Schema.Fields.Select(f => f.Name + ": " + _fields[f.Ordinal])) + "}";
+        string.Create(CultureInfo.InvariantCulture, $"<{OriginalKind} elided: weight {OriginalWeight}>");
+}
+
+/// <summary>Bounded algorithms over value trees that may share sub-values (no exponential blow-up).</summary>
+internal static class ValueAlgorithms
+{
+    /// <summary>Maximum length of a value's display text; longer renderings end in "...".</summary>
+    public const int MaxRenderLength = 4096;
+
+    /// <summary>Depth to which composite hashes look at elements (equal values always hash equally).</summary>
+    public const int HashDepth = 3;
+
+    private const int HashedElements = 4;
+
+    public static string Render(RuleValue value)
+    {
+        var sb = new StringBuilder();
+        if (!value.AppendTo(sb))
+        {
+            if (sb.Length > MaxRenderLength)
+            {
+                sb.Length = MaxRenderLength;
+            }
+
+            sb.Append("...");
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Hash consistent with deep equality: count, weight (equal values have equal weights) and a few leading
+    /// elements to a fixed depth. Cost is bounded by 4^depth.
+    /// </summary>
+    public static int BoundedHash(RuleValue value, int depth)
+    {
+        switch (value)
+        {
+            case ListValue l:
+            {
+                var h = new HashCode();
+                h.Add(RuleTypeKind.List);
+                h.Add(l.Array.Length);
+                h.Add(l.Weight);
+                for (int i = 0; depth > 0 && i < l.Array.Length && i < HashedElements; i++)
+                {
+                    h.Add(BoundedHash(l.Array[i], depth - 1));
+                }
+
+                return h.ToHashCode();
+            }
+
+            case MapValue m:
+                return HashCode.Combine(RuleTypeKind.Map, m.Count, m.Weight);
+            case ObjectValue o:
+            {
+                var h = new HashCode();
+                h.Add(o.Schema.Name, StringComparer.Ordinal);
+                h.Add(o.Weight);
+                for (int i = 0; depth > 0 && i < o.FieldCount && i < HashedElements; i++)
+                {
+                    h.Add(BoundedHash(o.GetByOrdinal(i), depth - 1));
+                }
+
+                return h.ToHashCode();
+            }
+
+            default:
+                return value.GetHashCode();
+        }
+    }
+
+    /// <summary>
+    /// Deep equality that remembers pairs of composite nodes already proven equal, so values built by sharing are
+    /// compared in time proportional to their distinct nodes, not their (possibly exponential) tree size.
+    /// </summary>
+    public static bool DeepEquals(RuleValue a, RuleValue b)
+    {
+        HashSet<(RuleValue, RuleValue)>? memo = null;
+        return DeepEquals(a, b, ref memo);
+    }
+
+    private static bool DeepEquals(RuleValue a, RuleValue b, ref HashSet<(RuleValue, RuleValue)>? memo)
+    {
+        if (ReferenceEquals(a, b))
+        {
+            return true;
+        }
+
+        if (a is not (ListValue or MapValue or ObjectValue))
+        {
+            return a.Equals(b);
+        }
+
+        if (a.Weight != b.Weight || a.Kind != b.Kind)
+        {
+            return false;
+        }
+
+        if (memo is not null && memo.Contains((a, b)))
+        {
+            return true;
+        }
+
+        bool equal;
+        switch (a)
+        {
+            case ListValue l:
+            {
+                var r = (ListValue)b;
+                equal = l.Array.Length == r.Array.Length;
+                for (int i = 0; equal && i < l.Array.Length; i++)
+                {
+                    equal = DeepEquals(l.Array[i], r.Array[i], ref memo);
+                }
+
+                break;
+            }
+
+            case MapValue m:
+            {
+                var r = (MapValue)b;
+                equal = m.Count == r.Count;
+                for (int i = 0; equal && i < m.Count; i++)
+                {
+                    var e = m.Entries[i];
+                    equal = r.TryGetValue(e.Key, out var v) && DeepEquals(e.Value, v, ref memo);
+                }
+
+                break;
+            }
+
+            default:
+            {
+                var o = (ObjectValue)a;
+                var r = (ObjectValue)b;
+                equal = ReferenceEquals(o.Schema, r.Schema);
+                for (int i = 0; equal && i < o.FieldCount; i++)
+                {
+                    equal = DeepEquals(o.GetByOrdinal(i), r.GetByOrdinal(i), ref memo);
+                }
+
+                break;
+            }
+        }
+
+        if (equal)
+        {
+            (memo ??= new HashSet<(RuleValue, RuleValue)>(PairByReference.Instance)).Add((a, b));
+        }
+
+        return equal;
+    }
+
+    private sealed class PairByReference : IEqualityComparer<(RuleValue, RuleValue)>
+    {
+        public static readonly PairByReference Instance = new();
+
+        public bool Equals((RuleValue, RuleValue) x, (RuleValue, RuleValue) y) =>
+            ReferenceEquals(x.Item1, y.Item1) && ReferenceEquals(x.Item2, y.Item2);
+
+        public int GetHashCode((RuleValue, RuleValue) obj) =>
+            HashCode.Combine(System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj.Item1), System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj.Item2));
+    }
 }

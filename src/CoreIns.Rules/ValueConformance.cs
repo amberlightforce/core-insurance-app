@@ -8,6 +8,20 @@ namespace CoreIns.Rules;
 internal static class ValueConformance
 {
     /// <summary>Validates an input value against a declared type, widening int to decimal. Throws <see cref="RuleInputException"/>.</summary>
+    /// <summary>Largest weight accepted for one input or field value (inputs are traversed when validated).</summary>
+    public const long MaxInputWeight = 10_000_000;
+
+    /// <summary>Validates a top-level input or field value: refuses oversized values before traversing them.</summary>
+    public static RuleValue ConformInput(RuleValue value, RuleType type, bool nullable, string path)
+    {
+        if (value.Weight > MaxInputWeight)
+        {
+            throw new RuleInputException(path, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"value weight {value.Weight} exceeds the maximum of {MaxInputWeight}"));
+        }
+
+        return Conform(value, type, nullable, path);
+    }
+
     public static RuleValue Conform(RuleValue value, RuleType type, bool nullable, string path)
     {
         if (value is NullValue)

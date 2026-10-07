@@ -328,14 +328,17 @@ internal sealed class ListNode : BoundNode
 
     protected override RuleValue EvalCore(EvalState state)
     {
-        state.Allocate(_elements.Length);
         var values = new RuleValue[_elements.Length];
         for (int i = 0; i < _elements.Length; i++)
         {
             values[i] = _elements[i].Eval(state);
         }
 
-        return new ListValue(values);
+        // A produced collection is charged its full weight (every element it contains, shared or not), so no value
+        // heavier than the allocation budget can ever be built.
+        var list = new ListValue(values);
+        state.Allocate(list.Weight);
+        return list;
     }
 }
 
@@ -353,7 +356,6 @@ internal sealed class MapNode : BoundNode
 
     protected override RuleValue EvalCore(EvalState state)
     {
-        state.Allocate(_keys.Length);
         var entries = new KeyValuePair<RuleValue, RuleValue>[_keys.Length];
         var seen = new HashSet<RuleValue>();
         for (int i = 0; i < _keys.Length; i++)
@@ -366,13 +368,15 @@ internal sealed class MapNode : BoundNode
 
             if (!seen.Add(k))
             {
-                throw Ops.Fail(RuleErrorCode.DuplicateKey, $"duplicate map key {k}");
+                throw Ops.Fail(RuleErrorCode.DuplicateKey, "duplicate map key " + Ops.Describe(k));
             }
 
             entries[i] = new KeyValuePair<RuleValue, RuleValue>(k, _values[i].Eval(state));
         }
 
-        return new MapValue(entries);
+        var map = new MapValue(entries);
+        state.Allocate(map.Weight);
+        return map;
     }
 }
 
@@ -486,7 +490,7 @@ internal sealed class ComprehensionNode : BoundNode
             state.Slots[_slot] = item;
             if (Test(state, _body, "filter predicate"))
             {
-                state.Allocate(1);
+                state.Allocate(item.Weight);
                 result.Add(item);
             }
         }
@@ -507,7 +511,7 @@ internal sealed class ComprehensionNode : BoundNode
             }
 
             var value = _body.Eval(state);
-            state.Allocate(1);
+            state.Allocate(value.Weight);
             result.Add(value);
         }
 

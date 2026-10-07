@@ -56,11 +56,16 @@ EvaluationResult result = expr.Evaluate(inputs, new EvaluationOptions { Trace = 
 * `CompiledExpression` is immutable and thread-safe. Compile once, evaluate concurrently. `env.GetOrCompile(...)`
   caches compiled expressions per environment.
 * `ContentHash` is the lower-case hex SHA-256 of three length-prefixed parts: `CanonicalText` (a whitespace- and
-  comment-free S-expression of the syntax tree), the result type, and `EnvironmentFingerprint` (the input schema
-  with types, nullability and object shapes, plus the signatures of the host functions the expression calls). Equal
-  hashes mean equal behaviour. Use it in the configuration hash.
+  comment-free S-expression of the syntax tree), the result type, and `EnvironmentFingerprint` (every
+  `RuleLimits` budget value, the input schema with types, nullability and object shapes, and the signatures of the
+  host functions the expression calls; ruling D-ARC-10e). Equal hashes mean equal logic, equal inputs contract and
+  equal limits: for the same inputs they give the same business result or the same typed failure. Use the hash in
+  the configuration hash.
 * Evaluation fails closed. A failed evaluation returns `IsSuccess == false` and a typed `RuleEvaluationError`, never
   a partial value.
+* `RULE-TIMEOUT` and `RULE-CANCELLED` are **operational** failures (wall clock, host load, caller cancellation):
+  they are fail-closed and retryable, and never a different business result. Every other error code is a
+  deterministic function of the expression, its limits and its inputs.
 
 ## 2. Types
 
@@ -191,7 +196,7 @@ position and, for decision tables, a context such as `rule 'R1' condition 'drive
 
 | Code | When |
 |---|---|
-| `RULE-SYNTAX`, `RULE-RESERVED-WORD`, `RULE-INVALID-LITERAL`, `RULE-UNSUPPORTED` | parsing |
+| `RULE-SYNTAX`, `RULE-RESERVED-WORD`, `RULE-INVALID-LITERAL` (also: lone UTF-16 surrogates in string literals, table ids, versions, rule ids or descriptions), `RULE-UNSUPPORTED` | parsing |
 | `RULE-EXPRESSION-TOO-LONG`, `RULE-DEPTH-EXCEEDED` | limits at compile time |
 | `RULE-UNKNOWN-IDENTIFIER` (names the undeclared input), `RULE-UNKNOWN-FIELD` (names the field path, for example `vehicle.colour`), `RULE-UNKNOWN-FUNCTION`, `RULE-NONDETERMINISTIC` | name resolution |
 | `RULE-NO-MATCHING-OVERLOAD`, `RULE-TYPE-MISMATCH`, `RULE-RESULT-TYPE-MISMATCH`, `RULE-INVALID-ARGUMENT`, `RULE-INVALID-REGEX`, `RULE-DUPLICATE-KEY` | type checking |
@@ -206,7 +211,7 @@ position and, for decision tables, a context such as `rule 'R1' condition 'drive
 `RuleLimits` (defaults in brackets): `MaxExpressionLength` [8 192 characters], `MaxAstDepth` [200; at most
 1 000], `MaxEvaluationSteps` [100 000], `MaxAllocatedElements` [1 000 000], `MaxEvaluationTime` [1 s],
 `MaxCollectionSize` [10 000], `MaxStringLength` [65 536], `MaxRegexPatternLength` [512], `RegexTimeout` [50 ms],
-`MaxTraceEntries` [10 000]. `EvaluationOptions.MaxSteps` can lower the budget and `EvaluationOptions.Cancellation`
+`MaxTraceEntries` [10 000], `MaxTraceValueWeight` [1 000]. `EvaluationOptions.MaxSteps` can lower the budget and `EvaluationOptions.Cancellation`
 cancels a single call.
 
 **Cost model.** Steps are charged in proportion to the work done, not per node: one step per node evaluation and
@@ -219,8 +224,24 @@ created (list/map literals and results, concatenations, keys of iterated maps, w
 (`MaxEvaluationTime`) and the cancellation token are checked every 256 steps. Exceeding a bound gives
 `RULE-COST-EXCEEDED`, `RULE-LIMIT-EXCEEDED`, `RULE-TIMEOUT` or `RULE-CANCELLED`.
 
+**No heavy value leaves the engine.** Every collection the engine produces (literals, `map`/`filter` results,
+concatenations, host-function results) is charged its full weight, so no value heavier than
+`MaxAllocatedElements` can be built. As a second line of defence, every value that crosses the engine boundary
+(an expression result, a decision-table variable, column or output) is checked against that budget
+(`RULE-LIMIT-EXCEEDED`), inputs heavier than the budget are refused before evaluation, and input values heavier than
+10 000 000 are refused when the inputs are built. `StepsUsed` is reported at most one past the budget;
+`AttemptedSteps` shows the full work the breaking operation tried to charge. Value `ToString` renders at most
+4 096 characters (then "..."), `GetHashCode` looks at a bounded prefix, and `Equals` remembers sub-values already
+proven equal, so values that share structure compare in time proportional to their distinct parts. Decision-table
+test cases whose expected values are heavier than the budget fail without being compared.
+
+**Error messages never echo input content.** A string value is described by its length ("a string of length 12"),
+other values by at most 64 characters, and dates of birth are not repeated; name the input path instead.
+
 ## 9. Explainability: traces and content hashes
 
+* Values heavier than `MaxTraceValueWeight` are recorded in a trace as an `ElidedValue` placeholder (kind and
+  weight only, for example `<List elided: weight 5001>`).
 * With `EvaluationOptions { Trace = true }`, `EvaluationResult.Trace` lists, in evaluation order, each evaluated
   sub-expression (source text, position, node id) and its value, for example
   `["x = 7", "y = 2", "y * 2 = 4", "x + y * 2 = 11"]`. Short-circuited operands are absent. Literals and implicit

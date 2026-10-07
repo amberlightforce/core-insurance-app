@@ -42,6 +42,24 @@ internal static class Identifiers
         return !Reserved.Contains(name) && !Keywords.Contains(name);
     }
 
+    /// <summary>Whether <paramref name="text"/> contains a UTF-16 surrogate that is not part of a valid pair.</summary>
+    public static bool HasLoneSurrogate(string text)
+    {
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+            {
+                i++;
+            }
+            else if (char.IsSurrogate(text[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static void Validate(string name, string paramName)
     {
         ArgumentNullException.ThrowIfNull(name, paramName);

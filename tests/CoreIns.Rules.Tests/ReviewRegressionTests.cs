@@ -75,9 +75,14 @@ public class ReviewRegressionTests
     [Fact]
     public void D1_allocation_cap_is_enforced()
     {
-        var env = RuleEnvironment.Create(Schema, new RuleLimits { MaxAllocatedElements = 100 });
-        Timed(env, "big.map(x, x)").Result.Error!.Code.ShouldBe(RuleErrorCode.LimitExceeded);
-        Timed(env, "l.map(x, x)").Result.IsSuccess.ShouldBeTrue();
+        var env = RuleEnvironment.Create(Schema, new RuleLimits { MaxAllocatedElements = 6_000, MaxEvaluationSteps = 1_000_000 });
+        Timed(env, "big.map(x, [x, x])").Result.Error!.Code.ShouldBe(RuleErrorCode.LimitExceeded);
+        var small = Timed(env, "l.map(x, x)").Result;
+        small.Error.ShouldBeNull(small.Error?.ToString());
+
+        // Inputs heavier than the budget are refused before evaluation.
+        var tiny = RuleEnvironment.Create(Schema, new RuleLimits { MaxAllocatedElements = 100 });
+        Timed(tiny, "size(l)").Result.Error!.Code.ShouldBe(RuleErrorCode.LimitExceeded);
     }
 
     [Fact]

@@ -308,6 +308,19 @@ internal sealed class Lexer
                 continue;
             }
 
+            if (char.IsSurrogate(c))
+            {
+                // A lone UTF-16 surrogate has no Unicode meaning and would collapse to U+FFFD in the UTF-8 hash.
+                if (!char.IsHighSurrogate(c) || !char.IsLowSurrogate(Peek(1)))
+                {
+                    throw new CompileFailure(RuleErrorCode.InvalidLiteral, _pos, "string literal contains a lone UTF-16 surrogate");
+                }
+
+                sb.Append(c).Append(_src[_pos + 1]);
+                _pos += 2;
+                continue;
+            }
+
             sb.Append(c);
             _pos++;
         }

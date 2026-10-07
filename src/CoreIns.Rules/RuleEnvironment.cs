@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using CoreIns.Rules.Checking;
 using CoreIns.Rules.Runtime;
@@ -110,7 +111,7 @@ public sealed class RuleEnvironment
     /// nullability, object shapes) and the signatures of the host functions it calls.
     /// </summary>
     internal string EnvironmentFingerprint(IEnumerable<HostFunction> usedFunctions) =>
-        CanonicalPrinter.LengthPrefixed(new[] { Schema.Fingerprint() }.Concat(usedFunctions.Select(f => f.Signature).Order(StringComparer.Ordinal)));
+        CanonicalPrinter.LengthPrefixed(new[] { Limits.Fingerprint(), Schema.Fingerprint() }.Concat(usedFunctions.Select(f => f.Signature).Order(StringComparer.Ordinal)));
 
     private readonly record struct CacheKey(string Source, RuleType? Expected, bool ExpectedNullable);
 }
@@ -171,8 +172,9 @@ public sealed record TraceEntry(int NodeId, SourcePosition Position, string Expr
 /// <summary>Result of evaluating a compiled expression. Rules fail closed: check <see cref="IsSuccess"/>.</summary>
 public sealed class EvaluationResult
 {
-    internal EvaluationResult(RuleValue? value, RuleEvaluationError? error, IReadOnlyList<TraceEntry> trace, bool traceTruncated, long steps)
+    internal EvaluationResult(RuleValue? value, RuleEvaluationError? error, IReadOnlyList<TraceEntry> trace, bool traceTruncated, long steps, long attemptedSteps)
     {
+        AttemptedSteps = attemptedSteps;
         Value = value;
         Error = error;
         Trace = trace;
@@ -197,6 +199,12 @@ public sealed class EvaluationResult
 
     /// <summary>Evaluation steps consumed (cost).</summary>
     public long StepsUsed { get; }
+
+    /// <summary>
+    /// All work the evaluation tried to charge, including the operation that broke the budget (diagnostic; can be far
+    /// above <see cref="StepsUsed"/>, which is capped at the budget plus one).
+    /// </summary>
+    public long AttemptedSteps { get; }
 
     /// <summary>Returns the value or throws <see cref="RuleEvaluationException"/>.</summary>
     public RuleValue GetValueOrThrow() => Error is null ? Value! : throw new RuleEvaluationException(Error);
@@ -258,6 +266,12 @@ public sealed class CompiledExpression
         long budget = Math.Min(options.MaxSteps ?? Environment.Limits.MaxEvaluationSteps, Environment.Limits.MaxEvaluationSteps);
         var state = new EvalState(SlotCount, Environment.Limits, budget, options.Trace, options.Cancellation);
         inputs.CopyTo(state.Slots);
+        var tooLarge = OversizedInput(state.Slots, inputs.Schema, Environment.Limits);
+        if (tooLarge is not null)
+        {
+            return new EvaluationResult(null, tooLarge, Array.Empty<TraceEntry>(), false, 0, 0);
+        }
+
         return Run(state, context: null);
     }
 
@@ -275,13 +289,25 @@ public sealed class CompiledExpression
         try
         {
             var value = Root.Eval(state);
-            return new EvaluationResult(value, null, BuildTrace(raw), state.TraceTruncated, state.Steps);
+
+            // Nothing heavier than the allocation budget leaves the engine (results, variables, columns, outputs).
+            if (value.Weight > Environment.Limits.MaxAllocatedElements)
+            {
+                throw new EvalFailure(
+                    RuleErrorCode.LimitExceeded,
+                    string.Create(CultureInfo.InvariantCulture, $"the result has weight {value.Weight}, above the allocation budget of {Environment.Limits.MaxAllocatedElements}"))
+                {
+                    Node = Root,
+                };
+            }
+
+            return new EvaluationResult(value, null, BuildTrace(raw), state.TraceTruncated, state.Steps, state.AttemptedSteps);
         }
         catch (EvalFailure f)
         {
             var position = f.Node is null ? (SourcePosition?)null : SourcePosition.FromOffset(Source, f.Node.Syntax.Start);
             var error = new RuleEvaluationError(f.Code, f.Message, position, context);
-            return new EvaluationResult(null, error, BuildTrace(raw), state.TraceTruncated, state.Steps);
+            return new EvaluationResult(null, error, BuildTrace(raw), state.TraceTruncated, state.Steps, state.AttemptedSteps);
         }
     }
 
@@ -297,7 +323,8 @@ public sealed class CompiledExpression
         {
             var (node, value) = raw[i];
             var syntax = node.Syntax;
-            entries[i] = new TraceEntry(syntax.Id, SourcePosition.FromOffset(Source, syntax.Start), Source[syntax.Start..syntax.End], value);
+            var recorded = value.Weight > Environment.Limits.MaxTraceValueWeight ? new ElidedValue(value.Kind, value.Weight) : value;
+            entries[i] = new TraceEntry(syntax.Id, SourcePosition.FromOffset(Source, syntax.Start), Source[syntax.Start..syntax.End], recorded);
         }
 
         return entries;
@@ -305,4 +332,21 @@ public sealed class CompiledExpression
 
     /// <inheritdoc />
     public override string ToString() => Source;
+
+    /// <summary>Inputs heavier than the allocation budget are refused before evaluation (fail closed).</summary>
+    internal static RuleEvaluationError? OversizedInput(RuleValue[] slots, InputSchema schema, RuleLimits limits)
+    {
+        for (int i = 0; i < schema.Variables.Count; i++)
+        {
+            if (slots[i].Weight > limits.MaxAllocatedElements)
+            {
+                return new RuleEvaluationError(
+                    RuleErrorCode.LimitExceeded,
+                    string.Create(CultureInfo.InvariantCulture, $"input '{schema.Variables[i].Name}' has weight {slots[i].Weight}, above the allocation budget of {limits.MaxAllocatedElements}"),
+                    null);
+            }
+        }
+
+        return null;
+    }
 }

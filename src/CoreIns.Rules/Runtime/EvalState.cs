@@ -56,7 +56,11 @@ internal sealed class EvalState
 
     public RuleLimits Limits { get; }
 
-    public long Steps { get; private set; }
+    /// <summary>Steps charged so far, reported at most one past the budget (M3: never a saturated sentinel).</summary>
+    public long Steps => _maxSteps == long.MaxValue ? AttemptedSteps : Math.Min(AttemptedSteps, _maxSteps + 1);
+
+    /// <summary>All work charged, including the charge that broke the budget (may be very large, saturating).</summary>
+    public long AttemptedSteps { get; private set; }
 
     public long Allocated { get; private set; }
 
@@ -83,8 +87,8 @@ internal sealed class EvalState
     /// <summary>Charges <paramref name="units"/> steps of work (for example the size of the values an operation traverses).</summary>
     public void Charge(long units)
     {
-        Steps = units >= long.MaxValue - Steps ? long.MaxValue : Steps + units;
-        if (Steps > _maxSteps)
+        AttemptedSteps = units >= long.MaxValue - AttemptedSteps ? long.MaxValue : AttemptedSteps + units;
+        if (AttemptedSteps > _maxSteps)
         {
             throw new EvalFailure(
                 RuleErrorCode.CostExceeded,

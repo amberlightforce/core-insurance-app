@@ -204,6 +204,16 @@ public sealed class CompiledDecisionTable
             Error("table id and version are required");
         }
 
+        foreach (var text in new[] { d.Metadata?.TableId, d.Metadata?.Version, d.Metadata?.Description }
+            .Concat(d.Rules?.Select(r => r?.RuleId) ?? Enumerable.Empty<string?>())
+            .Concat(d.Rules?.Select(r => r?.Description) ?? Enumerable.Empty<string?>()))
+        {
+            if (text is not null && Syntax.Identifiers.HasLoneSurrogate(text))
+            {
+                errors.Add(new RuleCompileError(RuleErrorCode.InvalidLiteral, "table ids, versions, rule ids and descriptions must be valid Unicode (lone surrogate found)", null, d.Metadata?.TableId));
+            }
+        }
+
         if (d.Metadata is { EffectiveTo: { } to } && to <= d.Metadata.EffectiveFrom)
         {
             Error("effective-to must be after effective-from (half-open range)");
@@ -311,6 +321,11 @@ public sealed class CompiledDecisionTable
         var limits = _baseEnvironment.Limits;
         var state = new EvalState(_slotCount, limits, limits.MaxEvaluationSteps, options.DetailedTrace, options.Cancellation);
         inputs.CopyTo(state.Slots);
+        var oversized = CompiledExpression.OversizedInput(state.Slots, inputs.Schema, limits);
+        if (oversized is not null)
+        {
+            return new DecisionResult(oversized with { Context = Metadata.TableId }, Array.Empty<DecisionMatch>(), EmptyTrace(0));
+        }
         var variableValues = new List<NamedValue>();
         var inputValues = new List<NamedValue>();
         var ruleTraces = new List<RuleTrace>();
@@ -512,7 +527,14 @@ public sealed class CompiledDecisionTable
         }
         else if (testCase.ExpectedOutputs is { } expected)
         {
-            if (expected.Count != result.Matches.Count)
+            long budget = _baseEnvironment.Limits.MaxAllocatedElements;
+            if (expected.Any(row => row.Any(e => e.Value.Weight > budget)))
+            {
+                // Comparison is bounded: an expected value heavier than any value the engine may produce cannot
+                // match, and comparing it could be arbitrarily expensive.
+                failure = string.Create(CultureInfo.InvariantCulture, $"an expected output is heavier than the allocation budget of {budget}");
+            }
+            else if (expected.Count != result.Matches.Count)
             {
                 failure = "expected outputs for a different number of matches";
             }
