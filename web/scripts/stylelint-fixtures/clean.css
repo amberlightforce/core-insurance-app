@@ -21,6 +21,27 @@
     transform var(--motion-duration-feedback-sm) var(--motion-ease-standard),
     opacity var(--motion-duration-feedback-sm) var(--motion-ease-standard);
   animation: spin var(--motion-duration-spinner) var(--motion-ease-linear) infinite;
+  padding-inline-start: var(--space-2);
+  scroll-margin-top: var(--space-12);
+  scroll-padding-block: var(--space-8);
+  text-indent: 0;
+  border-width: var(--border-width-hairline);
+  border-inline-start-width: var(--border-width-accent);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-block-end: 0;
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+  font-weight: 600;
+}
+
+.cleanWeights {
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: Inter;
+  font-weight: 100 900;
+  src: url('../fonts/inter-latin-opsz-normal.woff2') format('woff2-variations');
 }
 
 .cleanRaised {
