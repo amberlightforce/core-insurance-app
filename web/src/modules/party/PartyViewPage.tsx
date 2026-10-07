@@ -1,5 +1,5 @@
 import { Eye, EyeOff, FilePlus2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 
@@ -189,6 +189,17 @@ export function PartyViewPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [purpose, setPurpose] = useState<string | null>(null);
   const [revealedView, setRevealedView] = useState<PartyView | null>(null);
+
+  // Revealed P2 values never outlive the party they were revealed for: a route change (another party id) or leaving the
+  // page clears them, not only closing the dialog.
+  useEffect(
+    () => () => {
+      setRevealedView(null);
+      setDialogOpen(false);
+      setPurpose(null);
+    },
+    [partyId],
+  );
 
   const closeDialog = () => {
     setDialogOpen(false);

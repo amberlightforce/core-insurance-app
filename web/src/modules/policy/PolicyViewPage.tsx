@@ -243,7 +243,16 @@ function PolicyDetails({ data, asOf }: { data: PolicyGetResponse; asOf: string }
 export function PolicyViewPage() {
   const { policyId = '' } = useParams();
   const { t } = useTranslation('policy');
-  const [asOf, setAsOf] = useState(() => athensToday());
+  const [chosen, setChosen] = useState<string | null>(null);
+  const today = athensToday();
+  const current = usePolicy(policyId, today);
+  // A policy that has not started yet shows nothing as of today (no segment, no risk). Until the user picks a date,
+  // read it as of the start of its upcoming term instead, and say so.
+  const upcomingStart =
+    chosen === null && current.data?.policy.status === 'SCHEDULED' && current.data.term
+      ? athensToday(new Date(current.data.term.period.from))
+      : null;
+  const asOf = chosen ?? upcomingStart ?? today;
   const query = usePolicy(policyId, asOf);
   return (
     <div className={styles.page}>
@@ -252,9 +261,14 @@ export function PolicyViewPage() {
         description={t('asOf.help')}
         value={parseDate(asOf)}
         onChange={(value) => {
-          if (value) setAsOf(value.toString());
+          if (value) setChosen(value.toString());
         }}
       />
+      {upcomingStart ? (
+        <Banner variant="info" title={t('upcoming.title')}>
+          {t('upcoming.body')}
+        </Banner>
+      ) : null}
       <QueryView query={query} notFoundMessage={t('notFound')}>
         {(data) => <PolicyDetails data={data} asOf={asOf} />}
       </QueryView>

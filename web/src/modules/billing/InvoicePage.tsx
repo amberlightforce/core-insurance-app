@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import type { InvoiceGetResponse } from '../../api/types';
+import { compareMoney } from '../../format/money-input';
 import {
   Banner,
   KeyValueList,
@@ -66,7 +67,7 @@ function InvoiceDetails({ data }: { data: InvoiceGetResponse }) {
     ],
     [t, invoice.total.currency],
   );
-  const payable = invoice.kind === 'INVOICE' && Number(invoice.open.amount) > 0;
+  const payable = invoice.kind === 'INVOICE' && compareMoney(invoice.open.amount, '0', 4) > 0;
 
   return (
     <div className={styles.page}>

@@ -105,6 +105,46 @@ describe('PolicyViewPage', () => {
     expect(screen.getAllByText('Σε αναμονή έναρξης').length).toBeGreaterThan(0);
   });
 
+  it('a policy that has not started yet is read as of the start of its upcoming term, with a note', async () => {
+    const scheduled = { ...fx.policy('SCHEDULED'), riskTree: undefined, charges: [] };
+    const api = mockApi(
+      policyRoutes((validAt) => ({
+        // Today the policy has no segment; at the term start (2026-10-08, Athens) the cover is visible.
+        body: validAt === '2026-10-08' ? fx.policy('IN_FORCE') : scheduled,
+      })),
+    );
+    view();
+    expect(await screen.findByText('Δεν έχει αρχίσει ακόμη')).toBeInTheDocument();
+    const covers = await screen.findByRole('region', { name: 'Καλύψεις' });
+    await waitFor(() => {
+      expect(within(covers).getByText('MTPL')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Κατάσταση κατά 08/10/2026')).toBeInTheDocument();
+    expect(
+      api
+        .callsTo('GET', `/api/pol/v1/policies/${fx.policyId}`)
+        .some((c) => c.url.searchParams.get('validAt') === '2026-10-08'),
+    ).toBe(true);
+  });
+
+  it('shows a «no permission» state, not an endless loading, when the invoices are forbidden (403)', async () => {
+    mockApi([
+      {
+        method: 'GET',
+        path: `/api/pol/v1/policies/${fx.policyId}`,
+        respond: () => ({ body: fx.policy() }),
+      },
+      {
+        method: 'GET',
+        path: '/api/bil/v1/invoices',
+        respond: () => problem(403, 'PLT-ERR-FORBIDDEN', 'Forbidden'),
+      },
+    ]);
+    view();
+    expect(await screen.findByText('Δεν έχετε δικαίωμα')).toBeInTheDocument();
+    expect(screen.queryByText('Φόρτωση…')).not.toBeInTheDocument();
+  });
+
   it('shows not-found, error with retry, and empty invoices', async () => {
     mockApi([
       {

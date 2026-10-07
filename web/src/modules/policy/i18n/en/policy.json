@@ -75,5 +75,9 @@
   },
   "invoices": {
     "title": "Policy invoices"
+  },
+  "upcoming": {
+    "title": "Not started yet",
+    "body": "The policy starts later. Showing it as of the start of its upcoming term; pick another date to read it as of then."
   }
 }

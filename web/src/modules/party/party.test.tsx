@@ -1,4 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react';
+import { Link } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import i18n from '../../i18n';
@@ -236,6 +237,36 @@ describe('PartyViewPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Απόκρυψη προσωπικών δεδομένων' }));
     expect(screen.getByText('******201')).toBeInTheDocument();
+  });
+
+  it('clears revealed personal data when navigating to another party', async () => {
+    mockApi([
+      {
+        method: 'GET',
+        path: /^\/api\/pty\/v1\/parties\/[^/]+$/,
+        respond: (r: { url: URL }) => ({
+          body: { party: fx.party(r.url.searchParams.get('revealPurpose') !== null) },
+        }),
+      },
+    ]);
+    const { user } = renderScreen(
+      <>
+        <PartyViewPage />
+        <Link to="/parties/other-party">Άλλος πελάτης</Link>
+      </>,
+      { path: '/parties/:partyId', url: `/parties/${fx.partyId}` },
+    );
+    await screen.findByRole('heading', { level: 1, name: 'Διεπαφής Δοκιμή' });
+    await user.click(screen.getByRole('button', { name: 'Εμφάνιση προσωπικών δεδομένων' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Εμφάνιση προσωπικών δεδομένων' });
+    await user.click(within(dialog).getByRole('button', { name: /Σκοπός εμφάνισης/ }));
+    await user.click(await screen.findByRole('option', { name: 'Εξυπηρέτηση πελάτη' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Εμφάνιση' }));
+    expect(await screen.findByText('094 014 201')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('link', { name: 'Άλλος πελάτης' }));
+    expect(await screen.findByText('******201')).toBeInTheDocument();
+    expect(screen.queryByText('094 014 201')).not.toBeInTheDocument();
   });
 
   it('explains a refused reveal (403) inside the dialog', async () => {
