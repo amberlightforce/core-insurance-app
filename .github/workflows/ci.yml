@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  CI: "true"
+
+jobs:
+  dotnet:
+    name: .NET build, tests, SBOM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: |
+          dotnet restore CoreIns.sln
+          dotnet tool restore
+
+      - name: Build (warnings are errors)
+        run: dotnet build CoreIns.sln --configuration Release --no-restore
+
+      - name: Unit, analyser and architecture tests
+        run: |
+          set -euo pipefail
+          for project in tests/*/*.csproj; do
+            case "$project" in *IntegrationTests*) continue ;; esac
+            dotnet test --project "$project" --configuration Release --no-build
+          done
+
+      - name: Integration tests (Testcontainers PostgreSQL 17)
+        run: dotnet test --project tests/CoreIns.IntegrationTests --configuration Release --no-build
+
+      - name: SBOM (CycloneDX, .NET)
+        run: >
+          dotnet CycloneDX src/CoreIns.Host/CoreIns.Host.csproj --exclude-test-projects
+          --output artifacts/sbom --filename dotnet.cdx.json --output-format Json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-dotnet
+          path: artifacts/sbom/dotnet.cdx.json
+
+  web:
+    name: Web lint, typecheck, test, build, SBOM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            tests/e2e/package-lock.json
+
+      - run: npm ci --no-audit
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: Typecheck end-to-end tests
+        working-directory: tests/e2e
+        run: |
+          npm ci --no-audit
+          npm run typecheck
+
+      - name: SBOM (CycloneDX, npm)
+        run: npm run sbom
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-web
+          path: artifacts/sbom/web.cdx.json
+
+  image:
+    name: Container image builds
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build the single image (not pushed)
+        run: docker build --tag coreins:ci .

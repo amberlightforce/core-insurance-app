@@ -4,10 +4,15 @@ obj/
 *.user
 .vs/
 TestResults/
+StrykerOutput/
 # Node
 node_modules/
 dist/
 coverage/
+test-results/
+playwright-report/
+# Build outputs (SBOMs, reports)
+artifacts/
 # Env / secrets
 .env
 *.local

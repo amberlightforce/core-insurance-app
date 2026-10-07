@@ -1,0 +1,13 @@
+{
+  "stryker-config": {
+    "project": "CoreIns.SharedKernel.csproj",
+    "test-projects": ["CoreIns.SharedKernel.Tests.csproj"],
+    "mutation-level": "Complete",
+    "reporters": ["progress", "html", "json"],
+    "thresholds": {
+      "high": 90,
+      "low": 80,
+      "break": 80
+    }
+  }
+}

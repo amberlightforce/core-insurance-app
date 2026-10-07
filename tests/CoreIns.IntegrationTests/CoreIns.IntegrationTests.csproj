@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Integration tests against a real PostgreSQL 17 (Testcontainers), initialised with the same pg-init scripts as
+    the local Compose stack (INFRASTRUCTURE §4 rule 9). Requires Docker.
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Host\CoreIns.Host.csproj" />
+  </ItemGroup>
+
+</Project>
