@@ -65,7 +65,19 @@ public sealed class KeyRingOptions
 /// DecryptOnly with <c>DemotedAt</c>. Retirement has two steps, each after the write bound + margin:
 /// <see cref="BeginRetirementAsync"/> (DemotedAt + bound passed, first re-scan clean → Retiring, <c>RetiringAt</c>) and
 /// <see cref="CompleteRetirementAsync"/> (RetiringAt + bound passed, second re-scan clean → Retired). A write racing the
-/// first scan is caught by the second.</para>
+/// first scan is caught by the second. <see cref="UnretireAsync"/> (Retired → Retiring) is the recovery step when rows
+/// sealed with a retired version are found later.</para>
+/// <para><b>Operating constraints (D-ARC-23a)</b> — the guarantees above hold only when:
+/// <list type="number">
+/// <item>every write transaction touching encrypted or blind-indexed columns finishes within
+/// MaxStaleForWrite + 2 × RetirementMargin (enforce with PostgreSQL <c>idle_in_transaction_session_timeout</c> and
+/// statement timeouts; the retirement scan refuses while older transactions are open — <see cref="GuardedRetirementScan"/>
+/// over <see cref="PostgresLongTransactionGuard"/>, <c>pg_stat_activity.xact_start</c>);</item>
+/// <item>hosts are NTP-synchronised (skew well under RetirementMargin) and both retirement steps are run by one operator
+/// job, so DemotedAt, RetiringAt and the checks use one clock;</item>
+/// <item>the key store (<see cref="IDataKeyStore"/>) is always read from the PostgreSQL primary, never a lagging read
+/// replica, so a "fresh" view really is fresh.</item>
+/// </list></para>
 /// <para><b>KEK rotation</b> (new Key Vault key version) is <see cref="RewrapAsync"/>: data keys are re-wrapped under the
 /// new KEK version, data is untouched, and an unchanged KEK id fails loudly.</para>
 /// </summary>
@@ -174,11 +186,30 @@ public sealed class KeyRing
         return await UnwrapAsync(key, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>Synchronous <see cref="GetAsync"/> for EF Core value converters; blocks only for a version not yet loaded.</summary>
-    public DataKey Get(LegalEntityId legalEntity, KeyPurpose purpose, int version) =>
-        _unwrapped.TryGetValue((legalEntity, purpose, version), out var key)
-            ? key
-            : GetAsync(legalEntity, purpose, version).AsTask().GetAwaiter().GetResult();
+    /// <summary>
+    /// Synchronous <see cref="GetAsync"/> for EF Core value converters. A version not yet loaded is fetched with the wait
+    /// bounded by <see cref="KeyRingOptions.SyncReloadTimeout"/>; on timeout <see cref="KeyRingStaleException"/> is thrown
+    /// instead of blocking a request thread indefinitely (review R4).
+    /// </summary>
+    public DataKey Get(LegalEntityId legalEntity, KeyPurpose purpose, int version)
+    {
+        if (_unwrapped.TryGetValue((legalEntity, purpose, version), out var key))
+        {
+            return key;
+        }
+
+        try
+        {
+            return Task.Run(() => GetAsync(legalEntity, purpose, version).AsTask())
+                .WaitAsync(_options.SyncReloadTimeout)
+                .GetAwaiter().GetResult();
+        }
+        catch (TimeoutException exception)
+        {
+            throw new KeyRingStaleException(
+                $"Data key version {version} could not be loaded within {_options.SyncReloadTimeout}.", exception);
+        }
+    }
 
     /// <summary>
     /// All readable versions (Active first, then the others newest first) from a view at most
@@ -291,6 +322,24 @@ public sealed class KeyRing
 
         await _store.UpdateAsync(key with { Status = DataKeyStatus.Retired }, cancellationToken).ConfigureAwait(false);
         _unwrapped.TryRemove((legalEntity, purpose, version), out _);
+        await ReloadAsync(legalEntity, purpose, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Recovery (D-ARC-23a (4)): Retired → Retiring, when rows sealed or indexed with a retired version are found after
+    /// all. The version becomes readable and searchable again (it is never written); <c>RetiringAt</c> is reset to now, so
+    /// a later <see cref="CompleteRetirementAsync"/> waits the full bound and needs a clean scan again. The wrapped key is
+    /// never deleted on retirement, so this is always possible.
+    /// </summary>
+    public async ValueTask UnretireAsync(LegalEntityId legalEntity, KeyPurpose purpose, int version, CancellationToken cancellationToken = default)
+    {
+        var key = await FindAsync(legalEntity, purpose, version, cancellationToken).ConfigureAwait(false);
+        if (key.Status != DataKeyStatus.Retired)
+        {
+            throw new InvalidOperationException($"Data key version {version} is {key.Status}, not Retired.");
+        }
+
+        await _store.UpdateAsync(key with { Status = DataKeyStatus.Retiring, RetiringAt = _time.GetUtcNow() }, cancellationToken).ConfigureAwait(false);
         await ReloadAsync(legalEntity, purpose, cancellationToken).ConfigureAwait(false);
     }
 
