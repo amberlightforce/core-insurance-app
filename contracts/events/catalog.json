@@ -2813,7 +2813,8 @@
       "personalDataFields": [],
       "x-business-keys": [
         "policyId",
-        "jobId"
+        "jobId",
+        "quoteId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -2931,7 +2932,9 @@
       "x-business-keys": [
         "policyId",
         "policyTermId",
-        "transactionId"
+        "transactionId",
+        "jobId",
+        "quoteId"
       ],
       "setCompleteness": false,
       "consumers": [

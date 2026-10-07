@@ -17,7 +17,9 @@
   "x-business-keys": [
     "policyId",
     "policyTermId",
-    "transactionId"
+    "transactionId",
+    "jobId",
+    "quoteId"
   ],
   "x-payload-status": "full",
   "x-source": [
@@ -52,7 +54,9 @@
       "required": [
         "policyId",
         "policyTermId",
-        "transactionId"
+        "transactionId",
+        "jobId",
+        "quoteId"
       ]
     },
     "payload": {

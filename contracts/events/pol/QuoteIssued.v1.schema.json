@@ -16,7 +16,8 @@
   "x-set-completeness": false,
   "x-business-keys": [
     "policyId",
-    "jobId"
+    "jobId",
+    "quoteId"
   ],
   "x-payload-status": "full",
   "x-source": [
@@ -50,7 +51,8 @@
       "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
       "required": [
         "policyId",
-        "jobId"
+        "jobId",
+        "quoteId"
       ]
     },
     "payload": {
