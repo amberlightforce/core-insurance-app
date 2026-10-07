@@ -234,6 +234,10 @@
       "run": "unspecified",
       "results": "unspecified"
     },
+    "FinLocalizedText": {
+      "el": "Sample text",
+      "en": "Sample text"
+    },
     "FiscalReconciliationResultsItem": {
       "legs": "unspecified",
       "breaks": "unspecified"
@@ -452,15 +456,267 @@
       ]
     },
     "JournalGetResponse": {
-      "journalsLines": "unspecified"
+      "journal": {
+        "journalId": "0192319c-327e-7950-851c-270be49f643a",
+        "journalNumber": "SAMPLE-000001",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "SAMPLE_CODE",
+        "book": "SAMPLE_CODE",
+        "accountingDate": "2026-10-07",
+        "businessDate": "2026-10-07",
+        "period": "SAMPLE_CODE",
+        "sourceType": "EVENT",
+        "sourceModule": "SAMPLE_CODE",
+        "sourceEventType": "SAMPLE_CODE",
+        "sourceEventIds": [
+          "019295a0-d555-744d-8c3b-cb9d2280344c"
+        ],
+        "sourceRef": "Sample text",
+        "ruleSetId": "0192da68-ede7-739d-8ceb-909008a7f4a9",
+        "ruleSetVersion": 1,
+        "ruleCodes": [
+          "SAMPLE_CODE"
+        ],
+        "reversesJournalId": "0192efcf-f9ec-7f81-872b-1eb0d5337819",
+        "reversedByJournalId": "0192bc10-0212-7060-8a55-829e38da2230",
+        "postedAt": "2026-10-07T09:00:00Z",
+        "totals": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "lines": [
+          {
+            "lineNo": 1,
+            "account": "SAMPLE_CODE",
+            "accountName": {
+              "el": "Sample text",
+              "en": "Sample text"
+            },
+            "accountOrigin": "PRD09_ILLUSTRATIVE",
+            "side": "DEBIT",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "functionalAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "ruleCode": "SAMPLE_CODE",
+            "dimensions": {
+              "productCode": "SAMPLE_CODE",
+              "productVersion": "Sample text",
+              "coverageCode": "SAMPLE_CODE",
+              "chargeType": "SAMPLE_CODE",
+              "chargeCategory": "SAMPLE_CODE",
+              "glKey": "SAMPLE_CODE",
+              "policyId": "0192d777-8360-75ea-8b26-75fc8400d2f7",
+              "policyNumber": "SAMPLE-000001",
+              "policyTermId": "0192e6a1-ab39-71bf-815c-ae9364f6c2c4",
+              "policyTransactionId": "0192ab40-993e-77b5-869d-8dd8a9f207e8",
+              "chargeId": "01920261-2d09-7ecf-8e8c-db7010a19f31",
+              "billingAccountId": "019221d8-a8c1-714d-80b1-b154f55fc4cd",
+              "invoiceId": "0192e342-feaf-760b-8d05-196b72579662",
+              "receiptId": "01923bf8-0106-775d-8da3-483a2678c9ad"
+            }
+          }
+        ]
+      }
+    },
+    "JournalLineDimensions": {
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "Sample text",
+      "coverageCode": "SAMPLE_CODE",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "glKey": "SAMPLE_CODE",
+      "policyId": "0192a573-3b7d-7cd0-8d8b-45410fec030c",
+      "policyNumber": "SAMPLE-000001",
+      "policyTermId": "0192f88f-3486-75f6-8967-2bab5854d29b",
+      "policyTransactionId": "0192dd75-ac06-7d62-877e-e3f4c5967898",
+      "chargeId": "01920b3c-29f7-7d54-8e0e-84ae2307255c",
+      "billingAccountId": "019275b1-d0c9-7ea6-8d74-331e7ae21ea8",
+      "invoiceId": "01929089-787a-7a0b-87e5-558aaacef474",
+      "receiptId": "0192390d-3cd3-76e6-89e7-652401393116"
+    },
+    "JournalLineView": {
+      "lineNo": 1,
+      "account": "SAMPLE_CODE",
+      "accountName": {
+        "el": "Sample text",
+        "en": "Sample text"
+      },
+      "accountOrigin": "PRD09_ILLUSTRATIVE",
+      "side": "DEBIT",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "functionalAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ruleCode": "SAMPLE_CODE",
+      "dimensions": {
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "Sample text",
+        "coverageCode": "SAMPLE_CODE",
+        "chargeType": "SAMPLE_CODE",
+        "chargeCategory": "SAMPLE_CODE",
+        "glKey": "SAMPLE_CODE",
+        "policyId": "0192d090-2bb1-7a50-853b-0061a9834701",
+        "policyNumber": "SAMPLE-000001",
+        "policyTermId": "019278fd-7503-7988-8f2d-271ee66d44d0",
+        "policyTransactionId": "0192d4f4-49dc-7ba3-8c0a-c821a06efc0a",
+        "chargeId": "01925e99-f7a3-7ae0-85ef-f9892ebec1e2",
+        "billingAccountId": "0192226a-427d-7c85-8af1-1fbfc0cb9dd7",
+        "invoiceId": "0192d75e-9535-7ed4-81a6-75d99a77ee7e",
+        "receiptId": "01927893-f689-7f04-8555-0fb90c60c640"
+      }
     },
     "JournalQueryItem": {
-      "journalsLines": "unspecified"
+      "journal": {
+        "journalId": "0192f173-070f-760d-89fe-f970b2a37bc6",
+        "journalNumber": "SAMPLE-000001",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "SAMPLE_CODE",
+        "book": "SAMPLE_CODE",
+        "accountingDate": "2026-10-07",
+        "businessDate": "2026-10-07",
+        "period": "SAMPLE_CODE",
+        "sourceType": "EVENT",
+        "sourceModule": "SAMPLE_CODE",
+        "sourceEventType": "SAMPLE_CODE",
+        "sourceEventIds": [
+          "01920a72-6cb5-778e-8bf9-482599ad3b69"
+        ],
+        "sourceRef": "Sample text",
+        "ruleSetId": "01920950-5979-7fd0-8295-e6b120fa4993",
+        "ruleSetVersion": 1,
+        "ruleCodes": [
+          "SAMPLE_CODE"
+        ],
+        "reversesJournalId": "0192f62b-c00b-7097-8400-e0f555f92f44",
+        "reversedByJournalId": "01923d71-9e93-7d32-8708-e90a2241226b",
+        "postedAt": "2026-10-07T09:00:00Z",
+        "totals": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "lines": [
+          {
+            "lineNo": 1,
+            "account": "SAMPLE_CODE",
+            "accountName": {
+              "el": "Sample text",
+              "en": "Sample text"
+            },
+            "accountOrigin": "PRD09_ILLUSTRATIVE",
+            "side": "DEBIT",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "functionalAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "ruleCode": "SAMPLE_CODE",
+            "dimensions": {
+              "productCode": "SAMPLE_CODE",
+              "productVersion": "Sample text",
+              "coverageCode": "SAMPLE_CODE",
+              "chargeType": "SAMPLE_CODE",
+              "chargeCategory": "SAMPLE_CODE",
+              "glKey": "SAMPLE_CODE",
+              "policyId": "0192e982-13b8-7f84-8d78-571d253eeb62",
+              "policyNumber": "SAMPLE-000001",
+              "policyTermId": "01923f81-bae7-797c-8f1d-621f030bcccb",
+              "policyTransactionId": "0192008c-ffff-76ab-8dc0-1b7e624faf86",
+              "chargeId": "0192deda-3189-7b23-8531-9d371200a41e",
+              "billingAccountId": "0192e75f-569b-71b6-89a5-47eeb154688c",
+              "invoiceId": "01922f8b-b2de-7ba1-8103-ca4bf0455f42",
+              "receiptId": "019291ff-eaf7-7b39-86d5-a40d882f4a6d"
+            }
+          }
+        ]
+      }
     },
     "JournalQueryPage": {
       "items": [
         {
-          "journalsLines": "unspecified"
+          "journal": {
+            "journalId": "01926673-afa5-77c6-8a40-0ed2663654f4",
+            "journalNumber": "SAMPLE-000001",
+            "legalEntity": "SAMPLE_CODE",
+            "jurisdiction": "SAMPLE_CODE",
+            "book": "SAMPLE_CODE",
+            "accountingDate": "2026-10-07",
+            "businessDate": "2026-10-07",
+            "period": "SAMPLE_CODE",
+            "sourceType": "EVENT",
+            "sourceModule": "SAMPLE_CODE",
+            "sourceEventType": "SAMPLE_CODE",
+            "sourceEventIds": [
+              "019215a5-e803-742a-87e8-54c5ad689aff"
+            ],
+            "sourceRef": "Sample text",
+            "ruleSetId": "01923950-01ca-7610-8d40-1877ce4bd6fb",
+            "ruleSetVersion": 1,
+            "ruleCodes": [
+              "SAMPLE_CODE"
+            ],
+            "reversesJournalId": "01925eb0-7d12-7bf5-8ba9-75c06bc6128d",
+            "reversedByJournalId": "01926ab2-ec58-7c1f-8c29-70ac89d6dfa4",
+            "postedAt": "2026-10-07T09:00:00Z",
+            "totals": [
+              {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            ],
+            "lines": [
+              {
+                "lineNo": 1,
+                "account": "SAMPLE_CODE",
+                "accountName": {
+                  "el": "Sample text",
+                  "en": "Sample text"
+                },
+                "accountOrigin": "PRD09_ILLUSTRATIVE",
+                "side": "DEBIT",
+                "amount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                },
+                "functionalAmount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                },
+                "ruleCode": "SAMPLE_CODE",
+                "dimensions": {
+                  "productCode": "SAMPLE_CODE",
+                  "productVersion": "Sample text",
+                  "coverageCode": "SAMPLE_CODE",
+                  "chargeType": "SAMPLE_CODE",
+                  "chargeCategory": "SAMPLE_CODE",
+                  "glKey": "SAMPLE_CODE",
+                  "policyId": "0192cdfa-a399-7e2b-862c-aead4f997def",
+                  "policyNumber": "SAMPLE-000001",
+                  "policyTermId": "0192c9ee-e546-78ca-83cc-d90213ba3f9f",
+                  "policyTransactionId": "01921005-190e-7b07-87fc-4178782b58fa",
+                  "chargeId": "0192130b-3ffc-7430-814c-8118766b7e17",
+                  "billingAccountId": "01921b00-f876-7edd-8dbd-9f365ba61b9e",
+                  "invoiceId": "0192ccd0-6e37-746f-8b10-bc5a62ef97d5",
+                  "receiptId": "019246a3-fc78-7176-81f4-07f34c47a6bb"
+                }
+              }
+            ]
+          }
         }
       ],
       "nextCursor": "sample",
@@ -473,6 +729,74 @@
     },
     "JournalReverseResponse": {
       "reversalJournal": "unspecified"
+    },
+    "JournalView": {
+      "journalId": "0192437f-52e5-7625-8e4c-a4bcda62df1d",
+      "journalNumber": "SAMPLE-000001",
+      "legalEntity": "SAMPLE_CODE",
+      "jurisdiction": "SAMPLE_CODE",
+      "book": "SAMPLE_CODE",
+      "accountingDate": "2026-10-07",
+      "businessDate": "2026-10-07",
+      "period": "SAMPLE_CODE",
+      "sourceType": "EVENT",
+      "sourceModule": "SAMPLE_CODE",
+      "sourceEventType": "SAMPLE_CODE",
+      "sourceEventIds": [
+        "0192124c-3e99-7bbe-802e-bf338133f620"
+      ],
+      "sourceRef": "Sample text",
+      "ruleSetId": "0192dc05-99e9-7507-8e5a-1bdf7167543b",
+      "ruleSetVersion": 1,
+      "ruleCodes": [
+        "SAMPLE_CODE"
+      ],
+      "reversesJournalId": "01926f1f-86c2-78a2-889d-9a2df89c2b18",
+      "reversedByJournalId": "019289d4-c667-707b-8e15-973e83c13234",
+      "postedAt": "2026-10-07T09:00:00Z",
+      "totals": [
+        {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      ],
+      "lines": [
+        {
+          "lineNo": 1,
+          "account": "SAMPLE_CODE",
+          "accountName": {
+            "el": "Sample text",
+            "en": "Sample text"
+          },
+          "accountOrigin": "PRD09_ILLUSTRATIVE",
+          "side": "DEBIT",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "functionalAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleCode": "SAMPLE_CODE",
+          "dimensions": {
+            "productCode": "SAMPLE_CODE",
+            "productVersion": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "glKey": "SAMPLE_CODE",
+            "policyId": "01923136-8ef8-7727-8739-5542303b0050",
+            "policyNumber": "SAMPLE-000001",
+            "policyTermId": "01922651-a0f6-766a-8588-c675b9dbe514",
+            "policyTransactionId": "01929b16-3b3b-731d-83b9-e5012e9aaa8d",
+            "chargeId": "0192a6e2-540b-78d1-8ece-c9e51ebb8ebf",
+            "billingAccountId": "019262f7-a018-789a-88ef-325ab56c9e7a",
+            "invoiceId": "0192fde3-7b1c-77eb-8e05-1d9fcfb4f325",
+            "receiptId": "0192ab86-1757-7f0d-8b9e-76511e50919f"
+          }
+        }
+      ]
     },
     "LevyReturnAddAdjustmentRequest": {
       "levy": "unspecified",
@@ -656,16 +980,52 @@
       "preview": "unspecified"
     },
     "PostingRulesListItem": {
-      "compileResults": "unspecified",
-      "goldenResults": "unspecified",
-      "preview": "unspecified"
+      "ruleSetId": "01929f15-92f1-777d-81df-248f7e320bb6",
+      "ruleSetVersion": 1,
+      "ruleSetStatus": "ACTIVE",
+      "legalEntity": "SAMPLE_CODE",
+      "book": "SAMPLE_CODE",
+      "effectiveFrom": "2026-10-07",
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "ruleCode": "SAMPLE_CODE",
+      "sourceEventType": "SAMPLE_CODE",
+      "entryType": "SAMPLE_CODE",
+      "sourceAccount": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "chargeType": "SAMPLE_CODE",
+      "specificity": 1,
+      "account": "SAMPLE_CODE",
+      "accountOrigin": "PRD09_ILLUSTRATIVE",
+      "deriveFrom": "GL_KEY",
+      "description": {
+        "el": "Sample text",
+        "en": "Sample text"
+      }
     },
     "PostingRulesListPage": {
       "items": [
         {
-          "compileResults": "unspecified",
-          "goldenResults": "unspecified",
-          "preview": "unspecified"
+          "ruleSetId": "0192184f-4319-7e31-8214-19abd602e952",
+          "ruleSetVersion": 1,
+          "ruleSetStatus": "ACTIVE",
+          "legalEntity": "SAMPLE_CODE",
+          "book": "SAMPLE_CODE",
+          "effectiveFrom": "2026-10-07",
+          "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "ruleCode": "SAMPLE_CODE",
+          "sourceEventType": "SAMPLE_CODE",
+          "entryType": "SAMPLE_CODE",
+          "sourceAccount": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "specificity": 1,
+          "account": "SAMPLE_CODE",
+          "accountOrigin": "PRD09_ILLUSTRATIVE",
+          "deriveFrom": "GL_KEY",
+          "description": {
+            "el": "Sample text",
+            "en": "Sample text"
+          }
         }
       ],
       "nextCursor": "sample",

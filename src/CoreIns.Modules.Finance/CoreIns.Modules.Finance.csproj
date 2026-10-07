@@ -1,15 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- PRD-09 Finance: implementation of the Finance module (PostgreSQL schema `fin`). -->
+  <!--
+    PRD-09 Finance: implementation of the Finance module (PostgreSQL schema `fin`).
+    SL-FIN slice: intake of BIL BillingEntryPosted (posting source) and POL/BIL context events, data-driven posting
+    rules, balanced append-only journals, a minimal GR-TEST chart. Layout follows docs/module-pattern.md.
+  -->
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Finance.Contracts\CoreIns.Modules.Finance.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Billing.Contracts\CoreIns.Modules.Billing.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Versioned reference data (chart, derivations, catalogue, rule set) applied by the migrations; immutable once applied. -->
+    <EmbeddedResource Include="Seed\gr-test.finance.v1.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v1.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
+    <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
   </ItemGroup>
 
 </Project>

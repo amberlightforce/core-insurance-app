@@ -60,7 +60,7 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
         var ct = TestContext.Current.CancellationToken;
 
         var users = await client.GetFromJsonAsync<JsonNode>(new Uri("/api/plt/v1/dev/users", UriKind.Relative), ct);
-        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(["underwriter", "billing", "admin"]);
+        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(["underwriter", "billing", "finance", "admin"]);
 
         using var unknown = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = "nobody" }, ct);
         unknown.StatusCode.ShouldBe(HttpStatusCode.NotFound);

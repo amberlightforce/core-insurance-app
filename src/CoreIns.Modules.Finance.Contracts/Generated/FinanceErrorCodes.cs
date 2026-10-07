@@ -22,7 +22,7 @@ public static class FinanceErrorCodes
 
     /// <summary>FIN-ERR-COMPILE (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): fin.PostingRules.compile, fin.PostingRules.decide, fin.PostingRules.draft, fin.PostingRules.list, fin.PostingRules.previewImpact, fin.PostingRules.submit, fin.PostingRules.test.</para>
+    /// <para>Declared by 6 operation(s): fin.PostingRules.compile, fin.PostingRules.decide, fin.PostingRules.draft, fin.PostingRules.previewImpact, fin.PostingRules.submit, fin.PostingRules.test.</para>
     /// </remarks>
     public const string Compile = "FIN-ERR-COMPILE";
 
@@ -46,7 +46,7 @@ public static class FinanceErrorCodes
 
     /// <summary>FIN-ERR-GOLDEN (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): fin.PostingRules.compile, fin.PostingRules.decide, fin.PostingRules.draft, fin.PostingRules.list, fin.PostingRules.previewImpact, fin.PostingRules.submit, fin.PostingRules.test.</para>
+    /// <para>Declared by 6 operation(s): fin.PostingRules.compile, fin.PostingRules.decide, fin.PostingRules.draft, fin.PostingRules.previewImpact, fin.PostingRules.submit, fin.PostingRules.test.</para>
     /// </remarks>
     public const string Golden = "FIN-ERR-GOLDEN";
 
@@ -70,7 +70,7 @@ public static class FinanceErrorCodes
 
     /// <summary>FIN-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): fin.Dsar.restrict, fin.Ifrs17Group.assignment, fin.Ifrs17Group.riHeldAssignment.</para>
+    /// <para>Declared by 4 operation(s): fin.Dsar.restrict, fin.Ifrs17Group.assignment, fin.Ifrs17Group.riHeldAssignment, fin.Journal.get.</para>
     /// </remarks>
     public const string NotFound = "FIN-ERR-NOT-FOUND";
 
@@ -146,11 +146,17 @@ public static class FinanceErrorCodes
     /// </remarks>
     public const string Unbalanced = "FIN-ERR-UNBALANCED";
 
+    /// <summary>FIN-ERR-VALIDATION (HTTP 400).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): fin.Journal.query, fin.PostingRules.list.</para>
+    /// </remarks>
+    public const string Validation = "FIN-ERR-VALIDATION";
+
     /// <summary>The code prefix of this module.</summary>
     public const string Prefix = "FIN-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AlreadyReversed, ApprovalRequired, Compile, EvidenceRequired, ExtractState, GatesFailed, Golden, IdempotencyMismatch, Import, ImportReversalBlocked, NotFound, PeriodLocked, RateMissing, ReconUnexplained, ResultsetIncomplete, ReturnNotApproved, RunInProgress, SourceOwned, SpiUnbound, TemplateAccount, Tolerance, TotalsSchema, Unbalanced];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AlreadyReversed, ApprovalRequired, Compile, EvidenceRequired, ExtractState, GatesFailed, Golden, IdempotencyMismatch, Import, ImportReversalBlocked, NotFound, PeriodLocked, RateMissing, ReconUnexplained, ResultsetIncomplete, ReturnNotApproved, RunInProgress, SourceOwned, SpiUnbound, TemplateAccount, Tolerance, TotalsSchema, Unbalanced, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -178,5 +184,6 @@ public static class FinanceErrorCodes
         [Tolerance] = 422,
         [TotalsSchema] = 422,
         [Unbalanced] = 422,
+        [Validation] = 400,
     };
 }
