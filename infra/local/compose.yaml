@@ -8,7 +8,7 @@ name: coreins
 
 services:
   postgres:
-    image: postgres:17.11
+    image: postgres:18.4
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD:?set PG_PASSWORD in infra/local/.env}
       APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD in infra/local/.env}
