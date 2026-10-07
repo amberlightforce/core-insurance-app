@@ -11,7 +11,13 @@ afterEach(() => {
 
 describe('apiRequest', () => {
   it('sends JSON bodies, the Idempotency-Key and Accept-Language, and puts query values in the URL', async () => {
-    const api = mockApi([{ method: 'POST', path: '/api/x/v1/things', respond: () => ({ status: 201, body: { ok: true } }) }]);
+    const api = mockApi([
+      {
+        method: 'POST',
+        path: '/api/x/v1/things',
+        respond: () => ({ status: 201, body: { ok: true } }),
+      },
+    ]);
     const key = newIdempotencyKey();
     const result = await apiRequest<{ ok: boolean }>('/api/x/v1/things', {
       method: 'POST',
@@ -31,7 +37,11 @@ describe('apiRequest', () => {
   it('sends the dev bearer token when a session is held', async () => {
     sessionStorage.setItem(
       'coreins.devSession',
-      JSON.stringify({ accessToken: 'tok-1', expiresAt: new Date(Date.now() + 60_000).toISOString(), user: { id: 'u', name: 'U', roles: [] } }),
+      JSON.stringify({
+        accessToken: 'tok-1',
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+        user: { id: 'u', name: 'U', roles: [] },
+      }),
     );
     const api = mockApi([{ method: 'GET', path: '/api/x/v1/a', respond: () => ({ body: {} }) }]);
     await apiRequest('/api/x/v1/a');
@@ -39,7 +49,13 @@ describe('apiRequest', () => {
   });
 
   it('turns an RFC 9457 problem into an ApiError carrying code, status and trace id', async () => {
-    mockApi([{ method: 'GET', path: '/api/x/v1/a', respond: () => problem(422, 'POL-ERR-VALIDATION', 'Invalid', 'Add a vehicle.') }]);
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/x/v1/a',
+        respond: () => problem(422, 'POL-ERR-VALIDATION', 'Invalid', 'Add a vehicle.'),
+      },
+    ]);
     const error = await apiRequest('/api/x/v1/a').catch((e: unknown) => e);
     expect(isApiError(error)).toBe(true);
     const api = error as ApiError;
@@ -50,10 +66,16 @@ describe('apiRequest', () => {
   });
 
   it('synthesises a problem for non-JSON failures and for network errors', async () => {
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('<html>bad gateway</html>', { status: 502 }))));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('<html>bad gateway</html>', { status: 502 }))),
+    );
     const gateway = (await apiRequest('/api/x').catch((e: unknown) => e)) as ApiError;
     expect(gateway.status).toBe(502);
-    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new TypeError('Failed to fetch'))));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.reject(new TypeError('Failed to fetch'))),
+    );
     const offline = (await apiRequest('/api/x').catch((e: unknown) => e)) as ApiError;
     expect(offline.status).toBe(0);
     expect(offline.code).toBe('NETWORK');

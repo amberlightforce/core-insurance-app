@@ -9,6 +9,7 @@ import {
   KeyValueList,
   StatusPill,
   moneyColumn,
+  statusColumn,
   textColumn,
   type DataColumn,
 } from '../../design-system';
@@ -49,6 +50,18 @@ function lineColumns(
       { currency },
     ),
     textColumn<Line>('rule', t('lines.rule'), (l) => l.ruleCode),
+    statusColumn<Line>(
+      'origin',
+      t('lines.origin'),
+      (l) => l.accountOrigin,
+      (l) => (
+        <StatusPill
+          semantic={l.accountOrigin === 'TECHNICAL_PLACEHOLDER' ? 'warning' : 'info'}
+          subLabel={t(`origin.${l.accountOrigin}`)}
+          announceChanges={false}
+        />
+      ),
+    ),
   ];
 }
 
@@ -62,7 +75,7 @@ function JournalCard({ journal }: { journal: JournalView }) {
     [t, i18n.language, currency],
   );
   return (
-    <Section title={t('journal.title', { number: journal.journalNumber })} headingLevel={3}>
+    <Section title={t('journal.title', { number: journal.journalNumber })} headingLevel={2}>
       <KeyValueList
         aria-label={t('journal.title', { number: journal.journalNumber })}
         items={[

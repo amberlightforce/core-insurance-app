@@ -21,7 +21,11 @@ describe('ProblemBanner', () => {
   it('renders RFC 9457 Problem Details readably: localised headline, detail, field errors, code and trace id', async () => {
     const onRetry = vi.fn();
     const { container, user } = renderWithDs(<ProblemBanner error={problem} onRetry={onRetry} />);
-    expect(screen.getByText('Η προσφορά δεν είναι πλέον ισχύουσα. Υπολογίστε νέα προσφορά πριν τη δέσμευση.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Η προσφορά δεν είναι πλέον ισχύουσα. Υπολογίστε νέα προσφορά πριν τη δέσμευση.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText('The quote validity has ended.')).toBeInTheDocument();
     expect(screen.getByText('riskTree.vehicles[0]')).toBeInTheDocument();
     expect(screen.getByText(/Vehicle incomplete/)).toBeInTheDocument();
@@ -34,7 +38,11 @@ describe('ProblemBanner', () => {
 
   it('uses the server title for unknown codes, and English when the UI language is English', async () => {
     await i18n.changeLanguage('en');
-    renderWithDs(<ProblemBanner error={new ApiError({ status: 422, code: 'XYZ-ERR-UNKNOWN', title: 'Server title' })} />);
+    renderWithDs(
+      <ProblemBanner
+        error={new ApiError({ status: 422, code: 'XYZ-ERR-UNKNOWN', title: 'Server title' })}
+      />,
+    );
     expect(screen.getByText('Server title')).toBeInTheDocument();
     renderWithDs(<ProblemBanner error={problem} />);
     expect(screen.getByText(/Calculate a new quote before binding/)).toBeInTheDocument();

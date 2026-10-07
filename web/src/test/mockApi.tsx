@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- test helper module, never hot-reloaded */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { RenderResult } from '@testing-library/react';
 import type { ReactElement } from 'react';
@@ -40,7 +41,10 @@ export function mockApi(routes: MockRoute[]): MockApi {
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = new URL(String(input), 'http://localhost');
+      const url = new URL(
+        typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
+        'http://localhost',
+      );
       const method = (init?.method ?? 'GET').toUpperCase();
       const raw = typeof init?.body === 'string' ? init.body : undefined;
       const request: MockRequest = {
@@ -56,13 +60,16 @@ export function mockApi(routes: MockRoute[]): MockApi {
       const status = reply.status ?? 200;
       return new Response(reply.body === undefined ? null : JSON.stringify(reply.body), {
         status,
-        headers: { 'Content-Type': status >= 400 ? 'application/problem+json' : 'application/json' },
+        headers: {
+          'Content-Type': status >= 400 ? 'application/problem+json' : 'application/json',
+        },
       });
     }),
   );
   return {
     calls,
-    callsTo: (method, path) => calls.filter((c) => c.method === method && matches(path, c.url.pathname)),
+    callsTo: (method, path) =>
+      calls.filter((c) => c.method === method && matches(path, c.url.pathname)),
   };
 }
 

@@ -173,7 +173,11 @@ export const questionSet: QuestionSetGetResponse = {
         customerVisible: true,
         answers: [
           { code: 'PRIVATE', label: text('Ιδιωτική χρήση', 'Private use'), outcome: 'NONE' },
-          { code: 'BUSINESS', label: text('Επαγγελματική χρήση', 'Business use'), outcome: 'REFERRAL' },
+          {
+            code: 'BUSINESS',
+            label: text('Επαγγελματική χρήση', 'Business use'),
+            outcome: 'REFERRAL',
+          },
         ],
         mapsToField: 'vehicle.usage',
         illustrative: true,
@@ -187,7 +191,12 @@ export const questionSet: QuestionSetGetResponse = {
         customerVisible: true,
         answers: [
           { code: 'NO', label: text('Όχι', 'No'), outcome: 'NONE' },
-          { code: 'YES', label: text('Ναι', 'Yes'), outcome: 'KNOCK_OUT', reasonKey: 'pfc.question.hire.out_of_scope' },
+          {
+            code: 'YES',
+            label: text('Ναι', 'Yes'),
+            outcome: 'KNOCK_OUT',
+            reasonKey: 'pfc.question.hire.out_of_scope',
+          },
         ],
         illustrative: true,
         displayOrder: 3,
@@ -221,15 +230,38 @@ export function quote(overrides: Partial<JobQuoteResponse> = {}): JobQuoteRespon
     taxes: eur('46.85'),
     total: eur('479.20'),
     charges: [
-      { elementLocator: 'v1', coverageCode: 'MTPL', chargeType: 'PREM-MTPL', chargeCategory: 'PREMIUM', annualRate: '312.3456', amount: eur('312.35') },
-      { elementLocator: 'v1', coverageCode: 'OWN-DAMAGE', chargeType: 'PREM-OD', chargeCategory: 'PREMIUM', annualRate: '120.005', amount: eur('120.00') },
-      { elementLocator: 'v1', coverageCode: 'MTPL', chargeType: 'GR-IPT', chargeCategory: 'TAX', annualRate: '0.15', amount: eur('46.85'), legalStatus: 'Unverified', provisional: true },
+      {
+        elementLocator: 'v1',
+        coverageCode: 'MTPL',
+        chargeType: 'PREM-MTPL',
+        chargeCategory: 'PREMIUM',
+        annualRate: '312.3456',
+        amount: eur('312.35'),
+      },
+      {
+        elementLocator: 'v1',
+        coverageCode: 'OWN-DAMAGE',
+        chargeType: 'PREM-OD',
+        chargeCategory: 'PREMIUM',
+        annualRate: '120.005',
+        amount: eur('120.00'),
+      },
+      {
+        elementLocator: 'v1',
+        coverageCode: 'MTPL',
+        chargeType: 'GR-IPT',
+        chargeCategory: 'TAX',
+        annualRate: '0.15',
+        amount: eur('46.85'),
+        legalStatus: 'Unverified',
+        provisional: true,
+      },
     ],
     worksheetId: 'a'.repeat(64),
     issues: [],
     validUntil: '2026-11-06T10:00:00Z',
     ...overrides,
-  } as JobQuoteResponse;
+  };
 }
 
 export function bound(overrides: Partial<JobBindResponse> = {}): JobBindResponse {
@@ -244,10 +276,12 @@ export function bound(overrides: Partial<JobBindResponse> = {}): JobBindResponse
       { gate: 'UW_ISSUES', passed: true, severity: 'BLOCK' },
     ],
     ...overrides,
-  } as JobBindResponse;
+  };
 }
 
-export function policy(status: 'SCHEDULED' | 'IN_FORCE' | 'EXPIRED' = 'IN_FORCE'): PolicyGetResponse {
+export function policy(
+  status: 'SCHEDULED' | 'IN_FORCE' | 'EXPIRED' = 'IN_FORCE',
+): PolicyGetResponse {
   return {
     policy: {
       policyId,
@@ -274,7 +308,15 @@ export function policy(status: 'SCHEDULED' | 'IN_FORCE' | 'EXPIRED' = 'IN_FORCE'
       recordedAt: '2026-10-07T20:20:00Z',
     },
     riskTree: {
-      vehicles: [{ locator: 'v1', plate: 'ΙΚΧ-1234', make: 'Toyota', model: 'Yaris', firstRegistrationYear: 2021 }],
+      vehicles: [
+        {
+          locator: 'v1',
+          plate: 'ΙΚΧ-1234',
+          make: 'Toyota',
+          model: 'Yaris',
+          firstRegistrationYear: 2021,
+        },
+      ],
       drivers: [{ locator: 'd1', partyId, driverType: 'MAIN' }],
       coverages: [
         { coverageCode: 'MTPL', selected: true },
@@ -284,9 +326,22 @@ export function policy(status: 'SCHEDULED' | 'IN_FORCE' | 'EXPIRED' = 'IN_FORCE'
       questionSets: [],
     },
     transactions: [
-      { transactionId: 'tx-1', kind: 'NEW_BUSINESS', sequence: 1, effectiveAt: '2026-10-08T00:00:00+03:00', recordedAt: '2026-10-07T20:20:00Z', premium: eur('432.35'), taxes: eur('46.85'), total: eur('479.20') },
+      {
+        transactionId: 'tx-1',
+        kind: 'NEW_BUSINESS',
+        sequence: 1,
+        effectiveAt: '2026-10-08T00:00:00+03:00',
+        recordedAt: '2026-10-07T20:20:00Z',
+        premium: eur('432.35'),
+        taxes: eur('46.85'),
+        total: eur('479.20'),
+      },
     ],
-    charges: quote().charges.map((c) => ({ ...c, transactionId: 'tx-1', chargeId: `${c.chargeType}-id` })),
+    charges: quote().charges.map((c) => ({
+      ...c,
+      transactionId: 'tx-1',
+      chargeId: `${c.chargeType}-id`,
+    })),
   } as unknown as PolicyGetResponse;
 }
 
@@ -299,7 +354,7 @@ export const invoiceList: InvoiceListPage = {
   ],
   nextCursor: null,
   limit: 50,
-} as InvoiceListPage;
+};
 
 export function invoice(state: 'BILLED' | 'PAID' = 'BILLED'): InvoiceGetResponse {
   const open = state === 'PAID' ? '0.00' : '479.20';
@@ -340,7 +395,14 @@ export function invoice(state: 'BILLED' | 'PAID' = 'BILLED'): InvoiceGetResponse
       },
     ],
     allocations: [],
-    fiscalStatus: { status: 'REGISTERED', series: 'STUB-A', number: '000042', mark: '400000000042', uid: 'STUBUID1', documentType: '1.1' },
+    fiscalStatus: {
+      status: 'REGISTERED',
+      series: 'STUB-A',
+      number: '000042',
+      mark: '400000000042',
+      uid: 'STUBUID1',
+      documentType: '1.1',
+    },
     deliveryStatus: 'NOT_REQUESTED',
   } as unknown as InvoiceGetResponse;
 }
@@ -355,7 +417,16 @@ export function account(): BillingAccountGetResponse {
       status: 'ACTIVE',
       createdAt: '2026-10-07T20:20:00Z',
       terms: [
-        { policyTermId: 'term-1', policyId, policyNumber: 'POL000000007', termNumber: 1, productCode: 'MOTOR-GR', planCode: 'ANNUAL', billMode: 'DIRECT_BILL', termPeriod: { from: '2026-10-08', to: '2027-10-08' } },
+        {
+          policyTermId: 'term-1',
+          policyId,
+          policyNumber: 'POL000000007',
+          termNumber: 1,
+          productCode: 'MOTOR-GR',
+          planCode: 'ANNUAL',
+          billMode: 'DIRECT_BILL',
+          termPeriod: { from: '2026-10-08', to: '2027-10-08' },
+        },
       ],
     },
     balancesByState: {
@@ -378,6 +449,7 @@ export function journals(unbalanced = false): JournalQueryPage {
     amount: eur(amount),
     functionalAmount: eur(amount),
     ruleCode: 'R-WRITTEN',
+    accountOrigin: accountCode === '2300' ? 'TECHNICAL_PLACEHOLDER' : 'PRD09_ILLUSTRATIVE',
     dimensions: {},
   });
   return {

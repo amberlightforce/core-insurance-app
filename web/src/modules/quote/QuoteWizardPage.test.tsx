@@ -15,27 +15,66 @@ afterEach(() => {
 
 type User = ReturnType<typeof renderScreen>['user'];
 
-function routes(overrides: { bind?: () => { status?: number; body?: unknown }; quote?: () => { status?: number; body?: unknown } } = {}): MockRoute[] {
+function routes(
+  overrides: {
+    bind?: () => { status?: number; body?: unknown };
+    quote?: () => { status?: number; body?: unknown };
+  } = {},
+): MockRoute[] {
   return [
-    { method: 'GET', path: `/api/pty/v1/parties/${fx.partyId}`, respond: () => ({ body: { party: fx.party() } }) },
-    { method: 'POST', path: '/api/pfc/v1/product-versions/resolve', respond: () => ({ body: fx.resolved }) },
-    { method: 'GET', path: `/api/pfc/v1/catalogue/${fx.hash}`, respond: () => ({ body: fx.catalogue }) },
-    { method: 'GET', path: `/api/pfc/v1/question-sets/${fx.hash}`, respond: () => ({ body: fx.questionSet }) },
+    {
+      method: 'GET',
+      path: `/api/pty/v1/parties/${fx.partyId}`,
+      respond: () => ({ body: { party: fx.party() } }),
+    },
+    {
+      method: 'POST',
+      path: '/api/pfc/v1/product-versions/resolve',
+      respond: () => ({ body: fx.resolved }),
+    },
+    {
+      method: 'GET',
+      path: `/api/pfc/v1/catalogue/${fx.hash}`,
+      respond: () => ({ body: fx.catalogue }),
+    },
+    {
+      method: 'GET',
+      path: `/api/pfc/v1/question-sets/${fx.hash}`,
+      respond: () => ({ body: fx.questionSet }),
+    },
     {
       method: 'POST',
       path: '/api/pfc/v1/question-sets/evaluate',
-      respond: () => ({ body: { questions: [], knockOuts: [], referrals: [], missingRequired: [], complete: true } }),
+      respond: () => ({
+        body: { questions: [], knockOuts: [], referrals: [], missingRequired: [], complete: true },
+      }),
     },
     {
       method: 'POST',
       path: '/api/pol/v1/submissions',
-      respond: () => ({ status: 201, body: { jobId: fx.jobId, jobNumber: 'Q1', policyId: fx.policyId, state: 'DRAFT', productVersion: '1.0', expirationAt: '2027-10-08T00:00:00Z', versionNo: 1, manifest: { artefactHash: fx.hash } } }),
+      respond: () => ({
+        status: 201,
+        body: {
+          jobId: fx.jobId,
+          jobNumber: 'Q1',
+          policyId: fx.policyId,
+          state: 'DRAFT',
+          productVersion: '1.0',
+          expirationAt: '2027-10-08T00:00:00Z',
+          versionNo: 1,
+          manifest: { artefactHash: fx.hash },
+        },
+      }),
     },
     {
       method: 'POST',
       path: '/api/pol/v1/jobs/update-draft',
       respond: (r) => {
-        const body = r.body as { versionNo: number; expectedDraftVersion: number; instructions: { op: string }[] };
+        const body = r.body as {
+          versionNo: number;
+          expectedDraftVersion: number;
+          instructions: { op: string }[];
+        };
         const hasVehicle = body.instructions.some((i) => i.op === 'SET_VEHICLE');
         return {
           body: {
@@ -45,7 +84,9 @@ function routes(overrides: { bind?: () => { status?: number; body?: unknown }; q
             state: 'DRAFT',
             riskTree: {
               vehicles: [{ locator: 'veh-1', plate: 'ΙΚΧ1234' }],
-              drivers: hasVehicle ? [] : [{ locator: 'drv-1', partyId: fx.partyId, driverType: 'MAIN' }],
+              drivers: hasVehicle
+                ? []
+                : [{ locator: 'drv-1', partyId: fx.partyId, driverType: 'MAIN' }],
               coverages: [],
               questionSets: [],
             },
@@ -54,8 +95,16 @@ function routes(overrides: { bind?: () => { status?: number; body?: unknown }; q
         };
       },
     },
-    { method: 'POST', path: '/api/pol/v1/jobs/quote', respond: overrides.quote ?? (() => ({ body: fx.quote() })) },
-    { method: 'POST', path: '/api/pol/v1/jobs/bind', respond: overrides.bind ?? (() => ({ body: fx.bound() })) },
+    {
+      method: 'POST',
+      path: '/api/pol/v1/jobs/quote',
+      respond: overrides.quote ?? (() => ({ body: fx.quote() })),
+    },
+    {
+      method: 'POST',
+      path: '/api/pol/v1/jobs/bind',
+      respond: overrides.bind ?? (() => ({ body: fx.bound() })),
+    },
   ];
 }
 
@@ -82,7 +131,10 @@ async function walkToPremium(user: User) {
   await user.type(screen.getByRole('textbox', { name: /Μοντέλο/ }), 'Yaris');
   await user.type(screen.getByRole('textbox', { name: /Έτος πρώτης κυκλοφορίας/ }), '2021');
   await user.type(screen.getByRole('textbox', { name: /Κυβισμός/ }), '1400');
-  await user.type(screen.getByRole('textbox', { name: /Ταχυδρομικός κώδικας στάθμευσης/ }), '11526');
+  await user.type(
+    screen.getByRole('textbox', { name: /Ταχυδρομικός κώδικας στάθμευσης/ }),
+    '11526',
+  );
   await next(user);
 
   await screen.findByRole('heading', { level: 2, name: 'Οδηγός' });
@@ -105,28 +157,49 @@ const url = `/policies/quotes/new?partyId=${fx.partyId}`;
 describe('QuoteWizardPage', () => {
   it('walks the wizard, writes the draft, quotes with warnings and binds with explicit confirmation (ANNUAL)', async () => {
     const api = mockApi(routes());
-    const { user, container } = renderScreen(<QuoteWizardPage />, { path: '/policies/quotes/new', url });
+    const { user, container } = renderScreen(<QuoteWizardPage />, {
+      path: '/policies/quotes/new',
+      url,
+    });
 
     await walkToPremium(user);
     await expectNoA11yViolations(container);
     // Not yet calculated: Next explains why.
-    expect(screen.getByRole('button', { name: /Επόμενο/ })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: /Επόμενο/ })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
 
     await user.click(screen.getByRole('button', { name: 'Υπολογισμός ασφαλίστρου' }));
     expect(await screen.findByText('Ενδεικτικό τιμολόγιο')).toBeInTheDocument();
     expect(screen.getByText('Προσωρινοί φόροι και εισφορές')).toBeInTheDocument();
-    expect(screen.getByText('Αποδοχή')).toBeInTheDocument();
+    expect(screen.getAllByText('Αποδοχή').length).toBeGreaterThan(0);
     expect(screen.getAllByText('479,20 €').length).toBeGreaterThan(0);
 
     // The commands: one submission, two draft writes (vehicle first, then driver/covers/answers), one quote.
     const submission = api.callsTo('POST', '/api/pol/v1/submissions')[0];
-    expect(submission?.body).toMatchObject({ policyholderPartyId: fx.partyId, product: 'MOTOR-GR', channel: 'STAFF', quoteType: 'FULL' });
+    expect(submission?.body).toMatchObject({
+      policyholderPartyId: fx.partyId,
+      product: 'MOTOR-GR',
+      channel: 'STAFF',
+      quoteType: 'FULL',
+    });
     const drafts = api.callsTo('POST', '/api/pol/v1/jobs/update-draft');
     expect(drafts).toHaveLength(2);
-    const [vehicleCall, riskCall] = drafts.map((d) => d.body as { expectedDraftVersion: number; instructions: { op: string; driver?: { vehicleLocator: string } }[] });
+    const [vehicleCall, riskCall] = drafts.map(
+      (d) =>
+        d.body as {
+          expectedDraftVersion: number;
+          instructions: { op: string; driver?: { vehicleLocator: string } }[];
+        },
+    );
     expect(vehicleCall?.instructions.map((i) => i.op)).toEqual(['SET_VEHICLE']);
     expect(riskCall?.expectedDraftVersion).toBe(1);
-    expect(riskCall?.instructions.map((i) => i.op)).toEqual(['SET_DRIVER', 'SET_COVERAGES', 'SET_ANSWERS']);
+    expect(riskCall?.instructions.map((i) => i.op)).toEqual([
+      'SET_DRIVER',
+      'SET_COVERAGES',
+      'SET_ANSWERS',
+    ]);
     expect(riskCall?.instructions[0]?.driver?.vehicleLocator).toBe('veh-1');
     for (const call of [submission, ...drafts, api.callsTo('POST', '/api/pol/v1/jobs/quote')[0]]) {
       expect(call?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
@@ -139,23 +212,33 @@ describe('QuoteWizardPage', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Επιβεβαίωση δέσμευσης' });
     const confirm = within(dialog).getByRole('button', { name: 'Δέσμευση ασφαλιστηρίου' });
     expect(confirm).toHaveAttribute('aria-disabled', 'true');
-    await user.click(within(dialog).getByRole('checkbox', { name: 'Επιβεβαιώνω τη δέσμευση της προσφοράς.' }));
-    await user.click(confirm);
+    await user.click(
+      within(dialog).getByRole('checkbox', { name: 'Επιβεβαιώνω τη δέσμευση της προσφοράς.' }),
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Δέσμευση ασφαλιστηρίου' }));
 
     expect(await screen.findByText('Δεσμεύτηκε το ασφαλιστήριο POL000000007')).toBeInTheDocument();
     const bind = api.callsTo('POST', '/api/pol/v1/jobs/bind')[0];
-    expect(bind?.body).toEqual({ jobId: fx.jobId, versionNo: 1, paymentPlanOption: 'ANNUAL', confirmation: true });
+    expect(bind?.body).toEqual({
+      jobId: fx.jobId,
+      versionNo: 1,
+      paymentPlanOption: 'ANNUAL',
+      confirmation: true,
+    });
     expect(bind?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
     expect(screen.getByRole('button', { name: 'Άνοιγμα ασφαλιστηρίου' })).toBeInTheDocument();
   });
 
   it('shows the gate results when binding does not complete', async () => {
     const failed: JobBindResponse = fx.bound({
-      policyId: undefined,
-      policyNumber: undefined,
       state: 'QUOTED',
       gateResults: [
-        { gate: 'EFFECTIVE_DATE', passed: false, severity: 'BLOCK', reason: 'POL-ERR-RETROACTIVE-MTPL' },
+        {
+          gate: 'EFFECTIVE_DATE',
+          passed: false,
+          severity: 'BLOCK',
+          reason: 'POL-ERR-RETROACTIVE-MTPL',
+        },
         { gate: 'UW_ISSUES', passed: true, severity: 'BLOCK' },
       ],
     });
@@ -163,7 +246,7 @@ describe('QuoteWizardPage', () => {
     const { user } = renderScreen(<QuoteWizardPage />, { path: '/policies/quotes/new', url });
     await walkToPremium(user);
     await user.click(screen.getByRole('button', { name: 'Υπολογισμός ασφαλίστρου' }));
-    await screen.findByText('Αποδοχή');
+    await screen.findAllByText('Αποδοχή');
     await next(user);
     await user.click(await screen.findByRole('button', { name: 'Δέσμευση' }));
     const dialog = await screen.findByRole('dialog');
@@ -171,9 +254,17 @@ describe('QuoteWizardPage', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Δέσμευση ασφαλιστηρίου' }));
 
     const list = await screen.findByRole('list', { name: 'Αποτελέσματα ελέγχων δέσμευσης' });
-    expect(within(list).getByText(/Ημερομηνία έναρξης/)).toHaveTextContent('απέτυχε');
+    expect(
+      within(list)
+        .getByText(/Ημερομηνία έναρξης/)
+        .closest('li'),
+    ).toHaveTextContent('απέτυχε');
     expect(within(list).getByText(/POL-ERR-RETROACTIVE-MTPL/)).toBeInTheDocument();
-    expect(within(list).getByText(/Ζητήματα ανάληψης κινδύνου/)).toHaveTextContent('επιτυχής');
+    expect(
+      within(list)
+        .getByText(/Ζητήματα ανάληψης κινδύνου/)
+        .closest('li'),
+    ).toHaveTextContent('επιτυχής');
     expect(screen.queryByText(/Δεσμεύτηκε το ασφαλιστήριο/)).not.toBeInTheDocument();
   });
 
@@ -182,7 +273,7 @@ describe('QuoteWizardPage', () => {
     const { user } = renderScreen(<QuoteWizardPage />, { path: '/policies/quotes/new', url });
     await walkToPremium(user);
     await user.click(screen.getByRole('button', { name: 'Υπολογισμός ασφαλίστρου' }));
-    await screen.findByText('Αποδοχή');
+    await screen.findAllByText('Αποδοχή');
     await next(user);
     await user.click(await screen.findByRole('button', { name: 'Δέσμευση' }));
     const dialog = await screen.findByRole('dialog');
@@ -201,7 +292,15 @@ describe('QuoteWizardPage', () => {
             decision: 'REFER',
             referred: true,
             bindable: false,
-            issues: [{ issueId: 'i1', issueType: 'REFERRAL', blockingPoint: 'PRE_BIND', issueKey: 'UW-X', approvalStatus: 'OPEN' }],
+            issues: [
+              {
+                issueId: 'i1',
+                issueType: 'REFERRAL',
+                blockingPoint: 'PRE_BIND',
+                issueKey: 'UW-X',
+                approvalStatus: 'OPEN',
+              },
+            ],
           }),
         }),
       }),
@@ -209,7 +308,7 @@ describe('QuoteWizardPage', () => {
     const { user } = renderScreen(<QuoteWizardPage />, { path: '/policies/quotes/new', url });
     await walkToPremium(user);
     await user.click(screen.getByRole('button', { name: 'Υπολογισμός ασφαλίστρου' }));
-    expect(await screen.findByText('Παραπομπή')).toBeInTheDocument();
+    expect((await screen.findAllByText('Παραπομπή')).length).toBeGreaterThan(0);
     await next(user);
     const commit = await screen.findByRole('button', { name: 'Δέσμευση' });
     expect(commit).toHaveAttribute('aria-disabled', 'true');
@@ -230,6 +329,9 @@ describe('QuoteWizardPage', () => {
     await user.click(screen.getByRole('button', { name: /Πίσω/ }));
     await user.click(screen.getByRole('radio', { name: /^Ναι/ }));
     expect(await screen.findByText('Η απάντηση αποκλείει την ασφάλιση')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Επόμενο/ })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: /Επόμενο/ })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 });

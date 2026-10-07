@@ -17,7 +17,13 @@ import {
   vehicleInstruction,
   type Draft,
 } from './state';
-import { addDays, athensMidnight, athensOffsetMinutes, athensToday, effectiveInstant } from './time';
+import {
+  addDays,
+  athensMidnight,
+  athensOffsetMinutes,
+  athensToday,
+  effectiveInstant,
+} from './time';
 
 describe('Athens time helpers', () => {
   it('knows the UTC offset in winter (EET) and summer (EEST)', () => {
@@ -48,25 +54,61 @@ describe('Athens time helpers', () => {
 describe('quote validation', () => {
   it('flags missing and invalid vehicle fields', () => {
     const issues = validateVehicle(
-      { plate: 'ABC', vin: '', make: '', model: 'Yaris', firstRegistrationYear: '1850', engineCapacityCc: '0', powerKw: '', fuelType: '', value: '', garagingPostcode: '123' },
+      {
+        plate: 'ABC',
+        vin: '',
+        make: '',
+        model: 'Yaris',
+        firstRegistrationYear: '1850',
+        engineCapacityCc: '0',
+        powerKw: '',
+        fuelType: '',
+        value: '',
+        garagingPostcode: '123',
+      },
       2026,
     );
-    expect(issues).toMatchObject({ plate: 'plate', make: 'required', firstRegistrationYear: 'year', engineCapacityCc: 'range', garagingPostcode: 'postcode' });
+    expect(issues).toMatchObject({
+      plate: 'plate',
+      make: 'required',
+      firstRegistrationYear: 'year',
+      engineCapacityCc: 'range',
+      garagingPostcode: 'postcode',
+    });
     expect(issues.model).toBeUndefined();
   });
 
   it('accepts a complete vehicle and driver', () => {
-    const vehicle = { plate: 'ΙΚΧ1234', vin: '', make: 'Toyota', model: 'Yaris', firstRegistrationYear: '2021', engineCapacityCc: '1400', powerKw: '72', fuelType: 'PETROL', value: '15000.00', garagingPostcode: '11526' };
+    const vehicle = {
+      plate: 'ΙΚΧ1234',
+      vin: '',
+      make: 'Toyota',
+      model: 'Yaris',
+      firstRegistrationYear: '2021',
+      engineCapacityCc: '1400',
+      powerKw: '72',
+      fuelType: 'PETROL',
+      value: '15000.00',
+      garagingPostcode: '11526',
+    };
     expect(validateVehicle(vehicle, 2026)).toEqual({});
-    expect(validateDriver({ sameAsPolicyholder: true, party: null, yearFirstLicensed: '2010' }, 2026)).toEqual({});
-    expect(validateDriver({ sameAsPolicyholder: false, party: null, yearFirstLicensed: '2030' }, 2026)).toEqual({ party: 'required', yearFirstLicensed: 'year' });
+    expect(
+      validateDriver({ sameAsPolicyholder: true, party: null, yearFirstLicensed: '2010' }, 2026),
+    ).toEqual({});
+    expect(
+      validateDriver({ sameAsPolicyholder: false, party: null, yearFirstLicensed: '2030' }, 2026),
+    ).toEqual({ party: 'required', yearFirstLicensed: 'year' });
   });
 
   it('requires the terms of required and selected covers only', () => {
     const coverages = fx.catalogue.coverages ?? [];
     // MTPL has a two-option list the user must choose; own damage is not selected, so not required.
     expect(missingCoverTerms(coverages, {})).toEqual(['MTPL.BI_PER_PERSON']);
-    expect(missingCoverTerms(coverages, { MTPL: { selected: true, terms: { BI_PER_PERSON: 'BI-1300K' } } })).toEqual([]);
+    expect(
+      missingCoverTerms(coverages, {
+        MTPL: { selected: true, terms: { BI_PER_PERSON: 'BI-1300K' } },
+      }),
+    ).toEqual([]);
     expect(
       missingCoverTerms(coverages, {
         MTPL: { selected: true, terms: { BI_PER_PERSON: 'BI-1300K' } },
@@ -81,7 +123,9 @@ describe('question set', () => {
 
   it('applies visibleWhen/requiredWhen and finds unanswered required questions', () => {
     expect(unansweredRequired(questions, {})).toEqual(['Q-USAGE', 'Q-HIRE-REWARD']);
-    expect(unansweredRequired(questions, { 'Q-USAGE': 'PRIVATE', 'Q-HIRE-REWARD': 'NO' })).toEqual([]);
+    expect(unansweredRequired(questions, { 'Q-USAGE': 'PRIVATE', 'Q-HIRE-REWARD': 'NO' })).toEqual(
+      [],
+    );
     const conditional = {
       code: 'Q-BUSINESS-USE',
       required: false,
@@ -89,7 +133,10 @@ describe('question set', () => {
       requiredWhen: { question: 'Q-USAGE', answeredWith: ['BUSINESS'] },
     } as unknown as (typeof questions)[number];
     expect(questionState(conditional, {})).toEqual({ visible: false, required: false });
-    expect(questionState(conditional, { 'Q-USAGE': 'BUSINESS' })).toEqual({ visible: true, required: true });
+    expect(questionState(conditional, { 'Q-USAGE': 'BUSINESS' })).toEqual({
+      visible: true,
+      required: true,
+    });
   });
 
   it('detects knock-out answers', () => {
@@ -102,9 +149,23 @@ describe('draft instructions (pol.Job.updateDraft)', () => {
   const draft: Draft = {
     ...emptyDraft('2026-10-08'),
     policyholder: { partyId: fx.partyId, label: 'Δοκιμή Διεπαφής' },
-    vehicle: { plate: 'ΙΚΧ1234', vin: '', make: 'Toyota', model: 'Yaris', firstRegistrationYear: '2021', engineCapacityCc: '1400', powerKw: '72', fuelType: 'PETROL', value: '15000.00', garagingPostcode: '11526' },
+    vehicle: {
+      plate: 'ΙΚΧ1234',
+      vin: '',
+      make: 'Toyota',
+      model: 'Yaris',
+      firstRegistrationYear: '2021',
+      engineCapacityCc: '1400',
+      powerKw: '72',
+      fuelType: 'PETROL',
+      value: '15000.00',
+      garagingPostcode: '11526',
+    },
     driver: { sameAsPolicyholder: true, party: null, yearFirstLicensed: '2010' },
-    covers: { MTPL: { selected: true, terms: { BI_PER_PERSON: 'BI-1300K' } }, 'OWN-DAMAGE': { selected: true, terms: { SUM_INSURED: '15000.00', DEDUCTIBLE: 'DED-150' } } },
+    covers: {
+      MTPL: { selected: true, terms: { BI_PER_PERSON: 'BI-1300K' } },
+      'OWN-DAMAGE': { selected: true, terms: { SUM_INSURED: '15000.00', DEDUCTIBLE: 'DED-150' } },
+    },
     answers: { 'Q-USAGE': 'PRIVATE', 'Q-HIRE-REWARD': 'NO', 'Q-CLAIMS-5Y': '2' },
   };
   const questions = fx.questionSet.questionSet.questions;
@@ -129,43 +190,83 @@ describe('draft instructions (pol.Job.updateDraft)', () => {
   it('builds the main driver (policyholder or another party) with claims from the mapped question', () => {
     expect(driverInstruction(draft, questions, 'v-1', undefined)).toEqual({
       op: 'SET_DRIVER',
-      driver: { partyId: fx.partyId, driverType: 'MAIN', yearFirstLicensed: 2010, vehicleLocator: 'v-1', usagePercent: 100, claimsLast5Years: 2 },
+      driver: {
+        partyId: fx.partyId,
+        driverType: 'MAIN',
+        yearFirstLicensed: 2010,
+        vehicleLocator: 'v-1',
+        usagePercent: 100,
+        claimsLast5Years: 2,
+      },
     });
-    const other = { ...draft, driver: { ...draft.driver, sameAsPolicyholder: false, party: { partyId: 'p-2', label: 'X' } } };
+    const other = {
+      ...draft,
+      driver: { ...draft.driver, sameAsPolicyholder: false, party: { partyId: 'p-2', label: 'X' } },
+    };
     expect(driverInstruction(other, questions, 'v-1', 'd-1')?.driver?.partyId).toBe('p-2');
-    expect(driverInstruction({ ...draft, policyholder: null }, questions, 'v-1', undefined)).toBeNull();
+    expect(
+      driverInstruction({ ...draft, policyholder: null }, questions, 'v-1', undefined),
+    ).toBeNull();
   });
 
   it('sends every cover with its selection and chosen terms; compulsory covers are always selected', () => {
-    const instruction = coverageInstruction(fx.catalogue.coverages ?? [], { 'OWN-DAMAGE': draft.covers['OWN-DAMAGE'] ?? { selected: false, terms: {} } }, 'v-1');
+    const instruction = coverageInstruction(
+      fx.catalogue.coverages ?? [],
+      { 'OWN-DAMAGE': draft.covers['OWN-DAMAGE'] ?? { selected: false, terms: {} } },
+      'v-1',
+    );
     expect(instruction.coverages).toEqual([
       { coverageCode: 'MTPL', elementLocator: 'v-1', selected: true },
-      { coverageCode: 'OWN-DAMAGE', elementLocator: 'v-1', selected: true, options: { SUM_INSURED: '15000.00', DEDUCTIBLE: 'DED-150' } },
+      {
+        coverageCode: 'OWN-DAMAGE',
+        elementLocator: 'v-1',
+        selected: true,
+        options: { SUM_INSURED: '15000.00', DEDUCTIBLE: 'DED-150' },
+      },
     ]);
   });
 
   it('sends only visible, non-empty answers', () => {
-    const instruction = answersInstruction(questions, { ...draft.answers, 'Q-OLD': 'x', 'Q-CLAIMS-5Y': ' ' });
-    expect(instruction.questionSet?.answers).toEqual({ 'Q-USAGE': 'PRIVATE', 'Q-HIRE-REWARD': 'NO' });
+    const instruction = answersInstruction(questions, {
+      ...draft.answers,
+      'Q-OLD': 'x',
+      'Q-CLAIMS-5Y': ' ',
+    });
+    expect(instruction.questionSet?.answers).toEqual({
+      'Q-USAGE': 'PRIVATE',
+      'Q-HIRE-REWARD': 'NO',
+    });
   });
 
   it('changes the fingerprint when a price input changes', () => {
     const before = fingerprint(draft);
     expect(fingerprint({ ...draft })).toBe(before);
-    expect(fingerprint({ ...draft, answers: { ...draft.answers, 'Q-CLAIMS-5Y': '3' } })).not.toBe(before);
+    expect(fingerprint({ ...draft, answers: { ...draft.answers, 'Q-CLAIMS-5Y': '3' } })).not.toBe(
+      before,
+    );
   });
 });
 
 describe('rating warnings', () => {
   it('derives provisional-tax from the charge lines and illustrative-tariff from the product data', () => {
-    expect(ratingWarnings(fx.quote(), true).sort()).toEqual(['RAT-WARN-ILLUSTRATIVE-TARIFF', 'RAT-WARN-PROVISIONAL-TAX']);
+    expect(ratingWarnings(fx.quote(), true).sort()).toEqual([
+      'RAT-WARN-ILLUSTRATIVE-TARIFF',
+      'RAT-WARN-PROVISIONAL-TAX',
+    ]);
     expect(ratingWarnings(fx.quote(), false)).toEqual(['RAT-WARN-PROVISIONAL-TAX']);
-    const settled = fx.quote({ charges: fx.quote().charges.map((c) => ({ ...c, provisional: false, legalStatus: 'Settled' })) });
+    const settled = fx.quote({
+      charges: fx
+        .quote()
+        .charges.map((c) => ({ ...c, provisional: false, legalStatus: 'Settled' })),
+    });
     expect(ratingWarnings(settled, false)).toEqual([]);
   });
 
   it('merges warnings the API sends itself', () => {
-    const withWarnings = { ...fx.quote({ charges: [] }), warnings: [{ code: 'RAT-WARN-ILLUSTRATIVE-TARIFF' }] };
+    const withWarnings = {
+      ...fx.quote({ charges: [] }),
+      warnings: [{ code: 'RAT-WARN-ILLUSTRATIVE-TARIFF' }],
+    };
     expect(ratingWarnings(withWarnings, false)).toEqual(['RAT-WARN-ILLUSTRATIVE-TARIFF']);
   });
 });

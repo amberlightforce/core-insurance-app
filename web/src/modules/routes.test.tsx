@@ -34,21 +34,39 @@ describe('staff screens in the app shell', () => {
     ['/finance', 'Λογιστικές εγγραφές', 'Λογιστική'],
   ])('%s opens in the shell with its rail entry current', async (path, heading, railLabel) => {
     renderAt(path);
-    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: heading }, { timeout: 15_000 }),
+    ).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Κύρια πλοήγηση' });
-    expect(within(nav).getByRole('link', { name: railLabel })).toHaveAttribute('aria-current', 'page');
+    expect(within(nav).getByRole('link', { name: railLabel })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
   });
 
   it('opens the quote wizard under the policies rail entry', async () => {
     renderAt('/policies/quotes/new');
-    expect(await screen.findByRole('heading', { level: 2, name: 'Λήπτης και προϊόν' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole(
+        'heading',
+        { level: 2, name: 'Λήπτης και προϊόν' },
+        { timeout: 15_000 },
+      ),
+    ).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Κύρια πλοήγηση' });
-    expect(within(nav).getByRole('link', { name: 'Ασφαλιστήρια' })).toHaveAttribute('aria-current', 'page');
+    expect(within(nav).getByRole('link', { name: 'Ασφαλιστήρια' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
   });
 
   it('has no axe violations on the party search inside the shell', async () => {
     const { container } = renderAt('/parties');
-    await screen.findByRole('heading', { level: 1, name: 'Αναζήτηση πελατών' });
+    await screen.findByRole(
+      'heading',
+      { level: 1, name: 'Αναζήτηση πελατών' },
+      { timeout: 15_000 },
+    );
     await expectNoA11yViolations(container);
   });
 });

@@ -2589,7 +2589,7 @@ export interface components {
             valueDate: components["schemas"]["LocalDate"];
             accountingDate: components["schemas"]["LocalDate"];
             invoiceId?: components["schemas"]["Uuid"];
-            /** @description Why the receipt is unapplied (REQ-BIL-135), e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH */
+            /** @description Why the receipt is unapplied (REQ-BIL-135), e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH, CONCURRENT_ALLOCATION */
             suspenseReason?: components["schemas"]["Code"];
             recordedAt: components["schemas"]["Instant"];
         };

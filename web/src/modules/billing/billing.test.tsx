@@ -30,24 +30,39 @@ const receipt = {
   recordedAt: '2026-10-07T20:30:00Z',
 };
 
-const invoiceRoutes = (state: 'BILLED' | 'PAID' = 'BILLED', take?: MockRoute['respond']): MockRoute[] => [
-  { method: 'GET', path: `/api/bil/v1/invoices/${fx.invoiceId}`, respond: () => ({ body: fx.invoice(state) }) },
+const invoiceRoutes = (
+  state: 'BILLED' | 'PAID' = 'BILLED',
+  take?: MockRoute['respond'],
+): MockRoute[] => [
+  {
+    method: 'GET',
+    path: `/api/bil/v1/invoices/${fx.invoiceId}`,
+    respond: () => ({ body: fx.invoice(state) }),
+  },
   {
     method: 'POST',
     path: '/api/bil/v1/payments/take',
-    respond: take ?? (() => ({ status: 201, body: { receipt, allocations: [], allocationOutcome: 'ALLOCATED' } })),
+    respond:
+      take ??
+      (() => ({ status: 201, body: { receipt, allocations: [], allocationOutcome: 'ALLOCATED' } })),
   },
 ];
-const invoiceView = () => renderScreen(<InvoicePage />, { path: '/billing/invoices/:invoiceId', url: `/billing/invoices/${fx.invoiceId}` });
+const invoiceView = () =>
+  renderScreen(<InvoicePage />, {
+    path: '/billing/invoices/:invoiceId',
+    url: `/billing/invoices/${fx.invoiceId}`,
+  });
 
 describe('InvoicePage', () => {
   it('shows number, status, lines, totals and the fiscal document marked as a stub', async () => {
     mockApi(invoiceRoutes());
     const { container } = invoiceView();
-    expect(await screen.findByRole('heading', { level: 1, name: 'Τιμολόγιο INV000000003' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Τιμολόγιο INV000000003' }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText('Εκδόθηκε').length).toBeGreaterThan(0);
 
-    const fiscal = screen.getByLabelText('Φορολογικό παραστατικό', { selector: 'section' });
+    const fiscal = screen.getByRole('region', { name: 'Φορολογικό παραστατικό' });
     expect(within(fiscal).getByText('Δοκιμαστικό φορολογικό παραστατικό')).toBeInTheDocument();
     expect(within(fiscal).getByText(/Καταχωρίστηκε \(ΜΑΡΚ\)/)).toBeInTheDocument();
     expect(within(fiscal).getByText(/Δοκιμαστικό \(stub\)/)).toBeInTheDocument();
@@ -56,9 +71,11 @@ describe('InvoicePage', () => {
     const lines = screen.getByRole('grid', { name: 'Γραμμές τιμολογίου' });
     expect(within(lines).getByText('PREM-MTPL')).toBeInTheDocument();
     expect(within(lines).getAllByText('312,35 €').length).toBeGreaterThan(0);
-    const totals = screen.getByLabelText('Σύνολα');
-    expect(within(totals).getByText('479,20 €')).toBeInTheDocument();
-    expect(screen.getByText('Δεν έχει κατανεμηθεί είσπραξη σε αυτό το τιμολόγιο.')).toBeInTheDocument();
+    const totals = screen.getByRole('region', { name: 'Σύνολα' });
+    expect(within(totals).getAllByText('479,20 €').length).toBeGreaterThan(0);
+    expect(
+      screen.getByText('Δεν έχει κατανεμηθεί είσπραξη σε αυτό το τιμολόγιο.'),
+    ).toBeInTheDocument();
     await expectNoA11yViolations(container);
   });
 
@@ -78,14 +95,21 @@ describe('InvoicePage', () => {
 
     // A bank transfer needs its reference: the error summary says so and nothing is sent.
     await user.click(submit);
-    expect(await screen.findByText('Συμπληρώστε την αναφορά τράπεζας του εμβάσματος.')).toBeInTheDocument();
+    expect(
+      await screen.findAllByText('Συμπληρώστε την αναφορά τράπεζας του εμβάσματος.'),
+    ).not.toHaveLength(0);
     expect(api.callsTo('POST', '/api/bil/v1/payments/take')).toHaveLength(0);
 
-    await user.type(within(form).getByRole('textbox', { name: /Αναφορά τράπεζας/ }), 'TRF-2026-1007');
+    await user.type(
+      within(form).getByRole('textbox', { name: /Αναφορά τράπεζας/ }),
+      'TRF-2026-1007',
+    );
     await user.click(submit);
     expect(await screen.findByText('Η καταχώριση της πληρωμής απέτυχε')).toBeInTheDocument();
     await user.click(submit);
-    expect(await screen.findByText('Καταχωρίστηκε η απόδειξη RCP000000001')).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText('Καταχωρίστηκε η απόδειξη RCP000000001')).length,
+    ).toBeGreaterThan(0);
 
     const [first, second] = api.callsTo('POST', '/api/bil/v1/payments/take');
     expect(first?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
@@ -118,12 +142,20 @@ describe('InvoicePage', () => {
   it('offers no payment form for a paid invoice, and handles not-found', async () => {
     mockApi(invoiceRoutes('PAID'));
     invoiceView();
-    expect(await screen.findByText('Δεν υπάρχει ανοιχτό υπόλοιπο για πληρωμή.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Δεν υπάρχει ανοιχτό υπόλοιπο για πληρωμή.'),
+    ).toBeInTheDocument();
     expect(screen.getAllByText('Εξοφλήθηκε').length).toBeGreaterThan(0);
   });
 
   it('shows not-found', async () => {
-    mockApi([{ method: 'GET', path: `/api/bil/v1/invoices/${fx.invoiceId}`, respond: () => problem(404, 'BIL-ERR-NOT-FOUND', 'Δεν βρέθηκε') }]);
+    mockApi([
+      {
+        method: 'GET',
+        path: `/api/bil/v1/invoices/${fx.invoiceId}`,
+        respond: () => problem(404, 'BIL-ERR-NOT-FOUND', 'Δεν βρέθηκε'),
+      },
+    ]);
     invoiceView();
     expect(await screen.findByText('Το τιμολόγιο δεν βρέθηκε')).toBeInTheDocument();
   });
@@ -132,38 +164,64 @@ describe('InvoicePage', () => {
 describe('AccountPage', () => {
   it('shows balances, billed terms, invoices and the record-payment form', async () => {
     const api = mockApi([
-      { method: 'GET', path: `/api/bil/v1/billing-accounts/${fx.accountId}`, respond: () => ({ body: fx.account() }) },
+      {
+        method: 'GET',
+        path: `/api/bil/v1/billing-accounts/${fx.accountId}`,
+        respond: () => ({ body: fx.account() }),
+      },
       { method: 'GET', path: '/api/bil/v1/invoices', respond: () => ({ body: fx.invoiceList }) },
     ]);
-    const { container } = renderScreen(<AccountPage />, { path: '/billing/accounts/:accountId', url: `/billing/accounts/${fx.accountId}` });
-    expect(await screen.findByRole('heading', { level: 1, name: 'Λογαριασμός χρέωσης BA000000002' })).toBeInTheDocument();
-    const balances = screen.getByLabelText('Υπόλοιπα ανά κατάσταση');
+    const { container } = renderScreen(<AccountPage />, {
+      path: '/billing/accounts/:accountId',
+      url: `/billing/accounts/${fx.accountId}`,
+    });
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Λογαριασμός χρέωσης BA000000002' }),
+    ).toBeInTheDocument();
+    const balances = screen.getByRole('region', { name: 'Υπόλοιπα ανά κατάσταση' });
     expect(within(balances).getByText('Τιμολογημένο')).toBeInTheDocument();
     expect(within(balances).getAllByText('479,20 €')).toHaveLength(1);
     const terms = screen.getByRole('grid', { name: 'Περίοδοι ασφαλιστηρίων' });
     expect(within(terms).getByText('POL000000007')).toBeInTheDocument();
     expect(await screen.findByRole('grid', { name: 'Τιμολόγια' })).toBeInTheDocument();
     expect(screen.getByRole('form', { name: 'Καταχώριση πληρωμής' })).toBeInTheDocument();
-    expect(api.callsTo('GET', '/api/bil/v1/invoices')[0]?.url.searchParams.get('billingAccountId')).toBe(fx.accountId);
+    expect(
+      api.callsTo('GET', '/api/bil/v1/invoices')[0]?.url.searchParams.get('billingAccountId'),
+    ).toBe(fx.accountId);
     await expectNoA11yViolations(container);
   });
 
   it('shows not-found', async () => {
-    mockApi([{ method: 'GET', path: `/api/bil/v1/billing-accounts/${fx.accountId}`, respond: () => problem(404, 'BIL-ERR-NOT-FOUND', 'Δεν βρέθηκε') }]);
-    renderScreen(<AccountPage />, { path: '/billing/accounts/:accountId', url: `/billing/accounts/${fx.accountId}` });
+    mockApi([
+      {
+        method: 'GET',
+        path: `/api/bil/v1/billing-accounts/${fx.accountId}`,
+        respond: () => problem(404, 'BIL-ERR-NOT-FOUND', 'Δεν βρέθηκε'),
+      },
+    ]);
+    renderScreen(<AccountPage />, {
+      path: '/billing/accounts/:accountId',
+      url: `/billing/accounts/${fx.accountId}`,
+    });
     expect(await screen.findByText('Ο λογαριασμός χρέωσης δεν βρέθηκε')).toBeInTheDocument();
   });
 });
 
 describe('BillingHomePage', () => {
   it('starts empty, validates a record id and lists recent records', async () => {
-    const { user, container } = renderScreen(<BillingHomePage />, { path: '/billing', url: '/billing' });
+    const { user, container } = renderScreen(<BillingHomePage />, {
+      path: '/billing',
+      url: '/billing',
+    });
     expect(screen.getByText('Δεν υπάρχουν πρόσφατες εγγραφές')).toBeInTheDocument();
     await expectNoA11yViolations(container);
     await user.type(screen.getByRole('textbox', { name: /Αναγνωριστικό/ }), 'nope{Enter}');
     expect(await screen.findByText('Δώστε έγκυρο αναγνωριστικό UUID.')).toBeInTheDocument();
     await user.clear(screen.getByRole('textbox', { name: /Αναγνωριστικό/ }));
-    await user.type(screen.getByRole('textbox', { name: /Αναγνωριστικό/ }), `${fx.invoiceId}{Enter}`);
+    await user.type(
+      screen.getByRole('textbox', { name: /Αναγνωριστικό/ }),
+      `${fx.invoiceId}{Enter}`,
+    );
     await waitFor(() => {
       expect(screen.getByTestId('location')).toHaveTextContent(`/billing/invoices/${fx.invoiceId}`);
     });

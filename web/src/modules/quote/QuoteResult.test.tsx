@@ -14,7 +14,9 @@ const names = new Map([
 
 describe('QuoteResult', () => {
   it('shows the illustrative-tariff and provisional-tax warnings prominently, above the figures', async () => {
-    const { container } = renderWithDs(<QuoteResult quote={fx.quote()} coverNames={names} productIsIllustrative />);
+    const { container } = renderWithDs(
+      <QuoteResult quote={fx.quote()} coverNames={names} productIsIllustrative />,
+    );
     const illustrative = screen.getByText('Ενδεικτικό τιμολόγιο').closest('[role]');
     const provisional = screen.getByText('Προσωρινοί φόροι και εισφορές').closest('[role]');
     expect(illustrative).toHaveAttribute('role', 'status');
@@ -28,7 +30,9 @@ describe('QuoteResult', () => {
   });
 
   it('breaks the premium down per cover with its tax lines, marks provisional tax and shows the totals', () => {
-    renderWithDs(<QuoteResult quote={fx.quote()} coverNames={names} productIsIllustrative={false} />);
+    renderWithDs(
+      <QuoteResult quote={fx.quote()} coverNames={names} productIsIllustrative={false} />,
+    );
     const mtpl = screen.getByRole('grid', { name: 'Χρεώσεις κάλυψης Αστική ευθύνη αυτοκινήτου' });
     expect(within(mtpl).getByText('PREM-MTPL')).toBeInTheDocument();
     expect(within(mtpl).getByText('GR-IPT')).toBeInTheDocument();
@@ -53,9 +57,13 @@ describe('QuoteResult', () => {
   });
 
   it('shows the underwriting outcome: accept, refer with reasons, decline', async () => {
-    const { rerender, container } = renderWithDs(<QuoteResult quote={fx.quote()} coverNames={names} productIsIllustrative={false} />);
+    const { rerender, container } = renderWithDs(
+      <QuoteResult quote={fx.quote()} coverNames={names} productIsIllustrative={false} />,
+    );
     expect(screen.getByText('Αποδοχή')).toBeInTheDocument();
-    expect(screen.getByText('Δεν υπάρχουν ανοιχτά ζητήματα ανάληψης κινδύνου.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Δεν υπάρχουν ανοιχτά ζητήματα ανάληψης κινδύνου.'),
+    ).toBeInTheDocument();
 
     const issue = {
       issueId: 'i-1',
@@ -66,7 +74,11 @@ describe('QuoteResult', () => {
       approvalStatus: 'OPEN',
     };
     rerender(
-      <QuoteResult quote={fx.quote({ decision: 'REFER', referred: true, bindable: false, issues: [issue] })} coverNames={names} productIsIllustrative={false} />,
+      <QuoteResult
+        quote={fx.quote({ decision: 'REFER', referred: true, bindable: false, issues: [issue] })}
+        coverNames={names}
+        productIsIllustrative={false}
+      />,
     );
     expect(screen.getByText('Παραπομπή')).toBeInTheDocument();
     const grid = screen.getByRole('grid', { name: 'Ζητήματα ανάληψης κινδύνου' });
@@ -74,7 +86,13 @@ describe('QuoteResult', () => {
     expect(within(grid).getByText('Επαγγελματική χρήση του οχήματος')).toBeInTheDocument();
     expect(within(grid).getByText('Πριν τη δέσμευση')).toBeInTheDocument();
 
-    rerender(<QuoteResult quote={fx.quote({ decision: 'DECLINE', bindable: false })} coverNames={names} productIsIllustrative={false} />);
+    rerender(
+      <QuoteResult
+        quote={fx.quote({ decision: 'DECLINE', bindable: false })}
+        coverNames={names}
+        productIsIllustrative={false}
+      />,
+    );
     expect(screen.getByText('Απόρριψη')).toBeInTheDocument();
     expect(screen.getByText(/Ο κίνδυνος απορρίπτεται/)).toBeInTheDocument();
     await expectNoA11yViolations(container);

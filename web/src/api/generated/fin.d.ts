@@ -2131,6 +2131,7 @@ export interface components {
             lineNo: number;
             account: components["schemas"]["Code"];
             accountName: components["schemas"]["FinLocalizedText"];
+            accountOrigin: components["schemas"]["FinAccountCodeOrigin"];
             /** @enum {string} */
             side: "DEBIT" | "CREDIT";
             amount: components["schemas"]["Money"];
@@ -2155,6 +2156,11 @@ export interface components {
             invoiceId?: components["schemas"]["Uuid"] | null;
             receiptId?: components["schemas"]["Uuid"] | null;
         };
+        /**
+         * @description Where an account code comes from: PRD09_ILLUSTRATIVE (illustrative code of the PRD-09 §7.1.4 reference chart) or TECHNICAL_PLACEHOLDER (not in the PRD). Neither is the Greek statutory chart (OI-FIN-11).
+         * @enum {string}
+         */
+        FinAccountCodeOrigin: "PRD09_ILLUSTRATIVE" | "TECHNICAL_PLACEHOLDER";
         /** @description Greek and English text (NFR-FIN-016) */
         FinLocalizedText: {
             el: components["schemas"]["Text"];
@@ -2203,6 +2209,8 @@ export interface components {
             specificity: number;
             /** @description Fixed book account; null when derived */
             account?: components["schemas"]["Code"] | null;
+            /** @description Origin of the fixed account's code; null when derived */
+            accountOrigin?: components["schemas"]["FinAccountCodeOrigin"] | null;
             /** @description Account derivation source (REQ-FIN-050); null when the account is fixed */
             deriveFrom?: "GL_KEY" | null;
             description: components["schemas"]["FinLocalizedText"];

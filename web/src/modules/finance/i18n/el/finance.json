@@ -32,6 +32,11 @@
     "account": "Λογαριασμός",
     "debit": "Χρέωση",
     "credit": "Πίστωση",
+    "origin": "Προέλευση λογαριασμού",
     "rule": "Κανόνας"
+  },
+  "origin": {
+    "PRD09_ILLUSTRATIVE": "Ενδεικτικός (PRD-09)",
+    "TECHNICAL_PLACEHOLDER": "Τεχνικός προσωρινός"
   }
 }

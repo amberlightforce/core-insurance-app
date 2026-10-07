@@ -21,8 +21,13 @@ describe('PartySearchPage', () => {
   });
 
   it('starts with a first-use hint, posts the single search box in the body and lists masked results', async () => {
-    const api = mockApi([search(() => ({ body: { items: [fx.searchItem], nextCursor: null, limit: 25 } }))]);
-    const { user, container } = renderScreen(<PartySearchPage />, { path: '/parties', url: '/parties' });
+    const api = mockApi([
+      search(() => ({ body: { items: [fx.searchItem], nextCursor: null, limit: 25 } })),
+    ]);
+    const { user, container } = renderScreen(<PartySearchPage />, {
+      path: '/parties',
+      url: '/parties',
+    });
     expect(screen.getByRole('heading', { name: 'Αναζητήστε έναν πελάτη' })).toBeInTheDocument();
     await expectNoA11yViolations(container);
 
@@ -52,13 +57,17 @@ describe('PartySearchPage', () => {
     let fail = false;
     mockApi([
       search(() =>
-        fail ? problem(422, 'PTY-ERR-QUERY-TOO-SHORT', 'Η αναζήτηση είναι πολύ σύντομη') : { body: { items: [], nextCursor: null, limit: 25 } },
+        fail
+          ? problem(422, 'PTY-ERR-QUERY-TOO-SHORT', 'Η αναζήτηση είναι πολύ σύντομη')
+          : { body: { items: [], nextCursor: null, limit: 25 } },
       ),
     ]);
     const { user } = renderScreen(<PartySearchPage />, { path: '/parties', url: '/parties' });
     const box = screen.getByRole('searchbox', { name: 'Αναζήτηση πελάτη' });
     await user.type(box, 'zzzz{Enter}');
-    expect(await screen.findByRole('heading', { name: 'Δεν βρέθηκαν πελάτες' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Δεν βρέθηκαν πελάτες' }),
+    ).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Νέο πρόσωπο' }).length).toBeGreaterThan(0);
 
     fail = true;
@@ -89,7 +98,9 @@ describe('PartyCreatePage', () => {
     await user.type(screen.getByRole('textbox', { name: /^Όνομα(?! πατέρα)/ }), 'Δοκιμή');
     await user.type(screen.getByRole('textbox', { name: /Επώνυμο/ }), 'Διεπαφής');
     const birth = screen.getByRole('group', { name: /Ημερομηνία γέννησης/ });
-    await user.click(within(birth).getAllByRole('spinbutton')[0] as HTMLElement);
+    const [firstField] = within(birth).getAllByRole('spinbutton');
+    if (!firstField) throw new Error('no date field');
+    await user.click(firstField);
     await user.keyboard('12031985');
     await user.type(screen.getByRole('textbox', { name: /ΑΦΜ/ }), afm);
     await user.type(screen.getByRole('textbox', { name: /Οδός/ }), 'Λεωφ. Κηφισίας');
@@ -100,7 +111,10 @@ describe('PartyCreatePage', () => {
 
   it('checks the ΑΦΜ with the mod-11 rule and shows an error summary instead of calling the API', async () => {
     const api = mockApi([]);
-    const { user, container } = renderScreen(<PartyCreatePage />, { path: '/parties/new', url: '/parties/new' });
+    const { user, container } = renderScreen(<PartyCreatePage />, {
+      path: '/parties/new',
+      url: '/parties/new',
+    });
     await fillValid(user, '094014202');
     await user.click(screen.getByRole('button', { name: 'Δημιουργία πελάτη' }));
     const summary = await screen.findByRole('region', { name: /σφάλμα|σφάλματα/ });
@@ -111,11 +125,16 @@ describe('PartyCreatePage', () => {
 
   it('requires the mandatory fields and at least one contact', async () => {
     mockApi([]);
-    const { user } = renderScreen(<PartyCreatePage />, { path: '/parties/new', url: '/parties/new' });
+    const { user } = renderScreen(<PartyCreatePage />, {
+      path: '/parties/new',
+      url: '/parties/new',
+    });
     await user.click(screen.getByRole('button', { name: 'Δημιουργία πελάτη' }));
     const summary = await screen.findByRole('region', { name: /σφάλμα|σφάλματα/ });
     expect(within(summary).getAllByRole('link').length).toBeGreaterThanOrEqual(5);
-    expect(within(summary).getByText('Συμπληρώστε τουλάχιστον ένα στοιχείο επικοινωνίας.')).toBeInTheDocument();
+    expect(
+      within(summary).getByText('Συμπληρώστε τουλάχιστον ένα στοιχείο επικοινωνίας.'),
+    ).toBeInTheDocument();
   });
 
   it('posts the person with an Idempotency-Key and reuses it when the same form is retried after an error', async () => {
@@ -127,10 +146,16 @@ describe('PartyCreatePage', () => {
         respond: () =>
           ++attempt === 1
             ? problem(503, 'PTY-ERR-NOT-AVAILABLE', 'Η υπηρεσία δεν είναι διαθέσιμη')
-            : { status: 201, body: { party: fx.party(), duplicateSuggestions: [], missingData: [] } },
+            : {
+                status: 201,
+                body: { party: fx.party(), duplicateSuggestions: [], missingData: [] },
+              },
       },
     ]);
-    const { user } = renderScreen(<PartyCreatePage />, { path: '/parties/new', url: '/parties/new' });
+    const { user } = renderScreen(<PartyCreatePage />, {
+      path: '/parties/new',
+      url: '/parties/new',
+    });
     await fillValid(user);
     await user.click(screen.getByRole('button', { name: 'Δημιουργία πελάτη' }));
     expect(await screen.findByText('Η δημιουργία του πελάτη απέτυχε')).toBeInTheDocument();
@@ -154,14 +179,22 @@ describe('PartyCreatePage', () => {
       {
         method: 'POST',
         path: '/api/pty/v1/parties',
-        respond: () => ({ status: 201, body: { party: fx.party(), duplicateSuggestions: [fx.searchItem], missingData: [] } }),
+        respond: () => ({
+          status: 201,
+          body: { party: fx.party(), duplicateSuggestions: [fx.searchItem], missingData: [] },
+        }),
       },
     ]);
-    const { user } = renderScreen(<PartyCreatePage />, { path: '/parties/new', url: '/parties/new' });
+    const { user } = renderScreen(<PartyCreatePage />, {
+      path: '/parties/new',
+      url: '/parties/new',
+    });
     await fillValid(user);
     await user.click(screen.getByRole('button', { name: 'Δημιουργία πελάτη' }));
     expect(await screen.findByText('Βρέθηκε 1 πιθανό διπλότυπο')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /P000000021 · Δοκιμή Διεπαφής/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /P000000021 · Δοκιμή Διεπαφής/ }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -173,11 +206,14 @@ describe('PartyViewPage', () => {
   });
 
   it('masks personal data and reveals it only after a purpose is chosen', async () => {
-    const api = mockApi([
-      view((purpose) => ({ body: { party: fx.party(purpose !== null) } })),
-    ]);
-    const { user, container } = renderScreen(<PartyViewPage />, { path: '/parties/:partyId', url: `/parties/${fx.partyId}` });
-    expect(await screen.findByRole('heading', { level: 1, name: 'Διεπαφής Δοκιμή' })).toBeInTheDocument();
+    const api = mockApi([view((purpose) => ({ body: { party: fx.party(purpose !== null) } }))]);
+    const { user, container } = renderScreen(<PartyViewPage />, {
+      path: '/parties/:partyId',
+      url: `/parties/${fx.partyId}`,
+    });
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Διεπαφής Δοκιμή' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('******201')).toBeInTheDocument();
     expect(screen.queryByText('094 014 201')).not.toBeInTheDocument();
     expect(screen.queryByText('12/03/1985')).not.toBeInTheDocument();
@@ -205,16 +241,23 @@ describe('PartyViewPage', () => {
   it('explains a refused reveal (403) inside the dialog', async () => {
     mockApi([
       view((purpose) =>
-        purpose ? problem(403, 'PTY-ERR-AUTHORITY-DENIED', 'Δεν έχετε την απαιτούμενη εξουσιοδότηση') : { body: { party: fx.party() } },
+        purpose
+          ? problem(403, 'PTY-ERR-AUTHORITY-DENIED', 'Δεν έχετε την απαιτούμενη εξουσιοδότηση')
+          : { body: { party: fx.party() } },
       ),
     ]);
-    const { user } = renderScreen(<PartyViewPage />, { path: '/parties/:partyId', url: `/parties/${fx.partyId}` });
+    const { user } = renderScreen(<PartyViewPage />, {
+      path: '/parties/:partyId',
+      url: `/parties/${fx.partyId}`,
+    });
     await user.click(await screen.findByRole('button', { name: 'Εμφάνιση προσωπικών δεδομένων' }));
     const dialog = await screen.findByRole('dialog');
     await user.click(within(dialog).getByRole('button', { name: /Σκοπός εμφάνισης/ }));
     await user.click(await screen.findByRole('option', { name: 'Έλεγχος συμμόρφωσης' }));
     await user.click(within(dialog).getByRole('button', { name: 'Εμφάνιση' }));
-    expect(await within(dialog).findByText('Δεν έχετε δικαίωμα εμφάνισης προσωπικών δεδομένων.')).toBeInTheDocument();
+    expect(
+      await within(dialog).findByText('Δεν έχετε δικαίωμα εμφάνισης προσωπικών δεδομένων.'),
+    ).toBeInTheDocument();
     expect(screen.queryByText('094 014 201')).not.toBeInTheDocument();
   });
 
@@ -226,9 +269,20 @@ describe('PartyViewPage', () => {
 
   it('retries after a server error', async () => {
     let calls = 0;
-    mockApi([view(() => (++calls === 1 ? problem(500, 'PLT-ERR-INTERNAL', 'Σφάλμα διακομιστή') : { body: { party: fx.party() } }))]);
-    const { user } = renderScreen(<PartyViewPage />, { path: '/parties/:partyId', url: `/parties/${fx.partyId}` });
+    mockApi([
+      view(() =>
+        ++calls === 1
+          ? problem(500, 'PLT-ERR-INTERNAL', 'Σφάλμα διακομιστή')
+          : { body: { party: fx.party() } },
+      ),
+    ]);
+    const { user } = renderScreen(<PartyViewPage />, {
+      path: '/parties/:partyId',
+      url: `/parties/${fx.partyId}`,
+    });
     await user.click(await screen.findByRole('button', { name: /Επανάληψη/ }));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Διεπαφής Δοκιμή' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Διεπαφής Δοκιμή' }),
+    ).toBeInTheDocument();
   });
 });

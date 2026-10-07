@@ -32,6 +32,11 @@
     "account": "Account",
     "debit": "Debit",
     "credit": "Credit",
+    "origin": "Account origin",
     "rule": "Rule"
+  },
+  "origin": {
+    "PRD09_ILLUSTRATIVE": "Illustrative (PRD-09)",
+    "TECHNICAL_PLACEHOLDER": "Technical placeholder"
   }
 }

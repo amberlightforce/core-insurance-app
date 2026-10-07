@@ -9,4 +9,3 @@ export function problemOf(error: unknown): ProblemDetails {
     title: error instanceof Error ? error.message : undefined,
   } as ProblemDetails;
 }
-
