@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "Insurance portal",
+    "product": "Core Insurance"
+  },
+  "save": "Save",
+  "saveDraft": "Save draft",
+  "saved": "Saved",
+  "cancel": "Cancel",
+  "close": "Close",
+  "back": "Back",
+  "next": "Next",
+  "undo": "Undo",
+  "retry": "Try again",
+  "details": "Details",
+  "why": "Why?",
+  "sources": "Sources",
+  "more": "More",
+  "loading": "Loading…",
+  "empty": "empty",
+  "required": "required",
+  "approval": {
+    "send": "Send for approval",
+    "pending": "Pending approval",
+    "approve": "Approve",
+    "reject": "Reject",
+    "returnForChanges": "Return for changes"
+  },
+  "ai": {
+    "suggestion": "AI suggestion",
+    "generated": "AI-generated",
+    "accept": "Accept",
+    "edit": "Edit",
+    "reject": "Reject",
+    "unavailable": "AI help isn't available; continue manually",
+    "disclosureCustomer": "Part of this text was drafted with the help of AI and reviewed by a member of our staff."
+  },
+  "unsaved": {
+    "title": "You have unsaved changes"
+  },
+  "offline": {
+    "banner": "You're offline. Changes will save when you're back online."
+  },
+  "search": {
+    "placeholder": "Search or run a command…"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "spinner": {
+    "label": "Loading…"
+  },
+  "button": {
+    "busy": "Working…",
+    "disabledBecause": "Unavailable: {reason}"
+  },
+  "kbd": {
+    "ctrl": "Ctrl",
+    "cmd": "⌘",
+    "enter": "↵",
+    "shift": "Shift",
+    "alt": "Alt",
+    "esc": "Esc"
+  }
+}

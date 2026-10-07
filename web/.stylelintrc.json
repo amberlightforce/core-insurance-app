@@ -1,3 +1,86 @@
 {
-  "extends": ["stylelint-config-standard"]
+  "extends": ["stylelint-config-standard"],
+  "ignoreFiles": [
+    "dist/**",
+    "storybook-static/**",
+    "coverage/**",
+    "src/design-system/tokens/aegean.css"
+  ],
+  "rules": {
+    "selector-class-pattern": [
+      "^(ds-)?[a-z][a-zA-Z0-9]*(-[a-z0-9]+)*$",
+      {
+        "message": "Use camelCase CSS Module classes (global helpers are prefixed ds-)"
+      }
+    ],
+    "custom-property-pattern": [
+      "^_?[a-z0-9]+([-_][a-z0-9]+)*$",
+      {
+        "message": "Custom properties are kebab-case tokens; component-private ones start with --_"
+      }
+    ],
+    "color-no-hex": [
+      true,
+      {
+        "message": "Raw colours are not allowed: use a --color-* token (rule 1)"
+      }
+    ],
+    "color-named": [
+      "never",
+      {
+        "message": "Raw colours are not allowed: use a --color-* token (rule 1)"
+      }
+    ],
+    "function-disallowed-list": [
+      ["rgb", "rgba", "hsl", "hsla", "hwb", "lab", "lch", "oklab", "oklch"],
+      {
+        "message": "Raw colours are not allowed: use a --color-* token (rule 1)"
+      }
+    ],
+    "declaration-property-value-disallowed-list": [
+      {
+        "/^(margin|padding|gap|row-gap|column-gap|inset)(-.*)?$/": [
+          "/(^|[\\s(,])-?(?!0(px)?\\b)\\d*\\.?\\d+(px|rem|em)\\b/"
+        ],
+        "/^border(-[a-z]+)*-radius$/": ["/\\d+(px|rem|em)\\b/"],
+        "z-index": ["/^-?\\d+$/"],
+        "/^(transition|animation)(-duration|-delay)?$/": ["/(^|[\\s(,])\\d*\\.?\\d+m?s\\b/"],
+        "/^(transition|animation)(-timing-function)?$/": [
+          "/cubic-bezier\\(/",
+          "/(^|\\s)(ease|ease-in|ease-out|ease-in-out)(\\s|,|$)/"
+        ],
+        "/^transition(-property)?$/": [
+          "/(^|[\\s,])(all|width|height|top|left|right|bottom|margin|padding|max-height|min-height|inset)([\\s,]|$)/"
+        ],
+        "/^(font|font-size|line-height)$/": ["/\\d+px/"]
+      },
+      {
+        "message": "Off-token value: use space/radius/z/motion/type tokens; animate transform and opacity only (rules 1, 10)"
+      }
+    ],
+    "declaration-no-important": null,
+    "no-descending-specificity": null,
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global", "local"]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/design-system/tokens/**/*.css"],
+      "rules": {
+        "color-no-hex": null,
+        "color-named": null,
+        "function-disallowed-list": null,
+        "declaration-property-value-disallowed-list": null,
+        "color-hex-length": null,
+        "alpha-value-notation": null,
+        "color-function-notation": null,
+        "color-function-alias-notation": null,
+        "number-max-precision": null
+      }
+    }
+  ]
 }
