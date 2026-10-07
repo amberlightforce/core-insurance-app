@@ -1407,6 +1407,13 @@ export interface components {
             issues: components["schemas"]["UwIssue"][];
             /** @description Quote validity */
             validUntil?: components["schemas"]["Instant"];
+            /** @description Non-blocking warnings of the quote (additive; none when the quote is clean) */
+            warnings?: {
+                /** @description RAT-WARN-* from rating or UW-WARN-* from underwriting, passed through (e.g. RAT-WARN-ILLUSTRATIVE-TARIFF, RAT-WARN-PROVISIONAL-TAX, UW-WARN-ILLUSTRATIVE-RULES) */
+                code: components["schemas"]["Code"];
+                /** @description Text in the request language */
+                message: components["schemas"]["Text"];
+            }[];
         };
         /** @description pol.Job.requote request. PRD inputs: "jobId, versionNo" */
         JobRequoteRequest: {
@@ -1475,6 +1482,8 @@ export interface components {
             versionNo: number;
             /** @description BIL plan code (bil.PaymentPlan.select); carried to BIL in PolicyBound.paymentPlanRef */
             paymentPlanOption: components["schemas"]["Code"];
+            /** @description Optional payment method; carried to BIL in PolicyBound.paymentMethod */
+            paymentMethod?: components["schemas"]["Code"];
             /** @description Hold issuance */
             holdIssuance?: boolean;
             /** @description Human confirmation (POL-ERR-HUMAN-CONFIRMATION-REQUIRED, REQ-POL-181) */

@@ -2301,6 +2301,10 @@ export interface components {
             chargeCategory: components["schemas"]["Code"];
             /** @description PFC fiscal-category key of the charge type (REQ-PFC-121) */
             fiscalCategoryKey?: components["schemas"]["Code"];
+            /** @description Legal status of the rate behind a tax or levy line, carried from POL (absent for premium) */
+            legalStatus?: components["schemas"]["Code"];
+            /** @description True when the line rests on a value that is not Settled (D-REG-02) */
+            provisional?: boolean;
             validPeriod: components["schemas"]["DatePeriod"];
             amount: components["schemas"]["Money"];
             open: components["schemas"]["Money"];

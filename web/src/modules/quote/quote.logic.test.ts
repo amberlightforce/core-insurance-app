@@ -265,7 +265,7 @@ describe('rating warnings', () => {
   it('merges warnings the API sends itself', () => {
     const withWarnings = {
       ...fx.quote({ charges: [] }),
-      warnings: [{ code: 'RAT-WARN-ILLUSTRATIVE-TARIFF' }],
+      warnings: [{ code: 'RAT-WARN-ILLUSTRATIVE-TARIFF', message: 'Illustrative tariff' }],
     };
     expect(ratingWarnings(withWarnings, false)).toEqual(['RAT-WARN-ILLUSTRATIVE-TARIFF']);
   });
