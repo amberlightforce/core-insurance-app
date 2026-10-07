@@ -146,9 +146,9 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "in review",
-   "owner": "reviewer agent",
-   "reviewAttempts": 0,
+   "status": "failed",
+   "owner": "builder: fixing review 1 defects",
+   "reviewAttempts": 1,
    "blockers": []
   },
   {
