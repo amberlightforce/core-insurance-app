@@ -1,0 +1,113 @@
+# Manual deployment of one stamp to Azure (INFRASTRUCTURE §6.5). OIDC federation, no stored Azure credentials.
+#
+# Required per GitHub environment (`dev`, `prod`):
+#   vars.AZURE_CLIENT_ID              - app registration / user-assigned identity with a federated credential for this repo
+#   vars.AZURE_TENANT_ID              - Entra tenant
+#   vars.AZURE_SUBSCRIPTION_ID        - target subscription
+#   vars.AZURE_RESOURCE_GROUP         - rg-coreins-<env>-<region>, pre-created; the identity needs Owner (role assignments)
+#                                       or Contributor + User Access Administrator on it
+#   vars.ENTRA_CLIENT_ID              - staff app registration used by Container Apps built-in authentication
+#   secrets.PG_ADMIN_PASSWORD         - PostgreSQL server administrator password
+#   secrets.APP_DB_PASSWORD           - password of the `app` database role
+#   secrets.MIGRATOR_DB_PASSWORD      - password of the `migrator` database role
+#   secrets.ENTRA_CLIENT_SECRET       - client secret of the staff app registration (stored in Key Vault, api only)
+# Role passwords must be printable ASCII (the bootstrap computes SCRAM-SHA-256 verifiers from them).
+# Additionally for `prod`:
+#   vars.STAMP_LEGAL_ENTITY           - legal entity code of the stamp
+#   vars.IMMUTABILITY_RETENTION_DAYS  - blob immutability retention from the PLT retention catalogue
+# Order per run: infrastructure -> image -> jobs -> bootstrap -> migrate -> apps, so api/worker never run on an
+# image whose migrations have not completed (INFRASTRUCTURE §6.5).
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target stamp
+        type: choice
+        options: [dev, prod]
+        default: dev
+      provision:
+        description: Run the Bicep deployment before updating the apps
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: ${{ inputs.environment }}
+    env:
+      RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      IMAGE_TAG: ${{ github.sha }}
+      PG_ADMIN_PASSWORD: ${{ secrets.PG_ADMIN_PASSWORD }}
+      APP_DB_PASSWORD: ${{ secrets.APP_DB_PASSWORD }}
+      MIGRATOR_DB_PASSWORD: ${{ secrets.MIGRATOR_DB_PASSWORD }}
+      ENTRA_CLIENT_ID: ${{ vars.ENTRA_CLIENT_ID }}
+      ENTRA_CLIENT_SECRET: ${{ secrets.ENTRA_CLIENT_SECRET }}
+      STAMP_LEGAL_ENTITY: ${{ vars.STAMP_LEGAL_ENTITY }}
+      IMMUTABILITY_RETENTION_DAYS: ${{ vars.IMMUTABILITY_RETENTION_DAYS }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: "Stage 1: provision infrastructure (no image needed)"
+        if: ${{ inputs.provision }}
+        run: |
+          az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "coreins-infra-${{ github.run_id }}" \
+            --template-file infra/azure/main.bicep \
+            --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
+            --parameters deployJobs=false deployApps=false
+
+      - name: Build and push the image
+        run: |
+          ACR_LOGIN_SERVER=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].loginServer" -o tsv)
+          az acr login --name "${ACR_LOGIN_SERVER%%.*}"
+          docker build --tag "$ACR_LOGIN_SERVER/coreins:$IMAGE_TAG" .
+          docker push "$ACR_LOGIN_SERVER/coreins:$IMAGE_TAG"
+
+      - name: "Stage 2: bootstrap and migrate jobs on the new image (apps untouched)"
+        run: |
+          az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "coreins-jobs-${{ github.run_id }}" \
+            --template-file infra/azure/main.bicep \
+            --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
+            --parameters deployJobs=true deployApps=false imageTag="$IMAGE_TAG"
+
+      - name: Run the database bootstrap (roles, privileges, extensions; idempotent) and wait
+        run: scripts/run-job.sh bootstrap
+
+      - name: Run the database migrations and wait
+        run: scripts/run-job.sh migrate
+
+      - name: "Stage 3: gotenberg, worker and api on the new image (after a successful migration)"
+        run: |
+          az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "coreins-apps-${{ github.run_id }}" \
+            --template-file infra/azure/main.bicep \
+            --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
+            --parameters deployJobs=true deployApps=true imageTag="$IMAGE_TAG"
+
+      - name: Smoke test
+        run: |
+          FQDN=$(az containerapp show --name api --resource-group "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv)
+          curl --fail --silent --show-error "https://$FQDN/health/live"
+          # API calls must get 401 from the application, never a sign-in redirect (INFRASTRUCTURE §6.1).
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' "https://$FQDN/api/plt/v1/health")" = "401"

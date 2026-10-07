@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- PRD-15 Data & analytics: implementation of the Data module (PostgreSQL schema `dat`). -->
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoreIns.Modules.Data.Contracts\CoreIns.Modules.Data.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
+    <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

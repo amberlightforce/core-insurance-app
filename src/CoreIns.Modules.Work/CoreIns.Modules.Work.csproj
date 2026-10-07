@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- PRD-13 Work management: implementation of the Work module (PostgreSQL schema `wrk`). -->
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoreIns.Modules.Work.Contracts\CoreIns.Modules.Work.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
+    <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

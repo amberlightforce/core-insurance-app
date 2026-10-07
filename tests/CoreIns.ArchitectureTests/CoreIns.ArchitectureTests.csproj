@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Module-boundary rules (ADR §2 rule 8), checked on compiled assemblies (NetArchTest) and on project references. -->
+
+  <ItemGroup>
+    <PackageReference Include="NetArchTest.Rules" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Host\CoreIns.Host.csproj" />
+  </ItemGroup>
+
+</Project>

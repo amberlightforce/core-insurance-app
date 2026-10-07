@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- PRD-10 Documents: public contract of the Documents module. The only project other modules may reference. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

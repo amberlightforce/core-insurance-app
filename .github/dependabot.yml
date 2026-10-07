@@ -1,0 +1,48 @@
+# Pinned versions are updated weekly by Dependabot (ARCHITECTURE-DECISIONS §2 rule 11).
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 10
+    groups:
+      dotnet-platform:
+        patterns: ["Microsoft.*", "System.*"]
+      opentelemetry:
+        patterns: ["OpenTelemetry*", "Azure.Monitor.*"]
+      hangfire:
+        patterns: ["Hangfire*"]
+      test:
+        patterns: ["xunit*", "Shouldly", "FsCheck*", "NetArchTest*", "Testcontainers*"]
+
+  - package-ecosystem: dotnet-sdk
+    directory: /
+    schedule: { interval: weekly, day: monday }
+
+  - package-ecosystem: npm
+    directory: /web
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 10
+    groups:
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      lint:
+        patterns: ["eslint*", "@eslint/*", "typescript-eslint", "prettier", "stylelint*", "globals"]
+      vite-vitest:
+        patterns: ["vite", "vitest", "@vitejs/*"]
+
+  - package-ecosystem: npm
+    directory: /tests/e2e
+    schedule: { interval: weekly, day: monday }
+
+  - package-ecosystem: docker
+    directory: /
+    schedule: { interval: weekly, day: monday }
+
+  - package-ecosystem: docker-compose
+    directory: /infra/local
+    schedule: { interval: weekly, day: monday }
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday }

@@ -1,0 +1,9 @@
+/* Placeholder global styles; the Aegean design tokens replace these in F-1d. */
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+.app {
+  padding: 2rem;
+}

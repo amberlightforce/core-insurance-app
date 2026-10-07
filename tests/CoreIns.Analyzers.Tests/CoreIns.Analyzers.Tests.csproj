@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Proves COREINS001 (no floating point in production code) reports what it must and nothing else. -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\tools\CoreIns.Analyzers\CoreIns.Analyzers.csproj" />
+  </ItemGroup>
+
+</Project>
