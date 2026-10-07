@@ -140,3 +140,17 @@ co-signing access (OI-UW-04, OI-DOC-05) · BoG DORA channel (OI-CMP-09) · SMS s
 | D-PRG-12 | The backlog is 134 WPs: 6 foundation, 116 feature (3 deferred under D-USR-01/03), 12 E2E. It covers 3,711 Musts: 3,710 + 9 D6 promotions + REQ-RI-193 − 9 bancassurance demotions (REQ-PLT-057, REQ-PTY-253/254/255/257, REQ-CHN-206/207/209/214). REQ-CHN-042 stays Must (only its bank part is out) | Every Must is placed exactly once | Made |
 | D-PRG-13 | E2E-12 (pack rollback after bound business) is scheduled in W5, not W1. W1 only delivers its harness | The scenario needs POL bind (W4) and BIL/FIN handling | Made |
 | D-PRG-14 | Tracker: `orchestration/backlog/backlog.json` is the source of truth. `orchestration/tracker/export_tracker.py` exports it, and the orchestrator pushes it to the tracker artifact database on every status change | Simple, auto-updating view for the user | Made |
+
+## K. Event catalogue rulings (F-1c)
+
+| ID | Decision | Reason | Status |
+|---|---|---|---|
+| D-CON-22 | Ordering keys follow the producer PRD where it already applied PRD-18's own fixes (F-117/R3-005): PartyUnmerged → survivor `party_id`; LevyAccrued/LevyRemitted → `levy_period_id`; ConfigChanged → `resolution_context_id`; ClaimsHistoryCertificateIssued → `certificate_id` | These are later corrections of the same catalogue | Made |
+| D-CON-10a | **Amends D-CON-10:** no new `RefundCleared` event. Bank-statement clearing of a refund is signalled by the existing `DisbursementCleared` | Avoid inventing an event when one already covers it | Made |
+| D-CON-23 | Consumer lists are trimmed to modules whose own PRD §8 declares a handler: 143 pairs removed, 44 added, 7 kept by PRD evidence, all recorded in `contracts/events/catalog.json` `consumerChanges`. LakehouseErasureCompleted keeps PLT; ModelVersionApproved gains CMP and PLT | D-CON-09 applied | Made |
+| D-CON-24 | The disbursement `source` field is an open code, with the D1 values listed (refund, claim payment, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE, …) | The contract and PRD-09 value lists differ | Made |
+| D-CON-25 | `TermStarted` is not created (optional in PRD-18, undecided). 15 events have `minimal` payloads (listed in catalog.json) and are completed by the owning WP from its PRD | Never invent | Made |
+| D-CON-26 | The event envelope requires `actor`, `jurisdiction`, and `aiInteractionId` (nullable) on every event, as the contract §3.4.1 lists them for all events | Contract wins over PLAN §4.3's shorter list | Made |
+| D-CON-27 | Fraud scores and SIU case data are classified **P3** (criminal-offence data, GDPR Art. 10) | Conservative reading; PRD-07 is silent | Made |
+| D-CON-28 | Each event declares its required lineage keys (`x-business-keys` in catalog.json), and the validator enforces them | D5 lineage must be checkable | Made |
+| D-CON-29 | Lineage keys belong in the envelope `businessKeys` and need not appear in the payload. PolicyBound carries jobId + quoteId so that quote → job → transaction is traceable | D5 | Made |

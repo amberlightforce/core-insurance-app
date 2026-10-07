@@ -165,9 +165,9 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "not started",
-   "owner": null,
-   "reviewAttempts": 0,
+   "status": "in review",
+   "owner": "reviewer agent (attempt 2)",
+   "reviewAttempts": 1,
    "blockers": []
   },
   {
@@ -222,8 +222,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "not started",
-   "owner": null,
+   "status": "building",
+   "owner": "builders: CEL engine + Gotenberg spike (worktrees)",
    "reviewAttempts": 0,
    "blockers": []
   },
