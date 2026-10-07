@@ -24,12 +24,12 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 |---|---|---|---|
 | SL-0 platform wiring + Party | **merged** (5720b79) | opus | review 1 FAIL (M1 plaintext P2 in idempotency store) → fixed 4e849b4, orchestrator-verified; main: build clean, integration 83, arch 196, platform 47, host 18 |
 | SL-FIX-WEB | **merged** | sonnet | 1109/1109 native |
-| SL-POL | **fixing** (review 1 FAIL: M1 retroactive record-close = hidden delete; M2 Policy.get status null outside term; 9 minors) | opus | 634cfa5 wired to real RAT/UW: integration 234/234 incl. real-module E2E-01 path; D-SLC-13..17 |
+| SL-POL | **merged** (5ed800f) | opus | review 1 FAIL (M1 history erase, M2 status) → fixed 82548c7, orchestrator re-check; gate green: integration 257, all suites |
 | SL-MKT | **merged** (ca3c127) | sonnet | light review PASS; D-REG-06a split removed; full gate green (10 suites) |
 | SL-PFC | **merged** (ae022f0) | sonnet | light review PASS; full gate green (integration 135, arch 196) |
 | SL-RAT-UW | **merged** (77a6947) | sonnet | review 1 FAIL (M1 IPT legalStatus/fail-open) → fixed 0060a00, orchestrator re-check; gate green: integration 237, all suites |
-| SL-BIL | building | opus | started early against contracts/fakes (POL still building) |
-| SL-FIN | building | opus | started early against contracts/fakes |
+| SL-BIL | **in review** (deep, opus, 1st round) | opus | built 06be56f: bind→invoice→stub fiscal→payment→PAID with all real modules; integration 270 |
+| SL-FIN | **fixing** (review 1 FAIL: M1 lines appendable to a posted journal; 5 minors to fix) | opus | hand-checked money path OK; concurrent exactly-once OK; re-check light |
 | SL-UI | building | sonnet | staff screens |
 | SL-E2E | not started | | after S2 |
 
