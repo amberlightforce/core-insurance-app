@@ -268,7 +268,7 @@ internal sealed partial class Intake(
         payload.EventTypeValue,
         payload.AccountingDate,
         payload.BusinessDate,
-        [.. payload.Lines.Select(l => new SourceLine(l.Account, l.Side.ToString().ToUpperInvariant(), l.Amount, Dimensions(l.Dimensions)))]);
+        [.. payload.Lines.Select(l => new SourceLine(l.Account, l.Side.ToString().ToUpperInvariant(), l.Amount, Dimensions(JsonSerializer.SerializeToElement(l.Dimensions, SharedKernelJson.Options))))]);
 
     private static SourceEntry? TryNormalise(string payload)
     {

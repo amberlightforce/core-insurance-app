@@ -59,11 +59,8 @@ public sealed record DownPaymentClearedV1 : global::CoreIns.Platform.Contracts.E
     public required global::CoreIns.SharedKernel.Money Amount { get; init; }
 
     /// <summary>Contract member 'receiptIds'.</summary>
-    /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'receiptId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("receiptIds")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::System.Guid> ReceiptIds { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.PaymentId> ReceiptIds { get; init; }
 
     /// <summary>Contract member 'mode'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("mode")]

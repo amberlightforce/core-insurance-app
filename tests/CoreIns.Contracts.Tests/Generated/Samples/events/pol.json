@@ -184,7 +184,9 @@
       "bookingDate": "2026-10-07",
       "transactionId": "0192c7f5-8d06-70b3-8e0a-1f345153e609",
       "correlationKey": "Sample text",
-      "taxTreatmentRef": "Sample text"
+      "taxTreatmentRef": "Sample text",
+      "legalStatus": "SAMPLE_CODE",
+      "provisional": true
     },
     "set_id": "01925a23-1611-75b1-8a5a-4eede0a6ae14",
     "set_size": 1,
@@ -545,6 +547,8 @@
       "accountId": "0192d573-c0e0-7edc-8284-4ab838d422fc",
       "payerPartyId": "01928528-a7d3-7c95-8382-927961e952f3",
       "paymentPlanRef": "Sample text",
+      "paymentMethod": "SAMPLE_CODE",
+      "currency": "EUR",
       "ifrs17Tags": {
         "note": "sample"
       },

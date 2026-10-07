@@ -4164,6 +4164,9 @@ components:
         paymentPlanOption:
           $ref: ../events/common.schema.json#/$defs/Code
           description: BIL plan code (bil.PaymentPlan.select); carried to BIL in PolicyBound.paymentPlanRef
+        paymentMethod:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Optional payment method; carried to BIL in PolicyBound.paymentMethod
         holdIssuance:
           type: boolean
           description: Hold issuance

@@ -42,6 +42,9 @@ public static class NumberingSchemes
     /// <summary>Receipt number (REQ-BIL-086).</summary>
     public const string Receipt = "RECEIPT";
 
+    /// <summary>Billing account number (REQ-BIL-030).</summary>
+    public const string BillingAccount = "BILLING_ACCOUNT";
+
     /// <summary>Claim number (REQ-CLM-001).</summary>
     public const string Claim = "CLAIM";
 

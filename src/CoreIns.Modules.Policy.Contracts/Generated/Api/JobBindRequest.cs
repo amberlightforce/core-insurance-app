@@ -20,6 +20,11 @@ public sealed record JobBindRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("paymentPlanOption")]
     public required string PaymentPlanOption { get; init; }
 
+    /// <summary>Optional payment method; carried to BIL in PolicyBound.paymentMethod</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("paymentMethod")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? PaymentMethod { get; init; }
+
     /// <summary>Hold issuance</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("holdIssuance")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]

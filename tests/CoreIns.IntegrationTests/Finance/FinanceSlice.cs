@@ -107,6 +107,7 @@ internal sealed class FinanceSlice(ApiHostFactory factory)
             ["invoiceItemId"] = null,
             ["receiptId"] = receiptId?.ToString(),
             ["allocationId"] = null,
+            ["ruleId"] = "TEST-RULE",
         },
     };
 

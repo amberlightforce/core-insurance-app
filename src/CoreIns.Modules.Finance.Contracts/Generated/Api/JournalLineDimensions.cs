@@ -64,9 +64,6 @@ public sealed record JournalLineDimensions
     public global::CoreIns.SharedKernel.Identifiers.InvoiceId? InvoiceId { get; init; }
 
     /// <summary>Contract member 'receiptId'.</summary>
-    /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'receiptId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("receiptId")]
-    public global::System.Guid? ReceiptId { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.PaymentId? ReceiptId { get; init; }
 }

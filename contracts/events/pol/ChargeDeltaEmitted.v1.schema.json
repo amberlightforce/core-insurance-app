@@ -147,6 +147,16 @@
           ],
           "description": "Tax treatment reference (D2, TaxCalculator.treatment)",
           "x-classification": "P0"
+        },
+        "legalStatus": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "description": "Legal status of the tax or levy rate the line was priced with (MKT); absent for premium lines",
+          "x-classification": "P0"
+        },
+        "provisional": {
+          "type": "boolean",
+          "description": "True when the line rests on a value that is not Settled (D-REG-02)",
+          "x-classification": "P0"
         }
       }
     }

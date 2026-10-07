@@ -172,7 +172,7 @@ internal sealed class JournalReader(DbSession session)
             ChargeId = l.ChargeId is { } charge ? new ChargeId(charge) : null,
             BillingAccountId = l.BillingAccountId is { } account ? new BillingAccountId(account) : null,
             InvoiceId = l.InvoiceId is { } invoice ? new InvoiceId(invoice) : null,
-            ReceiptId = l.ReceiptId,
+            ReceiptId = l.ReceiptId is { } receipt ? new PaymentId(receipt) : null,
         },
     };
 

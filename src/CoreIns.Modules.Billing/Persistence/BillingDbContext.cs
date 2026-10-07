@@ -144,6 +144,8 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.QuarantineReason).HasColumnName("quarantine_reason");
             entity.Property(e => e.FiscalCategoryKey).HasColumnName("fiscal_category_key");
+            entity.Property(e => e.LegalStatus).HasColumnName("legal_status");
+            entity.Property(e => e.Provisional).HasColumnName("provisional").HasDefaultValue(false);
             entity.Property(e => e.WrittenEntryId).HasColumnName("written_entry_id");
             entity.HasIndex(e => new { e.SetId, e.SetIndex }).IsUnique().HasDatabaseName("ux_charge_set_member");
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_charge_term");
@@ -220,6 +222,8 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.ChargeType).HasColumnName("charge_type");
             entity.Property(e => e.ChargeCategory).HasColumnName("charge_category");
             entity.Property(e => e.FiscalCategoryKey).HasColumnName("fiscal_category_key");
+            entity.Property(e => e.LegalStatus).HasColumnName("legal_status");
+            entity.Property(e => e.Provisional).HasColumnName("provisional").HasDefaultValue(false);
             entity.Property(e => e.ValidFrom).HasColumnName("valid_from");
             entity.Property(e => e.ValidTo).HasColumnName("valid_to");
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");

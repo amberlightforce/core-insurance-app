@@ -183,7 +183,7 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
             EventDescriptor.From(CashAllocatedV1.Descriptor), "BillingAccount", receipt.BillingAccountId.Value.ToString(),
             new CashAllocatedV1
             {
-                ReceiptId = receipt.ReceiptId.Value,
+                ReceiptId = receipt.ReceiptId,
                 Allocations = [.. rows.Select(r => new Allocation { ItemId = r.InvoiceItemId, TermId = r.TermId, Amount = new Money(r.Amount, currency) })],
                 ArrearsCleared = [.. termsTouched.Select(t => new TermArrearsFlag { TermId = t, ArrearsCleared = openAfter.GetValueOrDefault(t) == 0m })],
                 DownPayment = false,

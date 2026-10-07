@@ -730,6 +730,169 @@
         "status"
       ]
     },
+    "LedgerDimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Dimensions of a ledger line (REQ-BIL-283). A dimension that does not apply is null by rule.",
+      "properties": {
+        "legalEntity": {
+          "$ref": "#/$defs/Code",
+          "description": "Legal entity code"
+        },
+        "jurisdiction": {
+          "$ref": "#/$defs/CountryCode"
+        },
+        "ruleId": {
+          "$ref": "#/$defs/Code",
+          "description": "Posting rule that produced the line"
+        },
+        "billingAccountId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policyId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policyTermId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "transactionId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "chargeId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "chargeType": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "chargeCategory": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverageCode": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "productCode": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "billMode": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invoiceId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invoiceItemId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "receiptId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "allocationId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "legalEntity",
+        "jurisdiction",
+        "ruleId"
+      ]
+    },
     "LedgerLine": {
       "type": "object",
       "additionalProperties": false,
@@ -748,7 +911,7 @@
           "$ref": "#/$defs/Money"
         },
         "dimensions": {
-          "$ref": "#/$defs/OpenObject"
+          "$ref": "#/$defs/LedgerDimensions"
         }
       },
       "required": [

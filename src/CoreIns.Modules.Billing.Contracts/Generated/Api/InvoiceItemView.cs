@@ -44,6 +44,16 @@ public sealed record InvoiceItemView
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? FiscalCategoryKey { get; init; }
 
+    /// <summary>Legal status of the rate behind a tax or levy line, carried from POL (absent for premium)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LegalStatus { get; init; }
+
+    /// <summary>True when the line rests on a value that is not Settled (D-REG-02)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Provisional { get; init; }
+
     /// <summary>Contract member 'validPeriod'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("validPeriod")]
     public required global::CoreIns.SharedKernel.DateRange ValidPeriod { get; init; }

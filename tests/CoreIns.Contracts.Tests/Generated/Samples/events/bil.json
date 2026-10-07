@@ -186,7 +186,23 @@
             "currency": "EUR"
           },
           "dimensions": {
-            "note": "sample"
+            "legalEntity": "SAMPLE_CODE",
+            "jurisdiction": "GR",
+            "ruleId": "SAMPLE_CODE",
+            "billingAccountId": "0192871e-7f3d-72df-8893-02486513f07e",
+            "policyId": "0192c61f-2841-702e-8212-ffdd922b1966",
+            "policyTermId": "0192d0ff-f421-772c-8e29-80b2fd760338",
+            "transactionId": "01921434-a056-7ffa-8b7a-90d0d72bf8ea",
+            "chargeId": "0192d3ef-bd15-75ac-871e-6f0f534cf547",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "coverageCode": "SAMPLE_CODE",
+            "productCode": "SAMPLE_CODE",
+            "billMode": "SAMPLE_CODE",
+            "invoiceId": "01929dea-fa68-78d9-8a68-adbb13f60cfc",
+            "invoiceItemId": "019233a4-1871-7ebd-85f8-762f16c436d9",
+            "receiptId": "0192617a-8240-7110-8a50-b16e4e68ba48",
+            "allocationId": "01926516-b6a7-77e7-8ed2-af5775753a46"
           }
         }
       ]
@@ -231,7 +247,23 @@
             "currency": "EUR"
           },
           "dimensions": {
-            "note": "sample"
+            "legalEntity": "SAMPLE_CODE",
+            "jurisdiction": "GR",
+            "ruleId": "SAMPLE_CODE",
+            "billingAccountId": "019286be-be47-7a4b-8c23-7e540dd81fcc",
+            "policyId": "01927930-8a0d-75c6-8eea-7f936b63d1d5",
+            "policyTermId": "019294f4-81d9-79d0-8401-f08b1748e64d",
+            "transactionId": "019246d7-da8b-7ea6-8dcb-1539fdcd74ea",
+            "chargeId": "0192ae81-2ca0-7f38-843e-763455907139",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "coverageCode": "SAMPLE_CODE",
+            "productCode": "SAMPLE_CODE",
+            "billMode": "SAMPLE_CODE",
+            "invoiceId": "0192106e-6ccf-7ef9-8398-cc5012797e51",
+            "invoiceItemId": "0192418a-3af9-7db1-8dd7-0696a03cf73d",
+            "receiptId": "019204bc-d382-78f5-81ff-63b29bdee572",
+            "allocationId": "0192165e-1f68-7ed5-8a4e-046e381779d8"
           }
         }
       ]

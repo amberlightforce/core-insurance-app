@@ -114,6 +114,16 @@ public sealed record PolicyBoundV1 : global::CoreIns.Platform.Contracts.Events.I
     [global::System.Text.Json.Serialization.JsonPropertyName("paymentPlanRef")]
     public required string PaymentPlanRef { get; init; }
 
+    /// <summary>Payment method chosen at bind (BIL method code); absent: BIL applies its default</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("paymentMethod")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? PaymentMethod { get; init; }
+
+    /// <summary>Currency of the term and its charges</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Currency? Currency { get; init; }
+
     /// <summary>IFRS 17 proposals (portfolio, cohort, group); FIN assigns (R-52)</summary>
     /// <remarks>
     /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>

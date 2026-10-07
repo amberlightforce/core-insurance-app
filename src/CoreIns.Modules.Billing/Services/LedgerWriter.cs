@@ -149,29 +149,25 @@ internal sealed class LedgerWriter(
     /// <summary>The request's jurisdiction.</summary>
     public Jurisdiction Jurisdiction => context.Jurisdiction ?? throw new InvalidOperationException("The request context has no jurisdiction.");
 
-    /// <summary>The line dimensions on the wire (camelCase; a dimension that does not apply is null, REQ-BIL-283).</summary>
-    private JsonElement Dimensions(LegalEntityCode legalEntity, string ruleId, LineDimensions d)
+    /// <summary>The line dimensions on the wire (typed, D-SLC-19a; a dimension that does not apply is null, REQ-BIL-283).</summary>
+    private LedgerDimensions Dimensions(LegalEntityCode legalEntity, string ruleId, LineDimensions d) => new()
     {
-        var json = new JsonObject
-        {
-            ["legalEntity"] = legalEntity.Value,
-            ["jurisdiction"] = Jurisdiction.Value,
-            ["billingAccountId"] = d.BillingAccountId?.Value.ToString("D"),
-            ["policyId"] = d.PolicyId?.Value.ToString("D"),
-            ["policyTermId"] = d.PolicyTermId?.Value.ToString("D"),
-            ["transactionId"] = d.TransactionId?.Value.ToString("D"),
-            ["chargeId"] = d.ChargeId?.Value.ToString("D"),
-            ["chargeType"] = d.ChargeType,
-            ["chargeCategory"] = d.ChargeCategory,
-            ["coverageCode"] = d.CoverageCode,
-            ["productCode"] = d.ProductCode,
-            ["billMode"] = d.BillMode,
-            ["invoiceId"] = d.InvoiceId?.Value.ToString("D"),
-            ["invoiceItemId"] = d.InvoiceItemId?.ToString("D"),
-            ["receiptId"] = d.ReceiptId?.Value.ToString("D"),
-            ["allocationId"] = d.AllocationId?.ToString("D"),
-            ["ruleId"] = ruleId,
-        };
-        return JsonSerializer.SerializeToElement(json);
-    }
+        LegalEntity = legalEntity.Value,
+        Jurisdiction = Jurisdiction.Value,
+        RuleId = ruleId,
+        BillingAccountId = d.BillingAccountId,
+        PolicyId = d.PolicyId,
+        PolicyTermId = d.PolicyTermId,
+        TransactionId = d.TransactionId,
+        ChargeId = d.ChargeId,
+        ChargeType = d.ChargeType,
+        ChargeCategory = d.ChargeCategory,
+        CoverageCode = d.CoverageCode,
+        ProductCode = d.ProductCode,
+        BillMode = d.BillMode,
+        InvoiceId = d.InvoiceId,
+        InvoiceItemId = d.InvoiceItemId,
+        ReceiptId = d.ReceiptId,
+        AllocationId = d.AllocationId,
+    };
 }

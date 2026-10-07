@@ -124,6 +124,12 @@ internal sealed class ChargeRow
 
     public string? FiscalCategoryKey { get; set; }
 
+    /// <summary>Legal status of the rate behind a tax or levy line, as POL sent it (D-SLC-19a); null for premium.</summary>
+    public string? LegalStatus { get; set; }
+
+    /// <summary>True when the line rests on a value that is not Settled (D-SLC-19a).</summary>
+    public bool Provisional { get; set; }
+
     public Guid? WrittenEntryId { get; set; }
 }
 
@@ -211,6 +217,12 @@ internal sealed class InvoiceItemRow
     public string ChargeCategory { get; set; } = string.Empty;
 
     public string? FiscalCategoryKey { get; set; }
+
+    /// <summary>Carried from the charge (D-SLC-19a).</summary>
+    public string? LegalStatus { get; set; }
+
+    /// <summary>Carried from the charge (D-SLC-19a).</summary>
+    public bool Provisional { get; set; }
 
     public BusinessDate ValidFrom { get; set; }
 

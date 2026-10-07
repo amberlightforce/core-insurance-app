@@ -759,6 +759,7 @@
       "jobId": "0192804b-5203-754a-85fb-80fe27f3e7d6",
       "versionNo": 1,
       "paymentPlanOption": "SAMPLE_CODE",
+      "paymentMethod": "SAMPLE_CODE",
       "holdIssuance": true,
       "confirmation": true,
       "disclosureEvidence": {

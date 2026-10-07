@@ -6646,6 +6646,12 @@ components:
         fiscalCategoryKey:
           $ref: ../events/common.schema.json#/$defs/Code
           description: PFC fiscal-category key of the charge type (REQ-PFC-121)
+        legalStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Legal status of the rate behind a tax or levy line, carried from POL (absent for premium)
+        provisional:
+          type: boolean
+          description: True when the line rests on a value that is not Settled (D-REG-02)
         validPeriod:
           $ref: ../events/common.schema.json#/$defs/DatePeriod
         amount:

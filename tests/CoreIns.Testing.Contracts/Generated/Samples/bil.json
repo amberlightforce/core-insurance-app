@@ -243,6 +243,8 @@
           "chargeType": "SAMPLE_CODE",
           "chargeCategory": "SAMPLE_CODE",
           "fiscalCategoryKey": "SAMPLE_CODE",
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
           "validPeriod": {
             "from": "2026-01-01",
             "to": "2027-01-01"
@@ -1239,6 +1241,8 @@
           "chargeType": "SAMPLE_CODE",
           "chargeCategory": "SAMPLE_CODE",
           "fiscalCategoryKey": "SAMPLE_CODE",
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
           "validPeriod": {
             "from": "2026-01-01",
             "to": "2027-01-01"
@@ -1293,6 +1297,8 @@
       "chargeType": "SAMPLE_CODE",
       "chargeCategory": "SAMPLE_CODE",
       "fiscalCategoryKey": "SAMPLE_CODE",
+      "legalStatus": "SAMPLE_CODE",
+      "provisional": true,
       "validPeriod": {
         "from": "2026-01-01",
         "to": "2027-01-01"
