@@ -165,8 +165,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "in review",
-   "owner": "reviewer (light, Sonnet)",
+   "status": "merged",
+   "owner": "merged (events, OpenAPI, C# types)",
    "reviewAttempts": 2,
    "blockers": []
   },
