@@ -8,7 +8,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 
 | Module | Operations | Full | Minimal | Commands | Queries | In-process only | Partner-facing | Unexpanded families |
 |---|---|---|---|---|---|---|---|---|
-| [PTY](#pty) | 65 | 43 | 22 | 47 | 18 | 5 | 0 | 5 |
+| [PTY](#pty) | 67 | 47 | 20 | 47 | 20 | 5 | 0 | 5 |
 | [PFC](#pfc) | 31 | 28 | 3 | 15 | 16 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
@@ -25,7 +25,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 20 | 20 | 0 | 12 | 8 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 32 | 16 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1110 | 890 | 220 | 727 | 383 | 127 | 69 | 65 |
+| **Total** | 1112 | 894 | 218 | 727 | 385 | 127 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -63,11 +63,11 @@ Contract anchors: 174; covered by operations or families: 164; not an API (reaso
 | `pty.Dsar.restrict` | POST `/api/pty/v1/dsar/restrict` | C |  | internal | CMP | W6 | full | REQ-PTY-161..REQ-PTY-165, REQ-PTY-165 |
 | `pty.Identifier.verify` | POST `/api/pty/v1/identifiers/verify` | C |  | ui |  | W2 | full | REQ-PTY-003, REQ-PTY-054 |
 | `pty.Import.reverse` | POST `/api/pty/v1/import/reverse` | C | yes | internal | MIG | unscheduled | full | REQ-PTY-282 |
-| `pty.Intermediary.create` | POST `/api/pty/v1/intermediaries` | C |  | ui |  | W2 | minimal | REQ-PTY-187..REQ-PTY-202 |
+| `pty.Intermediary.create` | POST `/api/pty/v1/intermediaries` | C |  | ui |  | W2 | full | REQ-PTY-187..REQ-PTY-202 |
 | `pty.Intermediary.importRegister` | POST `/api/pty/v1/intermediaries/import-register` | C |  | ui |  | W2 | minimal | REQ-PTY-187..REQ-PTY-202 |
 | `pty.Intermediary.suspend` | POST `/api/pty/v1/intermediaries/suspend` | C |  | ui |  | W2 | minimal | REQ-PTY-187..REQ-PTY-202 |
 | `pty.Intermediary.terminate` | POST `/api/pty/v1/intermediaries/terminate` | C | yes | ui |  | W2 | minimal | REQ-PTY-187..REQ-PTY-202 |
-| `pty.Intermediary.update` | PATCH `/api/pty/v1/intermediaries/{id}` | C |  | ui |  | W2 | minimal | REQ-PTY-187..REQ-PTY-202 |
+| `pty.Intermediary.update` | PATCH `/api/pty/v1/intermediaries/{id}` | C |  | ui |  | W2 | full | REQ-PTY-187..REQ-PTY-202 |
 | `pty.LifeEvent.complete` | POST `/api/pty/v1/life-events/complete` | C | yes | ui |  | W6 | full | REQ-PTY-113 |
 | `pty.LifeEvent.reverse` | POST `/api/pty/v1/life-events/reverse` | C | yes | ui |  | W6 | full | REQ-PTY-113 |
 | `pty.LifeEvent.start` | POST `/api/pty/v1/life-events/start` | C | yes | ui |  | W6 | full | REQ-PTY-113 |
@@ -78,6 +78,7 @@ Contract anchors: 174; covered by operations or families: 164; not an API (reaso
 | `pty.Party.get` | GET `/api/pty/v1/parties/{id}` | Q |  | ui | BIL, CHN, CLM, CMP, DOC, FIN, PLT, POL, RI, UW | W2 | full | REQ-PTY-001, REQ-PTY-036 |
 | `pty.Party.merge` | POST `/api/pty/v1/parties/merge` | C | yes | ui | MIG | W6 | full | REQ-PTY-007 |
 | `pty.Party.search` | GET `/api/pty/v1/parties/search` | Q |  | ui | CHN, CLM, CMP, PLT, POL, UW, WRK | W2 | full | REQ-PTY-001, REQ-PTY-068 |
+| `pty.Party.searchByCriteria` | POST `/api/pty/v1/parties/search` | Q |  | ui | CHN, CLM, CMP, PLT, POL, UW, WRK | W2 | full | REQ-PTY-001, REQ-PTY-060, REQ-PTY-068 |
 | `pty.Party.unmerge` | POST `/api/pty/v1/parties/unmerge` | C | yes | ui | MIG | W2 | full | REQ-PTY-007, REQ-PTY-138 |
 | `pty.Party.update` | PATCH `/api/pty/v1/parties/{id}` | C | yes | ui | CHN, MIG | W2 | full | REQ-PTY-001, REQ-PTY-012, REQ-PTY-038 |
 | `pty.Party.validate` | POST `/api/pty/v1/parties/validate` | Q |  | ui |  | W2 | full | REQ-PTY-003, REQ-PTY-131 |
@@ -85,6 +86,7 @@ Contract anchors: 174; covered by operations or families: 164; not an API (reaso
 | `pty.PartyRole.end` | POST `/api/pty/v1/party-roles/end` | C |  | ui |  | W2 | full | REQ-PTY-002 |
 | `pty.PartyRole.query` | GET `/api/pty/v1/party-roles/query` | Q |  | ui | BIL, CHN, POL, RI | W2 | full | REQ-PTY-002 |
 | `pty.ProducerCode.search` | GET `/api/pty/v1/producer-codes/search` | Q |  | ui |  | W2 | full | REQ-PTY-008 |
+| `pty.ProducerCode.searchByCriteria` | POST `/api/pty/v1/producer-codes/search` | Q |  | ui |  | W2 | full | REQ-PTY-207 |
 | `pty.ProducerCode.validate` | POST `/api/pty/v1/producer-codes/validate` | Q |  | ui | BIL, CHN, DOC, PFC, PLT, POL, UW | W2 | full | REQ-PTY-008 |
 | `pty.ProducerOfRecord.bulkTransfer` | POST `/api/pty/v1/producer-of-records/bulk-transfer` | C | yes | ui | CHN | W2 | full | REQ-PTY-009 |
 | `pty.ProducerOfRecord.cancel` | POST `/api/pty/v1/producer-of-records/cancel` | C | yes | ui |  | W2 | full | REQ-PTY-009 |
@@ -1382,7 +1384,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 
 | Anchor | Covered by | Note |
 |---|---|---|
-| REQ-PTY-001 | `pty.Party.create`, `pty.Party.get`, `pty.Party.search`, `pty.Party.update` |  |
+| REQ-PTY-001 | `pty.Party.create`, `pty.Party.get`, `pty.Party.search`, `pty.Party.searchByCriteria` (+1) |  |
 | REQ-PTY-002 | `pty.PartyRole.assign`, `pty.PartyRole.end`, `pty.PartyRole.query` |  |
 | REQ-PTY-003 | `pty.Identifier.verify`, `pty.Party.validate` | mapped by builder |
 | REQ-PTY-004 | `pty.Account.addMember`, `pty.Account.create`, `pty.Account.get`, `pty.Account.removeMember` (+3) |  |

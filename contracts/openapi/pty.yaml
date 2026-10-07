@@ -83,12 +83,84 @@ paths:
       - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: criteria
+      - name: partyNumber
         in: query
         required: false
-        description: 'PRD: "criteria"'
+        description: Exact party number
         schema:
           type: string
+          maxLength: 64
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartySearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    post:
+      operationId: pty.Party.searchByCriteria
+      summary: Search parties (POST form, criteria in the body)
+      description: |-
+        POST form of pty.Party.search (D-SLC-05): names, identifiers and the single search box (which may hold an
+        identifier) travel in the body, never in a URL. The GET form takes only partyNumber. A read; no Idempotency-Key.
+
+        PRD inputs: criteria, validAt, cursor
+        PRD outputs: ranked results
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-001
+      - REQ-PTY-060
+      - REQ-PTY-068
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - CLM
+      - CMP
+      - PLT
+      - POL
+      - UW
+      - WRK
+      x-permission: pty.Party.search
+      x-prd-name: pty.Party.search
+      x-error-codes:
+      - code: PTY-ERR-QUERY-TOO-SHORT
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1636
+      - DECISIONS D-SLC-05
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartySearchCriteria'
       responses:
         '200':
           description: Success
@@ -146,6 +218,8 @@ paths:
       - RI
       - UW
       x-permission: pty.Party.get
+      x-additional-permissions:
+      - pty.Party.revealP2  # unmasked P2 with revealPurpose (REQ-PTY-044, D-SLC-06)
       x-error-codes:
       - code: PTY-ERR-NOT-FOUND
         status: 404
@@ -174,6 +248,14 @@ paths:
         description: 'PRD: "profile"'
         schema:
           type: string
+      - name: revealPurpose
+        in: query
+        required: false
+        description: Purpose code for showing P2 values unmasked (REQ-PTY-044). Needs permission pty.Party.revealP2; every
+          unmasked view is audited with the purpose. Without it P2 values are masked.
+        schema:
+          type: string
+          maxLength: 64
       responses:
         '200':
           description: Success
@@ -227,6 +309,9 @@ paths:
       - MIG
       x-permission: pty.Party.update
       x-error-codes:
+      - code: PTY-ERR-NOT-AVAILABLE
+        status: 501
+        note: not built yet in the slice (D-SLC-06)
       - code: PTY-ERR-ID-CHECKDIGIT
         status: 422
       - code: PTY-ERR-STALE
@@ -444,6 +529,9 @@ paths:
       - MIG
       x-permission: pty.Party.merge
       x-error-codes:
+      - code: PTY-ERR-NOT-AVAILABLE
+        status: 501
+        note: not built yet in the slice (D-SLC-06)
       - code: PTY-ERR-MERGE-CROSS-ENTITY
         status: 422
       - code: PTY-ERR-WINDOW-CLOSED
@@ -516,6 +604,9 @@ paths:
       - MIG
       x-permission: pty.Party.unmerge
       x-error-codes:
+      - code: PTY-ERR-NOT-AVAILABLE
+        status: 501
+        note: not built yet in the slice (D-SLC-06)
       - code: PTY-ERR-MERGE-CROSS-ENTITY
         status: 422
       - code: PTY-ERR-WINDOW-CLOSED
@@ -3006,6 +3097,59 @@ paths:
           $ref: common.yaml#/components/responses/Forbidden
         '500':
           $ref: common.yaml#/components/responses/InternalError
+    post:
+      operationId: pty.ProducerCode.searchByCriteria
+      summary: Search producer codes (POST form, criteria in the body)
+      description: |-
+        POST form of pty.ProducerCode.search (D-SLC-05): the intermediary name travels in the body, never in a URL.
+        A read; no Idempotency-Key.
+      tags:
+      - ProducerCode
+      x-requirement:
+      - REQ-PTY-207
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: inherent'
+      x-exposure:
+      - ui
+      x-permission: pty.ProducerCode.search
+      x-prd-name: pty.ProducerCode.search
+      x-error-codes: []
+      x-source:
+      - PRD-01 §9.1 l.1653
+      - DECISIONS D-SLC-05
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProducerCodeSearchCriteria'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProducerCodeSearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/pty/v1/intermediaries:
     post:
       operationId: pty.Intermediary.create
@@ -3022,7 +3166,7 @@ paths:
       x-wave: W2
       x-work-packages:
       - W2-PTY-04
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
@@ -3085,7 +3229,7 @@ paths:
       x-wave: W2
       x-work-packages:
       - W2-PTY-04
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
@@ -4459,11 +4603,657 @@ components:
   schemas:
     PartySearchItem:
       type: object
-      description: 'pty.Party.search result. PRD outputs: "ranked results"'
+      description: 'Typed by SL-0 from REQ-PTY-001, REQ-PTY-069. One ranked pty.Party.search result; P2 values masked (REQ-PTY-044).'
       properties:
-        rankedResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "ranked results"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        partyType:
+          $ref: '#/components/schemas/PartyType'
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Party status (PRD-01 §7.3, upper-snake code)
+        displayName:
+          type: string
+          description: Display name in the native script
+        displayNameLatin:
+          type:
+          - string
+          - 'null'
+          description: Latin display name (as on ID document when held, else generated), null when the native name is Latin
+        maskedIdentifier:
+          oneOf:
+          - $ref: '#/components/schemas/MaskedIdentifier'
+          - type: 'null'
+        primaryPostcode:
+          type:
+          - string
+          - 'null'
+        primaryLocality:
+          type:
+          - string
+          - 'null'
+        matchQuality:
+          type: string
+          enum:
+          - EXACT
+          - PREFIX
+          - FUZZY
+          description: Exact and prefix matches rank before fuzzy matches (REQ-PTY-066)
+        similarity:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Trigram similarity of the best-matching key, 0..1 as a decimal string
+      required:
+      - partyId
+      - partyNumber
+      - partyType
+      - status
+      - displayName
+      - matchQuality
+      - similarity
+    PartySearchCriteria:
+      type: object
+      description: 'Body of pty.Party.searchByCriteria (D-SLC-05). At least one criterion.'
+      properties:
+        criteria:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+          description: 'Single search box (SCR-PTY-01): a name in any script, a party number or an identifier value (at least 2 characters)'
+        name:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+          description: Person or organisation name in any script; accent-, case- and script-insensitive (REQ-PTY-065..067)
+        identifierScheme:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Identifier scheme for an exact search through the blind index (REQ-PTY-060); needs identifierValue
+        identifierValue:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+          description: Identifier value (P2; never logged)
+        partyNumber:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+    MaskedIdentifier:
+      type: object
+      description: An identifier shown masked (last three characters only, REQ-PTY-044).
+      properties:
+        scheme:
+          $ref: ../events/common.schema.json#/$defs/Code
+        maskedValue:
+          type: string
+      required:
+      - scheme
+      - maskedValue
+    PartyType:
+      type: string
+      enum:
+      - PERSON
+      - ORGANISATION
+      description: Person or Organisation, immutable (REQ-PTY-030)
+    PartyView:
+      type: object
+      description: 'Typed by SL-0 from REQ-PTY-001, REQ-PTY-012, REQ-PTY-031, REQ-PTY-035, REQ-PTY-044. The party as valid at validAt and known at knownAt.'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        partyType:
+          $ref: '#/components/schemas/PartyType'
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+        legalEntity:
+          type: string
+          description: Legal entity code of the row (REQ-PTY-035)
+        jurisdiction:
+          $ref: ../events/common.schema.json#/$defs/CountryCode
+        preferredLanguage:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: Optimistic concurrency version (REQ-PTY-043)
+        birthDate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: P2; null when masked (see p2Revealed) or not held
+        p2Revealed:
+          type: boolean
+          description: True when P2 values are shown unmasked (permission pty.Party.revealP2 and a purpose; the view is audited)
+        names:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartyNameView'
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartyIdentifierView'
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartyAddressView'
+        contactPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactPointView'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - partyId
+      - partyNumber
+      - partyType
+      - status
+      - legalEntity
+      - jurisdiction
+      - preferredLanguage
+      - recordVersion
+      - p2Revealed
+      - names
+      - identifiers
+      - addresses
+      - contactPoints
+      - createdAt
+    PartyNameView:
+      type: object
+      description: One name form (REQ-PTY-061..063).
+      properties:
+        form:
+          type: string
+          enum:
+          - NATIVE
+          - LATIN_GENERATED
+          - LATIN_AS_ON_DOCUMENT
+        script:
+          type: string
+          description: ISO 15924 script code (Grek, Latn, Cyrl, ...)
+        givenNames:
+          type:
+          - string
+          - 'null'
+        familyName:
+          type:
+          - string
+          - 'null'
+        fatherName:
+          type:
+          - string
+          - 'null'
+        motherName:
+          type:
+          - string
+          - 'null'
+        organisationName:
+          type:
+          - string
+          - 'null'
+        tradeName:
+          type:
+          - string
+          - 'null'
+        transliteratorVersion:
+          type:
+          - string
+          - 'null'
+          description: Rule set that generated a LATIN_GENERATED form (REQ-PTY-062)
+        sourceDocumentRef:
+          type:
+          - string
+          - 'null'
+          description: Source document of a LATIN_AS_ON_DOCUMENT form (REQ-PTY-063)
+      required:
+      - form
+      - script
+    PartyIdentifierView:
+      type: object
+      description: A typed identifier (REQ-PTY-046); the value is masked unless P2 is revealed.
+      properties:
+        identifierId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        scheme:
+          $ref: ../events/common.schema.json#/$defs/Code
+        value:
+          type: string
+          description: Normalised value, or masked to its last three characters
+        masked:
+          type: boolean
+        issuingCountry:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/CountryCode
+          - type: 'null'
+        verificationStatus:
+          type: string
+          enum:
+          - SELF_DECLARED
+          - DOCUMENT_VERIFIED
+          - REGISTRY_VERIFIED
+          - VERIFICATION_FAILED
+          - EXPIRED
+        verificationSource:
+          type: string
+        validatorVersion:
+          type: string
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      required:
+      - identifierId
+      - scheme
+      - value
+      - masked
+      - verificationStatus
+      - verificationSource
+      - validatorVersion
+      - validFrom
+    AddressFields:
+      type: object
+      description: Structured address fields in one script (REQ-PTY-075).
+      properties:
+        street:
+          type:
+          - string
+          - 'null'
+        number:
+          type:
+          - string
+          - 'null'
+        building:
+          type:
+          - string
+          - 'null'
+        floor:
+          type:
+          - string
+          - 'null'
+        unit:
+          type:
+          - string
+          - 'null'
+        postcode:
+          type:
+          - string
+          - 'null'
+        locality:
+          type:
+          - string
+          - 'null'
+        municipality:
+          type:
+          - string
+          - 'null'
+        regionalUnit:
+          type:
+          - string
+          - 'null'
+        region:
+          type:
+          - string
+          - 'null'
+        freeLines:
+          type: array
+          maxItems: 3
+          items:
+            type: string
+    PartyAddressView:
+      type: object
+      description: A typed, effective-dated address with native and Latin forms (REQ-PTY-012, REQ-PTY-074).
+      properties:
+        addressId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        types:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressType'
+        primary:
+          type: boolean
+        country:
+          $ref: ../events/common.schema.json#/$defs/CountryCode
+        native:
+          $ref: '#/components/schemas/AddressFields'
+        latin:
+          $ref: '#/components/schemas/AddressFields'
+        formattedLines:
+          type: array
+          items:
+            type: string
+        formattedLinesLatin:
+          type: array
+          items:
+            type: string
+        validationState:
+          type: string
+          enum:
+          - VALIDATED
+          - UNVALIDATED
+          - INVALID
+        description:
+          type:
+          - string
+          - 'null'
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+      required:
+      - addressId
+      - types
+      - primary
+      - country
+      - native
+      - latin
+      - formattedLines
+      - formattedLinesLatin
+      - validationState
+      - validFrom
+    AddressType:
+      type: string
+      enum:
+      - LEGAL
+      - MAILING
+      - RISK
+      - GARAGING
+      - BILLING
+      - BUSINESS
+      description: Address types (REQ-PTY-074)
+    ContactPointType:
+      type: string
+      enum:
+      - MOBILE
+      - LANDLINE
+      - WORK_PHONE
+      - FAX
+      - EMAIL
+      - SECURE_INBOX
+      description: Contact point types (REQ-PTY-081)
+    ContactPointPurpose:
+      type: string
+      enum:
+      - PERSONAL
+      - WORK
+    ContactPointView:
+      type: object
+      properties:
+        contactPointId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        type:
+          $ref: '#/components/schemas/ContactPointType'
+        value:
+          type: string
+          description: E.164 phone number or lower-case email address (REQ-PTY-082, REQ-PTY-083)
+        purpose:
+          $ref: '#/components/schemas/ContactPointPurpose'
+        primary:
+          type: boolean
+        verificationStatus:
+          type: string
+          enum:
+          - UNVERIFIED
+          - VERIFIED
+          - BOUNCING
+      required:
+      - contactPointId
+      - type
+      - value
+      - purpose
+      - primary
+      - verificationStatus
+    PartyGetResponse:
+      type: object
+      description: 'pty.Party.get result. Typed by SL-0.'
+      properties:
+        party:
+          $ref: '#/components/schemas/PartyView'
+      required:
+      - party
+    PersonInput:
+      type: object
+      description: Person data (REQ-PTY-031, REQ-PTY-061, REQ-PTY-063). Names in the native script.
+      properties:
+        givenNames:
+          type: string
+          minLength: 1
+          maxLength: 200
+        familyName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        fatherName:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        motherName:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        birthDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        latinNameAsOnDocument:
+          oneOf:
+          - $ref: '#/components/schemas/LatinNameAsOnDocument'
+          - type: 'null'
+      required:
+      - givenNames
+      - familyName
+      - birthDate
+    LatinNameAsOnDocument:
+      type: object
+      description: The "as on ID document" Latin name (REQ-PTY-063).
+      properties:
+        givenNames:
+          type: string
+          minLength: 1
+          maxLength: 200
+        familyName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        sourceDocumentRef:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+      required:
+      - givenNames
+      - familyName
+    OrganisationInput:
+      type: object
+      description: Organisation data (REQ-PTY-032, subset).
+      properties:
+        legalName:
+          type: string
+          minLength: 1
+          maxLength: 300
+        tradeName:
+          type:
+          - string
+          - 'null'
+          maxLength: 300
+      required:
+      - legalName
+    IdentifierInput:
+      type: object
+      description: An identifier to validate through IdValidator and store encrypted (REQ-PTY-003, REQ-PTY-046, REQ-PTY-060).
+      properties:
+        scheme:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Scheme code from the pack's identifier catalogue (Greece pack e.g. AFM)
+        value:
+          type: string
+          minLength: 1
+          maxLength: 100
+        issuingCountry:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/CountryCode
+          - type: 'null'
+      required:
+      - scheme
+      - value
+    AddressInput:
+      type: object
+      description: A typed address in the native script (REQ-PTY-074, REQ-PTY-075); validated and formatted by AddressFormatter.
+      properties:
+        types:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/AddressType'
+        primary:
+          type: boolean
+        country:
+          $ref: ../events/common.schema.json#/$defs/CountryCode
+        street:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        number:
+          type:
+          - string
+          - 'null'
+          maxLength: 20
+        building:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+        floor:
+          type:
+          - string
+          - 'null'
+          maxLength: 20
+        unit:
+          type:
+          - string
+          - 'null'
+          maxLength: 20
+        postcode:
+          type:
+          - string
+          - 'null'
+          maxLength: 20
+        locality:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+        municipality:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+        regionalUnit:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+        region:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+        freeLines:
+          type: array
+          maxItems: 3
+          items:
+            type: string
+            maxLength: 200
+        description:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+      required:
+      - types
+      - country
+    ContactPointInput:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ContactPointType'
+        value:
+          type: string
+          minLength: 1
+          maxLength: 254
+        purpose:
+          $ref: '#/components/schemas/ContactPointPurpose'
+        primary:
+          type: boolean
+      required:
+      - type
+      - value
+    PartyCreateRequest:
+      type: object
+      description: 'pty.Party.create request. Typed by SL-0 from REQ-PTY-001, REQ-PTY-012, REQ-PTY-030..032. Exactly one of person / organisation, matching partyType.'
+      properties:
+        partyType:
+          $ref: '#/components/schemas/PartyType'
+        person:
+          oneOf:
+          - $ref: '#/components/schemas/PersonInput'
+          - type: 'null'
+        organisation:
+          oneOf:
+          - $ref: '#/components/schemas/OrganisationInput'
+          - type: 'null'
+        preferredLanguage:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LanguageCode
+          - type: 'null'
+          description: Default from the jurisdiction (REQ-PTY-041)
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifierInput'
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressInput'
+        contactPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactPointInput'
+        reason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Change reason code (REQ-PTY-038)
+      required:
+      - partyType
+    PartyCreateResponse:
+      type: object
+      description: 'pty.Party.create result. Typed by SL-0. An identifier already held by another party is refused with PTY-ERR-DUPLICATE-IDENTIFIER, whose Problem Details name the existing party (REQ-PTY-052).'
+      properties:
+        party:
+          $ref: '#/components/schemas/PartyView'
+        duplicateSuggestions:
+          type: array
+          description: Possible duplicates found by name and birth date (exact identifier conflicts are refused instead)
+          items:
+            $ref: '#/components/schemas/PartySearchItem'
+        missingData:
+          type: array
+          description: Recommended data not supplied (warnings, never errors)
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - party
+      - duplicateSuggestions
+      - missingData
     PartySearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -4474,36 +5264,6 @@ components:
             items:
               $ref: '#/components/schemas/PartySearchItem'
       description: Page of pty.Party.search results (cursor pagination, contract §3.5.5)
-    PartyGetResponse:
-      type: object
-      description: 'pty.Party.get result. PRD outputs: "party"'
-      properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
-    PartyCreateRequest:
-      type: object
-      description: 'pty.Party.create request. PRD inputs: "party data, reason"'
-      properties:
-        partyData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party data"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    PartyCreateResponse:
-      type: object
-      description: 'pty.Party.create result. PRD outputs: "party, duplicate suggestions, missing data"'
-      properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
-        duplicateSuggestions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "duplicate suggestions"'
-        missingData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "missing data"'
     PartyUpdateRequest:
       type: object
       description: 'pty.Party.update request. PRD inputs: "party data, reason"'
@@ -5311,19 +6071,49 @@ components:
       - valid
       - reasons
       description: 'Typed from REQ-PTY-008. PRD outputs: "validity, reasons, intermediary data"'
+    ProducerCodeSearchCriteria:
+      type: object
+      description: 'Body of pty.ProducerCode.searchByCriteria (D-SLC-05).'
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Producer code prefix
+        name:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+          description: Intermediary name prefix, any script
     ProducerCodeSearchItem:
       type: object
-      description: 'pty.ProducerCode.search result. PRD outputs: "validity, reasons, intermediary data"'
+      description: 'pty.ProducerCode.search result. Typed by SL-0 from REQ-PTY-207 (subset).'
       properties:
-        validity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validity"'
-        reasons:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reasons"'
-        intermediaryData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "intermediary data"'
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - SUSPENDED
+          - TERMINATED
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        intermediaryName:
+          type: string
+        intermediaryType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        intermediaryStatus:
+          $ref: '#/components/schemas/IntermediaryStatus'
+      required:
+      - producerCode
+      - status
+      - intermediaryId
+      - intermediaryName
+      - intermediaryType
+      - intermediaryStatus
     ProducerCodeSearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5336,20 +6126,178 @@ components:
       description: Page of pty.ProducerCode.search results (cursor pagination, contract §3.5.5)
     IntermediaryCreateRequest:
       type: object
-      description: 'pty.Intermediary.create request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Intermediary.create request. Typed by SL-0 from REQ-PTY-187, REQ-PTY-188, REQ-PTY-204, REQ-PTY-205 (subset). The intermediary is an existing party; a producer code is issued through the numbering service.'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        intermediaryType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Category code from the country pack's intermediary category list (REQ-PTY-187)
+        register:
+          $ref: '#/components/schemas/IntermediaryRegisterInput'
+        authorities:
+          $ref: '#/components/schemas/ProducerAuthorities'
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: First day the producer code is valid
+      required:
+      - partyId
+      - intermediaryType
+      - register
+      - authorities
+      - validFrom
+    IntermediaryRegisterInput:
+      type: object
+      description: Register data recorded by manual verification (REQ-PTY-188, REQ-PTY-189 Greece pack manual verification).
+      properties:
+        registerName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        chamber:
+          type: string
+          minLength: 1
+          maxLength: 200
+        registerNumber:
+          type: string
+          minLength: 1
+          maxLength: 50
+        registrationCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+        registrationDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        registerStatus:
+          $ref: '#/components/schemas/RegisterStatus'
+        verificationLink:
+          type:
+          - string
+          - 'null'
+          maxLength: 500
+        evidenceRef:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+      required:
+      - registerName
+      - chamber
+      - registerNumber
+      - registrationCategory
+      - registrationDate
+      - registerStatus
+    RegisterStatus:
+      type: string
+      enum:
+      - ACTIVE
+      - SUSPENDED
+      - DELETED
+      description: Register / authorisation status (REQ-PTY-190)
+    ProducerAuthorities:
+      type: object
+      description: Authorities per producer code (REQ-PTY-205); limits arrive with W2-PTY-04.
+      properties:
+        collectPremium:
+          type: boolean
+        issueCoverNotes:
+          type: boolean
+        bindWithinAuthority:
+          type: boolean
+        serviceOnly:
+          type: boolean
+      required:
+      - collectPremium
+      - issueCoverNotes
+      - bindWithinAuthority
+      - serviceOnly
+    IntermediaryStatus:
+      type: string
+      enum:
+      - ONBOARDING
+      - ACTIVE
+      - SUSPENDED
+      - TERMINATED
+      description: Intermediary lifecycle (REQ-PTY-198)
+    IntermediaryView:
+      type: object
+      properties:
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        name:
+          type: string
+        intermediaryType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        status:
+          $ref: '#/components/schemas/IntermediaryStatus'
+        registerNumber:
+          type: string
+        registerStatus:
+          $ref: '#/components/schemas/RegisterStatus'
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        producerCodeStatus:
+          type: string
+          enum:
+          - ACTIVE
+          - SUSPENDED
+          - TERMINATED
+        authorities:
+          $ref: '#/components/schemas/ProducerAuthorities'
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - intermediaryId
+      - partyId
+      - partyNumber
+      - name
+      - intermediaryType
+      - status
+      - registerNumber
+      - registerStatus
+      - producerCode
+      - producerCodeStatus
+      - authorities
+      - validFrom
+      - recordVersion
     IntermediaryCreateResponse:
       type: object
-      description: 'pty.Intermediary.create result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Intermediary.create result. Typed by SL-0.'
+      properties:
+        intermediary:
+          $ref: '#/components/schemas/IntermediaryView'
+      required:
+      - intermediary
     IntermediaryUpdateRequest:
       type: object
-      description: 'pty.Intermediary.update request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Intermediary.update request. Typed by SL-0 for the lifecycle transition Onboarding → Active only (REQ-PTY-198); other attributes arrive with W2-PTY-04.'
+      properties:
+        status:
+          $ref: '#/components/schemas/IntermediaryStatus'
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Optimistic concurrency (REQ-PTY-043)
+        reason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+      required:
+      - status
+      - expectedRecordVersion
     IntermediaryUpdateResponse:
       type: object
-      description: 'pty.Intermediary.update result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Intermediary.update result. Typed by SL-0.'
+      properties:
+        intermediary:
+          $ref: '#/components/schemas/IntermediaryView'
+      required:
+      - intermediary
     IntermediarySuspendRequest:
       type: object
       description: 'pty.Intermediary.suspend request. PRD inputs: "as named"'

@@ -50,6 +50,7 @@ internal sealed partial class DatabaseMigrator(IConfiguration configuration, ILo
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
 
         await VerifyExtensionsAsync(connection, cancellationToken).ConfigureAwait(false);
+        await VerifyGreekSearchAsync(connection, cancellationToken).ConfigureAwait(false);
 
         var appRoleExists = await RoleExistsAsync(connection, appRole, cancellationToken).ConfigureAwait(false);
         foreach (var schema in schemas)
@@ -116,6 +117,25 @@ internal sealed partial class DatabaseMigrator(IConfiguration configuration, ILo
             throw new InvalidOperationException(
                 $"PostgreSQL extensions missing: {string.Join(", ", missing)}. Run the database bootstrap first "
                 + "(locally infra/local/pg-init; on Azure the `bootstrap` job: APP_ROLE=migrate, Migrate__Bootstrap=true).");
+        }
+    }
+
+    /// <summary>
+    /// The Greek search objects of infra/database/greek-search.sql (applied by the bootstrap, which owns schema public):
+    /// module searches sort with <c>public.el_gr_ci_ai</c> and SQL tools use <c>public.coreins_search_key</c>.
+    /// </summary>
+    private static async Task VerifyGreekSearchAsync(NpgsqlConnection connection, CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand(
+            """
+            SELECT to_regprocedure('public.coreins_search_key(text)') IS NOT NULL
+               AND EXISTS (SELECT 1 FROM pg_collation WHERE collname = 'el_gr_ci_ai' AND collnamespace = 'public'::regnamespace)
+            """, connection);
+        if (await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false) is not true)
+        {
+            throw new InvalidOperationException(
+                "Greek search objects missing (public.coreins_search_key, collation public.el_gr_ci_ai). Run the database bootstrap "
+                + "(locally: the compose `bootstrap` service or infra/local/pg-init; on Azure: APP_ROLE=migrate, Migrate__Bootstrap=true).");
         }
     }
 

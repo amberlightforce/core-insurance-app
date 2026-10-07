@@ -1,7 +1,9 @@
 # Local stack (INFRASTRUCTURE §3.2). Every port is bound to 127.0.0.1. Synthetic data only.
-# Usage (from the repository root):
+# Usage (from the repository root; see infra/local/README.md):
 #   cp infra/local/.env.example infra/local/.env   # then set the passwords
 #   docker compose -f infra/local/compose.yaml up -d --build
+# Order: postgres → bootstrap → migrate → api + worker. The api listens on http://localhost:5000 with the
+# Development-only local sign-in (POST /api/plt/v1/dev/sign-in).
 name: coreins
 
 services:
@@ -11,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${PG_PASSWORD:?set PG_PASSWORD in infra/local/.env}
       APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD in infra/local/.env}
       MIGRATOR_DB_PASSWORD: ${MIGRATOR_DB_PASSWORD:?set MIGRATOR_DB_PASSWORD in infra/local/.env}
-    ports: ["127.0.0.1:5432:5432"]
+    ports: ["127.0.0.1:${PG_HOST_PORT:-5432}:5432"] # PG_HOST_PORT in .env when 5432 is taken
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./pg-init:/docker-entrypoint-initdb.d:ro # creates the database, then runs the shared bootstrap
@@ -27,42 +29,59 @@ services:
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.37.0
     command: azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck
-    ports: ["127.0.0.1:10000:10000"]
+    ports: ["127.0.0.1:${AZURITE_HOST_PORT:-10000}:10000"]
 
   gotenberg:
     image: gotenberg/gotenberg:8.37.0
-    ports: ["127.0.0.1:3000:3000"]
+    ports: ["127.0.0.1:${GOTENBERG_HOST_PORT:-3000}:3000"]
 
   mailpit:
     image: axllent/mailpit:v1.31.4
-    ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
+    ports: ["127.0.0.1:${MAILPIT_UI_HOST_PORT:-8025}:8025", "127.0.0.1:${MAILPIT_SMTP_HOST_PORT:-1025}:1025"]
 
   wiremock:
     image: wiremock/wiremock:3.13.2
     volumes: ["./wiremock:/home/wiremock"]
-    ports: ["127.0.0.1:8089:8080"]
+    ports: ["127.0.0.1:${WIREMOCK_HOST_PORT:-8089}:8080"]
 
   otel:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:13.6.0
     environment:
       ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true" # local only; bound to 127.0.0.1
-    ports: ["127.0.0.1:18888:18888", "127.0.0.1:4317:18889"]
+    ports: ["127.0.0.1:${OTEL_UI_HOST_PORT:-18888}:18888", "127.0.0.1:${OTEL_HOST_PORT:-4317}:18889"]
 
-  migrate:
+  # Bootstrap (server administrator credential, idempotent): roles, privileges, extensions and the Greek search
+  # objects, the same code path as the Azure "bootstrap" job. pg-init does the same on a fresh volume; this service
+  # also brings an existing volume up to date.
+  bootstrap:
     build: ../..
+    image: coreins-host:local
     environment:
       APP_ROLE: migrate
-    env_file: .env
+      Migrate__Bootstrap: "true"
+      ConnectionStrings__Admin: Host=postgres;Database=postgres;Username=postgres;Password=${PG_PASSWORD}
+      Database__AppPassword: ${APP_DB_PASSWORD}
+      Database__MigratorPassword: ${MIGRATOR_DB_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
 
+  # Schema migrations of every module (EF Core, idempotent), then the app role's grants. Never at api/worker start-up.
+  migrate:
+    image: coreins-host:local
+    environment:
+      APP_ROLE: migrate
+    env_file: .env
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+
   api:
-    build: ../..
+    image: coreins-host:local
     environment:
       APP_ROLE: api
     env_file: .env
-    ports: ["127.0.0.1:5000:8080"]
+    ports: ["127.0.0.1:${API_HOST_PORT:-5000}:8080"]
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -72,7 +91,7 @@ services:
         condition: service_started
 
   worker:
-    build: ../..
+    image: coreins-host:local
     environment:
       APP_ROLE: worker
     env_file: .env
