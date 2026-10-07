@@ -132,3 +132,11 @@ co-signing access (OI-UW-04, OI-DOC-05) · BoG DORA channel (OI-CMP-09) · SMS s
 | D-REG-06 | The Auxiliary Fund levy split is **not hard-coded anywhere**. PRD-17 says 4.2% / 1.8% and REQ-FIN-190 says 4.5% / 1.5%, so both are kept out of code and the pack key stays `Unverified` until OQ-010 is answered | The PRDs contradict each other; never invent | 02, 06, 09, 17 | Open-Reg |
 | D-REG-07 | The retention schedule has no durations (F-329). Retention is built as configuration with empty values that block purge, so legal hold and DSAR are testable with synthetic durations in non-prod only | Never invent | 14, 11, 15 | Open-Reg |
 | D-PRG-11 | All PRDs are treated as citing contract v1.12 (the frozen version), whatever version their document-control cell gives | Freeze record | all | Made |
+
+## J. Backlog (2026-10-07)
+
+| ID | Decision | Reason | Status |
+|---|---|---|---|
+| D-PRG-12 | The backlog is 134 WPs: 6 foundation, 116 feature (3 deferred under D-USR-01/03), 12 E2E. It covers 3,711 Musts: 3,710 + 9 D6 promotions + REQ-RI-193 − 9 bancassurance demotions (REQ-PLT-057, REQ-PTY-253/254/255/257, REQ-CHN-206/207/209/214). REQ-CHN-042 stays Must (only its bank part is out) | Every Must is placed exactly once | Made |
+| D-PRG-13 | E2E-12 (pack rollback after bound business) is scheduled in W5, not W1. W1 only delivers its harness | The scenario needs POL bind (W4) and BIL/FIN handling | Made |
+| D-PRG-14 | Tracker: `orchestration/backlog/backlog.json` is the source of truth. `orchestration/tracker/export_tracker.py` exports it, and the orchestrator pushes it to the tracker artifact database on every status change | Simple, auto-updating view for the user | Made |

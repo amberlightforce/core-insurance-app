@@ -1,6 +1,7 @@
 # STATUS — Greek P&C core insurance build
 
-**Current phase:** 0 — Discovery complete; PLAN.md + DECISIONS.md written. **Awaiting user approval before Phase 1.**
+**Current phase:** 1 — Foundations (plan approved 2026-10-07)
+**Repo:** https://github.com/amberlightforce/core-insurance-app (private) · **Live tracker:** https://claude.ai/artifact/QwQVP63L5vGPhUskFrAzaD (source of truth: `orchestration/backlog/backlog.json`, pushed to the tracker database by the orchestrator on every status change)
 **Last updated:** 2026-10-07
 
 Re-read STATUS.md, PLAN.md and DECISIONS.md at the start of every wave.
@@ -20,4 +21,7 @@ Re-read STATUS.md, PLAN.md and DECISIONS.md at the start of every wave.
 
 | PRD | Module | Status | Owner agent | Blockers |
 |---|---|---|---|---|
-| (filled after PLAN.md approval) | | not started | | |
+| FOUNDATION | F-1a scaffold, CI, test harness | building | builder agent (worktree) | .NET 10 SDK not installed locally (building via Docker) |
+| FOUNDATION | F-1b … F-1f | not started | — | after F-1a |
+| PRD-01 … PRD-17 | all modules | not started | — | Phase 1 |
+| — | Backlog generation (WP split) | building | backlog agent | — |
