@@ -69,10 +69,10 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
         signIn.StatusCode.ShouldBe(HttpStatusCode.OK);
         var token = (await signIn.Content.ReadFromJsonAsync<JsonNode>(ct))!["accessToken"]!.GetValue<string>();
 
-        using var anonymous = await client.GetAsync(new Uri("/api/pty/v1/parties/search?name=test", UriKind.Relative), ct);
+        using var anonymous = await client.GetAsync(new Uri("/api/pty/v1/parties/search?partyNumber=P000000001", UriKind.Relative), ct);
         anonymous.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
-        using var search = new HttpRequestMessage(HttpMethod.Get, new Uri("/api/pty/v1/parties/search?name=test", UriKind.Relative));
+        using var search = new HttpRequestMessage(HttpMethod.Get, new Uri("/api/pty/v1/parties/search?partyNumber=P000000001", UriKind.Relative));
         search.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         using var allowed = await client.SendAsync(search, ct);
         allowed.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -94,7 +94,7 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
             Claims = new Dictionary<string, object> { ["sub"] = "dev:mallory", ["roles"] = AdminRoles },
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(new byte[32]), SecurityAlgorithms.HmacSha256),
         });
-        using var forgedRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("/api/pty/v1/parties/search?name=test", UriKind.Relative));
+        using var forgedRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("/api/pty/v1/parties/search?partyNumber=P000000001", UriKind.Relative));
         forgedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", forged);
         using var rejected = await client.SendAsync(forgedRequest, ct);
         rejected.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);

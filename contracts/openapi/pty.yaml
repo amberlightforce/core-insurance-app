@@ -83,13 +83,6 @@ paths:
       - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: name
-        in: query
-        required: false
-        description: Person or organisation name in any script; accent-, case- and script-insensitive (REQ-PTY-001, REQ-PTY-065..067)
-        schema:
-          type: string
-          maxLength: 200
       - name: partyNumber
         in: query
         required: false
@@ -118,8 +111,8 @@ paths:
       operationId: pty.Party.searchByCriteria
       summary: Search parties (POST form, criteria in the body)
       description: |-
-        POST form of pty.Party.search (D-SLC-05): identifiers and the single search box (which may hold an identifier)
-        travel in the body, never in a URL. A read; no Idempotency-Key.
+        POST form of pty.Party.search (D-SLC-05): names, identifiers and the single search box (which may hold an
+        identifier) travel in the body, never in a URL. The GET form takes only partyNumber. A read; no Idempotency-Key.
 
         PRD inputs: criteria, validAt, cursor
         PRD outputs: ranked results
@@ -3104,6 +3097,59 @@ paths:
           $ref: common.yaml#/components/responses/Forbidden
         '500':
           $ref: common.yaml#/components/responses/InternalError
+    post:
+      operationId: pty.ProducerCode.searchByCriteria
+      summary: Search producer codes (POST form, criteria in the body)
+      description: |-
+        POST form of pty.ProducerCode.search (D-SLC-05): the intermediary name travels in the body, never in a URL.
+        A read; no Idempotency-Key.
+      tags:
+      - ProducerCode
+      x-requirement:
+      - REQ-PTY-207
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: inherent'
+      x-exposure:
+      - ui
+      x-permission: pty.ProducerCode.search
+      x-prd-name: pty.ProducerCode.search
+      x-error-codes: []
+      x-source:
+      - PRD-01 §9.1 l.1653
+      - DECISIONS D-SLC-05
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProducerCodeSearchCriteria'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProducerCodeSearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/pty/v1/intermediaries:
     post:
       operationId: pty.Intermediary.create
@@ -4621,6 +4667,7 @@ components:
           - string
           - 'null'
           maxLength: 200
+          description: Person or organisation name in any script; accent-, case- and script-insensitive (REQ-PTY-065..067)
         identifierScheme:
           type:
           - string
@@ -6024,6 +6071,22 @@ components:
       - valid
       - reasons
       description: 'Typed from REQ-PTY-008. PRD outputs: "validity, reasons, intermediary data"'
+    ProducerCodeSearchCriteria:
+      type: object
+      description: 'Body of pty.ProducerCode.searchByCriteria (D-SLC-05).'
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Producer code prefix
+        name:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+          description: Intermediary name prefix, any script
     ProducerCodeSearchItem:
       type: object
       description: 'pty.ProducerCode.search result. Typed by SL-0 from REQ-PTY-207 (subset).'

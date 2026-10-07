@@ -1,4 +1,8 @@
 using System.Net;
+using CoreIns.Modules.Party.Contracts;
+using CoreIns.Platform.Context;
+using CoreIns.SharedKernel.Identifiers;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using static CoreIns.IntegrationTests.Party.PartyApi;
 
@@ -78,20 +82,16 @@ public sealed class PartyApiTests(PostgresFixture database) : IClassFixture<Post
         var (dokos, _) = await SendAsync(_client, HttpMethod.Post, "/api/pty/v1/parties", Person("Νίκος", "Ντόκος", null));
         dokos.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        foreach (var query in new[]
-                 {
-                     "name=ΣΩΤΗΡΟΠΟΥΛΟΥ", "name=σωτηροπουλου", "name=Sotiropoulou", "name=sotiropoulou%20eleni", "name=Ελενη%20Σωτηρ",
-                     $"partyNumber={number}",
-                 })
-        {
-            var (response, page) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?" + query);
-            response.StatusCode.ShouldBe(HttpStatusCode.OK, query);
-            page!["items"]!.AsArray().Select(item => item!["partyId"]!.GetValue<string>()).ShouldContain(id, query);
-        }
+        // GET carries only the party number (D-SLC-05).
+        var (byNumber, numberPage) = await SendAsync(_client, HttpMethod.Get, $"/api/pty/v1/parties/search?partyNumber={number}");
+        byNumber.StatusCode.ShouldBe(HttpStatusCode.OK);
+        numberPage!["items"]!.AsArray().Select(item => item!["partyId"]!.GetValue<string>()).ShouldContain(id);
 
-        // D-SLC-05: identifiers and the single search box travel in a POST body, never in a URL (no Idempotency-Key: a read).
+        // D-SLC-05: names, identifiers and the single search box travel in a POST body, never in a URL (a read: no Idempotency-Key).
         foreach (var criteria in new object[]
                  {
+                     new { name = "ΣΩΤΗΡΟΠΟΥΛΟΥ" }, new { name = "σωτηροπουλου" }, new { name = "Sotiropoulou" }, new { name = "sotiropoulou eleni" },
+                     new { name = "Ελενη Σωτηρ" }, new { name = "Sotiro%" },
                      new { identifierScheme = "AFM", identifierValue = "111111114" }, new { criteria = "111111114" }, new { criteria = number },
                      new { criteria = "Σωτηροπούλου" },
                  })
@@ -101,12 +101,12 @@ public sealed class PartyApiTests(PostgresFixture database) : IClassFixture<Post
             page!["items"]!.AsArray().Select(item => item!["partyId"]!.GetValue<string>()).ShouldContain(id, criteria.ToString());
         }
 
-        // The GET form ignores identifier parameters: an AFM in the URL finds nothing.
-        var (ignored, ignoredPage) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?identifierScheme=AFM&identifierValue=111111114");
+        // The GET form ignores names and identifiers: they are never search criteria in a URL.
+        var (ignored, ignoredPage) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?identifierScheme=AFM&identifierValue=111111114&name=Sotiropoulou");
         ignored.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, ignoredPage?.ToJsonString());
 
         // REQ-PTY-067: the reverse digraph alternative finds the Greek-only "Ντόκος" from Latin "Dokos".
-        var (byDokos, dokosPage) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?name=Dokos");
+        var (byDokos, dokosPage) = await SendAsync(_client, HttpMethod.Post, "/api/pty/v1/parties/search", new { name = "Dokos" }, withKey: false);
         byDokos.StatusCode.ShouldBe(HttpStatusCode.OK);
         dokosPage!["items"]!.AsArray().Select(item => item!["displayName"]!.GetValue<string>()).ShouldContain("Νίκος Ντόκος");
 
@@ -119,7 +119,7 @@ public sealed class PartyApiTests(PostgresFixture database) : IClassFixture<Post
         exactPage.Text("items.0.displayName").ShouldBe("Ελένη Σωτηροπούλου");
         exactPage.Text("items.0.displayNameLatin").ShouldBe("Eleni Sotiropoulou");
 
-        var (tooShort, problem) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?name=Σ");
+        var (tooShort, problem) = await SendAsync(_client, HttpMethod.Post, "/api/pty/v1/parties/search", new { name = "Σ" }, withKey: false);
         tooShort.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         problem.Text("code").ShouldBe("PTY-ERR-QUERY-TOO-SHORT");
     }
@@ -156,6 +156,44 @@ public sealed class PartyApiTests(PostgresFixture database) : IClassFixture<Post
         var (missing, missingBody) = await SendAsync(_client, HttpMethod.Get, $"/api/pty/v1/parties/{Guid.CreateVersion7()}");
         missing.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         missingBody.Text("code").ShouldBe("PTY-ERR-NOT-FOUND");
+    }
+
+    [Fact]
+    public async Task A_reveal_sent_with_an_idempotency_key_never_stores_its_result()
+    {
+        var (_, body) = await SendAsync(_client, HttpMethod.Post, "/api/pty/v1/parties", Person("Σοφία", "Καμπάνη", "094014298", "1969-07-20"));
+        var id = body.Text("party.partyId");
+
+        // HTTP: a GET carrying an Idempotency-Key header (the context picks it up for every request).
+        using (var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"/api/pty/v1/parties/{id}?revealPurpose=RATING", UriKind.Relative)))
+        {
+            request.Headers.Add(TestAuthHandler.RolesHeader, Underwriter);
+            request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+            using var response = await _client.SendAsync(request, TestContext.Current.CancellationToken);
+            response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        }
+
+        // In process: the caller's unit of work has an idempotency key (e.g. a POL command reading a birth date for rating).
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<RequestContext>();
+            context.Actor = ActorRef.User("rating-caller");
+            context.Roles = [Underwriter];
+            context.LegalEntity = LegalEntityCode.Parse("GR-TEST");
+            context.Jurisdiction = Jurisdiction.Parse("GR");
+            context.IdempotencyKey = IdempotencyKey.New();
+            var parties = scope.ServiceProvider.GetRequiredService<IPartyPartyService>();
+            for (var i = 0; i < 2; i++)
+            {
+                (await parties.GetAsync(id, revealPurpose: "RATING", cancellationToken: TestContext.Current.CancellationToken)).Party.BirthDate
+                    .ShouldBe(new CoreIns.SharedKernel.BusinessDate(1969, 7, 20));
+            }
+        }
+
+        await using var dataSource = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        (await ScalarAsync<long>(dataSource, "SELECT count(*) FROM plt.idempotency_record WHERE scope LIKE '%revealP2%'")).ShouldBe(0);
+        (await ScalarAsync<long>(dataSource, "SELECT count(*) FROM plt.idempotency_record WHERE convert_from(response_body, 'UTF8') LIKE '%1969-07-20%'")).ShouldBe(0);
+        (await ScalarAsync<long>(dataSource, $"SELECT count(*) FROM plt.audit_event WHERE operation = 'pty.Party.revealP2' AND object_id = '{id}'")).ShouldBe(3);
     }
 
     [Fact]

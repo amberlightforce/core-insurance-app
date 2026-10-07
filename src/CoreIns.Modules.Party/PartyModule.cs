@@ -56,7 +56,7 @@ public static class PartyModule
         services.AddScoped<IValidator<RevealParty>, RevealPartyValidator>();
         services.AddCommandAuditor<RevealParty, PartyGetResponse, RevealPartyAuditor>();
         services.AddCommand<RevealParty, PartyGetResponse, RevealPartyHandler>(
-            CommandDescriptor.For("pty.Party.revealP2") with { RequiresIdempotencyKey = false });
+            CommandDescriptor.For("pty.Party.revealP2") with { RequiresIdempotencyKey = false, Idempotent = false });
 
         services.AddScoped<IValidator<CreateIntermediary>, CreateIntermediaryValidator>();
         services.AddCommandAuditor<CreateIntermediary, IntermediaryCreateResponse, IntermediaryAuditor>();

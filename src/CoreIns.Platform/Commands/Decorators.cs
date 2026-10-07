@@ -90,7 +90,7 @@ internal sealed class IdempotencyDecorator<TCommand, TResult>(
 {
     public async Task<Result<TResult>> HandleAsync(TCommand command, CancellationToken cancellationToken)
     {
-        if (context.DryRun)
+        if (context.DryRun || !descriptor.Idempotent)
         {
             return await inner.HandleAsync(command, cancellationToken).ConfigureAwait(false);
         }

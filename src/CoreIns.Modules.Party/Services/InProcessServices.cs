@@ -69,9 +69,8 @@ internal sealed class PartyPartyService(
     }
 
     public Task<PartySearchPage> SearchAsync(
-        ValidAt? validAt = null, string? cursor = null, int? limit = null, string? name = null, string? partyNumber = null,
-        CancellationToken cancellationToken = default) =>
-        RunSearchAsync(null, name, null, null, partyNumber, cursor, limit, cancellationToken);
+        ValidAt? validAt = null, string? cursor = null, int? limit = null, string? partyNumber = null, CancellationToken cancellationToken = default) =>
+        RunSearchAsync(null, null, null, null, partyNumber, cursor, limit, cancellationToken);
 
     public Task<PartySearchPage> SearchByCriteriaAsync(
         PartySearchCriteria request, ValidAt? validAt = null, string? cursor = null, int? limit = null, CancellationToken cancellationToken = default)
