@@ -53,6 +53,7 @@ internal static class ModuleCatalog
         .. PartyModule.Databases,
         .. RatingModule.Databases,
         .. UnderwritingModule.Databases,
+        .. ProductModule.Databases,
         .. MarketModule.Databases,
     ];
 
@@ -62,6 +63,7 @@ internal static class ModuleCatalog
         typeof(PartyModule).Assembly,
         typeof(RatingModule).Assembly,
         typeof(UnderwritingModule).Assembly,
+        typeof(ProductModule).Assembly,
         typeof(MarketModule).Assembly,
     ];
 

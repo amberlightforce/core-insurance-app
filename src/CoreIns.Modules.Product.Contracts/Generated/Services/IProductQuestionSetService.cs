@@ -31,6 +31,5 @@ public interface IProductQuestionSetService
     /// </remarks>
     /// <param name="id">Identifier of the QuestionSet (PRD input: "hash")</param>
     /// <param name="set">PRD: "set"</param>
-    /// <param name="answers">PRD: "answers"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.QuestionSetGetResponse> GetAsync(string id, string? set = null, string? answers = null, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.QuestionSetGetResponse> GetAsync(string id, string? set = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

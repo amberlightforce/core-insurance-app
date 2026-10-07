@@ -4,15 +4,107 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ChargeType.list result. PRD outputs: "charge types"</summary>
+/// <summary>One charge type of a version (REQ-PFC-004, -113..-125, -250). Tax and levy charge types hold no rate: the rate lives in MKT pack data, referenced through `configKeys` (REQ-PFC-123).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ChargeTypeListItem
 {
-    /// <summary>PRD: "charge types"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("chargeTypes")]
+    /// <summary>Contract member 'code'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("code")]
+    public required string Code { get; init; }
+
+    /// <summary>Contract member 'name'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("name")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.LocalizedText Name { get; init; }
+
+    /// <summary>Contract member 'category'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("category")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChargeCategory Category { get; init; }
+
+    /// <summary>Derived from the category, never authored (REQ-PFC-250)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("writtenPremium")]
+    public required bool WrittenPremium { get; init; }
+
+    /// <summary>Contract member 'computedBy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("computedBy")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChargeComputedBy ComputedBy { get; init; }
+
+    /// <summary>Coverage the charge is premium for, when it is a premium charge</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coverage")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ChargeTypes { get; init; }
+    public string? Coverage { get; init; }
+
+    /// <summary>For tax and levy charges, the charge types forming the base</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("baseChargeCodes")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<string>? BaseChargeCodes { get; init; }
+
+    /// <summary>Contract member 'handling'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("handling")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChargeHandling Handling { get; init; }
+
+    /// <summary>Contract member 'earningPattern'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("earningPattern")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.EarningPattern EarningPattern { get; init; }
+
+    /// <summary>Contract member 'cancellationTreatment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cancellationTreatment")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.CancellationTreatment CancellationTreatment { get; init; }
+
+    /// <summary>Contract member 'reemitOnReapply'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reemitOnReapply")]
+    public required bool ReemitOnReapply { get; init; }
+
+    /// <summary>Contract member 'billingTreatment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("billingTreatment")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.BillingTreatment BillingTreatment { get; init; }
+
+    /// <summary>Contract member 'taxClass'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("taxClass")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? TaxClass { get; init; }
+
+    /// <summary>Tax and levy charge types whose base contains this charge (REQ-PFC-117)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("includedInTaxBases")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<string>? IncludedInTaxBases { get; init; }
+
+    /// <summary>Contract member 'glKey'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("glKey")]
+    public required string GlKey { get; init; }
+
+    /// <summary>Contract member 'beneficiary'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("beneficiary")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChargeBeneficiary Beneficiary { get; init; }
+
+    /// <summary>Contract member 'fiscalCategoryKey'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fiscalCategoryKey")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? FiscalCategoryKey { get; init; }
+
+    /// <summary>Contract member 'riCedable'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("riCedable")]
+    public required bool RiCedable { get; init; }
+
+    /// <summary>Contract member 'commissionable'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("commissionable")]
+    public required bool Commissionable { get; init; }
+
+    /// <summary>MKT configuration keys the charge's computation reads (references only, no values)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("configKeys")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> ConfigKeys { get; init; }
+
+    /// <summary>Contract member 'legalStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Product.Contracts.Api.ConfigLegalStatus? LegalStatus { get; init; }
+
+    /// <summary>PRD requirement that states the charge type</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("source")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Source { get; init; }
+
+    /// <summary>Contract member 'displayOrder'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("displayOrder")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? DisplayOrder { get; init; }
 }

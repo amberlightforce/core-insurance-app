@@ -46,7 +46,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 15 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.create, pfc.ChangeSet.edit, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.ImpactAnalysis.run, pfc.Pog.recordReview, pfc.Pog.recordTest, pfc.Pog.update, pfc.ProductImport.import, pfc.ProductVersion.cancelSchedule, pfc.ProductVersion.fallBack, ….</para>
+    /// <para>Declared by 16 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.create, pfc.ChangeSet.edit, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.ImpactAnalysis.run, pfc.Pog.recordReview, pfc.Pog.recordTest, pfc.Pog.update, pfc.ProductImport.import, pfc.ProductVersion.cancelSchedule, pfc.ProductVersion.fallBack, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "PFC-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -55,6 +55,12 @@ public static class ProductErrorCodes
     /// <para>Declared by 1 operation(s): pfc.ProductImport.import.</para>
     /// </remarks>
     public const string ImportInvalid = "PFC-ERR-IMPORT-INVALID";
+
+    /// <summary>PFC-ERR-INVALID-DEFINITION (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pfc.ProductVersion.import.</para>
+    /// </remarks>
+    public const string InvalidDefinition = "PFC-ERR-INVALID-DEFINITION";
 
     /// <summary>PFC-ERR-MAKER-IS-CHECKER (HTTP 403).</summary>
     /// <remarks>
@@ -104,11 +110,23 @@ public static class ProductErrorCodes
     /// </remarks>
     public const string UnknownProduct = "PFC-ERR-UNKNOWN-PRODUCT";
 
+    /// <summary>PFC-ERR-VERSION-EXISTS (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pfc.ProductVersion.import.</para>
+    /// </remarks>
+    public const string VersionExists = "PFC-ERR-VERSION-EXISTS";
+
+    /// <summary>PFC-ERR-WINDOW-OVERLAP (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pfc.ProductVersion.import.</para>
+    /// </remarks>
+    public const string WindowOverlap = "PFC-ERR-WINDOW-OVERLAP";
+
     /// <summary>The code prefix of this module.</summary>
     public const string Prefix = "PFC-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Abstract, Authority, ChecksFailed, Conflict, DataUnavailable, Forbidden, IdempotencyMismatch, ImportInvalid, MakerIsChecker, NoConversionRules, NoRating, NoVersion, Sod, UnknownHash, UnknownItem, UnknownProduct];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Abstract, Authority, ChecksFailed, Conflict, DataUnavailable, Forbidden, IdempotencyMismatch, ImportInvalid, InvalidDefinition, MakerIsChecker, NoConversionRules, NoRating, NoVersion, Sod, UnknownHash, UnknownItem, UnknownProduct, VersionExists, WindowOverlap];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -121,6 +139,7 @@ public static class ProductErrorCodes
         [Forbidden] = 403,
         [IdempotencyMismatch] = 409,
         [ImportInvalid] = 422,
+        [InvalidDefinition] = 422,
         [MakerIsChecker] = 403,
         [NoConversionRules] = 422,
         [NoRating] = 422,
@@ -129,5 +148,7 @@ public static class ProductErrorCodes
         [UnknownHash] = 404,
         [UnknownItem] = 422,
         [UnknownProduct] = 422,
+        [VersionExists] = 409,
+        [WindowOverlap] = 409,
     };
 }
