@@ -2,13 +2,13 @@
 
 **Current phase:** 1 — Foundations (plan approved 2026-10-07)
 **Last updated:** 2026-10-07 (afternoon)
-**Repo:** https://github.com/amberlightforce/core-insurance-app (private). Local `main` is AHEAD of origin, because pushing needs the `workflow` scope on the active gh account (amberlightforce). See D-PRG-16.
+**Repo:** https://github.com/amberlightforce/core-insurance-app (private). GitHub push works (workflow scope fixed by user 2026-10-07). main pushed; first CI run GREEN (all jobs incl. Testcontainers integration tests + Trivy).
 **Live tracker:** https://claude.ai/artifact/QwQVP63L5vGPhUskFrAzaD. Source of truth: `orchestration/backlog/backlog.json`. Update it with `tracker/set_status.py`, then push the change with ArtifactData.
 
 Re-read STATUS.md, PLAN.md and DECISIONS.md at the start of every wave.
 
 ## Environment blockers (user action needed)
-1. gh active account `amberlightforce` lacks the `workflow` scope, so pushes containing `.github/workflows` are rejected. Fix: `gh auth refresh -h github.com -s workflow`. The other account, FFHDigital, has the scope but may not have repo access, so do not switch silently.
+1. ~~GitHub workflow scope~~: FIXED by user.
 2. Docker Desktop will not start (stale `%LOCALAPPDATA%\docker-secrets-engine\engine.sock`). Testcontainers and the image build can't run locally.
 3. Windows App Control blocks freshly built DLLs. Agents build and test in WSL (SDK 10.0.401 at ~/.dotnet-coreins, ICU via ~/dn.sh), with an embedded PostgreSQL 17 at ~/pg17.
 
@@ -16,7 +16,7 @@ Re-read STATUS.md, PLAN.md and DECISIONS.md at the start of every wave.
 
 | WP | Status | Notes |
 |---|---|---|
-| F-1a scaffold, CI, harness | **merged (local, CI pending)** | PASS on review attempt 3 (Key Vault least privilege, SCRAM bootstrap) |
+| F-1a scaffold, CI, harness | **merged, CI green** | PASS on review attempt 3 (Key Vault least privilege, SCRAM bootstrap) |
 | F-1b shared kernel + platform primitives (+ outbox throughput spike) | building | started after F-1a merge |
 | F-1c contracts: events | **merged** | 304 event schemas, PASS on attempt 2 |
 | F-1c contracts: OpenAPI | final minors, then merge | 1,110 operations; PASS with minors after D-API-06a |

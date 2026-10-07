@@ -128,11 +128,9 @@
    "points": null,
    "dependsOn": [],
    "status": "merged",
-   "owner": "merged locally (CI pending)",
+   "owner": "merged; CI green (run 37625282113)",
    "reviewAttempts": 2,
-   "blockers": [
-    "CI not yet run: GitHub 'workflow' scope missing on active account"
-   ]
+   "blockers": []
   },
   {
    "id": "F-1b",
@@ -205,9 +203,9 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "building",
-   "owner": "builder: Greek cross-cutting (worktree)",
-   "reviewAttempts": 0,
+   "status": "failed",
+   "owner": "builder: fixing review 1 defects",
+   "reviewAttempts": 1,
    "blockers": []
   },
   {
@@ -224,8 +222,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "in review",
-   "owner": "reviewer: rule engine (final attempt 3)",
+   "status": "building",
+   "owner": "rule engine + PDF/A spike MERGED; outbox throughput inside F-1b",
    "reviewAttempts": 2,
    "blockers": []
   },

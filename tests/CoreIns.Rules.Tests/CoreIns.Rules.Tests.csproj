@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Unit, conformance, property-based, requirement (GWT) and golden tests for CoreIns.Rules (F-1f(c)). -->
+
+  <PropertyGroup>
+    <!-- CA1861 (hoist constant arrays) is a performance rule; expected-value arrays in assertions read better inline. -->
+    <NoWarn>$(NoWarn);CA1861</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FsCheck.Xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Rules\CoreIns.Rules.csproj" />
+  </ItemGroup>
+
+</Project>

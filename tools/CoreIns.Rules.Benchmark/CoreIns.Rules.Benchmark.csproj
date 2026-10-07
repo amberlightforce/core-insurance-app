@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    NFR-UW-001 spike (F-1f(c), review item D11): times one UW checkpoint evaluation shaped like a motor job
+    (4 drivers, 2 vehicles, 150 rules over nested contexts) on the CEL-subset runtime. Not a unit test: wall-clock
+    numbers depend on the machine. Run it with "dotnet run" in Release, project tools/CoreIns.Rules.Benchmark.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Rules\CoreIns.Rules.csproj" />
+  </ItemGroup>
+
+</Project>
