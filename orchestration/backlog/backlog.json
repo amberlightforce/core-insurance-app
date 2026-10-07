@@ -146,8 +146,8 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "failed",
-   "owner": "builder: fixing review 1 defects",
+   "status": "merged",
+   "owner": "merged (review PASS attempt 2)",
    "reviewAttempts": 1,
    "blockers": []
   },
@@ -222,8 +222,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "building",
-   "owner": "rule engine + PDF/A spike MERGED; outbox throughput inside F-1b",
+   "status": "merged",
+   "owner": "merged (rule engine, PDF/A spike, outbox throughput 2,380 ev/s)",
    "reviewAttempts": 2,
    "blockers": []
   },
