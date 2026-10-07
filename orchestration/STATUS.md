@@ -27,7 +27,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | SL-POL | **in review** (deep, opus, 1st round) | opus | built d60d87c: integration 149/149; bitemporal + exclusion constraints; RAT/UW faked; D-SLC-11 alignment at merge |
 | SL-MKT | **merged** (ca3c127) | sonnet | light review PASS; D-REG-06a split removed; full gate green (10 suites) |
 | SL-PFC | **merged** (ae022f0) | sonnet | light review PASS; full gate green (integration 135, arch 196) |
-| SL-RAT-UW | **in review** (deep, opus, 1st round) | sonnet | built 9924d68: integration 218/218; IPT only (no AuxFund, D-REG-06a); illustrative tariff |
+| SL-RAT-UW | **fixing** (review 1 FAIL: M1 IPT legalStatus ignores motor class + fail-open default; 9 minors) | sonnet | money verified by hand (430.00 + IPT 64.51 = 494.51); re-check light per D-USR-09; also D-SLC-11 |
 | SL-BIL | building | opus | started early against contracts/fakes (POL still building) |
 | SL-FIN | building | opus | started early against contracts/fakes |
 | SL-UI | not started | sonnet | next free slot |
