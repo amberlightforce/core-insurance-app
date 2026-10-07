@@ -259,6 +259,8 @@ internal sealed class TermBilling(
                 ChargeType = charge.ChargeType,
                 ChargeCategory = charge.ChargeCategory,
                 FiscalCategoryKey = charge.FiscalCategoryKey,
+                LegalStatus = charge.LegalStatus,
+                Provisional = charge.Provisional,
                 ValidFrom = charge.ValidFrom,
                 ValidTo = charge.ValidTo,
                 Amount = charge.Amount,

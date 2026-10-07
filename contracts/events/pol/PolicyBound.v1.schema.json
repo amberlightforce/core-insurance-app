@@ -150,6 +150,16 @@
           "$ref": "../common.schema.json#/$defs/Text",
           "x-classification": "P0"
         },
+        "paymentMethod": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "description": "Payment method chosen at bind (BIL method code); absent: BIL applies its default",
+          "x-classification": "P0"
+        },
+        "currency": {
+          "$ref": "../common.schema.json#/$defs/CurrencyCode",
+          "description": "Currency of the term and its charges",
+          "x-classification": "P0"
+        },
         "ifrs17Tags": {
           "$ref": "../common.schema.json#/$defs/OpenObject",
           "description": "IFRS 17 proposals (portfolio, cohort, group); FIN assigns (R-52)",

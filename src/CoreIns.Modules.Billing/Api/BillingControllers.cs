@@ -77,7 +77,7 @@ internal sealed class BillingController : ControllerBase
     {
         var result = await handler.HandleAsync(new TakePayment(request), cancellationToken).ConfigureAwait(false);
         return result.IsSuccess
-            ? Results.Created($"/api/bil/v1/receipts/{result.Value.Receipt.ReceiptId:D}", result.Value)
+            ? Results.Created($"/api/bil/v1/receipts/{result.Value.Receipt.ReceiptId.Value:D}", result.Value)
             : HttpResults.Problem(result.Error!, HttpContext);
     }
 

@@ -24,11 +24,8 @@ public sealed record LedgerLine
     public required global::CoreIns.SharedKernel.Money Amount { get; init; }
 
     /// <summary>Contract member 'dimensions'.</summary>
-    /// <remarks>
-    /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("dimensions")]
-    public required global::System.Text.Json.JsonElement Dimensions { get; init; }
+    public required global::CoreIns.Platform.Contracts.Common.LedgerDimensions Dimensions { get; init; }
 
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<SideValue>))]

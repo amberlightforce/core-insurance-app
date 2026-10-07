@@ -102,6 +102,8 @@ internal sealed class BillingReader(BillingDbContext db)
                 ChargeType = i.ChargeType,
                 ChargeCategory = i.ChargeCategory,
                 FiscalCategoryKey = i.FiscalCategoryKey,
+                LegalStatus = i.LegalStatus,
+                Provisional = i.LegalStatus is null ? null : i.Provisional,
                 ValidPeriod = new DateRange(i.ValidFrom, i.ValidTo),
                 Amount = new Money(i.Amount, currency),
                 Open = new Money(i.Amount - paidByItem.GetValueOrDefault(i.InvoiceItemId), currency),
@@ -178,7 +180,7 @@ internal sealed class BillingReader(BillingDbContext db)
         var currency = Currency.FromCode(r.Currency);
         return new ReceiptView
         {
-            ReceiptId = r.ReceiptId.Value,
+            ReceiptId = r.ReceiptId,
             ReceiptNumber = ReceiptNumber.Parse(r.ReceiptNumber),
             BillingAccountId = r.BillingAccountId,
             State = Codes.Api<ReceiptView.StateValue>(Codes.Parse<PaymentState>(r.State)),
@@ -198,7 +200,7 @@ internal sealed class BillingReader(BillingDbContext db)
     public static AllocationView Allocation(AllocationRow a) => new()
     {
         AllocationId = a.AllocationId,
-        ReceiptId = a.ReceiptId.Value,
+        ReceiptId = a.ReceiptId,
         InvoiceId = a.InvoiceId,
         InvoiceItemId = a.InvoiceItemId,
         Amount = new Money(a.Amount, Currency.FromCode(a.Currency)),

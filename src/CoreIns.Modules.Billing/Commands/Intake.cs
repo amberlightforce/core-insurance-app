@@ -75,6 +75,8 @@ internal sealed class IntakeChargeHandler(
             BookingDate = delta.BookingDate,
             CorrelationKey = delta.CorrelationKey,
             TaxTreatmentRef = delta.TaxTreatmentRef,
+            LegalStatus = delta.LegalStatus,
+            Provisional = delta.Provisional ?? false,
             SourceEventId = command.Source.EventId,
             SourceSequence = command.Source.AggregateSequence,
             ReceivedAt = clock.Now,
@@ -117,9 +119,6 @@ internal sealed class AttachTermHandler(
     TermBilling billing,
     IOptions<BillingOptions> options) : ICommandHandler<AttachTerm, IntakeOutcome>
 {
-    /// <summary>Numbering identifier type of billing accounts (REQ-BIL-030; series in Platform:Numbering).</summary>
-    public const string BillingAccountScheme = "BILLING_ACCOUNT";
-
     public async Task<Result<IntakeOutcome>> HandleAsync(AttachTerm command, CancellationToken cancellationToken)
     {
         var bound = command.Bound;
@@ -142,8 +141,9 @@ internal sealed class AttachTermHandler(
         var now = clock.Now;
         var today = now.ToBusinessDate(zone);
 
-        // PolicyBound carries no currency: take the term's charges' currency when they arrived first, else the stamp default.
-        var currency = await db.Charges.Where(c => c.TermId == bound.TermId).Select(c => c.Currency).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false)
+        // PolicyBound carries the term's currency (D-SLC-19a); an older producer without it falls back to the term's charges, then the stamp default.
+        var currency = bound.Currency?.Code
+                       ?? await db.Charges.Where(c => c.TermId == bound.TermId).Select(c => c.Currency).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false)
                        ?? options.Value.Currency.Code;
         var active = Codes.Of(BillingAccountStatus.Active);
         var account = await db.Accounts.SingleOrDefaultAsync(
@@ -152,7 +152,7 @@ internal sealed class AttachTermHandler(
         var createdAccount = account is null;
         if (account is null)
         {
-            var number = await numbering.NextAsync(new NumberRequest(BillingAccountScheme, today), cancellationToken).ConfigureAwait(false);
+            var number = await numbering.NextAsync(new NumberRequest(NumberingSchemes.BillingAccount, today), cancellationToken).ConfigureAwait(false);
             account = new BillingAccountRow
             {
                 BillingAccountId = BillingAccountId.New(),
@@ -184,7 +184,7 @@ internal sealed class AttachTermHandler(
             ArtefactHash = bound.ArtefactHash.Value,
             PlanCode = PaymentPlans.Annual,
             BillMode = PaymentPlans.DirectBill,
-            Method = TermBilling.DefaultMethod,
+            Method = bound.PaymentMethod ?? TermBilling.DefaultMethod,
             TermFrom = bound.EffectivePeriod.Start.ToBusinessDate(zone),
             TermTo = (bound.EffectivePeriod.End ?? throw new InvalidOperationException("PolicyBound without a term end.")).ToBusinessDate(zone),
             SourceEventId = command.Source.EventId,

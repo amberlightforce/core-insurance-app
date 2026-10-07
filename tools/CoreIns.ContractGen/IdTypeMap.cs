@@ -34,7 +34,7 @@ internal static class IdTypeMap
         ("*", "intermediaryId", "IntermediaryId"),
         ("*", "billingAccountId", "BillingAccountId"),
         ("*", "invoiceId", "InvoiceId"),
-        ("*", "paymentId", "PaymentId"), ("*", "newPaymentId", "PaymentId"), ("*", "originalPaymentId", "PaymentId"),
+        ("*", "paymentId", "PaymentId"), ("*", "receiptId", "PaymentId"), ("*", "newPaymentId", "PaymentId"), ("*", "originalPaymentId", "PaymentId"),
         ("*", "refundId", "RefundId"),
         ("*", "disbursementId", "DisbursementId"),
         ("BIL", "planId", "PaymentPlanId"),

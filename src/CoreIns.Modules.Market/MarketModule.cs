@@ -5,6 +5,7 @@ using CoreIns.Modules.Market.Persistence;
 using CoreIns.Modules.Market.Queries;
 using CoreIns.Modules.Market.Services;
 using CoreIns.Platform;
+using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Persistence;
@@ -49,6 +50,10 @@ public static class MarketModule
         // Configuration state: core defaults plus the data of every bound pack source (bound by the Host).
         services.TryAddSingleton(sp => new ConfigurationCatalogue(sp.GetServices<IPackConfigurationSource>(), sp.GetRequiredService<IClock>().Now));
         services.TryAddSingleton<ConfigurationEngine>();
+
+        // MKT is the configuration authority (D-SLC-15): the platform's resolver, and so the hash pinned per request, is MKT's.
+        services.RemoveAll<IConfigurationResolver>();
+        services.AddSingleton<IConfigurationResolver, MarketConfigurationResolver>();
 
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<MarketConfigurationService>();

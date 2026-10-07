@@ -126,7 +126,7 @@ internal sealed class TakePaymentHandler(
             EventDescriptor.From(PaymentReceivedV1.Descriptor), "BillingAccount", account.BillingAccountId.Value.ToString(),
             new PaymentReceivedV1
             {
-                ReceiptId = receipt.ReceiptId.Value,
+                ReceiptId = receipt.ReceiptId,
                 ReceiptNumber = ReceiptNumber.Parse(receipt.ReceiptNumber),
                 Channel = receipt.Channel,
                 Method = receipt.Method,
@@ -239,9 +239,9 @@ internal sealed class TakePaymentAuditor : ICommandAuditor<TakePayment, PaymentT
 
         return new CommandAuditFacts
         {
-            ObjectRef = new ObjectRef(ModuleCode.BIL, "Receipt", ok.Value.Receipt.ReceiptId.ToString("D")),
+            ObjectRef = new ObjectRef(ModuleCode.BIL, "Receipt", ok.Value.Receipt.ReceiptId.Value.ToString("D")),
             ObjectNumber = ok.Value.Receipt.ReceiptNumber.Value,
-            BusinessKeys = keys.With("receiptId", ok.Value.Receipt.ReceiptId.ToString()),
+            BusinessKeys = keys.With("receiptId", ok.Value.Receipt.ReceiptId.Value.ToString()),
             Changes = AuditDiff.Compute(null, new
             {
                 amount = ok.Value.Receipt.Amount.ToString(),
@@ -275,7 +275,7 @@ internal sealed class AllocateReceiptHandler(BillingDbContext db, RequestContext
     {
         var request = command.Request;
         var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("No legal entity."));
-        var receiptId = new PaymentId(request.ReceiptId);
+        var receiptId = request.ReceiptId;
         var receipt = await db.Receipts.SingleOrDefaultAsync(r => r.ReceiptId == receiptId && r.LegalEntityId == legalEntity, cancellationToken).ConfigureAwait(false);
         if (receipt is null)
         {
@@ -314,8 +314,8 @@ internal sealed class AllocateReceiptAuditor : ICommandAuditor<AllocateReceipt, 
 {
     public CommandAuditFacts Describe(AllocateReceipt command, Result<AllocationAllocateResponse>? result) => new()
     {
-        ObjectRef = new ObjectRef(ModuleCode.BIL, "Receipt", command.Request.ReceiptId.ToString("D")),
-        BusinessKeys = BusinessKeys.Empty.With("receiptId", command.Request.ReceiptId.ToString()),
+        ObjectRef = new ObjectRef(ModuleCode.BIL, "Receipt", command.Request.ReceiptId.Value.ToString("D")),
+        BusinessKeys = BusinessKeys.Empty.With("receiptId", command.Request.ReceiptId.Value.ToString()),
         Changes = result is { IsSuccess: true } ok
             ? AuditDiff.Compute(null, new { allocations = ok.Value.Allocations.Count, receiptState = ok.Value.Receipt.State.ToString() })
             : [],

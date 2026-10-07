@@ -47,11 +47,8 @@ public sealed record PaymentReceivedV1 : global::CoreIns.Platform.Contracts.Even
     global::CoreIns.Platform.Contracts.Events.EventContract global::CoreIns.Platform.Contracts.Events.IEventPayload.Contract => Descriptor;
 
     /// <summary>Contract member 'receiptId'.</summary>
-    /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'receiptId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("receiptId")]
-    public required global::System.Guid ReceiptId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.PaymentId ReceiptId { get; init; }
 
     /// <summary>Contract member 'receiptNumber'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("receiptNumber")]

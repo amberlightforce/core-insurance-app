@@ -233,6 +233,7 @@ internal sealed class BindJobHandler(
                     ChargeId = chargeId, TermId = termId, ElementLocator = line.ElementLocator, CoverageCode = line.CoverageCode,
                     ChargeType = line.ChargeType, ChargeCategory = line.ChargeCategory, DeltaKind = DeltaKinds.Net, NetAmount = line.Amount,
                     ValidPeriod = period, BookingDate = today, TransactionId = transactionId, CorrelationKey = transactionId.Value.ToString(),
+                    LegalStatus = line.LegalStatus, Provisional = line.Provisional,
                 },
                 BusinessKeys.Empty.With("policyId", job.PolicyId.Value.ToString()).With("chargeId", chargeId.Value.ToString())
                     .With("policyTermId", termId.Value.ToString()).With("transactionId", transactionId.Value.ToString()))
@@ -251,6 +252,7 @@ internal sealed class BindJobHandler(
                 ProductVersion = ProductVersionNumber.Parse(job.ProductVersion), ArtefactHash = Sha256Hash.Parse(job.ArtefactHash),
                 ResolutionHash = ResolutionHash.Parse(job.ResolutionHash), ConfigurationHash = configuration, ProducerOfRecord = job.ProducerCode,
                 AccountId = job.AccountId, PayerPartyId = job.PolicyholderPartyId, PaymentPlanRef = request.PaymentPlanOption!,
+                Currency = currency, PaymentMethod = request.PaymentMethod,
                 // IFRS 17 proposals only (FIN assigns, REQ-POL-034): annual cohort of inception and the PRD's default model PAA.
                 Ifrs17Tags = JsonSerializer.SerializeToElement(new { cohort = job.EffectiveAt.ToBusinessDate(zone).Value.Year.ToString(System.Globalization.CultureInfo.InvariantCulture), measurementModel = "PAA" }),
                 Motor = tree.Vehicles.Count > 0,

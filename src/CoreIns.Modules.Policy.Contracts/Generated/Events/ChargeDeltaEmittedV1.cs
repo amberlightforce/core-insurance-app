@@ -98,4 +98,14 @@ public sealed record ChargeDeltaEmittedV1 : global::CoreIns.Platform.Contracts.E
     /// <summary>Tax treatment reference (D2, TaxCalculator.treatment)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("taxTreatmentRef")]
     public string? TaxTreatmentRef { get; init; }
+
+    /// <summary>Legal status of the tax or levy rate the line was priced with (MKT); absent for premium lines</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LegalStatus { get; init; }
+
+    /// <summary>True when the line rests on a value that is not Settled (D-REG-02)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Provisional { get; init; }
 }
