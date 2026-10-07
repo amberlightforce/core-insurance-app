@@ -28,7 +28,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | SL-MKT | **merged** (ca3c127) | sonnet | light review PASS; D-REG-06a split removed; full gate green (10 suites) |
 | SL-PFC | **merged** (ae022f0) | sonnet | light review PASS; full gate green (integration 135, arch 196) |
 | SL-RAT-UW | **merged** (77a6947) | sonnet | review 1 FAIL (M1 IPT legalStatus/fail-open) → fixed 0060a00, orchestrator re-check; gate green: integration 237, all suites |
-| SL-BIL | building | opus | started early against contracts/fakes (POL still building) |
+| SL-BIL | **in review** (deep, opus, 1st round) | opus | built 06be56f: bind→invoice→stub fiscal→payment→PAID with all real modules; integration 270 |
 | SL-FIN | **fixing** (review 1 FAIL: M1 lines appendable to a posted journal; 5 minors to fix) | opus | hand-checked money path OK; concurrent exactly-once OK; re-check light |
 | SL-UI | building | sonnet | staff screens |
 | SL-E2E | not started | | after S2 |
