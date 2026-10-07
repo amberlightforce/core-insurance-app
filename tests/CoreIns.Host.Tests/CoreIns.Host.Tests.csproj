@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Unit tests of the Host's own logic (role selection, configuration rules). No database, no Docker. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Host\CoreIns.Host.csproj" />
+  </ItemGroup>
+
+</Project>

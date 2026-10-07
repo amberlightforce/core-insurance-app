@@ -12,10 +12,18 @@ builder.Services.AddCoreInsModules(builder.Configuration);
 
 if (role == AppRole.Migrate)
 {
+    builder.Services.AddSingleton<DatabaseBootstrapper>();
     builder.Services.AddSingleton<DatabaseMigrator>();
     await using var migrateApp = builder.Build();
-    var lifetime = migrateApp.Services.GetRequiredService<IHostApplicationLifetime>();
-    return await migrateApp.Services.GetRequiredService<DatabaseMigrator>().RunAsync(lifetime.ApplicationStopping);
+    var stopping = migrateApp.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping;
+
+    // Bootstrap phase (server administrator credential): roles, privileges, extensions. Then exit.
+    if (builder.Configuration.GetValue<bool>(DatabaseBootstrapper.BootstrapKey))
+    {
+        return await migrateApp.Services.GetRequiredService<DatabaseBootstrapper>().RunAsync(stopping);
+    }
+
+    return await migrateApp.Services.GetRequiredService<DatabaseMigrator>().RunAsync(stopping);
 }
 
 var connectionString = builder.Configuration.GetRequiredCoreConnectionString();

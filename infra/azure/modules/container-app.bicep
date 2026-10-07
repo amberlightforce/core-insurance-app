@@ -17,6 +17,9 @@ param registryServer string = ''
 param ingress string
 
 param targetPort int = 8080
+
+@description('Allow plain HTTP on the ingress. Only for internal ingress inside the environment (gotenberg).')
+param allowInsecure bool = false
 param minReplicas int
 param maxReplicas int
 
@@ -34,7 +37,7 @@ param secrets array = []
 param liveProbePath string = '/health/live'
 param readyProbePath string = '/health/ready'
 
-@description('Container Apps built-in authentication (Entra ID). Empty object disables it. Keys: tenantId, clientId, clientSecretName.')
+@description('Container Apps built-in authentication (Entra ID), used only for the external api. Empty object = none (worker, gotenberg). Keys: tenantId, clientId, clientSecretName.')
 param entraAuth object = {}
 
 var probes = empty(liveProbePath)
@@ -73,7 +76,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             external: ingress == 'external'
             targetPort: targetPort
             transport: 'auto'
-            allowInsecure: false
+            allowInsecure: allowInsecure
           }
       registries: empty(registryServer) ? [] : [{ server: registryServer, identity: identityId }]
       secrets: secrets
@@ -99,9 +102,11 @@ resource auth 'Microsoft.App/containerApps/authConfigs@2024-03-01' = if (!empty(
   properties: {
     platform: { enabled: true }
     globalValidation: {
+      // Browser routes are redirected to Microsoft sign-in. API calls are not redirected: /api/* is excluded here and
+      // the application itself answers 401 (fallback policy) after validating the bearer token (INFRASTRUCTURE §6.1).
       unauthenticatedClientAction: 'RedirectToLoginPage'
       redirectToProvider: 'azureactivedirectory'
-      excludedPaths: [liveProbePath, readyProbePath]
+      excludedPaths: [liveProbePath, readyProbePath, '/api/*']
     }
     identityProviders: {
       azureActiveDirectory: {
@@ -112,7 +117,7 @@ resource auth 'Microsoft.App/containerApps/authConfigs@2024-03-01' = if (!empty(
           openIdIssuer: '${environment().authentication.loginEndpoint}${entraAuth.?tenantId ?? ''}/v2.0'
         }
         validation: {
-          allowedAudiences: ['api://${entraAuth.?clientId ?? ''}']
+          allowedAudiences: [entraAuth.?clientId ?? '', 'api://${entraAuth.?clientId ?? ''}']
         }
       }
     }

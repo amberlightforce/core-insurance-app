@@ -1,6 +1,9 @@
 // One stamp of the core insurance system (INFRASTRUCTURE §6): deploy into resource group rg-coreins-<env>-<region>.
 //   az deployment group create -g rg-coreins-dev-gwc -f infra/azure/main.bicep -p infra/azure/dev.bicepparam
-// First deployment: deployApps=false (creates the registry), push the image, then deploy again with deployApps=true.
+// Deployment stages (see .github/workflows/deploy.yml), each an incremental run of this template:
+//   1. deployJobs=false, deployApps=false : infrastructure incl. registry (no image needed)
+//   2. push the image; deployJobs=true    : `bootstrap` and `migrate` jobs on the new image; run bootstrap, then migrate
+//   3. deployJobs=true, deployApps=true   : gotenberg, worker and api on the new image (only after migrate succeeded)
 targetScope = 'resourceGroup'
 
 @description('Azure region. Default Germany West Central (INFRASTRUCTURE §10 decision 1).')
@@ -21,7 +24,10 @@ param stampCountry string = 'GR'
 @maxLength(8)
 param uniqueSuffix string = substring(uniqueString(resourceGroup().id), 0, 6)
 
-@description('Deploy api, worker, gotenberg and the migrate job. False on the very first run, before an image exists.')
+@description('Deploy the bootstrap and migrate jobs (needs the image in the registry).')
+param deployJobs bool = true
+
+@description('Deploy gotenberg, worker and api (only after the migrate job has run on the same image).')
 param deployApps bool = true
 
 @description('Application image tag in the registry (repository coreins).')
@@ -60,8 +66,10 @@ param gotenbergMaxReplicas int = 2
 
 @description('Entra ID tenant of the staff app registration.')
 param entraTenantId string = subscription().tenantId
-@description('Client ID of the staff app registration. Empty disables built-in authentication (not allowed for real use).')
-param entraClientId string = ''
+@description('Client ID of the staff app registration (Container Apps built-in authentication and token audience). Required.')
+@minLength(36)
+@maxLength(36)
+param entraClientId string
 @description('Name of the Key Vault secret holding the app registration client secret (created manually).')
 param entraClientSecretName string = 'entra-client-secret'
 
@@ -133,6 +141,15 @@ module postgres 'modules/postgres.bicep' = {
 
 var pgHost = postgres.outputs.fqdn
 
+module email 'modules/email.bicep' = {
+  name: 'email'
+  params: {
+    namePrefix: namePrefix
+    tags: tags
+    senderPrincipalIds: [identities.outputs.worker.principalId]
+  }
+}
+
 module keyVault 'modules/keyvault.bicep' = {
   name: 'keyvault'
   params: {
@@ -147,6 +164,9 @@ module keyVault 'modules/keyvault.bicep' = {
     ]
     coreConnectionString: 'Host=${pgHost};Database=coreins;Username=app;Password=${appDbPassword};SslMode=Require'
     migratorConnectionString: 'Host=${pgHost};Database=coreins;Username=migrator;Password=${migratorDbPassword};SslMode=Require'
+    adminConnectionString: 'Host=${pgHost};Database=postgres;Username=${postgresAdminLogin};Password=${postgresAdminPassword};SslMode=Require'
+    appDbPassword: appDbPassword
+    migratorDbPassword: migratorDbPassword
   }
 }
 
@@ -187,6 +207,8 @@ var commonEnv = [
   { name: 'AzureAd__ClientId', value: entraClientId }
   { name: 'DocRender__Url', value: 'http://gotenberg' }
   { name: 'Email__Provider', value: 'AzureCommunicationServices' }
+  { name: 'Email__Endpoint', value: email.outputs.endpoint }
+  { name: 'Email__SenderDomain', value: email.outputs.senderDomain }
   { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
   { name: 'Ai__Enabled', value: 'false' }
   { name: 'Stamp__Id', value: environmentName }
@@ -211,10 +233,52 @@ module gotenberg 'modules/container-app.bicep' = if (deployApps) {
     memory: '2Gi'
     liveProbePath: '/health'
     readyProbePath: '/health'
+    // Internal-only HTTP, as configured by DocRender__Url=http://gotenberg (INFRASTRUCTURE §5).
+    allowInsecure: true
   }
 }
 
-module migrateJob 'modules/migrate-job.bicep' = if (deployApps) {
+module bootstrapJob 'modules/migrate-job.bicep' = if (deployJobs) {
+  name: 'job-bootstrap'
+  params: {
+    location: location
+    name: 'bootstrap'
+    tags: tags
+    environmentId: environment.outputs.id
+    identityId: identities.outputs.migrate.id
+    image: appImage
+    registryServer: registry.outputs.loginServer
+    secrets: [
+      {
+        name: 'connectionstrings-admin'
+        keyVaultUrl: keyVault.outputs.adminSecretUri
+        identity: identities.outputs.migrate.id
+      }
+      {
+        name: 'db-app-password'
+        keyVaultUrl: keyVault.outputs.appRoleSecretUri
+        identity: identities.outputs.migrate.id
+      }
+      {
+        name: 'db-migrator-password'
+        keyVaultUrl: keyVault.outputs.migratorRoleSecretUri
+        identity: identities.outputs.migrate.id
+      }
+    ]
+    // Runs infra/database/bootstrap.sql as the server administrator: roles, privileges, extensions. Idempotent.
+    env: [
+      { name: 'APP_ROLE', value: 'migrate' }
+      { name: 'Migrate__Bootstrap', value: 'true' }
+      { name: 'Database__Name', value: 'coreins' }
+      { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
+      { name: 'ConnectionStrings__Admin', secretRef: 'connectionstrings-admin' }
+      { name: 'Database__AppPassword', secretRef: 'db-app-password' }
+      { name: 'Database__MigratorPassword', secretRef: 'db-migrator-password' }
+    ]
+  }
+}
+
+module migrateJob 'modules/migrate-job.bicep' = if (deployJobs) {
   name: 'job-migrate'
   params: {
     location: location
@@ -280,41 +344,34 @@ module api 'modules/container-app.bicep' = if (deployApps) {
     ingress: 'external'
     minReplicas: apiMinReplicas
     maxReplicas: apiMaxReplicas
-    secrets: concat(
-      [
-        {
-          name: 'connectionstrings-core'
-          keyVaultUrl: keyVault.outputs.coreSecretUri
-          identity: identities.outputs.api.id
-        }
-      ],
-      empty(entraClientId)
-        ? []
-        : [
-            {
-              name: 'microsoft-provider-authentication-secret'
-              keyVaultUrl: '${keyVault.outputs.uri}secrets/${entraClientSecretName}'
-              identity: identities.outputs.api.id
-            }
-          ]
-    )
+    secrets: [
+      {
+        name: 'connectionstrings-core'
+        keyVaultUrl: keyVault.outputs.coreSecretUri
+        identity: identities.outputs.api.id
+      }
+      {
+        name: 'microsoft-provider-authentication-secret'
+        keyVaultUrl: '${keyVault.outputs.uri}secrets/${entraClientSecretName}'
+        identity: identities.outputs.api.id
+      }
+    ]
     env: concat(commonEnv, [
       { name: 'APP_ROLE', value: 'api' }
       { name: 'AZURE_CLIENT_ID', value: identities.outputs.api.clientId }
       { name: 'ConnectionStrings__Core', secretRef: 'connectionstrings-core' }
     ])
-    entraAuth: empty(entraClientId)
-      ? {}
-      : {
-          tenantId: entraTenantId
-          clientId: entraClientId
-          clientSecretName: 'microsoft-provider-authentication-secret'
-        }
+    entraAuth: {
+      tenantId: entraTenantId
+      clientId: entraClientId
+      clientSecretName: 'microsoft-provider-authentication-secret'
+    }
   }
 }
 
 output registryLoginServer string = registry.outputs.loginServer
 output apiFqdn string = deployApps ? api!.outputs.fqdn : ''
-output migrateJobName string = deployApps ? migrateJob!.outputs.name : ''
+output migrateJobName string = deployJobs ? migrateJob!.outputs.name : ''
+output bootstrapJobName string = deployJobs ? bootstrapJob!.outputs.name : ''
 output postgresFqdn string = pgHost
 output keyVaultUri string = keyVault.outputs.uri

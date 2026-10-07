@@ -13,7 +13,9 @@
 # Additionally for `prod`:
 #   vars.STAMP_LEGAL_ENTITY           - legal entity code of the stamp
 #   vars.IMMUTABILITY_RETENTION_DAYS  - blob immutability retention from the PLT retention catalogue
-# Key Vault secret `entra-client-secret` (the app registration client secret) is created manually after provisioning.
+# Key Vault secret `entra-client-secret` (the app registration client secret) is created manually after stage 1.
+# Order per run: infrastructure -> image -> jobs -> bootstrap -> migrate -> apps, so api/worker never run on an
+# image whose migrations have not completed (INFRASTRUCTURE §6.5).
 name: Deploy
 
 on:
@@ -52,15 +54,15 @@ jobs:
       STAMP_LEGAL_ENTITY: ${{ vars.STAMP_LEGAL_ENTITY }}
       IMMUTABILITY_RETENTION_DAYS: ${{ vars.IMMUTABILITY_RETENTION_DAYS }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: azure/login@v2
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Provision infrastructure (registry first, apps after the image exists)
+      - name: "Stage 1: provision infrastructure (no image needed)"
         if: ${{ inputs.provision }}
         run: |
           az deployment group create \
@@ -68,7 +70,7 @@ jobs:
             --name "coreins-infra-${{ github.run_id }}" \
             --template-file infra/azure/main.bicep \
             --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
-            --parameters deployApps=false
+            --parameters deployJobs=false deployApps=false
 
       - name: Build and push the image
         run: |
@@ -77,45 +79,33 @@ jobs:
           docker build --tag "$ACR_LOGIN_SERVER/coreins:$IMAGE_TAG" .
           docker push "$ACR_LOGIN_SERVER/coreins:$IMAGE_TAG"
 
-      - name: Run database migrations with the new image (job `migrate`) and wait
+      - name: "Stage 2: bootstrap and migrate jobs on the new image (apps untouched)"
         run: |
-          set -euo pipefail
-          ACR_LOGIN_SERVER=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].loginServer" -o tsv)
-          if az containerapp job show --name migrate --resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
-            az containerapp job update --name migrate --resource-group "$RESOURCE_GROUP" \
-              --image "$ACR_LOGIN_SERVER/coreins:$IMAGE_TAG" > /dev/null
-          else
-            # First deployment: create the job (and the apps) from the templates.
-            az deployment group create \
-              --resource-group "$RESOURCE_GROUP" \
-              --name "coreins-first-${{ github.run_id }}" \
-              --template-file infra/azure/main.bicep \
-              --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
-              --parameters deployApps=true imageTag="$IMAGE_TAG"
-          fi
-          EXECUTION=$(az containerapp job start --name migrate --resource-group "$RESOURCE_GROUP" --query name -o tsv)
-          for _ in $(seq 1 90); do
-            STATUS=$(az containerapp job execution show --name migrate --resource-group "$RESOURCE_GROUP" \
-              --job-execution-name "$EXECUTION" --query properties.status -o tsv)
-            echo "migrate: $STATUS"
-            case "$STATUS" in
-              Succeeded) exit 0 ;;
-              Failed|Stopped|Degraded) exit 1 ;;
-            esac
-            sleep 10
-          done
-          echo "migrate did not finish in time" && exit 1
+          az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "coreins-jobs-${{ github.run_id }}" \
+            --template-file infra/azure/main.bicep \
+            --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
+            --parameters deployJobs=true deployApps=false imageTag="$IMAGE_TAG"
 
-      - name: Update gotenberg, worker and api to the new image
+      - name: Run the database bootstrap (roles, privileges, extensions; idempotent) and wait
+        run: scripts/run-job.sh bootstrap
+
+      - name: Run the database migrations and wait
+        run: scripts/run-job.sh migrate
+
+      - name: "Stage 3: gotenberg, worker and api on the new image (after a successful migration)"
         run: |
           az deployment group create \
             --resource-group "$RESOURCE_GROUP" \
             --name "coreins-apps-${{ github.run_id }}" \
             --template-file infra/azure/main.bicep \
             --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
-            --parameters deployApps=true imageTag="$IMAGE_TAG"
+            --parameters deployJobs=true deployApps=true imageTag="$IMAGE_TAG"
 
       - name: Smoke test
         run: |
           FQDN=$(az containerapp show --name api --resource-group "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv)
           curl --fail --silent --show-error "https://$FQDN/health/live"
+          # API calls must get 401 from the application, never a sign-in redirect (INFRASTRUCTURE §6.1).
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' "https://$FQDN/api/plt/v1/health")" = "401"

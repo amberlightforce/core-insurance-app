@@ -7,13 +7,15 @@ WORKDIR /web
 COPY web/package.json web/package-lock.json web/.npmrc ./
 RUN npm ci --no-audit
 COPY web/ ./
-RUN npm run build
+# Source maps are built `hidden` (no sourceMappingURL) and are never shipped in the image.
+RUN npm run build && find dist -name '*.map' -delete
 
 # --- 2. Back end: restore and publish the Host ----------------------------------------------------
 FROM mcr.microsoft.com/dotnet/sdk:10.0.401 AS build
 WORKDIR /src
 COPY global.json Directory.Build.props Directory.Packages.props .editorconfig ./
 COPY tools/ tools/
+COPY infra/database/ infra/database/
 COPY src/ src/
 RUN dotnet restore src/CoreIns.Host/CoreIns.Host.csproj
 RUN dotnet publish src/CoreIns.Host/CoreIns.Host.csproj --configuration Release --no-restore --output /app \
