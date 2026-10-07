@@ -193,6 +193,7 @@ public sealed class CoreNumberFormat : INumberFormat
 /// Modules call it from their command handlers, inside their unit of work: a gapless number is allocated in the
 /// caller's transaction (a rollback releases it, REQ-PLT-211); a gap-allowed number comes from a reserved block.
 /// </summary>
+// The generated IPlatformNumberService (plt.Number.next as an API command) stays unimplemented until W1-PLT builds it on this service (D-SLC-06).
 public interface INumberingService
 {
     /// <summary>Issues the next number for the request context's legal entity. Fails with PLT-ERR-RANGE-EXHAUSTED.</summary>

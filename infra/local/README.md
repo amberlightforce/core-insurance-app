@@ -52,7 +52,9 @@ curl -s -X POST localhost:5000/api/pty/v1/parties -H "Authorization: Bearer $TOK
   -H 'Content-Type: application/json' -H "Idempotency-Key: $(uuidgen)" --data-binary @party.json
 
 curl -s "localhost:5000/api/pty/v1/parties/search?name=efthymiou" -H "Authorization: Bearer $TOKEN"
-curl -s "localhost:5000/api/pty/v1/parties/search?identifierScheme=AFM&identifierValue=123456783" -H "Authorization: Bearer $TOKEN"
+# Identifiers (and the single search box) go in a POST body, never in a URL (D-SLC-05):
+curl -s -X POST localhost:5000/api/pty/v1/parties/search -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"identifierScheme":"AFM","identifierValue":"123456783"}'
 curl -s "localhost:5000/api/pty/v1/parties/<partyId>" -H "Authorization: Bearer $TOKEN"                     # P2 masked
 curl -s "localhost:5000/api/pty/v1/parties/<partyId>?revealPurpose=RATING" -H "Authorization: Bearer $TOKEN"  # P2 shown, audited
 ```

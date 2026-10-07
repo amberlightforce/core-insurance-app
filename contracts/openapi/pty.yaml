@@ -83,14 +83,6 @@ paths:
       - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: criteria
-        in: query
-        required: false
-        description: 'Single search box (SCR-PTY-01): a name in any script, a party number or an identifier value. At least
-          2 characters (PTY-ERR-QUERY-TOO-SHORT).'
-        schema:
-          type: string
-          maxLength: 200
       - name: name
         in: query
         required: false
@@ -98,20 +90,6 @@ paths:
         schema:
           type: string
           maxLength: 200
-      - name: identifierScheme
-        in: query
-        required: false
-        description: Identifier scheme for an exact identifier search through the blind index (REQ-PTY-060); needs identifierValue
-        schema:
-          type: string
-          maxLength: 64
-      - name: identifierValue
-        in: query
-        required: false
-        description: Identifier value (never logged; the request is audited with the scheme only)
-        schema:
-          type: string
-          maxLength: 100
       - name: partyNumber
         in: query
         required: false
@@ -119,6 +97,77 @@ paths:
         schema:
           type: string
           maxLength: 64
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartySearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    post:
+      operationId: pty.Party.searchByCriteria
+      summary: Search parties (POST form, criteria in the body)
+      description: |-
+        POST form of pty.Party.search (D-SLC-05): identifiers and the single search box (which may hold an identifier)
+        travel in the body, never in a URL. A read; no Idempotency-Key.
+
+        PRD inputs: criteria, validAt, cursor
+        PRD outputs: ranked results
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-001
+      - REQ-PTY-060
+      - REQ-PTY-068
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - CLM
+      - CMP
+      - PLT
+      - POL
+      - UW
+      - WRK
+      x-permission: pty.Party.search
+      x-prd-name: pty.Party.search
+      x-error-codes:
+      - code: PTY-ERR-QUERY-TOO-SHORT
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1636
+      - DECISIONS D-SLC-05
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartySearchCriteria'
       responses:
         '200':
           description: Success
@@ -176,6 +225,8 @@ paths:
       - RI
       - UW
       x-permission: pty.Party.get
+      x-additional-permissions:
+      - pty.Party.revealP2  # unmasked P2 with revealPurpose (REQ-PTY-044, D-SLC-06)
       x-error-codes:
       - code: PTY-ERR-NOT-FOUND
         status: 404
@@ -265,6 +316,9 @@ paths:
       - MIG
       x-permission: pty.Party.update
       x-error-codes:
+      - code: PTY-ERR-NOT-AVAILABLE
+        status: 501
+        note: not built yet in the slice (D-SLC-06)
       - code: PTY-ERR-ID-CHECKDIGIT
         status: 422
       - code: PTY-ERR-STALE
@@ -482,6 +536,9 @@ paths:
       - MIG
       x-permission: pty.Party.merge
       x-error-codes:
+      - code: PTY-ERR-NOT-AVAILABLE
+        status: 501
+        note: not built yet in the slice (D-SLC-06)
       - code: PTY-ERR-MERGE-CROSS-ENTITY
         status: 422
       - code: PTY-ERR-WINDOW-CLOSED
@@ -554,6 +611,9 @@ paths:
       - MIG
       x-permission: pty.Party.unmerge
       x-error-codes:
+      - code: PTY-ERR-NOT-AVAILABLE
+        status: 501
+        note: not built yet in the slice (D-SLC-06)
       - code: PTY-ERR-MERGE-CROSS-ENTITY
         status: 422
       - code: PTY-ERR-WINDOW-CLOSED
@@ -4546,6 +4606,38 @@ components:
       - displayName
       - matchQuality
       - similarity
+    PartySearchCriteria:
+      type: object
+      description: 'Body of pty.Party.searchByCriteria (D-SLC-05). At least one criterion.'
+      properties:
+        criteria:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+          description: 'Single search box (SCR-PTY-01): a name in any script, a party number or an identifier value (at least 2 characters)'
+        name:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        identifierScheme:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Identifier scheme for an exact search through the blind index (REQ-PTY-060); needs identifierValue
+        identifierValue:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+          description: Identifier value (P2; never logged)
+        partyNumber:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
     MaskedIdentifier:
       type: object
       description: An identifier shown masked (last three characters only, REQ-PTY-044).

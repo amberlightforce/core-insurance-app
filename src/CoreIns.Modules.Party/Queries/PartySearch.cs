@@ -16,7 +16,7 @@ using SkLegalEntityId = CoreIns.SharedKernel.Identifiers.LegalEntityId;
 namespace CoreIns.Modules.Party.Queries;
 
 /// <summary>Criteria of <c>pty.Party.search</c> (REQ-PTY-068 subset).</summary>
-internal sealed record PartySearchCriteria(string? Criteria, string? Name, string? IdentifierScheme, string? IdentifierValue, string? PartyNumber, int Limit, int Offset);
+internal sealed record SearchCriteria(string? Criteria, string? Name, string? IdentifierScheme, string? IdentifierValue, string? PartyNumber, int Limit, int Offset);
 
 /// <summary>
 /// <c>pty.Party.search</c> (REQ-PTY-001, REQ-PTY-060, REQ-PTY-065..069): names in any script, accent-, case- and
@@ -35,7 +35,7 @@ internal sealed class PartySearch(
     /// <summary>Minimum query length (PTY-ERR-QUERY-TOO-SHORT).</summary>
     public const int MinimumQueryLength = 2;
 
-    public async Task<Result<PartySearchPage>> SearchAsync(PartySearchCriteria criteria, CancellationToken cancellationToken)
+    public async Task<Result<PartySearchPage>> SearchAsync(SearchCriteria criteria, CancellationToken cancellationToken)
     {
         var text = (criteria.Name ?? criteria.Criteria)?.Trim();
         var hasIdentifier = !string.IsNullOrWhiteSpace(criteria.IdentifierScheme) && !string.IsNullOrWhiteSpace(criteria.IdentifierValue);

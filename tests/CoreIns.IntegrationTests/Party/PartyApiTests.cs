@@ -81,7 +81,7 @@ public sealed class PartyApiTests(PostgresFixture database) : IClassFixture<Post
         foreach (var query in new[]
                  {
                      "name=ΣΩΤΗΡΟΠΟΥΛΟΥ", "name=σωτηροπουλου", "name=Sotiropoulou", "name=sotiropoulou%20eleni", "name=Ελενη%20Σωτηρ",
-                     "identifierScheme=AFM&identifierValue=111111114", "criteria=111111114", $"criteria={number}", $"partyNumber={number}",
+                     $"partyNumber={number}",
                  })
         {
             var (response, page) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?" + query);
@@ -89,12 +89,29 @@ public sealed class PartyApiTests(PostgresFixture database) : IClassFixture<Post
             page!["items"]!.AsArray().Select(item => item!["partyId"]!.GetValue<string>()).ShouldContain(id, query);
         }
 
+        // D-SLC-05: identifiers and the single search box travel in a POST body, never in a URL (no Idempotency-Key: a read).
+        foreach (var criteria in new object[]
+                 {
+                     new { identifierScheme = "AFM", identifierValue = "111111114" }, new { criteria = "111111114" }, new { criteria = number },
+                     new { criteria = "Σωτηροπούλου" },
+                 })
+        {
+            var (response, page) = await SendAsync(_client, HttpMethod.Post, "/api/pty/v1/parties/search", criteria, withKey: false);
+            response.StatusCode.ShouldBe(HttpStatusCode.OK, criteria.ToString());
+            page!["items"]!.AsArray().Select(item => item!["partyId"]!.GetValue<string>()).ShouldContain(id, criteria.ToString());
+        }
+
+        // The GET form ignores identifier parameters: an AFM in the URL finds nothing.
+        var (ignored, ignoredPage) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?identifierScheme=AFM&identifierValue=111111114");
+        ignored.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, ignoredPage?.ToJsonString());
+
         // REQ-PTY-067: the reverse digraph alternative finds the Greek-only "Ντόκος" from Latin "Dokos".
         var (byDokos, dokosPage) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?name=Dokos");
         byDokos.StatusCode.ShouldBe(HttpStatusCode.OK);
         dokosPage!["items"]!.AsArray().Select(item => item!["displayName"]!.GetValue<string>()).ShouldContain("Νίκος Ντόκος");
 
-        var (exact, exactPage) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?identifierScheme=AFM&identifierValue=111111114");
+        var (exact, exactPage) = await SendAsync(
+            _client, HttpMethod.Post, "/api/pty/v1/parties/search", new { identifierScheme = "AFM", identifierValue = "111111114" }, withKey: false);
         exact.StatusCode.ShouldBe(HttpStatusCode.OK);
         exactPage.Text("items.0.matchQuality").ShouldBe("EXACT");
         exactPage.Text("items.0.maskedIdentifier.maskedValue").ShouldBe("******114");

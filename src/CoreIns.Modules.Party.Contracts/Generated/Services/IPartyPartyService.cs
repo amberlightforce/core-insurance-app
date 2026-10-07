@@ -45,7 +45,7 @@ public interface IPartyPartyService
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: MIG.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PTY-ERR-MERGE-CROSS-ENTITY (422), PTY-ERR-WINDOW-CLOSED (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PTY-ERR-NOT-AVAILABLE (501), PTY-ERR-MERGE-CROSS-ENTITY (422), PTY-ERR-WINDOW-CLOSED (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyMergeResponse> MergeAsync(global::CoreIns.Modules.Party.Contracts.Api.PartyMergeRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -60,12 +60,22 @@ public interface IPartyPartyService
     /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    /// <param name="criteria">Single search box (SCR-PTY-01): a name in any script, a party number or an identifier value. At least 2 characters (PTY-ERR-QUERY-TOO-SHORT).</param>
     /// <param name="name">Person or organisation name in any script; accent-, case- and script-insensitive (REQ-PTY-001, REQ-PTY-065..067)</param>
-    /// <param name="identifierScheme">Identifier scheme for an exact identifier search through the blind index (REQ-PTY-060); needs identifierValue</param>
-    /// <param name="identifierValue">Identifier value (never logged; the request is audited with the scheme only)</param>
     /// <param name="partyNumber">Exact party number</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage> SearchAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, string? criteria = null, string? name = null, string? identifierScheme = null, string? identifierValue = null, string? partyNumber = null, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage> SearchAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, string? name = null, string? partyNumber = null, global::System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>Search parties (POST form, criteria in the body)</summary>
+    /// <remarks>
+    /// <para>Operation pty.Party.searchByCriteria (query; HTTP POST /api/pty/v1/parties/search).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full. Wave W2.</para>
+    /// <para>Exposure: ui; consumers: CHN, CLM, CMP, PLT, POL, UW, WRK.</para>
+    /// <para>Errors: PTY-ERR-QUERY-TOO-SHORT (422).</para>
+    /// </remarks>
+    /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
+    /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
+    /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage> SearchByCriteriaAsync(global::CoreIns.Modules.Party.Contracts.Api.PartySearchCriteria request, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Unmerge within the window (stated separately for MIG and steward callers; same operation as the unmerge half …</summary>
     /// <remarks>
@@ -74,7 +84,7 @@ public interface IPartyPartyService
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui; consumers: MIG.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PTY-ERR-MERGE-CROSS-ENTITY (422), PTY-ERR-WINDOW-CLOSED (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PTY-ERR-NOT-AVAILABLE (501), PTY-ERR-MERGE-CROSS-ENTITY (422), PTY-ERR-WINDOW-CLOSED (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyUnmergeResponse> UnmergeAsync(global::CoreIns.Modules.Party.Contracts.Api.PartyUnmergeRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -85,7 +95,7 @@ public interface IPartyPartyService
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui; consumers: CHN, MIG.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PTY-ERR-ID-CHECKDIGIT (422), PTY-ERR-STALE (409), PTY-ERR-DUPLICATE-IDENTIFIER (409), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PTY-ERR-NOT-AVAILABLE (501), PTY-ERR-ID-CHECKDIGIT (422), PTY-ERR-STALE (409), PTY-ERR-DUPLICATE-IDENTIFIER (409), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     /// <param name="id">Identifier of the Party</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyUpdateResponse> UpdateAsync(string id, global::CoreIns.Modules.Party.Contracts.Api.PartyUpdateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);

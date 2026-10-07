@@ -335,6 +335,28 @@
       "nextCursor": "sample",
       "limit": 1
     },
+    "pty.Party.searchByCriteria": {
+      "items": [
+        {
+          "partyId": "019224a8-7d02-70ae-82a7-d0640ab4aae6",
+          "partyNumber": "SAMPLE-000001",
+          "partyType": "PERSON",
+          "status": "SAMPLE_CODE",
+          "displayName": "sample",
+          "displayNameLatin": "sample",
+          "maskedIdentifier": {
+            "scheme": "SAMPLE_CODE",
+            "maskedValue": "sample"
+          },
+          "primaryPostcode": "sample",
+          "primaryLocality": "sample",
+          "matchQuality": "EXACT",
+          "similarity": "12.50"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
     "pty.Party.unmerge": {
       "restoredParties": "unspecified",
       "approvalRequest": "unspecified"
@@ -1146,6 +1168,13 @@
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "PartySearchCriteria": {
+      "criteria": "sample",
+      "name": "sample",
+      "identifierScheme": "sample",
+      "identifierValue": "sample",
+      "partyNumber": "sample"
     },
     "PartySearchItem": {
       "partyId": "01921e94-929a-7eba-8783-8ff6ff34b507",

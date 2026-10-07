@@ -68,13 +68,24 @@ internal sealed class PartyPartyService(
         return view is null ? throw new DomainException(DomainError.Of(ModuleCode.PTY, "NOT-FOUND", "The party does not exist.")) : new PartyGetResponse { Party = view };
     }
 
-    public async Task<PartySearchPage> SearchAsync(
-        ValidAt? validAt = null, string? cursor = null, int? limit = null, string? criteria = null, string? name = null, string? identifierScheme = null,
-        string? identifierValue = null, string? partyNumber = null, CancellationToken cancellationToken = default)
+    public Task<PartySearchPage> SearchAsync(
+        ValidAt? validAt = null, string? cursor = null, int? limit = null, string? name = null, string? partyNumber = null,
+        CancellationToken cancellationToken = default) =>
+        RunSearchAsync(null, name, null, null, partyNumber, cursor, limit, cancellationToken);
+
+    public Task<PartySearchPage> SearchByCriteriaAsync(
+        PartySearchCriteria request, ValidAt? validAt = null, string? cursor = null, int? limit = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return RunSearchAsync(request.Criteria, request.Name, request.IdentifierScheme, request.IdentifierValue, request.PartyNumber, cursor, limit, cancellationToken);
+    }
+
+    private async Task<PartySearchPage> RunSearchAsync(
+        string? criteria, string? name, string? scheme, string? value, string? partyNumber, string? cursor, int? limit, CancellationToken cancellationToken)
     {
         var offset = PartySearch.DecodeCursor(cursor) ?? throw new DomainException(DomainError.Of(ModuleCode.PTY, "VALIDATION", "The cursor is malformed."));
         return Unwrap(await search.SearchAsync(
-            new PartySearchCriteria(criteria, name, identifierScheme, identifierValue, partyNumber, Math.Clamp(limit ?? 25, 1, 200), offset), cancellationToken)
+            new SearchCriteria(criteria, name, scheme, value, partyNumber, Math.Clamp(limit ?? 25, 1, 200), offset), cancellationToken)
             .ConfigureAwait(false));
     }
 

@@ -105,7 +105,7 @@ and must be idempotent and order-aware (D-ARC-26).
 Classify per the PRD. P2 identifiers (and other P2 values the PRD lists) are encrypted with `FieldEncryptor`
 (AES-256-GCM, row-bound: pass the row id as row key) and searched through a `BlindIndexer` blind index (one index name
 per scheme, candidates over all readable key versions); see `Domain/PartyProtection.cs`. Responses mask P2 by default;
-unmasking needs a permission and a purpose and is audited.
+unmasking needs a permission and a purpose and is audited. P2+ data is never a path or query parameter (D-SLC-05): searches by identifier take a POST body (pty.Party.searchByCriteria).
 
 ## 7. Controllers and permissions
 

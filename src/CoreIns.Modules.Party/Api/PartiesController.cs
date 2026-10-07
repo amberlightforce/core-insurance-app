@@ -4,6 +4,7 @@ using CoreIns.Modules.Party.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
+using CoreIns.Platform.Http;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
@@ -81,12 +82,25 @@ internal sealed class PartiesController : ControllerBase
             : Results.Ok(new PartyGetResponse { Party = view });
     }
 
-    /// <summary>pty.Party.search.</summary>
+    /// <summary>pty.Party.search (GET): non-personal filters only, name and party number (D-SLC-05).</summary>
     [HttpGet("search")]
     [Authorize(Policy = PartyPermissions.Search)]
-    public async Task<IResult> SearchAsync(
-        [FromQuery] string? criteria, [FromQuery] string? name, [FromQuery] string? identifierScheme, [FromQuery] string? identifierValue,
-        [FromQuery] string? partyNumber, [FromQuery] int? limit, [FromQuery] string? cursor, [FromServices] PartySearch search,
+    public Task<IResult> SearchAsync(
+        [FromQuery] string? name, [FromQuery] string? partyNumber, [FromQuery] int? limit, [FromQuery] string? cursor, [FromServices] PartySearch search,
+        CancellationToken cancellationToken) =>
+        RunAsync(search, null, name, null, null, partyNumber, limit, cursor, cancellationToken);
+
+    /// <summary>pty.Party.searchByCriteria (POST): identifiers and the single search box travel in the body, never in a URL (D-SLC-05).</summary>
+    [HttpPost("search")]
+    [SkipIdempotency]
+    [Authorize(Policy = PartyPermissions.Search)]
+    public Task<IResult> SearchByCriteriaAsync(
+        [FromBody] PartySearchCriteria body, [FromQuery] int? limit, [FromQuery] string? cursor, [FromServices] PartySearch search,
+        CancellationToken cancellationToken) =>
+        RunAsync(search, body.Criteria, body.Name, body.IdentifierScheme, body.IdentifierValue, body.PartyNumber, limit, cursor, cancellationToken);
+
+    private async Task<IResult> RunAsync(
+        PartySearch search, string? criteria, string? name, string? scheme, string? value, string? partyNumber, int? limit, string? cursor,
         CancellationToken cancellationToken)
     {
         var offset = PartySearch.DecodeCursor(cursor);
@@ -95,7 +109,7 @@ internal sealed class PartiesController : ControllerBase
             return HttpResults.Problem(DomainError.Of(ModuleCode.PTY, "VALIDATION", "cursor is malformed or limit is outside 1..200."), HttpContext);
         }
 
-        var result = await search.SearchAsync(new PartySearchCriteria(criteria, name, identifierScheme, identifierValue, partyNumber, limit ?? 25, offset.Value), cancellationToken)
+        var result = await search.SearchAsync(new SearchCriteria(criteria, name, scheme, value, partyNumber, limit ?? 25, offset.Value), cancellationToken)
             .ConfigureAwait(false);
         return result.ToHttpResult(HttpContext);
     }

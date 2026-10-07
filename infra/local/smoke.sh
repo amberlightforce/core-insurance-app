@@ -41,7 +41,11 @@ search() {
 }
 search "efthymiou (Latin, lower case)" "name=efthymiou"
 search "ΕΥΘΥΜΙΟΥ angeliki (Greek capitals without accents + Latin)" "name=%CE%95%CE%A5%CE%98%CE%A5%CE%9C%CE%99%CE%9F%CE%A5%20angeliki"
-search "AFM through the blind index" "identifierScheme=AFM&identifierValue=123456783"
+# Identifiers go in a POST body, never in a URL (D-SLC-05).
+echo "--- search AFM through the blind index (POST body)"
+curl -s -X POST "$API/api/pty/v1/parties/search" -H "$AUTH" -H 'Content-Type: application/json' \
+  -d '{"identifierScheme":"AFM","identifierValue":"123456783"}' -o "$WORK/search.json"
+json "$WORK/search.json" "[(i['partyNumber'], i['displayName'], i['displayNameLatin'], i['matchQuality']) for i in d['items']]"
 
 echo "--- get (P2 masked)"
 curl -s "$API/api/pty/v1/parties/$ID" -H "$AUTH" -o "$WORK/get.json"
