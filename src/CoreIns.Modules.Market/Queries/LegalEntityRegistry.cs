@@ -25,19 +25,36 @@ internal sealed record LegalEntityInfo(
 /// no write path in the slice (one seeded entity, GR-TEST), so a short time-to-live is enough; the lookup is synchronous
 /// because <see cref="ILegalEntityDirectory"/> is. Rows are read on the application role's data source.
 /// </summary>
-internal sealed class LegalEntityRegistry(NpgsqlDataSource dataSource, TimeProvider time)
+internal sealed class LegalEntityRegistry
 {
     private static readonly TimeSpan TimeToLive = TimeSpan.FromMinutes(5);
+    private readonly NpgsqlDataSource? _dataSource;
+    private readonly TimeProvider _time;
     private readonly Lock _gate = new();
     private List<LegalEntityInfo> _entities = [];
     private DateTimeOffset _loadedAt = DateTimeOffset.MinValue;
+
+    /// <summary>Registry over the database (the Host).</summary>
+    public LegalEntityRegistry(NpgsqlDataSource dataSource, TimeProvider time)
+    {
+        _dataSource = dataSource;
+        _time = time;
+    }
+
+    /// <summary>A fixed registry for tests: no database is read.</summary>
+    public LegalEntityRegistry(IReadOnlyList<LegalEntityInfo> fixedEntities)
+    {
+        _time = TimeProvider.System;
+        _entities = [.. fixedEntities];
+        _loadedAt = DateTimeOffset.MaxValue;
+    }
 
     /// <summary>Every legal entity of the deployment.</summary>
     public IReadOnlyList<LegalEntityInfo> All()
     {
         lock (_gate)
         {
-            var now = time.GetUtcNow();
+            var now = _time.GetUtcNow();
             if (_entities.Count == 0 || now - _loadedAt > TimeToLive)
             {
                 _entities = Load();
@@ -53,7 +70,7 @@ internal sealed class LegalEntityRegistry(NpgsqlDataSource dataSource, TimeProvi
 
     private List<LegalEntityInfo> Load()
     {
-        using var connection = dataSource.OpenConnection();
+        using var connection = _dataSource!.OpenConnection();
         var rows = connection.Query<Row>(
             """
             SELECT legal_entity_id AS LegalEntityId, code AS Code, home_jurisdiction AS HomeJurisdiction, pack_id AS PackId,
