@@ -63,7 +63,7 @@ public sealed class RequestContext
     public IReadOnlyCollection<string> Roles { get; set; } = [];
 
     /// <summary>Legal entity of the work (defaults to the stamp's legal entity).</summary>
-    public LegalEntityId? LegalEntity { get; set; }
+    public LegalEntityCode? LegalEntity { get; set; }
 
     /// <summary>Jurisdiction whose rules apply (defaults to the stamp's country).</summary>
     public Jurisdiction? Jurisdiction { get; set; }

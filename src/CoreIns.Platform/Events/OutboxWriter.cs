@@ -164,7 +164,7 @@ internal static class EnvelopeColumnsReader
             AggregateSequence = reader.GetInt64(offset + 6),
             OccurredAt = Time(7),
             RecordedAt = Time(8),
-            LegalEntity = LegalEntityId.Parse(Text(9)),
+            LegalEntity = LegalEntityCode.Parse(Text(9)),
             Jurisdiction = Jurisdiction.Parse(Text(10).Trim()),
             ConfigurationHash = ConfigurationHash.Parse(Text(11).Trim()),
             BusinessKeys = JsonSerializer.Deserialize<BusinessKeys>(Text(12), SharedKernelJson.Options) ?? BusinessKeys.Empty,

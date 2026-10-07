@@ -95,7 +95,7 @@ public sealed record AuditRecord
     public EventOrigin Origin { get; init; } = EventOrigin.Live;
 
     /// <summary>Legal entity.</summary>
-    public required LegalEntityId LegalEntity { get; init; }
+    public required LegalEntityCode LegalEntity { get; init; }
 
     /// <summary>Jurisdiction.</summary>
     public required Jurisdiction Jurisdiction { get; init; }

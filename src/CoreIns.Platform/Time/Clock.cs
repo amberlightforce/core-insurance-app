@@ -24,7 +24,18 @@ public sealed class SystemClock : IClock
     /// <inheritdoc />
     [SuppressMessage("CoreIns.Time", "COREINS002:Read the current time from IClock",
         Justification = "This is the IClock implementation; it is the one place that reads the system clock.")]
-    public Instant Now => Instant.FromDateTimeOffset(TimeProvider.System.GetUtcNow());
+    public Instant Now => Instant.FromDateTimeOffset(DateTimeOffset.UtcNow);
+}
+
+/// <summary>
+/// A BCL <see cref="TimeProvider"/> whose wall clock is <see cref="IClock"/>, so libraries written against
+/// <see cref="TimeProvider"/> (data protection, timers with business deadlines) follow the platform time service and
+/// its non-production shifts. Timestamps and timers stay monotonic (system).
+/// </summary>
+public sealed class ClockTimeProvider(IClock clock) : TimeProvider
+{
+    /// <inheritdoc />
+    public override DateTimeOffset GetUtcNow() => clock.Now.ToDateTimeOffset();
 }
 
 /// <summary>

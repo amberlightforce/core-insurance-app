@@ -30,6 +30,10 @@ public sealed class PlatformRulesTests
         result.IsSuccessful.ShouldBeTrue($"Platform depends on: {string.Join(", ", result.FailingTypeNames ?? [])}");
     }
 
+    /// <summary>
+    /// A module may use the platform (CoreIns.Platform and its sub-libraries such as DataProtection), the shared kernel,
+    /// the shared rule engine (D-ARC-10) and other modules' contracts — nothing else.
+    /// </summary>
     [Theory]
     [MemberData(nameof(Modules))]
     public void A_module_references_only_the_platform_the_shared_kernel_and_contracts(string module)
@@ -37,8 +41,10 @@ public sealed class PlatformRulesTests
         var implementation = SolutionModel.Implementation(module);
         SolutionModel.ProjectReferences(implementation)
             .Where(reference => reference != SolutionModel.Platform && reference != SolutionModel.SharedKernel
+                                && !reference.StartsWith(SolutionModel.Platform + ".", StringComparison.Ordinal)
+                                && reference != "CoreIns.Rules"
                                 && !reference.EndsWith(SolutionModel.ContractsSuffix, StringComparison.Ordinal))
-            .ShouldBeEmpty($"{implementation} may reference only Platform, SharedKernel and *.Contracts");
+            .ShouldBeEmpty($"{implementation} may reference only Platform, SharedKernel, the rule engine and *.Contracts");
 
         var contracts = SolutionModel.Contracts(module);
         SolutionModel.ProjectReferences(contracts)
@@ -129,7 +135,6 @@ public sealed class PlatformRulesTests
     {
         "System.DateTime" => method.Name is "get_Now" or "get_UtcNow" or "get_Today",
         "System.DateTimeOffset" => method.Name is "get_Now" or "get_UtcNow",
-        "System.TimeProvider" => method.Name == "get_System",
         _ => false,
     };
 

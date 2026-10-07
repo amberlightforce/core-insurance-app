@@ -119,7 +119,7 @@ public sealed partial record EventEnvelope
     public required Instant RecordedAt { get; init; }
 
     /// <summary>Legal entity code.</summary>
-    public required LegalEntityId LegalEntity { get; init; }
+    public required LegalEntityCode LegalEntity { get; init; }
 
     /// <summary>ISO 3166-1 jurisdiction.</summary>
     public required Jurisdiction Jurisdiction { get; init; }

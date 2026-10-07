@@ -604,25 +604,25 @@ public readonly record struct ActivityNumber : IStringValue<ActivityNumber>
     public override string ToString() => Value ?? string.Empty;
 }
 
-/// <summary>Legal entity code (one stamp per legal entity, e.g. GR-TEST); carried on every business row and event (legalEntity).</summary>
-[JsonConverter(typeof(StringValueJsonConverter<LegalEntityId>))]
-public readonly record struct LegalEntityId : IStringValue<LegalEntityId>
+/// <summary>Legal entity code (one stamp per legal entity, e.g. GR-TEST): the envelope field legalEntity and the stamp setting Stamp__LegalEntity; the entity id is LegalEntityId.</summary>
+[JsonConverter(typeof(StringValueJsonConverter<LegalEntityCode>))]
+public readonly record struct LegalEntityCode : IStringValue<LegalEntityCode>
 {
-    private LegalEntityId(string value) => Value = value;
+    private LegalEntityCode(string value) => Value = value;
 
     /// <summary>The value as text.</summary>
     public string Value { get; }
 
     /// <summary>Parses and validates; throws <see cref="FormatException"/> when invalid.</summary>
-    public static LegalEntityId Parse(string value) =>
-        TryParse(value, out var result) ? result : throw new FormatException(IdentifierRules.Invalid(nameof(LegalEntityId), value, IdentifierRules.LegalEntityDescription));
+    public static LegalEntityCode Parse(string value) =>
+        TryParse(value, out var result) ? result : throw new FormatException(IdentifierRules.Invalid(nameof(LegalEntityCode), value, IdentifierRules.LegalEntityDescription));
 
     /// <summary>Validates without throwing.</summary>
-    public static bool TryParse([NotNullWhen(true)] string? value, out LegalEntityId result)
+    public static bool TryParse([NotNullWhen(true)] string? value, out LegalEntityCode result)
     {
         if (IdentifierRules.IsLegalEntity(value))
         {
-            result = new LegalEntityId(value);
+            result = new LegalEntityCode(value);
             return true;
         }
 

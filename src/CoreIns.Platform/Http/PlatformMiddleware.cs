@@ -68,7 +68,7 @@ public sealed class RequestContextMiddleware(RequestDelegate next)
         context.Language = LanguageResolver.Resolve(http);
         CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(context.Language == Language.En ? "en" : "el-GR");
         context.CorrelationId = RequestContext.CurrentTraceId();
-        if (LegalEntityId.TryParse(stamp.Value.LegalEntity, out var entity))
+        if (LegalEntityCode.TryParse(stamp.Value.LegalEntity, out var entity))
         {
             context.LegalEntity = entity;
         }

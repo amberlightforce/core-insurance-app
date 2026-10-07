@@ -33,7 +33,7 @@ public sealed class EnvelopeTests
         AggregateSequence = sequence,
         OccurredAt = Instant.Parse("2026-10-07T08:00:00Z"),
         RecordedAt = Instant.Parse("2026-10-07T08:00:01Z"),
-        LegalEntity = LegalEntityId.Parse("GR-TEST"),
+        LegalEntity = LegalEntityCode.Parse("GR-TEST"),
         Jurisdiction = Jurisdiction.Parse("GR"),
         ConfigurationHash = ConfigurationHash.Parse(new string('a', 64)),
         BusinessKeys = BusinessKeys.Empty

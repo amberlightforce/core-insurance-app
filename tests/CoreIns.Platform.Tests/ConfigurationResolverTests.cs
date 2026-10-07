@@ -12,7 +12,7 @@ public sealed class ConfigurationResolverTests
 {
     private static readonly Instant T0 = Instant.Parse("2026-01-01T00:00:00Z");
     private static readonly ConfigKey DownPayment = ConfigKey.Parse("bil.down_payment.percent");
-    private static readonly LegalEntityId Entity = LegalEntityId.Parse("GR-TEST");
+    private static readonly LegalEntityCode Entity = LegalEntityCode.Parse("GR-TEST");
     private static readonly Jurisdiction Greece = Jurisdiction.Parse("GR");
     private static readonly string[] Regions = ["a", "b", "c", "d", "e"];
 

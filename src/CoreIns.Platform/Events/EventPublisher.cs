@@ -29,7 +29,7 @@ public sealed record OutgoingEvent(EventDescriptor Descriptor, string AggregateT
     public Guid? CausationId { get; init; }
 
     /// <summary>Overrides the context's legal entity.</summary>
-    public LegalEntityId? LegalEntity { get; init; }
+    public LegalEntityCode? LegalEntity { get; init; }
 
     /// <summary>Overrides the context's jurisdiction.</summary>
     public Jurisdiction? Jurisdiction { get; init; }
@@ -123,7 +123,7 @@ internal sealed class EventPublisher(
             AggregateId = outgoing.AggregateId,
             OccurredAt = outgoing.OccurredAt ?? now,
             RecordedAt = now,
-            LegalEntity = outgoing.LegalEntity ?? context.LegalEntity ?? Required<LegalEntityId>(stamp.Value.LegalEntity, "legal entity"),
+            LegalEntity = outgoing.LegalEntity ?? context.LegalEntity ?? Required<LegalEntityCode>(stamp.Value.LegalEntity, "legal entity"),
             Jurisdiction = outgoing.Jurisdiction ?? context.Jurisdiction ?? Required<Jurisdiction>(stamp.Value.Country, "jurisdiction"),
             ConfigurationHash = outgoing.ConfigurationHash ?? context.ConfigurationHash
                 ?? throw new EnvelopeValidationException(outgoing.Descriptor.EventType.Value, ["configurationHash is required: no hash is pinned for this unit of work"]),

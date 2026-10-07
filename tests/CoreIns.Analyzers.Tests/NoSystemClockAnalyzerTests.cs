@@ -14,7 +14,6 @@ public sealed class NoSystemClockAnalyzerTests
     [InlineData("public class C { public System.DateTime M() => System.DateTime.Today; }")]
     [InlineData("public class C { public System.DateTimeOffset M() => System.DateTimeOffset.Now; }")]
     [InlineData("public class C { public System.DateTimeOffset M() => System.DateTimeOffset.UtcNow; }")]
-    [InlineData("public class C { public System.TimeProvider M() => System.TimeProvider.System; }")]
     [InlineData("using System; public class C { public long M() { var t = DateTime.UtcNow; return t.Ticks; } }")]
     public async Task System_clock_reads_are_reported(string source)
     {

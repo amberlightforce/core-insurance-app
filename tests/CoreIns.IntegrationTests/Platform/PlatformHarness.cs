@@ -198,7 +198,7 @@ internal sealed class PlatformHarness : IAsyncDisposable
         context.ConfigurationHash = Hash;
         context.IdempotencyKey = key ?? IdempotencyKey.New();
         context.DryRun = dryRun;
-        context.LegalEntity = LegalEntityId.Parse("GR-TEST");
+        context.LegalEntity = LegalEntityCode.Parse("GR-TEST");
         context.Jurisdiction = Jurisdiction.Parse("GR");
         return await scope.ServiceProvider.GetRequiredService<ICommandHandler<CreateWidget, WidgetCreatedPayload>>()
             .HandleAsync(command, TestContext.Current.CancellationToken);

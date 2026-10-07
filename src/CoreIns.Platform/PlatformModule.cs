@@ -54,6 +54,9 @@ public static class PlatformModule
             ? ClockConfiguration.Create(configuration, sp.GetRequiredService<IHostEnvironment>())
             : SystemClock.Instance);
 
+        // Libraries written against the BCL TimeProvider (e.g. data protection key rings) follow IClock too.
+        services.TryAddSingleton<TimeProvider>(sp => new ClockTimeProvider(sp.GetRequiredService<IClock>()));
+
         services.TryAddScoped<RequestContext>();
         services.TryAddScoped<DbSession>();
         services.TryAddScoped<OutboxStaging>();

@@ -3,6 +3,20 @@ using CoreIns.SharedKernel.Json;
 
 namespace CoreIns.SharedKernel.Identifiers;
 
+/// <summary>Internal id (UUIDv7) of a LegalEntity (MKT; its human code is LegalEntityCode); owner MKT.</summary>
+[JsonConverter(typeof(EntityIdJsonConverter<LegalEntityId>))]
+public readonly record struct LegalEntityId(Guid Value) : IEntityId<LegalEntityId>
+{
+    /// <summary>A new UUIDv7 id.</summary>
+    public static LegalEntityId New() => new(EntityIds.NewGuid());
+
+    /// <summary>Wraps an existing id; the empty GUID is rejected.</summary>
+    public static LegalEntityId From(Guid value) => new(EntityIds.RequireNotEmpty(value));
+
+    /// <summary>The id in lower-case <c>D</c> format.</summary>
+    public override string ToString() => Value.ToString("D");
+}
+
 /// <summary>Internal id (UUIDv7) of a configuration value binding; owner MKT.</summary>
 [JsonConverter(typeof(EntityIdJsonConverter<ConfigBindingId>))]
 public readonly record struct ConfigBindingId(Guid Value) : IEntityId<ConfigBindingId>

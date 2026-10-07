@@ -50,7 +50,7 @@ public sealed record LayerNode(ConfigLayer Layer, string Name)
     public static LayerNode Country(Jurisdiction country) => new(ConfigLayer.Country, "country:" + country.Value);
 
     /// <summary>A legal-entity node.</summary>
-    public static LayerNode Entity(LegalEntityId entity) => new(ConfigLayer.LegalEntity, "entity:" + entity.Value);
+    public static LayerNode Entity(LegalEntityCode entity) => new(ConfigLayer.LegalEntity, "entity:" + entity.Value);
 
     /// <summary>A product node.</summary>
     public static LayerNode Product(ProductCode product) => new(ConfigLayer.ProductChannel, "product:" + product.Value);
@@ -75,7 +75,7 @@ public sealed record LayerNode(ConfigLayer Layer, string Name)
 /// <summary>The context a value is resolved for (REQ-MKT-001 inputs).</summary>
 /// <param name="LegalEntity">Legal entity.</param>
 /// <param name="Jurisdiction">Jurisdiction.</param>
-public sealed record ResolutionContext(LegalEntityId LegalEntity, Jurisdiction Jurisdiction)
+public sealed record ResolutionContext(LegalEntityCode LegalEntity, Jurisdiction Jurisdiction)
 {
     /// <summary>Group code (L1), if the entity belongs to one.</summary>
     public string? Group { get; init; }

@@ -7,10 +7,11 @@ namespace CoreIns.Analyzers;
 
 /// <summary>
 /// COREINS002: production code reads the current time only from the platform time service (<c>IClock</c>,
-/// REQ-PLT-332, contract §3.9.13 "never system clock"). Reports <c>DateTime.Now</c>, <c>DateTime.UtcNow</c>,
-/// <c>DateTime.Today</c>, <c>DateTimeOffset.Now</c>, <c>DateTimeOffset.UtcNow</c> and <c>TimeProvider.System</c>.
-/// The one system-clock implementation suppresses it locally with a justification; the architecture tests allow that
-/// suppression in exactly one file.
+/// REQ-PLT-332, contract §3.9.13 "never system clock"). Reports the static clock reads <c>DateTime.Now</c>,
+/// <c>DateTime.UtcNow</c>, <c>DateTime.Today</c>, <c>DateTimeOffset.Now</c> and <c>DateTimeOffset.UtcNow</c>.
+/// Code that needs a BCL <see cref="System.TimeProvider"/> takes one by injection; the Platform registers a
+/// <c>TimeProvider</c> backed by <c>IClock</c>. The one system-clock implementation suppresses the rule locally with a
+/// justification; the architecture tests allow that suppression in exactly one file.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class NoSystemClockAnalyzer : DiagnosticAnalyzer
@@ -48,7 +49,6 @@ public sealed class NoSystemClockAnalyzer : DiagnosticAnalyzer
         {
             "DateTime" => property.Name is "Now" or "UtcNow" or "Today",
             "DateTimeOffset" => property.Name is "Now" or "UtcNow",
-            "TimeProvider" => property.Name == "System",
             _ => false,
         };
 

@@ -52,7 +52,7 @@ public sealed class IdentifierTests
     [InlineData("GR01", true)]
     [InlineData("gr-test", false)]
     [InlineData("", false)]
-    public void Legal_entity_codes_are_upper_case(string code, bool valid) => LegalEntityId.TryParse(code, out _).ShouldBe(valid);
+    public void Legal_entity_codes_are_upper_case(string code, bool valid) => LegalEntityCode.TryParse(code, out _).ShouldBe(valid);
 
     [Fact]
     public void Business_numbers_are_opaque_but_never_blank_or_padded()

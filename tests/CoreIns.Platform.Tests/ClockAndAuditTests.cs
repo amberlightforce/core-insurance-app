@@ -67,7 +67,7 @@ public sealed class AuditHashTests
         Reason = reason,
         CorrelationId = CorrelationId.New(),
         BusinessKeys = BusinessKeys.Empty.With("claimId", "c-1"),
-        LegalEntity = LegalEntityId.Parse("GR-TEST"),
+        LegalEntity = LegalEntityCode.Parse("GR-TEST"),
         Jurisdiction = Jurisdiction.Parse("GR"),
         OccurredAt = Instant.Parse("2026-10-07T08:00:00Z"),
         RecordedAt = Instant.Parse("2026-10-07T08:00:01Z"),

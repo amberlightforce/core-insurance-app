@@ -128,11 +128,9 @@
    "points": null,
    "dependsOn": [],
    "status": "merged",
-   "owner": "merged locally (CI pending)",
+   "owner": "merged; CI green (run 37625282113)",
    "reviewAttempts": 2,
-   "blockers": [
-    "CI not yet run: GitHub 'workflow' scope missing on active account"
-   ]
+   "blockers": []
   },
   {
    "id": "F-1b",
@@ -167,8 +165,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "in review",
-   "owner": "reviewer: API contracts (attempt 2)",
+   "status": "building",
+   "owner": "events + OpenAPI MERGED; C# contract records after F-1b",
    "reviewAttempts": 2,
    "blockers": []
   },
@@ -186,9 +184,9 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "building",
-   "owner": "builder: finishing components + patterns",
-   "reviewAttempts": 0,
+   "status": "failed",
+   "owner": "builder: fixing review 1 defects",
+   "reviewAttempts": 1,
    "blockers": []
   },
   {
@@ -205,9 +203,9 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "not started",
-   "owner": null,
-   "reviewAttempts": 0,
+   "status": "merged",
+   "owner": "merged (review PASS attempt 3)",
+   "reviewAttempts": 2,
    "blockers": []
   },
   {
@@ -224,8 +222,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "failed",
-   "owner": "builder: final fix attempt (bounded outputs)",
+   "status": "building",
+   "owner": "rule engine + PDF/A spike MERGED; outbox throughput inside F-1b",
    "reviewAttempts": 2,
    "blockers": []
   },
