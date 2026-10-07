@@ -64,7 +64,6 @@
       "additionalProperties": false,
       "required": [
         "jobId",
-        "accountId",
         "productCode",
         "productVersion",
         "channel"
@@ -76,6 +75,7 @@
         },
         "accountId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
+          "description": "PTY account; absent until pty.Account exists (SL-POL, pre-release)",
           "x-classification": "P1",
           "x-personal-data": true
         },

@@ -15,7 +15,7 @@ internal static class PolicyTime
         var next = DateTime.SpecifyKind(local.AddYears(1), DateTimeKind.Unspecified);
         if (zone.IsInvalidTime(next))
         {
-            next = next.AddHours(1);
+            next = next.AddTicks(TimeSpan.TicksPerHour);
         }
 
         return Instant.FromUtcDateTime(TimeZoneInfo.ConvertTimeToUtc(next, zone));

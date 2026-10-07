@@ -1888,7 +1888,6 @@
     "dataClassification": "P1",
     "payload": {
       "jobId": "0192a9be-f577-7f46-8fc4-42e38e0e1a86",
-      "accountId": "0192be60-b066-787a-83bc-8e41a7c09f0c",
       "productCode": "SAMPLE_CODE",
       "productVersion": "1.0",
       "channel": "SAMPLE_CODE",

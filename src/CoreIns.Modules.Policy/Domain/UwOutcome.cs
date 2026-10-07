@@ -8,7 +8,7 @@ namespace CoreIns.Modules.Policy.Domain;
 /// derives the Referred flag from open blocking issues, and a decline reaches POL only as <c>uw.DeclineIssued</c>
 /// (REQ-POL-156). An issue blocks its point while Open, Rejected or Invalidated (BR-UW-001).
 /// </summary>
-internal static class Underwriting
+internal static class UwOutcome
 {
     private static readonly HashSet<string> BlockingStatuses = new(StringComparer.Ordinal) { "OPEN", "REJECTED", "INVALIDATED" };
 
