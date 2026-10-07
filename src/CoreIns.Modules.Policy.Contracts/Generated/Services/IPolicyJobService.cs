@@ -15,10 +15,10 @@ public interface IPolicyJobService
     /// <remarks>
     /// <para>Operation pol.Job.bind (command; HTTP POST /api/pol/v1/jobs/bind).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full; fully typed from REQ-POL-001, REQ-POL-003, REQ-POL-170. Wave W4.</para>
+    /// <para>Status: full; fully typed from REQ-POL-001, REQ-POL-003, REQ-POL-170, REQ-POL-182 (SL-POL). Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-GATE-FAILED (422), POL-ERR-PREEMPTED (409), POL-ERR-REBASE-REQUIRED (409), POL-ERR-QUOTE-STALE (409), POL-ERR-CONFLICTS-OPEN (409), POL-ERR-HUMAN-CONFIRMATION-REQUIRED (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-QUICK-QUOTE-NOT-BINDABLE (422), POL-ERR-ILLEGAL-TRANSITION (409), POL-ERR-STALE (409), POL-ERR-NOT-FOUND (404), POL-ERR-GATE-FAILED (422), POL-ERR-PREEMPTED (409), POL-ERR-REBASE-REQUIRED (409), POL-ERR-QUOTE-STALE (409), POL-ERR-CONFLICTS-OPEN (409), POL-ERR-HUMAN-CONFIRMATION-REQUIRED (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobBindResponse> BindAsync(global::CoreIns.Modules.Policy.Contracts.Api.JobBindRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -52,10 +52,10 @@ public interface IPolicyJobService
     /// <remarks>
     /// <para>Operation pol.Job.quote (command; HTTP POST /api/pol/v1/jobs/quote).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full; fully typed from REQ-POL-011, REQ-POL-157. Wave W4.</para>
+    /// <para>Status: full; fully typed from REQ-POL-011, REQ-POL-157, REQ-POL-126 (SL-POL). Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-QUICK-QUOTE-NOT-BINDABLE (422), POL-ERR-RATING (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-VALIDATION (422), POL-ERR-ILLEGAL-TRANSITION (409), POL-ERR-STALE (409), POL-ERR-NOT-FOUND (404), POL-ERR-QUICK-QUOTE-NOT-BINDABLE (422), POL-ERR-RATING (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobQuoteResponse> QuoteAsync(global::CoreIns.Modules.Policy.Contracts.Api.JobQuoteRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -63,10 +63,10 @@ public interface IPolicyJobService
     /// <remarks>
     /// <para>Operation pol.Job.updateDraft (command; HTTP POST /api/pol/v1/jobs/update-draft).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W4.</para>
+    /// <para>Status: full; fully typed from REQ-POL-010, REQ-POL-153, REQ-POL-277, REQ-POL-280, REQ-POL-292 (SL-POL). Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-LOCKED (409), POL-ERR-VALIDATION (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-STALE (409), POL-ERR-ILLEGAL-TRANSITION (409), POL-ERR-NOT-FOUND (404), POL-ERR-LOCKED (409), POL-ERR-VALIDATION (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobUpdateDraftResponse> UpdateDraftAsync(global::CoreIns.Modules.Policy.Contracts.Api.JobUpdateDraftRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 

@@ -79,6 +79,12 @@ paths:
       - MCP tool quote_motor_save
       x-permission: pol.Submission.create
       x-error-codes:
+      - code: POL-ERR-VALIDATION
+        status: 422
+      - code: POL-ERR-EFFDATE-LIMIT
+        status: 422
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       - code: POL-ERR-PRODUCT-UNAVAILABLE
         status: 503
       - code: POL-ERR-PRODUCER-INVALID
@@ -150,6 +156,7 @@ paths:
       - W4-POL-04
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-POL-010, REQ-POL-153, REQ-POL-277, REQ-POL-280, REQ-POL-292 (SL-POL)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -163,6 +170,12 @@ paths:
       - CHN facade POST /api/chn/v1/quotes
       x-permission: pol.Job.updateDraft
       x-error-codes:
+      - code: POL-ERR-STALE
+        status: 409
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       - code: POL-ERR-LOCKED
         status: 409
       - code: POL-ERR-VALIDATION
@@ -224,7 +237,7 @@ paths:
       - W4-POL-04
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-POL-011, REQ-POL-157
+      x-typed: REQ-POL-011, REQ-POL-157, REQ-POL-126 (SL-POL)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -239,6 +252,14 @@ paths:
       - MCP tool quote_motor_dry_run
       x-permission: pol.Job.quote
       x-error-codes:
+      - code: POL-ERR-VALIDATION
+        status: 422
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
+      - code: POL-ERR-STALE
+        status: 409
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       - code: POL-ERR-QUICK-QUOTE-NOT-BINDABLE
         note: bind only
         status: 422
@@ -560,7 +581,7 @@ paths:
       - W4-POL-05
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-POL-001, REQ-POL-003, REQ-POL-170
+      x-typed: REQ-POL-001, REQ-POL-003, REQ-POL-170, REQ-POL-182 (SL-POL)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -577,6 +598,14 @@ paths:
       - MCP tool quote_motor_bind
       x-permission: pol.Job.bind
       x-error-codes:
+      - code: POL-ERR-QUICK-QUOTE-NOT-BINDABLE
+        status: 422
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
+      - code: POL-ERR-STALE
+        status: 409
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       - code: POL-ERR-GATE-FAILED
         status: 422
       - code: POL-ERR-PREEMPTED
@@ -1121,6 +1150,7 @@ paths:
       - W4-POL-05
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-POL-331 (SL-POL)
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1129,7 +1159,9 @@ paths:
       x-exposure:
       - ui
       x-permission: pol.Job.get
-      x-error-codes: []
+      x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-05 §9.1 l.1783
       parameters:
@@ -2462,6 +2494,7 @@ paths:
       - W4-POL-04
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-POL-002, REQ-POL-084 (SL-POL)
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2541,6 +2574,7 @@ paths:
       - W4-POL-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-POL-002, REQ-POL-084 (SL-POL)
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -3539,34 +3573,56 @@ components:
       properties:
         accountId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PTY account. Optional until pty.Account is built (SL-POL); the policyholder party is then the reference
+        policyholderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PTY party of the policyholder (PrimaryNamedInsured, REQ-POL-288); checked through pty.Party.get
         product:
           $ref: ../events/common.schema.json#/$defs/Code
         producerCode:
           $ref: ../events/common.schema.json#/$defs/Code
+          description: Producer of record; checked through pty.ProducerCode.validate (REQ-POL-174). Absent for direct business
         channel:
           $ref: ../events/common.schema.json#/$defs/Code
           description: R-84 channel code (e.g. STAFF, WEB_DIRECT, BROKER_PORTAL, PARTNER_API, AI_AGENT)
         effectiveAt:
           $ref: ../events/common.schema.json#/$defs/Instant
+          description: Requested term start; never before now for new business (REQ-POL-137)
         quoteType:
           type: string
           enum:
           - QUICK
           - FULL
           description: Quick or full quote (REQ-POL-011)
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+          description: Term currency; defaults to the stamp's configured currency
       required:
-      - accountId
+      - policyholderPartyId
       - product
       - channel
       - effectiveAt
       - quoteType
       description: 'Typed from REQ-POL-001, REQ-POL-145. PRD inputs: "accountId, product, producerCode, channel, effectiveAt,
-        quoteType"'
+        quoteType". SL-POL: the term is annual (REQ-POL-040 subset).'
     SubmissionCreateResponse:
       type: object
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+        jobNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: Job (quote) number from PLT numbering (REQ-POL-047)
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Policy id reserved for the submission (event ordering key); the policy exists once bound
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        productVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        expirationAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Term end (exclusive)
         describeModel:
           $ref: ../events/common.schema.json#/$defs/OpenObject
           description: pfc.Product.describe model
@@ -3604,40 +3660,308 @@ components:
           description: Resolution manifest (REQ-PFC-221)
       required:
       - jobId
+      - jobNumber
+      - policyId
+      - state
+      - productVersion
+      - expirationAt
       - versionNo
       - manifest
       description: 'Typed from REQ-POL-001, REQ-POL-145. PRD outputs: "jobId, describe model, version, manifest"'
+    JobStateCode:
+      type: string
+      enum:
+      - DRAFT
+      - QUOTED
+      - BOUND
+      - SCHEDULED
+      - RESCINDED
+      - WITHDRAWN
+      - DECLINED
+      - NOT_TAKEN
+      - EXPIRED
+      description: Job state (contract §3.2.4, D-CON-08b)
+    Vehicle:
+      type: object
+      properties:
+        locator:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Static locator (UUIDv7, REQ-POL-036); assigned by POL when absent
+        plate:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Registration plate as entered
+        plateNormalised:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Plate normalised by IdValidator VEHICLE_PLATE (REQ-POL-279); output only
+        vin:
+          $ref: ../events/common.schema.json#/$defs/Text
+        make:
+          $ref: ../events/common.schema.json#/$defs/Text
+        model:
+          $ref: ../events/common.schema.json#/$defs/Text
+        firstRegistrationYear:
+          type: integer
+          minimum: 1900
+          maximum: 2200
+        use:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Vehicle use code from the PFC vehicle element
+        value:
+          $ref: ../events/common.schema.json#/$defs/Money
+        fields:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Further PFC vehicle element fields (REQ-POL-277, REQ-POL-299)
+      required:
+      - plate
+      description: Vehicle element of the risk tree (REQ-POL-277)
+    Driver:
+      type: object
+      properties:
+        locator:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Static locator (UUIDv7, REQ-POL-036); assigned by POL when absent
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PTY person of the driver (REQ-POL-280)
+        driverType:
+          type: string
+          enum:
+          - MAIN
+          - OCCASIONAL
+          - EXCLUDED
+          description: Excluded drivers are named persons not covered (REQ-POL-283)
+        yearFirstLicensed:
+          type: integer
+          minimum: 1900
+          maximum: 2200
+        vehicleLocator:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Vehicle the driver is assigned to (REQ-POL-282)
+        usagePercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        fields:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Further PFC driver element fields (REQ-POL-299); gender is never captured
+      required:
+      - partyId
+      - driverType
+      description: PolicyDriver element of the risk tree (REQ-POL-280)
+    CoverageSelection:
+      type: object
+      properties:
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        elementLocator:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Element the coverage attaches to (a vehicle locator); absent for policy-level coverages
+        selected:
+          type: boolean
+        options:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Coverage terms and options from the PFC catalogue (REQ-POL-292)
+      required:
+      - coverageCode
+      - selected
+      description: A coverage selection (REQ-POL-292)
+    QuestionAnswers:
+      type: object
+      properties:
+        questionSetCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        questionSetVersion:
+          $ref: ../events/common.schema.json#/$defs/Text
+        answers:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+      required:
+      - questionSetCode
+      - answers
+      description: Answered question set stored on the quote version (REQ-POL-149)
+    RiskTree:
+      type: object
+      properties:
+        vehicles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vehicle'
+        drivers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Driver'
+        coverages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoverageSelection'
+        questionSets:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAnswers'
+      required:
+      - vehicles
+      - drivers
+      - coverages
+      - questionSets
+      description: Draft risk tree of a quote version (REQ-POL-010); frozen into the segment snapshot at bind
+    DraftInstruction:
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - SET_VEHICLE
+          - REMOVE_VEHICLE
+          - SET_DRIVER
+          - REMOVE_DRIVER
+          - SET_COVERAGES
+          - SET_ANSWERS
+          description: SET_* adds the element or replaces the one with the same locator; SET_COVERAGES replaces all selections
+        vehicle:
+          $ref: '#/components/schemas/Vehicle'
+        driver:
+          $ref: '#/components/schemas/Driver'
+        locator:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Element to remove (REMOVE_*)
+        coverages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoverageSelection'
+        questionSet:
+          $ref: '#/components/schemas/QuestionAnswers'
+      required:
+      - op
+      description: One intent edit of the draft risk tree
+    ChargeLine:
+      type: object
+      properties:
+        chargeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Present once frozen on a transaction
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        elementLocator:
+          $ref: ../events/common.schema.json#/$defs/Text
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: PREMIUM, TAX or LEVY (from RAT)
+        annualRate:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Annual rate from the RAT worksheet
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Term amount, rounded through mkt.Rounding.apply (REQ-POL-123)
+      required:
+      - elementLocator
+      - coverageCode
+      - chargeType
+      - chargeCategory
+      - annualRate
+      - amount
+      description: A charge line of a quote or bound transaction (REQ-POL-115, REQ-POL-126)
+    UwIssue:
+      type: object
+      properties:
+        issueId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        issueType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Issue type code
+        severity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        blockingPoint:
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
+        issueKey:
+          type: string
+          description: Issue key, e.g. `driver:<driverRef>` (REQ-UW-001)
+        lane:
+          $ref: ../events/common.schema.json#/$defs/Code
+        explanationKeys:
+          type: array
+          items:
+            type: string
+        approvalStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Issue state (PRD-04 §7.3)
+      required:
+      - issueId
+      - issueType
+      - blockingPoint
+      - issueKey
+      - approvalStatus
+      description: UW issue as returned by evaluate (REQ-UW-001)
     JobUpdateDraftRequest:
       type: object
-      description: 'pol.Job.updateDraft request. PRD inputs: "jobId, versionNo, instructions[], expectedDraftVersion"'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
         versionNo:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versionNo"'
+          type: integer
+          minimum: 1
+          description: Quote version being edited
+        expectedDraftVersion:
+          type: integer
+          minimum: 0
+          description: Draft version the caller edited (optimistic concurrency, POL-ERR-STALE)
         instructions:
           type: array
+          minItems: 1
+          maxItems: 100
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instructions[]"'
-        expectedDraftVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "expectedDraftVersion"'
+            $ref: '#/components/schemas/DraftInstruction'
+      required:
+      - jobId
+      - versionNo
+      - expectedDraftVersion
+      - instructions
+      description: 'pol.Job.updateDraft request. PRD inputs: "jobId, versionNo, instructions[], expectedDraftVersion". Editing
+        a Quoted job returns it to Draft on a new quote version (REQ-POL-153, D-CON-08c).'
     JobUpdateDraftResponse:
       type: object
-      description: 'pol.Job.updateDraft result. PRD outputs: "draft state, validation, premium preview"'
       properties:
-        draftState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "draft state"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+          minimum: 1
+          description: Quote version now in Draft (a new one when a Quoted job was edited)
+        draftVersion:
+          type: integer
+          minimum: 0
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        riskTree:
+          $ref: '#/components/schemas/RiskTree'
         validation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validation"'
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              code:
+                $ref: ../events/common.schema.json#/$defs/Code
+              message:
+                type: string
+            required:
+            - field
+            - code
+          description: Findings that block quoting but not saving the draft
         premiumPreview:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "premium preview"'
+          description: 'PRD: "premium preview" (background pricing, REQ-POL-163; not in SL-POL)'
+      required:
+      - jobId
+      - versionNo
+      - draftVersion
+      - state
+      - riskTree
+      - validation
+      description: 'pol.Job.updateDraft result. PRD outputs: "draft state, validation, premium preview"'
     JobQuoteRequest:
       type: object
       properties:
@@ -3656,53 +3980,62 @@ components:
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+        quoteId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         versionNo:
           type: integer
           description: Quote version
           minimum: 1
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        decision:
+          type: string
+          enum:
+          - ACCEPT
+          - REFER
+          description: UW outcome at PRE_QUOTE. REFER with state DRAFT = blocked at PRE_QUOTE; with QUOTED = bind blocked until
+            approval. Declines arrive as uw.DeclineIssued (REQ-POL-156)
+        referred:
+          type: boolean
+          description: Referred flag (blocking UW issues open)
+        bindable:
+          type: boolean
+          description: False for quick quotes and when RAT says so (REQ-POL-148)
         premium:
           $ref: ../events/common.schema.json#/$defs/Money
+        taxes:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Taxes and levies
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+        charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeLine'
+        worksheetId:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: RAT worksheet (D-API-12)
         issues:
           type: array
           items:
-            type: object
-            properties:
-              issueId:
-                $ref: ../events/common.schema.json#/$defs/Uuid
-              issueType:
-                $ref: ../events/common.schema.json#/$defs/Code
-                description: Issue type code
-              severity:
-                $ref: ../events/common.schema.json#/$defs/Code
-              blockingPoint:
-                $ref: ../events/common.schema.json#/$defs/BlockingPoint
-              issueKey:
-                type: string
-                description: Issue key, e.g. `driver:<driverRef>` (REQ-UW-001)
-              lane:
-                $ref: ../events/common.schema.json#/$defs/Code
-              explanationKeys:
-                type: array
-                items:
-                  type: string
-              approvalStatus:
-                $ref: ../events/common.schema.json#/$defs/Code
-                description: Issue state (PRD-04 §7.3)
-            required:
-            - issueId
-            - issueType
-            - blockingPoint
-            - issueKey
-            - approvalStatus
-            description: UW issue as returned by evaluate (REQ-UW-001)
+            $ref: '#/components/schemas/UwIssue'
           description: UW issues by blocking point
         validUntil:
           $ref: ../events/common.schema.json#/$defs/Instant
           description: Quote validity
       required:
       - jobId
+      - quoteId
       - versionNo
+      - state
+      - decision
+      - referred
+      - bindable
       - premium
+      - taxes
+      - total
+      - charges
+      - worksheetId
       - issues
       description: 'Typed from REQ-POL-011, REQ-POL-157. PRD outputs: "quote version, premium, issues, validity"'
     JobRequoteRequest:
@@ -3804,13 +4137,13 @@ components:
           minimum: 1
         paymentPlanOption:
           $ref: ../events/common.schema.json#/$defs/Code
-          description: BIL plan code (bil.PaymentPlan.select)
+          description: BIL plan code (bil.PaymentPlan.select); carried to BIL in PolicyBound.paymentPlanRef
         holdIssuance:
           type: boolean
           description: Hold issuance
         confirmation:
           type: boolean
-          description: Human confirmation (POL-ERR-HUMAN-CONFIRMATION-REQUIRED)
+          description: Human confirmation (POL-ERR-HUMAN-CONFIRMATION-REQUIRED, REQ-POL-181)
         disclosureEvidence:
           type: object
           properties:
@@ -3821,33 +4154,38 @@ components:
       required:
       - jobId
       - versionNo
+      - paymentPlanOption
       description: 'Typed from REQ-POL-001, REQ-POL-003, REQ-POL-170. PRD inputs: "jobId, versionNo, paymentPlanOption, holdIssuance,
         confirmation, disclosureEvidence (CHN presentation receipt, optional)"'
     JobBindResponse:
       type: object
       properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          $ref: '#/components/schemas/JobStateCode'
         transactionId:
           $ref: ../events/common.schema.json#/$defs/Uuid
         termId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+        termNumber:
+          type: integer
+          minimum: 1
+        termState:
+          $ref: '#/components/schemas/TermStateCode'
         policyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: Gapless policy number from PLT numbering, allocated in the bind transaction
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Transaction time (knownAt) of the bind
         chargeDeltas:
           type: array
           items:
-            type: object
-            properties:
-              chargeId:
-                $ref: ../events/common.schema.json#/$defs/Uuid
-              elementId:
-                type: string
-              chargeType:
-                $ref: ../events/common.schema.json#/$defs/Code
-              amount:
-                $ref: ../events/common.schema.json#/$defs/Money
-            required:
-            - chargeType
-            - amount
+            $ref: '#/components/schemas/ChargeLine'
+          description: Charge lines frozen on the issuance transaction and emitted as ChargeDeltaEmitted
         gateResults:
           type: array
           items:
@@ -3877,10 +4215,332 @@ components:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: doc.ProofOfCover.issue result
       required:
+      - jobId
+      - state
       - gateResults
       description: 'On a failed gate the job stays Quoted, no transaction exists and gateResults explain why (REQ-POL-003)
         Typed from REQ-POL-001, REQ-POL-003, REQ-POL-170. PRD outputs: "transaction, term, deltas, gate results, cover note
         ref"'
+    TermStateCode:
+      type: string
+      enum:
+      - SCHEDULED
+      - IN_FORCE
+      - PENDING_CANCELLATION
+      - CANCELLED
+      - EXPIRED
+      - VOIDED
+      - REWRITTEN
+      description: PolicyTerm state (contract §3.2.4, D-CON-02); Scheduled → InForce is derived on read (REQ-POL-131)
+    QuoteVersionView:
+      type: object
+      properties:
+        quoteId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+          minimum: 1
+        state:
+          type: string
+          enum:
+          - DRAFT
+          - QUOTED
+          - SUPERSEDED
+          - EXPIRED
+        draftVersion:
+          type: integer
+          minimum: 0
+        riskTree:
+          $ref: '#/components/schemas/RiskTree'
+        premium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        taxes:
+          $ref: ../events/common.schema.json#/$defs/Money
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+        charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeLine'
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/UwIssue'
+        worksheetId:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        quotedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        validUntil:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - quoteId
+      - versionNo
+      - state
+      - draftVersion
+      - riskTree
+      - charges
+      - issues
+    JobView:
+      type: object
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        jobNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        jobType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        referred:
+          type: boolean
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        policyholderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        productVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        quoteType:
+          type: string
+          enum:
+          - QUICK
+          - FULL
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        expirationAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        currentVersionNo:
+          type: integer
+          minimum: 1
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Bound transaction
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuoteVersionView'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - jobId
+      - jobNumber
+      - jobType
+      - state
+      - referred
+      - policyId
+      - policyholderPartyId
+      - productCode
+      - productVersion
+      - channel
+      - quoteType
+      - effectiveAt
+      - expirationAt
+      - currency
+      - currentVersionNo
+      - versions
+      - createdAt
+      description: A job with its quote versions (REQ-POL-331)
+    JobGetResponse:
+      type: object
+      description: 'pol.Job.get result. PRD outputs: "jobs"'
+      properties:
+        job:
+          $ref: '#/components/schemas/JobView'
+      required:
+      - job
+    PolicyView:
+      type: object
+      properties:
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        policyholderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        jurisdiction:
+          $ref: ../events/common.schema.json#/$defs/CountryCode
+        status:
+          $ref: '#/components/schemas/TermStateCode'
+          description: Display status derived from the term valid at validAt (REQ-POL-132)
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - policyId
+      - policyNumber
+      - productCode
+      - policyholderPartyId
+      - legalEntity
+      - jurisdiction
+      - recordedAt
+    TermView:
+      type: object
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        termNumber:
+          type: integer
+          minimum: 1
+        period:
+          $ref: ../events/common.schema.json#/$defs/TimeWindow
+          description: Valid time of the term, half-open (REQ-POL-041)
+        state:
+          $ref: '#/components/schemas/TermStateCode'
+        productVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        ratingArtefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        resolutionHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        configurationHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        paymentPlanRef:
+          $ref: ../events/common.schema.json#/$defs/Text
+        writtenDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Transaction time the term became known
+      required:
+      - termId
+      - termNumber
+      - period
+      - state
+      - productVersion
+      - artefactHash
+      - resolutionHash
+      - configurationHash
+      - currency
+      - paymentPlanRef
+      - writtenDate
+      - recordedAt
+    SegmentView:
+      type: object
+      properties:
+        segmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        validPeriod:
+          $ref: ../events/common.schema.json#/$defs/TimeWindow
+        recordedPeriod:
+          $ref: ../events/common.schema.json#/$defs/TimeWindow
+        snapshotHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: SHA-256 of the RFC 8785 canonical snapshot (REQ-POL-080)
+      required:
+      - segmentId
+      - transactionId
+      - validPeriod
+      - recordedPeriod
+      - snapshotHash
+    TransactionView:
+      type: object
+      properties:
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          $ref: ../events/common.schema.json#/$defs/Code
+        sequence:
+          type: integer
+          minimum: 1
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Valid time (validAt) of the transaction
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Transaction time (knownAt) of the transaction
+        premium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        taxes:
+          $ref: ../events/common.schema.json#/$defs/Money
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - transactionId
+      - kind
+      - sequence
+      - effectiveAt
+      - recordedAt
+      - premium
+      - taxes
+      - total
+    PolicyGetResponse:
+      type: object
+      description: 'pol.Policy.get result as of validAt / knownAt. PRD outputs: "policy, term, segment, risk tree". Term, segment
+        and risk tree are absent when nothing is valid at validAt as known at knownAt.'
+      properties:
+        policy:
+          $ref: '#/components/schemas/PolicyView'
+        term:
+          $ref: '#/components/schemas/TermView'
+        segment:
+          $ref: '#/components/schemas/SegmentView'
+        riskTree:
+          $ref: '#/components/schemas/RiskTree'
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionView'
+          description: Transactions of the term as known at knownAt
+        charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeLine'
+          description: Charge lines of the term as known at knownAt
+      required:
+      - policy
+      - transactions
+      - charges
+    TermGetResponse:
+      type: object
+      description: 'pol.Term.get result as of validAt / knownAt. PRD outputs: "policy, term, segment, risk tree"'
+      properties:
+        policy:
+          $ref: '#/components/schemas/PolicyView'
+        term:
+          $ref: '#/components/schemas/TermView'
+        segment:
+          $ref: '#/components/schemas/SegmentView'
+        riskTree:
+          $ref: '#/components/schemas/RiskTree'
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionView'
+        charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeLine'
+      required:
+      - policy
+      - term
+      - transactions
+      - charges
     JobWithdrawRequest:
       type: object
       description: 'pol.Job.withdraw request. PRD inputs: "jobId, reasonCode, text"'
@@ -4002,13 +4662,6 @@ components:
             items:
               $ref: '#/components/schemas/JobListItem'
       description: Page of pol.Job.list results (cursor pagination, contract §3.5.5)
-    JobGetResponse:
-      type: object
-      description: 'pol.Job.get result. PRD outputs: "jobs"'
-      properties:
-        jobs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "jobs"'
     PolicyChangeCreateRequest:
       type: object
       description: 'pol.PolicyChange.create request. PRD inputs: "policyId, effectiveAt, description"'
@@ -4446,38 +5099,6 @@ components:
         rePointMap:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "re-point map"'
-    PolicyGetResponse:
-      type: object
-      description: 'pol.Policy.get result. PRD outputs: "policy, term, segment, risk tree"'
-      properties:
-        policy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policy"'
-        term:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term"'
-        segment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "segment"'
-        riskTree:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "risk tree"'
-    TermGetResponse:
-      type: object
-      description: 'pol.Term.get result. PRD outputs: "policy, term, segment, risk tree"'
-      properties:
-        policy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policy"'
-        term:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term"'
-        segment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "segment"'
-        riskTree:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "risk tree"'
     TermTimelineResponse:
       type: object
       description: 'pol.Term.timeline result. PRD outputs: "policy, term, segment, risk tree"'

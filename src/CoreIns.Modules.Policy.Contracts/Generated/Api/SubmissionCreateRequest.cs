@@ -4,19 +4,24 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>Typed from REQ-POL-001, REQ-POL-145. PRD inputs: "accountId, product, producerCode, channel, effectiveAt, quoteType"</summary>
+/// <summary>Typed from REQ-POL-001, REQ-POL-145. PRD inputs: "accountId, product, producerCode, channel, effectiveAt, quoteType". SL-POL: the term is annual (REQ-POL-040 subset).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SubmissionCreateRequest
 {
-    /// <summary>Contract member 'accountId'.</summary>
+    /// <summary>PTY account. Optional until pty.Account is built (SL-POL); the policyholder party is then the reference</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("accountId")]
-    public required global::CoreIns.SharedKernel.Identifiers.AccountId AccountId { get; init; }
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.AccountId? AccountId { get; init; }
+
+    /// <summary>PTY party of the policyholder (PrimaryNamedInsured, REQ-POL-288); checked through pty.Party.get</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyholderPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PolicyholderPartyId { get; init; }
 
     /// <summary>Contract member 'product'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("product")]
     public required string Product { get; init; }
 
-    /// <summary>Contract member 'producerCode'.</summary>
+    /// <summary>Producer of record; checked through pty.ProducerCode.validate (REQ-POL-174). Absent for direct business</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("producerCode")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? ProducerCode { get; init; }
@@ -25,13 +30,18 @@ public sealed record SubmissionCreateRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
     public required string Channel { get; init; }
 
-    /// <summary>Contract member 'effectiveAt'.</summary>
+    /// <summary>Requested term start; never before now for new business (REQ-POL-137)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("effectiveAt")]
     public required global::CoreIns.SharedKernel.Instant EffectiveAt { get; init; }
 
     /// <summary>Quick or full quote (REQ-POL-011)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("quoteType")]
     public required QuoteTypeValue QuoteType { get; init; }
+
+    /// <summary>Term currency; defaults to the stamp's configured currency</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Currency? Currency { get; init; }
 
     /// <summary>Quick or full quote (REQ-POL-011)</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<QuoteTypeValue>))]

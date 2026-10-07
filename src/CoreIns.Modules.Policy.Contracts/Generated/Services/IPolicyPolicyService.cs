@@ -15,7 +15,7 @@ public interface IPolicyPolicyService
     /// <remarks>
     /// <para>Operation pol.Policy.get (query; HTTP GET /api/pol/v1/policies/{id}).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W4.</para>
+    /// <para>Status: full; fully typed from REQ-POL-002, REQ-POL-084 (SL-POL). Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN, CLM, CMP, DAT, DOC, FIN, MIG, PTY, RI.</para>
     /// <para>Errors: POL-ERR-NOT-FOUND (404).</para>
     /// </remarks>

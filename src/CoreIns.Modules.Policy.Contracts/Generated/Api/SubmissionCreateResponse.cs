@@ -12,6 +12,26 @@ public sealed record SubmissionCreateResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
     public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
+    /// <summary>Job (quote) number from PLT numbering (REQ-POL-047)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobNumber")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobNumber JobNumber { get; init; }
+
+    /// <summary>Policy id reserved for the submission (event ordering key); the policy exists once bound</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyId PolicyId { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>Contract member 'productVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productVersion")]
+    public required global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber ProductVersion { get; init; }
+
+    /// <summary>Term end (exclusive)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expirationAt")]
+    public required global::CoreIns.SharedKernel.Instant ExpirationAt { get; init; }
+
     /// <summary>pfc.Product.describe model</summary>
     /// <remarks>
     /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>

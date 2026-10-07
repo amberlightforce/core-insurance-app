@@ -12,60 +12,70 @@ public sealed record JobQuoteResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
     public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
+    /// <summary>Contract member 'quoteId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("quoteId")]
+    public required global::CoreIns.SharedKernel.Identifiers.QuoteId QuoteId { get; init; }
+
     /// <summary>Quote version</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
     public required int VersionNo { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>UW outcome at PRE_QUOTE. REFER with state DRAFT = blocked at PRE_QUOTE; with QUOTED = bind blocked until approval. Declines arrive as uw.DeclineIssued (REQ-POL-156)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    public required DecisionValue Decision { get; init; }
+
+    /// <summary>Referred flag (blocking UW issues open)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("referred")]
+    public required bool Referred { get; init; }
+
+    /// <summary>False for quick quotes and when RAT says so (REQ-POL-148)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("bindable")]
+    public required bool Bindable { get; init; }
 
     /// <summary>Contract member 'premium'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("premium")]
     public required global::CoreIns.SharedKernel.Money Premium { get; init; }
 
+    /// <summary>Taxes and levies</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("taxes")]
+    public required global::CoreIns.SharedKernel.Money Taxes { get; init; }
+
+    /// <summary>Contract member 'total'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("total")]
+    public required global::CoreIns.SharedKernel.Money Total { get; init; }
+
+    /// <summary>Contract member 'charges'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("charges")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.ChargeLine> Charges { get; init; }
+
+    /// <summary>RAT worksheet (D-API-12)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("worksheetId")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash WorksheetId { get; init; }
+
     /// <summary>UW issues by blocking point</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
-    public required global::System.Collections.Generic.IReadOnlyList<IssueItem> Issues { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.UwIssue> Issues { get; init; }
 
     /// <summary>Quote validity</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("validUntil")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Instant? ValidUntil { get; init; }
 
-    /// <summary>UW issue as returned by evaluate (REQ-UW-001)</summary>
+    /// <summary>UW outcome at PRE_QUOTE. REFER with state DRAFT = blocked at PRE_QUOTE; with QUOTED = bind blocked until approval. Declines arrive as uw.DeclineIssued (REQ-POL-156)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
-    public sealed record IssueItem
+    public enum DecisionValue
     {
-        /// <summary>Contract member 'issueId'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("issueId")]
-        public required global::CoreIns.SharedKernel.Identifiers.UwIssueId IssueId { get; init; }
+        /// <summary><c>ACCEPT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACCEPT")]
+        Accept,
 
-        /// <summary>Issue type code</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("issueType")]
-        public required string IssueType { get; init; }
-
-        /// <summary>Contract member 'severity'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("severity")]
-        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        public string? Severity { get; init; }
-
-        /// <summary>Contract member 'blockingPoint'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("blockingPoint")]
-        public required global::CoreIns.Platform.Contracts.Common.BlockingPoint BlockingPoint { get; init; }
-
-        /// <summary>Issue key, e.g. `driver:&lt;driverRef&gt;` (REQ-UW-001)</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("issueKey")]
-        public required string IssueKey { get; init; }
-
-        /// <summary>Contract member 'lane'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("lane")]
-        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        public string? Lane { get; init; }
-
-        /// <summary>Contract member 'explanationKeys'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("explanationKeys")]
-        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        public global::System.Collections.Generic.IReadOnlyList<string>? ExplanationKeys { get; init; }
-
-        /// <summary>Issue state (PRD-04 §7.3)</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("approvalStatus")]
-        public required string ApprovalStatus { get; init; }
+        /// <summary><c>REFER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFER")]
+        Refer,
     }
 }

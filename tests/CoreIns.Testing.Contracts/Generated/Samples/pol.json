@@ -35,14 +35,24 @@
       "key": "value"
     },
     "pol.Job.bind": {
+      "jobId": "019290b6-3ea3-78ac-8383-44c77f5a005b",
+      "state": "DRAFT",
       "transactionId": "01928e57-fa2c-7132-809a-4f7421445777",
       "termId": "0192074e-4191-7c1c-8b5b-c93abf6cadc6",
+      "termNumber": 1,
+      "termState": "SCHEDULED",
       "policyId": "01923f2f-1575-785a-8302-103abb4151d4",
+      "policyNumber": "SAMPLE-000001",
+      "recordedAt": "2026-10-07T09:00:00Z",
       "chargeDeltas": [
         {
           "chargeId": "0192e1e0-af93-7b04-8d2c-a6d05a868dc5",
-          "elementId": "sample",
+          "transactionId": "019261ed-2921-7a68-8206-9bd2678cfade",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
           "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
@@ -75,11 +85,40 @@
     },
     "pol.Job.quote": {
       "jobId": "0192ee18-f32e-7fb2-8038-7e58b1b4288f",
+      "quoteId": "019243b4-7e93-7d0c-83f2-956f71126d92",
       "versionNo": 1,
+      "state": "DRAFT",
+      "decision": "ACCEPT",
+      "referred": true,
+      "bindable": true,
       "premium": {
         "amount": "120.50",
         "currency": "EUR"
       },
+      "taxes": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "charges": [
+        {
+          "chargeId": "0192fdad-ad03-79ed-8cad-2e1a690d0a8a",
+          "transactionId": "0192b817-8f5a-7642-8a71-e6a389111878",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "issues": [
         {
           "issueId": "01928e4f-9c2b-7663-89c9-220406b813e9",
@@ -97,8 +136,70 @@
       "validUntil": "2026-10-07T09:00:00Z"
     },
     "pol.Job.updateDraft": {
-      "draftState": "unspecified",
-      "validation": "unspecified",
+      "jobId": "01921855-41d9-7752-8ad7-bde9a93d257a",
+      "versionNo": 1,
+      "draftVersion": 1,
+      "state": "DRAFT",
+      "riskTree": {
+        "vehicles": [
+          {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "drivers": [
+          {
+            "locator": "Sample text",
+            "partyId": "01922940-939a-7890-8831-cd1f0b313c00",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "coverageCode": "SAMPLE_CODE",
+            "elementLocator": "Sample text",
+            "selected": true,
+            "options": {
+              "note": "sample"
+            }
+          }
+        ],
+        "questionSets": [
+          {
+            "questionSetCode": "SAMPLE_CODE",
+            "questionSetVersion": "Sample text",
+            "answers": {
+              "note": "sample"
+            }
+          }
+        ]
+      },
+      "validation": [
+        {
+          "field": "sample",
+          "code": "SAMPLE_CODE",
+          "message": "sample"
+        }
+      ],
       "premiumPreview": {
         "amount": "120.50",
         "currency": "EUR"
@@ -108,10 +209,139 @@
       "job": "unspecified"
     },
     "pol.Policy.get": {
-      "policy": "unspecified",
-      "term": "unspecified",
-      "segment": "unspecified",
-      "riskTree": "unspecified"
+      "policy": {
+        "policyId": "0192001e-e812-78d2-8e71-89b8aa84bacc",
+        "policyNumber": "SAMPLE-000001",
+        "productCode": "SAMPLE_CODE",
+        "policyholderPartyId": "0192cdc9-b138-74c9-893b-76462d992da9",
+        "accountId": "0192c8dc-d2ad-799d-8a29-b34ef97709de",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "GR",
+        "status": "SCHEDULED",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "term": {
+        "termId": "01928c82-188c-7495-85c5-757aa3b51cfa",
+        "termNumber": 1,
+        "period": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "state": "SCHEDULED",
+        "productVersion": "1.0",
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "currency": "EUR",
+        "producerCode": "SAMPLE_CODE",
+        "paymentPlanRef": "Sample text",
+        "writtenDate": "2026-10-07",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "segment": {
+        "segmentId": "0192ab50-4d21-7472-84af-480f45c73ec5",
+        "transactionId": "0192f1da-569f-7a34-8988-32e110c85fdb",
+        "validPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "recordedPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "riskTree": {
+        "vehicles": [
+          {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "drivers": [
+          {
+            "locator": "Sample text",
+            "partyId": "0192e742-18a3-770f-827e-4f8257345e37",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "coverageCode": "SAMPLE_CODE",
+            "elementLocator": "Sample text",
+            "selected": true,
+            "options": {
+              "note": "sample"
+            }
+          }
+        ],
+        "questionSets": [
+          {
+            "questionSetCode": "SAMPLE_CODE",
+            "questionSetVersion": "Sample text",
+            "answers": {
+              "note": "sample"
+            }
+          }
+        ]
+      },
+      "transactions": [
+        {
+          "transactionId": "0192a1b8-7e62-7c1c-8e19-256e723708b6",
+          "kind": "SAMPLE_CODE",
+          "sequence": 1,
+          "jobId": "01920016-0808-7b7e-87d0-07e3e425cb17",
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "premium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "taxes": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "total": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "charges": [
+        {
+          "chargeId": "0192f241-0610-7c33-8252-380dcfcee382",
+          "transactionId": "0192ced0-ae73-7c6a-8848-a49c0bec396d",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "pol.Policy.getMany": {
       "policies": "unspecified"
@@ -161,6 +391,11 @@
     },
     "pol.Submission.create": {
       "jobId": "01925eb9-f3a5-7802-86d7-10cffca2a528",
+      "jobNumber": "SAMPLE-000001",
+      "policyId": "019209c1-ee80-727c-86b7-c37a997aaac8",
+      "state": "DRAFT",
+      "productVersion": "1.0",
+      "expirationAt": "2026-10-07T09:00:00Z",
       "describeModel": {
         "note": "sample"
       },
@@ -186,10 +421,139 @@
       "jobId": "019293df-99db-71e2-8309-44e58c85da15"
     },
     "pol.Term.get": {
-      "policy": "unspecified",
-      "term": "unspecified",
-      "segment": "unspecified",
-      "riskTree": "unspecified"
+      "policy": {
+        "policyId": "0192994b-1425-7ef0-8218-2575faefb7c7",
+        "policyNumber": "SAMPLE-000001",
+        "productCode": "SAMPLE_CODE",
+        "policyholderPartyId": "01924fa3-d0f9-77f7-8f16-c89fa8fe5ee9",
+        "accountId": "01923898-44a8-7bb9-8e13-c3c1349c0526",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "GR",
+        "status": "SCHEDULED",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "term": {
+        "termId": "01925cac-8648-79a1-8ddb-33543d595331",
+        "termNumber": 1,
+        "period": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "state": "SCHEDULED",
+        "productVersion": "1.0",
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "currency": "EUR",
+        "producerCode": "SAMPLE_CODE",
+        "paymentPlanRef": "Sample text",
+        "writtenDate": "2026-10-07",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "segment": {
+        "segmentId": "0192827c-4f19-74da-8738-a9d20ced7fca",
+        "transactionId": "0192c6ce-738b-7925-80f4-a237e70d802f",
+        "validPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "recordedPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "riskTree": {
+        "vehicles": [
+          {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "drivers": [
+          {
+            "locator": "Sample text",
+            "partyId": "0192c9f5-51cf-779d-88c9-b137c645e872",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "coverageCode": "SAMPLE_CODE",
+            "elementLocator": "Sample text",
+            "selected": true,
+            "options": {
+              "note": "sample"
+            }
+          }
+        ],
+        "questionSets": [
+          {
+            "questionSetCode": "SAMPLE_CODE",
+            "questionSetVersion": "Sample text",
+            "answers": {
+              "note": "sample"
+            }
+          }
+        ]
+      },
+      "transactions": [
+        {
+          "transactionId": "0192a6e7-4c4e-73ac-8066-7caab1597dda",
+          "kind": "SAMPLE_CODE",
+          "sequence": 1,
+          "jobId": "019281b7-6321-7bd3-8961-f10243b8cf65",
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "premium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "taxes": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "total": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "charges": [
+        {
+          "chargeId": "01920bcb-8640-7b99-841b-ffa5ec14326f",
+          "transactionId": "01928b21-c453-7b40-88c8-1dcff6ef4eb1",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "pol.Term.timeline": {
       "policy": "unspecified",
@@ -239,12 +603,93 @@
       "jobId": "0192ffd1-d0ee-7157-833f-9b4c33f98c28",
       "refundPreview": "unspecified"
     },
+    "ChargeLine": {
+      "chargeId": "01925fbf-fe7d-7b2c-88e8-340b4238207d",
+      "transactionId": "019280fa-d0ee-71fc-8c6a-410dc243832f",
+      "elementLocator": "Sample text",
+      "coverageCode": "SAMPLE_CODE",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "annualRate": "12.50",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
     "ChargesReconcileRequest": {
       "termId": "01928174-f0ea-7bd5-83e2-ea5a5bbf8d4d",
       "counterpartTotals": "unspecified"
     },
     "ChargesReconcileResponse": {
       "differences": "unspecified"
+    },
+    "CoverageSelection": {
+      "coverageCode": "SAMPLE_CODE",
+      "elementLocator": "Sample text",
+      "selected": true,
+      "options": {
+        "note": "sample"
+      }
+    },
+    "DraftInstruction": {
+      "op": "SET_VEHICLE",
+      "vehicle": {
+        "locator": "Sample text",
+        "plate": "Sample text",
+        "plateNormalised": "Sample text",
+        "vin": "Sample text",
+        "make": "Sample text",
+        "model": "Sample text",
+        "firstRegistrationYear": 1900,
+        "use": "SAMPLE_CODE",
+        "value": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "fields": {
+          "note": "sample"
+        }
+      },
+      "driver": {
+        "locator": "Sample text",
+        "partyId": "019201a9-a725-7c19-87ad-967bbc272e32",
+        "driverType": "MAIN",
+        "yearFirstLicensed": 1900,
+        "vehicleLocator": "Sample text",
+        "usagePercent": 1,
+        "fields": {
+          "note": "sample"
+        }
+      },
+      "locator": "Sample text",
+      "coverages": [
+        {
+          "coverageCode": "SAMPLE_CODE",
+          "elementLocator": "Sample text",
+          "selected": true,
+          "options": {
+            "note": "sample"
+          }
+        }
+      ],
+      "questionSet": {
+        "questionSetCode": "SAMPLE_CODE",
+        "questionSetVersion": "Sample text",
+        "answers": {
+          "note": "sample"
+        }
+      }
+    },
+    "Driver": {
+      "locator": "Sample text",
+      "partyId": "01926afc-7b0c-793c-80ff-a9733b821e9c",
+      "driverType": "MAIN",
+      "yearFirstLicensed": 1900,
+      "vehicleLocator": "Sample text",
+      "usagePercent": 1,
+      "fields": {
+        "note": "sample"
+      }
     },
     "DsarExportRequest": {
       "partyId": "019244f7-1501-7ad3-8923-bed5f1ad555e",
@@ -302,14 +747,24 @@
       }
     },
     "JobBindResponse": {
+      "jobId": "0192fd50-5f33-777c-8bb4-3936feb81653",
+      "state": "DRAFT",
       "transactionId": "0192014d-8687-7a18-8d48-bcba712e749c",
       "termId": "0192948b-fc43-715e-8cc1-a7fa7dae3422",
+      "termNumber": 1,
+      "termState": "SCHEDULED",
       "policyId": "019201c2-064a-7326-8c91-766c518f25bc",
+      "policyNumber": "SAMPLE-000001",
+      "recordedAt": "2026-10-07T09:00:00Z",
       "chargeDeltas": [
         {
           "chargeId": "019253ac-6516-7147-8b5e-eee1e3a8f92a",
-          "elementId": "sample",
+          "transactionId": "0192d5b0-dab5-7466-8a4a-95b579068ee7",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
           "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
@@ -344,7 +799,133 @@
       "comparison": "unspecified"
     },
     "JobGetResponse": {
-      "jobs": "unspecified"
+      "job": {
+        "jobId": "0192b087-c1aa-7140-828c-7d0f31fd73d3",
+        "jobNumber": "SAMPLE-000001",
+        "jobType": "SAMPLE_CODE",
+        "state": "DRAFT",
+        "referred": true,
+        "policyId": "0192fae6-acd6-703a-879e-9ecbd765df04",
+        "policyNumber": "SAMPLE-000001",
+        "policyholderPartyId": "0192b7cb-9002-7b1d-8058-e729cc45c8fb",
+        "accountId": "0192348c-365c-7228-8fd3-0c2db9815da4",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "1.0",
+        "channel": "SAMPLE_CODE",
+        "producerCode": "SAMPLE_CODE",
+        "quoteType": "QUICK",
+        "effectiveAt": "2026-10-07T09:00:00Z",
+        "expirationAt": "2026-10-07T09:00:00Z",
+        "currency": "EUR",
+        "currentVersionNo": 1,
+        "transactionId": "01925b08-ab55-791f-8c76-9442a2f90f0d",
+        "versions": [
+          {
+            "quoteId": "01920c48-6af4-7f3a-8e9f-91be0540ccdb",
+            "versionNo": 1,
+            "state": "DRAFT",
+            "draftVersion": 1,
+            "riskTree": {
+              "vehicles": [
+                {
+                  "locator": "Sample text",
+                  "plate": "Sample text",
+                  "plateNormalised": "Sample text",
+                  "vin": "Sample text",
+                  "make": "Sample text",
+                  "model": "Sample text",
+                  "firstRegistrationYear": 1900,
+                  "use": "SAMPLE_CODE",
+                  "value": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  },
+                  "fields": {
+                    "note": "sample"
+                  }
+                }
+              ],
+              "drivers": [
+                {
+                  "locator": "Sample text",
+                  "partyId": "01929b78-fbfc-758f-8474-6d466d01931a",
+                  "driverType": "MAIN",
+                  "yearFirstLicensed": 1900,
+                  "vehicleLocator": "Sample text",
+                  "usagePercent": 1,
+                  "fields": {
+                    "note": "sample"
+                  }
+                }
+              ],
+              "coverages": [
+                {
+                  "coverageCode": "SAMPLE_CODE",
+                  "elementLocator": "Sample text",
+                  "selected": true,
+                  "options": {
+                    "note": "sample"
+                  }
+                }
+              ],
+              "questionSets": [
+                {
+                  "questionSetCode": "SAMPLE_CODE",
+                  "questionSetVersion": "Sample text",
+                  "answers": {
+                    "note": "sample"
+                  }
+                }
+              ]
+            },
+            "premium": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "taxes": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "total": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "charges": [
+              {
+                "chargeId": "01927287-6d33-7f1d-8525-9d6c0d3c5932",
+                "transactionId": "01923372-b9dc-7370-8626-f5d44d51010b",
+                "elementLocator": "Sample text",
+                "coverageCode": "SAMPLE_CODE",
+                "chargeType": "SAMPLE_CODE",
+                "chargeCategory": "SAMPLE_CODE",
+                "annualRate": "12.50",
+                "amount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                }
+              }
+            ],
+            "issues": [
+              {
+                "issueId": "01929587-4a5c-7fa9-8cab-80a3c71843f9",
+                "issueType": "SAMPLE_CODE",
+                "severity": "SAMPLE_CODE",
+                "blockingPoint": "PRE_QUOTE",
+                "issueKey": "sample",
+                "lane": "SAMPLE_CODE",
+                "explanationKeys": [
+                  "sample"
+                ],
+                "approvalStatus": "SAMPLE_CODE"
+              }
+            ],
+            "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "quotedAt": "2026-10-07T09:00:00Z",
+            "validUntil": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      }
     },
     "JobLeaseRequest": {
       "jobId": "0192dff7-6a1d-7167-8b3d-8dadc2065e45"
@@ -386,11 +967,40 @@
     },
     "JobQuoteResponse": {
       "jobId": "0192bf55-e541-7371-8bbc-191d9ec17695",
+      "quoteId": "01925918-b83f-74b2-8f00-9180da969af6",
       "versionNo": 1,
+      "state": "DRAFT",
+      "decision": "ACCEPT",
+      "referred": true,
+      "bindable": true,
       "premium": {
         "amount": "120.50",
         "currency": "EUR"
       },
+      "taxes": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "charges": [
+        {
+          "chargeId": "01920233-662b-7238-8466-3e4b37f6b5d9",
+          "transactionId": "0192bc16-c8df-7e5c-8659-65725e7e5f1c",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "issues": [
         {
           "issueId": "019261dc-f27a-7567-883a-aa4ca1bb7ebc",
@@ -446,19 +1056,256 @@
     },
     "JobUpdateDraftRequest": {
       "jobId": "0192b621-737b-7ce5-8530-31159adf00d5",
-      "versionNo": "unspecified",
+      "versionNo": 1,
+      "expectedDraftVersion": 1,
       "instructions": [
-        "unspecified"
-      ],
-      "expectedDraftVersion": "unspecified"
+        {
+          "op": "SET_VEHICLE",
+          "vehicle": {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          },
+          "driver": {
+            "locator": "Sample text",
+            "partyId": "0192ac0f-8171-70c8-8d23-a88106881c24",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "fields": {
+              "note": "sample"
+            }
+          },
+          "locator": "Sample text",
+          "coverages": [
+            {
+              "coverageCode": "SAMPLE_CODE",
+              "elementLocator": "Sample text",
+              "selected": true,
+              "options": {
+                "note": "sample"
+              }
+            }
+          ],
+          "questionSet": {
+            "questionSetCode": "SAMPLE_CODE",
+            "questionSetVersion": "Sample text",
+            "answers": {
+              "note": "sample"
+            }
+          }
+        }
+      ]
     },
     "JobUpdateDraftResponse": {
-      "draftState": "unspecified",
-      "validation": "unspecified",
+      "jobId": "0192b08f-389b-7311-8f18-22caa11bfbfe",
+      "versionNo": 1,
+      "draftVersion": 1,
+      "state": "DRAFT",
+      "riskTree": {
+        "vehicles": [
+          {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "drivers": [
+          {
+            "locator": "Sample text",
+            "partyId": "0192c2f2-fecd-7b58-8658-af1fd7011f4a",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "coverageCode": "SAMPLE_CODE",
+            "elementLocator": "Sample text",
+            "selected": true,
+            "options": {
+              "note": "sample"
+            }
+          }
+        ],
+        "questionSets": [
+          {
+            "questionSetCode": "SAMPLE_CODE",
+            "questionSetVersion": "Sample text",
+            "answers": {
+              "note": "sample"
+            }
+          }
+        ]
+      },
+      "validation": [
+        {
+          "field": "sample",
+          "code": "SAMPLE_CODE",
+          "message": "sample"
+        }
+      ],
       "premiumPreview": {
         "amount": "120.50",
         "currency": "EUR"
       }
+    },
+    "JobView": {
+      "jobId": "01926568-d789-7faa-82c3-0add3e8d36de",
+      "jobNumber": "SAMPLE-000001",
+      "jobType": "SAMPLE_CODE",
+      "state": "DRAFT",
+      "referred": true,
+      "policyId": "01920cf9-8569-78f4-82d0-53b909fb9029",
+      "policyNumber": "SAMPLE-000001",
+      "policyholderPartyId": "0192d190-aeaf-784c-8900-ea2ea8379b79",
+      "accountId": "0192d12a-4a79-7e89-81ad-b404ca92e5f5",
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "channel": "SAMPLE_CODE",
+      "producerCode": "SAMPLE_CODE",
+      "quoteType": "QUICK",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "expirationAt": "2026-10-07T09:00:00Z",
+      "currency": "EUR",
+      "currentVersionNo": 1,
+      "transactionId": "01924bef-a476-7aaa-8a13-7df688ca49c4",
+      "versions": [
+        {
+          "quoteId": "0192ca52-1c4d-7487-8b15-551c3d1f5954",
+          "versionNo": 1,
+          "state": "DRAFT",
+          "draftVersion": 1,
+          "riskTree": {
+            "vehicles": [
+              {
+                "locator": "Sample text",
+                "plate": "Sample text",
+                "plateNormalised": "Sample text",
+                "vin": "Sample text",
+                "make": "Sample text",
+                "model": "Sample text",
+                "firstRegistrationYear": 1900,
+                "use": "SAMPLE_CODE",
+                "value": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                },
+                "fields": {
+                  "note": "sample"
+                }
+              }
+            ],
+            "drivers": [
+              {
+                "locator": "Sample text",
+                "partyId": "01921afb-852b-7473-871c-5f2a296dfde9",
+                "driverType": "MAIN",
+                "yearFirstLicensed": 1900,
+                "vehicleLocator": "Sample text",
+                "usagePercent": 1,
+                "fields": {
+                  "note": "sample"
+                }
+              }
+            ],
+            "coverages": [
+              {
+                "coverageCode": "SAMPLE_CODE",
+                "elementLocator": "Sample text",
+                "selected": true,
+                "options": {
+                  "note": "sample"
+                }
+              }
+            ],
+            "questionSets": [
+              {
+                "questionSetCode": "SAMPLE_CODE",
+                "questionSetVersion": "Sample text",
+                "answers": {
+                  "note": "sample"
+                }
+              }
+            ]
+          },
+          "premium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "taxes": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "total": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "charges": [
+            {
+              "chargeId": "0192897f-230a-750b-84fd-a8bce1c373be",
+              "transactionId": "019230c3-9893-78c8-8faf-f8f380326776",
+              "elementLocator": "Sample text",
+              "coverageCode": "SAMPLE_CODE",
+              "chargeType": "SAMPLE_CODE",
+              "chargeCategory": "SAMPLE_CODE",
+              "annualRate": "12.50",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "issues": [
+            {
+              "issueId": "0192ede4-6638-7fdf-8cc9-8dccb0adfc36",
+              "issueType": "SAMPLE_CODE",
+              "severity": "SAMPLE_CODE",
+              "blockingPoint": "PRE_QUOTE",
+              "issueKey": "sample",
+              "lane": "SAMPLE_CODE",
+              "explanationKeys": [
+                "sample"
+              ],
+              "approvalStatus": "SAMPLE_CODE"
+            }
+          ],
+          "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "quotedAt": "2026-10-07T09:00:00Z",
+          "validUntil": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "createdAt": "2026-10-07T09:00:00Z"
     },
     "JobWithdrawRequest": {
       "jobId": "01929a5b-a2d1-7ea0-89e3-ec64a8048463",
@@ -480,10 +1327,139 @@
       "policies": "unspecified"
     },
     "PolicyGetResponse": {
-      "policy": "unspecified",
-      "term": "unspecified",
-      "segment": "unspecified",
-      "riskTree": "unspecified"
+      "policy": {
+        "policyId": "0192a75c-2548-7116-886f-08e3f832621d",
+        "policyNumber": "SAMPLE-000001",
+        "productCode": "SAMPLE_CODE",
+        "policyholderPartyId": "019294e9-147d-7508-894e-3f2c8f74c571",
+        "accountId": "0192d641-ca82-7694-813a-3335d2a09cfd",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "GR",
+        "status": "SCHEDULED",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "term": {
+        "termId": "0192c2b7-3293-7483-8160-3ee35bf31695",
+        "termNumber": 1,
+        "period": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "state": "SCHEDULED",
+        "productVersion": "1.0",
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "currency": "EUR",
+        "producerCode": "SAMPLE_CODE",
+        "paymentPlanRef": "Sample text",
+        "writtenDate": "2026-10-07",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "segment": {
+        "segmentId": "01925291-33fd-7d12-8664-863411793f48",
+        "transactionId": "01920b2a-3fc0-73fe-8541-6879c318d7c0",
+        "validPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "recordedPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "riskTree": {
+        "vehicles": [
+          {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "drivers": [
+          {
+            "locator": "Sample text",
+            "partyId": "01926ff5-570e-7576-8afa-3343895140cc",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "coverageCode": "SAMPLE_CODE",
+            "elementLocator": "Sample text",
+            "selected": true,
+            "options": {
+              "note": "sample"
+            }
+          }
+        ],
+        "questionSets": [
+          {
+            "questionSetCode": "SAMPLE_CODE",
+            "questionSetVersion": "Sample text",
+            "answers": {
+              "note": "sample"
+            }
+          }
+        ]
+      },
+      "transactions": [
+        {
+          "transactionId": "0192d22f-a132-7bfc-8872-2e33344da04c",
+          "kind": "SAMPLE_CODE",
+          "sequence": 1,
+          "jobId": "01926629-1206-79b9-8dbe-61a14cc59af4",
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "premium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "taxes": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "total": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "charges": [
+        {
+          "chargeId": "0192d2c0-6ea4-7e7e-8243-4380787c7f50",
+          "transactionId": "0192bdd0-084a-7414-85f0-e2959aa81fa7",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "PolicyMoveExecuteRequest": {
       "policyIds": [
@@ -506,6 +1482,127 @@
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "PolicyView": {
+      "policyId": "01926f43-879b-7900-8ba4-947a69235d65",
+      "policyNumber": "SAMPLE-000001",
+      "productCode": "SAMPLE_CODE",
+      "policyholderPartyId": "01925c93-5462-7bb3-8f64-70d9cb485d4c",
+      "accountId": "019220f4-6a07-79a3-849b-36c5a6fd1a12",
+      "legalEntity": "SAMPLE_CODE",
+      "jurisdiction": "GR",
+      "status": "SCHEDULED",
+      "recordedAt": "2026-10-07T09:00:00Z"
+    },
+    "QuestionAnswers": {
+      "questionSetCode": "SAMPLE_CODE",
+      "questionSetVersion": "Sample text",
+      "answers": {
+        "note": "sample"
+      }
+    },
+    "QuoteVersionView": {
+      "quoteId": "0192d28e-4597-7d42-83cb-0891b9c49ee0",
+      "versionNo": 1,
+      "state": "DRAFT",
+      "draftVersion": 1,
+      "riskTree": {
+        "vehicles": [
+          {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "drivers": [
+          {
+            "locator": "Sample text",
+            "partyId": "0192b4cd-cf01-7be1-88d0-927f5a63f0ff",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "coverageCode": "SAMPLE_CODE",
+            "elementLocator": "Sample text",
+            "selected": true,
+            "options": {
+              "note": "sample"
+            }
+          }
+        ],
+        "questionSets": [
+          {
+            "questionSetCode": "SAMPLE_CODE",
+            "questionSetVersion": "Sample text",
+            "answers": {
+              "note": "sample"
+            }
+          }
+        ]
+      },
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "taxes": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "charges": [
+        {
+          "chargeId": "0192c5fe-960e-7b15-8652-46a2beb3ff97",
+          "transactionId": "0192e227-9fa5-730b-87b4-c9e291947a74",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "issues": [
+        {
+          "issueId": "0192fae0-5f59-7790-80e4-4a6117ff2b70",
+          "issueType": "SAMPLE_CODE",
+          "severity": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "issueKey": "sample",
+          "lane": "SAMPLE_CODE",
+          "explanationKeys": [
+            "sample"
+          ],
+          "approvalStatus": "SAMPLE_CODE"
+        }
+      ],
+      "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "quotedAt": "2026-10-07T09:00:00Z",
+      "validUntil": "2026-10-07T09:00:00Z"
     },
     "ReactivationCreateRequest": {
       "termId": "019295fd-9b8d-74f6-8a76-66f446a50ed6",
@@ -604,6 +1701,59 @@
     "RewriteCreateResponse": {
       "jobId": "01924c22-e36a-72c4-8a86-47fcecce39c0"
     },
+    "RiskTree": {
+      "vehicles": [
+        {
+          "locator": "Sample text",
+          "plate": "Sample text",
+          "plateNormalised": "Sample text",
+          "vin": "Sample text",
+          "make": "Sample text",
+          "model": "Sample text",
+          "firstRegistrationYear": 1900,
+          "use": "SAMPLE_CODE",
+          "value": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "fields": {
+            "note": "sample"
+          }
+        }
+      ],
+      "drivers": [
+        {
+          "locator": "Sample text",
+          "partyId": "0192b3fc-6c12-75c0-8ce1-e9fd87075184",
+          "driverType": "MAIN",
+          "yearFirstLicensed": 1900,
+          "vehicleLocator": "Sample text",
+          "usagePercent": 1,
+          "fields": {
+            "note": "sample"
+          }
+        }
+      ],
+      "coverages": [
+        {
+          "coverageCode": "SAMPLE_CODE",
+          "elementLocator": "Sample text",
+          "selected": true,
+          "options": {
+            "note": "sample"
+          }
+        }
+      ],
+      "questionSets": [
+        {
+          "questionSetCode": "SAMPLE_CODE",
+          "questionSetVersion": "Sample text",
+          "answers": {
+            "note": "sample"
+          }
+        }
+      ]
+    },
     "SegmentChangesItem": {
       "segmentVersions": "unspecified"
     },
@@ -616,6 +1766,19 @@
       "nextCursor": "sample",
       "limit": 1
     },
+    "SegmentView": {
+      "segmentId": "019289f3-f4d8-7cac-8bc1-1a3ed4021f92",
+      "transactionId": "01922dda-ee0a-73dd-8891-ce0286af9a60",
+      "validPeriod": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "recordedPeriod": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
     "SnapshotGetResponse": {
       "snapshotRef": "unspecified",
       "content": "unspecified"
@@ -625,14 +1788,21 @@
     },
     "SubmissionCreateRequest": {
       "accountId": "0192e866-20dd-78e2-85c0-3a2fc619e6a6",
+      "policyholderPartyId": "0192b8d4-4af7-7307-8f15-a79de3e4883c",
       "product": "SAMPLE_CODE",
       "producerCode": "SAMPLE_CODE",
       "channel": "SAMPLE_CODE",
       "effectiveAt": "2026-10-07T09:00:00Z",
-      "quoteType": "QUICK"
+      "quoteType": "QUICK",
+      "currency": "EUR"
     },
     "SubmissionCreateResponse": {
       "jobId": "0192d160-66a6-729b-8750-932871737f3e",
+      "jobNumber": "SAMPLE-000001",
+      "policyId": "01929796-918b-7881-8171-fab219d302f2",
+      "state": "DRAFT",
+      "productVersion": "1.0",
+      "expirationAt": "2026-10-07T09:00:00Z",
       "describeModel": {
         "note": "sample"
       },
@@ -665,16 +1835,213 @@
       "jobId": "0192a305-e7ef-7f41-8648-cdee81c8d446"
     },
     "TermGetResponse": {
-      "policy": "unspecified",
-      "term": "unspecified",
-      "segment": "unspecified",
-      "riskTree": "unspecified"
+      "policy": {
+        "policyId": "01926687-03c6-7aab-8c2b-4d68f9aea4f7",
+        "policyNumber": "SAMPLE-000001",
+        "productCode": "SAMPLE_CODE",
+        "policyholderPartyId": "01923ae2-4966-7226-806c-43d76d992c8e",
+        "accountId": "01922624-9e30-7e4f-899e-425b7ae46101",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "GR",
+        "status": "SCHEDULED",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "term": {
+        "termId": "01923e51-d726-79a4-8184-66292f7aaff8",
+        "termNumber": 1,
+        "period": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "state": "SCHEDULED",
+        "productVersion": "1.0",
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "currency": "EUR",
+        "producerCode": "SAMPLE_CODE",
+        "paymentPlanRef": "Sample text",
+        "writtenDate": "2026-10-07",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "segment": {
+        "segmentId": "019229f1-78f3-77a8-8b4b-1e75163c0f71",
+        "transactionId": "019229c2-c37e-70f3-8ef1-7738f04434eb",
+        "validPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "recordedPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "riskTree": {
+        "vehicles": [
+          {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "drivers": [
+          {
+            "locator": "Sample text",
+            "partyId": "0192e167-197f-7a1a-8433-63fdede2a1f6",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "coverageCode": "SAMPLE_CODE",
+            "elementLocator": "Sample text",
+            "selected": true,
+            "options": {
+              "note": "sample"
+            }
+          }
+        ],
+        "questionSets": [
+          {
+            "questionSetCode": "SAMPLE_CODE",
+            "questionSetVersion": "Sample text",
+            "answers": {
+              "note": "sample"
+            }
+          }
+        ]
+      },
+      "transactions": [
+        {
+          "transactionId": "0192b87b-dc11-78e9-8de7-2abc2bf9377b",
+          "kind": "SAMPLE_CODE",
+          "sequence": 1,
+          "jobId": "01928d38-7725-7acc-8190-b5526ab344f9",
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "premium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "taxes": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "total": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "charges": [
+        {
+          "chargeId": "019294d4-44a9-72dc-89bb-0e67896f16d8",
+          "transactionId": "019255d6-a9ee-712d-885f-71cd6007e746",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "TermTimelineResponse": {
       "policy": "unspecified",
       "term": "unspecified",
       "segment": "unspecified",
       "riskTree": "unspecified"
+    },
+    "TermView": {
+      "termId": "019251a7-c440-7f9b-8c08-c2bbf0f3be43",
+      "termNumber": 1,
+      "period": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "state": "SCHEDULED",
+      "productVersion": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "currency": "EUR",
+      "producerCode": "SAMPLE_CODE",
+      "paymentPlanRef": "Sample text",
+      "writtenDate": "2026-10-07",
+      "recordedAt": "2026-10-07T09:00:00Z"
+    },
+    "TransactionView": {
+      "transactionId": "01927f1f-a2b1-727d-82ff-a1b66afdec79",
+      "kind": "SAMPLE_CODE",
+      "sequence": 1,
+      "jobId": "0192687a-8f60-7807-8a9c-f3a88656d6e0",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "recordedAt": "2026-10-07T09:00:00Z",
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "taxes": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "UwIssue": {
+      "issueId": "01923324-349a-73ae-8e39-ed1eb60c6cd0",
+      "issueType": "SAMPLE_CODE",
+      "severity": "SAMPLE_CODE",
+      "blockingPoint": "PRE_QUOTE",
+      "issueKey": "sample",
+      "lane": "SAMPLE_CODE",
+      "explanationKeys": [
+        "sample"
+      ],
+      "approvalStatus": "SAMPLE_CODE"
+    },
+    "Vehicle": {
+      "locator": "Sample text",
+      "plate": "Sample text",
+      "plateNormalised": "Sample text",
+      "vin": "Sample text",
+      "make": "Sample text",
+      "model": "Sample text",
+      "firstRegistrationYear": 1900,
+      "use": "SAMPLE_CODE",
+      "value": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "fields": {
+        "note": "sample"
+      }
     },
     "WithdrawalSubmitRequest": {
       "policyId": "01929782-2e1e-77a9-8f49-be3c564432c5",

@@ -80,8 +80,6 @@
         "artefactHash",
         "resolutionHash",
         "configurationHash",
-        "producerOfRecord",
-        "accountId",
         "payerPartyId",
         "paymentPlanRef",
         "ifrs17Tags",
@@ -134,11 +132,12 @@
         },
         "producerOfRecord": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "description": "Producer code of record",
+          "description": "Producer code of record; absent for direct business",
           "x-classification": "P0"
         },
         "accountId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
+          "description": "PTY account; absent until pty.Account exists (SL-POL, pre-release)",
           "x-classification": "P1",
           "x-personal-data": true
         },

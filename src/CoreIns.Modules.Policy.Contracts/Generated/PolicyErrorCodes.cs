@@ -28,7 +28,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-EFFDATE-LIMIT (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.PolicyChange.create.</para>
+    /// <para>Declared by 5 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.PolicyChange.create, pol.Submission.create.</para>
     /// </remarks>
     public const string EffdateLimit = "POL-ERR-EFFDATE-LIMIT";
 
@@ -52,7 +52,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): pol.Job.notTaken, pol.Job.withdraw, pol.PolicyChange.create, pol.Reinstatement.create, pol.Rewrite.create.</para>
+    /// <para>Declared by 8 operation(s): pol.Job.bind, pol.Job.notTaken, pol.Job.quote, pol.Job.updateDraft, pol.Job.withdraw, pol.PolicyChange.create, pol.Reinstatement.create, pol.Rewrite.create.</para>
     /// </remarks>
     public const string IllegalTransition = "POL-ERR-ILLEGAL-TRANSITION";
 
@@ -76,7 +76,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pol.Policy.get, pol.Term.get, pol.Term.timeline.</para>
+    /// <para>Declared by 8 operation(s): pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.Policy.get, pol.Submission.create, pol.Term.get, pol.Term.timeline.</para>
     /// </remarks>
     public const string NotFound = "POL-ERR-NOT-FOUND";
 
@@ -118,7 +118,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-QUICK-QUOTE-NOT-BINDABLE (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): pol.Job.quote, pol.Job.requote.</para>
+    /// <para>Declared by 3 operation(s): pol.Job.bind, pol.Job.quote, pol.Job.requote.</para>
     /// </remarks>
     public const string QuickQuoteNotBindable = "POL-ERR-QUICK-QUOTE-NOT-BINDABLE";
 
@@ -146,9 +146,15 @@ public static class PolicyErrorCodes
     /// </remarks>
     public const string RightExpired = "POL-ERR-RIGHT-EXPIRED";
 
+    /// <summary>POL-ERR-STALE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): pol.Job.bind, pol.Job.quote, pol.Job.updateDraft.</para>
+    /// </remarks>
+    public const string Stale = "POL-ERR-STALE";
+
     /// <summary>POL-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): pol.Job.updateDraft.</para>
+    /// <para>Declared by 3 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.Submission.create.</para>
     /// </remarks>
     public const string Validation = "POL-ERR-VALIDATION";
 
@@ -156,7 +162,7 @@ public static class PolicyErrorCodes
     public const string Prefix = "POL-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AfterCancellation, AuthorityRequired, ConflictsOpen, EffdateLimit, GateFailed, HumanConfirmationRequired, IdempotencyMismatch, IllegalTransition, JobConflict, Locked, MigrationReversalBlocked, NotFound, NotPreempted, NoticeTooLate, OpenJob, Preempted, ProducerInvalid, ProductUnavailable, QuickQuoteNotBindable, QuoteStale, Rating, RebaseRequired, RightExpired, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AfterCancellation, AuthorityRequired, ConflictsOpen, EffdateLimit, GateFailed, HumanConfirmationRequired, IdempotencyMismatch, IllegalTransition, JobConflict, Locked, MigrationReversalBlocked, NotFound, NotPreempted, NoticeTooLate, OpenJob, Preempted, ProducerInvalid, ProductUnavailable, QuickQuoteNotBindable, QuoteStale, Rating, RebaseRequired, RightExpired, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -184,6 +190,7 @@ public static class PolicyErrorCodes
         [Rating] = 422,
         [RebaseRequired] = 409,
         [RightExpired] = 422,
+        [Stale] = 409,
         [Validation] = 422,
     };
 }
