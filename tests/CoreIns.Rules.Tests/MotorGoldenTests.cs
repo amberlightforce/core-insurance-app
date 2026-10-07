@@ -92,7 +92,7 @@ public class MotorGoldenTests
     }
 
     /// <summary>Pinned content hash of the age-band table (changes only when its content or the language changes).</summary>
-    private const string PinnedAgeTableHash = "187e0da6dc844cb148de5fdbcb296117ef235b60bc86f4acb20ce7e446e292ed";
+    private const string PinnedAgeTableHash = "1b4272c8a4fd0c01488a156f211009c054d64e566b8b8dc15860791bfe9d8192";
 
     private static DateOnly Date(string s) => DateOnly.ParseExact(s, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 }

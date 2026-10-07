@@ -23,7 +23,9 @@ public class ReviewRegressionTests
 
     private static (EvaluationResult Result, TimeSpan Elapsed) Timed(RuleEnvironment env, string source, EvaluationOptions? options = null)
     {
+        // The work bound is what is asserted, not JIT warm-up: time the second of two identical evaluations.
         var compiled = env.Compile(source);
+        compiled.Evaluate(Inputs, options);
         long start = Stopwatch.GetTimestamp();
         var result = compiled.Evaluate(Inputs, options);
         return (result, Stopwatch.GetElapsedTime(start));

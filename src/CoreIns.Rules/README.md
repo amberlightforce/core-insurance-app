@@ -211,7 +211,7 @@ position and, for decision tables, a context such as `rule 'R1' condition 'drive
 `RuleLimits` (defaults in brackets): `MaxExpressionLength` [8 192 characters], `MaxAstDepth` [200; at most
 1 000], `MaxEvaluationSteps` [100 000], `MaxAllocatedElements` [1 000 000], `MaxEvaluationTime` [1 s],
 `MaxCollectionSize` [10 000], `MaxStringLength` [65 536], `MaxRegexPatternLength` [512], `RegexTimeout` [50 ms],
-`MaxTraceEntries` [10 000], `MaxTraceValueWeight` [1 000]. `EvaluationOptions.MaxSteps` can lower the budget and `EvaluationOptions.Cancellation`
+`MaxTraceEntries` [10 000], `MaxTraceValueWeight` [1 000], `MaxInputDepth` [64; at most 1 000]. `EvaluationOptions.MaxSteps` can lower the budget and `EvaluationOptions.Cancellation`
 cancels a single call.
 
 **Cost model.** Steps are charged in proportion to the work done, not per node: one step per node evaluation and
@@ -233,7 +233,10 @@ concatenations, host-function results) is charged its full weight, so no value h
 `AttemptedSteps` shows the full work the breaking operation tried to charge. Value `ToString` renders at most
 4 096 characters (then "..."), `GetHashCode` looks at a bounded prefix, and `Equals` remembers sub-values already
 proven equal, so values that share structure compare in time proportional to their distinct parts. Decision-table
-test cases whose expected values are heavier than the budget fail without being compared.
+test cases whose expected values are heavier than the budget fail without being compared. Every decision-table output
+value is charged against the evaluation's allocation budget, so the aggregate size of all matches is bounded.
+Inputs and host results nested deeper than `MaxInputDepth` are refused (`RULE-LIMIT-EXCEEDED`); values nested deeper
+than 1 000 are refused when inputs are built; deep equality is iterative, so no value can exhaust the call stack.
 
 **Error messages never echo input content.** A string value is described by its length ("a string of length 12"),
 other values by at most 64 characters, and dates of birth are not repeated; name the input path instead.
