@@ -10,8 +10,9 @@ Fill in every field. Never send a vague task.
   Do not modify them. If a change is needed, report back instead of making it (small additive contract typing of your
   own module's operations is allowed per D-API-06/06a).
 - **Design guide sections:** <list>
-- **Infra constraints:** <list> plus: build and test in WSL (`source ~/dn.sh`); Docker works, so integration tests use
-  Testcontainers; warnings are errors; no float/double; time only via IClock.
+- **Infra constraints:** <list> plus: build and test **natively on Windows** from your worktree (`dotnet build CoreIns.sln -c Release`,
+  `dotnet test --project tests/<X>`, `npm ci && npm test` in `web/`); never use WSL (D-ARC-30). Docker Desktop runs, so
+  integration tests use Testcontainers; warnings are errors; no float/double; time only via IClock.
 - **Read first:** `orchestration/HANDOVER.md` §4, `orchestration/DECISIONS.md` (search for your module), the digest(s) in
   `orchestration/digests/`, and the PRD sections listed.
 - **Do not spawn sub-agents** (D-PRG-15). Commit to your worktree branch; do not merge or push.

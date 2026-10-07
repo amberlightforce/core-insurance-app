@@ -28,6 +28,6 @@ parallel; S2 wires the real implementations.
 
 ## Rules for every slice builder
 - Docker is available: integration tests use **Testcontainers** (PostgreSQL 17). Do not use the embedded `~/pg17`.
-- Build and test in WSL Ubuntu (`source ~/dn.sh`), because Windows App Control blocks freshly built DLLs.
+- Build and test natively on Windows (D-ARC-30). Never use WSL.
 - Follow the SL-0 reference vertical (Party) for module layout, persistence, migrations, commands, events, controllers.
 - Regulatory values come only from the PRDs (D-REG-01..07); anything not Settled carries its legalStatus.

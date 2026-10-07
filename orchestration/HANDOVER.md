@@ -41,10 +41,8 @@ This document is for whoever picks the work up next, human or agent. Read it wit
 - **Benchmarks:** `tools/CoreIns.Rules.Benchmark` (NFR-UW-001) and `tools/CoreIns.OutboxBenchmark`.
 - **npm lock files:** regenerate with the npm version CI uses (`npx npm@11.19.0 install --package-lock-only`). A Windows-generated lock broke `npm ci` in CI for several commits (D-ARC-29).
 
-### Environment problems on the current dev machine (Windows 11)
-1. **Docker Desktop won't start.** A stale `%LOCALAPPDATA%\docker-secrets-engine\engine.sock` blocks it. Fix: close Docker, delete that folder, restart. A Phase 1 agent renamed `%LOCALAPPDATA%\Docker\run` to `run.stale-20261007`; it can be deleted once Docker works. Docker Desktop's log also shows a "Reset to factory defaults" at 11:00, which no agent performed.
-2. **Windows App Control blocks freshly built DLLs.** All agents built and tested in **WSL Ubuntu**: `source ~/dn.sh` puts the user-local SDK at `~/.dotnet-coreins` and ICU on the path. An embedded PostgreSQL 17.11 lives at `~/pg17`; helper scripts are in the session scratchpad. Allow-listing the repo folder would let native Windows builds run.
-3. **The .NET 10 SDK is not installed on Windows:** `winget install Microsoft.DotNet.SDK.10`.
+### Dev machine (Windows 11): native toolchain (D-ARC-30)
+Everything runs natively on Windows: .NET SDK 10.0.401, Node 24, Docker Desktop (Testcontainers). The earlier problems (Docker would not start, App Control blocked new DLLs, no SDK) are resolved, and WSL is no longer used. If a native build is ever blocked again, stop and report it.
 
 ## 3. Foundations: what was built
 
