@@ -326,5 +326,11 @@ internal sealed class ChargeLineRow
 
     public string? TaxTreatmentRef { get; set; }
 
+    /// <summary>Legal status of the tax or levy value (D-SLC-11).</summary>
+    public string? LegalStatus { get; set; }
+
+    /// <summary>The tax or levy value was not Settled.</summary>
+    public bool? Provisional { get; set; }
+
     public Instant RecordedAt { get; set; }
 }

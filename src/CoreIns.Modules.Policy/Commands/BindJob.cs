@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CoreIns.Modules.Market.Contracts;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Contracts.Events;
@@ -63,6 +64,7 @@ internal sealed class BindJobHandler(
     IEventPublisher events,
     Dependency<IUnderwritingRulesService> underwriting,
     RatingInput ratingInput,
+    Dependency<IMarketConfigurationService> marketConfiguration,
     IOptions<PolicyOptions> options) : ICommandHandler<BindJob, JobBindResponse>
 {
     private const string Block = "BLOCK";
@@ -105,12 +107,25 @@ internal sealed class BindJobHandler(
             return DomainError.Of(ModuleCode.POL, "QUOTE-STALE", "The quote's validity has ended; requote it.");
         }
 
+        // The quote is bound at its quoted price only under the configuration it was priced with (REQ-POL-088, -158).
+        var current = (await marketConfiguration.Value.CurrentHashAsync(cancellationToken).ConfigureAwait(false)).Hash;
+        if (current is { } currentHash && !string.Equals(version.ConfigurationHash, currentHash.Value, StringComparison.Ordinal))
+        {
+            return new DomainError(ErrorCode.For(ModuleCode.POL, "QUOTE-STALE"), "The configuration changed since the quote was priced; requote it before binding.")
+            {
+                Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["quotedConfigurationHash"] = version.ConfigurationHash ?? string.Empty, ["currentConfigurationHash"] = currentHash.Value,
+                },
+            };
+        }
+
         var tree = JobSupport.Tree(version);
 
         // Gates in one evaluation (REQ-POL-003).
         var gates = new List<JobBindResponse.GateResultItem>
         {
-            Gate("EFFECTIVE_DATE", job.EffectiveAt >= now, "RETROACTIVE_NEW_BUSINESS"),
+            Gate("EFFECTIVE_DATE", job.EffectiveAt >= now, "POL-ERR-RETROACTIVE-MTPL"),
         };
         var view = await ratingInput.BuildAsync(tree, job.EffectiveAt, cancellationToken).ConfigureAwait(false);
         if (view.IsFailure)
@@ -208,7 +223,7 @@ internal sealed class BindJobHandler(
                 ElementLocator = line.ElementLocator, CoverageCode = line.CoverageCode, ChargeType = line.ChargeType, ChargeCategory = line.ChargeCategory,
                 DeltaKind = DeltaKinds.Net, AnnualRate = line.AnnualRate, Amount = line.Amount.Amount, Currency = job.Currency,
                 ValidFrom = period.Start, ValidTo = period.End!.Value, BookingDate = today, CorrelationKey = transactionId.Value.ToString(),
-                SetIndex = i + 1, SetSize = charges.Count, RecordedAt = now,
+                SetIndex = i + 1, SetSize = charges.Count, RecordedAt = now, LegalStatus = line.LegalStatus, Provisional = line.Provisional,
             });
             frozen.Add(line with { ChargeId = chargeId, TransactionId = transactionId });
             events.Publish(new OutgoingEvent(
@@ -279,9 +294,12 @@ internal sealed class BindJobHandler(
         {
             return JobSupport.Stale();
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation or PostgresErrorCodes.ExclusionViolation })
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation or PostgresErrorCodes.ExclusionViolation } pg)
         {
-            return JobSupport.Stale();
+            // Overlapping cover or a second current version of a term or segment: the timeline invariant (REQ-POL-079).
+            return pg.SqlState == PostgresErrorCodes.ExclusionViolation || pg.TableName is "segment" or "policy_term"
+                ? DomainError.Of(ModuleCode.POL, "SEGMENT-INVARIANT", $"The bind would break the policy timeline ({pg.ConstraintName}).")
+                : JobSupport.Stale();
         }
     }
 

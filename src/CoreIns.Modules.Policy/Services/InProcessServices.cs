@@ -35,7 +35,7 @@ internal static class InProcess
 
     public static Instant Valid(ValidAt? validAt, IClock clock, PolicyOptions options) =>
         validAt is { Instant: { } instant } ? instant
-        : validAt is { Date: { } date } ? PolicyTime.StartOf(date, options.Zone)
+        : validAt is { Date: { } date } ? PolicyTime.EndOf(date, options.Zone)
         : clock.Now;
 }
 

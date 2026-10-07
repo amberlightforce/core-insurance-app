@@ -56,7 +56,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "gateResults": [
@@ -115,7 +117,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -343,7 +347,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ]
     },
@@ -557,7 +563,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ]
     },
@@ -620,7 +628,9 @@
       "amount": {
         "amount": "120.50",
         "currency": "EUR"
-      }
+      },
+      "legalStatus": "SAMPLE_CODE",
+      "provisional": true
     },
     "ChargesReconcileRequest": {
       "termId": "01928174-f0ea-7bd5-83e2-ea5a5bbf8d4d",
@@ -777,7 +787,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "gateResults": [
@@ -913,7 +925,9 @@
                 "amount": {
                   "amount": "120.50",
                   "currency": "EUR"
-                }
+                },
+                "legalStatus": "SAMPLE_CODE",
+                "provisional": true
               }
             ],
             "issues": [
@@ -1008,7 +1022,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -1300,7 +1316,9 @@
               "amount": {
                 "amount": "120.50",
                 "currency": "EUR"
-              }
+              },
+              "legalStatus": "SAMPLE_CODE",
+              "provisional": true
             }
           ],
           "issues": [
@@ -1476,7 +1494,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ]
     },
@@ -1604,7 +1624,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "issues": [
@@ -1990,7 +2012,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ]
     },

@@ -27,6 +27,7 @@ using CoreIns.SharedKernel.Json;
 using CoreIns.SharedKernel.Results;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CoreIns.Modules.Policy.Commands;
@@ -51,7 +52,7 @@ internal sealed class QuoteJobValidator : AbstractValidator<QuoteJob>
 /// </list>
 /// A quote never emits charge deltas, numbers or policy rows (REQ-POL-129). Dry-run runs the same path and rolls back.
 /// </summary>
-internal sealed class QuoteJobHandler(
+internal sealed partial class QuoteJobHandler(
     PolicyDbContext db,
     RequestContext context,
     ILegalEntityDirectory legalEntities,
@@ -63,6 +64,7 @@ internal sealed class QuoteJobHandler(
     Dependency<IMarketRoundingService> roundingService,
     Dependency<IUnderwritingRulesService> underwritingService,
     RatingInput ratingInput,
+    ILogger<QuoteJobHandler> logger,
     IOptions<PolicyOptions> options) : ICommandHandler<QuoteJob, JobQuoteResponse>
 {
     public async Task<Result<JobQuoteResponse>> HandleAsync(QuoteJob command, CancellationToken cancellationToken)
@@ -223,8 +225,18 @@ internal sealed class QuoteJobHandler(
             }
         }
 
-        // pfc.PolicyDraft.validate (REQ-POL-295) runs where PFC offers it; SL-PFC does not build it yet.
-        if (draftService.TryValue is { } drafts)
+        // pfc.PolicyDraft.validate (REQ-POL-295). Fail closed when PFC does not provide it, unless the Development/test option allows it.
+        var drafts = draftService.TryValue;
+        if (drafts is null)
+        {
+            if (!options.Value.AllowMissingDraftValidation)
+            {
+                return DomainError.Of(ModuleCode.POL, "DEPENDENCY-UNAVAILABLE", "pfc.PolicyDraft.validate is not available; quoting fails closed (REQ-POL-295).");
+            }
+
+            LogDraftValidationSkipped(logger);
+        }
+        else
         {
             var validated = await drafts.ValidateAsync(
                 new PolicyDraftValidateRequest
@@ -323,6 +335,7 @@ internal sealed class QuoteJobHandler(
             {
                 ElementLocator = draft.ElementLocator, CoverageCode = draft.CoverageCode, ChargeType = draft.ChargeType,
                 ChargeCategory = draft.ChargeCategory, AnnualRate = draft.AnnualRate, Amount = amount.Value,
+                LegalStatus = draft.LegalStatus, Provisional = draft.Provisional,
             });
         }
 
@@ -366,6 +379,9 @@ internal sealed class QuoteJobHandler(
                 p => p.Name,
                 p => p.Value.ValueKind == JsonValueKind.String ? p.Value.GetString()! : p.Value.GetRawText(),
                 StringComparer.Ordinal);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Quoting without pfc.PolicyDraft.validate: Policy:AllowMissingDraftValidation is set (Development and tests only).")]
+    private static partial void LogDraftValidationSkipped(ILogger logger);
 
     private static DomainError Validation(string message, IEnumerable<FieldError> errors) =>
         new(ErrorCode.For(ModuleCode.POL, "VALIDATION"), message) { FieldErrors = [.. errors] };

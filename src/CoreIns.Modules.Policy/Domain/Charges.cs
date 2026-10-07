@@ -10,7 +10,14 @@ namespace CoreIns.Modules.Policy.Domain;
 /// A charge line of a term from RAT: the annual rate and, for tax and levy lines, the amount RAT already computed and
 /// rounded on the rounded premium (null for premium lines, which POL rounds through MKT).
 /// </summary>
-internal sealed record ChargeDraft(string ElementLocator, string CoverageCode, string ChargeType, string ChargeCategory, decimal AnnualRate, Money? Amount);
+internal sealed record ChargeDraft(string ElementLocator, string CoverageCode, string ChargeType, string ChargeCategory, decimal AnnualRate, Money? Amount)
+{
+    /// <summary>Legal status of the configured tax or levy value (tax and levy lines).</summary>
+    public string? LegalStatus { get; init; }
+
+    /// <summary>The tax or levy value is not Settled.</summary>
+    public bool? Provisional { get; init; }
+}
 
 /// <summary>
 /// Turns a RAT rating result into the term's charge lines (REQ-POL-115, REQ-POL-124): rates, not amounts, cross the RAT
@@ -53,7 +60,11 @@ internal static class Charges
 
             lines.Add(new ChargeDraft(
                 vehicleLocator, tax.CoverageCode ?? string.Empty, tax.ChargeType,
-                tax.Category == RateRateResponse.TaxeItem.CategoryValue.Levy ? ChargeCategories.Levy : ChargeCategories.Tax, tax.Rate, tax.Amount));
+                tax.Category == RateRateResponse.TaxeItem.CategoryValue.Levy ? ChargeCategories.Levy : ChargeCategories.Tax, tax.Rate, tax.Amount)
+            {
+                LegalStatus = tax.LegalStatus,
+                Provisional = tax.Provisional,
+            });
         }
 
         if (lines.Count == 0)

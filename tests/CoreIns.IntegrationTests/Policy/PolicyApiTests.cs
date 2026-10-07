@@ -165,8 +165,11 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         // Valid today (before the start): the term is not yet valid; nothing to show for that instant.
         var (today, beforeStart) = await SendAsync(_slice.Client, HttpMethod.Get, $"/api/pol/v1/policies/{policyId}", roles: Billing);
         today.StatusCode.ShouldBe(HttpStatusCode.OK);
-        beforeStart!["term"].ShouldBeNull();
-        beforeStart["segment"].ShouldBeNull();
+        // Review M2: no term covers today, so status and term come from the next term (Scheduled); no segment is valid.
+        beforeStart.Text("policy.status").ShouldBe("SCHEDULED");
+        beforeStart.Text("term.state").ShouldBe("SCHEDULED");
+        beforeStart!["segment"].ShouldBeNull();
+        beforeStart["riskTree"].ShouldBeNull();
 
         // As known before the bind: the policy did not exist yet.
         var (unknown, problem) = await SendAsync(_slice.Client, HttpMethod.Get, $"/api/pol/v1/policies/{policyId}?validAt={At(inTerm)}&knownAt={Uri.EscapeDataString(beforeBind)}", roles: Billing);
@@ -179,6 +182,19 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         expired.StatusCode.ShouldBe(HttpStatusCode.OK, expiredBody?.ToJsonString());
         expiredBody.Text("term.state").ShouldBe("EXPIRED");
         expiredBody!["segment"].ShouldBeNull();
+        var (ended, endedBody) = await SendAsync(_slice.Client, HttpMethod.Get, $"/api/pol/v1/policies/{policyId}?validAt={afterTerm}", roles: Billing);
+        ended.StatusCode.ShouldBe(HttpStatusCode.OK);
+        endedBody.Text("policy.status").ShouldBe("EXPIRED");
+        endedBody.Text("term.state").ShouldBe("EXPIRED");
+        endedBody!["segment"].ShouldBeNull();
+
+        // D-SLC-13: a date-form validAt is the end of that business day in Europe/Athens, so the start date reads in force.
+        var athens = TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens");
+        var startDate = TimeZoneInfo.ConvertTime(effective, athens).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+        var (onStart, onStartBody) = await SendAsync(_slice.Client, HttpMethod.Get, $"/api/pol/v1/policies/{policyId}?validAt={startDate}", roles: Billing);
+        onStart.StatusCode.ShouldBe(HttpStatusCode.OK);
+        onStartBody.Text("policy.status").ShouldBe("IN_FORCE");
+        onStartBody.Text("segment.transactionId").ShouldBe(bind.Text("transactionId"));
 
         // In process (what CLM, DOC, BIL call): the same answer through IPolicyPolicyService.
         await using var scope = _slice.Factory.Services.CreateAsyncScope();
@@ -352,11 +368,11 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         // REQ-POL-137: new business never before now.
         var (past, pastBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", _slice.Submission(party, DateTimeOffset.UtcNow.AddDays(-1)));
         past.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
-        pastBody.Text("code").ShouldBe("POL-ERR-EFFDATE-LIMIT");
+        pastBody.Text("code").ShouldBe("POL-ERR-RETROACTIVE-MTPL");
 
         // Unknown policyholder in PTY.
         var (unknown, unknownBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", _slice.Submission(Guid.CreateVersion7().ToString(), InTwoDays));
-        unknown.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        unknown.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         unknownBody.Text("code").ShouldBe("POL-ERR-VALIDATION");
 
         var (jobId, draftVersion, _) = await _slice.DraftAsync(party, InTwoDays);
@@ -370,7 +386,7 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         // Unknown locator.
         var (bad, badBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/jobs/update-draft",
             new { jobId, versionNo = 1, expectedDraftVersion = draftVersion, instructions = new object[] { new { op = "REMOVE_VEHICLE", locator = "no-such" } } });
-        bad.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        bad.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         badBody.Text("code").ShouldBe("POL-ERR-VALIDATION");
 
         // Bind before quote; bind without confirmation (REQ-POL-181).
@@ -412,11 +428,11 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
 
         // The real PFC question set MOTOR-RISK: hire or reward is a knock-out; a required answer may not be missing.
         var knockOut = await AnswerAndQuoteAsync(new() { ["Q-USAGE"] = "PRIVATE", ["Q-HIRE-REWARD"] = "YES" }, draftVersion);
-        knockOut.Status.ShouldBe(HttpStatusCode.BadRequest, knockOut.Body);
+        knockOut.Status.ShouldBe(HttpStatusCode.UnprocessableEntity, knockOut.Body);
         knockOut.Body.ShouldContain("KNOCK_OUT");
 
         var missing = await AnswerAndQuoteAsync(new() { ["Q-USAGE"] = "PRIVATE" }, draftVersion + 1);
-        missing.Status.ShouldBe(HttpStatusCode.BadRequest, missing.Body);
+        missing.Status.ShouldBe(HttpStatusCode.UnprocessableEntity, missing.Body);
         missing.Body.ShouldContain("QUESTION_REQUIRED");
     }
 
@@ -433,6 +449,52 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         // Idempotency-Key is required on commands.
         var (keyless, keylessBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/jobs/quote", new { jobId, versionNo = 1 }, withKey: false);
         keyless.StatusCode.ShouldBe(HttpStatusCode.BadRequest, keylessBody?.ToJsonString());
+    }
+
+    [Fact]
+    public async Task REQ_POL_088_158_bind_refuses_when_the_configuration_changed_since_the_quote()
+    {
+        var party = await _slice.CreatePartyAsync();
+        var (jobId, _, _) = await _slice.DraftAsync(party, InTwoDays);
+        (await _slice.QuoteAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        await using var dataSource = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        await using (var command = dataSource.CreateCommand($"UPDATE pol.quote_version SET configuration_hash = '{new string('e', 64)}' WHERE job_id = '{jobId}'"))
+        {
+            await command.ExecuteNonQueryAsync(Ct);
+        }
+
+        var (stale, problem) = await _slice.BindAsync(jobId);
+        stale.StatusCode.ShouldBe(HttpStatusCode.Conflict, problem?.ToJsonString());
+        problem.Text("code").ShouldBe("POL-ERR-QUOTE-STALE");
+        problem!.ToJsonString().ShouldContain("requote");
+    }
+
+    [Fact]
+    public async Task Parallel_edits_of_a_quoted_job_create_one_new_version_and_the_rest_are_stale()
+    {
+        var party = await _slice.CreatePartyAsync();
+        var (jobId, draftVersion, _) = await _slice.DraftAsync(party, InTwoDays);
+        (await _slice.QuoteAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var edits = await Task.WhenAll(Enumerable.Range(0, 4).Select(_ => SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/jobs/update-draft", new
+        {
+            jobId, versionNo = 1, expectedDraftVersion = draftVersion,
+            instructions = new object[] { new { op = "SET_ANSWERS", questionSet = new { questionSetCode = "MOTOR-RISK", answers = new Dictionary<string, string> { ["Q-USAGE"] = "PRIVATE", ["Q-HIRE-REWARD"] = "NO" } } } },
+        })));
+        edits.Count(e => e.Response.StatusCode == HttpStatusCode.OK).ShouldBe(1);
+        edits.Where(e => e.Response.StatusCode != HttpStatusCode.OK).Select(e => e.Body.Text("code")).ShouldAllBe(code => code == "POL-ERR-STALE");
+    }
+
+    [Fact]
+    public async Task REQ_POL_295_without_PFC_draft_validation_quoting_fails_closed_unless_allowed()
+    {
+        await using var strict = new PolicySlice(database.AppConnectionString, allowMissingDraftValidation: false);
+        await strict.SeedAsync();
+        var party = await strict.CreatePartyAsync();
+        var (jobId, _, _) = await strict.DraftAsync(party, InTwoDays);
+        var (refused, problem) = await strict.QuoteAsync(jobId);
+        refused.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable, problem?.ToJsonString());
+        problem.Text("code").ShouldBe("POL-ERR-DEPENDENCY-UNAVAILABLE");
     }
 
     private static async Task<T> ScalarAsync<T>(NpgsqlDataSource dataSource, string sql)

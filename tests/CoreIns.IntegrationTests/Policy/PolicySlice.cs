@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json.Nodes;
 using CoreIns.IntegrationTests.Product;
+using CoreIns.Modules.Market.Contracts;
 using CoreIns.Modules.Rating.Contracts;
 using CoreIns.Modules.Rating.Contracts.Api;
 using CoreIns.Modules.Underwriting.Contracts;
@@ -29,10 +30,13 @@ internal sealed class PolicySlice : IAsyncDisposable
     public const string WorksheetId = "4444444444444444444444444444444444444444444444444444444444444444";
 
     private readonly ApiHostFactory _root;
+    private Sha256Hash? _configurationHash;
 
-    public PolicySlice(string connectionString, bool realRatingAndUnderwriting = false)
+    public PolicySlice(string connectionString, bool realRatingAndUnderwriting = false, bool allowMissingDraftValidation = true)
     {
-        _root = new ApiHostFactory(connectionString);
+        _root = new ApiHostFactory(
+            connectionString,
+            settings: new Dictionary<string, string?> { ["Policy:AllowMissingDraftValidation"] = allowMissingDraftValidation ? "true" : "false" });
         Real = realRatingAndUnderwriting;
         Product = Real ? "MOTOR-GR" : "MOTOR-GR-" + Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();
         Factory = Real
@@ -63,6 +67,12 @@ internal sealed class PolicySlice : IAsyncDisposable
     /// <summary>Imports and locks the PFC seed (MOTOR-GR 1.0) under this host's product code (re-importing the same definition is idempotent).</summary>
     public async Task SeedAsync()
     {
+        // The scripted RAT prices under MKT's current configuration, as the real one does (the bind compares hashes).
+        await using (var scope = Factory.Services.CreateAsyncScope())
+        {
+            _configurationHash = (await scope.ServiceProvider.GetRequiredService<IMarketConfigurationService>().CurrentHashAsync()).Hash;
+        }
+
         var (response, body) = await ProductApi.ImportAsync(Client, ProductApi.Seed(Product));
         response.IsSuccessStatusCode.ShouldBeTrue(body?.ToJsonString());
     }
@@ -90,7 +100,7 @@ internal sealed class PolicySlice : IAsyncDisposable
     /// Illustrative rating (TEST DATA): per vehicle an MTPL premium and an own-damage premium, plus one tax line on the
     /// MTPL premium in the rate-item shape. Amounts carry four decimals so that rounding is visible.
     /// </summary>
-    private static RateRateResponse Rate(RateRateRequest request)
+    private RateRateResponse Rate(RateRateRequest request)
     {
         var tree = request.Segments[0].RiskTree;
         var vehicle = tree.GetProperty("vehicle").GetProperty("elementId").GetString()!;
@@ -114,6 +124,7 @@ internal sealed class PolicySlice : IAsyncDisposable
                 },
             ],
             RatingArtefactHash = Sha256Hash.Parse(RatingArtefactHash),
+            ConfigurationHash = _configurationHash is { } hash ? new ConfigurationHash(hash) : null,
             Bindable = request.Envelope.Mode == RateRateRequest.EnvelopeDetail.ModeValue.Full,
             WorksheetId = Sha256Hash.Parse(WorksheetId),
             WorksheetHash = Sha256Hash.Parse(WorksheetId),

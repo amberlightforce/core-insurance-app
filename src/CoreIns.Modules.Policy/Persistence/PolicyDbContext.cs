@@ -256,6 +256,8 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.SetIndex).HasColumnName("set_index");
             entity.Property(e => e.SetSize).HasColumnName("set_size");
             entity.Property(e => e.TaxTreatmentRef).HasColumnName("tax_treatment_ref");
+            entity.Property(e => e.LegalStatus).HasColumnName("legal_status");
+            entity.Property(e => e.Provisional).HasColumnName("provisional");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.TransactionId, e.SetIndex }).IsUnique().HasDatabaseName("ux_charge_line_set");
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_charge_line_term");
