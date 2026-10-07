@@ -8,6 +8,14 @@ namespace CoreIns.Modules.Policy.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobBindResponse
 {
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
     /// <summary>Contract member 'transactionId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("transactionId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
@@ -18,15 +26,35 @@ public sealed record JobBindResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.PolicyTermId? TermId { get; init; }
 
+    /// <summary>Contract member 'termNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termNumber")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? TermNumber { get; init; }
+
+    /// <summary>Contract member 'termState'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termState")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Policy.Contracts.Api.TermStateCode? TermState { get; init; }
+
     /// <summary>Contract member 'policyId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.PolicyId? PolicyId { get; init; }
 
-    /// <summary>Contract member 'chargeDeltas'.</summary>
+    /// <summary>Gapless policy number from PLT numbering, allocated in the bind transaction</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyNumber")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.PolicyNumber? PolicyNumber { get; init; }
+
+    /// <summary>Transaction time (knownAt) of the bind</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? RecordedAt { get; init; }
+
+    /// <summary>Charge lines frozen on the issuance transaction and emitted as ChargeDeltaEmitted</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("chargeDeltas")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<ChargeDeltaItem>? ChargeDeltas { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.ChargeLine>? ChargeDeltas { get; init; }
 
     /// <summary>Contract member 'gateResults'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("gateResults")]
@@ -36,29 +64,6 @@ public sealed record JobBindResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("coverNoteDocumentId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.DocumentId? CoverNoteDocumentId { get; init; }
-
-    /// <summary>Generated contract member.</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
-    public sealed record ChargeDeltaItem
-    {
-        /// <summary>Contract member 'chargeId'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("chargeId")]
-        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        public global::CoreIns.SharedKernel.Identifiers.ChargeId? ChargeId { get; init; }
-
-        /// <summary>Contract member 'elementId'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("elementId")]
-        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        public string? ElementId { get; init; }
-
-        /// <summary>Contract member 'chargeType'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("chargeType")]
-        public required string ChargeType { get; init; }
-
-        /// <summary>Contract member 'amount'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
-        public required global::CoreIns.SharedKernel.Money Amount { get; init; }
-    }
 
     /// <summary>Generated contract member.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

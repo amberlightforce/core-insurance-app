@@ -15,7 +15,7 @@ public interface IPolicyTermService
     /// <remarks>
     /// <para>Operation pol.Term.get (query; HTTP GET /api/pol/v1/terms/{id}).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W4.</para>
+    /// <para>Status: full; fully typed from REQ-POL-002, REQ-POL-084 (SL-POL). Wave W4.</para>
     /// <para>Exposure: ui; consumers: PTY.</para>
     /// <para>Errors: POL-ERR-NOT-FOUND (404).</para>
     /// </remarks>

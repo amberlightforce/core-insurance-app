@@ -184,7 +184,7 @@ public sealed partial class GeneratedContractTests
         var fake = new Testing.Contracts.Fakes.Policy.FakePolicyJobService();
         var canned = fake.Canned<Modules.Policy.Contracts.Api.JobBindResponse>("pol.Job.bind");
         fake.Setup("pol.Job.bind", canned with { CoverNoteDocumentId = null });
-        var request = new Modules.Policy.Contracts.Api.JobBindRequest { JobId = JobId.New(), VersionNo = 1 };
+        var request = new Modules.Policy.Contracts.Api.JobBindRequest { JobId = JobId.New(), VersionNo = 1, PaymentPlanOption = "PLAN-1" };
 
         var response = await fake.BindAsync(request, CommandOptions.New(), TestContext.Current.CancellationToken);
 

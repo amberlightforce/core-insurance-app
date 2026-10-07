@@ -50,12 +50,13 @@ public sealed record SubmissionCreatedV1 : global::CoreIns.Platform.Contracts.Ev
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
     public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>Contract member 'accountId'.</summary>
+    /// <summary>PTY account; absent until pty.Account exists (SL-POL, pre-release)</summary>
     /// <remarks>
     /// <para>Personal data, class P1 (x-classification).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("accountId")]
-    public required global::CoreIns.SharedKernel.Identifiers.AccountId AccountId { get; init; }
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.AccountId? AccountId { get; init; }
 
     /// <summary>Contract member 'productCode'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]

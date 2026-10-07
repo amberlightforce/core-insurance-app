@@ -8,11 +8,7 @@ namespace CoreIns.Modules.Policy.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobGetResponse
 {
-    /// <summary>PRD: "jobs"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("jobs")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Jobs { get; init; }
+    /// <summary>Contract member 'job'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("job")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobView Job { get; init; }
 }

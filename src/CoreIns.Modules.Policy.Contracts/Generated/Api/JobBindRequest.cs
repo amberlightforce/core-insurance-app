@@ -16,17 +16,16 @@ public sealed record JobBindRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
     public required int VersionNo { get; init; }
 
-    /// <summary>BIL plan code (bil.PaymentPlan.select)</summary>
+    /// <summary>BIL plan code (bil.PaymentPlan.select); carried to BIL in PolicyBound.paymentPlanRef</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("paymentPlanOption")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public string? PaymentPlanOption { get; init; }
+    public required string PaymentPlanOption { get; init; }
 
     /// <summary>Hold issuance</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("holdIssuance")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public bool? HoldIssuance { get; init; }
 
-    /// <summary>Human confirmation (POL-ERR-HUMAN-CONFIRMATION-REQUIRED)</summary>
+    /// <summary>Human confirmation (POL-ERR-HUMAN-CONFIRMATION-REQUIRED, REQ-POL-181)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("confirmation")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public bool? Confirmation { get; init; }

@@ -12,13 +12,35 @@ public sealed record RateRateResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("rates")]
     public required global::System.Collections.Generic.IReadOnlyList<RateItem> Rates { get; init; }
 
-    /// <summary>Tax and levy lines from TaxCalculator (REQ-RAT-009)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Tax and levy lines whose rates come from MKT configuration (REQ-RAT-009, REQ-RAT-110)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("taxes")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Taxes { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<TaxeItem>? Taxes { get; init; }
+
+    /// <summary>Sum of the premium per coverage (SL-RAT-UW addition)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coveragePremiumTotal")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? CoveragePremiumTotal { get; init; }
+
+    /// <summary>Sum of the tax and levy lines (SL-RAT-UW addition)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("taxTotal")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? TaxTotal { get; init; }
+
+    /// <summary>Premium plus taxes (SL-RAT-UW addition)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("grossTotal")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? GrossTotal { get; init; }
+
+    /// <summary>The artefact that rated (SL-RAT-UW addition)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratingArtefactHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? RatingArtefactHash { get; init; }
+
+    /// <summary>The MKT configuration hash the taxes were resolved under (SL-RAT-UW addition)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("configurationHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ConfigurationHash? ConfigurationHash { get; init; }
 
     /// <summary>Referral signals (REQ-RAT-006)</summary>
     /// <remarks>
@@ -81,8 +103,7 @@ public sealed record RateRateResponse
 
         /// <summary>Contract member 'coverageCode'.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("coverageCode")]
-        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        public string? CoverageCode { get; init; }
+        public required string CoverageCode { get; init; }
 
         /// <summary>Annual rate, scale 4</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("annualRate")]
@@ -115,6 +136,113 @@ public sealed record RateRateResponse
             /// <summary><c>PRORATABLE</c></summary>
             [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PRORATABLE")]
             Proratable,
+        }
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record TaxeItem
+    {
+        /// <summary>Contract member 'segmentId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("segmentId")]
+        public required string SegmentId { get; init; }
+
+        /// <summary>Contract member 'coverageCode'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("coverageCode")]
+        public required string CoverageCode { get; init; }
+
+        /// <summary>Contract member 'chargeType'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("chargeType")]
+        public required string ChargeType { get; init; }
+
+        /// <summary>Contract member 'category'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("category")]
+        public required CategoryValue Category { get; init; }
+
+        /// <summary>Contract member 'taxClass'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("taxClass")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? TaxClass { get; init; }
+
+        /// <summary>Contract member 'base'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("base")]
+        public required global::CoreIns.SharedKernel.Money Base { get; init; }
+
+        /// <summary>Rate read from MKT configuration (decimal fraction, e.g. 0.15)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("rate")]
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+        public required decimal Rate { get; init; }
+
+        /// <summary>Contract member 'amount'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+
+        /// <summary>Explicit rounding applied to the amount (places and mode)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("roundingRule")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? RoundingRule { get; init; }
+
+        /// <summary>MKT configuration key the rate came from</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("configurationKey")]
+        public required string ConfigurationKey { get; init; }
+
+        /// <summary>Contract member 'configurationValueVersionId'.</summary>
+        /// <remarks>
+        /// <para>Untyped id: no SharedKernel id type is mapped for 'configurationValueVersionId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+        /// </remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("configurationValueVersionId")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::System.Guid? ConfigurationValueVersionId { get; init; }
+
+        /// <summary>Legal status of the configuration value as MKT reports it (carried unchanged, D-REG-01)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? LegalStatus { get; init; }
+
+        /// <summary>Contract member 'legalSourceRef'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("legalSourceRef")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? LegalSourceRef { get; init; }
+
+        /// <summary>TAX or LEVY, the same as category (D-SLC-11; POL reads this name)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("chargeCategory")]
+        public required string ChargeCategory { get; init; }
+
+        /// <summary>MKT key that decided the tax class (for example tax.ipt.motor_class)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("classConfigurationKey")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? ClassConfigurationKey { get; init; }
+
+        /// <summary>Contract member 'classConfigurationValueVersionId'.</summary>
+        /// <remarks>
+        /// <para>Untyped id: no SharedKernel id type is mapped for 'classConfigurationValueVersionId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+        /// </remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("classConfigurationValueVersionId")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::System.Guid? ClassConfigurationValueVersionId { get; init; }
+
+        /// <summary>Legal status of the class value; the line's legalStatus is the weaker of class and rate</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("classLegalStatus")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? ClassLegalStatus { get; init; }
+
+        /// <summary>True when the value is not Settled; such a line is provisional and refused in production (D-REG-02)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public bool? Provisional { get; init; }
+
+        /// <summary>Generated contract member.</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CategoryValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum CategoryValue
+        {
+            /// <summary><c>TAX</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("TAX")]
+            Tax,
+
+            /// <summary><c>LEVY</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("LEVY")]
+            Levy,
         }
     }
 

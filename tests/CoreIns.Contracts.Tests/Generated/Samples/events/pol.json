@@ -595,8 +595,6 @@
       "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "producerOfRecord": "SAMPLE_CODE",
-      "accountId": "01927f85-8704-7236-89a1-5d3f5b5adeb5",
       "payerPartyId": "01928b09-74a4-70d0-80a9-3a5c00b6f2ef",
       "paymentPlanRef": "Sample text",
       "ifrs17Tags": {
@@ -1890,7 +1888,6 @@
     "dataClassification": "P1",
     "payload": {
       "jobId": "0192a9be-f577-7f46-8fc4-42e38e0e1a86",
-      "accountId": "0192be60-b066-787a-83bc-8e41a7c09f0c",
       "productCode": "SAMPLE_CODE",
       "productVersion": "1.0",
       "channel": "SAMPLE_CODE",

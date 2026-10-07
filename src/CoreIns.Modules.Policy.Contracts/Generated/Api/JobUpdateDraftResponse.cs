@@ -8,24 +8,50 @@ namespace CoreIns.Modules.Policy.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobUpdateDraftResponse
 {
-    /// <summary>PRD: "draft state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("draftState")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DraftState { get; init; }
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "validation"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Quote version now in Draft (a new one when a Quoted job was edited)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
+    public required int VersionNo { get; init; }
+
+    /// <summary>Contract member 'draftVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("draftVersion")]
+    public required int DraftVersion { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>Contract member 'riskTree'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("riskTree")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.RiskTree RiskTree { get; init; }
+
+    /// <summary>Findings that block quoting but not saving the draft</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("validation")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Validation { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<ValidationItem> Validation { get; init; }
 
-    /// <summary>PRD: "premium preview"</summary>
+    /// <summary>PRD: "premium preview" (background pricing, REQ-POL-163; not in SL-POL)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("premiumPreview")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Money? PremiumPreview { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ValidationItem
+    {
+        /// <summary>Contract member 'field'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("field")]
+        public required string Field { get; init; }
+
+        /// <summary>Contract member 'code'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("code")]
+        public required string Code { get; init; }
+
+        /// <summary>Contract member 'message'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("message")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Message { get; init; }
+    }
 }

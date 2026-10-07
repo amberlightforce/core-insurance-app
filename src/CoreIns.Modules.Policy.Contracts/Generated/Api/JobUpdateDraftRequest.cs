@@ -4,36 +4,23 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Job.updateDraft request. PRD inputs: "jobId, versionNo, instructions[], expectedDraftVersion"</summary>
+/// <summary>pol.Job.updateDraft request. PRD inputs: "jobId, versionNo, instructions[], expectedDraftVersion". Editing a Quoted job returns it to Draft on a new quote version (REQ-POL-153, D-CON-08c).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobUpdateDraftRequest
 {
-    /// <summary>PRD: "jobId"</summary>
+    /// <summary>Contract member 'jobId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "versionNo"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Quote version being edited</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? VersionNo { get; init; }
+    public required int VersionNo { get; init; }
 
-    /// <summary>PRD: "instructions[]"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("instructions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Instructions { get; init; }
-
-    /// <summary>PRD: "expectedDraftVersion"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Draft version the caller edited (optimistic concurrency, POL-ERR-STALE)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("expectedDraftVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ExpectedDraftVersion { get; init; }
+    public required int ExpectedDraftVersion { get; init; }
+
+    /// <summary>Contract member 'instructions'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("instructions")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.DraftInstruction> Instructions { get; init; }
 }
