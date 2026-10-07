@@ -6,8 +6,10 @@ using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Json;
 using CoreIns.SharedKernel.Results;
 using CoreIns.SharedKernel.StateMachines;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -59,8 +61,62 @@ public static class ApiRoutes
         return segments is ["api", var module, ..] && ModuleCodes.TryParse(module.ToUpperInvariant(), out var code) ? code : ModuleCode.PLT;
     }
 
-    /// <summary>The stable <c>type</c> URI of an error code (RFC 9457 §3.1.1).</summary>
-    public static Uri TypeUri(ErrorCode code) => new($"https://contracts.coreinsurance.example/errors/{code.Value}");
+    /// <summary>Path prefix of the problem type pages.</summary>
+    public const string ProblemsPath = "/problems";
+
+    /// <summary>
+    /// The stable <c>type</c> URI of an error code (RFC 9457 §3.1.1, ruling D-API-15): the relative reference
+    /// <c>/problems/&lt;CODE&gt;</c>, resolved against the API's own origin, where a page describes the problem.
+    /// </summary>
+    public static Uri TypeUri(ErrorCode code) => new($"{ProblemsPath}/{code.Value}", UriKind.Relative);
+}
+
+/// <summary>The human-readable problem type pages (<c>GET /problems/{code}</c>, anonymous, Greek and English).</summary>
+public static class ProblemPages
+{
+    /// <summary>Maps <c>GET /problems/{code}</c>: an HTML page with the title, description, HTTP status and retryability in both languages.</summary>
+    public static IEndpointConventionBuilder MapCoreInsProblemPages(this IEndpointRouteBuilder endpoints)
+    {
+        ArgumentNullException.ThrowIfNull(endpoints);
+        return endpoints.MapGet(ApiRoutes.ProblemsPath + "/{code}", (string code, HttpContext http, ErrorCatalog catalog) =>
+        {
+            if (!ErrorCode.TryParse(code, out var errorCode) || !catalog.IsKnown(errorCode))
+            {
+                return Results.NotFound();
+            }
+
+            var language = LanguageResolver.Resolve(http);
+            return Results.Content(Render(errorCode, catalog.Find(errorCode), language), "text/html; charset=utf-8");
+        }).AllowAnonymous();
+    }
+
+    /// <summary>The page HTML; the preferred language first, then the other one.</summary>
+    public static string Render(ErrorCode code, ErrorDefinition definition, Language preferred)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        var languages = preferred == Language.En ? new[] { Language.En, Language.El } : [Language.El, Language.En];
+        var builder = new System.Text.StringBuilder();
+        builder.Append(System.Globalization.CultureInfo.InvariantCulture,
+            $"<!doctype html><html lang=\"{preferred.ToTag()}\"><head><meta charset=\"utf-8\"><title>{Encode(code.Value)}</title></head><body>");
+        builder.Append(System.Globalization.CultureInfo.InvariantCulture, $"<h1><code>{Encode(code.Value)}</code></h1>");
+        foreach (var language in languages)
+        {
+            var (status, retry) = language == Language.En
+                ? ("HTTP status", definition.Retryable ? "A retry may succeed." : "Retrying the same request will not succeed.")
+                : ("Κατάσταση HTTP", definition.Retryable ? "Μια επανάληψη μπορεί να πετύχει." : "Η επανάληψη του ίδιου αιτήματος δεν θα πετύχει.");
+            builder.Append(System.Globalization.CultureInfo.InvariantCulture, $"<section lang=\"{language.ToTag()}\"><h2>{Encode(definition.Title.In(language))}</h2>");
+            if (definition.Description is { } description)
+            {
+                builder.Append(System.Globalization.CultureInfo.InvariantCulture, $"<p>{Encode(description.In(language))}</p>");
+            }
+
+            builder.Append(System.Globalization.CultureInfo.InvariantCulture, $"<p>{status}: {definition.Status}. {retry}</p></section>");
+        }
+
+        return builder.Append("</body></html>").ToString();
+    }
+
+    private static string Encode(string text) => System.Net.WebUtility.HtmlEncode(text);
 }
 
 /// <summary>Chooses the response language: the user's profile claim, then <c>Accept-Language</c>, then Greek (R-101).</summary>

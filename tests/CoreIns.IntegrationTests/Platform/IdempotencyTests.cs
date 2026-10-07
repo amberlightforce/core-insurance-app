@@ -79,6 +79,24 @@ public sealed class IdempotencyTests(PostgresFixture database) : IClassFixture<P
     }
 
     [Fact]
+    public async Task An_http_replay_restores_location_etag_and_retry_after_but_not_cookies()
+    {
+        await using var api = await TestApi.StartAsync(database);
+        var key = Guid.NewGuid().ToString();
+
+        using var first = await api.PostAsync(key, new CreateWidget("hdr-replay", 2m));
+        using var retry = await api.PostAsync(key, new CreateWidget("hdr-replay", 2m));
+
+        first.Headers.Contains("Set-Cookie").ShouldBeTrue();
+        retry.Headers.GetValues(PlatformHeaders.IdempotentReplayed).ShouldBe(["true"]);
+        retry.Headers.Location!.ToString().ShouldBe(Path + "/hdr-replay");
+        retry.Headers.ETag!.ToString().ShouldBe("\"hdr-replay-v1\"");
+        retry.Headers.RetryAfter!.Delta.ShouldBe(TimeSpan.FromSeconds(7));
+        retry.Headers.Contains("Set-Cookie").ShouldBeFalse();
+        api.Log.Executions.Count(e => e == "hdr-replay").ShouldBe(1);
+    }
+
+    [Fact]
     public async Task An_http_retry_with_a_different_body_is_a_localized_409_problem()
     {
         await using var api = await TestApi.StartAsync(database);
@@ -92,7 +110,7 @@ public sealed class IdempotencyTests(PostgresFixture database) : IClassFixture<P
         using var problem = JsonDocument.Parse(await mismatch.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         problem.RootElement.GetProperty("code").GetString().ShouldBe("WRK-ERR-IDEMPOTENCY-MISMATCH");
         problem.RootElement.GetProperty("title").GetString().ShouldBe("The Idempotency-Key was already used with a different request");
-        problem.RootElement.GetProperty("type").GetString().ShouldBe("https://contracts.coreinsurance.example/errors/WRK-ERR-IDEMPOTENCY-MISMATCH");
+        problem.RootElement.GetProperty("type").GetString().ShouldBe("/problems/WRK-ERR-IDEMPOTENCY-MISMATCH");
         problem.RootElement.GetProperty("traceId").GetString()!.Length.ShouldBe(32);
         api.Log.Executions.ShouldNotContain("body-b");
     }
@@ -187,7 +205,19 @@ public sealed class IdempotencyTests(PostgresFixture database) : IClassFixture<P
             });
             app.UseCoreInsPlatform();
             app.MapPost(Path, async (CreateWidget command, ICommandHandler<CreateWidget, WidgetCreatedPayload> handler, HttpContext http) =>
-                (await handler.HandleAsync(command, http.RequestAborted)).ToHttpResult(http));
+            {
+                var result = await handler.HandleAsync(command, http.RequestAborted);
+                if (command.Name.StartsWith("hdr-", StringComparison.Ordinal))
+                {
+                    // Headers a create endpoint sets; the cookie must never be replayed to another caller.
+                    http.Response.Headers.Location = $"{Path}/{command.Name}";
+                    http.Response.Headers.ETag = $"\"{command.Name}-v1\"";
+                    http.Response.Headers.RetryAfter = "7";
+                    http.Response.Headers.SetCookie = "session=first-caller; HttpOnly";
+                }
+
+                return result.ToHttpResult(http);
+            });
             await app.StartAsync();
             return new TestApi(app);
         }

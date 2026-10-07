@@ -18,7 +18,10 @@ public interface ITransactionParticipant
     /// <summary>Writes staged work on the transaction's connection.</summary>
     Task BeforeCommitAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken cancellationToken);
 
-    /// <summary>Called after a rollback; staged work is discarded except what must survive (it is written in a new transaction).</summary>
+    /// <summary>Called after a successful commit: staged work is done and can be discarded.</summary>
+    Task AfterCommitAsync(CancellationToken cancellationToken);
+
+    /// <summary>Called after a rollback (also when the commit itself failed); staged work is discarded except what must survive (it is written in a new transaction).</summary>
     Task AfterRollbackAsync(DbSession session, CancellationToken cancellationToken);
 }
 
@@ -130,9 +133,9 @@ public sealed class DbSession : IAsyncDisposable
         }
 
         await EndTransactionAsync().ConfigureAwait(false);
-        foreach (var context in _contexts)
+        foreach (var participant in Participants())
         {
-            context.ChangeTracker.AcceptAllChanges();
+            await participant.AfterCommitAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 

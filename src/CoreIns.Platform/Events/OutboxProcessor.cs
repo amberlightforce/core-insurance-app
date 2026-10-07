@@ -73,16 +73,38 @@ public sealed record OutboxBatchResult(int Claimed, int Dispatched, int Retried,
 /// handler, retries failures with exponential backoff (later events of that aggregate wait), parks handlers that keep
 /// failing in <c>plt.outbox_dead_letter</c> (raising <c>DeadLetterParked</c>), and archives every completed message in
 /// <c>plt.event_archive</c>. Several dispatchers may run at once.
+/// <para><b>Dead-letter semantics (D-ARC-26).</b> Retries before parking keep the aggregate's order: later events of the
+/// aggregate wait. Parking does <b>not</b> hold the aggregate: after the last attempt the failing handler's event is
+/// parked and the aggregate's later events are delivered. A parked event that is replayed later therefore arrives
+/// <b>out of order</b> (after events with a higher <c>aggregateSequence</c>). Handlers whose effects depend on order
+/// must compare <see cref="EventEnvelope.AggregateSequence"/> with the last sequence they applied for the aggregate and
+/// ignore or reconcile stale events.</para>
 /// </summary>
 public sealed partial class OutboxProcessor
 {
+    // Only claimable runs: a message is skipped while an earlier undispatched event of its aggregate is in backoff or
+    // leased by another dispatcher, so a blocked aggregate never fills the batch and starves the others. The blocked
+    // aggregates come from two small index ranges (backoff, live leases), so the claim stays a walk of the pending
+    // queue in position order however long the backlog is.
     private const string ClaimSql = $"""
-        WITH candidates AS (
-            SELECT event_id AS claim_id FROM plt.outbox_message
-            WHERE status = 'Pending' AND next_attempt_at <= @now AND (lease_until IS NULL OR lease_until < @now)
-            ORDER BY position
+        WITH blocked AS MATERIALIZED (
+            SELECT b.aggregate_type, b.aggregate_id, min(b.aggregate_sequence) AS from_sequence
+            FROM (
+                SELECT aggregate_type, aggregate_id, aggregate_sequence FROM plt.outbox_message
+                WHERE status = 'Pending' AND next_attempt_at > @now
+                UNION ALL
+                SELECT aggregate_type, aggregate_id, aggregate_sequence FROM plt.outbox_message
+                WHERE status = 'Pending' AND lease_until >= @now) b
+            GROUP BY b.aggregate_type, b.aggregate_id),
+        candidates AS (
+            SELECT m.event_id AS claim_id FROM plt.outbox_message m
+            WHERE m.status = 'Pending' AND m.next_attempt_at <= @now AND (m.lease_until IS NULL OR m.lease_until < @now)
+              AND NOT EXISTS (
+                SELECT 1 FROM blocked x
+                WHERE x.aggregate_type = m.aggregate_type AND x.aggregate_id = m.aggregate_id AND x.from_sequence < m.aggregate_sequence)
+            ORDER BY m.position
             LIMIT @batch
-            FOR UPDATE SKIP LOCKED)
+            FOR UPDATE OF m SKIP LOCKED)
         UPDATE plt.outbox_message m SET lease_until = @lease_until, lease_owner = @owner
         FROM candidates c WHERE m.event_id = c.claim_id
         RETURNING m.position, m.attempts, {EnvelopeColumnsReader.Columns}
@@ -118,7 +140,7 @@ public sealed partial class OutboxProcessor
         UPDATE plt.outbox_message m
         SET attempts = m.attempts + 1, next_attempt_at = u.next_at, last_error = u.error, lease_until = NULL, lease_owner = NULL
         FROM unnest(@ids, @next_at, @errors) AS u(id, next_at, error)
-        WHERE m.event_id = u.id AND m.status = 'Pending'
+        WHERE m.event_id = u.id AND m.status = 'Pending' AND m.lease_owner = @owner
         """;
 
     private const string ReleaseSql = """
@@ -228,124 +250,105 @@ public sealed partial class OutboxProcessor
         return new OutboxBatchResult(claimed.Count, outcome.Completed.Count, outcome.Retries.Count, outcome.Parked.Count, released.Count);
     }
 
-    /// <summary>Groups whole aggregate runs into lanes of about one handler micro-batch, spread over the parallelism.</summary>
+    /// <summary>Splits the aggregate runs into lanes (one per parallel worker), each with at most one micro-batch of runs.</summary>
     private List<List<List<ClaimedMessage>>> Lanes(List<List<ClaimedMessage>> runs)
     {
-        var total = runs.Sum(r => r.Count);
         var dop = Math.Max(1, _options.MaxDegreeOfParallelism);
-        var size = Math.Max(1, Math.Min(Math.Max(1, _options.HandlerBatchSize), (total + dop - 1) / dop));
-        var lanes = new List<List<List<ClaimedMessage>>>();
-        var current = new List<List<ClaimedMessage>>();
-        var count = 0;
-        foreach (var run in runs)
-        {
-            current.Add(run);
-            count += run.Count;
-            if (count >= size)
-            {
-                lanes.Add(current);
-                current = [];
-                count = 0;
-            }
-        }
-
-        if (current.Count > 0)
-        {
-            lanes.Add(current);
-        }
-
-        return lanes;
+        var size = Math.Max(1, Math.Min(Math.Max(1, _options.HandlerBatchSize), (runs.Count + dop - 1) / dop));
+        return [.. runs.Chunk(size).Select(chunk => chunk.ToList())];
     }
 
     /// <summary>
-    /// Fast path: each handler processes the whole lane in one transaction. If any handler's micro-batch fails, the
-    /// lane falls back to event-by-event processing (handlers that committed their batch are skipped by their markers).
+    /// Processes a lane of aggregate runs in waves: wave k holds the k-th event of every run still active. Within a wave
+    /// every handler runs, one micro-batch transaction per handler (markers and effects commit together); a failing
+    /// micro-batch is retried event by event. Wave k+1 starts only after wave k is done for every handler, so all of a
+    /// module's handlers — whatever event types they subscribe to — see each aggregate's events in sequence order. An
+    /// event that still fails is retried later (the rest of its run is released) or, after the last attempt, parked
+    /// (its aggregate continues, D-ARC-26).
     /// </summary>
     private async Task ProcessLaneAsync(List<List<ClaimedMessage>> lane, RoundOutcome outcome, CancellationToken cancellationToken)
     {
-        var envelopes = lane.SelectMany(run => run).Select(m => m.Envelope).ToList();
-        if (_options.HandlerBatchSize > 1 && envelopes.Count > 1)
+        var stopped = new HashSet<int>();
+        for (var k = 0; ; k++)
         {
-            var batched = true;
-            foreach (var handler in envelopes.Select(e => e.RoutingKey).Distinct(StringComparer.Ordinal).SelectMany(_registry.For).Distinct())
+            var wave = lane.Select((run, index) => (Run: index, Message: k < run.Count && !stopped.Contains(index) ? run[k] : null))
+                .Where(w => w.Message is not null)
+                .Select(w => (w.Run, Message: w.Message!))
+                .ToList();
+            if (wave.Count == 0)
             {
-                var own = envelopes.Where(e => string.Equals(e.RoutingKey, handler.RoutingKey, StringComparison.Ordinal)).ToList();
-                try
-                {
-                    await _invoker.InvokeBatchAsync(handler, own, _clock, cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
-                {
-                    LogBatchFailed(_logger, ex, handler.HandlerName, own.Count);
-                    batched = false;
-                    break;
-                }
-            }
-
-            if (batched)
-            {
-                foreach (var envelope in envelopes)
-                {
-                    outcome.Completed.Add(envelope.EventId.Value);
-                }
-
                 return;
             }
-        }
 
-        foreach (var run in lane)
-        {
-            await ProcessRunAsync(run, outcome, cancellationToken).ConfigureAwait(false);
-        }
-    }
-
-    private async Task ProcessRunAsync(List<ClaimedMessage> run, RoundOutcome outcome, CancellationToken cancellationToken)
-    {
-        for (var i = 0; i < run.Count; i++)
-        {
-            var message = run[i];
-            var failures = new List<(EventHandlerRegistration Handler, Exception Error)>();
-            foreach (var handler in _registry.For(message.Envelope.RoutingKey))
+            var failures = new Dictionary<Guid, List<(EventHandlerRegistration Handler, Exception Error)>>();
+            var handlers = wave.Select(w => w.Message.Envelope.RoutingKey).Distinct(StringComparer.Ordinal).SelectMany(_registry.For).Distinct().ToList();
+            foreach (var handler in handlers)
             {
-                try
+                var own = wave.Select(w => w.Message.Envelope)
+                    .Where(e => string.Equals(e.RoutingKey, handler.RoutingKey, StringComparison.Ordinal))
+                    .ToList();
+                if (_options.HandlerBatchSize > 1 && own.Count > 1)
                 {
-                    await _invoker.InvokeAsync(handler, message.Envelope, replay: false, _clock, cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
-                {
-                    LogHandlerFailed(_logger, ex, handler.HandlerName, message.Envelope.EventType.Value, message.Envelope.EventId.Value);
-                    failures.Add((handler, ex));
-                }
-            }
-
-            if (failures.Count == 0)
-            {
-                outcome.Completed.Add(message.Envelope.EventId.Value);
-                continue;
-            }
-
-            var attempt = message.Attempts + 1;
-            if (attempt >= _options.MaxAttempts)
-            {
-                foreach (var (handler, error) in failures)
-                {
-                    outcome.Parked.Add(new ParkedFailure(message.Envelope, handler.HandlerName, error, attempt));
+                    try
+                    {
+                        await _invoker.InvokeBatchAsync(handler, own, _clock, cancellationToken).ConfigureAwait(false);
+                        continue;
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+                    {
+                        LogBatchFailed(_logger, ex, handler.HandlerName, own.Count);
+                    }
                 }
 
-                outcome.Completed.Add(message.Envelope.EventId.Value);
-                continue;
+                foreach (var envelope in own)
+                {
+                    try
+                    {
+                        await _invoker.InvokeAsync(handler, envelope, replay: false, _clock, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+                    {
+                        LogHandlerFailed(_logger, ex, handler.HandlerName, envelope.EventType.Value, envelope.EventId.Value);
+                        if (!failures.TryGetValue(envelope.EventId.Value, out var list))
+                        {
+                            failures[envelope.EventId.Value] = list = [];
+                        }
+
+                        list.Add((handler, ex));
+                    }
+                }
             }
 
-            var summary = string.Join("; ", failures.Select(f => $"{f.Handler.HandlerName}: {ErrorText.Of(f.Error)}"));
-            outcome.Retries.Add((message.Envelope.EventId.Value, _clock.Now.Plus(_options.Backoff(attempt)), ErrorText.Truncate(summary)));
-
-            // Order per aggregate: later events wait for this one.
-            foreach (var later in run.Skip(i + 1))
+            foreach (var (run, message) in wave)
             {
-                outcome.Released.Add(later.Envelope.EventId.Value);
-            }
+                if (!failures.TryGetValue(message.Envelope.EventId.Value, out var failed))
+                {
+                    outcome.Completed.Add(message.Envelope.EventId.Value);
+                    continue;
+                }
 
-            return;
+                var attempt = message.Attempts + 1;
+                if (attempt >= _options.MaxAttempts)
+                {
+                    foreach (var (handler, error) in failed)
+                    {
+                        outcome.Parked.Add(new ParkedFailure(message.Envelope, handler.HandlerName, error, attempt));
+                    }
+
+                    outcome.Completed.Add(message.Envelope.EventId.Value);
+                    continue;
+                }
+
+                var summary = string.Join("; ", failed.Select(f => $"{f.Handler.HandlerName}: {ErrorText.Of(f.Error)}"));
+                outcome.Retries.Add((message.Envelope.EventId.Value, _clock.Now.Plus(_options.Backoff(attempt)), ErrorText.Truncate(summary)));
+
+                // Order per aggregate: later events wait for this one.
+                stopped.Add(run);
+                foreach (var later in lane[run].Skip(k + 1))
+                {
+                    outcome.Released.Add(later.Envelope.EventId.Value);
+                }
+            }
         }
     }
 
@@ -413,6 +416,7 @@ public sealed partial class OutboxProcessor
                 Value = retries.Select(r => r.NextAttemptAt.ToUtcDateTime()).ToArray(),
             });
             retry.Parameters.Add(new NpgsqlParameter<string[]>("errors", [.. retries.Select(r => r.Error)]));
+            retry.Parameters.Add(new NpgsqlParameter<string>("owner", _owner));
             await retry.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
 

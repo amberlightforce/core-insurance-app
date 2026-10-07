@@ -17,6 +17,12 @@ namespace CoreIns.Platform.Errors;
 /// <param name="Retryable">True when the same request may succeed later.</param>
 public sealed record ErrorDefinition(string Name, ModuleCode? Module, int Status, LocalizedText Title, bool Retryable = false)
 {
+    /// <summary>What the error means and what the caller can do (shown on the <c>/problems/&lt;CODE&gt;</c> page).</summary>
+    public LocalizedText? Description { get; init; }
+
+    /// <summary>A copy with a description.</summary>
+    public ErrorDefinition Describe(string descriptionEl, string descriptionEn) => this with { Description = new LocalizedText(descriptionEl, descriptionEn) };
+
     /// <summary>A definition for every module's <c>&lt;MOD&gt;-ERR-&lt;name&gt;</c>.</summary>
     public static ErrorDefinition Generic(string name, int status, string titleEl, string titleEn, bool retryable = false) =>
         new(name, null, status, new LocalizedText(titleEl, titleEn), retryable);
@@ -91,27 +97,63 @@ public sealed class ErrorCatalog
     public ErrorCatalog(IEnumerable<ErrorDefinition> moduleDefinitions)
     {
         ArgumentNullException.ThrowIfNull(moduleDefinitions);
-        Register(ErrorDefinition.Generic(PlatformErrors.Validation, 400, "Τα στοιχεία του αιτήματος δεν είναι έγκυρα", "The request is not valid"));
-        Register(ErrorDefinition.Generic(PlatformErrors.IdempotencyKeyRequired, 400, "Λείπει η κεφαλίδα Idempotency-Key", "The Idempotency-Key header is required"));
-        Register(ErrorDefinition.Generic(PlatformErrors.IdempotencyKeyInvalid, 400, "Η κεφαλίδα Idempotency-Key πρέπει να είναι UUID", "The Idempotency-Key header must be a UUID"));
+        Register(ErrorDefinition.Generic(PlatformErrors.Validation, 400, "Τα στοιχεία του αιτήματος δεν είναι έγκυρα", "The request is not valid")
+            .Describe(
+                "Ένα ή περισσότερα πεδία δεν πέρασαν τον έλεγχο· το errors[] αναφέρει το πεδίο και τον λόγο. Διορθώστε τα και στείλτε ξανά.",
+                "One or more fields failed validation; errors[] names each field and the reason. Correct them and send again."));
+        Register(ErrorDefinition.Generic(PlatformErrors.IdempotencyKeyRequired, 400, "Λείπει η κεφαλίδα Idempotency-Key", "The Idempotency-Key header is required")
+            .Describe(
+                "Κάθε αίτημα που αλλάζει δεδομένα χρειάζεται μια κεφαλίδα Idempotency-Key με νέο UUID, ώστε μια επανάληψη να μην εκτελεστεί δύο φορές.",
+                "Every state-changing request needs an Idempotency-Key header with a fresh UUID, so that a retry never executes twice."));
+        Register(ErrorDefinition.Generic(PlatformErrors.IdempotencyKeyInvalid, 400, "Η κεφαλίδα Idempotency-Key πρέπει να είναι UUID", "The Idempotency-Key header must be a UUID")
+            .Describe(
+                "Η τιμή της κεφαλίδας Idempotency-Key πρέπει να είναι ένα μόνο UUID στη μορφή 8-4-4-4-12.",
+                "The Idempotency-Key header value must be a single UUID in 8-4-4-4-12 form."));
         Register(ErrorDefinition.Generic(
             PlatformErrors.IdempotencyMismatch, 409,
-            "Το Idempotency-Key χρησιμοποιήθηκε ήδη με διαφορετικό αίτημα", "The Idempotency-Key was already used with a different request"));
+            "Το Idempotency-Key χρησιμοποιήθηκε ήδη με διαφορετικό αίτημα", "The Idempotency-Key was already used with a different request")
+            .Describe(
+                "Το κλειδί έχει ήδη χρησιμοποιηθεί για άλλο αίτημα· τα αρχικά αποτελέσματα δεν άλλαξαν. Χρησιμοποιήστε νέο κλειδί για νέο αίτημα.",
+                "The key was already used for a different request; the original result is unchanged. Use a new key for a new request."));
         Register(ErrorDefinition.Generic(
             PlatformErrors.IdempotencyInProgress, 409,
             "Το αρχικό αίτημα με αυτό το Idempotency-Key βρίσκεται ακόμη σε εξέλιξη", "The original request with this Idempotency-Key is still in progress",
-            retryable: true));
-        Register(ErrorDefinition.Generic(PlatformErrors.InvalidStateTransition, 409, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση", "The action is not allowed in the current state"));
-        Register(ErrorDefinition.Generic(PlatformErrors.AuthorityDenied, 403, "Δεν έχετε την απαιτούμενη εξουσιοδότηση", "You do not have the required authority"));
-        Register(ErrorDefinition.Generic(PlatformErrors.AuthorityReferral, 403, "Απαιτείται έγκριση από ανώτερη εξουσιοδότηση", "Approval by a higher authority is required"));
-        Register(ErrorDefinition.Generic(PlatformErrors.NotFound, 404, "Δεν βρέθηκε", "Not found"));
-        Register(ErrorDefinition.Generic(PlatformErrors.ConcurrencyConflict, 409, "Η εγγραφή άλλαξε στο μεταξύ· δοκιμάστε ξανά", "The record changed meanwhile; try again", retryable: true));
-        Register(ErrorDefinition.Generic(PlatformErrors.Internal, 500, "Παρουσιάστηκε απρόσμενο σφάλμα", "An unexpected error occurred", retryable: true));
-        Register(ErrorDefinition.For(ModuleCode.PLT, PlatformErrors.UnknownAuthorityType, 400, "Άγνωστος τύπος εξουσιοδότησης", "Unknown authority type"));
-        Register(ErrorDefinition.For(ModuleCode.PLT, PlatformErrors.AuthorityTypeExists, 409, "Ο τύπος εξουσιοδότησης υπάρχει ήδη", "The authority type already exists"));
+            retryable: true)
+            .Describe(
+                "Το πρώτο αίτημα με αυτό το κλειδί δεν έχει ολοκληρωθεί. Δοκιμάστε ξανά σε λίγο με το ίδιο κλειδί για να λάβετε το αποτέλεσμά του.",
+                "The first request with this key has not finished. Retry shortly with the same key to receive its result."));
+        Register(ErrorDefinition.Generic(PlatformErrors.InvalidStateTransition, 409, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση", "The action is not allowed in the current state")
+            .Describe(
+                "Ο κύκλος ζωής της εγγραφής δεν επιτρέπει αυτή την ενέργεια από την τρέχουσα κατάστασή της.",
+                "The record's lifecycle does not allow this action from its current state."));
+        Register(ErrorDefinition.Generic(PlatformErrors.AuthorityDenied, 403, "Δεν έχετε την απαιτούμενη εξουσιοδότηση", "You do not have the required authority")
+            .Describe(
+                "Δεν διαθέτετε εξουσιοδότηση αυτού του τύπου για την ενέργεια. Ο κωδικός λόγου εξηγεί γιατί.",
+                "You hold no authority of this type for the action. The reason code explains why."));
+        Register(ErrorDefinition.Generic(PlatformErrors.AuthorityReferral, 403, "Απαιτείται έγκριση από ανώτερη εξουσιοδότηση", "Approval by a higher authority is required")
+            .Describe(
+                "Η ενέργεια υπερβαίνει το όριό σας. Τα referralTargets δείχνουν ποιος μπορεί να την εγκρίνει.",
+                "The action exceeds your limit. referralTargets shows who can approve it."));
+        Register(ErrorDefinition.Generic(PlatformErrors.NotFound, 404, "Δεν βρέθηκε", "Not found")
+            .Describe("Η εγγραφή δεν υπάρχει ή δεν έχετε πρόσβαση σε αυτήν.", "The record does not exist or is not visible to you."));
+        Register(ErrorDefinition.Generic(PlatformErrors.ConcurrencyConflict, 409, "Η εγγραφή άλλαξε στο μεταξύ· δοκιμάστε ξανά", "The record changed meanwhile; try again", retryable: true)
+            .Describe(
+                "Κάποιος άλλος άλλαξε την εγγραφή στο μεταξύ. Φορτώστε την ξανά και επαναλάβετε.",
+                "Someone else changed the record meanwhile. Reload it and try again."));
+        Register(ErrorDefinition.Generic(PlatformErrors.Internal, 500, "Παρουσιάστηκε απρόσμενο σφάλμα", "An unexpected error occurred", retryable: true)
+            .Describe(
+                "Το σύστημα δεν ολοκλήρωσε το αίτημα και δεν έγινε καμία αλλαγή. Δοκιμάστε ξανά· αναφέρετε το traceId αν επιμένει.",
+                "The system could not complete the request and nothing changed. Try again; quote the traceId if it persists."));
+        Register(ErrorDefinition.For(ModuleCode.PLT, PlatformErrors.UnknownAuthorityType, 400, "Άγνωστος τύπος εξουσιοδότησης", "Unknown authority type")
+            .Describe("Ο τύπος εξουσιοδότησης δεν έχει καταχωρηθεί από καμία ενότητα.", "No module has registered this authority type."));
+        Register(ErrorDefinition.For(ModuleCode.PLT, PlatformErrors.AuthorityTypeExists, 409, "Ο τύπος εξουσιοδότησης υπάρχει ήδη", "The authority type already exists")
+            .Describe("Μια άλλη ενότητα έχει ήδη καταχωρήσει τύπο εξουσιοδότησης με αυτόν τον κωδικό.", "Another module already registered an authority type with this code."));
         Register(ErrorDefinition.For(
             ModuleCode.PLT, PlatformErrors.HumanDecisionRequired, 403,
-            "Απαιτείται απόφαση από εξουσιοδοτημένο πρόσωπο", "A decision by an authorised person is required"));
+            "Απαιτείται απόφαση από εξουσιοδοτημένο πρόσωπο", "A decision by an authorised person is required")
+            .Describe(
+                "Μια ενέργεια με νομικό ή οικονομικό αποτέλεσμα δεν αποφασίζεται από τεχνητή νοημοσύνη· πρέπει να την επιβεβαιώσει εξουσιοδοτημένο πρόσωπο.",
+                "An action with legal or financial effect is never decided by AI; an authorised person must confirm it."));
         foreach (var definition in moduleDefinitions)
         {
             Register(definition);
@@ -131,6 +173,9 @@ public sealed class ErrorCatalog
             _generic[definition.Name] = definition;
         }
     }
+
+    /// <summary>True when the code has its own or a generic definition (not the <see cref="Unknown"/> fallback).</summary>
+    public bool IsKnown(ErrorCode code) => _exact.ContainsKey(code.Value) || _generic.ContainsKey(code.Name);
 
     /// <summary>The definition of a code: exact, then generic by name, then <see cref="Unknown"/>.</summary>
     public ErrorDefinition Find(ErrorCode code) =>

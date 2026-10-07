@@ -3,6 +3,7 @@ using System;
 using CoreIns.Platform.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CoreIns.Platform.Persistence.Migrations
 {
     [DbContext(typeof(PlatformDbContext))]
-    partial class PlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261007150444_AuditChainHeadGuard")]
+    partial class AuditChainHeadGuard
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -700,14 +703,6 @@ namespace CoreIns.Platform.Persistence.Migrations
                     b.HasIndex("DispatchedAt")
                         .HasDatabaseName("ix_outbox_message_dispatched")
                         .HasFilter("status = 'Dispatched'");
-
-                    b.HasIndex("LeaseUntil")
-                        .HasDatabaseName("ix_outbox_message_pending_lease")
-                        .HasFilter("status = 'Pending'");
-
-                    b.HasIndex("NextAttemptAt")
-                        .HasDatabaseName("ix_outbox_message_pending_next_attempt")
-                        .HasFilter("status = 'Pending'");
 
                     b.HasIndex("Position")
                         .HasDatabaseName("ix_outbox_message_pending")

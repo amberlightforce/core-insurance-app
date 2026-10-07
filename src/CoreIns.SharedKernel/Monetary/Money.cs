@@ -8,10 +8,10 @@ namespace CoreIns.SharedKernel;
 /// An amount of money: a <see cref="decimal"/> plus its <see cref="Currency"/> (contract §3.2.1).
 /// <list type="bullet">
 /// <item>Arithmetic is exact <see cref="decimal"/> arithmetic and only between amounts of the same currency
-/// (<see cref="CurrencyMismatchException"/> otherwise). Nothing is ever rounded implicitly: multiplication and division
-/// keep every digit decimal can hold, and callers round explicitly with <see cref="Round"/> or
-/// <see cref="RoundToMinorUnits"/>, naming the precision and the <see cref="MidpointRounding"/> mode that configuration
-/// prescribes (ADR §2 rule 2).</item>
+/// (<see cref="CurrencyMismatchException"/> otherwise). Nothing is ever rounded implicitly (ADR §2 rule 2, D-ARC-27):
+/// a product is exact or throws <see cref="PrecisionLossException"/>; division always takes the precision and the
+/// <see cref="MidpointRounding"/> mode; callers round explicitly with <see cref="Round"/> or
+/// <see cref="RoundToMinorUnits"/>, naming what configuration prescribes.</item>
 /// <item>JSON: <c>{"amount": "&lt;decimal string&gt;", "currency": "&lt;ISO 4217&gt;"}</c>, as contracts/events
 /// common <c>Money</c>; amounts are never JSON numbers.</item>
 /// </list>
@@ -85,22 +85,20 @@ public readonly record struct Money : IComparable<Money>
         return new Money(Amount - other.Amount, Currency);
     }
 
-    /// <summary>Multiplies by a factor. The result is not rounded.</summary>
-    public Money Multiply(decimal factor) => new(Amount * factor, Currency);
+    /// <summary>
+    /// Multiplies by a factor. The result is exact and not rounded; a product that <see cref="decimal"/> cannot hold
+    /// exactly throws <see cref="PrecisionLossException"/> instead of losing digits (D-ARC-27).
+    /// </summary>
+    public Money Multiply(decimal factor) => new(ExactDecimal.Multiply(Amount, factor), Currency);
 
-    /// <summary>Applies a rate (e.g. a tax rate). The result is not rounded.</summary>
-    public Money Multiply(Rate rate) => new(Amount * rate.Value, Currency);
+    /// <summary>Applies a rate (e.g. a tax rate): exact, not rounded, or <see cref="PrecisionLossException"/>.</summary>
+    public Money Multiply(Rate rate) => Multiply(rate.Value);
 
-    /// <summary>Divides by a non-zero divisor. Decimal division keeps 28-29 significant digits; the result is not rounded to the currency.</summary>
-    public Money Divide(decimal divisor)
-    {
-        if (divisor == 0m)
-        {
-            throw new DivideByZeroException("Money cannot be divided by zero.");
-        }
-
-        return new Money(Amount / divisor, Currency);
-    }
+    /// <summary>
+    /// Divides by a non-zero divisor, rounding the exact quotient to <paramref name="decimals"/> places with
+    /// <paramref name="mode"/>. Division always names its rounding (D-ARC-27): there is no unrounded money division.
+    /// </summary>
+    public Money Divide(decimal divisor, int decimals, MidpointRounding mode) => new(ExactDecimal.Divide(Amount, divisor, decimals, mode), Currency);
 
     /// <summary>The amount with the opposite sign.</summary>
     public Money Negate() => new(-Amount, Currency);
@@ -154,17 +152,14 @@ public readonly record struct Money : IComparable<Money>
     /// <summary>The amount with the opposite sign.</summary>
     public static Money operator -(Money value) => value.Negate();
 
-    /// <summary>Multiplies by a factor (not rounded).</summary>
+    /// <summary>Multiplies by a factor (exact; <see cref="PrecisionLossException"/> instead of lost digits).</summary>
     public static Money operator *(Money left, decimal right) => left.Multiply(right);
 
-    /// <summary>Multiplies by a factor (not rounded).</summary>
+    /// <summary>Multiplies by a factor (exact; <see cref="PrecisionLossException"/> instead of lost digits).</summary>
     public static Money operator *(decimal left, Money right) => right.Multiply(left);
 
-    /// <summary>Applies a rate (not rounded).</summary>
+    /// <summary>Applies a rate (exact; <see cref="PrecisionLossException"/> instead of lost digits).</summary>
     public static Money operator *(Money left, Rate right) => left.Multiply(right);
-
-    /// <summary>Divides by a non-zero divisor (not rounded to the currency).</summary>
-    public static Money operator /(Money left, decimal right) => left.Divide(right);
 
     /// <summary>Same-currency comparison.</summary>
     public static bool operator <(Money left, Money right) => left.CompareTo(right) < 0;

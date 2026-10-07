@@ -30,6 +30,9 @@ public sealed record ReplayFilter
 /// overridden, so it must be idempotent), re-runs a parked dead letter, and purges dispatched outbox rows and the
 /// archive by age. The archive's replay window is independent of the outbox purge. Retention durations are
 /// configuration (D-REG-07: none is invented here).
+/// <para>A replayed dead letter arrives out of order: its aggregate was not held while it was parked (D-ARC-26), so later
+/// events of the aggregate have usually been delivered already. Order-sensitive handlers check
+/// <see cref="EventEnvelope.AggregateSequence"/> against the last sequence they applied.</para>
 /// </summary>
 public sealed class OutboxReplayService(NpgsqlDataSource dataSource, EventHandlerRegistry registry, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory scopes, IClock clock)
 {

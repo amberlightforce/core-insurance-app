@@ -10,7 +10,9 @@ namespace CoreIns.Platform.Events;
 /// An in-process consumer of one event type (the "consumer group" of the PRDs, D-ARC-02). Invoked by the outbox
 /// dispatcher at least once per event, in aggregate order, inside a transaction that also records
 /// <c>plt.processed_event</c> — so a handler that only writes through the scope's <c>DbSession</c> is effectively
-/// exactly-once. Handlers must tolerate replays (<c>origin = REPLAY</c>).
+/// exactly-once. Handlers must tolerate replays (<c>origin = REPLAY</c>). Events of one aggregate reach all handlers in
+/// <c>aggregateSequence</c> order, except a parked event replayed from the dead-letter table, which arrives after later
+/// events (D-ARC-26): order-sensitive handlers check the sequence they last applied.
 /// </summary>
 /// <typeparam name="TPayload">Payload type (deserialised with the SharedKernel JSON options; unknown fields are ignored).</typeparam>
 [SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix",

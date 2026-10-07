@@ -34,13 +34,32 @@ public sealed class ProblemDetailsTests
         var english = mapper.Create(error, Http("/api/pol/v1/jobs", "en-GB,el;q=0.5"));
 
         greek.Status.ShouldBe(409);
-        greek.Type.ShouldBe("https://contracts.coreinsurance.example/errors/POL-ERR-IDEMPOTENCY-MISMATCH");
+        greek.Type.ShouldBe("/problems/POL-ERR-IDEMPOTENCY-MISMATCH");
         greek.Title.ShouldBe("Το Idempotency-Key χρησιμοποιήθηκε ήδη με διαφορετικό αίτημα");
         greek.Detail.ShouldBe("Key reused.");
         greek.Extensions["code"].ShouldBe("POL-ERR-IDEMPOTENCY-MISMATCH");
         greek.Extensions["retryable"].ShouldBe(false);
         greek.Extensions.ShouldContainKey("traceId");
         english.Title.ShouldBe("The Idempotency-Key was already used with a different request");
+    }
+
+    [Fact]
+    public void Problem_pages_describe_the_code_in_both_languages_preferred_first()
+    {
+        var catalog = new ErrorCatalog();
+        var code = ErrorCode.Parse("BIL-ERR-IDEMPOTENCY-IN-PROGRESS");
+
+        var english = ProblemPages.Render(code, catalog.Find(code), CoreIns.SharedKernel.Language.En);
+        var greek = ProblemPages.Render(code, catalog.Find(code), CoreIns.SharedKernel.Language.El);
+
+        english.ShouldStartWith("<!doctype html><html lang=\"en\">");
+        english.IndexOf("The original request", StringComparison.Ordinal).ShouldBeLessThan(english.IndexOf("Το αρχικό αίτημα", StringComparison.Ordinal));
+        english.ShouldContain("Retry shortly with the same key");
+        english.ShouldContain("HTTP status: 409");
+        greek.ShouldContain("lang=\"el\"");
+        greek.ShouldContain("Δοκιμάστε ξανά σε λίγο");
+        catalog.IsKnown(code).ShouldBeTrue();
+        catalog.IsKnown(ErrorCode.Parse("BIL-ERR-NO-SUCH-THING")).ShouldBeFalse();
     }
 
     [Theory]

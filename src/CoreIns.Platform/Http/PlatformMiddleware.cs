@@ -106,6 +106,9 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
 {
     private static readonly TimeSpan StaleAfter = TimeSpan.FromMinutes(2);
 
+    /// <summary>Response headers stored with the result and replayed (never cookies or other per-session headers).</summary>
+    private static readonly string[] ReplayedHeaders = ["Location", "ETag", "Content-Location", "Retry-After"];
+
     /// <summary>Runs the middleware.</summary>
     public async Task InvokeAsync(HttpContext http, NpgsqlDataSource dataSource, IClock clock, RequestContext context, ProblemDetailsMapper problems)
     {
@@ -152,7 +155,7 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
 
                 if (existing is { Completed: true, ResponseStatus: { } status })
                 {
-                    await ReplayAsync(http, status, existing.ContentType, existing.Body).ConfigureAwait(false);
+                    await ReplayAsync(http, status, existing.ContentType, existing.Body, existing.Headers).ConfigureAwait(false);
                     return;
                 }
 
@@ -184,9 +187,12 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
             if (http.Response.StatusCode < 500)
             {
                 await using var connection = await dataSource.OpenConnectionAsync(CancellationToken.None).ConfigureAwait(false);
+                var headers = ReplayedHeaders
+                    .Where(name => http.Response.Headers.ContainsKey(name))
+                    .ToDictionary(name => name, name => http.Response.Headers[name].ToString(), StringComparer.OrdinalIgnoreCase);
                 await IdempotencyStore.CompleteAsync(
-                    connection, null, scope, key, http.Response.StatusCode, http.Response.ContentType, buffer.ToArray(), clock.Now, CancellationToken.None)
-                    .ConfigureAwait(false);
+                    connection, null, scope, key, http.Response.StatusCode, http.Response.ContentType, buffer.ToArray(), clock.Now, CancellationToken.None,
+                    headers).ConfigureAwait(false);
                 stored = true;
             }
         }
@@ -201,9 +207,18 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
         }
     }
 
-    private static async Task ReplayAsync(HttpContext http, int status, string? contentType, byte[]? body)
+    private static async Task ReplayAsync(
+        HttpContext http, int status, string? contentType, byte[]? body, IReadOnlyDictionary<string, string>? headers)
     {
         http.Response.StatusCode = status;
+        foreach (var (name, value) in headers ?? new Dictionary<string, string>())
+        {
+            if (ReplayedHeaders.Contains(name, StringComparer.OrdinalIgnoreCase))
+            {
+                http.Response.Headers[name] = value;
+            }
+        }
+
         http.Response.Headers[PlatformHeaders.IdempotentReplayed] = "true";
         if (contentType is not null)
         {

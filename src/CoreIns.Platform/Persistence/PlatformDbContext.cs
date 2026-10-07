@@ -59,6 +59,10 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
             entity.HasIndex(e => new { e.AggregateType, e.AggregateId, e.AggregateSequence }).IsUnique()
                 .HasDatabaseName("ux_outbox_message_aggregate_sequence");
             entity.HasIndex(e => e.Position).HasFilter("status = 'Pending'").HasDatabaseName("ix_outbox_message_pending");
+
+            // The claim finds blocked aggregates (head in backoff or leased elsewhere) through these two small ranges.
+            entity.HasIndex(e => e.NextAttemptAt).HasFilter("status = 'Pending'").HasDatabaseName("ix_outbox_message_pending_next_attempt");
+            entity.HasIndex(e => e.LeaseUntil).HasFilter("status = 'Pending'").HasDatabaseName("ix_outbox_message_pending_lease");
             entity.HasIndex(e => e.DispatchedAt).HasFilter("status = 'Dispatched'").HasDatabaseName("ix_outbox_message_dispatched");
         });
 
