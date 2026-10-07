@@ -1,8 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Shared value types (Money, DateRange, strongly typed IDs, ...) used by every module. Filled by F-1b.
-    Rule: references nothing internal (checked by CoreIns.ArchitectureTests).
+    Shared value types used by every module (PLAN §4.1): Money, Currency, Rate/Percentage, DateRange, BusinessDate,
+    Instant, Bitemporal<T>, strongly typed IDs and business numbers, hashes, lineage keys, LocalizedText, Iban,
+    TaxIdentifier, Result/Error, the StateMachine primitive and RFC 8785 canonical JSON.
+    Rule: references nothing internal and no packages (checked by CoreIns.ArchitectureTests).
   -->
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.SharedKernel.Tests" />
+  </ItemGroup>
 
 </Project>

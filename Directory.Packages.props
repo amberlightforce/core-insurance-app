@@ -54,6 +54,9 @@
 
   <!-- Build-time tooling -->
   <ItemGroup>
+    <!-- EF Core design-time services: generates and checks the per-module EF Core migrations (dotnet-ef, ADR §1 schema
+         migrations). Referenced with PrivateAssets=all, so it never ships in the runtime image. -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
     <!-- Roslyn API for the in-repo analyser COREINS001 (no double/float in production code, ADR §2 rule 2).
          5.0.0 = the compiler of the minimum SDK in global.json (10.0.100), so the analyser loads in every allowed SDK. -->
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
