@@ -2,7 +2,7 @@
 # One image per commit for api, worker and migrate; APP_ROLE selects the mode (INFRASTRUCTURE §1).
 
 # --- 1. Front end: React + Vite build -------------------------------------------------------------
-FROM node:24.21.0-bookworm-slim AS web
+FROM node:26.9.0-bookworm-slim AS web
 WORKDIR /web
 COPY web/package.json web/package-lock.json web/.npmrc ./
 RUN npm ci --no-audit
