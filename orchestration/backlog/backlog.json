@@ -203,8 +203,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "building",
-   "owner": "builder: Greek cross-cutting (worktree)",
+   "status": "in review",
+   "owner": "reviewer agent",
    "reviewAttempts": 0,
    "blockers": []
   },
