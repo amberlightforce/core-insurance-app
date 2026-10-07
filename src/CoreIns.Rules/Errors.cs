@@ -34,6 +34,9 @@ public enum RuleErrorCode
     NoSuchKey,
     DuplicateKey,
     CostExceeded,
+    Timeout,
+    Cancelled,
+    PrecisionLoss,
     RegexTimeout,
     LimitExceeded,
     InvalidValue,
@@ -74,6 +77,9 @@ public static class RuleErrorCodeExtensions
         RuleErrorCode.NoSuchKey => "RULE-NO-SUCH-KEY",
         RuleErrorCode.DuplicateKey => "RULE-DUPLICATE-KEY",
         RuleErrorCode.CostExceeded => "RULE-COST-EXCEEDED",
+        RuleErrorCode.Timeout => "RULE-TIMEOUT",
+        RuleErrorCode.Cancelled => "RULE-CANCELLED",
+        RuleErrorCode.PrecisionLoss => "RULE-PRECISION-LOSS",
         RuleErrorCode.RegexTimeout => "RULE-REGEX-TIMEOUT",
         RuleErrorCode.LimitExceeded => "RULE-LIMIT-EXCEEDED",
         RuleErrorCode.InvalidValue => "RULE-INVALID-VALUE",
@@ -196,7 +202,7 @@ public sealed class RuleInputException : ArgumentException
     }
 
     /// <summary>Always <see cref="RuleErrorCode.InputInvalid"/>.</summary>
-    public RuleErrorCode Code => RuleErrorCode.InputInvalid;
+    public RuleErrorCode Code { get; } = RuleErrorCode.InputInvalid;
 
     /// <summary>Path of the offending input, for example <c>vehicle.value</c>.</summary>
     public string Path { get; }

@@ -22,6 +22,15 @@ public abstract class RuleValue : IEquatable<RuleValue>
     /// <summary>The null value.</summary>
     public static RuleValue Null => NullValue.Instance;
 
+    /// <summary>
+    /// Size of the value tree (1 per scalar, 1 per 16 string characters, plus every element of a collection, counting
+    /// shared sub-values once per occurrence; saturating). Operations that traverse a value are charged its weight, so
+    /// the cost budget bounds work even for exponentially shared structures.
+    /// </summary>
+    internal virtual long Weight => 1;
+
+    internal static long AddWeight(long total, long add) => add >= long.MaxValue - total ? long.MaxValue : total + add;
+
     /// <summary>Wraps an int.</summary>
     public static implicit operator RuleValue(long value) => IntValue.Of(value);
 
@@ -192,6 +201,8 @@ public sealed class StringValue : RuleValue
     /// <inheritdoc />
     public override RuleTypeKind Kind => RuleTypeKind.String;
 
+    internal override long Weight => 1 + (Value.Length / 16);
+
     /// <inheritdoc />
     public override bool Equals(RuleValue? other) => other is StringValue s && string.Equals(s.Value, Value, StringComparison.Ordinal);
 
@@ -357,16 +368,22 @@ public sealed class DurationValue : RuleValue
 public sealed class ListValue : RuleValue
 {
     private readonly RuleValue[] _items;
+    private readonly long _weight;
 
     internal ListValue(RuleValue[] items)
     {
+        long weight = 1;
         foreach (var item in items)
         {
             ArgumentNullException.ThrowIfNull(item, nameof(items));
+            weight = AddWeight(weight, item.Weight);
         }
 
         _items = items;
+        _weight = weight;
     }
+
+    internal override long Weight => _weight;
 
     /// <summary>The elements.</summary>
     public IReadOnlyList<RuleValue> Items => _items;
@@ -417,15 +434,23 @@ public sealed class MapValue : RuleValue
     private readonly KeyValuePair<RuleValue, RuleValue>[] _entries;
     private readonly Dictionary<RuleValue, RuleValue> _lookup;
 
+    private readonly long _weight;
+
     internal MapValue(KeyValuePair<RuleValue, RuleValue>[] entries)
     {
         _entries = entries;
         _lookup = new Dictionary<RuleValue, RuleValue>(entries.Length);
+        long weight = 1;
         foreach (var e in entries)
         {
             _lookup[e.Key] = e.Value;
+            weight = AddWeight(AddWeight(weight, e.Key.Weight), e.Value.Weight);
         }
+
+        _weight = weight;
     }
+
+    internal override long Weight => _weight;
 
     /// <summary>The entries in insertion order.</summary>
     public IReadOnlyList<KeyValuePair<RuleValue, RuleValue>> Entries => _entries;
@@ -492,11 +517,22 @@ public sealed class ObjectValue : RuleValue
 {
     private readonly RuleValue[] _fields;
 
+    private readonly long _weight;
+
     internal ObjectValue(ObjectSchema schema, RuleValue[] fields)
     {
         Schema = schema;
         _fields = fields;
+        long weight = 1;
+        foreach (var f in fields)
+        {
+            weight = AddWeight(weight, f.Weight);
+        }
+
+        _weight = weight;
     }
+
+    internal override long Weight => _weight;
 
     /// <summary>The schema.</summary>
     public ObjectSchema Schema { get; }

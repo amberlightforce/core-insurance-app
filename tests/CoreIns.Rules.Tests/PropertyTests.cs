@@ -1,5 +1,4 @@
-using System;
-using System.Linq;
+using System.Numerics;
 using CoreIns.Rules.DecisionTables;
 using FsCheck.Xunit;
 
@@ -34,41 +33,107 @@ public class PropertyTests
     private static RuleInputs Inputs(decimal a = 0m, decimal b = 0m, long i = 0, long j = 0, bool p = false) =>
         NumSchema.NewInputs().Set("a", a).Set("b", b).Set("i", i).Set("j", j).Set("p", p).Set("zero", 0).Build();
 
-    private static bool MatchesReference(CompiledExpression expr, RuleInputs inputs, Func<decimal> reference)
+    // ---- Exact oracle: decimals as (BigInteger mantissa, scale), computed independently of System.Decimal arithmetic.
+
+    private static readonly BigInteger MaxMantissa = (BigInteger.One << 96) - 1;
+
+    private static (BigInteger M, int S) Exact(decimal d)
     {
-        decimal expected;
-        try
+        int[] bits = decimal.GetBits(d);
+        var m = (new BigInteger((uint)bits[2]) << 64) | (new BigInteger((uint)bits[1]) << 32) | new BigInteger((uint)bits[0]);
+        return (bits[3] < 0 ? -m : m, d.Scale);
+    }
+
+    private static (BigInteger M, int S) ExactSum((BigInteger M, int S) a, (BigInteger M, int S) b)
+    {
+        int s = Math.Max(a.S, b.S);
+        return ((a.M * BigInteger.Pow(10, s - a.S)) + (b.M * BigInteger.Pow(10, s - b.S)), s);
+    }
+
+    /// <summary>
+    /// The engine must return the exact result when it is representable as a decimal, RULE-OVERFLOW when its
+    /// magnitude exceeds decimal.MaxValue, and RULE-PRECISION-LOSS (or RULE-OVERFLOW when rounding would cross the
+    /// maximum) otherwise. Never a silently rounded value.
+    /// </summary>
+    private static bool MatchesExactOracle(CompiledExpression expr, RuleInputs inputs, (BigInteger M, int S) exact)
+    {
+        var (m, s) = exact;
+        while (s > 0 && m % 10 == 0)
         {
-            expected = reference();
-        }
-        catch (OverflowException)
-        {
-            return expr.Evaluate(inputs).Error?.Code == RuleErrorCode.Overflow;
-        }
-        catch (DivideByZeroException)
-        {
-            return expr.Evaluate(inputs).Error?.Code == RuleErrorCode.DivisionByZero;
+            m /= 10;
+            s--;
         }
 
-        var value = expr.Evaluate(inputs).Value as DecimalValue;
-        // Exact: same value AND same scale (string form) as System.Decimal.
-        return value is not null && value.Value == expected && value.ToString() == expected.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var result = expr.Evaluate(inputs);
+        if (BigInteger.Abs(m) > MaxMantissa * BigInteger.Pow(10, s))
+        {
+            return result.Error?.Code == RuleErrorCode.Overflow;
+        }
+
+        if (s <= 28 && BigInteger.Abs(m) <= MaxMantissa)
+        {
+            if (result.Value is not DecimalValue v)
+            {
+                return false;
+            }
+
+            var (mr, sr) = Exact(v.Value);
+            return mr * BigInteger.Pow(10, s) == m * BigInteger.Pow(10, sr);
+        }
+
+        return result.Error?.Code is RuleErrorCode.PrecisionLoss or RuleErrorCode.Overflow;
     }
 
     [Property(MaxTest = 500)]
-    public bool Decimal_addition_is_exact(decimal a, decimal b) => MatchesReference(Add, Inputs(a, b), () => a + b);
+    public bool Decimal_addition_matches_exact_BigInteger_oracle(decimal a, decimal b) =>
+        MatchesExactOracle(Add, Inputs(a, b), ExactSum(Exact(a), Exact(b)));
 
     [Property(MaxTest = 500)]
-    public bool Decimal_subtraction_is_exact(decimal a, decimal b) => MatchesReference(Sub, Inputs(a, b), () => a - b);
+    public bool Decimal_subtraction_matches_exact_BigInteger_oracle(decimal a, decimal b) =>
+        MatchesExactOracle(Sub, Inputs(a, b), ExactSum(Exact(a), Exact(-b)));
 
     [Property(MaxTest = 500)]
-    public bool Decimal_multiplication_is_exact(decimal a, decimal b) => MatchesReference(Mul, Inputs(a, b), () => a * b);
-
-    [Property(MaxTest = 500)]
-    public bool Decimal_division_matches_System_Decimal(decimal a, decimal b) => MatchesReference(Div, Inputs(a, b), () => a / b);
+    public bool Decimal_multiplication_matches_exact_BigInteger_oracle(decimal a, decimal b)
+    {
+        var (ma, sa) = Exact(a);
+        var (mb, sb) = Exact(b);
+        return MatchesExactOracle(Mul, Inputs(a, b), (ma * mb, sa + sb));
+    }
 
     [Property(MaxTest = 300)]
-    public bool Mixed_int_decimal_arithmetic_widens_exactly(long i, decimal a) => MatchesReference(Mixed, Inputs(a: a, i: i), () => i + a);
+    public bool Mixed_int_decimal_addition_matches_exact_BigInteger_oracle(long i, decimal a) =>
+        MatchesExactOracle(Mixed, Inputs(a: a, i: i), ExactSum((new BigInteger(i), 0), Exact(a)));
+
+    /// <summary>
+    /// Division is the one rounding operation (documented): the quotient q must be within half a unit of its last
+    /// digit of the exact a / b, i.e. 2·|q·b − a| ≤ |b|·10^-scale(q), checked in exact integer arithmetic.
+    /// </summary>
+    [Property(MaxTest = 500)]
+    public bool Decimal_division_is_correctly_rounded_against_exact_oracle(decimal a, decimal b)
+    {
+        var result = Div.Evaluate(Inputs(a, b));
+        var (ma, sa) = Exact(a);
+        var (mb, sb) = Exact(b);
+        if (b == 0m)
+        {
+            return result.Error?.Code == RuleErrorCode.DivisionByZero;
+        }
+
+        if (result.Error?.Code == RuleErrorCode.Overflow)
+        {
+            // |a / b| exceeds decimal.MaxValue (allowing the last-unit rounding edge).
+            return BigInteger.Abs(ma) * BigInteger.Pow(10, sb) * 2 >= MaxMantissa * BigInteger.Abs(mb) * BigInteger.Pow(10, sa);
+        }
+
+        if (result.Value is not DecimalValue q)
+        {
+            return false;
+        }
+
+        var (mq, sq) = Exact(q.Value);
+        var difference = BigInteger.Abs((mq * mb * BigInteger.Pow(10, sa)) - (ma * BigInteger.Pow(10, sq + sb)));
+        return 2 * difference <= BigInteger.Abs(mb) * BigInteger.Pow(10, sa);
+    }
 
     [Property(MaxTest = 500)]
     public bool Int_arithmetic_is_checked(long i, long j)

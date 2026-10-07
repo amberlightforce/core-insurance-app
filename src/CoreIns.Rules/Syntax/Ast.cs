@@ -47,6 +47,9 @@ internal sealed class CallExpr : Expr
 {
     public required string Function { get; init; }
 
+    /// <summary>Position of the operator token or function name (where type errors point).</summary>
+    public int OpStart { get; init; }
+
     /// <summary>Receiver for member-style calls (<c>x.f(y)</c>); null for global calls and operators.</summary>
     public Expr? Target { get; init; }
 

@@ -134,7 +134,7 @@ internal static class MotorFixtures
             new InputColumn("youngestAge", RuleType.Int, "min(drivers.map(d, ageAt(d.birthDate, policy.effectiveDate)))"),
             new InputColumn("powerKw", RuleType.Int, "vehicle.powerKw"),
             new InputColumn("territory", RuleType.String, "policy.territory"),
-            new InputColumn("tracker", RuleType.Bool, "vehicle.trackerFitted"),
+            new InputColumn("tracker", RuleType.Bool.Nullable(), "vehicle.trackerFitted"),
         },
         new[] { new OutputColumn("code", RuleType.String), new OutputColumn("loading", RuleType.Decimal) },
         new[]

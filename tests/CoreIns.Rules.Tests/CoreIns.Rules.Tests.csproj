@@ -1,25 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Unit, conformance, property-based, requirement (GWT) and golden tests for CoreIns.Rules (F-1f(c)). -->
+
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <LangVersion>latest</LangVersion>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
+    <!-- CA1861 (hoist constant arrays) is a performance rule; expected-value arrays in assertions read better inline. -->
+    <NoWarn>$(NoWarn);CA1861</NoWarn>
   </PropertyGroup>
 
-  <!-- Test stack per ARCHITECTURE-DECISIONS §1: xUnit, FsCheck, Shouldly. Versions pinned. -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="FsCheck.Xunit" Version="3.3.1" />
-    <PackageReference Include="Shouldly" Version="4.3.0" />
+    <PackageReference Include="FsCheck.Xunit.v3" />
   </ItemGroup>
 
   <ItemGroup>

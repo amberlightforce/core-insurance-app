@@ -108,7 +108,8 @@ public class DynamicAndEdgeTests
         Run("anyOf('list')", RuleType.ListOf(RuleType.Decimal)).Value!.ToString().ShouldBe("[1, 2]");
         Run("anyOf('map')", RuleType.MapOf(RuleType.String, RuleType.Int)).IsSuccess.ShouldBeTrue();
         Run("anyOf('obj')", RuleType.ObjectOf(T.Vehicle)).IsSuccess.ShouldBeTrue();
-        Run("anyOf('null')", RuleType.Int).Value.ShouldBe(RuleValue.Null);
+        Run("anyOf('null')", RuleType.Int.Nullable()).Value.ShouldBe(RuleValue.Null);
+        Run("anyOf('null')", RuleType.Int).Error!.Code.ShouldBe(RuleErrorCode.NullValue);
         Run("anyOf('str')", RuleType.Int).Error!.Code.ShouldBe(RuleErrorCode.InvalidValue);
         Run("anyOf('mixed')", RuleType.ListOf(RuleType.Int)).Error!.Code.ShouldBe(RuleErrorCode.InvalidValue);
         Run("anyOf('obj')", RuleType.ObjectOf(T.Driver)).Error!.Code.ShouldBe(RuleErrorCode.InvalidValue);
@@ -212,7 +213,7 @@ public class DynamicAndEdgeTests
     public void Regex_match_timeout_is_a_typed_error()
     {
         var schema = InputSchema.Define().Variable("t", RuleType.String).Build();
-        var env = RuleEnvironment.Create(schema, new RuleLimits { RegexTimeout = TimeSpan.FromTicks(1) });
+        var env = RuleEnvironment.Create(schema, new RuleLimits { RegexTimeout = TimeSpan.FromTicks(1), MaxEvaluationSteps = long.MaxValue / 2 });
         string big = string.Concat(Enumerable.Repeat("ab", 2_000_000));
         var result = env.Compile("t.matches('(a|b)*c$')").Evaluate(schema.NewInputs().Set("t", big).Build());
         result.Error!.Code.ShouldBe(RuleErrorCode.RegexTimeout);

@@ -170,7 +170,7 @@ internal sealed class AndNode : BoundNode
         {
             right = Ops.AsBool(_right.Eval(state), "right operand of '&&'");
         }
-        catch (EvalFailure) when (leftError is not null)
+        catch (EvalFailure f) when (leftError is not null && f.Absorbable)
         {
             throw leftError;
         }
@@ -216,7 +216,7 @@ internal sealed class OrNode : BoundNode
         {
             right = Ops.AsBool(_right.Eval(state), "right operand of '||'");
         }
-        catch (EvalFailure) when (leftError is not null)
+        catch (EvalFailure f) when (leftError is not null && f.Absorbable)
         {
             throw leftError;
         }
@@ -328,6 +328,7 @@ internal sealed class ListNode : BoundNode
 
     protected override RuleValue EvalCore(EvalState state)
     {
+        state.Allocate(_elements.Length);
         var values = new RuleValue[_elements.Length];
         for (int i = 0; i < _elements.Length; i++)
         {
@@ -352,6 +353,7 @@ internal sealed class MapNode : BoundNode
 
     protected override RuleValue EvalCore(EvalState state)
     {
+        state.Allocate(_keys.Length);
         var entries = new KeyValuePair<RuleValue, RuleValue>[_keys.Length];
         var seen = new HashSet<RuleValue>();
         for (int i = 0; i < _keys.Length; i++)
@@ -398,7 +400,7 @@ internal sealed class ComprehensionNode : BoundNode
         IReadOnlyList<RuleValue> items = target switch
         {
             ListValue l => l.Items,
-            MapValue m => KeysOf(m),
+            MapValue m => KeysOf(m, state),
             NullValue => throw Ops.Fail(RuleErrorCode.NullValue, $"macro '{MacroExpr.NameOf(_kind)}' applied to null"),
             _ => throw Ops.Fail(RuleErrorCode.InvalidValue, $"macro '{MacroExpr.NameOf(_kind)}' requires a list or map"),
         };
@@ -408,7 +410,7 @@ internal sealed class ComprehensionNode : BoundNode
         {
             return _kind switch
             {
-                MacroKind.All => Quantify(state, items, decisive: false),
+                MacroKind.All => (RuleValue)Quantify(state, items, decisive: false),
                 MacroKind.Exists => Quantify(state, items, decisive: true),
                 MacroKind.ExistsOne => ExistsOne(state, items),
                 MacroKind.Filter => Filter(state, items),
@@ -421,8 +423,9 @@ internal sealed class ComprehensionNode : BoundNode
         }
     }
 
-    private static RuleValue[] KeysOf(MapValue m)
+    private static RuleValue[] KeysOf(MapValue m, EvalState state)
     {
+        state.Allocate(m.Count);
         var keys = new RuleValue[m.Count];
         for (int i = 0; i < keys.Length; i++)
         {
@@ -432,10 +435,10 @@ internal sealed class ComprehensionNode : BoundNode
         return keys;
     }
 
-    private bool Test(EvalState state, BoundNode predicate, string what) => Ops.AsBool(predicate.Eval(state), what);
+    private static bool Test(EvalState state, BoundNode predicate, string what) => Ops.AsBool(predicate.Eval(state), what);
 
     /// <summary>all (decisive = false) and exists (decisive = true), with CEL error absorption.</summary>
-    private RuleValue Quantify(EvalState state, IReadOnlyList<RuleValue> items, bool decisive)
+    private BoolValue Quantify(EvalState state, IReadOnlyList<RuleValue> items, bool decisive)
     {
         EvalFailure? deferred = null;
         foreach (var item in items)
@@ -458,7 +461,7 @@ internal sealed class ComprehensionNode : BoundNode
         return deferred is null ? BoolValue.Of(!decisive) : throw deferred;
     }
 
-    private RuleValue ExistsOne(EvalState state, IReadOnlyList<RuleValue> items)
+    private BoolValue ExistsOne(EvalState state, IReadOnlyList<RuleValue> items)
     {
         int count = 0;
         foreach (var item in items)
@@ -474,7 +477,7 @@ internal sealed class ComprehensionNode : BoundNode
         return BoolValue.Of(count == 1);
     }
 
-    private RuleValue Filter(EvalState state, IReadOnlyList<RuleValue> items)
+    private ListValue Filter(EvalState state, IReadOnlyList<RuleValue> items)
     {
         var result = new List<RuleValue>();
         foreach (var item in items)
@@ -483,6 +486,7 @@ internal sealed class ComprehensionNode : BoundNode
             state.Slots[_slot] = item;
             if (Test(state, _body, "filter predicate"))
             {
+                state.Allocate(1);
                 result.Add(item);
             }
         }
@@ -490,7 +494,7 @@ internal sealed class ComprehensionNode : BoundNode
         return new ListValue(result.ToArray());
     }
 
-    private RuleValue Map(EvalState state, IReadOnlyList<RuleValue> items)
+    private ListValue Map(EvalState state, IReadOnlyList<RuleValue> items)
     {
         var result = new List<RuleValue>(items.Count);
         foreach (var item in items)
@@ -502,7 +506,9 @@ internal sealed class ComprehensionNode : BoundNode
                 continue;
             }
 
-            result.Add(_body.Eval(state));
+            var value = _body.Eval(state);
+            state.Allocate(1);
+            result.Add(value);
         }
 
         return new ListValue(result.ToArray());
@@ -536,7 +542,12 @@ internal sealed class WidenNode : BoundNode
 
     public override bool Traceable => false;
 
-    protected override RuleValue EvalCore(EvalState state) => ValueConformance.Widen(_operand.Eval(state), Type);
+    protected override RuleValue EvalCore(EvalState state)
+    {
+        var value = _operand.Eval(state);
+        state.Allocate(value.Weight);
+        return ValueConformance.Widen(value, Type);
+    }
 }
 
 /// <summary>Run-time type check where the static type is dyn.</summary>
@@ -551,7 +562,9 @@ internal sealed class CheckTypeNode : BoundNode
 
     protected override RuleValue EvalCore(EvalState state)
     {
-        var v = ValueConformance.Widen(_operand.Eval(state), Type);
+        var raw = _operand.Eval(state);
+        state.Allocate(raw.Weight);
+        var v = ValueConformance.Widen(raw, Type);
         return ValueConformance.Matches(v, Type)
             ? v
             : throw Ops.Fail(RuleErrorCode.InvalidValue, $"value of kind {v.Kind} where {Type} is required");
@@ -578,6 +591,7 @@ internal sealed class RegexMatchNode : BoundNode
             throw Ops.Fail(v is NullValue ? RuleErrorCode.NullValue : RuleErrorCode.InvalidValue, "matches() requires a string");
         }
 
+        state.ChargeText(s.Value);
         try
         {
             return BoolValue.Of(_regex.IsMatch(s.Value));
@@ -588,5 +602,24 @@ internal sealed class RegexMatchNode : BoundNode
                 RuleErrorCode.RegexTimeout,
                 string.Create(CultureInfo.InvariantCulture, $"regular expression match exceeded {_regex.MatchTimeout.Ticks / TimeSpan.TicksPerMillisecond} ms"));
         }
+    }
+}
+
+/// <summary>Enforces a non-nullable expected result type at run time (ruling D-ARC-10c).</summary>
+internal sealed class NonNullNode : BoundNode
+{
+    private readonly BoundNode _operand;
+
+    public NonNullNode(BoundNode operand)
+        : base(operand.Syntax, operand.Type) => _operand = operand;
+
+    public override bool Traceable => false;
+
+    protected override RuleValue EvalCore(EvalState state)
+    {
+        var v = _operand.Eval(state);
+        return v is NullValue
+            ? throw Ops.Fail(RuleErrorCode.NullValue, $"the expression produced null but its declared result type {Type} is not nullable")
+            : v;
     }
 }

@@ -141,7 +141,7 @@ public class TypeCheckingTests
         var map = T.Env.Compile("names", RuleType.MapOf(RuleType.String, RuleType.Decimal));
         map.Evaluate(T.Default).Value.ShouldBeOfType<MapValue>().Entries.ShouldAllBe(e => e.Value is DecimalValue);
 
-        T.Env.Compile("null", RuleType.Decimal).Evaluate(T.Default).Value.ShouldBe(RuleValue.Null);
+        T.Env.Compile("null", RuleType.Decimal.Nullable()).Evaluate(T.Default).Value.ShouldBe(RuleValue.Null);
         T.Env.Compile("[]", RuleType.ListOf(RuleType.Int)).Evaluate(T.Default).Value!.ToString().ShouldBe("[]");
         T.Env.Compile("x", RuleType.Dyn).ResultType.ShouldBe(RuleType.Dyn);
     }

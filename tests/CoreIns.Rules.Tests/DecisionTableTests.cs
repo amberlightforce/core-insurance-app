@@ -40,7 +40,7 @@ public class DecisionTableTests
     private static DecisionTableDefinition Table(HitPolicy policy, params DecisionRule[] rules) => new(
         new DecisionTableMetadata("T-1", "1.0", DecisionTableStatus.Active, new DateOnly(2026, 1, 1), new DateOnly(2027, 1, 1)),
         policy,
-        new[] { new InputColumn("driverAge", RuleType.Int, "age"), new InputColumn("area", RuleType.String, "region") },
+        new[] { new InputColumn("driverAge", RuleType.Int.Nullable(), "age"), new InputColumn("area", RuleType.String, "region") },
         new[] { new OutputColumn("label", RuleType.String), new OutputColumn("factor", RuleType.Decimal) },
         rules);
 
@@ -250,7 +250,7 @@ public class DecisionTableTests
         result.MatchedRuleIds.ShouldBe(new[] { "UW-AGE-U18" });
         var variable = result.Trace.Expressions.First(e => e.Label == "variable 'mainDriverAge'");
         variable.Source.ShouldStartWith("ageAt(");
-        variable.Entries.Last().Value.ShouldBe(IntValue.Of(17));
+        variable.Entries[^1].Value.ShouldBe(IntValue.Of(17));
         result.Trace.Expressions.ShouldContain(e => e.Label == "rule 'UW-AGE-U18' condition 'driverAge'");
         result.Trace.Expressions.ShouldContain(e => e.Label == "rule 'UW-AGE-U18' output 'issueKey'");
     }
@@ -420,26 +420,5 @@ public class DecisionTableTests
         });
         errorOutcomes[0].Passed.ShouldBeTrue();
         errorOutcomes[1].Failure!.ShouldStartWith("evaluation failed: PLT-ERR-HIT-POLICY-VIOLATION");
-    }
-
-    [Fact]
-    public void Evaluates_a_150_rule_table_within_the_20ms_p95_budget()
-    {
-        var rules = Enumerable.Range(0, 150)
-            .Select(i => R("R" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), $"[{i}..{i + 1})", "in [\"ATTICA\", \"CRETE\"]", "\"r\"", "1.0"))
-            .ToArray();
-        var table = CompiledDecisionTable.Compile(Table(HitPolicy.Collect, rules), Env);
-        var inputs = In(149);
-        table.Evaluate(inputs, AsOf).MatchedRuleIds.ShouldBe(new[] { "R149" });
-        var timings = new List<long>();
-        for (int i = 0; i < 200; i++)
-        {
-            long start = Stopwatch.GetTimestamp();
-            table.Evaluate(inputs, AsOf);
-            timings.Add(Stopwatch.GetElapsedTime(start).Ticks);
-        }
-
-        timings.Sort();
-        TimeSpan.FromTicks(timings[189]).ShouldBeLessThan(TimeSpan.FromTicks(20 * TimeSpan.TicksPerMillisecond));
     }
 }

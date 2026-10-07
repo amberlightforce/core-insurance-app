@@ -78,18 +78,6 @@ internal static class Ops
         _ => throw Fail(RuleErrorCode.InvalidValue, what + $" has kind {v.Kind}, expected list"),
     };
 
-    private static decimal CheckedDec(Func<decimal> f)
-    {
-        try
-        {
-            return f();
-        }
-        catch (OverflowException)
-        {
-            throw DecimalOverflow();
-        }
-    }
-
     // ------------------------------------------------------------------ arithmetic
 
     public static RuleValue Add(RuleValue a, RuleValue b, EvalState s)
@@ -108,8 +96,7 @@ internal static class Ops
 
         if (IsNum(a) && IsNum(b))
         {
-            decimal l = Dec(a), r = Dec(b);
-            return new DecimalValue(CheckedDec(() => l + r));
+            return new DecimalValue(ExactDecimal.Add(Dec(a), Dec(b)));
         }
 
         switch (a)
@@ -120,6 +107,7 @@ internal static class Ops
                     throw Fail(RuleErrorCode.LimitExceeded, "string concatenation exceeds the maximum string length");
                 }
 
+                s.Allocate(1 + ((sa.Value.Length + sb.Value.Length) / 16));
                 return new StringValue(sa.Value + sb.Value);
             case ListValue la when b is ListValue lb:
                 if ((long)la.Array.Length + lb.Array.Length > s.Limits.MaxCollectionSize)
@@ -127,6 +115,7 @@ internal static class Ops
                     throw Fail(RuleErrorCode.LimitExceeded, "list concatenation exceeds the maximum collection size");
                 }
 
+                s.Allocate(la.Array.Length + lb.Array.Length);
                 return new ListValue(la.Array.Concat(lb.Array).ToArray());
             case TimestampValue ta when b is DurationValue db:
                 return AddTimestamp(ta.Value, db.Value);
@@ -155,8 +144,7 @@ internal static class Ops
 
         if (IsNum(a) && IsNum(b))
         {
-            decimal l = Dec(a), r = Dec(b);
-            return new DecimalValue(CheckedDec(() => l - r));
+            return new DecimalValue(ExactDecimal.Subtract(Dec(a), Dec(b)));
         }
 
         switch (a)
@@ -203,8 +191,7 @@ internal static class Ops
 
         if (IsNum(a) && IsNum(b))
         {
-            decimal l = Dec(a), r = Dec(b);
-            return new DecimalValue(CheckedDec(() => l * r));
+            return new DecimalValue(ExactDecimal.Multiply(Dec(a), Dec(b)));
         }
 
         throw NoOverload("*", a, b);
@@ -235,7 +222,16 @@ internal static class Ops
                 throw Fail(RuleErrorCode.DivisionByZero, "division by zero");
             }
 
-            return new DecimalValue(CheckedDec(() => l / r));
+            // Division is the one operation that rounds: System.Decimal keeps 28-29 significant digits (documented);
+            // rules must pass the quotient through round(...) before it becomes money.
+            try
+            {
+                return new DecimalValue(l / r);
+            }
+            catch (OverflowException)
+            {
+                throw DecimalOverflow();
+            }
         }
 
         throw NoOverload("/", a, b);
@@ -307,9 +303,17 @@ internal static class Ops
 
     // ------------------------------------------------------------------ comparison
 
-    public static RuleValue Equal(RuleValue a, RuleValue b, EvalState s) => BoolValue.Of(a.Equals(b));
+    public static RuleValue Equal(RuleValue a, RuleValue b, EvalState s)
+    {
+        s.ChargeCompare(a, b);
+        return BoolValue.Of(a.Equals(b));
+    }
 
-    public static RuleValue NotEqual(RuleValue a, RuleValue b, EvalState s) => BoolValue.Of(!a.Equals(b));
+    public static RuleValue NotEqual(RuleValue a, RuleValue b, EvalState s)
+    {
+        s.ChargeCompare(a, b);
+        return BoolValue.Of(!a.Equals(b));
+    }
 
     public static int Compare(RuleValue a, RuleValue b, string op)
     {
@@ -334,20 +338,52 @@ internal static class Ops
         };
     }
 
-    public static RuleValue Less(RuleValue a, RuleValue b, EvalState s) => BoolValue.Of(Compare(a, b, "<") < 0);
-
-    public static RuleValue LessOrEqual(RuleValue a, RuleValue b, EvalState s) => BoolValue.Of(Compare(a, b, "<=") <= 0);
-
-    public static RuleValue Greater(RuleValue a, RuleValue b, EvalState s) => BoolValue.Of(Compare(a, b, ">") > 0);
-
-    public static RuleValue GreaterOrEqual(RuleValue a, RuleValue b, EvalState s) => BoolValue.Of(Compare(a, b, ">=") >= 0);
-
-    public static RuleValue In(RuleValue element, RuleValue collection, EvalState s) => collection switch
+    public static RuleValue Less(RuleValue a, RuleValue b, EvalState s)
     {
-        ListValue l => BoolValue.Of(l.Array.Any(i => i.Equals(element))),
-        MapValue m => BoolValue.Of(m.ContainsKey(element)),
-        _ => throw NoOverload("in", collection),
-    };
+        s.ChargeCompare(a, b);
+        return BoolValue.Of(Compare(a, b, "<") < 0);
+    }
+
+    public static RuleValue LessOrEqual(RuleValue a, RuleValue b, EvalState s)
+    {
+        s.ChargeCompare(a, b);
+        return BoolValue.Of(Compare(a, b, "<=") <= 0);
+    }
+
+    public static RuleValue Greater(RuleValue a, RuleValue b, EvalState s)
+    {
+        s.ChargeCompare(a, b);
+        return BoolValue.Of(Compare(a, b, ">") > 0);
+    }
+
+    public static RuleValue GreaterOrEqual(RuleValue a, RuleValue b, EvalState s)
+    {
+        s.ChargeCompare(a, b);
+        return BoolValue.Of(Compare(a, b, ">=") >= 0);
+    }
+
+    public static RuleValue In(RuleValue element, RuleValue collection, EvalState s)
+    {
+        switch (collection)
+        {
+            case ListValue l:
+                foreach (var item in l.Array)
+                {
+                    s.ChargeCompare(item, element);
+                    if (item.Equals(element))
+                    {
+                        return BoolValue.True;
+                    }
+                }
+
+                return BoolValue.False;
+            case MapValue m:
+                s.Charge(element.Weight);
+                return BoolValue.Of(m.ContainsKey(element));
+            default:
+                throw NoOverload("in", collection);
+        }
+    }
 
     public static RuleValue Index(RuleValue collection, RuleValue index, EvalState s)
     {
@@ -382,26 +418,46 @@ internal static class Ops
 
     public static RuleValue Size(RuleValue v, EvalState s) => v switch
     {
-        StringValue str => IntValue.Of(str.Value.EnumerateRunes().Count()),
+        StringValue str => CountRunes(str.Value, s),
         ListValue l => IntValue.Of(l.Array.Length),
         MapValue m => IntValue.Of(m.Count),
         _ => throw NoOverload("size", v),
     };
 
+    private static IntValue CountRunes(string text, EvalState s)
+    {
+        s.ChargeText(text);
+        return IntValue.Of(text.EnumerateRunes().Count());
+    }
+
+    private static string Scanned(RuleValue v, string what, EvalState s)
+    {
+        string text = AsString(v, what);
+        s.ChargeText(text);
+        return text;
+    }
+
+    private static string Produced(RuleValue v, EvalState s)
+    {
+        string text = AsString(v, "receiver");
+        s.Allocate(1 + (text.Length / 16));
+        return text;
+    }
+
     public static RuleValue StartsWith(RuleValue a, RuleValue b, EvalState s) =>
-        BoolValue.Of(AsString(a, "receiver").StartsWith(AsString(b, "argument"), StringComparison.Ordinal));
+        BoolValue.Of(Scanned(a, "receiver", s).StartsWith(AsString(b, "argument"), StringComparison.Ordinal));
 
     public static RuleValue EndsWith(RuleValue a, RuleValue b, EvalState s) =>
-        BoolValue.Of(AsString(a, "receiver").EndsWith(AsString(b, "argument"), StringComparison.Ordinal));
+        BoolValue.Of(Scanned(a, "receiver", s).EndsWith(AsString(b, "argument"), StringComparison.Ordinal));
 
     public static RuleValue Contains(RuleValue a, RuleValue b, EvalState s) =>
-        BoolValue.Of(AsString(a, "receiver").Contains(AsString(b, "argument"), StringComparison.Ordinal));
+        BoolValue.Of(Scanned(a, "receiver", s).Contains(AsString(b, "argument"), StringComparison.Ordinal));
 
-    public static RuleValue LowerAscii(RuleValue a, EvalState s) => new StringValue(MapAscii(AsString(a, "receiver"), upper: false));
+    public static RuleValue LowerAscii(RuleValue a, EvalState s) => new StringValue(MapAscii(Produced(a, s), upper: false));
 
-    public static RuleValue UpperAscii(RuleValue a, EvalState s) => new StringValue(MapAscii(AsString(a, "receiver"), upper: true));
+    public static RuleValue UpperAscii(RuleValue a, EvalState s) => new StringValue(MapAscii(Produced(a, s), upper: true));
 
-    public static RuleValue Trim(RuleValue a, EvalState s) => new StringValue(AsString(a, "receiver").Trim());
+    public static RuleValue Trim(RuleValue a, EvalState s) => new StringValue(Produced(a, s).Trim());
 
     private static string MapAscii(string text, bool upper)
     {
@@ -625,8 +681,9 @@ internal static class Ops
         }
     }
 
-    public static RuleValue MinOf(IReadOnlyList<RuleValue> values, string name, bool max)
+    public static RuleValue MinOf(IReadOnlyList<RuleValue> values, string name, bool max, EvalState s)
     {
+        s.Charge(values.Count);
         if (values.Count == 0)
         {
             throw Fail(RuleErrorCode.InvalidValue, name + " of an empty list");
@@ -650,12 +707,14 @@ internal static class Ops
         return best;
     }
 
-    public static RuleValue MinOfList(RuleValue list, string name, bool max) => MinOf(AsList(list, name + " argument"), name, max);
+    public static RuleValue MinOfList(RuleValue list, string name, bool max, EvalState s) => MinOf(AsList(list, name + " argument"), name, max, s);
 
     public static RuleValue Sum(RuleValue list, bool asDecimal, EvalState s)
     {
         RuleValue total = asDecimal ? new DecimalValue(0m) : IntValue.Of(0);
-        foreach (var item in AsList(list, "sum argument"))
+        var items = AsList(list, "sum argument");
+        s.Charge(items.Count);
+        foreach (var item in items)
         {
             total = Add(total, item, s);
         }

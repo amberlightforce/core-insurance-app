@@ -125,6 +125,9 @@ public sealed record DecisionEvaluationOptions
 
     /// <summary>Also record the sub-expression trace of every evaluated expression.</summary>
     public bool DetailedTrace { get; init; }
+
+    /// <summary>Cancels the evaluation (typed RULE-CANCELLED); the wall-clock deadline applies in addition.</summary>
+    public CancellationToken Cancellation { get; init; }
 }
 
 /// <summary>Result of evaluating a decision table. Fails closed: check <see cref="IsSuccess"/>.</summary>

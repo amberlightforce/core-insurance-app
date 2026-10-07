@@ -45,6 +45,13 @@ public sealed class HostFunction
     /// <summary>Return type.</summary>
     public RuleType ReturnType { get; }
 
+    /// <summary>
+    /// Canonical signature (name, parameter and return types), part of the content hash of expressions calling it.
+    /// The implementation itself cannot be hashed: version a changed implementation by renaming the function or by
+    /// passing the configuration it closes over as an argument.
+    /// </summary>
+    public string Signature => RuleValue.Quote(Name) + "(" + string.Join(",", Parameters.Select(p => p.ToString())) + ")->" + ReturnType;
+
     /// <summary>The pure implementation.</summary>
     public Func<IReadOnlyList<RuleValue>, RuleValue> Implementation { get; }
 }

@@ -96,50 +96,26 @@ public sealed class CompiledDecisionTable
 
         var conditions = new CompiledExpression?[definition.Rules.Count][];
         var outputs = new CompiledExpression[definition.Rules.Count][];
-        var canonical = new StringBuilder();
-        canonical.Append("decision-table/").Append(RuleLanguage.Version).Append(";hit=").Append(definition.HitPolicy.ToString().ToUpperInvariant()).Append('\n');
-        for (int i = 0; i < definition.Variables.Count; i++)
-        {
-            var v = definition.Variables[i];
-            canonical.Append("var ").Append(v.Name).Append(':').Append(v.Type).Append('=').Append(variables[i]?.CanonicalText).Append('\n');
-        }
-
-        for (int i = 0; i < definition.Inputs.Count; i++)
-        {
-            var c = definition.Inputs[i];
-            canonical.Append("in ").Append(c.Name).Append(':').Append(c.Type).Append('=').Append(inputs[i]?.CanonicalText).Append('\n');
-        }
-
-        foreach (var o in definition.Outputs)
-        {
-            canonical.Append("out ").Append(o.Name).Append(':').Append(o.Type).Append('\n');
-        }
-
         for (int r = 0; r < definition.Rules.Count; r++)
         {
             var rule = definition.Rules[r];
             conditions[r] = new CompiledExpression?[definition.Inputs.Count];
             outputs[r] = new CompiledExpression[definition.Outputs.Count];
-            canonical.Append("rule ").Append(rule.RuleId).Append(" prio=").Append(rule.Priority.ToString(CultureInfo.InvariantCulture));
             for (int c = 0; c < definition.Inputs.Count; c++)
             {
                 var column = definition.Inputs[c];
-                string? text = ConditionCell.Translate(rule.Conditions[c], column.Name);
-                conditions[r][c] = text is null
+                string cell = rule.Conditions[c];
+                var mapped = ConditionCell.TranslateMapped(cell, column.Name);
+                conditions[r][c] = mapped is null
                     ? null
-                    : CompileOne(extended, text, RuleType.Bool, $"rule '{rule.RuleId}' condition '{column.Name}' ({rule.Conditions[c].Trim()})", errors);
-                canonical.Append(" | ").Append(conditions[r][c]?.CanonicalText ?? "-");
+                    : CompileOne(extended, mapped.Text, RuleType.Bool, $"rule '{rule.RuleId}' condition '{column.Name}' ({cell.Trim()})", errors, cell, mapped);
             }
 
-            canonical.Append(" =>");
             for (int o = 0; o < definition.Outputs.Count; o++)
             {
                 var column = definition.Outputs[o];
                 outputs[r][o] = CompileOne(extended, rule.Outputs[o], column.Type, $"rule '{rule.RuleId}' output '{column.Name}'", errors)!;
-                canonical.Append(" | ").Append(outputs[r][o]?.CanonicalText);
             }
-
-            canonical.Append('\n');
         }
 
         if (errors.Count > 0)
@@ -147,10 +123,59 @@ public sealed class CompiledDecisionTable
             throw new RuleCompileException(errors);
         }
 
-        return new CompiledDecisionTable(definition, environment, variables, inputs, conditions, outputs, canonical.ToString());
+        return new CompiledDecisionTable(definition, environment, variables, inputs, conditions, outputs, CanonicalTextOf(definition, variables, inputs, conditions, outputs));
     }
 
-    private static CompiledExpression? CompileOne(RuleEnvironment env, string source, RuleType type, string context, List<RuleCompileError> errors)
+    /// <summary>
+    /// Injective canonical text of the table content: every component is length-prefixed (so free-text rule ids
+    /// cannot forge structure), and every expression is represented by its content hash, which covers its syntax,
+    /// result type, the input schema it was checked against and the host-function signatures it calls.
+    /// </summary>
+    private static string CanonicalTextOf(
+        DecisionTableDefinition d,
+        CompiledExpression[] variables,
+        CompiledExpression[] inputs,
+        CompiledExpression?[][] conditions,
+        CompiledExpression[][] outputs)
+    {
+        static string Count(int n) => n.ToString(CultureInfo.InvariantCulture);
+        var parts = new List<string>
+        {
+            "decision-table/" + RuleLanguage.Version,
+            "hit=" + d.HitPolicy.ToString().ToUpperInvariant(),
+            "variables=" + Count(d.Variables.Count),
+        };
+        for (int i = 0; i < d.Variables.Count; i++)
+        {
+            parts.AddRange(new[] { d.Variables[i].Name, d.Variables[i].Type.ToString(), variables[i].ContentHash });
+        }
+
+        parts.Add("inputs=" + Count(d.Inputs.Count));
+        for (int i = 0; i < d.Inputs.Count; i++)
+        {
+            parts.AddRange(new[] { d.Inputs[i].Name, d.Inputs[i].Type.ToString(), inputs[i].ContentHash });
+        }
+
+        parts.Add("outputs=" + Count(d.Outputs.Count));
+        foreach (var o in d.Outputs)
+        {
+            parts.AddRange(new[] { o.Name, o.Type.ToString() });
+        }
+
+        parts.Add("rules=" + Count(d.Rules.Count));
+        for (int r = 0; r < d.Rules.Count; r++)
+        {
+            parts.Add(d.Rules[r].RuleId);
+            parts.Add("priority=" + d.Rules[r].Priority.ToString(CultureInfo.InvariantCulture));
+            parts.AddRange(conditions[r].Select(c => c?.ContentHash ?? "-"));
+            parts.AddRange(outputs[r].Select(o => o.ContentHash));
+        }
+
+        return CanonicalPrinter.LengthPrefixed(parts);
+    }
+
+    private static CompiledExpression? CompileOne(
+        RuleEnvironment env, string source, RuleType type, string context, List<RuleCompileError> errors, string? cell = null, MappedText? mapped = null)
     {
         var result = env.TryCompile(source, type);
         if (result.IsSuccess)
@@ -158,7 +183,15 @@ public sealed class CompiledDecisionTable
             return result.Expression;
         }
 
-        errors.AddRange(result.Errors.Select(e => e with { Context = context }));
+        foreach (var e in result.Errors)
+        {
+            // Positions of condition-cell errors refer to the cell text the author wrote, not the generated expression.
+            var position = cell is not null && mapped is not null && e.Position is { } p
+                ? SourcePosition.FromOffset(cell, mapped.ToCellOffset(p.Offset))
+                : e.Position;
+            errors.Add(e with { Context = context, Position = position });
+        }
+
         return null;
     }
 
@@ -276,7 +309,7 @@ public sealed class CompiledDecisionTable
         }
 
         var limits = _baseEnvironment.Limits;
-        var state = new EvalState(_slotCount, limits, limits.MaxEvaluationSteps, options.DetailedTrace);
+        var state = new EvalState(_slotCount, limits, limits.MaxEvaluationSteps, options.DetailedTrace, options.Cancellation);
         inputs.CopyTo(state.Slots);
         var variableValues = new List<NamedValue>();
         var inputValues = new List<NamedValue>();

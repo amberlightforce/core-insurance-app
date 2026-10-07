@@ -55,8 +55,10 @@ EvaluationResult result = expr.Evaluate(inputs, new EvaluationOptions { Trace = 
 
 * `CompiledExpression` is immutable and thread-safe. Compile once, evaluate concurrently. `env.GetOrCompile(...)`
   caches compiled expressions per environment.
-* `ContentHash` is the lower-case hex SHA-256 of `CanonicalText`, a whitespace- and comment-free S-expression of
-  the syntax tree. Use it in the configuration hash.
+* `ContentHash` is the lower-case hex SHA-256 of three length-prefixed parts: `CanonicalText` (a whitespace- and
+  comment-free S-expression of the syntax tree), the result type, and `EnvironmentFingerprint` (the input schema
+  with types, nullability and object shapes, plus the signatures of the host functions the expression calls). Equal
+  hashes mean equal behaviour. Use it in the configuration hash.
 * Evaluation fails closed. A failed evaluation returns `IsSuccess == false` and a typed `RuleEvaluationError`, never
   a partial value.
 
@@ -65,17 +67,24 @@ EvaluationResult result = expr.Evaluate(inputs, new EvaluationOptions { Trace = 
 | Type | CLR value | Literal / constructor | Notes |
 |---|---|---|---|
 | `int` | `long` | `42`, `-7`, `0x1F` | 64-bit, checked: overflow is an error |
-| `decimal` | `decimal` | `100.10`, `.5`, `-0.15` | **Every number with a fraction is decimal. There is no double.** Up to 28 significant digits; the scale is preserved (`1.50` stays `1.50`) |
+| `decimal` | `decimal` | `100.10`, `.5`, `-0.15` | **Every number with a fraction is decimal. There is no double.** Up to 28 significant digits; the scale is preserved (`1.50` stays `1.50`). `+ - *` never round (see §6) |
 | `string` | `string` | `"a"`, `'a'`, `"""multi"""`, `r"raw\d"` | CEL escapes `\n \t \" \\ \xHH \uHHHH \UHHHHHHHH \ooo` |
 | `bool` | `bool` | `true`, `false` | |
 | `null_type` | — | `null` | "No value". Declared nullable inputs and fields can hold it |
 | `date` | `DateOnly` | `date("2026-11-01")` | Calendar (business) date. Insurance extension, not in CEL |
 | `timestamp` | `DateTimeOffset` (UTC) | `timestamp("2026-11-01T10:00:00Z")` | RFC 3339, `Z` or `±hh:mm` offset; normalised to UTC |
-| `duration` | `TimeSpan` | `duration("1h30m")`, `duration("90s")` | Units `h m s ms us ns`, decimal amounts allowed |
+| `duration` | `TimeSpan` | `duration("1h30m")`, `duration("90s")` | Units `h m s ms us ns`, decimal amounts allowed. **Resolution is 100 ns**: a literal that is not a whole number of 100 ns (`"150ns"`) is rejected, never rounded |
 | `list(T)` | `ListValue` | `[1, 2, 3]` | Homogeneous. `[1, 2.5]` is `list(decimal)` |
 | `map(K, V)` | `MapValue` | `{"a": 1}` | Keys are `int`, `string` or `bool`. Insertion order is kept for iteration |
 | object | `ObjectValue` | from inputs only | Declared with `ObjectSchema`; fields are selected with `.` |
 | `dyn` | any | — | Only the element type of `[]`, or a host function's declared result. Checked at run time |
+
+**Nullability (ruling D-ARC-10c):** types are non-null by default. Declare "no value" explicitly:
+`InputSchema.Define().Variable("n", RuleType.Decimal.Nullable())` (or `nullable: true`), `Field(..., nullable: true)`,
+an expected result type `RuleType.Decimal.Nullable()`, or a nullable decision-table column or output type. An
+expression compiled with a non-nullable expected type that produces `null` at run time fails with
+`RULE-NULL-VALUE`; the literal `null` for a non-nullable expected type fails compilation. Nullability is an
+annotation: it does not affect type equality, but it is part of type names (`decimal?`) and of content hashes.
 
 **Implicit widening:** `int` widens to `decimal` wherever a decimal is expected: mixed arithmetic, list and map
 literals, ternary branches, the expected result type, host-function arguments and input values. Nothing else is
@@ -159,9 +168,12 @@ and the actuaries; some jurisdictions use 1 March.
   explicit input from the time service. The names `now`, `today`, `random`, `uuid`, `clock`, … fail compilation
   with `RULE-NONDETERMINISTIC`. All parsing and formatting is culture-invariant (tests run under el-GR, de-DE,
   tr-TR and ar-SA).
-* **Decimal arithmetic** is System.Decimal: exact for `+ - *`, 28–29 significant digits for `/`. Overflow is an
-  error. Rounding is never implicit, so rounding points are explicit `round(...)` calls or host rounding functions
-  (`mkt.Rounding.apply`, REQ-MKT-006).
+* **Decimal arithmetic** (ruling D-ARC-10b): `+`, `-` and `*` are exact. If the exact result needs more than
+  System.Decimal's 28–29 significant digits, evaluation fails with `RULE-PRECISION-LOSS` instead of rounding
+  silently (fail closed); round an operand explicitly first. Overflow is `RULE-OVERFLOW`. **Division is the one
+  rounding operation**: the quotient is System.Decimal's correctly rounded 28–29 significant digit result
+  (`1 / 3.0` = `0.3333333333333333333333333333`), so a quotient must pass through an explicit `round(...)` (or a host
+  rounding function such as `mkt.Rounding.apply`, REQ-MKT-006) before it becomes money.
 * **Logical operators** short-circuit left to right: `false && x` and `true || x` never evaluate `x`. They follow
   CEL error absorption: if the left side fails and the right side decides the result (`err || true`,
   `err && false`), the result is that decision; otherwise the left error is raised. Cost-budget, size-limit and
@@ -184,16 +196,28 @@ position and, for decision tables, a context such as `rule 'R1' condition 'drive
 | `RULE-UNKNOWN-IDENTIFIER` (names the undeclared input), `RULE-UNKNOWN-FIELD` (names the field path, for example `vehicle.colour`), `RULE-UNKNOWN-FUNCTION`, `RULE-NONDETERMINISTIC` | name resolution |
 | `RULE-NO-MATCHING-OVERLOAD`, `RULE-TYPE-MISMATCH`, `RULE-RESULT-TYPE-MISMATCH`, `RULE-INVALID-ARGUMENT`, `RULE-INVALID-REGEX`, `RULE-DUPLICATE-KEY` | type checking |
 | `RULE-DIVISION-BY-ZERO`, `RULE-OVERFLOW`, `RULE-NULL-VALUE`, `RULE-INDEX-OUT-OF-RANGE`, `RULE-NO-SUCH-KEY`, `RULE-DUPLICATE-KEY`, `RULE-INVALID-VALUE`, `RULE-HOST-FUNCTION-FAILED` | evaluation |
-| `RULE-COST-EXCEEDED`, `RULE-LIMIT-EXCEEDED`, `RULE-REGEX-TIMEOUT` | evaluation limits |
+| `RULE-PRECISION-LOSS` | `+ - *` whose exact result does not fit a decimal |
+| `RULE-COST-EXCEEDED`, `RULE-LIMIT-EXCEEDED`, `RULE-TIMEOUT`, `RULE-CANCELLED`, `RULE-REGEX-TIMEOUT` | resource limits (never absorbed by `&&`/`\|\|`) |
 | `RULE-INPUT-INVALID` (`RuleInputException`, with the input path) | input binding |
 | `PLT-ERR-TABLE-NOT-ACTIVE`, `PLT-ERR-HIT-POLICY-VIOLATION`, `RULE-INVALID-DEFINITION` | decision tables |
 
 ## 8. Limits
 
-`RuleLimits` (defaults in brackets): `MaxExpressionLength` [8 192 characters], `MaxAstDepth` [200],
-`MaxEvaluationSteps` [100 000 steps, one per node evaluation plus one per comprehension iteration],
+`RuleLimits` (defaults in brackets): `MaxExpressionLength` [8 192 characters], `MaxAstDepth` [200; at most
+1 000], `MaxEvaluationSteps` [100 000], `MaxAllocatedElements` [1 000 000], `MaxEvaluationTime` [1 s],
 `MaxCollectionSize` [10 000], `MaxStringLength` [65 536], `MaxRegexPatternLength` [512], `RegexTimeout` [50 ms],
-`MaxTraceEntries` [10 000]. `EvaluationOptions.MaxSteps` can lower the budget for a single call.
+`MaxTraceEntries` [10 000]. `EvaluationOptions.MaxSteps` can lower the budget and `EvaluationOptions.Cancellation`
+cancels a single call.
+
+**Cost model.** Steps are charged in proportion to the work done, not per node: one step per node evaluation and
+per comprehension iteration, plus the *weight* of every value an operation traverses (`==`, `!=`, ordering, each
+comparison inside `in`, `min`/`max`/`sum`, string scans at one step per 16 characters, run-time type checks).
+A value's weight is the size of its tree counting shared sub-values once per occurrence, so values built by
+sharing (whose size grows exponentially with linear steps) cannot be compared or scanned cheaply. Every element
+created (list/map literals and results, concatenations, keys of iterated maps, widened copies, strings in
+16-character chunks) counts towards `MaxAllocatedElements` and is also charged as steps. A wall-clock deadline
+(`MaxEvaluationTime`) and the cancellation token are checked every 256 steps. Exceeding a bound gives
+`RULE-COST-EXCEEDED`, `RULE-LIMIT-EXCEEDED`, `RULE-TIMEOUT` or `RULE-CANCELLED`.
 
 ## 9. Explainability: traces and content hashes
 
@@ -203,7 +227,9 @@ position and, for decision tables, a context such as `rule 'R1' condition 'drive
   conversions are omitted.
 * `CanonicalText` example: `x + 1` gives `cel-subset/1.0:(call _+_ (id x) (int 1))`. Whitespace, comments,
   parentheses and quote style do not change it. Literal scale does (`1.0` and `1.00` hash differently because they
-  produce differently scaled results).
+  produce differently scaled results). The content hash also covers the result type and `EnvironmentFingerprint`,
+  so `p / 3` over `p: int` and over `p: decimal` hash differently. A host function's *implementation* cannot be
+  hashed: change its name (or pass the configuration it depends on as an argument) when its behaviour changes.
 
 ## 10. Decision tables
 
@@ -221,26 +247,35 @@ version and reports **all** errors, each with its cell context.
   |---|---|
   | `-` or empty | any value |
   | `null` / `not null` | no value / has a value |
-  | `< x`, `<= x`, `> x`, `>= x`, `== x`, `!= x` | comparison. A null column never matches, except with `!=` |
-  | `[a..b]`, `[a..b)`, `(a..b]`, `(a..b)` | range (`[` `]` inclusive, `(` `)` exclusive); works for numbers, dates and strings |
-  | `in [a, b]`, `not in [a, b]` | set membership |
-  | `? <boolean expression>` | any predicate over inputs, variables and columns |
-  | anything else | equality with that expression's value |
+  | `< x`, `<= x`, `> x`, `>= x`, `== x` | positive comparison |
+  | `!= x` | negative comparison |
+  | `[a..b]`, `[a..b)`, `(a..b]`, `(a..b)` | positive range (`[` `]` inclusive, `(` `)` exclusive); numbers, dates, strings |
+  | `in [a, b]` / `not in [a, b]` | positive / negative set membership |
+  | `? <boolean expression>` | any predicate over inputs, variables and columns (null is the author's responsibility) |
+  | anything else | positive equality with that expression's value |
+
+  **Null rule:** a null column never matches a positive test and always matches a negative test (`!=`, `not in`),
+  like SQL's `IS DISTINCT FROM`; `null` and `not null` test for it explicitly. A column that can be null must be
+  declared with a nullable type (`RuleType.Int.Nullable()`); otherwise a null column value is `RULE-NULL-VALUE`.
+  Compile errors in a cell carry positions in the cell text the author wrote, not in the generated expression.
 
 * **Hit policies:** `First` (row order; later rows are not evaluated), `Unique` (more than one match gives
   `PLT-ERR-HIT-POLICY-VIOLATION`), `Priority` (highest `DecisionRule.Priority`; on a tie, the earlier row wins),
   `Collect` (all matches in row order). No match is a success with no matches.
 * **Versioning** (`DecisionTableMetadata`): table id, version, status (`Draft … Retired`) and a half-open
   effective range `[EffectiveFrom, EffectiveTo)`. `Evaluate(inputs, asOf)` refuses with `PLT-ERR-TABLE-NOT-ACTIVE`
-  unless the status is `Active` and `asOf` is inside the range. `EvaluateForTesting` skips this check, for authoring
-  and test runs. The `ContentHash` covers the content (hit policy, variables, columns, cells, outputs, priorities)
-  and not the metadata.
+  unless the status is `Active` and `asOf` is inside the range.   `EvaluateForTesting` skips this check, for authoring
+  and test runs. The `ContentHash` covers the content (hit policy, variables, columns, cells, outputs, priorities,
+  and through each expression's hash the input schema and host signatures) and not the metadata. `CanonicalText`
+  is a sequence of length-prefixed components (`length:text;`), so free-text rule ids cannot forge structure.
 * **Trace** (`DecisionTrace`, REQ-PLT-177): table id, version, content hash, variable and column values, per-row
   cell outcomes (`Matched`, `NotMatched`, `Any`, `NotEvaluated`), the matched rules with their outputs and the steps
   used. `DetailedTrace = true` adds the sub-expression trace of every expression evaluated.
 * **Test cases and activation gate** (REQ-PLT-176, REQ-UW-038): `RunTests(cases)` and
   `CheckActivationReadiness(cases, requireEveryRuleCovered)`. Activation is refused if there are no cases, if any
   case fails (the failing cases are listed), or, optionally, if some rule is not covered by any case.
+* **Performance:** `tools/CoreIns.Rules.Benchmark` is the NFR-UW-001 spike (150 rules over 4 drivers and 2 vehicles
+  with nested macros; budget p95 ≤ 150 ms, p99 ≤ 300 ms). Unit tests assert step counts, not wall-clock time.
 * Persistence, approval workflow, maker-checker and DMN import/export belong to the PLT module (W1-PLT-04). They
   are not part of this library.
 
@@ -270,4 +305,7 @@ that does not match the declared type.
 * **Static typing:** expressions are always type-checked against a declared schema (checked CEL). `dyn` exists only
   for empty list literals and host results.
 * **Evaluation order** of `&&`/`||` is left to right with short-circuiting. Results match CEL's commutative
-  semantics, including error absorption, except that budget, limit and timeout errors are never absorbed.
+  semantics, including error absorption, except that budget, allocation, deadline, cancellation and regex-timeout
+  errors are never absorbed: if the left side failed with an ordinary error and the right side then exhausts a
+  resource, the resource error is reported.
+* **No silent decimal rounding** (`RULE-PRECISION-LOSS`) and **non-null expected types** are stricter than CEL.

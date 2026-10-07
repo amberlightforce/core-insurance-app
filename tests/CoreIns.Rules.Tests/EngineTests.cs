@@ -63,7 +63,11 @@ public class EngineTests
     {
         var a = T.Env.Compile("x + 1");
         a.CanonicalText.ShouldBe("cel-subset/1.0:(call _+_ (id x) (int 1))");
-        a.ContentHash.ShouldBe(string.Concat(SHA256.HashData(Encoding.UTF8.GetBytes(a.CanonicalText)).Select(x => x.ToString("x2", CultureInfo.InvariantCulture))));
+        string Prefixed(string s) => s.Length.ToString(CultureInfo.InvariantCulture) + ":" + s + ";";
+        string hashed = Prefixed(a.CanonicalText) + Prefixed("int") + Prefixed(a.EnvironmentFingerprint);
+        a.ContentHash.ShouldBe(string.Concat(SHA256.HashData(Encoding.UTF8.GetBytes(hashed)).Select(x => x.ToString("x2", CultureInfo.InvariantCulture))));
+        a.EnvironmentFingerprint.ShouldContain("inputs{\"x\":int;");
+        a.EnvironmentFingerprint.ShouldContain("object \"Vehicle\"{\"value\":decimal;\"powerKw\":int;\"usage\":string;\"trackerFitted\":bool?;}");
         a.ContentHash.Length.ShouldBe(64);
 
         T.Env.Compile("  x+1 // add one\n").ContentHash.ShouldBe(a.ContentHash);

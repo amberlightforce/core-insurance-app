@@ -73,7 +73,7 @@ public sealed class ObjectSchema
                 throw new ArgumentException($"duplicate field '{name}' in schema '{_name}'", nameof(name));
             }
 
-            _fields.Add(new FieldDefinition(name, type, nullable, _fields.Count));
+            _fields.Add(new FieldDefinition(name, type, nullable || type.IsNullable, _fields.Count));
             return this;
         }
 
@@ -137,6 +137,7 @@ public sealed class ObjectValueBuilder
 public sealed class InputSchema
 {
     private readonly Dictionary<string, VariableDefinition> _byName;
+    private string? _fingerprint;
 
     private InputSchema(IReadOnlyList<VariableDefinition> variables)
     {
@@ -156,6 +157,56 @@ public sealed class InputSchema
 
     /// <summary>Starts building a set of input values for this schema.</summary>
     public RuleInputs.Builder NewInputs() => new(this);
+
+    /// <summary>
+    /// Canonical, injective text of the schema: every input with its type and nullability, then every object schema
+    /// reachable from it with its fields. Part of every content hash (the same expression over different input types
+    /// can give different results).
+    /// </summary>
+    public string Fingerprint() => _fingerprint ??= BuildFingerprint();
+
+    private string BuildFingerprint()
+    {
+        var sb = new System.Text.StringBuilder("inputs{");
+        var objects = new List<ObjectSchema>();
+        foreach (var v in Variables)
+        {
+            sb.Append(RuleValue.Quote(v.Name)).Append(':').Append(v.Type.NonNullable()).Append(v.Nullable ? "?" : string.Empty).Append(';');
+            Collect(v.Type, objects);
+        }
+
+        sb.Append('}');
+        for (int i = 0; i < objects.Count; i++)
+        {
+            var o = objects[i];
+            sb.Append("object ").Append(RuleValue.Quote(o.Name)).Append('{');
+            foreach (var f in o.Fields)
+            {
+                sb.Append(RuleValue.Quote(f.Name)).Append(':').Append(f.Type.NonNullable()).Append(f.Nullable ? "?" : string.Empty).Append(';');
+                Collect(f.Type, objects);
+            }
+
+            sb.Append('}');
+        }
+
+        return sb.ToString();
+    }
+
+    private static void Collect(RuleType type, List<ObjectSchema> objects)
+    {
+        switch (type.Kind)
+        {
+            case RuleTypeKind.Object when !objects.Any(o => ReferenceEquals(o, type.Schema)):
+                objects.Add(type.Schema!);
+                break;
+            case RuleTypeKind.List:
+                Collect(type.ElementType!, objects);
+                break;
+            case RuleTypeKind.Map:
+                Collect(type.ElementType!, objects);
+                break;
+        }
+    }
 
     /// <summary>Creates an extended schema (same leading slots) with additional nullable variables.</summary>
     internal InputSchema Extend(IEnumerable<(string Name, RuleType Type)> extra)
@@ -188,7 +239,7 @@ public sealed class InputSchema
                 throw new ArgumentException($"duplicate input '{name}'", nameof(name));
             }
 
-            _variables.Add(new VariableDefinition(name, type, nullable, _variables.Count));
+            _variables.Add(new VariableDefinition(name, type, nullable || type.IsNullable, _variables.Count));
             return this;
         }
 

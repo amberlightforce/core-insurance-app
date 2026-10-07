@@ -72,7 +72,7 @@ public class RequirementTests
         var condition = RuleEnvironment.Create(schema).Compile("\"THEFT\" in coverages", RuleType.Bool);
         var result = condition.Evaluate(schema.NewInputs().Set("coverages", RuleValue.List("MTPL", "FIRE")).Build(), new EvaluationOptions { Trace = true });
         result.Value.ShouldBe(BoolValue.False);
-        result.Trace.Last().ToString().ShouldBe("\"THEFT\" in coverages = false");
+        result.Trace[^1].ToString().ShouldBe("\"THEFT\" in coverages = false");
     }
 
     [Fact]

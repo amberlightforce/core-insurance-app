@@ -133,19 +133,20 @@ internal sealed class Parser
         return node;
     }
 
-    private CallExpr Call(string function, Expr? target, IReadOnlyList<Expr> args, int start, int end) =>
-        Node(new CallExpr { Function = function, Target = target, Args = args, Start = start, End = end });
+    private CallExpr Call(string function, Expr? target, IReadOnlyList<Expr> args, int start, int end, int? opStart = null) =>
+        Node(new CallExpr { Function = function, Target = target, Args = args, Start = start, End = end, OpStart = opStart ?? start });
 
     private Expr ParseExpr()
     {
         Enter();
         var cond = ParseOr();
+        int questionAt = Current.Start;
         if (Match(TokenKind.Question))
         {
             var whenTrue = ParseOr();
             Expect(TokenKind.Colon, "':'");
             var whenFalse = ParseExpr();
-            cond = Call("_?_:_", null, new[] { cond, whenTrue, whenFalse }, cond.Start, whenFalse.End);
+            cond = Call("_?_:_", null, new[] { cond, whenTrue, whenFalse }, cond.Start, whenFalse.End, questionAt);
         }
 
         Leave();
@@ -155,10 +156,11 @@ internal sealed class Parser
     private Expr ParseOr()
     {
         var left = ParseAnd();
-        while (Match(TokenKind.OrOr))
+        while (Current.Kind == TokenKind.OrOr)
         {
+            int opAt = Advance().Start;
             var right = ParseAnd();
-            left = Call("_||_", null, new[] { left, right }, left.Start, right.End);
+            left = Call("_||_", null, new[] { left, right }, left.Start, right.End, opAt);
         }
 
         return left;
@@ -167,10 +169,11 @@ internal sealed class Parser
     private Expr ParseAnd()
     {
         var left = ParseRelation();
-        while (Match(TokenKind.AndAnd))
+        while (Current.Kind == TokenKind.AndAnd)
         {
+            int opAt = Advance().Start;
             var right = ParseRelation();
-            left = Call("_&&_", null, new[] { left, right }, left.Start, right.End);
+            left = Call("_&&_", null, new[] { left, right }, left.Start, right.End, opAt);
         }
 
         return left;
@@ -197,9 +200,9 @@ internal sealed class Parser
                 return left;
             }
 
-            Advance();
+            int opAt = Advance().Start;
             var right = ParseAddition();
-            left = Call(op, null, new[] { left, right }, left.Start, right.End);
+            left = Call(op, null, new[] { left, right }, left.Start, right.End, opAt);
         }
     }
 
@@ -208,9 +211,10 @@ internal sealed class Parser
         var left = ParseMultiplication();
         while (Current.Kind is TokenKind.Plus or TokenKind.Minus)
         {
-            string op = Advance().Kind == TokenKind.Plus ? "_+_" : "_-_";
+            var opToken = Advance();
+            string op = opToken.Kind == TokenKind.Plus ? "_+_" : "_-_";
             var right = ParseMultiplication();
-            left = Call(op, null, new[] { left, right }, left.Start, right.End);
+            left = Call(op, null, new[] { left, right }, left.Start, right.End, opToken.Start);
         }
 
         return left;
@@ -221,14 +225,15 @@ internal sealed class Parser
         var left = ParseUnary();
         while (Current.Kind is TokenKind.Star or TokenKind.Slash or TokenKind.Percent)
         {
-            string op = Advance().Kind switch
+            var opToken = Advance();
+            string op = opToken.Kind switch
             {
                 TokenKind.Star => "_*_",
                 TokenKind.Slash => "_/_",
                 _ => "_%_",
             };
             var right = ParseUnary();
-            left = Call(op, null, new[] { left, right }, left.Start, right.End);
+            left = Call(op, null, new[] { left, right }, left.Start, right.End, opToken.Start);
         }
 
         return left;
@@ -284,11 +289,12 @@ internal sealed class Parser
                     e = Node(new SelectExpr { Operand = e, Field = name.Text, Start = e.Start, End = name.End });
                 }
             }
-            else if (Match(TokenKind.LBracket))
+            else if (Current.Kind == TokenKind.LBracket)
             {
+                int bracketAt = Advance().Start;
                 var index = ParseExpr();
                 var close = Expect(TokenKind.RBracket, "']'");
-                e = Call("_[_]", null, new[] { e, index }, e.Start, close.End);
+                e = Call("_[_]", null, new[] { e, index }, e.Start, close.End, bracketAt);
             }
             else
             {
@@ -326,7 +332,7 @@ internal sealed class Parser
         };
         if (macro is not { } kind)
         {
-            return Call(name.Text, target, args, target.Start, end);
+            return Call(name.Text, target, args, target.Start, end, name.Start);
         }
 
         bool arityOk = kind == MacroKind.Map ? args.Count is 2 or 3 : args.Count == 2;
@@ -451,7 +457,7 @@ internal sealed class Parser
         }
     }
 
-    private Expr MakeNumber(Token t, bool negative, int start)
+    private LiteralExpr MakeNumber(Token t, bool negative, int start)
     {
         RuleValue value;
         if (t.Kind == TokenKind.Int)

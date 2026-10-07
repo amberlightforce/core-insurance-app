@@ -17,6 +17,18 @@ internal static class CanonicalPrinter
         return sb.ToString();
     }
 
+    /// <summary>Joins components injectively: each one is written as <c>length:text;</c>.</summary>
+    public static string LengthPrefixed(IEnumerable<string> components)
+    {
+        var sb = new StringBuilder();
+        foreach (var c in components)
+        {
+            sb.Append(c.Length.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(':').Append(c).Append(';');
+        }
+
+        return sb.ToString();
+    }
+
     /// <summary>Lower-case hexadecimal SHA-256 of the UTF-8 bytes of <paramref name="canonicalText"/>.</summary>
     public static string Hash(string canonicalText)
     {

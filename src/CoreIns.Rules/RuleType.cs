@@ -24,12 +24,13 @@ public enum RuleTypeKind
 /// <summary>A static type of the rule language. Instances are immutable and compared structurally.</summary>
 public sealed class RuleType : IEquatable<RuleType>
 {
-    private RuleType(RuleTypeKind kind, RuleType? keyType, RuleType? elementType, ObjectSchema? schema)
+    private RuleType(RuleTypeKind kind, RuleType? keyType, RuleType? elementType, ObjectSchema? schema, bool isNullable = false)
     {
         Kind = kind;
         KeyType = keyType;
         ElementType = elementType;
         Schema = schema;
+        IsNullable = isNullable;
     }
 
     /// <summary>64-bit signed integer (CEL <c>int</c>).</summary>
@@ -71,6 +72,13 @@ public sealed class RuleType : IEquatable<RuleType>
     /// <summary>Schema of an object type; otherwise null.</summary>
     public ObjectSchema? Schema { get; }
 
+    /// <summary>
+    /// Whether <c>null</c> ("no value") is allowed where this type is declared (an expected result type, an input,
+    /// a field or a decision-table column). Types are non-null by default (ruling D-ARC-10c); nullability is an
+    /// annotation and does not take part in type equality.
+    /// </summary>
+    public bool IsNullable { get; }
+
     /// <summary>True for <c>int</c> and <c>decimal</c>.</summary>
     public bool IsNumeric => Kind is RuleTypeKind.Int or RuleTypeKind.Decimal;
 
@@ -93,6 +101,12 @@ public sealed class RuleType : IEquatable<RuleType>
 
         return new RuleType(RuleTypeKind.Map, key, value, null);
     }
+
+    /// <summary>Returns this type annotated as nullable (for example <c>RuleType.Decimal.Nullable()</c>).</summary>
+    public RuleType Nullable() => IsNullable ? this : new RuleType(Kind, KeyType, ElementType, Schema, isNullable: true);
+
+    /// <summary>Returns this type without the nullable annotation.</summary>
+    public RuleType NonNullable() => IsNullable ? new RuleType(Kind, KeyType, ElementType, Schema) : this;
 
     /// <summary>Creates the type of objects conforming to <paramref name="schema"/>.</summary>
     public static RuleType ObjectOf(ObjectSchema schema)
@@ -122,8 +136,10 @@ public sealed class RuleType : IEquatable<RuleType>
     /// <inheritdoc />
     public override int GetHashCode() => HashCode.Combine(Kind, KeyType, ElementType, Schema?.Name);
 
-    /// <summary>The canonical type name, for example <c>list(decimal)</c>.</summary>
-    public override string ToString() => Kind switch
+    /// <summary>The canonical type name, for example <c>list(decimal)</c>; nullable types end in <c>?</c>.</summary>
+    public override string ToString() => IsNullable ? Name() + "?" : Name();
+
+    private string Name() => Kind switch
     {
         RuleTypeKind.Int => "int",
         RuleTypeKind.Decimal => "decimal",

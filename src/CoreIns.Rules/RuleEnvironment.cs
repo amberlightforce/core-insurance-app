@@ -66,17 +66,24 @@ public sealed class RuleEnvironment
             var resultType = root.Type;
             if (expectedType is not null)
             {
-                if (!Binder.IsAssignable(root.Type, expectedType))
+                bool nullLiteralIntoNonNull = root.Type.Kind == RuleTypeKind.Null && !expectedType.IsNullable && expectedType.Kind != RuleTypeKind.Null;
+                if (!Binder.IsAssignable(root.Type, expectedType) || nullLiteralIntoNonNull)
                 {
                     throw new CompileFailure(RuleErrorCode.ResultTypeMismatch, ast.Start, $"expression has type {root.Type} but {expectedType} is required");
                 }
 
                 root = Binder.Coerce(root, expectedType);
+                if (!expectedType.IsNullable && expectedType.Kind is not (RuleTypeKind.Null or RuleTypeKind.Dyn))
+                {
+                    root = new NonNullNode(root);
+                }
+
                 resultType = expectedType;
             }
 
             var canonical = CanonicalPrinter.Print(ast);
-            return CompileResult.Ok(new CompiledExpression(this, source, resultType, root, binder.SlotCount, canonical));
+            string fingerprint = EnvironmentFingerprint(binder.UsedHostFunctions);
+            return CompileResult.Ok(new CompiledExpression(this, source, resultType, root, binder.SlotCount, canonical, fingerprint));
         }
         catch (CompileFailure f)
         {
@@ -91,14 +98,21 @@ public sealed class RuleEnvironment
     public CompiledExpression GetOrCompile(string source, RuleType? expectedType = null)
     {
         ArgumentNullException.ThrowIfNull(source);
-        var lazy = _cache.GetOrAdd(new CacheKey(source, expectedType), k => new Lazy<CompileResult>(() => TryCompile(k.Source, k.Expected)));
+        var lazy = _cache.GetOrAdd(new CacheKey(source, expectedType, expectedType?.IsNullable == true), k => new Lazy<CompileResult>(() => TryCompile(k.Source, k.Expected)));
         return lazy.Value.GetOrThrow();
     }
 
     /// <summary>A derived environment with the same functions and limits over an extended schema.</summary>
     internal RuleEnvironment WithSchema(InputSchema schema) => new(schema, Limits, _functions);
 
-    private readonly record struct CacheKey(string Source, RuleType? Expected);
+    /// <summary>
+    /// Canonical text of what an expression's meaning depends on besides its syntax: the input schema (types,
+    /// nullability, object shapes) and the signatures of the host functions it calls.
+    /// </summary>
+    internal string EnvironmentFingerprint(IEnumerable<HostFunction> usedFunctions) =>
+        CanonicalPrinter.LengthPrefixed(new[] { Schema.Fingerprint() }.Concat(usedFunctions.Select(f => f.Signature).Order(StringComparer.Ordinal)));
+
+    private readonly record struct CacheKey(string Source, RuleType? Expected, bool ExpectedNullable);
 }
 
 /// <summary>Outcome of <see cref="RuleEnvironment.TryCompile"/>.</summary>
@@ -138,6 +152,9 @@ public sealed record EvaluationOptions
 
     /// <summary>Optional lower cost budget for this call (cannot raise the environment budget).</summary>
     public long? MaxSteps { get; init; }
+
+    /// <summary>Cancels the evaluation (typed RULE-CANCELLED); the wall-clock deadline applies in addition.</summary>
+    public CancellationToken Cancellation { get; init; }
 }
 
 /// <summary>One trace entry: a sub-expression (by source span) and the value it produced, in evaluation order.</summary>
@@ -191,15 +208,16 @@ public sealed class EvaluationResult
 /// </summary>
 public sealed class CompiledExpression
 {
-    internal CompiledExpression(RuleEnvironment environment, string source, RuleType resultType, BoundNode root, int slotCount, string canonicalText)
+    internal CompiledExpression(RuleEnvironment environment, string source, RuleType resultType, BoundNode root, int slotCount, string canonicalText, string environmentFingerprint)
     {
+        EnvironmentFingerprint = environmentFingerprint;
         Environment = environment;
         Source = source;
         ResultType = resultType;
         Root = root;
         SlotCount = slotCount;
         CanonicalText = canonicalText;
-        ContentHash = CanonicalPrinter.Hash(canonicalText);
+        ContentHash = CanonicalPrinter.Hash(CanonicalPrinter.LengthPrefixed(new[] { canonicalText, resultType.ToString(), environmentFingerprint }));
     }
 
     /// <summary>The environment the expression was compiled in.</summary>
@@ -214,7 +232,13 @@ public sealed class CompiledExpression
     /// <summary>Canonical text of the syntax tree (whitespace and comments removed, language version prefixed).</summary>
     public string CanonicalText { get; }
 
-    /// <summary>Lower-case hex SHA-256 of <see cref="CanonicalText"/>.</summary>
+    /// <summary>Input schema and host-function signatures the expression was type-checked against.</summary>
+    public string EnvironmentFingerprint { get; }
+
+    /// <summary>
+    /// Lower-case hex SHA-256 over the length-prefixed <see cref="CanonicalText"/>, result type and
+    /// <see cref="EnvironmentFingerprint"/>: equal hashes mean equal behaviour.
+    /// </summary>
     public string ContentHash { get; }
 
     internal BoundNode Root { get; }
@@ -232,7 +256,7 @@ public sealed class CompiledExpression
 
         options ??= EvaluationOptions.Default;
         long budget = Math.Min(options.MaxSteps ?? Environment.Limits.MaxEvaluationSteps, Environment.Limits.MaxEvaluationSteps);
-        var state = new EvalState(SlotCount, Environment.Limits, budget, options.Trace);
+        var state = new EvalState(SlotCount, Environment.Limits, budget, options.Trace, options.Cancellation);
         inputs.CopyTo(state.Slots);
         return Run(state, context: null);
     }
@@ -261,7 +285,7 @@ public sealed class CompiledExpression
         }
     }
 
-    private IReadOnlyList<TraceEntry> BuildTrace(List<(BoundNode Node, RuleValue Value)>? raw)
+    private TraceEntry[] BuildTrace(List<(BoundNode Node, RuleValue Value)>? raw)
     {
         if (raw is null || raw.Count == 0)
         {

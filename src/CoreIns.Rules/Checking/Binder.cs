@@ -34,6 +34,9 @@ internal sealed class Binder
         SlotCount = _nextSlot;
     }
 
+    /// <summary>Host functions referenced by the bound expression (their signatures enter the content hash).</summary>
+    public HashSet<HostFunction> UsedHostFunctions { get; } = new();
+
     /// <summary>Total slots needed (inputs plus comprehension variables).</summary>
     public int SlotCount { get; private set; }
 
@@ -158,6 +161,9 @@ internal sealed class Binder
 
     private static CompileFailure Fail(Expr e, RuleErrorCode code, string message) => new(code, e.Start, message);
 
+    /// <summary>A type error of a call or operator: points at the operator token or function name.</summary>
+    private static CompileFailure FailOp(CallExpr c, RuleErrorCode code, string message) => new(code, c.OpStart, message);
+
     private static string PathOf(Expr e) => e switch
     {
         IdentExpr i => i.Name,
@@ -191,7 +197,7 @@ internal sealed class Binder
 
     private bool IsDeclared(string name) => _locals.Any(l => l.Name == name) || _schema.TryGetVariable(name, out _);
 
-    private BoundNode BindIdent(IdentExpr i)
+    private SlotNode BindIdent(IdentExpr i)
     {
         for (int k = _locals.Count - 1; k >= 0; k--)
         {
@@ -236,7 +242,7 @@ internal sealed class Binder
         throw Fail(s, RuleErrorCode.UnknownField, $"cannot select field '{PathOf(s)}' from a value of type {t}");
     }
 
-    private BoundNode BindHas(HasExpr h)
+    private HasNode BindHas(HasExpr h)
     {
         var operand = Bind(h.Select.Operand);
         var t = operand.Type;
@@ -258,7 +264,7 @@ internal sealed class Binder
         throw Fail(h, RuleErrorCode.NoMatchingOverload, $"has() requires an object or map with string keys, found {t}");
     }
 
-    private BoundNode BindList(ListExpr l)
+    private ListNode BindList(ListExpr l)
     {
         var elements = l.Elements.Select(Bind).ToArray();
         RuleType elementType = RuleType.Dyn;
@@ -276,7 +282,7 @@ internal sealed class Binder
         return new ListNode(l, RuleType.ListOf(elementType), elements);
     }
 
-    private BoundNode BindMap(MapExpr m)
+    private MapNode BindMap(MapExpr m)
     {
         var keys = m.Keys.Select(Bind).ToArray();
         var values = m.Values.Select(Bind).ToArray();
@@ -308,7 +314,7 @@ internal sealed class Binder
         return new MapNode(m, RuleType.MapOf(keyType, valueType), keys, values);
     }
 
-    private BoundNode BindMacro(MacroExpr m)
+    private ComprehensionNode BindMacro(MacroExpr m)
     {
         string name = MacroExpr.NameOf(m.Kind);
         var target = Bind(m.Target);
@@ -377,7 +383,7 @@ internal sealed class Binder
                 var whenTrue = Bind(c.Args[1]);
                 var whenFalse = Bind(c.Args[2]);
                 var type = Unify(whenTrue.Type, whenFalse.Type)
-                    ?? throw Fail(c, RuleErrorCode.TypeMismatch, $"the branches of '?:' have incompatible types {whenTrue.Type} and {whenFalse.Type}");
+                    ?? throw FailOp(c, RuleErrorCode.TypeMismatch, $"the branches of '?:' have incompatible types {whenTrue.Type} and {whenFalse.Type}");
                 return new ConditionalNode(c, type, cond, Coerce(whenTrue, type), Coerce(whenFalse, type));
             }
 
@@ -386,7 +392,7 @@ internal sealed class Binder
                 var operand = Bind(c.Args[0]);
                 if (operand.Type.Kind is not (RuleTypeKind.Int or RuleTypeKind.Decimal or RuleTypeKind.Duration or RuleTypeKind.Dyn))
                 {
-                    throw Fail(c, RuleErrorCode.NoMatchingOverload, $"unary '-' is not defined for {operand.Type}");
+                    throw FailOp(c, RuleErrorCode.NoMatchingOverload, $"unary '-' is not defined for {operand.Type}");
                 }
 
                 return new UnaryNode(c, operand.Type, operand, Ops.Negate);
@@ -405,7 +411,7 @@ internal sealed class Binder
                 var r = Bind(c.Args[1]);
                 if (!Comparable(l.Type, r.Type))
                 {
-                    throw Fail(c, RuleErrorCode.NoMatchingOverload, $"cannot compare {l.Type} with {r.Type}");
+                    throw FailOp(c, RuleErrorCode.NoMatchingOverload, $"cannot compare {l.Type} with {r.Type}");
                 }
 
                 return new BinaryNode(c, RuleType.Bool, l, r, c.Function == "_==_" ? Ops.Equal : Ops.NotEqual);
@@ -420,7 +426,7 @@ internal sealed class Binder
                 var r = Bind(c.Args[1]);
                 if (!Orderable(l.Type, r.Type))
                 {
-                    throw Fail(c, RuleErrorCode.NoMatchingOverload, $"operator '{c.Function.Trim('_')}' is not defined for ({l.Type}, {r.Type})");
+                    throw FailOp(c, RuleErrorCode.NoMatchingOverload, $"operator '{c.Function.Trim('_')}' is not defined for ({l.Type}, {r.Type})");
                 }
 
                 Func<RuleValue, RuleValue, EvalState, RuleValue> op = c.Function switch
@@ -446,7 +452,7 @@ internal sealed class Binder
                 };
                 if (!ok)
                 {
-                    throw Fail(c, RuleErrorCode.NoMatchingOverload, $"operator 'in' is not defined for ({element.Type}, {collection.Type})");
+                    throw FailOp(c, RuleErrorCode.NoMatchingOverload, $"operator 'in' is not defined for ({element.Type}, {collection.Type})");
                 }
 
                 return new BinaryNode(c, RuleType.Bool, element, collection, Ops.In);
@@ -465,7 +471,7 @@ internal sealed class Binder
                 };
                 if (type is null)
                 {
-                    throw Fail(c, RuleErrorCode.NoMatchingOverload, $"cannot index {collection.Type} with {index.Type}");
+                    throw FailOp(c, RuleErrorCode.NoMatchingOverload, $"cannot index {collection.Type} with {index.Type}");
                 }
 
                 return new BinaryNode(c, type, collection, index, Ops.Index);
@@ -476,7 +482,7 @@ internal sealed class Binder
         }
     }
 
-    private BoundNode BindArithmetic(CallExpr c)
+    private BinaryNode BindArithmetic(CallExpr c)
     {
         var l = Bind(c.Args[0]);
         var r = Bind(c.Args[1]);
@@ -517,7 +523,7 @@ internal sealed class Binder
 
         if (result is null)
         {
-            throw Fail(c, RuleErrorCode.NoMatchingOverload, $"operator '{op}' is not defined for ({lt}, {rt})");
+            throw FailOp(c, RuleErrorCode.NoMatchingOverload, $"operator '{op}' is not defined for ({lt}, {rt})");
         }
 
         if (result.Kind == RuleTypeKind.List)
@@ -537,11 +543,11 @@ internal sealed class Binder
         return new BinaryNode(c, result, l, r, fn);
     }
 
-    private void RequireArity(CallExpr c, int count)
+    private static void RequireArity(CallExpr c, int count)
     {
         if (c.Args.Count != count)
         {
-            throw Fail(c, RuleErrorCode.NoMatchingOverload, string.Create(CultureInfo.InvariantCulture, $"function '{c.Function}' takes {count} argument(s) but got {c.Args.Count}"));
+            throw FailOp(c, RuleErrorCode.NoMatchingOverload, string.Create(CultureInfo.InvariantCulture, $"function '{c.Function}' takes {count} argument(s) but got {c.Args.Count}"));
         }
     }
 
@@ -585,10 +591,10 @@ internal sealed class Binder
 
             if (NonDeterministic.Contains(root))
             {
-                throw Fail(c, RuleErrorCode.NonDeterministic, $"'{full}' is not deterministic; pass the current date or time as a declared input");
+                throw FailOp(c, RuleErrorCode.NonDeterministic, $"'{full}' is not deterministic; pass the current date or time as a declared input");
             }
 
-            throw Fail(c, RuleErrorCode.UnknownFunction, $"undefined function '{full}'");
+            throw FailOp(c, RuleErrorCode.UnknownFunction, $"undefined function '{full}'");
         }
 
         var target = Bind(c.Target!);
@@ -632,19 +638,19 @@ internal sealed class Binder
             default:
                 if (Unsupported.Contains(c.Function))
                 {
-                    throw Fail(c, RuleErrorCode.UnsupportedFeature, $"function '{c.Function}' is outside the adopted CEL subset");
+                    throw FailOp(c, RuleErrorCode.UnsupportedFeature, $"function '{c.Function}' is outside the adopted CEL subset");
                 }
 
                 if (Globals.Contains(c.Function))
                 {
-                    throw Fail(c, RuleErrorCode.UnknownFunction, $"function '{c.Function}' is a global function; call it as {c.Function}(...)");
+                    throw FailOp(c, RuleErrorCode.UnknownFunction, $"function '{c.Function}' is a global function; call it as {c.Function}(...)");
                 }
 
-                throw Fail(c, RuleErrorCode.UnknownFunction, $"undefined member function '{c.Function}' on type {target.Type}");
+                throw FailOp(c, RuleErrorCode.UnknownFunction, $"undefined member function '{c.Function}' on type {target.Type}");
         }
     }
 
-    private BoundNode BindMatches(CallExpr c, BoundNode target, Expr patternSyntax)
+    private RegexMatchNode BindMatches(CallExpr c, BoundNode target, Expr patternSyntax)
     {
         target = Expect(target, "matches", RuleTypeKind.String);
         var pattern = Bind(patternSyntax);
@@ -680,13 +686,13 @@ internal sealed class Binder
         string name = c.Function;
         if (NonDeterministic.Contains(name))
         {
-            throw Fail(c, RuleErrorCode.NonDeterministic, $"'{name}()' is not deterministic; pass the current date or time as a declared input from the time service");
+            throw FailOp(c, RuleErrorCode.NonDeterministic, $"'{name}()' is not deterministic; pass the current date or time as a declared input from the time service");
         }
 
         if (Unsupported.Contains(name))
         {
             string hint = name == "double" ? " (numbers with a fraction are decimal; use decimal())" : string.Empty;
-            throw Fail(c, RuleErrorCode.UnsupportedFeature, $"function '{name}' is outside the adopted CEL subset{hint}");
+            throw FailOp(c, RuleErrorCode.UnsupportedFeature, $"function '{name}' is outside the adopted CEL subset{hint}");
         }
 
         switch (name)
@@ -803,10 +809,10 @@ internal sealed class Binder
 
                 if (RuleLanguage.MemberFunctions.Contains(name))
                 {
-                    throw Fail(c, RuleErrorCode.UnknownFunction, $"function '{name}' is a member function; call it as value.{name}(...)");
+                    throw FailOp(c, RuleErrorCode.UnknownFunction, $"function '{name}' is a member function; call it as value.{name}(...)");
                 }
 
-                throw Fail(c, RuleErrorCode.UnknownFunction, $"undefined function '{name}'");
+                throw FailOp(c, RuleErrorCode.UnknownFunction, $"undefined function '{name}'");
         }
     }
 
@@ -831,7 +837,7 @@ internal sealed class Binder
         return new UnaryNode(c, type, arg, op);
     }
 
-    private BoundNode BindRound(CallExpr c)
+    private BinaryNode BindRound(CallExpr c)
     {
         RequireArity(c, 3);
         var value = Expect(Bind(c.Args[0]), "round", RuleTypeKind.Int, RuleTypeKind.Decimal);
@@ -862,12 +868,12 @@ internal sealed class Binder
                 throw Fail(c.Args[0], RuleErrorCode.NoMatchingOverload, $"function '{name}' requires a list of orderable values or two or more arguments, found {list.Type}");
             }
 
-            return new UnaryNode(c, list.Type.ElementType!, list, (v, s) => Ops.MinOfList(v, name, max));
+            return new UnaryNode(c, list.Type.ElementType!, list, (v, s) => Ops.MinOfList(v, name, max, s));
         }
 
         if (c.Args.Count < 2)
         {
-            throw Fail(c, RuleErrorCode.NoMatchingOverload, $"function '{name}' takes a list or two or more arguments");
+            throw FailOp(c, RuleErrorCode.NoMatchingOverload, $"function '{name}' takes a list or two or more arguments");
         }
 
         var args = c.Args.Select(Bind).ToArray();
@@ -888,14 +894,14 @@ internal sealed class Binder
             args[i] = Coerce(args[i], type);
         }
 
-        return new CallNode(c, type, args, (v, s) => Ops.MinOf(v, name, max));
+        return new CallNode(c, type, args, (v, s) => Ops.MinOf(v, name, max, s));
     }
 
-    private BoundNode BindHost(CallExpr c, HostFunction host)
+    private CallNode BindHost(CallExpr c, HostFunction host)
     {
         if (c.Args.Count != host.Parameters.Count)
         {
-            throw Fail(c, RuleErrorCode.NoMatchingOverload, string.Create(CultureInfo.InvariantCulture, $"function '{host.Name}' takes {host.Parameters.Count} argument(s) but got {c.Args.Count}"));
+            throw FailOp(c, RuleErrorCode.NoMatchingOverload, string.Create(CultureInfo.InvariantCulture, $"function '{host.Name}' takes {host.Parameters.Count} argument(s) but got {c.Args.Count}"));
         }
 
         var args = new BoundNode[c.Args.Count];
@@ -910,10 +916,11 @@ internal sealed class Binder
             args[i] = Coerce(a, host.Parameters[i]);
         }
 
-        return new CallNode(c, host.ReturnType, args, (values, state) => InvokeHost(host, values));
+        UsedHostFunctions.Add(host);
+        return new CallNode(c, host.ReturnType, args, (values, state) => InvokeHost(host, values, state));
     }
 
-    private static RuleValue InvokeHost(HostFunction host, RuleValue[] values)
+    private static RuleValue InvokeHost(HostFunction host, RuleValue[] values, EvalState state)
     {
         RuleValue result;
         try
@@ -923,6 +930,11 @@ internal sealed class Binder
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             throw Ops.Fail(RuleErrorCode.HostFunctionFailed, $"function '{host.Name}' failed: {ex.Message}");
+        }
+
+        if (result is not null)
+        {
+            state.Allocate(result.Weight);
         }
 
         if (result is null || !ValueConformance.Matches(result, host.ReturnType))

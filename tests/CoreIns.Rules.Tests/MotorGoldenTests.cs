@@ -87,17 +87,12 @@ public class MotorGoldenTests
         // Re-baselining these needs approval (rating golden rule): a change means the table content changed.
         var again = CompiledDecisionTable.Compile(MotorFixtures.AgeDefinition, MotorFixtures.Env);
         again.ContentHash.ShouldBe(MotorFixtures.AgeTable.ContentHash);
-        MotorFixtures.AgeTable.CanonicalText.ShouldBe(
-            "decision-table/1.0;hit=UNIQUE\n"
-            + "var mainDriverAge:int=cel-subset/1.0:(call ageAt (sel (call _[_] (macro filter d (id drivers) (sel (id d) isMain)) (int 0)) birthDate) (sel (id policy) effectiveDate))\n"
-            + "in driverAge:int=cel-subset/1.0:(id mainDriverAge)\n"
-            + "out ageFactor:decimal\n"
-            + "rule AGE-18-24 prio=0 | cel-subset/1.0:(call _&&_ (call _&&_ (call _!=_ (id driverAge) (null)) (call _>=_ (id driverAge) (int 18))) (call _<_ (id driverAge) (int 25))) => | cel-subset/1.0:(dec 1.80)\n"
-            + "rule AGE-25-29 prio=0 | cel-subset/1.0:(call _&&_ (call _&&_ (call _!=_ (id driverAge) (null)) (call _>=_ (id driverAge) (int 25))) (call _<_ (id driverAge) (int 30))) => | cel-subset/1.0:(dec 1.30)\n"
-            + "rule AGE-30-64 prio=0 | cel-subset/1.0:(call _&&_ (call _&&_ (call _!=_ (id driverAge) (null)) (call _>=_ (id driverAge) (int 30))) (call _<_ (id driverAge) (int 65))) => | cel-subset/1.0:(dec 1.00)\n"
-            + "rule AGE-65-74 prio=0 | cel-subset/1.0:(call _&&_ (call _&&_ (call _!=_ (id driverAge) (null)) (call _>=_ (id driverAge) (int 65))) (call _<_ (id driverAge) (int 75))) => | cel-subset/1.0:(dec 1.15)\n"
-            + "rule AGE-75P prio=0 | cel-subset/1.0:(call _&&_ (call _!=_ (id driverAge) (null)) (call _>=_ (id driverAge) (int 75))) => | cel-subset/1.0:(dec 1.40)\n");
+        MotorFixtures.AgeTable.CanonicalText.ShouldStartWith("18:decision-table/1.0;10:hit=UNIQUE;11:variables=1;13:mainDriverAge;3:int;");
+        MotorFixtures.AgeTable.ContentHash.ShouldBe(PinnedAgeTableHash);
     }
+
+    /// <summary>Pinned content hash of the age-band table (changes only when its content or the language changes).</summary>
+    private const string PinnedAgeTableHash = "3f9b445c012179d8c0ab2eeb2e278909411fd194b00e2e7da6bc0224f11d6a22";
 
     private static DateOnly Date(string s) => DateOnly.ParseExact(s, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 }
