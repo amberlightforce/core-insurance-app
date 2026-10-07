@@ -85,12 +85,229 @@
       "perObjectOutcome": "unspecified"
     },
     "pty.Party.create": {
-      "party": "unspecified",
-      "duplicateSuggestions": "unspecified",
-      "missingData": "unspecified"
+      "party": {
+        "partyId": "019257a0-7e61-7f51-824f-5b6485b0eef7",
+        "partyNumber": "SAMPLE-000001",
+        "partyType": "PERSON",
+        "status": "SAMPLE_CODE",
+        "legalEntity": "sample",
+        "jurisdiction": "GR",
+        "preferredLanguage": "el",
+        "recordVersion": 1,
+        "birthDate": "2026-10-07",
+        "p2Revealed": true,
+        "names": [
+          {
+            "form": "NATIVE",
+            "script": "sample",
+            "givenNames": "sample",
+            "familyName": "sample",
+            "fatherName": "sample",
+            "motherName": "sample",
+            "organisationName": "sample",
+            "tradeName": "sample",
+            "transliteratorVersion": "sample",
+            "sourceDocumentRef": "sample"
+          }
+        ],
+        "identifiers": [
+          {
+            "identifierId": "019216c0-44b4-7330-847f-9f05abd3e96b",
+            "scheme": "SAMPLE_CODE",
+            "value": "sample",
+            "masked": true,
+            "issuingCountry": "GR",
+            "verificationStatus": "SELF_DECLARED",
+            "verificationSource": "sample",
+            "validatorVersion": "sample",
+            "validFrom": "2026-10-07"
+          }
+        ],
+        "addresses": [
+          {
+            "addressId": "01925b52-f76f-75c9-8c0d-d7e523e11611",
+            "types": [
+              "LEGAL"
+            ],
+            "primary": true,
+            "country": "GR",
+            "native": {
+              "street": "sample",
+              "number": "sample",
+              "building": "sample",
+              "floor": "sample",
+              "unit": "sample",
+              "postcode": "sample",
+              "locality": "sample",
+              "municipality": "sample",
+              "regionalUnit": "sample",
+              "region": "sample",
+              "freeLines": [
+                "sample"
+              ]
+            },
+            "latin": {
+              "street": "sample",
+              "number": "sample",
+              "building": "sample",
+              "floor": "sample",
+              "unit": "sample",
+              "postcode": "sample",
+              "locality": "sample",
+              "municipality": "sample",
+              "regionalUnit": "sample",
+              "region": "sample",
+              "freeLines": [
+                "sample"
+              ]
+            },
+            "formattedLines": [
+              "sample"
+            ],
+            "formattedLinesLatin": [
+              "sample"
+            ],
+            "validationState": "VALIDATED",
+            "description": "sample",
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07"
+          }
+        ],
+        "contactPoints": [
+          {
+            "contactPointId": "0192a613-ed5d-7dc1-8433-4d4a1c03573a",
+            "type": "MOBILE",
+            "value": "sample",
+            "purpose": "PERSONAL",
+            "primary": true,
+            "verificationStatus": "UNVERIFIED"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "duplicateSuggestions": [
+        {
+          "partyId": "0192b39f-d968-70f0-87bb-7e2f599cad8c",
+          "partyNumber": "SAMPLE-000001",
+          "partyType": "PERSON",
+          "status": "SAMPLE_CODE",
+          "displayName": "sample",
+          "displayNameLatin": "sample",
+          "maskedIdentifier": {
+            "scheme": "SAMPLE_CODE",
+            "maskedValue": "sample"
+          },
+          "primaryPostcode": "sample",
+          "primaryLocality": "sample",
+          "matchQuality": "EXACT",
+          "similarity": "12.50"
+        }
+      ],
+      "missingData": [
+        "SAMPLE_CODE"
+      ]
     },
     "pty.Party.get": {
-      "party": "unspecified"
+      "party": {
+        "partyId": "01928a54-7807-792b-81d0-6c2c51d7ba04",
+        "partyNumber": "SAMPLE-000001",
+        "partyType": "PERSON",
+        "status": "SAMPLE_CODE",
+        "legalEntity": "sample",
+        "jurisdiction": "GR",
+        "preferredLanguage": "el",
+        "recordVersion": 1,
+        "birthDate": "2026-10-07",
+        "p2Revealed": true,
+        "names": [
+          {
+            "form": "NATIVE",
+            "script": "sample",
+            "givenNames": "sample",
+            "familyName": "sample",
+            "fatherName": "sample",
+            "motherName": "sample",
+            "organisationName": "sample",
+            "tradeName": "sample",
+            "transliteratorVersion": "sample",
+            "sourceDocumentRef": "sample"
+          }
+        ],
+        "identifiers": [
+          {
+            "identifierId": "0192c962-032e-7070-84a7-2ec1c7a63e4c",
+            "scheme": "SAMPLE_CODE",
+            "value": "sample",
+            "masked": true,
+            "issuingCountry": "GR",
+            "verificationStatus": "SELF_DECLARED",
+            "verificationSource": "sample",
+            "validatorVersion": "sample",
+            "validFrom": "2026-10-07"
+          }
+        ],
+        "addresses": [
+          {
+            "addressId": "01927bf6-d8ba-7729-81d5-fcfc0a53f5c8",
+            "types": [
+              "LEGAL"
+            ],
+            "primary": true,
+            "country": "GR",
+            "native": {
+              "street": "sample",
+              "number": "sample",
+              "building": "sample",
+              "floor": "sample",
+              "unit": "sample",
+              "postcode": "sample",
+              "locality": "sample",
+              "municipality": "sample",
+              "regionalUnit": "sample",
+              "region": "sample",
+              "freeLines": [
+                "sample"
+              ]
+            },
+            "latin": {
+              "street": "sample",
+              "number": "sample",
+              "building": "sample",
+              "floor": "sample",
+              "unit": "sample",
+              "postcode": "sample",
+              "locality": "sample",
+              "municipality": "sample",
+              "regionalUnit": "sample",
+              "region": "sample",
+              "freeLines": [
+                "sample"
+              ]
+            },
+            "formattedLines": [
+              "sample"
+            ],
+            "formattedLinesLatin": [
+              "sample"
+            ],
+            "validationState": "VALIDATED",
+            "description": "sample",
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07"
+          }
+        ],
+        "contactPoints": [
+          {
+            "contactPointId": "01922a12-0fcb-7af3-8e2f-fbcbafc5f657",
+            "type": "MOBILE",
+            "value": "sample",
+            "purpose": "PERSONAL",
+            "primary": true,
+            "verificationStatus": "UNVERIFIED"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      }
     },
     "pty.Party.merge": {
       "mergeRecord": "unspecified",
@@ -99,7 +316,20 @@
     "pty.Party.search": {
       "items": [
         {
-          "rankedResults": "unspecified"
+          "partyId": "0192d5df-4dc1-777b-882a-d7b17fead0ab",
+          "partyNumber": "SAMPLE-000001",
+          "partyType": "PERSON",
+          "status": "SAMPLE_CODE",
+          "displayName": "sample",
+          "displayNameLatin": "sample",
+          "maskedIdentifier": {
+            "scheme": "SAMPLE_CODE",
+            "maskedValue": "sample"
+          },
+          "primaryPostcode": "sample",
+          "primaryLocality": "sample",
+          "matchQuality": "EXACT",
+          "similarity": "12.50"
         }
       ],
       "nextCursor": "sample",
@@ -213,6 +443,42 @@
     "AccountSplitResponse": {
       "request": "unspecified"
     },
+    "AddressFields": {
+      "street": "sample",
+      "number": "sample",
+      "building": "sample",
+      "floor": "sample",
+      "unit": "sample",
+      "postcode": "sample",
+      "locality": "sample",
+      "municipality": "sample",
+      "regionalUnit": "sample",
+      "region": "sample",
+      "freeLines": [
+        "sample"
+      ]
+    },
+    "AddressInput": {
+      "types": [
+        "LEGAL"
+      ],
+      "primary": true,
+      "country": "GR",
+      "street": "sample",
+      "number": "sample",
+      "building": "sample",
+      "floor": "sample",
+      "unit": "sample",
+      "postcode": "sample",
+      "locality": "sample",
+      "municipality": "sample",
+      "regionalUnit": "sample",
+      "region": "sample",
+      "freeLines": [
+        "sample"
+      ],
+      "description": "sample"
+    },
     "CommunicationPreferenceResolveRequest": {
       "party": "unspecified",
       "purpose": "unspecified"
@@ -266,6 +532,20 @@
     "ConsentWithdrawResponse": {
       "state": "unspecified"
     },
+    "ContactPointInput": {
+      "type": "MOBILE",
+      "value": "sample",
+      "purpose": "PERSONAL",
+      "primary": true
+    },
+    "ContactPointView": {
+      "contactPointId": "01928d13-8e7e-77dc-82d4-8f81893d5f9e",
+      "type": "MOBILE",
+      "value": "sample",
+      "purpose": "PERSONAL",
+      "primary": true,
+      "verificationStatus": "UNVERIFIED"
+    },
     "DsarEvaluateErasureRequest": {
       "party": "unspecified",
       "requestId": "01927481-e3e3-7641-85e0-3ba24441a84d"
@@ -297,6 +577,11 @@
     "DsarRestrictResponse": {
       "statusRestricted": "unspecified"
     },
+    "IdentifierInput": {
+      "scheme": "SAMPLE_CODE",
+      "value": "sample",
+      "issuingCountry": "GR"
+    },
     "IdentifierVerifyRequest": {
       "partyId": "019208e5-33e1-7218-8289-80b49a54ffab",
       "scheme": "unspecified"
@@ -310,6 +595,111 @@
     },
     "ImportReverseResponse": {
       "perObjectOutcome": "unspecified"
+    },
+    "IntermediaryCreateRequest": {
+      "partyId": "0192a7d3-57d6-74bd-8ad2-c23a5e463b28",
+      "intermediaryType": "SAMPLE_CODE",
+      "register": {
+        "registerName": "sample",
+        "chamber": "sample",
+        "registerNumber": "sample",
+        "registrationCategory": "SAMPLE_CODE",
+        "registrationDate": "2026-10-07",
+        "registerStatus": "ACTIVE",
+        "verificationLink": "sample",
+        "evidenceRef": "sample"
+      },
+      "authorities": {
+        "collectPremium": true,
+        "issueCoverNotes": true,
+        "bindWithinAuthority": true,
+        "serviceOnly": true
+      },
+      "validFrom": "2026-10-07"
+    },
+    "IntermediaryCreateResponse": {
+      "intermediary": {
+        "intermediaryId": "019283c8-3c2e-76a2-8f66-a6f025597b3b",
+        "partyId": "0192b882-7f43-7a09-8d99-c9845701dc9c",
+        "partyNumber": "SAMPLE-000001",
+        "name": "sample",
+        "intermediaryType": "SAMPLE_CODE",
+        "status": "ONBOARDING",
+        "registerNumber": "sample",
+        "registerStatus": "ACTIVE",
+        "producerCode": "SAMPLE_CODE",
+        "producerCodeStatus": "ACTIVE",
+        "authorities": {
+          "collectPremium": true,
+          "issueCoverNotes": true,
+          "bindWithinAuthority": true,
+          "serviceOnly": true
+        },
+        "validFrom": "2026-10-07",
+        "recordVersion": 1
+      }
+    },
+    "IntermediaryRegisterInput": {
+      "registerName": "sample",
+      "chamber": "sample",
+      "registerNumber": "sample",
+      "registrationCategory": "SAMPLE_CODE",
+      "registrationDate": "2026-10-07",
+      "registerStatus": "ACTIVE",
+      "verificationLink": "sample",
+      "evidenceRef": "sample"
+    },
+    "IntermediaryUpdateRequest": {
+      "status": "ONBOARDING",
+      "expectedRecordVersion": 1,
+      "reason": "SAMPLE_CODE"
+    },
+    "IntermediaryUpdateResponse": {
+      "intermediary": {
+        "intermediaryId": "0192ec37-5f5f-7a10-817d-d653cc2f022b",
+        "partyId": "01926e40-4db7-7eb4-887a-f19de905642a",
+        "partyNumber": "SAMPLE-000001",
+        "name": "sample",
+        "intermediaryType": "SAMPLE_CODE",
+        "status": "ONBOARDING",
+        "registerNumber": "sample",
+        "registerStatus": "ACTIVE",
+        "producerCode": "SAMPLE_CODE",
+        "producerCodeStatus": "ACTIVE",
+        "authorities": {
+          "collectPremium": true,
+          "issueCoverNotes": true,
+          "bindWithinAuthority": true,
+          "serviceOnly": true
+        },
+        "validFrom": "2026-10-07",
+        "recordVersion": 1
+      }
+    },
+    "IntermediaryView": {
+      "intermediaryId": "01920dc0-248d-72c5-887c-6438250b7bc3",
+      "partyId": "0192fe3e-0f9d-7432-8a97-00208cb8b646",
+      "partyNumber": "SAMPLE-000001",
+      "name": "sample",
+      "intermediaryType": "SAMPLE_CODE",
+      "status": "ONBOARDING",
+      "registerNumber": "sample",
+      "registerStatus": "ACTIVE",
+      "producerCode": "SAMPLE_CODE",
+      "producerCodeStatus": "ACTIVE",
+      "authorities": {
+        "collectPremium": true,
+        "issueCoverNotes": true,
+        "bindWithinAuthority": true,
+        "serviceOnly": true
+      },
+      "validFrom": "2026-10-07",
+      "recordVersion": 1
+    },
+    "LatinNameAsOnDocument": {
+      "givenNames": "sample",
+      "familyName": "sample",
+      "sourceDocumentRef": "sample"
     },
     "LifeEventCompleteRequest": {
       "type": "unspecified",
@@ -356,17 +746,356 @@
     "LocationUpdateResponse": {
       "location": "unspecified"
     },
+    "MaskedIdentifier": {
+      "scheme": "SAMPLE_CODE",
+      "maskedValue": "sample"
+    },
+    "OrganisationInput": {
+      "legalName": "sample",
+      "tradeName": "sample"
+    },
+    "PartyAddressView": {
+      "addressId": "0192b018-92b3-7a7f-84d5-c3017ab94abc",
+      "types": [
+        "LEGAL"
+      ],
+      "primary": true,
+      "country": "GR",
+      "native": {
+        "street": "sample",
+        "number": "sample",
+        "building": "sample",
+        "floor": "sample",
+        "unit": "sample",
+        "postcode": "sample",
+        "locality": "sample",
+        "municipality": "sample",
+        "regionalUnit": "sample",
+        "region": "sample",
+        "freeLines": [
+          "sample"
+        ]
+      },
+      "latin": {
+        "street": "sample",
+        "number": "sample",
+        "building": "sample",
+        "floor": "sample",
+        "unit": "sample",
+        "postcode": "sample",
+        "locality": "sample",
+        "municipality": "sample",
+        "regionalUnit": "sample",
+        "region": "sample",
+        "freeLines": [
+          "sample"
+        ]
+      },
+      "formattedLines": [
+        "sample"
+      ],
+      "formattedLinesLatin": [
+        "sample"
+      ],
+      "validationState": "VALIDATED",
+      "description": "sample",
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07"
+    },
     "PartyCreateRequest": {
-      "partyData": "unspecified",
-      "reason": "unspecified"
+      "partyType": "PERSON",
+      "person": {
+        "givenNames": "sample",
+        "familyName": "sample",
+        "fatherName": "sample",
+        "motherName": "sample",
+        "birthDate": "2026-10-07",
+        "latinNameAsOnDocument": {
+          "givenNames": "sample",
+          "familyName": "sample",
+          "sourceDocumentRef": "sample"
+        }
+      },
+      "organisation": {
+        "legalName": "sample",
+        "tradeName": "sample"
+      },
+      "preferredLanguage": "el",
+      "identifiers": [
+        {
+          "scheme": "SAMPLE_CODE",
+          "value": "sample",
+          "issuingCountry": "GR"
+        }
+      ],
+      "addresses": [
+        {
+          "types": [
+            "LEGAL"
+          ],
+          "primary": true,
+          "country": "GR",
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "freeLines": [
+            "sample"
+          ],
+          "description": "sample"
+        }
+      ],
+      "contactPoints": [
+        {
+          "type": "MOBILE",
+          "value": "sample",
+          "purpose": "PERSONAL",
+          "primary": true
+        }
+      ],
+      "reason": "SAMPLE_CODE"
     },
     "PartyCreateResponse": {
-      "party": "unspecified",
-      "duplicateSuggestions": "unspecified",
-      "missingData": "unspecified"
+      "party": {
+        "partyId": "01928d8b-b040-7f35-8710-b099cbc3915c",
+        "partyNumber": "SAMPLE-000001",
+        "partyType": "PERSON",
+        "status": "SAMPLE_CODE",
+        "legalEntity": "sample",
+        "jurisdiction": "GR",
+        "preferredLanguage": "el",
+        "recordVersion": 1,
+        "birthDate": "2026-10-07",
+        "p2Revealed": true,
+        "names": [
+          {
+            "form": "NATIVE",
+            "script": "sample",
+            "givenNames": "sample",
+            "familyName": "sample",
+            "fatherName": "sample",
+            "motherName": "sample",
+            "organisationName": "sample",
+            "tradeName": "sample",
+            "transliteratorVersion": "sample",
+            "sourceDocumentRef": "sample"
+          }
+        ],
+        "identifiers": [
+          {
+            "identifierId": "0192e4a5-0e6b-76c7-8f0d-5c869857cc4e",
+            "scheme": "SAMPLE_CODE",
+            "value": "sample",
+            "masked": true,
+            "issuingCountry": "GR",
+            "verificationStatus": "SELF_DECLARED",
+            "verificationSource": "sample",
+            "validatorVersion": "sample",
+            "validFrom": "2026-10-07"
+          }
+        ],
+        "addresses": [
+          {
+            "addressId": "0192835e-0276-7384-8dd6-af2fc0898b70",
+            "types": [
+              "LEGAL"
+            ],
+            "primary": true,
+            "country": "GR",
+            "native": {
+              "street": "sample",
+              "number": "sample",
+              "building": "sample",
+              "floor": "sample",
+              "unit": "sample",
+              "postcode": "sample",
+              "locality": "sample",
+              "municipality": "sample",
+              "regionalUnit": "sample",
+              "region": "sample",
+              "freeLines": [
+                "sample"
+              ]
+            },
+            "latin": {
+              "street": "sample",
+              "number": "sample",
+              "building": "sample",
+              "floor": "sample",
+              "unit": "sample",
+              "postcode": "sample",
+              "locality": "sample",
+              "municipality": "sample",
+              "regionalUnit": "sample",
+              "region": "sample",
+              "freeLines": [
+                "sample"
+              ]
+            },
+            "formattedLines": [
+              "sample"
+            ],
+            "formattedLinesLatin": [
+              "sample"
+            ],
+            "validationState": "VALIDATED",
+            "description": "sample",
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07"
+          }
+        ],
+        "contactPoints": [
+          {
+            "contactPointId": "019298cf-6a85-7783-8ab9-538180d584bd",
+            "type": "MOBILE",
+            "value": "sample",
+            "purpose": "PERSONAL",
+            "primary": true,
+            "verificationStatus": "UNVERIFIED"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "duplicateSuggestions": [
+        {
+          "partyId": "0192f0a8-0845-755e-86c1-518daeefa376",
+          "partyNumber": "SAMPLE-000001",
+          "partyType": "PERSON",
+          "status": "SAMPLE_CODE",
+          "displayName": "sample",
+          "displayNameLatin": "sample",
+          "maskedIdentifier": {
+            "scheme": "SAMPLE_CODE",
+            "maskedValue": "sample"
+          },
+          "primaryPostcode": "sample",
+          "primaryLocality": "sample",
+          "matchQuality": "EXACT",
+          "similarity": "12.50"
+        }
+      ],
+      "missingData": [
+        "SAMPLE_CODE"
+      ]
     },
     "PartyGetResponse": {
-      "party": "unspecified"
+      "party": {
+        "partyId": "0192ac99-16a3-79a1-85bf-fadf13c473c4",
+        "partyNumber": "SAMPLE-000001",
+        "partyType": "PERSON",
+        "status": "SAMPLE_CODE",
+        "legalEntity": "sample",
+        "jurisdiction": "GR",
+        "preferredLanguage": "el",
+        "recordVersion": 1,
+        "birthDate": "2026-10-07",
+        "p2Revealed": true,
+        "names": [
+          {
+            "form": "NATIVE",
+            "script": "sample",
+            "givenNames": "sample",
+            "familyName": "sample",
+            "fatherName": "sample",
+            "motherName": "sample",
+            "organisationName": "sample",
+            "tradeName": "sample",
+            "transliteratorVersion": "sample",
+            "sourceDocumentRef": "sample"
+          }
+        ],
+        "identifiers": [
+          {
+            "identifierId": "01924c86-38a8-7816-8750-82b9dc20f2bd",
+            "scheme": "SAMPLE_CODE",
+            "value": "sample",
+            "masked": true,
+            "issuingCountry": "GR",
+            "verificationStatus": "SELF_DECLARED",
+            "verificationSource": "sample",
+            "validatorVersion": "sample",
+            "validFrom": "2026-10-07"
+          }
+        ],
+        "addresses": [
+          {
+            "addressId": "0192c829-2e05-7226-8b48-ed4888c4f535",
+            "types": [
+              "LEGAL"
+            ],
+            "primary": true,
+            "country": "GR",
+            "native": {
+              "street": "sample",
+              "number": "sample",
+              "building": "sample",
+              "floor": "sample",
+              "unit": "sample",
+              "postcode": "sample",
+              "locality": "sample",
+              "municipality": "sample",
+              "regionalUnit": "sample",
+              "region": "sample",
+              "freeLines": [
+                "sample"
+              ]
+            },
+            "latin": {
+              "street": "sample",
+              "number": "sample",
+              "building": "sample",
+              "floor": "sample",
+              "unit": "sample",
+              "postcode": "sample",
+              "locality": "sample",
+              "municipality": "sample",
+              "regionalUnit": "sample",
+              "region": "sample",
+              "freeLines": [
+                "sample"
+              ]
+            },
+            "formattedLines": [
+              "sample"
+            ],
+            "formattedLinesLatin": [
+              "sample"
+            ],
+            "validationState": "VALIDATED",
+            "description": "sample",
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07"
+          }
+        ],
+        "contactPoints": [
+          {
+            "contactPointId": "01921b1e-4b8a-7511-8046-e2d04c75d62d",
+            "type": "MOBILE",
+            "value": "sample",
+            "purpose": "PERSONAL",
+            "primary": true,
+            "verificationStatus": "UNVERIFIED"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      }
+    },
+    "PartyIdentifierView": {
+      "identifierId": "0192ee89-cd98-7d31-873b-5e62354fbc0b",
+      "scheme": "SAMPLE_CODE",
+      "value": "sample",
+      "masked": true,
+      "issuingCountry": "GR",
+      "verificationStatus": "SELF_DECLARED",
+      "verificationSource": "sample",
+      "validatorVersion": "sample",
+      "validFrom": "2026-10-07"
     },
     "PartyMergeRequest": {
       "candidates": "unspecified",
@@ -375,6 +1104,18 @@
     "PartyMergeResponse": {
       "mergeRecord": "unspecified",
       "approvalRequest": "unspecified"
+    },
+    "PartyNameView": {
+      "form": "NATIVE",
+      "script": "sample",
+      "givenNames": "sample",
+      "familyName": "sample",
+      "fatherName": "sample",
+      "motherName": "sample",
+      "organisationName": "sample",
+      "tradeName": "sample",
+      "transliteratorVersion": "sample",
+      "sourceDocumentRef": "sample"
     },
     "PartyRoleAssignRequest": {
       "party": "unspecified",
@@ -407,12 +1148,38 @@
       "limit": 1
     },
     "PartySearchItem": {
-      "rankedResults": "unspecified"
+      "partyId": "01921e94-929a-7eba-8783-8ff6ff34b507",
+      "partyNumber": "SAMPLE-000001",
+      "partyType": "PERSON",
+      "status": "SAMPLE_CODE",
+      "displayName": "sample",
+      "displayNameLatin": "sample",
+      "maskedIdentifier": {
+        "scheme": "SAMPLE_CODE",
+        "maskedValue": "sample"
+      },
+      "primaryPostcode": "sample",
+      "primaryLocality": "sample",
+      "matchQuality": "EXACT",
+      "similarity": "12.50"
     },
     "PartySearchPage": {
       "items": [
         {
-          "rankedResults": "unspecified"
+          "partyId": "0192daf5-6fea-7b8d-8d70-849bfc862c4b",
+          "partyNumber": "SAMPLE-000001",
+          "partyType": "PERSON",
+          "status": "SAMPLE_CODE",
+          "displayName": "sample",
+          "displayNameLatin": "sample",
+          "maskedIdentifier": {
+            "scheme": "SAMPLE_CODE",
+            "maskedValue": "sample"
+          },
+          "primaryPostcode": "sample",
+          "primaryLocality": "sample",
+          "matchQuality": "EXACT",
+          "similarity": "12.50"
         }
       ],
       "nextCursor": "sample",
@@ -444,17 +1211,141 @@
       ],
       "candidates": "unspecified"
     },
+    "PartyView": {
+      "partyId": "01927ece-0e15-7e47-8fe2-1f0d2b3f2cc6",
+      "partyNumber": "SAMPLE-000001",
+      "partyType": "PERSON",
+      "status": "SAMPLE_CODE",
+      "legalEntity": "sample",
+      "jurisdiction": "GR",
+      "preferredLanguage": "el",
+      "recordVersion": 1,
+      "birthDate": "2026-10-07",
+      "p2Revealed": true,
+      "names": [
+        {
+          "form": "NATIVE",
+          "script": "sample",
+          "givenNames": "sample",
+          "familyName": "sample",
+          "fatherName": "sample",
+          "motherName": "sample",
+          "organisationName": "sample",
+          "tradeName": "sample",
+          "transliteratorVersion": "sample",
+          "sourceDocumentRef": "sample"
+        }
+      ],
+      "identifiers": [
+        {
+          "identifierId": "01922d78-f970-7ff8-851d-730082f7e48c",
+          "scheme": "SAMPLE_CODE",
+          "value": "sample",
+          "masked": true,
+          "issuingCountry": "GR",
+          "verificationStatus": "SELF_DECLARED",
+          "verificationSource": "sample",
+          "validatorVersion": "sample",
+          "validFrom": "2026-10-07"
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "0192416b-a0e5-70fa-803d-8df8f2b992a0",
+          "types": [
+            "LEGAL"
+          ],
+          "primary": true,
+          "country": "GR",
+          "native": {
+            "street": "sample",
+            "number": "sample",
+            "building": "sample",
+            "floor": "sample",
+            "unit": "sample",
+            "postcode": "sample",
+            "locality": "sample",
+            "municipality": "sample",
+            "regionalUnit": "sample",
+            "region": "sample",
+            "freeLines": [
+              "sample"
+            ]
+          },
+          "latin": {
+            "street": "sample",
+            "number": "sample",
+            "building": "sample",
+            "floor": "sample",
+            "unit": "sample",
+            "postcode": "sample",
+            "locality": "sample",
+            "municipality": "sample",
+            "regionalUnit": "sample",
+            "region": "sample",
+            "freeLines": [
+              "sample"
+            ]
+          },
+          "formattedLines": [
+            "sample"
+          ],
+          "formattedLinesLatin": [
+            "sample"
+          ],
+          "validationState": "VALIDATED",
+          "description": "sample",
+          "validFrom": "2026-10-07",
+          "validTo": "2026-10-07"
+        }
+      ],
+      "contactPoints": [
+        {
+          "contactPointId": "0192d9bf-a827-7491-835b-ac3ab4415217",
+          "type": "MOBILE",
+          "value": "sample",
+          "purpose": "PERSONAL",
+          "primary": true,
+          "verificationStatus": "UNVERIFIED"
+        }
+      ],
+      "createdAt": "2026-10-07T09:00:00Z"
+    },
+    "PersonInput": {
+      "givenNames": "sample",
+      "familyName": "sample",
+      "fatherName": "sample",
+      "motherName": "sample",
+      "birthDate": "2026-10-07",
+      "latinNameAsOnDocument": {
+        "givenNames": "sample",
+        "familyName": "sample",
+        "sourceDocumentRef": "sample"
+      }
+    },
+    "ProducerAuthorities": {
+      "collectPremium": true,
+      "issueCoverNotes": true,
+      "bindWithinAuthority": true,
+      "serviceOnly": true
+    },
     "ProducerCodeSearchItem": {
-      "validity": "unspecified",
-      "reasons": "unspecified",
-      "intermediaryData": "unspecified"
+      "producerCode": "SAMPLE_CODE",
+      "status": "ACTIVE",
+      "intermediaryId": "0192a0d2-0221-72f1-848b-37d40ef3673b",
+      "intermediaryName": "sample",
+      "intermediaryType": "SAMPLE_CODE",
+      "intermediaryStatus": "ONBOARDING"
     },
     "ProducerCodeSearchPage": {
       "items": [
         {
-          "validity": "unspecified",
-          "reasons": "unspecified",
-          "intermediaryData": "unspecified"
+          "producerCode": "SAMPLE_CODE",
+          "status": "ACTIVE",
+          "intermediaryId": "01920c92-78b0-7e66-8d92-899ac17ed674",
+          "intermediaryName": "sample",
+          "intermediaryType": "SAMPLE_CODE",
+          "intermediaryStatus": "ONBOARDING"
         }
       ],
       "nextCursor": "sample",

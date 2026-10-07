@@ -10,6 +10,9 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 var role = AppRoles.Parse(builder.Configuration[AppRoles.ConfigurationKey]);
 
+// D-SLC-03: the Development-only local sign-in; the Host refuses to start if the flag is set in any other environment.
+var devSignIn = DevelopmentAuthentication.Guard(builder.Configuration, builder.Environment);
+
 builder.AddCoreInsObservability(role);
 builder.Services.AddCoreInsModules(builder.Configuration);
 
@@ -33,6 +36,8 @@ var connectionString = builder.Configuration.GetRequiredCoreConnectionString();
 builder.Services.AddCoreInsDataSource(connectionString);
 builder.Services.AddCoreInsHealthChecks();
 builder.Services.AddCoreInsJobs(connectionString, role);
+builder.Services.AddCountryPacks(builder.Configuration);
+builder.Services.AddCoreInsDataProtection(builder.Configuration, builder.Environment);
 
 if (role == AppRole.Worker)
 {
@@ -43,9 +48,9 @@ if (role == AppRole.Worker)
 if (role == AppRole.Api)
 {
     builder.Services.AddProblemDetails();
-    builder.Services.AddControllers();
+    builder.Services.AddControllers().AddModuleControllers(ModuleCatalog.ApiAssemblies);
     builder.Services.AddOpenApi();
-    builder.Services.AddCoreInsSecurity(builder.Configuration);
+    builder.Services.AddCoreInsSecurity(builder.Configuration, devSignIn);
 }
 
 var app = builder.Build();
@@ -68,6 +73,10 @@ if (role == AppRole.Api)
     app.MapCoreInsHealth();
     app.MapCoreInsProblemPages();
     app.MapControllers();
+    if (devSignIn)
+    {
+        app.MapDevelopmentSignIn();
+    }
 
     var openApi = app.MapOpenApi();
     if (app.Environment.IsDevelopment())

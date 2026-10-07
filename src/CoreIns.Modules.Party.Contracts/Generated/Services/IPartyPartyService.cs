@@ -35,7 +35,8 @@ public interface IPartyPartyService
     /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>
     /// <param name="partyNumber">PRD: "party_id or number" (optional)</param>
     /// <param name="profile">PRD: "profile"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyGetResponse> GetAsync(string id, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, string? partyNumber = null, string? profile = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="revealPurpose">Purpose code for showing P2 values unmasked (REQ-PTY-044). Needs permission pty.Party.revealP2; every unmasked view is audited with the purpose. Without it P2 values are masked.</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyGetResponse> GetAsync(string id, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, string? partyNumber = null, string? profile = null, string? revealPurpose = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Merge or unmerge</summary>
     /// <remarks>
@@ -59,8 +60,12 @@ public interface IPartyPartyService
     /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    /// <param name="criteria">PRD: "criteria"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage> SearchAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, string? criteria = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="criteria">Single search box (SCR-PTY-01): a name in any script, a party number or an identifier value. At least 2 characters (PTY-ERR-QUERY-TOO-SHORT).</param>
+    /// <param name="name">Person or organisation name in any script; accent-, case- and script-insensitive (REQ-PTY-001, REQ-PTY-065..067)</param>
+    /// <param name="identifierScheme">Identifier scheme for an exact identifier search through the blind index (REQ-PTY-060); needs identifierValue</param>
+    /// <param name="identifierValue">Identifier value (never logged; the request is audited with the scheme only)</param>
+    /// <param name="partyNumber">Exact party number</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage> SearchAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, string? criteria = null, string? name = null, string? identifierScheme = null, string? identifierValue = null, string? partyNumber = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Unmerge within the window (stated separately for MIG and steward callers; same operation as the unmerge half …</summary>
     /// <remarks>

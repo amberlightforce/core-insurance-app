@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+    <!-- D-CON-34: event descriptors come from the generated EventContract. Platform.Contracts references only the kernel. -->
+    <ProjectReference Include="..\CoreIns.Platform.Contracts\CoreIns.Platform.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

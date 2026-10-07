@@ -22,7 +22,8 @@ public sealed class PlatformRulesTests
     [Fact]
     public void Platform_never_references_a_module()
     {
-        SolutionModel.ProjectReferences(SolutionModel.Platform).ShouldBe([SolutionModel.SharedKernel]);
+        // D-CON-34: the platform also references its own contracts (generated EventContract → EventDescriptor).
+        SolutionModel.ProjectReferences(SolutionModel.Platform).ShouldBe([SolutionModel.SharedKernel, SolutionModel.Platform + ".Contracts"], ignoreOrder: true);
 
         var result = SolutionModel.TypesOf(SolutionModel.Platform)
             .ShouldNot().HaveDependencyOnAny("CoreIns.Modules", "CoreIns.CountryPacks", SolutionModel.Host)

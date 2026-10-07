@@ -4,15 +4,70 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Party.search result. PRD outputs: "ranked results"</summary>
+/// <summary>Typed by SL-0 from REQ-PTY-001, REQ-PTY-069. One ranked pty.Party.search result; P2 values masked (REQ-PTY-044).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PartySearchItem
 {
-    /// <summary>PRD: "ranked results"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("rankedResults")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RankedResults { get; init; }
+    /// <summary>Contract member 'partyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
+
+    /// <summary>Contract member 'partyNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyNumber")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyNumber PartyNumber { get; init; }
+
+    /// <summary>Contract member 'partyType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyType")]
+    public required global::CoreIns.Modules.Party.Contracts.Api.PartyType PartyType { get; init; }
+
+    /// <summary>Party status (PRD-01 §7.3, upper-snake code)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required string Status { get; init; }
+
+    /// <summary>Display name in the native script</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("displayName")]
+    public required string DisplayName { get; init; }
+
+    /// <summary>Latin display name (as on ID document when held, else generated), null when the native name is Latin</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("displayNameLatin")]
+    public string? DisplayNameLatin { get; init; }
+
+    /// <summary>Contract member 'maskedIdentifier'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("maskedIdentifier")]
+    public global::CoreIns.Modules.Party.Contracts.Api.MaskedIdentifier? MaskedIdentifier { get; init; }
+
+    /// <summary>Contract member 'primaryPostcode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("primaryPostcode")]
+    public string? PrimaryPostcode { get; init; }
+
+    /// <summary>Contract member 'primaryLocality'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("primaryLocality")]
+    public string? PrimaryLocality { get; init; }
+
+    /// <summary>Exact and prefix matches rank before fuzzy matches (REQ-PTY-066)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("matchQuality")]
+    public required MatchQualityValue MatchQuality { get; init; }
+
+    /// <summary>Trigram similarity of the best-matching key, 0..1 as a decimal string</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("similarity")]
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+    public required decimal Similarity { get; init; }
+
+    /// <summary>Exact and prefix matches rank before fuzzy matches (REQ-PTY-066)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<MatchQualityValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum MatchQualityValue
+    {
+        /// <summary><c>EXACT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("EXACT")]
+        Exact,
+
+        /// <summary><c>PREFIX</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PREFIX")]
+        Prefix,
+
+        /// <summary><c>FUZZY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FUZZY")]
+        Fuzzy,
+    }
 }
