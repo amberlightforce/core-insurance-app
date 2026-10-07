@@ -184,8 +184,8 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "building",
-   "owner": "builder: finishing components + patterns",
+   "status": "in review",
+   "owner": "reviewer agent",
    "reviewAttempts": 0,
    "blockers": []
   },
