@@ -25,6 +25,12 @@ public sealed class OutboxOptions
     /// <summary>Aggregates processed in parallel (events of one aggregate are always sequential).</summary>
     public int MaxDegreeOfParallelism { get; set; } = 8;
 
+    /// <summary>
+    /// Events one handler processes in a single transaction (processed markers and effects commit together). A failing
+    /// micro-batch is rolled back and its events are retried one by one, so failures stay isolated. 1 disables batching.
+    /// </summary>
+    public int HandlerBatchSize { get; set; } = 100;
+
     /// <summary>Wait between polls when the outbox is empty.</summary>
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromMilliseconds(250);
 
@@ -213,13 +219,84 @@ public sealed partial class OutboxProcessor
 
         var outcome = new RoundOutcome();
         await Parallel.ForEachAsync(
-            runs,
+            Lanes(runs),
             new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, _options.MaxDegreeOfParallelism), CancellationToken = cancellationToken },
-            async (run, ct) => await ProcessRunAsync(run, outcome, ct).ConfigureAwait(false)).ConfigureAwait(false);
+            async (lane, ct) => await ProcessLaneAsync(lane, outcome, ct).ConfigureAwait(false)).ConfigureAwait(false);
 
         released.AddRange(outcome.Released);
         await FinishAsync(outcome, released, cancellationToken).ConfigureAwait(false);
         return new OutboxBatchResult(claimed.Count, outcome.Completed.Count, outcome.Retries.Count, outcome.Parked.Count, released.Count);
+    }
+
+    /// <summary>Groups whole aggregate runs into lanes of about one handler micro-batch, spread over the parallelism.</summary>
+    private List<List<List<ClaimedMessage>>> Lanes(List<List<ClaimedMessage>> runs)
+    {
+        var total = runs.Sum(r => r.Count);
+        var dop = Math.Max(1, _options.MaxDegreeOfParallelism);
+        var size = Math.Max(1, Math.Min(Math.Max(1, _options.HandlerBatchSize), (total + dop - 1) / dop));
+        var lanes = new List<List<List<ClaimedMessage>>>();
+        var current = new List<List<ClaimedMessage>>();
+        var count = 0;
+        foreach (var run in runs)
+        {
+            current.Add(run);
+            count += run.Count;
+            if (count >= size)
+            {
+                lanes.Add(current);
+                current = [];
+                count = 0;
+            }
+        }
+
+        if (current.Count > 0)
+        {
+            lanes.Add(current);
+        }
+
+        return lanes;
+    }
+
+    /// <summary>
+    /// Fast path: each handler processes the whole lane in one transaction. If any handler's micro-batch fails, the
+    /// lane falls back to event-by-event processing (handlers that committed their batch are skipped by their markers).
+    /// </summary>
+    private async Task ProcessLaneAsync(List<List<ClaimedMessage>> lane, RoundOutcome outcome, CancellationToken cancellationToken)
+    {
+        var envelopes = lane.SelectMany(run => run).Select(m => m.Envelope).ToList();
+        if (_options.HandlerBatchSize > 1 && envelopes.Count > 1)
+        {
+            var batched = true;
+            foreach (var handler in envelopes.Select(e => e.RoutingKey).Distinct(StringComparer.Ordinal).SelectMany(_registry.For).Distinct())
+            {
+                var own = envelopes.Where(e => string.Equals(e.RoutingKey, handler.RoutingKey, StringComparison.Ordinal)).ToList();
+                try
+                {
+                    await _invoker.InvokeBatchAsync(handler, own, _clock, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+                {
+                    LogBatchFailed(_logger, ex, handler.HandlerName, own.Count);
+                    batched = false;
+                    break;
+                }
+            }
+
+            if (batched)
+            {
+                foreach (var envelope in envelopes)
+                {
+                    outcome.Completed.Add(envelope.EventId.Value);
+                }
+
+                return;
+            }
+        }
+
+        foreach (var run in lane)
+        {
+            await ProcessRunAsync(run, outcome, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private async Task ProcessRunAsync(List<ClaimedMessage> run, RoundOutcome outcome, CancellationToken cancellationToken)
@@ -379,6 +456,9 @@ public sealed partial class OutboxProcessor
     [LoggerMessage(Level = LogLevel.Warning, Message = "Event handler {Handler} failed for {EventType} {EventId}")]
     private static partial void LogHandlerFailed(ILogger logger, Exception exception, string handler, string eventType, Guid eventId);
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Event handler {Handler} failed a micro-batch of {Count}; retrying event by event")]
+    private static partial void LogBatchFailed(ILogger logger, Exception exception, string handler, int count);
+
     [LoggerMessage(Level = LogLevel.Error, Message = "Event handler {Handler} parked {EventType} {EventId} after {Attempts} attempts")]
     private static partial void LogParked(ILogger logger, string handler, string eventType, Guid eventId, int attempts);
 
@@ -411,6 +491,65 @@ internal sealed class HandlerInvoker(IServiceScopeFactory scopes)
         ON CONFLICT (handler, event_id) DO UPDATE SET processed_at = EXCLUDED.processed_at, replay_count = processed_event.replay_count + 1
         """;
 
+    private const string MarkBatchSql = """
+        INSERT INTO plt.processed_event (handler, event_id, processed_at, replay_count)
+        SELECT @handler, id, @now, 0 FROM unnest(@ids) AS id
+        ON CONFLICT (handler, event_id) DO NOTHING
+        RETURNING event_id
+        """;
+
+    /// <summary>
+    /// Runs one handler over several events (in the given order) in one scope and one transaction: markers for all of
+    /// them, the handler for those not yet processed, one commit. Throws when any invocation fails (nothing commits).
+    /// </summary>
+    public async Task InvokeBatchAsync(
+        EventHandlerRegistration handler, IReadOnlyList<EventEnvelope> envelopes, IClock clock, CancellationToken cancellationToken)
+    {
+        var scope = scopes.CreateAsyncScope();
+        await using (scope.ConfigureAwait(false))
+        {
+            var services = scope.ServiceProvider;
+            var context = services.GetRequiredService<RequestContext>();
+            var session = services.GetRequiredService<DbSession>();
+            var transaction = await session.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+            await using (transaction.ConfigureAwait(false))
+            {
+                var fresh = new HashSet<Guid>();
+                await using (var mark = new NpgsqlCommand(MarkBatchSql, transaction.Connection, transaction.Transaction))
+                {
+                    mark.Parameters.Add(new NpgsqlParameter<string>("handler", handler.HandlerName));
+                    mark.Parameters.Add(new NpgsqlParameter<Guid[]>("ids", [.. envelopes.Select(e => e.EventId.Value)]));
+                    mark.Parameters.Add(new NpgsqlParameter("now", NpgsqlDbType.TimestampTz) { Value = clock.Now.ToUtcDateTime() });
+                    await using var reader = await mark.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+                    while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+                    {
+                        fresh.Add(reader.GetGuid(0));
+                    }
+                }
+
+                foreach (var envelope in envelopes.Where(e => fresh.Contains(e.EventId.Value)))
+                {
+                    Prepare(context, handler, envelope, replay: false);
+                    await handler.Invoke(services, envelope, cancellationToken).ConfigureAwait(false);
+                }
+
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    private static void Prepare(RequestContext context, EventHandlerRegistration handler, EventEnvelope envelope, bool replay)
+    {
+        context.Actor = ActorRef.Service(handler.HandlerName);
+        context.CorrelationId = envelope.CorrelationId;
+        context.CausationId = envelope.EventId.Value;
+        context.LegalEntity = envelope.LegalEntity;
+        context.Jurisdiction = envelope.Jurisdiction;
+        context.ConfigurationHash = envelope.ConfigurationHash;
+        context.Origin = replay ? EventOrigin.Replay : envelope.Origin;
+        context.Channel = null;
+    }
+
     /// <summary>Returns false when the handler had already processed the event (and <paramref name="replay"/> is false).</summary>
     public async Task<bool> InvokeAsync(
         EventHandlerRegistration handler, EventEnvelope envelope, bool replay, IClock clock, CancellationToken cancellationToken)
@@ -419,15 +558,7 @@ internal sealed class HandlerInvoker(IServiceScopeFactory scopes)
         await using (scope.ConfigureAwait(false))
         {
             var services = scope.ServiceProvider;
-            var context = services.GetRequiredService<RequestContext>();
-            context.Actor = ActorRef.Service(handler.HandlerName);
-            context.CorrelationId = envelope.CorrelationId;
-            context.CausationId = envelope.EventId.Value;
-            context.LegalEntity = envelope.LegalEntity;
-            context.Jurisdiction = envelope.Jurisdiction;
-            context.ConfigurationHash = envelope.ConfigurationHash;
-            context.Origin = replay ? EventOrigin.Replay : envelope.Origin;
-            context.Channel = null;
+            Prepare(services.GetRequiredService<RequestContext>(), handler, envelope, replay);
 
             var session = services.GetRequiredService<DbSession>();
             var transaction = await session.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);

@@ -135,7 +135,11 @@ public sealed class OutboxTests(PostgresFixture database) : IClassFixture<Postgr
     [Fact]
     public async Task A_failing_event_holds_back_later_events_of_its_aggregate_and_is_retried_with_backoff()
     {
-        await using var harness = await PlatformHarness.CreateAsync(database, outbox: o => o.MaxAttempts = 5);
+        await using var harness = await PlatformHarness.CreateAsync(database, outbox: o =>
+        {
+            o.MaxAttempts = 5;
+            o.HandlerBatchSize = 1;
+        });
         var blocked = Guid.CreateVersion7();
         var other = Guid.CreateVersion7();
         for (var i = 0; i < 3; i++)
@@ -162,9 +166,46 @@ public sealed class OutboxTests(PostgresFixture database) : IClassFixture<Postgr
     }
 
     [Fact]
+    public async Task A_failing_micro_batch_falls_back_to_single_events_and_commits_each_effect_once()
+    {
+        await using var harness = await PlatformHarness.CreateAsync(database, outbox: o =>
+        {
+            o.HandlerBatchSize = 50;
+            o.MaxDegreeOfParallelism = 2;
+        });
+        var aggregates = Enumerable.Range(0, 20).Select(_ => Guid.CreateVersion7()).ToArray();
+        foreach (var aggregate in aggregates)
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                await harness.SendAsync(new CreateWidget($"m{i}", i, aggregate));
+            }
+        }
+
+        var poisoned = aggregates[7].ToString();
+        harness.Behaviour.FailWhile = e => e.AggregateId == poisoned && e.AggregateSequence == 2;
+        var first = await harness.Processor.DrainAsync(TestContext.Current.CancellationToken);
+
+        first.Retried.ShouldBe(1);
+        (await harness.CountAsync("SELECT count(*) FROM tst.delivery")).ShouldBe(58, "every event but the failing one and the one waiting behind it");
+        (await harness.CountAsync($"SELECT count(*) FROM plt.processed_event WHERE handler = '{PlatformHarness.HandlerName}'")).ShouldBe(58);
+
+        harness.Behaviour.FailWhile = _ => false;
+        harness.Clock.Advance(TimeSpan.FromSeconds(1));
+        await harness.Processor.DrainAsync(TestContext.Current.CancellationToken);
+
+        (await harness.CountAsync("SELECT count(*) FROM tst.delivery")).ShouldBe(60);
+        (await harness.CountAsync("SELECT count(*) FROM plt.outbox_message WHERE status = 'Pending'")).ShouldBe(0);
+    }
+
+    [Fact]
     public async Task A_handler_that_keeps_failing_is_dead_lettered_and_can_be_replayed()
     {
-        await using var harness = await PlatformHarness.CreateAsync(database, outbox: o => o.MaxAttempts = 3);
+        await using var harness = await PlatformHarness.CreateAsync(database, outbox: o =>
+        {
+            o.MaxAttempts = 3;
+            o.HandlerBatchSize = 1;
+        });
         var aggregate = Guid.CreateVersion7();
         await harness.SendAsync(new CreateWidget("poison", 1m, aggregate));
         await harness.SendAsync(new CreateWidget("after", 2m, aggregate));

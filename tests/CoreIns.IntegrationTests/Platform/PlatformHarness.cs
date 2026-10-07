@@ -41,8 +41,10 @@ internal sealed class WidgetDbContext(DbContextOptions<WidgetDbContext> options)
     public static string Ddl => """
         CREATE SCHEMA IF NOT EXISTS tst;
         CREATE TABLE IF NOT EXISTS tst.widget (id uuid PRIMARY KEY, name text NOT NULL, amount numeric(19,4) NOT NULL);
+        CREATE TABLE IF NOT EXISTS tst.delivery (handler text NOT NULL, event_id uuid NOT NULL, origin text NOT NULL, PRIMARY KEY (handler, event_id, origin));
         GRANT USAGE ON SCHEMA tst TO app;
-        GRANT SELECT, INSERT, UPDATE, DELETE ON tst.widget TO app;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON tst.widget, tst.delivery TO app;
+        TRUNCATE tst.delivery;
         """;
 }
 
@@ -97,19 +99,26 @@ internal sealed class ExecutionLog
     public ConcurrentQueue<(string Handler, string AggregateId, long Sequence, EventOrigin Origin)> Deliveries { get; } = new();
 }
 
-/// <summary>A configurable event handler: records deliveries, and fails while <see cref="FailWhile"/> says so.</summary>
-internal sealed class RecordingHandler(ExecutionLog log, HandlerBehaviour behaviour) : IEventHandler<WidgetCreatedPayload>
+/// <summary>
+/// A configurable event handler: writes a <c>tst.delivery</c> row in the handler's transaction (its committed effect;
+/// the primary key would reject a second committed delivery), records the delivery in memory, and fails while
+/// <see cref="HandlerBehaviour.FailWhile"/> says so.
+/// </summary>
+internal sealed class RecordingHandler(ExecutionLog log, HandlerBehaviour behaviour, DbSession session) : IEventHandler<WidgetCreatedPayload>
 {
     public async Task HandleAsync(EventEnvelope envelope, WidgetCreatedPayload payload, CancellationToken cancellationToken)
     {
+        await using (var effect = new NpgsqlCommand(
+            "INSERT INTO tst.delivery (handler, event_id, origin) VALUES ('recording', @id, @origin)", session.Connection, session.Transaction))
+        {
+            effect.Parameters.AddWithValue("id", envelope.EventId.Value);
+            effect.Parameters.AddWithValue("origin", envelope.Origin.ToCode());
+            await effect.ExecuteNonQueryAsync(cancellationToken);
+        }
+
         if (behaviour.FailWhile(envelope))
         {
             throw new InvalidOperationException($"handler failure for {payload.Name}");
-        }
-
-        if (behaviour.Delay > TimeSpan.Zero)
-        {
-            await Task.Delay(behaviour.Delay, cancellationToken);
         }
 
         log.Deliveries.Enqueue(("recording", envelope.AggregateId, envelope.AggregateSequence, envelope.Origin));
@@ -119,8 +128,6 @@ internal sealed class RecordingHandler(ExecutionLog log, HandlerBehaviour behavi
 internal sealed class HandlerBehaviour
 {
     public Func<EventEnvelope, bool> FailWhile { get; set; } = _ => false;
-
-    public TimeSpan Delay { get; set; }
 }
 
 /// <summary>
