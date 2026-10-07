@@ -4,6 +4,7 @@ using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Contracts.Events;
 using CoreIns.Modules.Policy.Domain;
 using CoreIns.Modules.Policy.Persistence;
+using CoreIns.Modules.Policy.Services;
 using CoreIns.Modules.Underwriting.Contracts;
 using CoreIns.Modules.Underwriting.Contracts.Api;
 using CoreIns.Platform.Audit;
@@ -60,7 +61,7 @@ internal sealed class BindJobHandler(
     IClock clock,
     INumberingService numbering,
     IEventPublisher events,
-    IUnderwritingRulesService underwriting,
+    Dependency<IUnderwritingRulesService> underwriting,
     IOptions<PolicyOptions> options) : ICommandHandler<BindJob, JobBindResponse>
 {
     private const string Block = "BLOCK";
@@ -260,7 +261,7 @@ internal sealed class BindJobHandler(
     {
         try
         {
-            var evaluation = await underwriting.EvaluateAsync(
+            var evaluation = await underwriting.Value.EvaluateAsync(
                 new RulesEvaluateRequest
                 {
                     JobRef = job.JobId, Checkpoint = RulesEvaluateRequest.CheckpointValue.PreBind,

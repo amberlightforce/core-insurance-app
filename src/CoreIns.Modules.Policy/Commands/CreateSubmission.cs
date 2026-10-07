@@ -5,6 +5,7 @@ using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Contracts.Events;
 using CoreIns.Modules.Policy.Domain;
 using CoreIns.Modules.Policy.Persistence;
+using CoreIns.Modules.Policy.Services;
 using CoreIns.Modules.Product.Contracts;
 using CoreIns.Modules.Product.Contracts.Api;
 using CoreIns.Platform.Audit;
@@ -54,7 +55,7 @@ internal sealed class CreateSubmissionHandler(
     IEventPublisher events,
     IPartyPartyService parties,
     IPartyProducerCodeService producerCodes,
-    IProductProductVersionService productVersions,
+    Dependency<IProductProductVersionService> productVersions,
     IOptions<PolicyOptions> options) : ICommandHandler<CreateSubmission, SubmissionCreateResponse>
 {
     private const string NewBusiness = "NewBusiness";
@@ -103,7 +104,7 @@ internal sealed class CreateSubmissionHandler(
         ProductVersionResolveResponse resolved;
         try
         {
-            resolved = await productVersions.ResolveAsync(
+            resolved = await productVersions.Value.ResolveAsync(
                 new ProductVersionResolveRequest
                 {
                     Jurisdiction = jurisdiction.Value, LegalEntity = legalEntityCode.Value, Product = request.Product, Channel = request.Channel,

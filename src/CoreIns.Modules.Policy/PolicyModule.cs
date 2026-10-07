@@ -62,6 +62,7 @@ public static class PolicyModule
         services.AddOptions<PolicyOptions>().Bind(configuration.GetSection(PolicyOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
         services.AddModuleDbContext<PolicyDbContext>(Schema);
 
+        services.AddScoped(typeof(Dependency<>));
         services.AddScoped<RiskTrees>();
         services.AddScoped<JobReader>();
         services.AddScoped<PolicyReader>();
@@ -121,6 +122,8 @@ public static class PolicyModule
             .Describe("Ο χρήστης πρέπει να επιβεβαιώσει ρητά τη σύναψη.", "The user must confirm the bind explicitly."),
         ErrorDefinition.For(ModuleCode.POL, "GATE-FAILED", 422, "Δεν πέρασε έλεγχος σύναψης", "A bind gate failed")
             .Describe("Ένας έλεγχος πριν από τη σύναψη δεν ολοκληρώθηκε.", "A check before binding could not be completed."),
+        ErrorDefinition.For(ModuleCode.POL, "DEPENDENCY-UNAVAILABLE", 503, "Μια απαραίτητη υπηρεσία δεν είναι διαθέσιμη", "A required service is not available", retryable: true)
+            .Describe("Η λειτουργία χρειάζεται υπηρεσία άλλης ενότητας που δεν έχει ακόμη συνδεθεί.", "The operation needs another module's service that is not wired yet."),
         ErrorDefinition.For(ModuleCode.POL, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

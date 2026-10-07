@@ -6,6 +6,7 @@ using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Contracts.Events;
 using CoreIns.Modules.Policy.Domain;
 using CoreIns.Modules.Policy.Persistence;
+using CoreIns.Modules.Policy.Services;
 using CoreIns.Modules.Product.Contracts;
 using CoreIns.Modules.Product.Contracts.Api;
 using CoreIns.Modules.Rating.Contracts;
@@ -56,17 +57,19 @@ internal sealed class QuoteJobHandler(
     ILegalEntityDirectory legalEntities,
     IClock clock,
     IEventPublisher events,
-    IProductQuestionSetService questionSets,
-    IProductPolicyDraftService drafts,
-    IRatingRateService rating,
-    IMarketRoundingService rounding,
-    IUnderwritingRulesService underwriting,
+    Dependency<IProductQuestionSetService> questionSetService,
+    Dependency<IProductPolicyDraftService> draftService,
+    Dependency<IRatingRateService> ratingService,
+    Dependency<IMarketRoundingService> roundingService,
+    Dependency<IUnderwritingRulesService> underwritingService,
     IOptions<PolicyOptions> options) : ICommandHandler<QuoteJob, JobQuoteResponse>
 {
     public async Task<Result<JobQuoteResponse>> HandleAsync(QuoteJob command, CancellationToken cancellationToken)
     {
         var request = command.Request;
         var now = clock.Now;
+        // Fail fast (POL-ERR-DEPENDENCY-UNAVAILABLE) before any work when a module is not wired yet.
+        _ = (questionSetService.Value, draftService.Value, ratingService.Value, roundingService.Value, underwritingService.Value);
         var loaded = await JobSupport.LoadAsync(db, JobSupport.LegalEntity(context, legalEntities), request.JobId, request.VersionNo, cancellationToken)
             .ConfigureAwait(false);
         if (loaded is not var (job, version))
@@ -112,7 +115,7 @@ internal sealed class QuoteJobHandler(
         RulesEvaluateResponse evaluation;
         try
         {
-            evaluation = await underwriting.EvaluateAsync(
+            evaluation = await underwritingService.Value.EvaluateAsync(
                 new RulesEvaluateRequest
                 {
                     JobRef = job.JobId, Checkpoint = RulesEvaluateRequest.CheckpointValue.PreQuote,
@@ -205,7 +208,7 @@ internal sealed class QuoteJobHandler(
 
         foreach (var (set, index) in tree.QuestionSets.Select((s, i) => (s, i)))
         {
-            var outcome = await questionSets.EvaluateAsync(
+            var outcome = await questionSetService.Value.EvaluateAsync(
                 new QuestionSetEvaluateRequest
                 {
                     Hash = artefact,
@@ -219,7 +222,7 @@ internal sealed class QuoteJobHandler(
             }
         }
 
-        var validated = await drafts.ValidateAsync(
+        var validated = await draftService.Value.ValidateAsync(
             new PolicyDraftValidateRequest
             {
                 Hash = artefact,
@@ -248,7 +251,7 @@ internal sealed class QuoteJobHandler(
         RateRateResponse response;
         try
         {
-            response = await rating.RateAsync(
+            response = await ratingService.Value.RateAsync(
                 new RateRateRequest
                 {
                     Envelope = new RateRateRequest.EnvelopeDetail
@@ -294,7 +297,7 @@ internal sealed class QuoteJobHandler(
         var lines = new List<ChargeLine>();
         foreach (var draft in drafts.Value)
         {
-            var rounded = await rounding.ApplyAsync(
+            var rounded = await roundingService.Value.ApplyAsync(
                 new RoundingApplyRequest
                 {
                     Amount = draft.Unrounded, Currency = currency,

@@ -402,6 +402,19 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         keyless.StatusCode.ShouldBe(HttpStatusCode.BadRequest, keylessBody?.ToJsonString());
     }
 
+    [Fact]
+    public async Task Before_PFC_RAT_UW_and_MKT_are_wired_the_host_starts_and_POL_answers_503()
+    {
+        // The plain Host (no sandbox doubles): S1 modules register their implementations in S2 (D-SLC-01).
+        await using var factory = new ApiHostFactory(database.AppConnectionString);
+        using var client = factory.CreateClient();
+        var (party, body) = await SendAsync(client, HttpMethod.Post, "/api/pty/v1/parties", Person("Νίκος", "Γεωργίου", null));
+        party.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var (response, problem) = await SendAsync(client, HttpMethod.Post, "/api/pol/v1/submissions", PolicySlice.Submission(body.Text("party.partyId"), InTwoDays));
+        response.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable, problem?.ToJsonString());
+        problem.Text("code").ShouldBe("POL-ERR-PRODUCT-UNAVAILABLE");
+    }
+
     private static async Task<T> ScalarAsync<T>(NpgsqlDataSource dataSource, string sql)
     {
         await using var command = dataSource.CreateCommand(sql);
