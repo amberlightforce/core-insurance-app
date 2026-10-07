@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Journal.query result. PRD outputs: "journals with lines"</summary>
+/// <summary>fin.Journal.query result: one journal with its lines. PRD outputs: "journals with lines"</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JournalQueryItem
 {
-    /// <summary>PRD: "journals with lines"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("journalsLines")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? JournalsLines { get; init; }
+    /// <summary>Contract member 'journal'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("journal")]
+    public required global::CoreIns.Modules.Finance.Contracts.Api.JournalView Journal { get; init; }
 }

@@ -4,31 +4,102 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.PostingRules.list result. PRD outputs: "compile and golden results, preview"</summary>
+/// <summary>One posting rule of a rule-set version in force (REQ-FIN-048, -050). FIN posts from BIL BillingEntryPosted (REQ-FIN-036, D-SLC-12): each sub-ledger line of an entry is matched to exactly one rule by entry type, source sub-ledger account and the optional charge-category and charge-type qualifiers (most qualifiers wins, REQ-FIN-049). The rule names the book account, fixed or derived from the charge …</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PostingRulesListItem
 {
-    /// <summary>PRD: "compile and golden results"</summary>
+    /// <summary>Contract member 'ruleSetId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'ruleSetId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("compileResults")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? CompileResults { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetId")]
+    public required global::System.Guid RuleSetId { get; init; }
 
-    /// <summary>PRD: "compile and golden results"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("goldenResults")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? GoldenResults { get; init; }
+    /// <summary>Contract member 'ruleSetVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetVersion")]
+    public required int RuleSetVersion { get; init; }
 
-    /// <summary>PRD: "preview"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("preview")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Preview { get; init; }
+    /// <summary>Contract member 'ruleSetStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetStatus")]
+    public required RuleSetStatusValue RuleSetStatus { get; init; }
+
+    /// <summary>Contract member 'legalEntity'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalEntity")]
+    public required string LegalEntity { get; init; }
+
+    /// <summary>Contract member 'book'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("book")]
+    public required string Book { get; init; }
+
+    /// <summary>Contract member 'effectiveFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveFrom")]
+    public required global::CoreIns.SharedKernel.BusinessDate EffectiveFrom { get; init; }
+
+    /// <summary>Contract member 'contentHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contentHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ContentHash { get; init; }
+
+    /// <summary>Contract member 'ruleCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleCode")]
+    public required string RuleCode { get; init; }
+
+    /// <summary>Registry name of the posting source, e.g. bil.BillingEntryPosted</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceEventType")]
+    public required string SourceEventType { get; init; }
+
+    /// <summary>Entry type of the source fact (BillingEntryPosted payload eventType, e.g. WRITTEN)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("entryType")]
+    public required string EntryType { get; init; }
+
+    /// <summary>Sub-ledger account of the source line (PRD-06 LA-xx)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceAccount")]
+    public required string SourceAccount { get; init; }
+
+    /// <summary>Charge-category qualifier; null matches any</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("chargeCategory")]
+    public string? ChargeCategory { get; init; }
+
+    /// <summary>Charge-type qualifier; null matches any</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("chargeType")]
+    public string? ChargeType { get; init; }
+
+    /// <summary>Number of qualifiers; the most specific matching rule wins (REQ-FIN-049)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("specificity")]
+    public required int Specificity { get; init; }
+
+    /// <summary>Fixed book account; null when derived</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("account")]
+    public string? Account { get; init; }
+
+    /// <summary>Account derivation source (REQ-FIN-050); null when the account is fixed</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("deriveFrom")]
+    public DeriveFromValue? DeriveFrom { get; init; }
+
+    /// <summary>Contract member 'description'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("description")]
+    public required global::CoreIns.Modules.Finance.Contracts.Api.FinLocalizedText Description { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<RuleSetStatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum RuleSetStatusValue
+    {
+        /// <summary><c>ACTIVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACTIVE")]
+        Active,
+
+        /// <summary><c>SUPERSEDED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUPERSEDED")]
+        Superseded,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DeriveFromValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DeriveFromValue
+    {
+        /// <summary><c>GL_KEY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("GL_KEY")]
+        GlKey,
+    }
 }

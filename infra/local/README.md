@@ -31,7 +31,7 @@ Ports already used on your machine: every host port is overridable in `.env` (`P
 `.env` sets `ASPNETCORE_ENVIRONMENT=Development` and `DevAuthentication__Enabled=true`. Then the api offers:
 
 - `GET /api/plt/v1/dev/users`: the configured synthetic users (`src/CoreIns.Host/appsettings.Development.json`):
-  `underwriter` (role `Staff.Underwriter`), `billing` (`Staff.Billing`), `admin` (`Platform.Admin`).
+  `underwriter` (role `Staff.Underwriter`), `billing` (`Staff.Billing`), `finance` (`Staff.Finance`), `admin` (`Platform.Admin`).
 - `POST /api/plt/v1/dev/sign-in` with `{"userId":"underwriter"}`: a bearer token (8 h) signed with a key generated at
   api start (a restart invalidates tokens; no signing secret exists in configuration).
 

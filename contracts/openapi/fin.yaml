@@ -389,7 +389,9 @@ paths:
       x-exposure:
       - ui
       x-permission: fin.Journal.query
-      x-error-codes: []
+      x-error-codes:
+      - code: FIN-ERR-VALIDATION
+        status: 400
       x-source:
       - PRD-09 §9.1 l.1530
       parameters:
@@ -398,24 +400,36 @@ paths:
       - $ref: common.yaml#/components/parameters/KnownAt
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: dimensions
+      - name: policyNumber
         in: query
         required: false
-        description: 'PRD: "dimensions"'
+        description: 'Policy business key (line dimension, REQ-FIN-075): journals with at least one line for this policy. PRD: "dimensions". SL-FIN typed the PRD inputs as the filters the slice needs (D-API-06a).'
         schema:
-          type: string
-      - name: refs
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+      - name: sourceEventType
         in: query
         required: false
-        description: 'PRD: "refs"'
+        description: 'Source business event type, e.g. ChargeDeltaEmitted (REQ-FIN-079). PRD: "refs"'
         schema:
-          type: string
-      - name: dates
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: book
         in: query
         required: false
-        description: 'PRD: "dates"'
+        description: Book code (IFRS17, SOLVENCY_II, LOCAL_GAAP)
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: accountingDateFrom
+        in: query
+        required: false
+        description: 'First accounting date, inclusive. PRD: "dates"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      - name: accountingDateTo
+        in: query
+        required: false
+        description: 'Last accounting date, inclusive. PRD: "dates"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
       responses:
         '200':
           description: Success
@@ -457,7 +471,9 @@ paths:
       x-exposure:
       - ui
       x-permission: fin.Journal.get
-      x-error-codes: []
+      x-error-codes:
+      - code: FIN-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-09 §9.1 l.1530
       parameters:
@@ -466,28 +482,10 @@ paths:
       - name: id
         in: path
         required: true
-        description: Identifier of the Journal
+        description: Journal id (UUID) or journal number
         schema:
           type: string
       - $ref: common.yaml#/components/parameters/KnownAt
-      - name: dimensions
-        in: query
-        required: false
-        description: 'PRD: "dimensions"'
-        schema:
-          type: string
-      - name: refs
-        in: query
-        required: false
-        description: 'PRD: "refs"'
-        schema:
-          type: string
-      - name: dates
-        in: query
-        required: false
-        description: 'PRD: "dates"'
-        schema:
-          type: string
       responses:
         '200':
           description: Success
@@ -703,12 +701,8 @@ paths:
       - ui
       x-permission: fin.PostingRules.list
       x-error-codes:
-      - code: FIN-ERR-COMPILE
-        status: 422
-      - code: FIN-ERR-GOLDEN
-        status: 422
-      - code: PLT-ERR-SOD
-        status: 403
+      - code: FIN-ERR-VALIDATION
+        status: 400
       x-source:
       - PRD-09 §9.1 l.1532
       parameters:
@@ -716,6 +710,18 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: book
+        in: query
+        required: false
+        description: Book code; every book when absent. SL-FIN lists the rules of the rule-set versions in force (REQ-FIN-048, -049, -052); compile, golden and preview results belong to fin.PostingRules.compile/test/previewImpact (W5-FIN-01).
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: validAt
+        in: query
+        required: false
+        description: Accounting date the rule sets are in force on (default today)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
       responses:
         '200':
           description: Success
@@ -6117,11 +6123,201 @@ components:
           description: 'PRD: "approval ref"'
     JournalQueryItem:
       type: object
-      description: 'fin.Journal.query result. PRD outputs: "journals with lines"'
+      description: 'fin.Journal.query result: one journal with its lines. PRD outputs: "journals with lines"'
       properties:
-        journalsLines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "journals with lines"'
+        journal:
+          $ref: '#/components/schemas/JournalView'
+      required:
+      - journal
+    JournalView:
+      type: object
+      description: 'A posted journal entry (REQ-FIN-067): header, source lineage and balanced lines. Journals are append-only; a correction is a reversal journal (REQ-FIN-002, -072).'
+      properties:
+        journalId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        journalNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        jurisdiction:
+          $ref: ../events/common.schema.json#/$defs/Code
+        book:
+          $ref: ../events/common.schema.json#/$defs/Code
+        accountingDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        businessDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        period:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Accounting period code (calendar month, yyyy-MM)
+        sourceType:
+          type: string
+          enum:
+          - EVENT
+          - REVERSAL
+        sourceModule:
+          $ref: ../events/common.schema.json#/$defs/Code
+        sourceEventType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        sourceEventIds:
+          type: array
+          description: Source event ids the journal posts (REQ-FIN-079)
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+        sourceRef:
+          $ref: ../events/common.schema.json#/$defs/Text
+        ruleSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        ruleSetVersion:
+          type: integer
+          minimum: 1
+        ruleCodes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        reversesJournalId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        reversedByJournalId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        postedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        totals:
+          type: array
+          description: Total debits (equal to total credits) per transaction currency
+          items:
+            $ref: ../events/common.schema.json#/$defs/Money
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/JournalLineView'
+      required:
+      - journalId
+      - journalNumber
+      - legalEntity
+      - jurisdiction
+      - book
+      - accountingDate
+      - businessDate
+      - period
+      - sourceType
+      - sourceModule
+      - sourceEventType
+      - sourceEventIds
+      - sourceRef
+      - ruleSetId
+      - ruleSetVersion
+      - ruleCodes
+      - postedAt
+      - totals
+      - lines
+    JournalLineView:
+      type: object
+      description: 'One journal line with its dimensions (REQ-FIN-075, slice subset). The functional amount is in the book functional currency; group (USD) amounts are not produced yet (REQ-FIN-006, W5-FIN-02).'
+      properties:
+        lineNo:
+          type: integer
+          minimum: 1
+        account:
+          $ref: ../events/common.schema.json#/$defs/Code
+        accountName:
+          $ref: '#/components/schemas/FinLocalizedText'
+        side:
+          type: string
+          enum:
+          - DEBIT
+          - CREDIT
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        functionalAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        ruleCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        dimensions:
+          $ref: '#/components/schemas/JournalLineDimensions'
+      required:
+      - lineNo
+      - account
+      - accountName
+      - side
+      - amount
+      - functionalAmount
+      - ruleCode
+      - dimensions
+    JournalLineDimensions:
+      type: object
+      description: Line dimensions (REQ-FIN-075, slice subset); null when they do not apply. No personal data.
+      properties:
+        productCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        productVersion:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        coverageCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        chargeType:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        chargeCategory:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        glKey:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        policyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        policyNumber:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          - type: 'null'
+        policyTermId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        policyTransactionId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        chargeId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        billingAccountId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        invoiceId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        receiptId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+    FinLocalizedText:
+      type: object
+      description: Greek and English text (NFR-FIN-016)
+      properties:
+        el:
+          $ref: ../events/common.schema.json#/$defs/Text
+        en:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - el
+      - en
     JournalQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -6136,9 +6332,10 @@ components:
       type: object
       description: 'fin.Journal.get result. PRD outputs: "journals with lines"'
       properties:
-        journalsLines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "journals with lines"'
+        journal:
+          $ref: '#/components/schemas/JournalView'
+      required:
+      - journal
     BalanceGetResponse:
       type: object
       description: 'fin.Balance.get result. PRD outputs: "balances"'
@@ -6155,17 +6352,79 @@ components:
           description: 'PRD: "balances"'
     PostingRulesListItem:
       type: object
-      description: 'fin.PostingRules.list result. PRD outputs: "compile and golden results, preview"'
+      description: 'One posting rule of a rule-set version in force (REQ-FIN-048, -050). FIN posts from BIL BillingEntryPosted (REQ-FIN-036, D-SLC-12): each sub-ledger line of an entry is matched to exactly one rule by entry type, source sub-ledger account and the optional charge-category and charge-type qualifiers (most qualifiers wins, REQ-FIN-049). The rule names the book account, fixed or derived from the charge type GL key through the account-derivation table; side and amount are those of the source line, so a balanced entry yields a balanced journal.'
       properties:
-        compileResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        goldenResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        preview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preview"'
+        ruleSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        ruleSetVersion:
+          type: integer
+          minimum: 1
+        ruleSetStatus:
+          type: string
+          enum:
+          - ACTIVE
+          - SUPERSEDED
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        book:
+          $ref: ../events/common.schema.json#/$defs/Code
+        effectiveFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        contentHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        ruleCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        sourceEventType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Registry name of the posting source, e.g. bil.BillingEntryPosted
+        entryType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Entry type of the source fact (BillingEntryPosted payload eventType, e.g. WRITTEN)
+        sourceAccount:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Sub-ledger account of the source line (PRD-06 LA-xx)
+        chargeCategory:
+          description: Charge-category qualifier; null matches any
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        chargeType:
+          description: Charge-type qualifier; null matches any
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        specificity:
+          type: integer
+          minimum: 0
+          description: Number of qualifiers; the most specific matching rule wins (REQ-FIN-049)
+        account:
+          description: Fixed book account; null when derived
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        deriveFrom:
+          description: Account derivation source (REQ-FIN-050); null when the account is fixed
+          oneOf:
+          - type: string
+            enum:
+            - GL_KEY
+          - type: 'null'
+        description:
+          $ref: '#/components/schemas/FinLocalizedText'
+      required:
+      - ruleSetId
+      - ruleSetVersion
+      - ruleSetStatus
+      - legalEntity
+      - book
+      - effectiveFrom
+      - contentHash
+      - ruleCode
+      - sourceEventType
+      - entryType
+      - sourceAccount
+      - specificity
+      - description
     PostingRulesListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
