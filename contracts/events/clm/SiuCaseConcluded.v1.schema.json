@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.coreinsurance.example/events/clm/SiuCaseConcluded.v1.schema.json",
   "title": "SiuCaseConcluded v1",
-  "description": "SIU case lifecycle. Restricted contract; no narrative.",
+  "description": "SIU case lifecycle. Restricted contract (P3, D-CON-27); no narrative.",
   "x-event-type": "SiuCaseConcluded",
   "x-registry-name": "clm.SiuCaseConcluded",
   "x-producer": "CLM",
@@ -12,8 +12,11 @@
   "x-aggregate-type": [
     "Claim"
   ],
-  "x-data-classification": "P2",
+  "x-data-classification": "P3",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "claimId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-07 §8.1",
@@ -39,7 +42,14 @@
       "const": "Claim"
     },
     "dataClassification": {
-      "const": "P2"
+      "const": "P3"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "claimId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"
@@ -57,12 +67,12 @@
       "properties": {
         "caseId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
-          "x-classification": "P2",
+          "x-classification": "P3",
           "x-personal-data": true
         },
         "outcomeCode": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "x-classification": "P2",
+          "x-classification": "P3",
           "x-personal-data": true
         }
       }

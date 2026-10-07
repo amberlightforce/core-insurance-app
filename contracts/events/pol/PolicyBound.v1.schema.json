@@ -14,6 +14,11 @@
   ],
   "x-data-classification": "P1",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "policyId",
+    "policyTermId",
+    "transactionId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-05 §8.1",
@@ -40,6 +45,15 @@
     },
     "dataClassification": {
       "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyId",
+        "policyTermId",
+        "transactionId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"
@@ -121,7 +135,8 @@
         },
         "accountId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
-          "x-classification": "P0"
+          "x-classification": "P1",
+          "x-personal-data": true
         },
         "payerPartyId": {
           "$ref": "../common.schema.json#/$defs/Uuid",

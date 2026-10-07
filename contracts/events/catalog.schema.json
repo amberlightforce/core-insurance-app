@@ -72,7 +72,7 @@
     },
     "Event": {
       "type": "object",
-      "required": ["name", "version", "producer", "topic", "registryName", "schema", "orderingKey", "aggregateType", "trigger", "source", "status", "dataClassification", "personalDataFields", "setCompleteness", "consumers"],
+      "required": ["name", "version", "producer", "topic", "registryName", "schema", "orderingKey", "aggregateType", "trigger", "source", "status", "dataClassification", "personalDataFields", "x-business-keys", "setCompleteness", "consumers"],
       "additionalProperties": false,
       "properties": {
         "name": { "type": "string", "pattern": "^[A-Z][A-Za-z0-9]+$" },
@@ -88,6 +88,13 @@
         "status": { "enum": ["full", "minimal"] },
         "dataClassification": { "enum": ["P0", "P1", "P2", "P3"] },
         "personalDataFields": { "type": "array", "items": { "type": "string" } },
+        "x-business-keys": {
+          "description": "Lineage keys the event must carry in envelope businessKeys (D-CON-28). 'a|b' means at least one of the alternatives.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(\\|[a-z][A-Za-z0-9]*)*$" }
+        },
         "setCompleteness": { "type": "boolean" },
         "notes": { "type": "string" },
         "consumers": {

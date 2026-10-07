@@ -14,6 +14,10 @@
   ],
   "x-data-classification": "P0",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "riContractId",
+    "policyTermId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-08 §8.1",
@@ -40,6 +44,14 @@
     },
     "dataClassification": {
       "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "riContractId",
+        "policyTermId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"
@@ -75,7 +87,8 @@
           "x-classification": "P0"
         },
         "premiumTerms": {
-          "$ref": "../common.schema.json#/$defs/OpenObject",
+          "$ref": "../common.schema.json#/$defs/NamedAmounts",
+          "description": "Named premium terms: amounts (Money) or rates (decimal strings)",
           "x-classification": "P0"
         }
       }

@@ -267,11 +267,83 @@
       "pattern": "^dc\\.[a-z]+\\.[a-z0-9_.-]+\\.v\\d+$",
       "description": "Data contract name `dc.<mod>.<entity>.v<major>` (PRD-15 §8.3)."
     },
+    "OpenValue": {
+      "description": "Value inside an open structure. JSON numbers are not allowed at any depth: amounts are Money objects or decimal strings, counts are integers only where a typed field says so.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OpenValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/OpenValue"
+          }
+        }
+      ]
+    },
     "OpenObject": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": {
+        "$ref": "#/$defs/OpenValue"
+      },
       "x-open-structure": true,
-      "description": "Structure not specified by the owning PRD; consumers must not rely on members until the producer defines them in a minor version."
+      "description": "Structure not specified by the owning PRD; consumers must not rely on members until the producer defines them in a minor version. Bare JSON numbers are rejected at any depth (amounts must be Money or decimal strings)."
+    },
+    "MoneyTotals": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/Money"
+      },
+      "x-open-structure": true,
+      "description": "Named money totals (total name → Money). The names are producer-defined; every value is a Money object."
+    },
+    "NamedAmounts": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/Money"
+          },
+          {
+            "$ref": "#/$defs/Decimal"
+          }
+        ]
+      },
+      "x-open-structure": true,
+      "description": "Named terms whose values are Money (amounts) or decimal strings (rates, shares). No bare JSON numbers."
+    },
+    "ClaimLevelTotal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claimId",
+        "totals"
+      ],
+      "properties": {
+        "claimId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "totals": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/MoneyByCurrency4"
+          },
+          "description": "Named claim-level totals (e.g. incurred, paid, outstanding) in four currencies."
+        }
+      },
+      "description": "RI recovery claim-level totals (PRD-08 §8.1)."
     },
     "Counts": {
       "type": "object",
@@ -371,6 +443,17 @@
         },
         "compatibleArtefactRange": {
           "$ref": "#/$defs/Text"
+        },
+        "pinnedArtefactHash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Hash of the pinned rating artefact (REQ-PFC-245 acceptance criterion). Required and non-null when bindingMode is PINNED."
         }
       },
       "required": [
@@ -379,7 +462,27 @@
         "bindingMode",
         "compatibleArtefactRange"
       ],
-      "description": "Rating-slot declaration (PRD-02 §8, R-27, REQ-PFC-245)."
+      "description": "Rating-slot declaration (PRD-02 §8, R-27, REQ-PFC-245).",
+      "if": {
+        "properties": {
+          "bindingMode": {
+            "const": "PINNED"
+          }
+        },
+        "required": [
+          "bindingMode"
+        ]
+      },
+      "then": {
+        "required": [
+          "pinnedArtefactHash"
+        ],
+        "properties": {
+          "pinnedArtefactHash": {
+            "$ref": "#/$defs/Sha256"
+          }
+        }
+      }
     },
     "Approval": {
       "type": "object",

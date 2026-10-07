@@ -14,6 +14,12 @@
   ],
   "x-data-classification": "P0",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "claimId",
+    "exposureId",
+    "documentId",
+    "deliveryEvidenceId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-07 §8.1",
@@ -40,6 +46,16 @@
     },
     "dataClassification": {
       "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "claimId",
+        "exposureId",
+        "documentId",
+        "deliveryEvidenceId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"

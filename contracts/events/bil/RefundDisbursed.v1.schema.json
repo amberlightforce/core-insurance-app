@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.coreinsurance.example/events/bil/RefundDisbursed.v1.schema.json",
   "title": "RefundDisbursed v1",
-  "description": "Refund disbursement accepted by the bank (ISSUED), per D-CON-10. Fires when the bank accepts the payment file (ISSUED), per D-CON-10, although PRD-06 words the trigger as Cleared. Stops POL_REFUND_DUE. D-CON-10 also names a later RefundCleared, which is not in the catalogue of record; clearing is visible through DisbursementCleared.",
+  "description": "Refund disbursement accepted by the bank (ISSUED), per D-CON-10. Fires when the bank accepts the payment file (ISSUED), per D-CON-10 as amended by D-CON-10a, although PRD-06 words the trigger as Cleared. Stops POL_REFUND_DUE. Per D-CON-10a there is no RefundCleared event; clearing is covered by DisbursementCleared.",
   "x-event-type": "RefundDisbursed",
   "x-registry-name": "bil.RefundDisbursed",
   "x-producer": "BIL",
@@ -14,6 +14,11 @@
   ],
   "x-data-classification": "P0",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "billingAccountId",
+    "refundId",
+    "disbursementId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-06 §8.1",
@@ -40,6 +45,15 @@
     },
     "dataClassification": {
       "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "billingAccountId",
+        "refundId",
+        "disbursementId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"

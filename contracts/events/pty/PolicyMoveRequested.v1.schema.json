@@ -12,8 +12,12 @@
   "x-aggregate-type": [
     "Account"
   ],
-  "x-data-classification": "P0",
+  "x-data-classification": "P1",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "accountId",
+    "requestId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-01 §8.1",
@@ -39,7 +43,15 @@
       "const": "Account"
     },
     "dataClassification": {
-      "const": "P0"
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "accountId",
+        "requestId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"
@@ -71,11 +83,13 @@
         },
         "sourceAccountId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
-          "x-classification": "P0"
+          "x-classification": "P1",
+          "x-personal-data": true
         },
         "targetAccountId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
-          "x-classification": "P0"
+          "x-classification": "P1",
+          "x-personal-data": true
         },
         "effectiveDate": {
           "$ref": "../common.schema.json#/$defs/LocalDate",

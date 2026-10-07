@@ -14,6 +14,10 @@
   ],
   "x-data-classification": "P0",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "journalId",
+    "periodId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-09 §8.1",
@@ -40,6 +44,14 @@
     },
     "dataClassification": {
       "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "journalId",
+        "periodId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"

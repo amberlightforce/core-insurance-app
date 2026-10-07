@@ -14,6 +14,11 @@
   ],
   "x-data-classification": "P0",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "billingAccountId",
+    "policyTermId",
+    "transactionId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-06 §8.1",
@@ -40,6 +45,15 @@
     },
     "dataClassification": {
       "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "billingAccountId",
+        "policyTermId",
+        "transactionId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"

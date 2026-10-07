@@ -68,6 +68,42 @@ def walk_refs(node, out: list[str]) -> None:
             walk_refs(v, out)
 
 
+def find_number_holes(node, where="$"):
+    """Static guard: payload schemas never use JSON `number` and never accept unconstrained members.
+
+    Amounts are Money objects with decimal-string amounts; integers are only allowed as typed counts."""
+    found = []
+    if isinstance(node, dict):
+        t = node.get("type")
+        if t == "number" or (isinstance(t, list) and "number" in t):
+            found.append((where, "type number"))
+        if node.get("additionalProperties") is True or node.get("additionalProperties") == {}:
+            found.append((where, "unconstrained additionalProperties"))
+        for k, v in node.items():
+            found += find_number_holes(v, f"{where}/{k}")
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            found += find_number_holes(v, f"{where}/{i}")
+    return found
+
+
+def check_envelope_semantics(inst) -> list[str]:
+    """Rules JSON Schema cannot express. The C# envelope type must enforce the same (README, R8)."""
+    errs = []
+    present = [f for f in SET_FIELDS if f in inst]
+    if present and len(present) != 3:
+        errs.append("set_id, set_size and index must be given together")
+    if len(present) == 3:
+        size, idx = inst["set_size"], inst["index"]
+        if not isinstance(idx, int) or not isinstance(size, int):
+            errs.append("set_size and index must be integers")
+        elif idx < 1:
+            errs.append(f"index {idx} < 1")
+        elif idx > size:
+            errs.append(f"index {idx} > set_size {size}")
+    return errs
+
+
 def check_structure(catalog, schemas: dict[Path, dict], rep: Report) -> None:
     events = catalog.get("events", [])
     if catalog.get("eventCount") != len(events):
@@ -155,6 +191,20 @@ def check_structure(catalog, schemas: dict[Path, dict], rep: Report) -> None:
                 rep.error(f"{name}: producer listed as its own consumer")
             if not re.fullmatch(r"PRD-\d{2} §8\.\d+", c.get("handler", "")):
                 rep.error(f"{name}: consumer {c.get('module')} has no handler reference")
+        # business keys (D-CON-28): declared, and enforced by the schema
+        bkeys = e.get("x-business-keys") or []
+        if not bkeys:
+            rep.error(f"{name}: x-business-keys must declare at least one lineage key")
+        if sch.get("x-business-keys") != bkeys:
+            rep.error(f"{rel}: x-business-keys differs from the catalogue")
+        bk = props.get("businessKeys", {})
+        simple = sorted(k for k in bkeys if "|" not in k)
+        alts = sorted(sorted(a["required"][0] for a in part.get("anyOf", [])) for part in bk.get("allOf", []))
+        if sorted(bk.get("required", [])) != simple or alts != sorted(sorted(k.split("|")) for k in bkeys if "|" in k):
+            rep.error(f"{rel}: properties.businessKeys does not require exactly the declared x-business-keys")
+        # no bare JSON numbers where money or open structures can appear (R2)
+        for where, bad in find_number_holes(payload):
+            rep.error(f"{rel}: payload {where} allows {bad}")
     for path in schemas:
         if path not in expected_files:
             rep.error(f"{path.relative_to(ROOT).as_posix()}: schema file has no catalogue entry")
@@ -206,6 +256,9 @@ class Sampler:
                     out[k] = self.make(props[k], base, depth + 1)
                 elif isinstance(s.get("additionalProperties"), dict):
                     out[k] = self.make(s["additionalProperties"], base, depth + 1)
+            for k, sub in props.items():  # optional members too, so their constraints are exercised
+                if k not in out:
+                    out[k] = self.make(sub, base, depth + 1)
             if s.get("minProperties", 0) > len(out) and props:
                 k = next(iter(props))
                 out[k] = self.make(props[k], base, depth + 1)
@@ -295,34 +348,128 @@ def run_jsonschema(catalog, schemas: dict[Path, dict], envelope, common, catalog
         return res.contents, urljoin(base, ref).split("#")[0]
 
     sampler = Sampler(resolve)
+    copy = lambda o: json.loads(json.dumps(o))  # noqa: E731
     for path, sch in schemas.items():
+        rel = path.relative_to(ROOT).as_posix()
         try:
             inst = sampler.make(sch, sch["$id"])
         except Exception as exc:  # noqa: BLE001
-            rep.error(f"{path.relative_to(ROOT).as_posix()}: cannot build a sample instance: {exc}")
+            rep.error(f"{rel}: cannot build a sample instance: {exc}")
             continue
-        if sch.get("x-set-completeness"):
-            inst.update({"set_id": str(uuid.UUID(int=2)), "set_size": 1, "index": 1})
+        inst.update({"set_id": str(uuid.UUID(int=2)), "set_size": 2, "index": 2})
+        # samples carry the declared business keys (D-CON-28)
+        keys = sch.get("x-business-keys") or []
+        inst["businessKeys"] = {k.split("|")[0]: f"bk-{i}" for i, k in enumerate(keys)}
         validator = Draft202012Validator(sch, registry=registry, format_checker=Draft202012Validator.FORMAT_CHECKER)
-        errs = list(validator.iter_errors(inst))
-        for err in errs[:3]:
-            rep.error(f"{path.relative_to(ROOT).as_posix()}: sample instance invalid at {'/'.join(map(str, err.path))}: {err.message}")
-        # negative check: an unknown payload field must be rejected
-        bad = json.loads(json.dumps(inst))
-        bad.setdefault("payload", {})["__unknownField"] = 1
-        if validator.is_valid(bad):
-            rep.error(f"{path.relative_to(ROOT).as_posix()}: unknown payload fields are not rejected")
+
+        def rejects(bad, what, semantic=False):
+            ok = validator.is_valid(bad) and not (semantic and check_envelope_semantics(bad))
+            if ok:
+                rep.error(f"{rel}: {what} is not rejected")
+
+        for err in list(validator.iter_errors(inst))[:3]:
+            rep.error(f"{rel}: sample instance invalid at {'/'.join(map(str, err.path))}: {err.message}")
+        for msg in check_envelope_semantics(inst):
+            rep.error(f"{rel}: sample instance: {msg}")
+        # unknown payload field
+        bad = copy(inst)
+        bad["payload"]["__unknownField"] = "x"
+        rejects(bad, "an unknown payload field")
+        # D-CON-26: actor, jurisdiction, aiInteractionId always present
+        for f in ("actor", "jurisdiction", "aiInteractionId"):
+            bad = copy(inst)
+            del bad[f]
+            rejects(bad, f"a missing envelope {f}")
+        # D-CON-28: every declared business key is required; businessKeys is never empty
+        for k in keys:
+            bad = copy(inst)
+            bad["businessKeys"].pop(k.split("|")[0], None)
+            rejects(bad, f"a missing business key {k}")
+        bad = copy(inst)
+        bad["businessKeys"] = {}
+        rejects(bad, "an empty businessKeys")
+        # D4 set completeness: required where declared; index range (semantic, R8)
         if sch.get("x-set-completeness"):
             bad = {k: v for k, v in inst.items() if k not in SET_FIELDS}
-            if validator.is_valid(bad):
-                rep.error(f"{path.relative_to(ROOT).as_posix()}: set fields are not required")
+            rejects(bad, "an event without set fields")
+        for idx, size in ((3, 2), (0, 2)):
+            bad = copy(inst)
+            bad["index"], bad["set_size"] = idx, size
+            rejects(bad, f"index {idx} with set_size {size}", semantic=True)
+        # R2: no bare JSON number in any structured payload member (money totals, open objects, lines...)
+        for fname, val in inst["payload"].items():
+            if isinstance(val, dict) or (isinstance(val, list) and val and isinstance(val[0], dict)):
+                bad = copy(inst)
+                bad["payload"][fname] = {"total": 12.5} if isinstance(val, dict) else [{"total": 12.5}]
+                rejects(bad, f"a bare number inside payload.{fname}")
+        bad = copy(inst)
+        n_amounts = mutate_amounts(bad["payload"])
+        if n_amounts:
+            rejects(bad, "a Money amount given as a JSON number")
+        # R1: a pinned rating slot must carry the pinned artefact hash
+        rsd = inst["payload"].get("ratingSlotDeclaration")
+        if isinstance(rsd, dict):
+            bad = copy(inst)
+            bad["payload"]["ratingSlotDeclaration"]["bindingMode"] = "PINNED"
+            bad["payload"]["ratingSlotDeclaration"].pop("pinnedArtefactHash", None)
+            rejects(bad, "a PINNED rating slot without pinnedArtefactHash")
+            bad["payload"]["ratingSlotDeclaration"]["pinnedArtefactHash"] = None
+            rejects(bad, "a PINNED rating slot with a null pinnedArtefactHash")
+            good = copy(inst)
+            good["payload"]["ratingSlotDeclaration"].update({"bindingMode": "FLOATING", "pinnedArtefactHash": None})
+            if not validator.is_valid(good):
+                rep.error(f"{rel}: a FLOATING rating slot without pinned hash should be valid")
     return True
+
+
+def mutate_amounts(node) -> int:
+    """Replace every Money `amount` string with a JSON number; returns how many were replaced."""
+    n = 0
+    if isinstance(node, dict):
+        for k, v in list(node.items()):
+            if k == "amount" and isinstance(v, str):
+                node[k] = 1.5
+                n += 1
+            else:
+                n += mutate_amounts(v)
+    elif isinstance(node, list):
+        for v in node:
+            n += mutate_amounts(v)
+    return n
+
+
+def validate_instances(paths: list[str], catalog, schemas: dict[Path, dict], rep: Report) -> None:
+    """Validate concrete event JSON files (one event, or a JSON array of events) against their schemas."""
+    from jsonschema import Draft202012Validator
+    from referencing import Registry, Resource
+    from referencing.jsonschema import DRAFT202012
+
+    docs = [load_json(ROOT / n, rep) for n in ("envelope.schema.json", "common.schema.json")] + list(schemas.values())
+    registry = Registry().with_resources([(d["$id"], Resource.from_contents(d, default_specification=DRAFT202012)) for d in docs])
+    by_type = {}
+    for e in catalog["events"]:
+        by_type[(e["name"], e["version"].split(".")[0])] = ROOT / e["schema"]
+    for p in paths:
+        data = json.loads(Path(p).read_text(encoding="utf-8"))
+        for i, ev in enumerate(data if isinstance(data, list) else [data]):
+            label = f"{p}[{i}]"
+            key = (ev.get("eventType"), str(ev.get("schemaVersion", "")).split(".")[0])
+            if key not in by_type:
+                rep.error(f"{label}: unknown event type/major {key}")
+                continue
+            v = Draft202012Validator(schemas[by_type[key]], registry=registry, format_checker=Draft202012Validator.FORMAT_CHECKER)
+            for err in v.iter_errors(ev):
+                rep.error(f"{label}: {'/'.join(map(str, err.path))}: {err.message}")
+            for msg in check_envelope_semantics(ev):
+                rep.error(f"{label}: {msg}")
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--require-jsonschema", action="store_true", help="fail when the jsonschema package is missing")
     ap.add_argument("--no-samples", action="store_true", help="skip synthetic sample validation")
+    ap.add_argument("--instance", nargs="*", default=[], metavar="FILE",
+                    help="also validate concrete event JSON files (an event or an array of events), e.g. test fixtures")
     args = ap.parse_args()
 
     rep = Report()
@@ -344,10 +491,14 @@ def main() -> int:
         return 1
 
     check_structure(catalog, schemas, rep)
+    for where, bad in find_number_holes(common):
+        rep.error(f"common.schema.json: {where} allows {bad}")
     used = run_jsonschema(catalog, schemas, envelope, common, catalog_schema, rep, samples=not args.no_samples)
     if not used:
         msg = "jsonschema package not installed: JSON Schema meta-validation, $ref resolution and sample checks skipped"
         (rep.error if args.require_jsonschema else rep.warn)(msg)
+    elif args.instance:
+        validate_instances(args.instance, catalog, schemas, rep)
 
     events = catalog.get("events", [])
     by_prod: dict[str, int] = {}

@@ -12,8 +12,11 @@
   "x-aggregate-type": [
     "Policy"
   ],
-  "x-data-classification": "P0",
+  "x-data-classification": "P1",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "policyId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-05 §8.1",
@@ -39,7 +42,14 @@
       "const": "Policy"
     },
     "dataClassification": {
-      "const": "P0"
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"
@@ -58,11 +68,13 @@
       "properties": {
         "oldAccountId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
-          "x-classification": "P0"
+          "x-classification": "P1",
+          "x-personal-data": true
         },
         "newAccountId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
-          "x-classification": "P0"
+          "x-classification": "P1",
+          "x-personal-data": true
         },
         "repointMap": {
           "$ref": "../common.schema.json#/$defs/RepointMap",

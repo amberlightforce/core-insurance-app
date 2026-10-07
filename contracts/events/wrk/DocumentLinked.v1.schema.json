@@ -14,6 +14,9 @@
   ],
   "x-data-classification": "P1",
   "x-set-completeness": false,
+  "x-business-keys": [
+    "inboundDocumentId"
+  ],
   "x-payload-status": "full",
   "x-source": [
     "PRD-13 §8.1",
@@ -40,6 +43,13 @@
     },
     "dataClassification": {
       "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "inboundDocumentId"
+      ]
     },
     "payload": {
       "$ref": "#/$defs/Payload"

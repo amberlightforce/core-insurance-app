@@ -15,10 +15,13 @@
     "occurredAt",
     "recordedAt",
     "legalEntity",
+    "jurisdiction",
     "configurationHash",
     "businessKeys",
     "correlationId",
     "causationId",
+    "actor",
+    "aiInteractionId",
     "origin",
     "dataClassification",
     "payload"
@@ -42,7 +45,25 @@
     "producer": {
       "description": "Producing module code (contract §3.6.1). Exactly one producer per event type.",
       "type": "string",
-      "enum": ["PTY", "PFC", "RAT", "UW", "POL", "BIL", "CLM", "RI", "FIN", "DOC", "CMP", "CHN", "WRK", "PLT", "DAT", "MIG", "MKT"]
+      "enum": [
+        "PTY",
+        "PFC",
+        "RAT",
+        "UW",
+        "POL",
+        "BIL",
+        "CLM",
+        "RI",
+        "FIN",
+        "DOC",
+        "CMP",
+        "CHN",
+        "WRK",
+        "PLT",
+        "DAT",
+        "MIG",
+        "MKT"
+      ]
     },
     "aggregateType": {
       "description": "Type of the aggregate whose order consumers depend on (R-100).",
@@ -75,7 +96,7 @@
       "maxLength": 64
     },
     "jurisdiction": {
-      "description": "ISO 3166-1 alpha-2 jurisdiction where the contract envelope requires it (contract §3.4.1).",
+      "description": "ISO 3166-1 alpha-2 jurisdiction of the fact (contract §3.4.1; required on every event per D-CON-26).",
       "type": "string",
       "pattern": "^[A-Z]{2}$"
     },
@@ -85,7 +106,7 @@
       "pattern": "^[0-9a-f]{64}$"
     },
     "businessKeys": {
-      "description": "Business lineage keys (D5, D-CON-01): named business ids such as quoteId, jobId, policyId, transactionId, chargeId, invoiceId, claimId, journalId. Journey lineage uses these, never correlationId.",
+      "description": "Business lineage keys (D5, D-CON-01): named business ids such as quoteId, jobId, policyId, transactionId, chargeId, invoiceId, claimId, journalId. Journey lineage uses these, never correlationId. At least one key (D-CON-28); each event schema requires its own keys (catalog x-business-keys). Party and account ids here are P1 pseudonymous ids.",
       "type": "object",
       "propertyNames": {
         "pattern": "^[a-z][A-Za-z0-9]*$"
@@ -94,7 +115,8 @@
         "type": "string",
         "minLength": 1,
         "maxLength": 200
-      }
+      },
+      "minProperties": 1
     },
     "correlationId": {
       "description": "W3C trace-id (32 lower-case hex, not all zero) for technical tracing only (D-CON-01).",
@@ -114,14 +136,21 @@
       ]
     },
     "actor": {
-      "description": "Who caused the fact: user, service or AI agent id (contract §3.4.1).",
+      "description": "Who caused the fact: user, service or AI agent id (contract §3.4.1; required per D-CON-26). Classified P1.",
       "type": "object",
-      "required": ["kind", "id"],
+      "required": [
+        "kind",
+        "id"
+      ],
       "additionalProperties": false,
       "properties": {
         "kind": {
           "type": "string",
-          "enum": ["USER", "SERVICE", "AI_AGENT"]
+          "enum": [
+            "USER",
+            "SERVICE",
+            "AI_AGENT"
+          ]
         },
         "id": {
           "type": "string",
@@ -132,7 +161,7 @@
       "x-classification": "P1"
     },
     "aiInteractionId": {
-      "description": "AiInteractionRecord id when the fact came from an accepted AI suggestion (contract §3.4.1); null otherwise.",
+      "description": "AiInteractionRecord id when the fact came from an accepted AI suggestion (contract §3.4.1); null otherwise. Always present (D-CON-26).",
       "oneOf": [
         {
           "type": "string",
@@ -146,12 +175,21 @@
     "origin": {
       "description": "LIVE for normal business, MIGRATION for converted business (contract §3.4.1, D-CON-09), REPLAY for events re-emitted by the replay command. MIG's own events are LIVE.",
       "type": "string",
-      "enum": ["LIVE", "MIGRATION", "REPLAY"]
+      "enum": [
+        "LIVE",
+        "MIGRATION",
+        "REPLAY"
+      ]
     },
     "dataClassification": {
       "description": "Highest personal-data class among the payload fields (P0 not personal, P1 personal, P2 personal-sensitive, P3 special category; contract §3.2.1, R-66). Each event schema pins this value.",
       "type": "string",
-      "enum": ["P0", "P1", "P2", "P3"]
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3"
+      ]
     },
     "set_id": {
       "description": "Contract D4 set-completeness: id of the set of events a consumer must process as a whole (e.g. one out-of-sequence aggregate or one transaction's charge deltas). Name kept as in the contract (D-CON-19).",
@@ -164,7 +202,7 @@
       "minimum": 1
     },
     "index": {
-      "description": "Contract D4: 1-based position of this event in its set (1..set_size).",
+      "description": "Contract D4: 1-based position of this event in its set; 1 <= index <= set_size. JSON Schema cannot compare two fields, so validate.py and the C# envelope type must reject index > set_size.",
       "type": "integer",
       "minimum": 1
     },
@@ -174,9 +212,18 @@
     }
   },
   "dependentRequired": {
-    "set_id": ["set_size", "index"],
-    "set_size": ["set_id", "index"],
-    "index": ["set_id", "set_size"]
+    "set_id": [
+      "set_size",
+      "index"
+    ],
+    "set_size": [
+      "set_id",
+      "index"
+    ],
+    "index": [
+      "set_id",
+      "set_size"
+    ]
   },
   "$defs": {
     "UtcInstant": {

@@ -38,25 +38,39 @@ set-completeness fields, which keep their contract names (`set_id`, `set_size`, 
 | `producer` | module code; exactly one producer per event type |
 | `aggregateType`, `aggregateId`, `aggregateSequence` | ordering key and gap-free per-aggregate sequence (starts at 1) |
 | `occurredAt`, `recordedAt` | business time and commit time, RFC 3339 UTC (`Z`) |
-| `legalEntity`, `jurisdiction` | legal entity code (stamp); jurisdiction where the contract asks for it |
+| `legalEntity`, `jurisdiction` | legal entity code (stamp) and ISO 3166-1 jurisdiction; both **required** on every event (D-CON-26) |
 | `configurationHash` | SHA-256 of the resolved configuration; for MKT activation events, the hash after the change |
-| `businessKeys` | lineage keys (quote, job, policy, transaction, charge, invoice, claim, journal ids…), D5 / D-CON-01 |
+| `businessKeys` | lineage keys (quote, job, policy, transaction, charge, invoice, claim, journal ids…), D5 / D-CON-01; never empty, and each event schema requires the keys listed in its catalogue `x-business-keys` (D-CON-28) |
 | `correlationId` | W3C trace id, technical tracing only (never used for lineage) |
 | `causationId` | id of the causing event or command, or null |
-| `actor`, `aiInteractionId` | who acted (user / service / AI agent) and the AI interaction record, if any |
+| `actor`, `aiInteractionId` | who acted (user / service / AI agent) and the AI interaction record; both **required** on every event, `aiInteractionId` is null when no AI was involved (D-CON-26) |
 | `origin` | `LIVE`, `MIGRATION` (converted business) or `REPLAY` (re-emitted by the replay command) |
 | `dataClassification` | highest personal-data class in the payload (P0–P3); each event schema pins it |
-| `set_id`, `set_size`, `index` | D4 set completeness; all three or none; **required** on `ChargeDeltaEmitted`, `TransactionReversed`, `TransactionReapplied` |
+| `set_id`, `set_size`, `index` | D4 set completeness; all three or none; `1 <= index <= set_size`; **required** on `ChargeDeltaEmitted`, `TransactionReversed`, `TransactionReapplied` |
 | `payload` | event-specific; bound by the event schema's `$defs/Payload` |
 
 An event schema composes the envelope with `allOf`, pins `eventType`, `producer`, `aggregateType`,
-`dataClassification` and the schema major, and sets `unevaluatedProperties: false`. Payloads use
-`additionalProperties: false`, so a producer cannot emit a field the schema does not declare.
+`dataClassification`, the required `businessKeys` and the schema major, and sets `unevaluatedProperties: false`.
+Payloads use `additionalProperties: false`, so a producer cannot emit a field the schema does not declare.
+
+**Rules JSON Schema cannot express** (enforced by `validate.py` and, later, by the C# envelope type and the outbox
+writer): `set_id`, `set_size` and `index` come together, `index >= 1` and `index <= set_size`. The C# envelope must
+reject such an event at construction, before the outbox row is written.
+
+**Business keys (D-CON-28).** Each catalogue entry lists `x-business-keys`: the aggregate's own id plus the required
+business-object ids in the payload (e.g. `ChargeDeltaEmitted` → policyId, chargeId, policyTermId, transactionId;
+payload `termId` is carried as `policyTermId`). Ids of people (P1) are not lineage keys, except the party or account id
+of PTY party/account events, whose aggregate is that party or account; those values are P1 pseudonymous ids. `a|b`
+means at least one of the two (events whose aggregate can be one of several kinds).
 
 ### Payload conventions
 
 - Money is `{ "amount": "<decimal string>", "currency": "<ISO 4217>" }`. Amounts in several currencies use
-  `MoneyByCurrency3` (transaction, functional, group) or `MoneyByCurrency4` (+ contract currency, RI).
+  `MoneyByCurrency3` (transaction, functional, group) or `MoneyByCurrency4` (+ contract currency, RI). Named totals
+  use `MoneyTotals` (name → Money); named terms mixing amounts and rates use `NamedAmounts` (Money or decimal string).
+- **No bare JSON numbers.** No payload schema uses `type: number`; integers appear only as typed counts. Open
+  structures reject numbers at any depth. `validate.py` checks this statically and injects a numeric value into every
+  structured payload member and every Money amount of every sample, which must be rejected.
 - Dates are ISO `YYYY-MM-DD`; instants are RFC 3339 UTC. Periods are `{from, to}` with `to = null` when open.
 - Internal ids are UUIDs (UUIDv7 generated in .NET). Business numbers (policy, claim, invoice…) are strings whose
   format belongs to the PLT numbering scheme. Where the contract defines a format, the schema enforces it: clock codes
@@ -66,7 +80,8 @@ An event schema composes the envelope with `allOf`, pins `eventType`, `producer`
   schema. A closed `enum` is used only where the PRD lists the values.
 - Optional fields may be absent or null (`oneOf [type, null]`, not in `required`); every other field is required.
 - `OpenObject` marks a structure the PRD names but does not define (e.g. "metrics summary"). Consumers must not rely on
-  its members until the producer defines them in a minor version.
+  its members until the producer defines them in a minor version. Its values may be strings, booleans, null, arrays
+  or objects, never numbers.
 - Payloads carry ids and minimum business data. No names, addresses, IBANs, card data or document content (contract
   §3.4.1). Envelope fields are not repeated in the payload (e.g. `origin`).
 
@@ -75,9 +90,10 @@ An event schema composes the envelope with `allOf`, pins `eventType`, `producer`
 Every payload field carries `x-classification` (`P0` not personal, `P1` personal, `P2` personal-sensitive, `P3`
 special category; contract §3.2.1, R-66). Fields above P0 also carry `x-personal-data: true`, and the catalogue lists
 them per event (`personalDataFields`). The envelope `dataClassification` must equal the highest class in the payload.
-The envelope `actor` is P1. Party, user and requester ids are classified P1 because they point at natural persons. The
-only P2 fields are the fraud score band (`FraudScoreReceived`) and the SIU case fields (`SiuCaseOpened`,
-`SiuCaseConcluded`, restricted). There is no P3 field.
+The envelope `actor` is P1. Party, account, user and requester ids are classified P1 because they point at natural
+persons (`accountId` is P1 everywhere). The fraud score band (`FraudScoreReceived`) and the SIU
+case fields (`SiuCaseOpened`, `SiuCaseConcluded`, restricted contract) are **P3** (D-CON-27), so those events carry
+`dataClassification = P3`. There is no P2 field.
 
 ### Consumers (D-CON-09)
 
@@ -146,5 +162,11 @@ It checks that every catalogue entry has a schema file and every schema file a c
 valid JSON Schema 2020-12 and composes the envelope, that every `$ref` resolves, that names are unique per major with
 one producer each, that producers and consumers are module codes and every consumer cites a handler, that
 classification is consistent, that D4 set fields are required where they must be, and that a synthetic sample of
-every event validates (and an unknown payload field is rejected). Without `jsonschema` it runs only the structural
-checks (and fails if `--require-jsonschema` is given).
+every event validates. Each sample also drives negative tests that must fail: an unknown payload field; a missing
+`actor`, `jurisdiction` or `aiInteractionId`; a missing declared business key or an empty `businessKeys`; missing set
+fields on a set event; `index > set_size` or `index < 1`; a bare number in any structured payload member or Money
+amount; a PINNED rating slot without `pinnedArtefactHash`. Without `jsonschema` it runs only the structural checks
+(and fails if `--require-jsonschema` is given).
+
+`--instance FILE...` additionally validates concrete events (one event or a JSON array), for example test fixtures or
+captured outbox rows, against their schema and the semantic rules above.

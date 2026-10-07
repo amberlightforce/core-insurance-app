@@ -33,6 +33,9 @@
         "partyId",
         "partyNumber"
       ],
+      "x-business-keys": [
+        "partyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -63,6 +66,9 @@
       "personalDataFields": [
         "partyId",
         "partyNumber"
+      ],
+      "x-business-keys": [
+        "partyId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -140,6 +146,10 @@
         "survivorPartyId",
         "mergedPartyIds",
         "repointMap"
+      ],
+      "x-business-keys": [
+        "partyId",
+        "mergeId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -228,6 +238,10 @@
         "restoredPartyIds",
         "reverseRepointMap"
       ],
+      "x-business-keys": [
+        "partyId",
+        "mergeId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -309,6 +323,9 @@
       "personalDataFields": [
         "partyId"
       ],
+      "x-business-keys": [
+        "partyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -348,7 +365,11 @@
       "status": "full",
       "dataClassification": "P1",
       "personalDataFields": [
+        "accountId",
         "holderPartyId"
+      ],
+      "x-business-keys": [
+        "accountId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -381,8 +402,14 @@
         "PRD-18 §8.2"
       ],
       "status": "full",
-      "dataClassification": "P0",
-      "personalDataFields": [],
+      "dataClassification": "P1",
+      "personalDataFields": [
+        "sourceAccountId",
+        "targetAccountId"
+      ],
+      "x-business-keys": [
+        "accountId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -425,8 +452,15 @@
         "PRD-18 §8.2"
       ],
       "status": "full",
-      "dataClassification": "P0",
-      "personalDataFields": [],
+      "dataClassification": "P1",
+      "personalDataFields": [
+        "sourceAccountId",
+        "targetAccountId"
+      ],
+      "x-business-keys": [
+        "accountId",
+        "requestId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -471,6 +505,9 @@
       "status": "full",
       "dataClassification": "P1",
       "personalDataFields": [
+        "partyId"
+      ],
+      "x-business-keys": [
         "partyId"
       ],
       "setCompleteness": false,
@@ -523,6 +560,9 @@
       "personalDataFields": [
         "partyId"
       ],
+      "x-business-keys": [
+        "partyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -573,6 +613,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "partyId"
+      ],
+      "x-business-keys": [
+        "caseNumber"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -635,6 +678,9 @@
       "personalDataFields": [
         "partyId"
       ],
+      "x-business-keys": [
+        "partyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -693,6 +739,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -746,6 +795,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "intermediaryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -799,6 +851,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "agreementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -832,6 +887,9 @@
       "status": "full",
       "dataClassification": "P1",
       "personalDataFields": [
+        "partyId"
+      ],
+      "x-business-keys": [
         "partyId"
       ],
       "setCompleteness": false,
@@ -870,6 +928,9 @@
         "fromPartyId",
         "toPartyId"
       ],
+      "x-business-keys": [
+        "partyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -902,6 +963,9 @@
         "partyId",
         "lifeEventType",
         "effectiveDate"
+      ],
+      "x-business-keys": [
+        "partyId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -940,6 +1004,9 @@
         "flagged",
         "handlingRuleCodes"
       ],
+      "x-business-keys": [
+        "partyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -977,8 +1044,13 @@
         "PRD-18 §8.2"
       ],
       "status": "full",
-      "dataClassification": "P0",
-      "personalDataFields": [],
+      "dataClassification": "P1",
+      "personalDataFields": [
+        "accountId"
+      ],
+      "x-business-keys": [
+        "accountId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1012,6 +1084,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "intermediaryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1045,6 +1120,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "intermediaryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1078,6 +1156,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "intermediaryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1106,6 +1187,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "transferId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1141,6 +1225,9 @@
       "personalDataFields": [
         "userId"
       ],
+      "x-business-keys": [
+        "intermediaryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1174,6 +1261,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "listCode"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1202,6 +1292,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "productId",
+        "changeSetId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1231,6 +1325,10 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "approvals"
+      ],
+      "x-business-keys": [
+        "productId",
+        "evidencePackId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -1275,6 +1373,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "productId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1313,6 +1414,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "productId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1376,6 +1480,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "productId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1434,6 +1541,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "productId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1462,6 +1572,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "tableCode"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1495,6 +1608,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "productId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1523,6 +1639,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "ratingSlotId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1556,6 +1675,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "ratingSlotId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1589,6 +1711,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "ratingSlotId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1632,6 +1757,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "ratingSlotId",
+        "runId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1665,6 +1794,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "ratingSlotId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1703,6 +1835,10 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "ratingSlotId",
+        "runId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1733,6 +1869,10 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "decidedBy"
+      ],
+      "x-business-keys": [
+        "jobId",
+        "modificationId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -1773,6 +1913,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "worksheetId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1802,6 +1945,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "jobId",
+        "issueId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1848,6 +1995,10 @@
         "approverUserId",
         "secondApproverUserId"
       ],
+      "x-business-keys": [
+        "jobId",
+        "issueId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1893,6 +2044,10 @@
       "personalDataFields": [
         "approverUserId"
       ],
+      "x-business-keys": [
+        "jobId",
+        "issueId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1936,6 +2091,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "jobId",
+        "issueId",
+        "approvalId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -1974,6 +2134,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "jobId",
+        "issueId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2008,6 +2172,10 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "assigneeUserId"
+      ],
+      "x-business-keys": [
+        "jobId",
+        "referralId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -2047,6 +2215,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "jobId",
+        "referralId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2086,6 +2258,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "declineId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2125,6 +2300,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "jobId",
+        "declineId",
+        "documentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2154,6 +2334,10 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "owner"
+      ],
+      "x-business-keys": [
+        "policyTermId",
+        "contingencyId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -2193,6 +2377,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyTermId",
+        "contingencyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2236,6 +2424,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyTermId",
+        "contingencyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2274,6 +2466,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "holdId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2322,6 +2517,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "holdId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2370,6 +2568,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "jobId",
+        "inspectionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2403,6 +2605,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "jobId",
+        "orderId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2436,6 +2642,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "ruleSetId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2469,6 +2678,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2502,6 +2714,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyTermId",
+        "findingId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2538,8 +2754,14 @@
         "PRD-18 §8.2"
       ],
       "status": "full",
-      "dataClassification": "P0",
-      "personalDataFields": [],
+      "dataClassification": "P1",
+      "personalDataFields": [
+        "accountId"
+      ],
+      "x-business-keys": [
+        "policyId",
+        "jobId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2589,6 +2811,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2642,6 +2868,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2695,7 +2925,13 @@
       "status": "full",
       "dataClassification": "P1",
       "personalDataFields": [
+        "accountId",
         "payerPartyId"
+      ],
+      "x-business-keys": [
+        "policyId",
+        "policyTermId",
+        "transactionId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -2785,6 +3021,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "policyTermId",
+        "transactionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2838,6 +3079,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "transactionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2916,6 +3161,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -2964,6 +3214,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3007,6 +3262,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "transactionId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3100,6 +3360,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "transactionId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3173,6 +3438,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "transactionId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3251,6 +3521,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "oldTermId",
+        "newTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3329,6 +3604,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId",
+        "expiringTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3377,6 +3657,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3430,6 +3714,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "newTermId",
+        "transactionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3508,6 +3797,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3581,6 +3874,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3649,6 +3946,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "originalTransactionId",
+        "reversalTransactionId"
+      ],
       "setCompleteness": true,
       "consumers": [
         {
@@ -3718,6 +4020,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "originalTransactionId",
+        "newTransactionId"
+      ],
       "setCompleteness": true,
       "consumers": [
         {
@@ -3787,6 +4094,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId",
+        "preemptingTransactionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3825,6 +4137,12 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "chargeId",
+        "policyTermId",
+        "transactionId"
+      ],
       "setCompleteness": true,
       "consumers": [
         {
@@ -3869,6 +4187,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3917,6 +4239,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3965,6 +4291,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "policyTermId",
+        "documentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -3998,6 +4329,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "jobId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4024,8 +4359,14 @@
         "PRD-18 §8.2"
       ],
       "status": "full",
-      "dataClassification": "P0",
-      "personalDataFields": [],
+      "dataClassification": "P1",
+      "personalDataFields": [
+        "oldAccountId",
+        "newAccountId"
+      ],
+      "x-business-keys": [
+        "policyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4064,6 +4405,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "runId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4092,6 +4436,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "invoiceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4136,6 +4484,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "receiptId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4204,6 +4556,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "receiptId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4262,6 +4618,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "receiptId",
+        "reversalId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4300,6 +4661,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "jobId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4339,6 +4704,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "policyTermId",
+        "processId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4382,6 +4752,12 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "policyTermId",
+        "documentId",
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4420,6 +4796,13 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "requestId",
+        "policyTermId",
+        "noticeDocumentId",
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4467,6 +4850,10 @@
         "payeePartyId",
         "decisionMaker"
       ],
+      "x-business-keys": [
+        "billingAccountId",
+        "refundId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4510,6 +4897,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "refundId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4538,6 +4929,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "refundId",
+        "disbursementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4566,7 +4962,7 @@
           "reaction": "Ingest into report store (REQ-DAT-001; rpt_raw per D-ARC-06)"
         }
       ],
-      "notes": "Fires when the bank accepts the payment file (ISSUED), per D-CON-10, although PRD-06 words the trigger as Cleared. Stops POL_REFUND_DUE. D-CON-10 also names a later RefundCleared, which is not in the catalogue of record; clearing is visible through DisbursementCleared."
+      "notes": "Fires when the bank accepts the payment file (ISSUED), per D-CON-10 as amended by D-CON-10a, although PRD-06 words the trigger as Cleared. Stops POL_REFUND_DUE. Per D-CON-10a there is no RefundCleared event; clearing is covered by DisbursementCleared."
     },
     {
       "name": "WriteOffPosted",
@@ -4587,6 +4983,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "writeOffId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4625,6 +5025,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "disbursementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4673,6 +5076,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "disbursementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4716,6 +5122,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "disbursementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4759,6 +5168,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "disbursementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4812,6 +5224,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "intermediaryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4850,6 +5265,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "intermediaryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4888,6 +5306,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "intermediaryId",
+        "statementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4921,6 +5343,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "intermediaryId",
+        "statementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4949,6 +5375,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "levyPeriodId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -4983,6 +5412,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "levyPeriodId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5017,6 +5449,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "policyTermId",
+        "transactionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5051,6 +5488,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "entryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5085,6 +5525,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "processId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5118,6 +5563,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "billingAccountId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5153,6 +5602,10 @@
       "personalDataFields": [
         "mandateReference"
       ],
+      "x-business-keys": [
+        "billingAccountId",
+        "mandateId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5183,6 +5636,10 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "mandateReference"
+      ],
+      "x-business-keys": [
+        "billingAccountId",
+        "mandateId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -5215,6 +5672,9 @@
       "personalDataFields": [
         "payerPartyId"
       ],
+      "x-business-keys": [
+        "billingAccountId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5244,6 +5704,10 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "claimants"
+      ],
+      "x-business-keys": [
+        "claimId",
+        "policyId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -5315,6 +5779,9 @@
       "personalDataFields": [
         "decisionMaker"
       ],
+      "x-business-keys": [
+        "claimId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5348,6 +5815,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5382,6 +5852,10 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "claimantPartyId"
+      ],
+      "x-business-keys": [
+        "claimId",
+        "exposureId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -5421,6 +5895,12 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId",
+        "exposureId",
+        "setId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5461,6 +5941,10 @@
       "personalDataFields": [
         "approverUserIds"
       ],
+      "x-business-keys": [
+        "claimId",
+        "setId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5499,6 +5983,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId",
+        "setId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5528,6 +6016,11 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "payeePartyId"
+      ],
+      "x-business-keys": [
+        "claimId",
+        "paymentId",
+        "disbursementId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -5578,6 +6071,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId",
+        "paymentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5618,6 +6115,10 @@
       "personalDataFields": [
         "counterpartyPartyId"
       ],
+      "x-business-keys": [
+        "claimId",
+        "recoveryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5656,6 +6157,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5719,6 +6223,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5782,6 +6289,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5820,6 +6330,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5858,6 +6371,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "catEventId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5896,6 +6412,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "catEventId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -5932,9 +6451,12 @@
         "PRD-18 §8.2"
       ],
       "status": "full",
-      "dataClassification": "P2",
+      "dataClassification": "P3",
       "personalDataFields": [
         "band"
+      ],
+      "x-business-keys": [
+        "claimId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -5949,7 +6471,7 @@
           "reaction": "Ingest into report store (REQ-DAT-001; rpt_raw per D-ARC-06)"
         }
       ],
-      "notes": "Score band only; model features are never carried."
+      "notes": "Score band only (P3, D-CON-27); model features are never carried."
     },
     {
       "name": "StatutoryOfferDue",
@@ -5971,6 +6493,11 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "claimantPartyId"
+      ],
+      "x-business-keys": [
+        "claimId",
+        "exposureId",
+        "clockInstanceId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -6003,6 +6530,11 @@
       "personalDataFields": [
         "claimantPartyId"
       ],
+      "x-business-keys": [
+        "claimId",
+        "exposureId",
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6032,6 +6564,12 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId",
+        "exposureId",
+        "documentId",
+        "deliveryEvidenceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6067,6 +6605,10 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "requesterPartyId"
+      ],
+      "x-business-keys": [
+        "certificateId",
+        "documentId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -6114,6 +6656,10 @@
       "personalDataFields": [
         "decisionMaker"
       ],
+      "x-business-keys": [
+        "claimId",
+        "exposureId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6144,6 +6690,10 @@
       "personalDataFields": [
         "vendorPartyId"
       ],
+      "x-business-keys": [
+        "claimId",
+        "serviceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6172,6 +6722,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId",
+        "invoiceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6198,9 +6752,12 @@
         "PRD-18 §8.2"
       ],
       "status": "full",
-      "dataClassification": "P2",
+      "dataClassification": "P3",
       "personalDataFields": [
         "caseId"
+      ],
+      "x-business-keys": [
+        "claimId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -6210,7 +6767,7 @@
           "reaction": "Ingest into report store (REQ-DAT-001; rpt_raw per D-ARC-06)"
         }
       ],
-      "notes": "Restricted contract; no narrative. Keyed on the first linked claim."
+      "notes": "Restricted contract (P3, D-CON-27); no narrative. Keyed on the first linked claim."
     },
     {
       "name": "SiuCaseConcluded",
@@ -6229,10 +6786,13 @@
         "PRD-18 §8.2"
       ],
       "status": "full",
-      "dataClassification": "P2",
+      "dataClassification": "P3",
       "personalDataFields": [
         "caseId",
         "outcomeCode"
+      ],
+      "x-business-keys": [
+        "claimId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -6242,7 +6802,7 @@
           "reaction": "Ingest into report store (REQ-DAT-001; rpt_raw per D-ARC-06)"
         }
       ],
-      "notes": "Restricted contract; no narrative."
+      "notes": "Restricted contract (P3, D-CON-27); no narrative."
     },
     {
       "name": "FriendlySettlementSubmitted",
@@ -6263,6 +6823,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "claimId",
+        "fsCaseId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6291,6 +6855,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6329,6 +6896,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6363,6 +6933,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riProgrammeId",
+        "programmeId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6391,6 +6965,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6419,6 +6996,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6447,6 +7027,13 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "policyTermId",
+        "riContractId",
+        "participantPartyId",
+        "deltaSetId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6481,6 +7068,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "exceptionId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6519,6 +7111,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId",
+        "exceptionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6547,6 +7143,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId",
+        "policyTermId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6580,6 +7180,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId",
+        "batchId",
+        "participantPartyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6618,6 +7223,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId",
+        "reinstatementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6651,6 +7260,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId",
+        "instalmentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6684,6 +7297,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6718,6 +7334,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6752,6 +7371,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId",
+        "bordereauId",
+        "documentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6785,6 +7409,11 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "statementId",
+        "riContractId",
+        "counterpartyPartyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6819,6 +7448,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "statementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6847,6 +7479,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "statementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6875,6 +7510,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId",
+        "cashCallId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6908,6 +7547,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "counterpartyPartyId",
+        "settlementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6941,6 +7584,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6971,6 +7617,9 @@
       "personalDataFields": [
         "decidedBy"
       ],
+      "x-business-keys": [
+        "riContractId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -6999,6 +7648,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId",
+        "documentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7027,6 +7680,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "riContractId",
+        "collateralId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7055,6 +7712,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "zoneKey"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7088,6 +7748,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "reinsurerPartyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7116,6 +7779,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "journalId",
+        "periodId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7155,6 +7822,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "runId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7183,6 +7853,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "extractId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7211,6 +7884,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "runId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7239,6 +7915,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "versionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7267,6 +7946,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "businessEventId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7295,6 +7977,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "resultSetId",
+        "runId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7323,6 +8009,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "periodId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7373,6 +8062,9 @@
       "personalDataFields": [
         "approverUserIds"
       ],
+      "x-business-keys": [
+        "periodId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7416,6 +8108,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "breakId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7464,6 +8159,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "breakId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7502,6 +8200,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "assignmentSubjectId",
+        "groupId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7536,6 +8238,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "returnId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7569,6 +8274,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "documentId",
+        "requestId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7598,6 +8307,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "recipients"
+      ],
+      "x-business-keys": [
+        "documentId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -7667,6 +8379,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "documentId",
+        "failureItemId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7706,6 +8422,10 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "recipientPartyId"
+      ],
+      "x-business-keys": [
+        "documentId",
+        "deliveryId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -7783,6 +8503,10 @@
         "recipientPartyId",
         "contactPointId"
       ],
+      "x-business-keys": [
+        "documentId",
+        "deliveryId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7856,6 +8580,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "envelopeId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7899,6 +8626,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "envelopeId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7942,6 +8672,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "documentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -7975,6 +8708,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "batchId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8003,6 +8739,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "documentId",
+        "packId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8031,6 +8771,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "templateId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8059,6 +8802,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clauseId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8092,6 +8838,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "bindingId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8125,6 +8874,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "formPatternId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8158,6 +8910,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "formPatternId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8191,6 +8946,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "fiscalDocumentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8254,6 +9012,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "fiscalDocumentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8317,6 +9078,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "fiscalDocumentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8357,6 +9121,11 @@
       "personalDataFields": [
         "vehicleRef"
       ],
+      "x-business-keys": [
+        "policyId",
+        "policyTermId",
+        "submissionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8395,6 +9164,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8438,6 +9210,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "policyId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8472,6 +9247,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8536,6 +9314,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8604,6 +9385,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8678,6 +9462,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8747,6 +9534,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8811,6 +9601,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8839,6 +9632,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8867,6 +9663,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clockInstanceId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8895,6 +9694,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "complaintId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8938,6 +9740,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "complaintId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -8976,6 +9781,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "complaintId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9005,6 +9813,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "complaintId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9034,6 +9845,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "complaintId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9064,6 +9878,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "subjectPartyIds"
+      ],
+      "x-business-keys": [
+        "dsarId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -9119,6 +9936,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "dsarId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9153,6 +9973,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "dsarId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9181,6 +10004,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "dsarId",
+        "taskId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9209,6 +10036,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "submissionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9237,6 +10067,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "submissionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9266,6 +10099,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "returnId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9294,6 +10130,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "obligationCode"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9323,6 +10162,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "obligationCode"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9352,6 +10194,9 @@
       "status": "minimal",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "changeId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9382,6 +10227,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "featureId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9417,6 +10265,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "withdrawalRequestId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9458,6 +10309,9 @@
       "personalDataFields": [
         "decisionMakerUserId"
       ],
+      "x-business-keys": [
+        "withdrawalRequestId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9486,6 +10340,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "jobId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9520,6 +10377,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "permissionMatrixVersion"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9548,6 +10408,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "clientId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9576,6 +10439,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "subscriptionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9606,6 +10472,9 @@
       "personalDataFields": [
         "approverUserId"
       ],
+      "x-business-keys": [
+        "ticketId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9635,6 +10504,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "requestNumber"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9666,6 +10538,9 @@
       "personalDataFields": [
         "pseudonymousIds"
       ],
+      "x-business-keys": [
+        "sessionId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9694,6 +10569,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "activityId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9735,6 +10613,9 @@
         "previousAssignee",
         "newAssignee"
       ],
+      "x-business-keys": [
+        "activityId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9769,6 +10650,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "closedBy"
+      ],
+      "x-business-keys": [
+        "activityId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -9848,6 +10732,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "activityId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9882,6 +10769,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "actor"
+      ],
+      "x-business-keys": [
+        "activityId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -9918,6 +10808,9 @@
       "personalDataFields": [
         "newAssignee"
       ],
+      "x-business-keys": [
+        "activityId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9952,6 +10845,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "activityId|requestId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -9993,6 +10889,9 @@
       "personalDataFields": [
         "authorUserId"
       ],
+      "x-business-keys": [
+        "noteId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10024,6 +10923,9 @@
       "personalDataFields": [
         "actor"
       ],
+      "x-business-keys": [
+        "noteId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10054,6 +10956,9 @@
       "personalDataFields": [
         "actor"
       ],
+      "x-business-keys": [
+        "noteId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10082,6 +10987,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "inboundDocumentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10116,6 +11024,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "inboundDocumentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10160,6 +11071,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "verifiedBy"
+      ],
+      "x-business-keys": [
+        "inboundDocumentId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -10216,6 +11130,9 @@
       "personalDataFields": [
         "verifiedBy"
       ],
+      "x-business-keys": [
+        "inboundDocumentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10254,6 +11171,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "inboundDocumentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10287,6 +11207,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "requestId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10316,6 +11239,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "requesterRef"
+      ],
+      "x-business-keys": [
+        "requestId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -10355,6 +11281,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "requestId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10391,6 +11320,9 @@
         "oldParticipant",
         "newParticipant"
       ],
+      "x-business-keys": [
+        "objectId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10419,6 +11351,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "resolutionContextId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10525,6 +11460,9 @@
       "personalDataFields": [
         "actor"
       ],
+      "x-business-keys": [
+        "flagKey"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10574,6 +11512,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "actor"
+      ],
+      "x-business-keys": [
+        "featureId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -10681,6 +11622,9 @@
       "personalDataFields": [
         "actor"
       ],
+      "x-business-keys": [
+        "aiFeatureId|killSwitchScope"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10785,6 +11729,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "incidentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10828,6 +11775,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "incidentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10861,6 +11811,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "incidentId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10894,6 +11847,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "rcCode"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10934,6 +11890,9 @@
       "personalDataFields": [
         "userId"
       ],
+      "x-business-keys": [
+        "userId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -10962,6 +11921,9 @@
       "status": "full",
       "dataClassification": "P1",
       "personalDataFields": [
+        "userId"
+      ],
+      "x-business-keys": [
         "userId"
       ],
       "setCompleteness": false,
@@ -10999,6 +11961,9 @@
       "personalDataFields": [
         "userId"
       ],
+      "x-business-keys": [
+        "userId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11034,6 +11999,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "usersAffected"
+      ],
+      "x-business-keys": [
+        "authorityProfileId|userId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -11094,6 +12062,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "requestId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11128,6 +12099,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "checkerUserId"
+      ],
+      "x-business-keys": [
+        "requestId"
       ],
       "setCompleteness": false,
       "consumers": [
@@ -11187,6 +12161,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "holdId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11250,6 +12227,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "holdId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11313,6 +12293,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "referenceSetCode"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11351,6 +12334,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "consumerGroup"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11379,6 +12365,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "jobCode",
+        "runId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11407,6 +12397,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "changeId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11435,6 +12428,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "modelId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11468,6 +12464,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "modelId",
+        "breachId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11557,6 +12557,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "breachId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11646,6 +12649,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "martRunId",
+        "runId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11684,6 +12691,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "runId",
+        "resultSetId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11712,6 +12723,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "snapshotId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11746,6 +12760,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "taskId",
+        "dsarId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11782,6 +12800,9 @@
       "personalDataFields": [
         "approverUserIds"
       ],
+      "x-business-keys": [
+        "modelId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11815,6 +12836,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "modelId"
+      ],
       "setCompleteness": false,
       "consumers": []
     },
@@ -11837,6 +12861,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "contractId"
+      ],
       "setCompleteness": false,
       "consumers": []
     },
@@ -11859,6 +12886,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "breakId"
+      ],
       "setCompleteness": false,
       "consumers": []
     },
@@ -11881,6 +12911,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "breakId"
+      ],
       "setCompleteness": false,
       "consumers": []
     },
@@ -11903,6 +12936,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "batchId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11954,6 +12990,9 @@
       "personalDataFields": [
         "signatories"
       ],
+      "x-business-keys": [
+        "batchId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -11992,6 +13031,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "waveId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12040,6 +13082,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "routeId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12094,6 +13139,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "stampId",
+        "changeRequestId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12163,6 +13212,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "stampId",
+        "packId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12256,6 +13309,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "stampId",
+        "packId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12329,6 +13386,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "stampId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12372,6 +13432,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "packId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12415,6 +13478,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "stampId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12458,6 +13524,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "stampId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12491,6 +13560,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "packId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12519,6 +13591,10 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "packId",
+        "runId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12547,6 +13623,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "stampId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12575,6 +13654,9 @@
       "status": "full",
       "dataClassification": "P0",
       "personalDataFields": [],
+      "x-business-keys": [
+        "disbursementId"
+      ],
       "setCompleteness": false,
       "consumers": [
         {
@@ -12640,6 +13722,9 @@
       "dataClassification": "P1",
       "personalDataFields": [
         "actor"
+      ],
+      "x-business-keys": [
+        "disbursementId"
       ],
       "setCompleteness": false,
       "consumers": [
