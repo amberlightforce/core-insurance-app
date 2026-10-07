@@ -62,6 +62,8 @@ paths:
       - W4-POL-01
       - W4-POL-04
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-POL-001, REQ-POL-145
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -147,6 +149,7 @@ paths:
       - W4-POL-01
       - W4-POL-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -220,7 +223,8 @@ paths:
       x-work-packages:
       - W4-POL-04
       x-status: full
-      x-io-shared: 2
+      x-maturity: pre-release
+      x-typed: REQ-POL-011, REQ-POL-157
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -298,6 +302,7 @@ paths:
       x-work-packages:
       - W4-POL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -365,6 +370,7 @@ paths:
       x-work-packages:
       - W4-POL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -433,6 +439,7 @@ paths:
       x-work-packages:
       - W4-POL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -494,6 +501,7 @@ paths:
       x-work-packages:
       - W4-POL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -551,6 +559,8 @@ paths:
       - W4-POL-01
       - W4-POL-05
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-POL-001, REQ-POL-003, REQ-POL-170
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -637,6 +647,7 @@ paths:
       - W4-POL-01
       - W4-POL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -703,6 +714,7 @@ paths:
       - W4-POL-01
       - W4-POL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -771,6 +783,7 @@ paths:
       - W4-POL-01
       - W4-POL-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -838,6 +851,7 @@ paths:
       x-work-packages:
       - W4-POL-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -904,6 +918,7 @@ paths:
       x-work-packages:
       - W4-POL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -966,6 +981,7 @@ paths:
       x-work-packages:
       - W4-POL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1028,6 +1044,7 @@ paths:
       x-work-packages:
       - W4-POL-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1103,6 +1120,7 @@ paths:
       x-work-packages:
       - W4-POL-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1181,6 +1199,7 @@ paths:
       x-work-packages:
       - W6-POL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1259,6 +1278,7 @@ paths:
       x-work-packages:
       - W6-POL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1339,6 +1359,7 @@ paths:
       x-work-packages:
       - W6-POL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1411,6 +1432,7 @@ paths:
       x-work-packages:
       - W6-POL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1482,6 +1504,7 @@ paths:
       x-work-packages:
       - W6-POL-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1546,6 +1569,7 @@ paths:
       x-work-packages:
       - W6-POL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1613,6 +1637,7 @@ paths:
       x-work-packages:
       - W6-POL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1681,6 +1706,7 @@ paths:
       x-work-packages:
       - W6-POL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1746,6 +1772,7 @@ paths:
       x-work-packages:
       - W6-POL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1812,6 +1839,7 @@ paths:
       x-work-packages:
       - W6-POL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1885,6 +1913,7 @@ paths:
       x-work-packages:
       - W6-POL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1958,6 +1987,7 @@ paths:
       x-work-packages:
       - W6-POL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2031,6 +2061,7 @@ paths:
       x-work-packages:
       - W6-POL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2104,6 +2135,7 @@ paths:
       x-work-packages:
       - W6-POL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2174,6 +2206,7 @@ paths:
       x-work-packages:
       - W6-POL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2234,6 +2267,7 @@ paths:
       x-work-packages:
       - W6-POL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2294,6 +2328,7 @@ paths:
       x-work-packages:
       - W6-POL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2354,6 +2389,7 @@ paths:
       x-work-packages:
       - W6-POL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -2425,6 +2461,7 @@ paths:
       - W4-POL-02
       - W4-POL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2503,6 +2540,7 @@ paths:
       - W4-POL-01
       - W4-POL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2567,7 +2605,9 @@ paths:
       - W4-POL-01
       - W4-POL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
+      x-bounded: one term's timeline (REQ-POL-002)
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2624,6 +2664,7 @@ paths:
       x-work-packages:
       - W4-POL-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2638,22 +2679,25 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-05 §9.1 l.1794
+      x-prd-param-names:
+        validAt: lossAt
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/KnownAt
-      - name: policyidOrSnapshotref
+      - name: policyId
         in: query
         required: false
-        description: 'PRD: "policyId or snapshotRef"'
+        description: 'PRD: "policyId or snapshotRef" (optional)'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: snapshotRef
+        in: query
+        required: false
+        description: 'PRD: "policyId or snapshotRef" (optional)'
         schema:
           type: string
-      - name: lossAt
-        in: query
-        required: false
-        description: 'PRD: "lossAt"'
-        schema:
-          $ref: ../events/common.schema.json#/$defs/Instant
       responses:
         '200':
           description: Success
@@ -2684,6 +2728,8 @@ paths:
       - REQ-POL-351
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
+      x-bounded: ids <= 200 per call (REQ-POL-351)
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2743,6 +2789,7 @@ paths:
       x-work-packages:
       - W4-POL-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2806,6 +2853,7 @@ paths:
       x-work-packages:
       - W4-POL-03
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2820,11 +2868,13 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-05 §9.1 l.1797
+      x-prd-param-names:
+        validAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/KnownAt
-      - $ref: common.yaml#/components/parameters/AsOf
       requestBody:
         required: true
         content:
@@ -2864,6 +2914,7 @@ paths:
       x-work-packages:
       - W4-POL-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2920,6 +2971,7 @@ paths:
       x-work-packages:
       - W4-POL-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2982,6 +3034,7 @@ paths:
       x-work-packages:
       - W4-POL-03
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3032,6 +3085,7 @@ paths:
       x-work-packages:
       - W4-POL-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3108,6 +3162,7 @@ paths:
       - W4-POL-05
       - W9-POL-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -3177,6 +3232,7 @@ paths:
       - W4-POL-05
       - W9-POL-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -3239,6 +3295,7 @@ paths:
       - REQ-POL-358
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3301,6 +3358,7 @@ paths:
       - REQ-POL-350
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3362,6 +3420,7 @@ paths:
       x-work-packages:
       - W4-POL-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3424,6 +3483,7 @@ paths:
       x-work-packages:
       - W4-POL-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3476,42 +3536,77 @@ components:
   schemas:
     SubmissionCreateRequest:
       type: object
-      description: 'pol.Submission.create request. PRD inputs: "accountId, product, producerCode, channel, effectiveAt, quoteType"'
       properties:
         accountId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "accountId"'
         product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
+          $ref: ../events/common.schema.json#/$defs/Code
         producerCode:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "producerCode"'
+          $ref: ../events/common.schema.json#/$defs/Code
         channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: R-84 channel code (e.g. STAFF, WEB_DIRECT, BROKER_PORTAL, PARTNER_API, AI_AGENT)
         effectiveAt:
           $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "effectiveAt"'
         quoteType:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "quoteType"'
+          type: string
+          enum:
+          - QUICK
+          - FULL
+          description: Quick or full quote (REQ-POL-011)
+      required:
+      - accountId
+      - product
+      - channel
+      - effectiveAt
+      - quoteType
+      description: 'Typed from REQ-POL-001, REQ-POL-145. PRD inputs: "accountId, product, producerCode, channel, effectiveAt,
+        quoteType"'
     SubmissionCreateResponse:
       type: object
-      description: 'pol.Submission.create result. PRD outputs: "jobId, describe model, version, manifest"'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
         describeModel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "describe model"'
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: pfc.Product.describe model
+        versionNo:
+          type: integer
+          description: Quote version number
+          minimum: 1
         manifest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manifest"'
+          type: object
+          properties:
+            artefactHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+            ratingArtefactHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+              description: Floating at resolution, pinned for the term (REQ-PFC-221)
+            uwRuleSetVersions:
+              type: object
+              additionalProperties:
+                $ref: ../events/common.schema.json#/$defs/Code
+              description: Rule-set version per checkpoint
+            formPatternEditions:
+              type: array
+              items:
+                $ref: ../events/common.schema.json#/$defs/Code
+            referenceTableVersions:
+              type: array
+              items:
+                $ref: ../events/common.schema.json#/$defs/Code
+            paymentPlanVersions:
+              type: array
+              items:
+                $ref: ../events/common.schema.json#/$defs/Code
+          required:
+          - artefactHash
+          description: Resolution manifest (REQ-PFC-221)
+      required:
+      - jobId
+      - versionNo
+      - manifest
+      description: 'Typed from REQ-POL-001, REQ-POL-145. PRD outputs: "jobId, describe model, version, manifest"'
     JobUpdateDraftRequest:
       type: object
       description: 'pol.Job.updateDraft request. PRD inputs: "jobId, versionNo, instructions[], expectedDraftVersion"'
@@ -3541,36 +3636,75 @@ components:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "validation"'
         premiumPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Money
           description: 'PRD: "premium preview"'
     JobQuoteRequest:
       type: object
-      description: 'pol.Job.quote request. PRD inputs: "jobId, versionNo"'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
         versionNo:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versionNo"'
+          type: integer
+          description: Quote version
+          minimum: 1
+      required:
+      - jobId
+      - versionNo
+      description: 'Typed from REQ-POL-011, REQ-POL-157. PRD inputs: "jobId, versionNo"'
     JobQuoteResponse:
       type: object
-      description: 'pol.Job.quote result. PRD outputs: "quote version, premium, issues, validity"'
       properties:
-        quoteVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "quote version"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+          description: Quote version
+          minimum: 1
         premium:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "premium"'
         issues:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
-        validity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validity"'
+            type: object
+            properties:
+              issueId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              issueType:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: Issue type code
+              severity:
+                $ref: ../events/common.schema.json#/$defs/Code
+              blockingPoint:
+                $ref: ../events/common.schema.json#/$defs/BlockingPoint
+              issueKey:
+                type: string
+                description: Issue key, e.g. `driver:<driverRef>` (REQ-UW-001)
+              lane:
+                $ref: ../events/common.schema.json#/$defs/Code
+              explanationKeys:
+                type: array
+                items:
+                  type: string
+              approvalStatus:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: Issue state (PRD-04 §7.3)
+            required:
+            - issueId
+            - issueType
+            - blockingPoint
+            - issueKey
+            - approvalStatus
+            description: UW issue as returned by evaluate (REQ-UW-001)
+          description: UW issues by blocking point
+        validUntil:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Quote validity
+      required:
+      - jobId
+      - versionNo
+      - premium
+      - issues
+      description: 'Typed from REQ-POL-011, REQ-POL-157. PRD outputs: "quote version, premium, issues, validity"'
     JobRequoteRequest:
       type: object
       description: 'pol.Job.requote request. PRD inputs: "jobId, versionNo"'
@@ -3661,46 +3795,92 @@ components:
           description: 'PRD: "comparison"'
     JobBindRequest:
       type: object
-      description: 'pol.Job.bind request. PRD inputs: "jobId, versionNo, paymentPlanOption, holdIssuance, confirmation, disclosureEvidence
-        (CHN presentation receipt, optional)"'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
         versionNo:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versionNo"'
+          type: integer
+          description: Quote version
+          minimum: 1
         paymentPlanOption:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "paymentPlanOption"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: BIL plan code (bil.PaymentPlan.select)
         holdIssuance:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "holdIssuance"'
+          type: boolean
+          description: Hold issuance
         confirmation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "confirmation"'
+          type: boolean
+          description: Human confirmation (POL-ERR-HUMAN-CONFIRMATION-REQUIRED)
         disclosureEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "disclosureEvidence (CHN presentation receipt, optional)"'
+          type: object
+          properties:
+            presentationReceiptId:
+              $ref: ../events/common.schema.json#/$defs/Uuid
+              description: CHN presentation receipt
+          description: Optional
+      required:
+      - jobId
+      - versionNo
+      description: 'Typed from REQ-POL-001, REQ-POL-003, REQ-POL-170. PRD inputs: "jobId, versionNo, paymentPlanOption, holdIssuance,
+        confirmation, disclosureEvidence (CHN presentation receipt, optional)"'
     JobBindResponse:
       type: object
-      description: 'pol.Job.bind result. PRD outputs: "transaction, term, deltas, gate results, cover note ref"'
       properties:
-        transaction:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transaction"'
-        term:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term"'
-        deltas:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deltas"'
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        chargeDeltas:
+          type: array
+          items:
+            type: object
+            properties:
+              chargeId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              elementId:
+                type: string
+              chargeType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+            required:
+            - chargeType
+            - amount
         gateResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "gate results"'
-        coverNoteRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "cover note ref"'
+          type: array
+          items:
+            type: object
+            properties:
+              gate:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: e.g. DOWN_PAYMENT
+              passed:
+                type: boolean
+                description: Gate passed
+              severity:
+                type: string
+                enum:
+                - BLOCK
+                - WARN
+                description: REQ-POL-170
+              reason:
+                $ref: ../events/common.schema.json#/$defs/Code
+              evidenceRef:
+                type: string
+            required:
+            - gate
+            - passed
+            - severity
+        coverNoteDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: doc.ProofOfCover.issue result
+      required:
+      - gateResults
+      description: 'On a failed gate the job stays Quoted, no transaction exists and gateResults explain why (REQ-POL-003)
+        Typed from REQ-POL-001, REQ-POL-003, REQ-POL-170. PRD outputs: "transaction, term, deltas, gate results, cover note
+        ref"'
     JobWithdrawRequest:
       type: object
       description: 'pol.Job.withdraw request. PRD inputs: "jobId, reasonCode, text"'
@@ -4318,7 +4498,10 @@ components:
       type: object
       description: 'pol.Snapshot.get result. PRD outputs: "snapshot ref + content"'
       properties:
-        snapshotRefContent:
+        snapshotRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "snapshot ref + content"'
+        content:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "snapshot ref + content"'
     PolicyGetManyResponse:
@@ -4352,12 +4535,6 @@ components:
         termId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "termId"'
-        asOf:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "asOf"'
-        knownAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "knownAt"'
     EarningComputeResponse:
       type: object
       description: 'pol.Earning.compute result. PRD outputs: "per element × charge type"'
@@ -4366,12 +4543,20 @@ components:
       type: object
       description: 'pol.Charges.reconcile request. PRD inputs: "termId or period, counterpart totals"'
       properties:
-        termidOrPeriod:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId or period" (optional)'
+        period:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "termId or period"'
+          description: 'PRD: "termId or period" (optional)'
         counterpartTotals:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "counterpart totals"'
+      oneOf:
+      - required:
+        - termId
+      - required:
+        - period
     ChargesReconcileResponse:
       type: object
       description: 'pol.Charges.reconcile result. PRD outputs: "differences"'
@@ -4448,9 +4633,17 @@ components:
       type: object
       description: 'pol.Import.reverse request. PRD inputs: "importBatchId or sourceKeys"'
       properties:
-        importbatchidOrSourcekeys:
+        importBatchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "importBatchId or sourceKeys" (optional)'
+        sourceKeys:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "importBatchId or sourceKeys"'
+          description: 'PRD: "importBatchId or sourceKeys" (optional)'
+      oneOf:
+      - required:
+        - importBatchId
+      - required:
+        - sourceKeys
     ImportReverseResponse:
       type: object
       description: 'pol.Import.reverse result. PRD outputs: "per-object outcome (reversed, refused with reason)"'

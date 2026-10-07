@@ -77,6 +77,7 @@ paths:
       x-work-packages:
       - W1-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -139,6 +140,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -213,6 +215,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -294,6 +297,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -363,6 +367,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -444,6 +449,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -523,6 +529,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -597,6 +604,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -662,6 +670,7 @@ paths:
       - W1-PLT-01
       - W4-CHN-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -739,6 +748,7 @@ paths:
       - W1-PLT-01
       - W4-CHN-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -816,6 +826,7 @@ paths:
       - W1-PLT-01
       - W4-CHN-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -895,6 +906,7 @@ paths:
       - W4-CHN-02
       - W9-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -971,6 +983,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1041,6 +1054,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1110,6 +1124,7 @@ paths:
       - W1-PLT-01
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1165,6 +1180,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1228,6 +1244,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1291,6 +1308,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1353,6 +1371,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -1423,6 +1442,8 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-PLT-003, REQ-PLT-103
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1450,11 +1471,14 @@ paths:
         status: 422
       x-source:
       - PRD-14 §9.1 l.1962
+      x-prd-param-names:
+        validAt: asAt
       x-superseded-names:
       - authority.check (contract REQ-PLT-003 shorthand)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -1495,6 +1519,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -1557,6 +1582,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1607,6 +1633,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1679,6 +1706,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1761,6 +1789,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1834,6 +1863,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1903,6 +1933,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -1968,6 +1999,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -2024,6 +2056,7 @@ paths:
       x-work-packages:
       - W1-PLT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2088,6 +2121,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -2164,6 +2198,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2218,6 +2253,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2282,6 +2318,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2351,6 +2388,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -2423,6 +2461,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -2492,6 +2531,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2555,6 +2595,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2628,6 +2669,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2686,6 +2728,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2757,6 +2800,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2823,6 +2867,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -2893,6 +2938,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2955,6 +3001,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3028,6 +3075,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3103,6 +3151,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -3163,6 +3212,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3233,6 +3283,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3300,6 +3351,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3364,6 +3416,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3426,6 +3479,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3488,6 +3542,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -3504,13 +3559,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JobHistoryResponse'
+                $ref: '#/components/schemas/JobHistoryPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -3538,6 +3595,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -3554,9 +3612,12 @@ paths:
         status: 422
       x-source:
       - PRD-14 §9.1 l.1976
+      x-prd-param-names:
+        validAt: version or as-at
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -3597,6 +3658,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3615,11 +3677,14 @@ paths:
         status: 409
       x-source:
       - PRD-14 §9.1 l.1976
+      x-prd-param-names:
+        validAt: version or as-at
       parameters:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/DryRun
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -3662,6 +3727,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3680,11 +3746,14 @@ paths:
         status: 409
       x-source:
       - PRD-14 §9.1 l.1976
+      x-prd-param-names:
+        validAt: version or as-at
       parameters:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/DryRun
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -3727,6 +3796,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -3742,9 +3812,12 @@ paths:
         status: 422
       x-source:
       - PRD-14 §9.1 l.1976
+      x-prd-param-names:
+        validAt: version or as-at
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       responses:
         '200':
           description: Success
@@ -3784,6 +3857,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -3849,6 +3923,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -3906,6 +3981,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3982,6 +4058,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -4039,6 +4116,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -4094,6 +4172,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -4151,6 +4230,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -4207,6 +4287,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4274,6 +4355,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4341,6 +4423,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4407,6 +4490,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -4465,7 +4549,9 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
+      x-bounded: rates of one currency pair and date range (REQ-PLT-200)
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -4520,6 +4606,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4587,6 +4674,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -4650,6 +4738,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4725,6 +4814,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4793,6 +4883,7 @@ paths:
       x-work-packages:
       - W1-PLT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4859,6 +4950,7 @@ paths:
       x-work-packages:
       - W8-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -4933,6 +5025,7 @@ paths:
       x-work-packages:
       - W8-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -5006,6 +5099,7 @@ paths:
       x-work-packages:
       - W8-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -5072,6 +5166,7 @@ paths:
       x-work-packages:
       - W8-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -5141,6 +5236,7 @@ paths:
       x-work-packages:
       - W8-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -5210,6 +5306,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -5279,6 +5376,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5347,6 +5445,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -5363,13 +5462,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RetentionRunsResponse'
+                $ref: '#/components/schemas/RetentionRunsPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -5400,6 +5501,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -5466,6 +5568,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -5532,6 +5635,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -5594,6 +5698,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -5663,6 +5768,7 @@ paths:
       x-work-packages:
       - W1-PLT-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -5732,6 +5838,7 @@ paths:
       x-work-packages:
       - W8-PLT-01
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -5793,6 +5900,7 @@ paths:
       x-work-packages:
       - W1-PLT-07
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -5851,6 +5959,7 @@ paths:
       x-work-packages:
       - W9-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5921,6 +6030,7 @@ paths:
       x-work-packages:
       - W9-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5991,6 +6101,7 @@ paths:
       x-work-packages:
       - W9-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -6061,6 +6172,7 @@ paths:
       x-work-packages:
       - W9-PLT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -6131,6 +6243,7 @@ paths:
       x-work-packages:
       - W1-PLT-07
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -6190,6 +6303,7 @@ paths:
       x-work-packages:
       - W1-PLT-07
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -6253,6 +6367,7 @@ paths:
       x-work-packages:
       - W1-PLT-07
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -6309,6 +6424,7 @@ paths:
       - REQ-PLT-358
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -6378,6 +6494,7 @@ paths:
       - REQ-PLT-358
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -6441,6 +6558,7 @@ paths:
       x-work-packages:
       - W1-PLT-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -6506,6 +6624,7 @@ paths:
       - REQ-PLT-364
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -6563,6 +6682,7 @@ paths:
       - REQ-PLT-364
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -6620,6 +6740,7 @@ paths:
       - REQ-PLT-362
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -6675,6 +6796,7 @@ x-operation-families:
   - REQ-PLT-078
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1958
@@ -6687,6 +6809,7 @@ x-operation-families:
   - REQ-PLT-089
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1960
@@ -6698,6 +6821,7 @@ x-operation-families:
   - REQ-PLT-101..REQ-PLT-112
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1964
@@ -6709,6 +6833,7 @@ x-operation-families:
   - REQ-PLT-101..REQ-PLT-112
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1964
@@ -6723,6 +6848,7 @@ x-operation-families:
   - REQ-PLT-008
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1978
@@ -6738,6 +6864,7 @@ x-operation-families:
   - REQ-PLT-008
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1979
@@ -6750,6 +6877,7 @@ x-operation-families:
   - REQ-PLT-299..REQ-PLT-319
   x-wave: W8
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1986
@@ -6762,6 +6890,7 @@ x-operation-families:
   - REQ-PLT-299..REQ-PLT-319
   x-wave: W8
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1986
@@ -6774,6 +6903,7 @@ x-operation-families:
   - REQ-PLT-299..REQ-PLT-319
   x-wave: W8
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1986
@@ -6785,6 +6915,7 @@ x-operation-families:
   - REQ-PLT-331
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-14 §9.1 l.1991
@@ -6949,9 +7080,12 @@ components:
       type: object
       description: 'plt.ExternalUser.invite request. PRD inputs: "party or intermediary ref, contact point, roles, scope"'
       properties:
-        partyOrIntermediaryRef:
+        partyRef:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party or intermediary ref"'
+          description: 'PRD: "party or intermediary ref" (optional)'
+        intermediaryRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party or intermediary ref" (optional)'
         contactPoint:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "contact point"'
@@ -6961,6 +7095,11 @@ components:
         scope:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "scope"'
+      oneOf:
+      - required:
+        - partyRef
+      - required:
+        - intermediaryRef
     ExternalUserInviteResponse:
       type: object
       description: 'plt.ExternalUser.invite result. PRD outputs: "invitation"'
@@ -7071,39 +7210,62 @@ components:
       x-status: minimal
     AuthorityCheckRequest:
       type: object
-      description: 'plt.Authority.check request. PRD inputs: "actor, type, dimensions, objectRef, asAt"'
       properties:
         actor:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "actor"'
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
+          $ref: ../events/common.schema.json#/$defs/Actor
+        authorityType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Registered authority type, e.g. CLM.PAYMENT
         dimensions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "dimensions"'
+          type: object
+          additionalProperties:
+            $ref: ../events/common.schema.json#/$defs/OpenValue
+          description: Dimension values of the registered type (amounts as Money objects)
         objectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "objectRef"'
-        asAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "asAt"'
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+      required:
+      - actor
+      - authorityType
+      - dimensions
+      description: 'Typed from REQ-PLT-003, REQ-PLT-103. PRD inputs: "actor, type, dimensions, objectRef, asAt"'
     AuthorityCheckResponse:
       type: object
-      description: 'plt.Authority.check result. PRD outputs: "decision, limit, referral targets, check id"'
       properties:
         decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+          type: string
+          enum:
+          - ALLOW
+          - REFER
+          - DENY
+          description: REQ-PLT-103 (allow, refer, deny)
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: e.g. AMOUNT_ABOVE_LIMIT
         limit:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "limit"'
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Applicable limit (amount or rate, per type)
+        sourceGrantId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         referralTargets:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "referral targets"'
+          type: array
+          items:
+            type: object
+            properties:
+              userId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              roleCode:
+                $ref: ../events/common.schema.json#/$defs/Code
+              groupCode:
+                $ref: ../events/common.schema.json#/$defs/Code
         checkId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "check id"'
+      required:
+      - decision
+      - reasonCode
+      - checkId
+      description: 'Typed from REQ-PLT-003, REQ-PLT-103. PRD outputs: "decision, limit, referral targets, check id"'
     AuthorityAttachDecisionRequest:
       type: object
       description: 'plt.Authority.attachDecision request. PRD inputs: "check id, decision ref"'
@@ -7524,15 +7686,23 @@ components:
       type: object
       description: 'plt.Workflow.signal request. PRD inputs: "workflow id or business key, signal, payload"'
       properties:
-        workflowIdOrBusinessKey:
+        workflowId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "workflow id or business key" (optional)'
+        businessKey:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "workflow id or business key"'
+          description: 'PRD: "workflow id or business key" (optional)'
         signal:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "signal"'
         payload:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "payload"'
+      oneOf:
+      - required:
+        - workflowId
+      - required:
+        - businessKey
     WorkflowSignalResponse:
       type: object
       description: 'plt.Workflow.signal result. PRD outputs: "ack"'
@@ -7621,10 +7791,20 @@ components:
       type: object
       description: 'plt.Job.schedule result. PRD outputs: "—"'
       x-status: minimal
-    JobHistoryResponse:
+    JobHistoryItem:
       type: object
       description: 'plt.Job.history result. PRD outputs: "—"'
       x-status: minimal
+    JobHistoryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/JobHistoryItem'
+      description: Page of plt.Job.history results (cursor pagination, contract §3.5.5)
     DecisionTableEvaluateRequest:
       type: object
       description: 'plt.DecisionTable.evaluate request. PRD inputs: "table, version or as-at, inputs"'
@@ -7632,12 +7812,13 @@ components:
         table:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "table"'
-        versionOrAsAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "version or as-at"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version or as-at" (optional)'
         inputs:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "inputs"'
+      x-rule: 'Give either `version` (body) or the `validAt` parameter (PRD: version or as-at)'
     DecisionTableEvaluateResponse:
       type: object
       description: 'plt.DecisionTable.evaluate result. PRD outputs: "outputs, rule ids, evaluation id"'
@@ -7660,12 +7841,13 @@ components:
         table:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "table"'
-        versionOrAsAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "version or as-at"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version or as-at" (optional)'
         inputs:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "inputs"'
+      x-rule: 'Give either `version` (body) or the `validAt` parameter (PRD: version or as-at)'
     DecisionTableTestResponse:
       type: object
       description: 'plt.DecisionTable.test result. PRD outputs: "outputs, rule ids, evaluation id"'
@@ -7688,12 +7870,13 @@ components:
         table:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "table"'
-        versionOrAsAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "version or as-at"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version or as-at" (optional)'
         inputs:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "inputs"'
+      x-rule: 'Give either `version` (body) or the `validAt` parameter (PRD: version or as-at)'
     DecisionTableActivateResponse:
       type: object
       description: 'plt.DecisionTable.activate result. PRD outputs: "outputs, rule ids, evaluation id"'
@@ -7923,9 +8106,17 @@ components:
         context:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "context"'
-        rangeOrLegacyNumbers:
+        rangeNumbers:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "range or legacy numbers"'
+          description: 'PRD: "range or legacy numbers" (optional)'
+        legacyNumbers:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "range or legacy numbers" (optional)'
+      oneOf:
+      - required:
+        - rangeNumbers
+      - required:
+        - legacyNumbers
     NumberReserveResponse:
       type: object
       description: 'plt.Number.reserve result. PRD outputs: "reservation"'
@@ -8093,10 +8284,20 @@ components:
         changeApprovalRequest:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "change → approval request"'
-    RetentionRunsResponse:
+    RetentionRunsItem:
       type: object
       description: 'plt.Retention.runs result. PRD outputs: "—"'
       x-status: minimal
+    RetentionRunsPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RetentionRunsItem'
+      description: Page of plt.Retention.runs results (cursor pagination, contract §3.5.5)
     LegalHoldApplyRequest:
       type: object
       description: 'plt.LegalHold.apply request. PRD inputs: "per op"'
@@ -8388,6 +8589,9 @@ components:
         perScenarioResult:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "per-scenario result"'
-        failingStepAndLineageKey:
+        failingStep:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "failing step and lineage key"'
+        lineageKey:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "failing step and lineage key"'

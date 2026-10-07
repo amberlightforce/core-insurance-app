@@ -56,6 +56,8 @@ paths:
       x-work-packages:
       - W2-PFC-04
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-PFC-001, REQ-PFC-167, REQ-PFC-221
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -81,11 +83,14 @@ paths:
         status: 422
       x-source:
       - PRD-02 §9.1 l.1460
+      x-prd-param-names:
+        validAt: date
       x-superseded-names:
       - pfc.Product.resolve (XRF-004d)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/KnownAt
       requestBody:
         required: true
@@ -136,6 +141,7 @@ paths:
       - W2-PFC-04
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -205,6 +211,7 @@ paths:
       x-work-packages:
       - W2-PFC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -285,6 +292,7 @@ paths:
       x-work-packages:
       - W2-PFC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -357,6 +365,7 @@ paths:
       x-work-packages:
       - W2-PFC-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -425,6 +434,7 @@ paths:
       x-work-packages:
       - W2-PFC-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -503,6 +513,7 @@ paths:
       x-work-packages:
       - W2-PFC-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -577,6 +588,7 @@ paths:
       x-work-packages:
       - W2-PFC-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -638,6 +650,7 @@ paths:
       x-work-packages:
       - W2-PFC-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -705,6 +718,7 @@ paths:
       x-work-packages:
       - W6-PFC-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -764,6 +778,7 @@ paths:
       x-work-packages:
       - W2-PFC-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -818,6 +833,7 @@ paths:
       x-work-packages:
       - W2-PFC-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -838,9 +854,12 @@ paths:
         status: 422
       x-source:
       - PRD-02 §9.1 l.1469
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -884,6 +903,7 @@ paths:
       x-work-packages:
       - W2-PFC-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -938,6 +958,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1002,6 +1023,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1066,6 +1088,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1130,6 +1153,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1194,6 +1218,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1258,6 +1283,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1321,6 +1347,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -1388,6 +1415,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1453,6 +1481,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1518,6 +1547,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1583,6 +1613,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1646,6 +1677,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -1709,6 +1741,7 @@ paths:
       x-work-packages:
       - W2-PFC-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1779,6 +1812,7 @@ paths:
       x-work-packages:
       - W2-PFC-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1841,6 +1875,7 @@ paths:
       x-work-packages:
       - W2-PFC-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1903,6 +1938,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1968,6 +2004,7 @@ paths:
       x-work-packages:
       - W2-PFC-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1981,7 +2018,13 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - name: legacySchemeAndCode
+      - name: legacyScheme
+        in: query
+        required: false
+        description: 'PRD: "legacy scheme and code"'
+        schema:
+          type: string
+      - name: legacyCode
         in: query
         required: false
         description: 'PRD: "legacy scheme and code"'
@@ -2019,6 +2062,7 @@ paths:
       x-work-packages:
       - W2-PFC-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2029,21 +2073,24 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-02 §9.1 l.1480
+      x-prd-param-names:
+        validAt: version or date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       - name: code
         in: query
         required: false
         description: 'PRD: "code"'
         schema:
           type: string
-      - name: versionOrDate
+      - name: version
         in: query
         required: false
-        description: 'PRD: "version or date"'
+        description: 'PRD: "version or date" (optional)'
         schema:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
+          type: string
       responses:
         '200':
           description: Success
@@ -2066,49 +2113,77 @@ components:
   schemas:
     ProductVersionResolveRequest:
       type: object
-      description: 'pfc.ProductVersion.resolve request. PRD inputs: "jurisdiction, legalEntity, product, channel, transactionType
-        (NewBusiness, Renewal), date, optional knownAt, optional predecessorHash (renewal)"'
       properties:
         jurisdiction:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "jurisdiction"'
+          $ref: ../events/common.schema.json#/$defs/CountryCode
         legalEntity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "legalEntity"'
+          $ref: ../events/common.schema.json#/$defs/Code
         product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Product code
         channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
+          $ref: ../events/common.schema.json#/$defs/Code
         transactionType:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transactionType (NewBusiness, Renewal)"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
-        knownAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "optional knownAt" (optional)'
+          type: string
+          enum:
+          - NewBusiness
+          - Renewal
+          description: PRD-02 §9.1 row values
         predecessorHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "optional predecessorHash (renewal)" (optional)'
+          description: 'Renewal: predecessor''s artefact hash (REQ-PFC-167)'
+      required:
+      - jurisdiction
+      - legalEntity
+      - product
+      - channel
+      - transactionType
+      description: 'Typed from REQ-PFC-001, REQ-PFC-167, REQ-PFC-221. PRD inputs: "jurisdiction, legalEntity, product, channel,
+        transactionType (NewBusiness, Renewal), date, optional knownAt, optional predecessorHash (renewal)"'
     ProductVersionResolveResponse:
       type: object
-      description: 'pfc.ProductVersion.resolve result. PRD outputs: "version, artefactHash, resolutionManifest, resolutionHash"'
       properties:
         version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
         artefactHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "artefactHash"'
         resolutionManifest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "resolutionManifest"'
+          type: object
+          properties:
+            artefactHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+            ratingArtefactHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+              description: Floating at resolution, pinned for the term (REQ-PFC-221)
+            uwRuleSetVersions:
+              type: object
+              additionalProperties:
+                $ref: ../events/common.schema.json#/$defs/Code
+              description: Rule-set version per checkpoint
+            formPatternEditions:
+              type: array
+              items:
+                $ref: ../events/common.schema.json#/$defs/Code
+            referenceTableVersions:
+              type: array
+              items:
+                $ref: ../events/common.schema.json#/$defs/Code
+            paymentPlanVersions:
+              type: array
+              items:
+                $ref: ../events/common.schema.json#/$defs/Code
+          required:
+          - artefactHash
+          description: Resolution manifest (REQ-PFC-221)
         resolutionHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "resolutionHash"'
+      required:
+      - version
+      - artefactHash
+      - resolutionManifest
+      - resolutionHash
+      description: 'Typed from REQ-PFC-001, REQ-PFC-167, REQ-PFC-221. PRD outputs: "version, artefactHash, resolutionManifest,
+        resolutionHash"'
     ArtifactGetResponse:
       type: object
       description: 'pfc.Artifact.get result. PRD outputs: "canonical JSON artefact"'
@@ -2168,7 +2243,10 @@ components:
         questionsVisibleRequiredFlags:
           type: boolean
           description: 'PRD: "questions with visible/required flags"'
-        knockOutAndReferralFlags:
+        knockOutFlags:
+          type: boolean
+          description: 'PRD: "knock-out and referral flags"'
+        referralFlags:
           type: boolean
           description: 'PRD: "knock-out and referral flags"'
     QuestionSetEvaluateRequest:
@@ -2192,7 +2270,10 @@ components:
         questionsVisibleRequiredFlags:
           type: boolean
           description: 'PRD: "questions with visible/required flags"'
-        knockOutAndReferralFlags:
+        knockOutFlags:
+          type: boolean
+          description: 'PRD: "knock-out and referral flags"'
+        referralFlags:
           type: boolean
           description: 'PRD: "knock-out and referral flags"'
     PogGetResponse:
@@ -2219,9 +2300,12 @@ components:
       description: 'pfc.RenewalConversion.convert request. PRD inputs: "sourceHash or `LEGACY:<code>`, targetHash, term selections,
         renewal date"'
       properties:
-        sourcehashOrLegacyCode:
+        sourceHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "sourceHash or `LEGACY:<code>"'
+          description: 'PRD: "sourceHash or `LEGACY:<code>" (optional)'
+        legacyCode:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sourceHash or `LEGACY:<code>" (optional)'
         targetHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "targetHash"'
@@ -2231,6 +2315,11 @@ components:
         renewalDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
           description: 'PRD: "renewal date"'
+      oneOf:
+      - required:
+        - sourceHash
+      - required:
+        - legacyCode
     RenewalConversionConvertResponse:
       type: object
       description: 'pfc.RenewalConversion.convert result. PRD outputs: "converted selections, grandfathered items, referrals,
@@ -2267,7 +2356,7 @@ components:
       description: 'pfc.Availability.check result. PRD outputs: "available, reason, winning rule id"'
       properties:
         available:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: boolean
           description: 'PRD: "available"'
         reason:
           $ref: common.yaml#/components/schemas/Unspecified
@@ -2279,9 +2368,12 @@ components:
       type: object
       description: 'pfc.Product.describe request. PRD inputs: "product or hash, channel, transactionType, language, date"'
       properties:
-        productOrHash:
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product or hash" (optional)'
+        hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "product or hash"'
+          description: 'PRD: "product or hash" (optional)'
         channel:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "channel"'
@@ -2291,9 +2383,11 @@ components:
         language:
           $ref: ../events/common.schema.json#/$defs/LanguageCode
           description: 'PRD: "language"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
+      oneOf:
+      - required:
+        - product
+      - required:
+        - hash
     ProductDescribeResponse:
       type: object
       description: 'pfc.Product.describe result. PRD outputs: "ordered steps, fields, rules, offerings, coverages, payment

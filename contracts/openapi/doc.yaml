@@ -53,6 +53,8 @@ paths:
       x-work-packages:
       - W2-DOC-01
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-DOC-001, REQ-DOC-007
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -142,6 +144,7 @@ paths:
       x-work-packages:
       - W6-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -206,6 +209,7 @@ paths:
       x-work-packages:
       - W2-DOC-02
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -265,6 +269,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -343,6 +348,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -425,6 +431,7 @@ paths:
       x-work-packages:
       - W6-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -492,6 +499,7 @@ paths:
       - W2-DOC-04
       - W6-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -555,6 +563,7 @@ paths:
       x-work-packages:
       - W6-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -619,6 +628,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -682,6 +692,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -745,6 +756,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -808,6 +820,7 @@ paths:
       x-work-packages:
       - W6-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -871,6 +884,7 @@ paths:
       x-work-packages:
       - W6-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -931,6 +945,7 @@ paths:
       - REQ-DOC-049
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -986,6 +1001,7 @@ paths:
       x-work-packages:
       - W2-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1042,6 +1058,7 @@ paths:
       x-work-packages:
       - W2-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1107,6 +1124,7 @@ paths:
       x-work-packages:
       - W2-DOC-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1160,6 +1178,7 @@ paths:
       - REQ-DOC-103
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1220,6 +1239,7 @@ paths:
       - REQ-DOC-103
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1282,6 +1302,7 @@ paths:
       x-work-packages:
       - W2-DOC-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1335,6 +1356,7 @@ paths:
       x-work-packages:
       - W2-DOC-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1386,6 +1408,7 @@ paths:
       - REQ-DOC-124
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1400,9 +1423,12 @@ paths:
         status: 422
       x-source:
       - PRD-10 §9.1 l.1648
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -1448,10 +1474,14 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-DOC-007, REQ-DOC-224
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
-      x-dry-run-note: 'PRD idempotency: Key'
+      x-dry-run-note: 'PRD idempotency: Key; no dry-run: the PRD-10 row gives Key only, and the operation renders the cover
+        note of a transaction already bound (cover and money change at pol.Job.bind, which offers dry-run); contract §3.5.3
+        does not require it'
       x-exposure:
       - ui
       - partner
@@ -1522,6 +1552,8 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-DOC-007, REQ-DOC-220
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1546,20 +1578,26 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - name: productVersion
         in: query
-        required: false
-        description: 'PRD: "product version"'
+        required: true
+        description: Product version
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+      - name: product
+        in: query
+        required: true
+        description: Product code
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
       - name: offering
         in: query
-        required: false
-        description: 'PRD: "offering"'
+        required: true
+        description: Offering
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/Code
       - name: language
         in: query
-        required: false
-        description: 'PRD: "language"'
+        required: true
+        description: Language
         schema:
           $ref: ../events/common.schema.json#/$defs/LanguageCode
       responses:
@@ -1603,6 +1641,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1678,6 +1717,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1745,6 +1785,7 @@ paths:
       x-work-packages:
       - W6-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1807,6 +1848,7 @@ paths:
       x-work-packages:
       - W6-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1872,6 +1914,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1948,6 +1991,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2022,6 +2066,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2096,6 +2141,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2170,6 +2216,7 @@ paths:
       x-work-packages:
       - W4-DOC-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -2242,6 +2289,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2319,6 +2367,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -2388,6 +2437,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2457,6 +2507,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2526,6 +2577,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2595,6 +2647,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -2615,13 +2668,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArchiveListForObjectResponse'
+                $ref: '#/components/schemas/ArchiveListForObjectPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -2650,6 +2705,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2714,6 +2770,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2778,6 +2835,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2841,6 +2899,7 @@ paths:
       x-work-packages:
       - W2-DOC-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -2909,6 +2968,7 @@ paths:
       x-idempotency: required
       x-idempotency-note: 'PRD: idempotent on the provider event id; the Idempotency-Key header carries it'
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: doc.ProviderEvent.receive
@@ -2955,46 +3015,81 @@ components:
   schemas:
     DocumentRequestRequest:
       type: object
-      description: 'doc.Document.request request. PRD inputs: "type, subject ref, recipients or resolve, language override,
-        payload supplement, delivery instruction, sync flag"'
       properties:
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
-        subjectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "subject ref"'
-        recipientsOrResolve:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "recipients or resolve"'
-        languageOverride:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "language override"'
-        payloadSupplement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payload supplement"'
-        deliveryInstruction:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "delivery instruction"'
-        syncFlag:
+        documentType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: DT-* catalogue, e.g. DT-IPID, DT-PRECONTRACT-INFO
+        subject:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+        recipients:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/OpenObject
+        resolveRecipients:
           type: boolean
-          description: 'PRD: "sync flag"'
+          description: Resolve recipients from the type
+        languageOverride:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+        payloadSupplement:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+        deliveryInstruction:
+          type: object
+          properties:
+            mode:
+              type: string
+              enum:
+              - RESOLVE
+              - SUPPRESS
+              - EXPLICIT
+              description: REQ-DOC-001
+            channel:
+              $ref: ../events/common.schema.json#/$defs/Code
+          required:
+          - mode
+        sync:
+          type: boolean
+          description: Synchronous rendering
+      required:
+      - documentType
+      - subject
+      - deliveryInstruction
+      oneOf:
+      - required:
+        - recipients
+      - required:
+        - resolveRecipients
+      description: 'Typed from REQ-DOC-001, REQ-DOC-007. PRD inputs: "type, subject ref, recipients or resolve, language override,
+        payload supplement, delivery instruction, sync flag"'
     DocumentRequestResponse:
       type: object
-      description: 'doc.Document.request result. PRD outputs: "document id, number, status, links"'
       properties:
         documentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "document id"'
-        number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+        documentNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          $ref: ../events/common.schema.json#/$defs/Code
         links:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "links"'
+          type: array
+          items:
+            type: string
+            format: uri
+        templateVersions:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Dry-run
+        channels:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Dry-run
+        preview:
+          type: string
+          description: Dry-run preview reference
+      required:
+      - status
+      description: 'Typed from REQ-DOC-001, REQ-DOC-007. PRD outputs: "document id, number, status, links"'
     DocumentRequestBatchRequest:
       type: object
       description: 'doc.Document.requestBatch request. PRD inputs: "items[], batch key, window"'
@@ -3112,12 +3207,6 @@ components:
         type:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "type"'
-        validAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "validAt"'
-        knownAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "knownAt"'
         wordingMode:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "wording mode"'
@@ -3363,9 +3452,6 @@ components:
         channel:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "channel"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
     BindingResolveResponse:
       type: object
       description: 'doc.Binding.resolve result. PRD outputs: "template version"'
@@ -3375,25 +3461,38 @@ components:
           description: 'PRD: "template version"'
     ProofOfCoverIssueRequest:
       type: object
-      description: 'doc.ProofOfCover.issue request. PRD inputs: "transaction id"'
       properties:
         transactionId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "transaction id"'
+      required:
+      - transactionId
+      description: 'Typed from REQ-DOC-007, REQ-DOC-224. PRD inputs: "transaction id"'
     ProofOfCoverIssueResponse:
       type: object
-      description: 'doc.ProofOfCover.issue result. PRD outputs: "document id"'
       properties:
         documentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "document id"'
+        documentNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: Statutory cover-note number
+      required:
+      - documentId
+      - documentNumber
+      description: 'Typed from REQ-DOC-007, REQ-DOC-224. PRD outputs: "document id"'
     IpidGetResponse:
       type: object
-      description: 'doc.Ipid.get result. PRD outputs: "archive link"'
       properties:
-        archiveLink:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "archive link"'
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        link:
+          type: string
+          format: uri
+      required:
+      - archiveId
+      - link
+      description: 'Typed from REQ-DOC-007, REQ-DOC-220. PRD outputs: "archive link"'
     DeliveryStatusResponse:
       type: object
       description: 'doc.Delivery.status result. PRD outputs: "statuses, completeness"'
@@ -3557,7 +3656,10 @@ components:
       type: object
       description: 'doc.Archive.store request. PRD inputs: "binary stream + declared hash, metadata"'
       properties:
-        binaryStreamDeclaredHash:
+        binaryStream:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binary stream + declared hash"'
+        declaredHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "binary stream + declared hash"'
         metadata:
@@ -3587,7 +3689,10 @@ components:
       type: object
       description: 'doc.Archive.verify request. PRD inputs: "binary stream + declared hash, metadata"'
       properties:
-        binaryStreamDeclaredHash:
+        binaryStream:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binary stream + declared hash"'
+        declaredHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "binary stream + declared hash"'
         metadata:
@@ -3607,7 +3712,10 @@ components:
       type: object
       description: 'doc.Archive.addRendition request. PRD inputs: "binary stream + declared hash, metadata"'
       properties:
-        binaryStreamDeclaredHash:
+        binaryStream:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binary stream + declared hash"'
+        declaredHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "binary stream + declared hash"'
         metadata:
@@ -3627,7 +3735,10 @@ components:
       type: object
       description: 'doc.Archive.setRetentionClass request. PRD inputs: "binary stream + declared hash, metadata"'
       properties:
-        binaryStreamDeclaredHash:
+        binaryStream:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binary stream + declared hash"'
+        declaredHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "binary stream + declared hash"'
         metadata:
@@ -3643,7 +3754,7 @@ components:
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "hash"'
-    ArchiveListForObjectResponse:
+    ArchiveListForObjectItem:
       type: object
       description: 'doc.Archive.listForObject result. PRD outputs: "archive id, hash"'
       properties:
@@ -3653,6 +3764,16 @@ components:
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "hash"'
+    ArchiveListForObjectPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ArchiveListForObjectItem'
+      description: Page of doc.Archive.listForObject results (cursor pagination, contract §3.5.5)
     SubjectExportRequest:
       type: object
       description: 'doc.Subject.export request. PRD inputs: "party id, scope"'
@@ -3721,7 +3842,12 @@ components:
       type: object
       description: 'doc.Document.import result. PRD outputs: "archive and document ids"'
       properties:
-        archiveAndDocumentIds:
+        archiveIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "archive and document ids"'
+        documentIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid

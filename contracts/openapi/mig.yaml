@@ -44,6 +44,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -108,6 +109,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -165,6 +167,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -221,6 +224,8 @@ paths:
       x-work-packages:
       - W9-MIG-03
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-MIG-004, REQ-MIG-149
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -239,10 +244,12 @@ paths:
         status: 422
       x-source:
       - PRD-16 §9.1 l.1283
+      x-prd-param-names:
+        validAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -283,6 +290,7 @@ paths:
       x-work-packages:
       - W9-MIG-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -345,6 +353,7 @@ paths:
       x-work-packages:
       - W9-MIG-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -367,10 +376,16 @@ paths:
         description: 'PRD: "party"'
         schema:
           type: string
-      - name: policyOrClaimKey
+      - name: policyKey
         in: query
         required: false
-        description: 'PRD: "policy or claim key"'
+        description: 'PRD: "policy or claim key" (optional)'
+        schema:
+          type: string
+      - name: claimKey
+        in: query
+        required: false
+        description: 'PRD: "policy or claim key" (optional)'
         schema:
           type: string
       responses:
@@ -407,6 +422,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -471,6 +487,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -535,6 +552,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -605,6 +623,7 @@ paths:
       - W9-MIG-01
       - W9-MIG-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -670,6 +689,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -734,6 +754,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -794,6 +815,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -812,13 +834,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchOutcomesResponse'
+                $ref: '#/components/schemas/BatchOutcomesPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -846,6 +870,7 @@ paths:
       x-work-packages:
       - W9-MIG-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -902,6 +927,7 @@ paths:
       x-work-packages:
       - W9-MIG-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -966,6 +992,7 @@ paths:
       x-work-packages:
       - W9-MIG-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1032,6 +1059,7 @@ paths:
       x-work-packages:
       - W9-MIG-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1098,6 +1126,7 @@ paths:
       x-work-packages:
       - W9-MIG-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1164,6 +1193,7 @@ paths:
       x-work-packages:
       - W9-MIG-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1231,6 +1261,7 @@ paths:
       x-work-packages:
       - W9-MIG-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -1282,6 +1313,7 @@ x-operation-families:
   - REQ-MIG-031..REQ-MIG-033
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1286
@@ -1293,6 +1325,7 @@ x-operation-families:
   - REQ-MIG-031..REQ-MIG-033
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1286
@@ -1304,6 +1337,7 @@ x-operation-families:
   - REQ-MIG-047..REQ-MIG-050
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1288
@@ -1315,6 +1349,7 @@ x-operation-families:
   - REQ-MIG-047..REQ-MIG-050
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1288
@@ -1326,6 +1361,7 @@ x-operation-families:
   - REQ-MIG-054..REQ-MIG-062
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1289
@@ -1340,6 +1376,7 @@ x-operation-families:
   - REQ-MIG-003
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1290
@@ -1351,6 +1388,7 @@ x-operation-families:
   - REQ-MIG-081..REQ-MIG-085
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1291
@@ -1365,6 +1403,7 @@ x-operation-families:
   - REQ-MIG-005
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1292
@@ -1377,6 +1416,7 @@ x-operation-families:
   - REQ-MIG-158
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1293
@@ -1388,6 +1428,7 @@ x-operation-families:
   - REQ-MIG-186..REQ-MIG-190
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1294
@@ -1399,6 +1440,7 @@ x-operation-families:
   - REQ-MIG-211
   x-wave: unscheduled
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1295
@@ -1410,6 +1452,7 @@ x-operation-families:
   - REQ-MIG-212
   x-wave: unscheduled
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1296
@@ -1421,6 +1464,7 @@ x-operation-families:
   - REQ-MIG-126
   x-wave: unscheduled
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-16 §9.1 l.1300
@@ -1461,7 +1505,10 @@ components:
       type: object
       description: 'mig.Xref.resolve request. PRD inputs: "key and direction"'
       properties:
-        keyAndDirection:
+        key:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "key and direction"'
+        direction:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "key and direction"'
     XrefResolveResponse:
@@ -1495,30 +1542,42 @@ components:
       description: Page of mig.Xref.list results (cursor pagination, contract §3.5.5)
     RoutingResolveRequest:
       type: object
-      description: 'mig.Routing.resolve request. PRD inputs: "object type, key, asOf"'
       properties:
         objectType:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "object type"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: policy, term, claim, party, billing account, payment reference, plate, AFM
         key:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "key"'
-        asOf:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "asOf"'
+          type: string
+          description: Core id, legacy key, plate, AFM or payment reference
+      required:
+      - objectType
+      - key
+      description: 'Typed from REQ-MIG-004, REQ-MIG-149. PRD inputs: "object type, key, asOf"'
     RoutingResolveResponse:
       type: object
-      description: 'mig.Routing.resolve result. PRD outputs: "master state, term split, deep link"'
       properties:
         masterState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "master state"'
+          type: string
+          enum:
+          - LegacyMaster
+          - Transitioning
+          - CoreMaster
+          - RunOffLegacy
+          - Archived
+          description: REQ-MIG-004
+        routeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         termSplit:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term split"'
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: 'Transitioning: expiring legacy term and core renewal'
+        legacyKey:
+          type: string
         deepLink:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deep link"'
+          type: string
+          format: uri
+      required:
+      - masterState
+      description: 'Typed from REQ-MIG-004, REQ-MIG-149. PRD outputs: "master state, term split, deep link"'
     RoutingOverrideRequest:
       type: object
       description: 'mig.Routing.override request. PRD inputs: "object, target state, reason, until"'
@@ -1650,7 +1709,7 @@ components:
         outcomes:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "outcomes"'
-    BatchOutcomesResponse:
+    BatchOutcomesItem:
       type: object
       description: 'mig.Batch.outcomes result. PRD outputs: "status, outcomes"'
       properties:
@@ -1660,6 +1719,16 @@ components:
         outcomes:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "outcomes"'
+    BatchOutcomesPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/BatchOutcomesItem'
+      description: Page of mig.Batch.outcomes results (cursor pagination, contract §3.5.5)
     ArchiveSearchItem:
       type: object
       description: 'mig.Archive.search result. PRD outputs: "records (masked)"'

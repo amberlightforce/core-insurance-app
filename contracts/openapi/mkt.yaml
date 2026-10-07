@@ -55,6 +55,8 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-MKT-001, REQ-MKT-044, REQ-MKT-045
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -79,6 +81,8 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-17 §9.1 l.1499
+      x-prd-param-names:
+        knownAt: knownAt (alternative to configurationHash)
       x-superseded-names:
       - mkt.Config.resolve (XRF-002)
       - mkt.Config.resolveModel (XRF-002)
@@ -86,6 +90,8 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
       requestBody:
         required: true
         content:
@@ -124,6 +130,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: minimal
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -173,6 +180,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -232,6 +240,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -293,6 +302,7 @@ paths:
       - REQ-MKT-063
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -344,6 +354,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -405,6 +416,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -473,6 +485,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -533,6 +546,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -593,6 +607,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -653,6 +668,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -714,6 +730,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -774,6 +791,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -834,6 +852,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -883,6 +902,7 @@ paths:
       - REQ-MKT-062
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -943,6 +963,7 @@ paths:
       x-work-packages:
       - W1-MKT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1001,6 +1022,7 @@ paths:
       x-work-packages:
       - W1-MKT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1019,11 +1041,14 @@ paths:
       x-source:
       - PRD-17 §9.1 l.1508
       - PRD-17 §9.1 l.1518
+      x-prd-param-names:
+        validAt: date
       x-superseded-names:
       - mkt.Spi.binding (XRF-004i)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -1060,6 +1085,7 @@ paths:
       - REQ-MKT-124
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1125,6 +1151,7 @@ paths:
       x-work-packages:
       - W1-MKT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -1178,6 +1205,7 @@ paths:
       x-work-packages:
       - W1-MKT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -1237,6 +1265,7 @@ paths:
       x-work-packages:
       - W1-MKT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1302,6 +1331,7 @@ paths:
       x-work-packages:
       - W1-MKT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1367,6 +1397,7 @@ paths:
       x-work-packages:
       - W1-MKT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1432,6 +1463,7 @@ paths:
       x-work-packages:
       - W1-MKT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1498,6 +1530,7 @@ paths:
       x-work-packages:
       - W1-MKT-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1563,6 +1596,7 @@ paths:
       x-work-packages:
       - W1-MKT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1575,9 +1609,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-17 §9.1 l.1511
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       - name: switch
         in: query
         required: false
@@ -1590,12 +1627,6 @@ paths:
         description: 'PRD: "scope"'
         schema:
           type: string
-      - name: date
-        in: query
-        required: false
-        description: 'PRD: "date"'
-        schema:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
       responses:
         '200':
           description: Success
@@ -1633,6 +1664,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1710,6 +1742,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1789,6 +1822,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1857,6 +1891,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1925,6 +1960,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1983,6 +2019,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2039,6 +2076,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2092,6 +2130,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2158,6 +2197,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2223,6 +2263,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2288,6 +2329,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2352,6 +2394,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2406,6 +2449,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2462,6 +2506,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2518,6 +2563,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2579,6 +2625,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2638,6 +2685,7 @@ paths:
       x-work-packages:
       - W1-MKT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2684,6 +2732,7 @@ paths:
       x-work-packages:
       - W8-MKT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2738,6 +2787,7 @@ paths:
       x-work-packages:
       - W8-MKT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2751,9 +2801,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-17 §9.1 l.1526
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -2793,6 +2846,7 @@ paths:
       x-work-packages:
       - W8-MKT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2804,9 +2858,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-17 §9.1 l.1526
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       - name: entity
         in: query
         required: false
@@ -2825,12 +2882,6 @@ paths:
         description: 'PRD: "class"'
         schema:
           type: string
-      - name: date
-        in: query
-        required: false
-        description: 'PRD: "date"'
-        schema:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
       responses:
         '200':
           description: Success
@@ -2868,6 +2919,7 @@ paths:
       x-work-packages:
       - W1-MKT-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2881,6 +2933,8 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-17 §9.1 l.1527
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
@@ -2890,6 +2944,7 @@ paths:
         description: Identifier of the StatutoryClockSet
         schema:
           type: string
+      - $ref: common.yaml#/components/parameters/ValidAt
       - name: clockCode
         in: query
         required: false
@@ -2902,12 +2957,6 @@ paths:
         description: 'PRD: "jurisdiction"'
         schema:
           type: string
-      - name: date
-        in: query
-        required: false
-        description: 'PRD: "date"'
-        schema:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
       responses:
         '200':
           description: Success
@@ -2947,7 +2996,9 @@ paths:
       x-work-packages:
       - W1-MKT-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
+      x-bounded: clock values of one jurisdiction at a date (REQ-MKT-291)
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2960,11 +3011,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-17 §9.1 l.1527
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/Cursor
-      - $ref: common.yaml#/components/parameters/Limit
+      - $ref: common.yaml#/components/parameters/ValidAt
       - name: clockCode
         in: query
         required: false
@@ -2977,19 +3029,13 @@ paths:
         description: 'PRD: "jurisdiction"'
         schema:
           type: string
-      - name: date
-        in: query
-        required: false
-        description: 'PRD: "date"'
-        schema:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatutoryClockSetListPage'
+                $ref: '#/components/schemas/StatutoryClockSetListResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -3011,6 +3057,7 @@ x-operation-families:
   - REQ-MKT-005
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-17 §9.1 l.1519
@@ -3024,6 +3071,7 @@ x-operation-families:
   - REQ-MKT-275
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-17 §9.1 l.1528
@@ -3037,6 +3085,7 @@ x-operation-families:
   - REQ-MKT-275
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-17 §9.1 l.1528
@@ -3050,6 +3099,7 @@ x-operation-families:
   - REQ-MKT-275
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-17 §9.1 l.1528
@@ -3063,6 +3113,7 @@ x-operation-families:
   - REQ-MKT-275
   x-wave: W1
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-17 §9.1 l.1528
@@ -3079,52 +3130,87 @@ components:
   schemas:
     ConfigurationResolveRequest:
       type: object
-      description: 'mkt.Configuration.resolve request. PRD inputs: "entity, jurisdiction(+subdivision), product, channel,
-        dates by time basis, hash or knownAt, keys/namespace"'
       properties:
-        entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
         jurisdiction:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "jurisdiction(+subdivision)"'
-        product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
+          $ref: ../events/common.schema.json#/$defs/CountryCode
+        subdivision:
+          $ref: ../events/common.schema.json#/$defs/Code
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        productVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
         channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
-        datesByTimeBasis:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "dates by time basis"'
-        hashOrKnownat:
+          $ref: ../events/common.schema.json#/$defs/Code
+        timeBasisDates:
+          type: object
+          additionalProperties:
+            $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Dates per time basis (REQ-MKT-044), keyed by time-basis code; `validAt` is the default
+        configurationHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash or knownAt"'
-        keysNamespace:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "keys/namespace"'
+          description: Resolve against this configuration state (REQ-MKT-044); alternative to the knownAt parameter
+        keys:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Requested keys
+        namespace:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Requested namespace
+      required:
+      - legalEntity
+      - jurisdiction
+      description: 'Resolve context (REQ-MKT-044) Typed from REQ-MKT-001, REQ-MKT-044, REQ-MKT-045. PRD inputs: "entity, jurisdiction(+subdivision),
+        product, channel, dates by time basis, hash or knownAt, keys/namespace"'
+      oneOf:
+      - required:
+        - keys
+      - required:
+        - namespace
     ConfigurationResolveResponse:
       type: object
-      description: 'mkt.Configuration.resolve result. PRD outputs: "values with source, version, validity, final, trace; hash"'
       properties:
-        valuesSource:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "values with source"'
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
-        validity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validity"'
-        final:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "final"'
-        trace:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "trace"'
-        hash:
+        configurationHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash"'
+          description: Configuration hash used (REQ-MKT-046)
+        values:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                $ref: ../events/common.schema.json#/$defs/Code
+              value:
+                $ref: common.yaml#/components/schemas/Unspecified
+                description: Typed per key definition
+              sourceLayer:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: 'Layer node: core, group, region:EU, country, legal_entity, product/channel (REQ-MKT-001)'
+              valueVersionId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              validity:
+                $ref: ../events/common.schema.json#/$defs/DatePeriod
+              final:
+                type: boolean
+                description: Final key
+              mergeTrace:
+                type: array
+                items:
+                  $ref: common.yaml#/components/schemas/Unspecified
+                description: Merge trace
+            required:
+            - key
+            - value
+            - sourceLayer
+            - valueVersionId
+            - final
+      required:
+      - configurationHash
+      - values
+      description: 'Typed from REQ-MKT-001, REQ-MKT-044, REQ-MKT-045. PRD outputs: "values with source, version, validity,
+        final, trace; hash"'
     ConfigurationCurrentHashResponse:
       type: object
       description: 'mkt.Configuration.currentHash result. PRD outputs: "hash, activated_at"'
@@ -3145,7 +3231,10 @@ components:
         mergeSteps:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "merge steps"'
-        crAndApprovers:
+        cr:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "CR and approvers"'
+        approvers:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "CR and approvers"'
     ConfigurationCompareResponse:
@@ -3314,9 +3403,6 @@ components:
         qualifier:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "qualifier"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "hash"'
@@ -3486,15 +3572,23 @@ components:
       type: object
       description: 'mkt.L10nUiLanguage.resolve request. PRD inputs: "user id or device choice, browser languages, legal entity"'
       properties:
-        userIdOrDeviceChoice:
+        userId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "user id or device choice" (optional)'
+        deviceChoice:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user id or device choice"'
+          description: 'PRD: "user id or device choice" (optional)'
         browserLanguages:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "browser languages"'
         legalEntity:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "legal entity"'
+      oneOf:
+      - required:
+        - userId
+      - required:
+        - deviceChoice
     L10nUiLanguageResolveResponse:
       type: object
       description: 'mkt.L10nUiLanguage.resolve result. PRD outputs: "language, source (PROFILE, DEVICE, BROWSER, ENTITY_DEFAULT),
@@ -3616,7 +3710,7 @@ components:
       description: 'mkt.Rounding.apply result. PRD outputs: "amount after rounding, rule id, residual"'
       properties:
         amountAfterRounding:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Money
           description: 'PRD: "amount after rounding"'
         ruleId:
           $ref: ../events/common.schema.json#/$defs/Uuid
@@ -3769,14 +3863,14 @@ components:
         class:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "class"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
     CrossBorderCheckResponse:
       type: object
       description: 'mkt.CrossBorder.check result. PRD outputs: "authorised + reason; DOMESTIC/FOS/FOE"'
       properties:
-        authorisedReason:
+        authorised:
+          type: boolean
+          description: 'PRD: "authorised + reason"'
+        reason:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "authorised + reason"'
         domesticFosFoe:
@@ -3786,7 +3880,10 @@ components:
       type: object
       description: 'mkt.CrossBorder.basis result. PRD outputs: "authorised + reason; DOMESTIC/FOS/FOE"'
       properties:
-        authorisedReason:
+        authorised:
+          type: boolean
+          description: 'PRD: "authorised + reason"'
+        reason:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "authorised + reason"'
         domesticFosFoe:
@@ -3799,20 +3896,10 @@ components:
         values:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "values"'
-    StatutoryClockSetListItem:
+    StatutoryClockSetListResponse:
       type: object
       description: 'mkt.StatutoryClockSet.list result. PRD outputs: "values"'
       properties:
         values:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "values"'
-    StatutoryClockSetListPage:
-      allOf:
-      - $ref: common.yaml#/components/schemas/PageEnvelope
-      - type: object
-        properties:
-          items:
-            type: array
-            items:
-              $ref: '#/components/schemas/StatutoryClockSetListItem'
-      description: Page of mkt.StatutoryClockSet.list results (cursor pagination, contract §3.5.5)

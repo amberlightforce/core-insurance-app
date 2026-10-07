@@ -66,6 +66,8 @@ paths:
       - W3-RAT-01
       - W3-RAT-03
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-RAT-001, REQ-RAT-030, REQ-RAT-035, REQ-RAT-036, REQ-RAT-038..041
       x-operation-kind: query
       x-idempotency: optional
       x-dry-run: false
@@ -153,6 +155,7 @@ paths:
       x-work-packages:
       - W3-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -222,6 +225,7 @@ paths:
       x-work-packages:
       - W3-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -277,6 +281,7 @@ paths:
       x-work-packages:
       - W3-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -332,6 +337,7 @@ paths:
       x-work-packages:
       - W3-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -399,6 +405,7 @@ paths:
       - W3-RAT-01
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -467,6 +474,7 @@ paths:
       - W3-RAT-01
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -537,6 +545,7 @@ paths:
       - W3-RAT-01
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -602,6 +611,7 @@ paths:
       - W3-RAT-01
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -662,6 +672,7 @@ paths:
       x-work-packages:
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -729,6 +740,7 @@ paths:
       x-work-packages:
       - W3-RAT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -790,6 +802,7 @@ paths:
       x-work-packages:
       - W3-RAT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -851,6 +864,7 @@ paths:
       x-work-packages:
       - W3-RAT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -929,6 +943,7 @@ paths:
       x-work-packages:
       - W3-RAT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1005,6 +1020,7 @@ paths:
       x-work-packages:
       - W3-RAT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1070,6 +1086,7 @@ paths:
       x-work-packages:
       - W3-RAT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1129,6 +1146,7 @@ paths:
       x-work-packages:
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1204,6 +1222,7 @@ paths:
       x-work-packages:
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1269,6 +1288,7 @@ paths:
       x-work-packages:
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1338,6 +1358,7 @@ paths:
       x-work-packages:
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1405,6 +1426,7 @@ paths:
       x-work-packages:
       - W3-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1419,9 +1441,12 @@ paths:
         status: 422
       x-source:
       - PRD-03 §9.1 l.1218
+      x-prd-param-names:
+        validAt: basis date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/KnownAt
       requestBody:
         required: true
@@ -1464,6 +1489,7 @@ paths:
       x-work-packages:
       - W3-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1519,6 +1545,7 @@ paths:
       x-work-packages:
       - W3-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1568,6 +1595,7 @@ paths:
       x-work-packages:
       - W3-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1614,6 +1642,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1677,6 +1706,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1740,6 +1770,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1796,6 +1827,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1846,6 +1878,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1924,6 +1957,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2002,6 +2036,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2080,6 +2115,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2158,6 +2194,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2236,6 +2273,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2314,6 +2352,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -2376,6 +2415,7 @@ paths:
       x-work-packages:
       - W3-RAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -2439,6 +2479,7 @@ paths:
       x-work-packages:
       - W8-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -2505,6 +2546,7 @@ paths:
       x-work-packages:
       - W8-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2572,6 +2614,7 @@ paths:
       x-work-packages:
       - W8-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2637,6 +2680,7 @@ paths:
       x-work-packages:
       - W8-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2698,6 +2742,7 @@ paths:
       x-work-packages:
       - W8-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2768,6 +2813,7 @@ paths:
       x-work-packages:
       - W8-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2829,6 +2875,7 @@ paths:
       x-work-packages:
       - W8-RAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2893,6 +2940,7 @@ paths:
       x-work-packages:
       - W3-RAT-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2949,6 +2997,7 @@ paths:
       x-work-packages:
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3016,6 +3065,7 @@ paths:
       - REQ-RAT-271
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3081,6 +3131,7 @@ paths:
       x-work-packages:
       - W3-RAT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3133,59 +3184,191 @@ components:
   schemas:
     RateRateRequest:
       type: object
-      description: 'rat.Rate.rate request. PRD inputs: "envelope (`REQ-RAT-030`), segments, policy inputs, history, modifications
-        refs, prior rates (renewal), explain flag"'
       properties:
         envelope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "envelope (`REQ-RAT-030`)"'
+          type: object
+          properties:
+            legalEntity:
+              $ref: ../events/common.schema.json#/$defs/Code
+            jurisdiction:
+              $ref: ../events/common.schema.json#/$defs/CountryCode
+            productCode:
+              $ref: ../events/common.schema.json#/$defs/Code
+            productArtefactHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+            ratingArtefactHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+            configurationHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+            mode:
+              type: string
+              enum:
+              - FULL
+              - ENDORSEMENT
+              - QUICK
+              - RENEWAL
+              - DRY_RUN
+              description: Rating mode (REQ-RAT-038..041; DRY_RUN per PRD-03 §9.1; CANDIDATE is RAT-internal, REQ-RAT-043)
+            transactionType:
+              $ref: ../events/common.schema.json#/$defs/Code
+            ratingBasisDate:
+              $ref: ../events/common.schema.json#/$defs/LocalDate
+            taxPointDate:
+              $ref: ../events/common.schema.json#/$defs/LocalDate
+            currency:
+              $ref: ../events/common.schema.json#/$defs/CurrencyCode
+            channel:
+              $ref: ../events/common.schema.json#/$defs/Code
+            producerCode:
+              $ref: ../events/common.schema.json#/$defs/Code
+            lineage:
+              type: object
+              properties:
+                quoteId:
+                  $ref: ../events/common.schema.json#/$defs/Uuid
+                jobId:
+                  $ref: ../events/common.schema.json#/$defs/Uuid
+                transactionId:
+                  $ref: ../events/common.schema.json#/$defs/Uuid
+              description: Business lineage keys (contract D5)
+            origin:
+              type: string
+              enum:
+              - LIVE
+              - MIGRATION
+              description: REQ-RAT-044
+          required:
+          - legalEntity
+          - jurisdiction
+          - productCode
+          - productArtefactHash
+          - ratingArtefactHash
+          - configurationHash
+          - mode
+          - transactionType
+          - ratingBasisDate
+          - currency
+          description: Rating envelope (REQ-RAT-030)
         segments:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "segments"'
+          type: array
+          items:
+            type: object
+            properties:
+              segmentId:
+                type: string
+                description: Segment id
+              validPeriod:
+                $ref: ../events/common.schema.json#/$defs/DatePeriod
+              riskTree:
+                $ref: ../events/common.schema.json#/$defs/OpenObject
+                description: Risk tree snapshot; validated against the artefact's input schema (REQ-RAT-031)
+            required:
+            - segmentId
+            - validPeriod
+            - riskTree
+          description: Segments (REQ-RAT-035)
+          minItems: 1
         policyInputs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policy inputs"'
+          $ref: ../events/common.schema.json#/$defs/OpenObject
         history:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "history"'
-        modificationsRefs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "modifications refs"'
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+        modificationRefs:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Pricing modifications (REQ-RAT-005)
         priorRates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "prior rates (renewal)"'
-        explainFlag:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'Renewal: prior annual rates (REQ-RAT-041)'
+        explain:
           type: boolean
-          description: 'PRD: "explain flag"'
+          description: Return explanation
+      required:
+      - envelope
+      - segments
+      description: 'Typed from REQ-RAT-001, REQ-RAT-030, REQ-RAT-035, REQ-RAT-036, REQ-RAT-038..041. PRD inputs: "envelope
+        (`REQ-RAT-030`), segments, policy inputs, history, modifications refs, prior rates (renewal), explain flag"'
     RateRateResponse:
       type: object
-      description: 'rat.Rate.rate result. PRD outputs: "rates per element × charge type × segment, taxes, signals, warnings,
-        defaults used, automated-decision flag, bindable, worksheet id and hash"'
       properties:
-        ratesPerElementChargeTypeSegment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rates per element × charge type × segment"'
+        rates:
+          type: array
+          items:
+            type: object
+            properties:
+              segmentId:
+                type: string
+              elementId:
+                type: string
+              chargeType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              chargeCategory:
+                $ref: ../events/common.schema.json#/$defs/Code
+              coverageCode:
+                $ref: ../events/common.schema.json#/$defs/Code
+              annualRate:
+                $ref: ../events/common.schema.json#/$defs/Decimal
+                description: Annual rate, scale 4
+              currency:
+                $ref: ../events/common.schema.json#/$defs/CurrencyCode
+              ratingStep:
+                type: string
+              handling:
+                type: string
+                enum:
+                - FLAT
+                - PRORATABLE
+                description: From PFC (REQ-RAT-036)
+            required:
+            - segmentId
+            - elementId
+            - chargeType
+            - annualRate
+            - currency
         taxes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "taxes"'
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: Tax and levy lines from TaxCalculator (REQ-RAT-009)
         signals:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "signals"'
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: Referral signals (REQ-RAT-006)
         warnings:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "warnings"'
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                description: e.g. W-DEFAULT-USED
+            required:
+            - code
         defaultsUsed:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "defaults used"'
-        automatedDecisionFlag:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+        automatedDecision:
           type: boolean
-          description: 'PRD: "automated-decision flag"'
+          description: Automated-decision flag
         bindable:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "bindable"'
-        worksheetIdAndHash:
+          type: boolean
+          description: False for QUICK results (REQ-RAT-040)
+        worksheetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        worksheetHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "worksheet id and hash"'
+      required:
+      - rates
+      - bindable
+      - worksheetId
+      - worksheetHash
+      description: 'Typed from REQ-RAT-001, REQ-RAT-030, REQ-RAT-035, REQ-RAT-036, REQ-RAT-038..041. PRD outputs: "rates per
+        element × charge type × segment, taxes, signals, warnings, defaults used, automated-decision flag, bindable, worksheet
+        id and hash"'
     RateRateBatchRequest:
       type: object
       description: 'rat.Rate.rateBatch request. PRD inputs: "items with item keys, priority class, origin"'
@@ -3522,7 +3705,7 @@ components:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "authority result"'
         dryRunPrice:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Money
           description: 'PRD: "dry-run price"'
     PricingModificationWithdrawRequest:
       type: object
@@ -3562,7 +3745,7 @@ components:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "authority result"'
         dryRunPrice:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Money
           description: 'PRD: "dry-run price"'
     PricingModificationGetResponse:
       type: object
@@ -3576,7 +3759,7 @@ components:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "authority result"'
         dryRunPrice:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Money
           description: 'PRD: "dry-run price"'
     PricingModificationListItem:
       type: object
@@ -3590,7 +3773,7 @@ components:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "authority result"'
         dryRunPrice:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Money
           description: 'PRD: "dry-run price"'
     PricingModificationListPage:
       allOf:
@@ -3684,12 +3867,6 @@ components:
         transactionType:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "transaction type"'
-        basisDate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "basis date"'
-        knownAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "knownAt"'
     RatingArtifactResolveResponse:
       type: object
       description: 'rat.RatingArtifact.resolve result. PRD outputs: "artefact hash, activation record"'
@@ -3753,15 +3930,25 @@ components:
       type: object
       description: 'rat.RatingChangeSet.create request. PRD inputs: "file or rows, mapping, change set"'
       properties:
-        fileOrRows:
+        file:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file or rows"'
+          description: 'PRD: "file or rows" (optional)'
+        rows:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file or rows" (optional)'
         mapping:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "mapping"'
         changeSet:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "change set"'
+      oneOf:
+      - required:
+        - file
+      - required:
+        - rows
     RatingChangeSetCreateResponse:
       type: object
       description: 'rat.RatingChangeSet.create result. PRD outputs: "table version, validation report, diff"'
@@ -3779,15 +3966,25 @@ components:
       type: object
       description: 'rat.RateTable.import request. PRD inputs: "file or rows, mapping, change set"'
       properties:
-        fileOrRows:
+        file:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file or rows"'
+          description: 'PRD: "file or rows" (optional)'
+        rows:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file or rows" (optional)'
         mapping:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "mapping"'
         changeSet:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "change set"'
+      oneOf:
+      - required:
+        - file
+      - required:
+        - rows
     RateTableImportResponse:
       type: object
       description: 'rat.RateTable.import result. PRD outputs: "table version, validation report, diff"'
@@ -3805,15 +4002,25 @@ components:
       type: object
       description: 'rat.RateTable.validate request. PRD inputs: "file or rows, mapping, change set"'
       properties:
-        fileOrRows:
+        file:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file or rows"'
+          description: 'PRD: "file or rows" (optional)'
+        rows:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file or rows" (optional)'
         mapping:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "mapping"'
         changeSet:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "change set"'
+      oneOf:
+      - required:
+        - file
+      - required:
+        - rows
     RateTableValidateResponse:
       type: object
       description: 'rat.RateTable.validate result. PRD outputs: "table version, validation report, diff"'
@@ -4249,7 +4456,10 @@ components:
       type: object
       description: 'rat.Statement.get result. PRD outputs: "current statement and document ref"'
       properties:
-        currentStatementAndDocumentRef:
+        currentStatement:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "current statement and document ref"'
+        documentRef:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "current statement and document ref"'
     LegacyRatingImportRequest:
@@ -4270,7 +4480,10 @@ components:
       type: object
       description: 'rat.Dsar.export request. PRD inputs: "party''s policy and quote refs"'
       properties:
-        partySPolicyAndQuoteRefs:
+        partySPolicy:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party''s policy and quote refs"'
+        quoteRefs:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "party''s policy and quote refs"'
     DsarExportResponse:

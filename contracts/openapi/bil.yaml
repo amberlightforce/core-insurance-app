@@ -66,6 +66,7 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -134,6 +135,7 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -207,6 +209,7 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -282,6 +285,7 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -339,6 +343,7 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -407,6 +412,7 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -471,6 +477,7 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -535,6 +542,7 @@ paths:
       - W5-BIL-01
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -604,6 +612,7 @@ paths:
       - W5-BIL-01
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -674,6 +683,9 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-BIL-003, REQ-BIL-047
+      x-bounded: returns the plans eligible for one term (plans offered by the product version)
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -691,39 +703,57 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/Cursor
-      - $ref: common.yaml#/components/parameters/Limit
       - name: productVersion
         in: query
-        required: false
-        description: 'PRD: "product version"'
+        required: true
+        description: Product version
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+      - name: product
+        in: query
+        required: true
+        description: Product code
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
       - name: channel
         in: query
-        required: false
-        description: 'PRD: "channel"'
+        required: true
+        description: R-84 channel code
         schema:
-          type: string
-      - name: producer
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: producerCode
         in: query
         required: false
-        description: 'PRD: "producer"'
+        description: Producer code
         schema:
-          type: string
-      - name: termData
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: termLength
         in: query
         required: false
-        description: 'PRD: "term data"'
+        description: Term length
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: premiumBand
+        in: query
+        required: false
+        description: Premium band
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: riskFlags
+        in: query
+        required: false
+        description: Risk flags supplied by POL
+        schema:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentPlanListPage'
+                $ref: '#/components/schemas/PaymentPlanListResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -750,7 +780,8 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
-      x-io-shared: 2
+      x-maturity: pre-release
+      x-typed: REQ-BIL-003, REQ-BIL-052
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -824,6 +855,7 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -891,6 +923,7 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -947,7 +980,8 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
-      x-io-shared: 2
+      x-maturity: pre-release
+      x-typed: REQ-BIL-003, REQ-BIL-054
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -966,18 +1000,18 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - name: jobOrTerm
+      - name: quoteId
         in: query
         required: false
-        description: 'PRD: "job or term"'
+        description: Quote id (one of quoteId / jobId)
         schema:
-          type: string
-      - name: method
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: jobId
         in: query
         required: false
-        description: 'PRD: "method"'
+        description: Job id
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -1015,7 +1049,8 @@ paths:
       x-work-packages:
       - W5-BIL-01
       x-status: full
-      x-io-shared: 2
+      x-maturity: pre-release
+      x-typed: REQ-BIL-055
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1082,6 +1117,7 @@ paths:
       x-work-packages:
       - W5-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1138,6 +1174,7 @@ paths:
       x-work-packages:
       - W5-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1188,6 +1225,7 @@ paths:
       x-work-packages:
       - W5-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1248,6 +1286,7 @@ paths:
       x-work-packages:
       - W5-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1309,6 +1348,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1375,6 +1415,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1440,6 +1481,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1495,6 +1537,7 @@ paths:
       x-work-packages:
       - W7-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1561,6 +1604,7 @@ paths:
       x-work-packages:
       - W7-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1622,6 +1666,7 @@ paths:
       x-work-packages:
       - W7-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -1689,6 +1734,7 @@ paths:
       x-work-packages:
       - W7-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1755,6 +1801,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1820,6 +1867,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1885,6 +1933,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1948,6 +1997,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2011,6 +2061,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -2075,6 +2126,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -2152,6 +2204,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2219,6 +2272,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2288,6 +2342,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2358,6 +2413,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2428,6 +2484,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2496,6 +2553,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2549,6 +2607,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2615,6 +2674,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2681,6 +2741,7 @@ paths:
       x-work-packages:
       - W5-BIL-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2747,6 +2808,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -2822,6 +2884,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -2890,6 +2953,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2957,6 +3021,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -3011,6 +3076,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3078,6 +3144,7 @@ paths:
       x-work-packages:
       - W5-BIL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -3143,6 +3210,7 @@ paths:
       x-work-packages:
       - W5-BIL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -3200,6 +3268,7 @@ paths:
       x-work-packages:
       - W5-BIL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3271,6 +3340,7 @@ paths:
       x-work-packages:
       - W5-BIL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3343,6 +3413,7 @@ paths:
       x-work-packages:
       - W5-BIL-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3414,6 +3485,7 @@ paths:
       x-work-packages:
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3491,6 +3563,7 @@ paths:
       x-work-packages:
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3560,6 +3633,7 @@ paths:
       x-work-packages:
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -3625,6 +3699,7 @@ paths:
       x-work-packages:
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3705,6 +3780,7 @@ paths:
       x-work-packages:
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3778,7 +3854,8 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
-      x-io-shared: 5
+      x-maturity: pre-release
+      x-typed: REQ-BIL-009, REQ-BIL-197, REQ-BIL-198
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3875,6 +3952,7 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -3960,6 +4038,7 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -4037,7 +4116,8 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
-      x-io-shared: 5
+      x-maturity: pre-release
+      x-typed: REQ-BIL-009, REQ-CLM-126
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4131,7 +4211,8 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
-      x-io-shared: 5
+      x-maturity: pre-release
+      x-typed: REQ-BIL-009, REQ-CLM-125
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4222,6 +4303,7 @@ paths:
       x-work-packages:
       - W7-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4287,6 +4369,7 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4355,6 +4438,7 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4423,6 +4507,7 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4491,6 +4576,7 @@ paths:
       x-work-packages:
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4557,6 +4643,7 @@ paths:
       x-work-packages:
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4623,6 +4710,7 @@ paths:
       x-work-packages:
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4689,6 +4777,7 @@ paths:
       x-work-packages:
       - W6-BIL-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4756,6 +4845,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -4770,13 +4860,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommissionCalculationsResponse'
+                $ref: '#/components/schemas/CommissionCalculationsPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -4809,6 +4901,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -4826,6 +4919,8 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       - name: intermediary
         in: query
         required: false
@@ -4844,7 +4939,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommissionStatementsResponse'
+                $ref: '#/components/schemas/CommissionStatementsPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -4876,6 +4971,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -4947,6 +5043,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5017,6 +5114,7 @@ paths:
       x-work-packages:
       - W6-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -5068,6 +5166,7 @@ paths:
       x-work-packages:
       - W5-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -5116,6 +5215,7 @@ paths:
       x-work-packages:
       - W5-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -5164,6 +5264,7 @@ paths:
       x-work-packages:
       - W5-BIL-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -5230,6 +5331,7 @@ paths:
       x-work-packages:
       - W5-BIL-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -5297,6 +5399,7 @@ paths:
       x-work-packages:
       - W5-BIL-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -5359,6 +5462,7 @@ paths:
       - W5-BIL-05
       - W5-BIL-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -5413,6 +5517,7 @@ paths:
       - W5-BIL-05
       - W5-BIL-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -5471,6 +5576,7 @@ paths:
       x-work-packages:
       - W5-BIL-06
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -5527,6 +5633,7 @@ paths:
       - REQ-BIL-365
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5590,6 +5697,7 @@ paths:
       - REQ-BIL-352
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5656,6 +5764,7 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -5721,6 +5830,7 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5790,6 +5900,7 @@ paths:
       x-work-packages:
       - W5-BIL-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5850,6 +5961,7 @@ x-operation-families:
   - REQ-BIL-012
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-06 §9.1 l.1812
@@ -6061,59 +6173,99 @@ components:
         preview:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "preview"'
-    PaymentPlanListItem:
+    PaymentPlanListResponse:
       type: object
-      description: 'bil.PaymentPlan.list result. PRD outputs: "plans, exclusions with reasons"'
       properties:
         plans:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "plans"'
-        exclusionsReasons:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exclusions with reasons"'
-    PaymentPlanListPage:
-      allOf:
-      - $ref: common.yaml#/components/schemas/PageEnvelope
-      - type: object
-        properties:
+          type: array
           items:
-            type: array
-            items:
-              $ref: '#/components/schemas/PaymentPlanListItem'
-      description: Page of bil.PaymentPlan.list results (cursor pagination, contract §3.5.5)
+            type: object
+            properties:
+              planCode:
+                $ref: ../events/common.schema.json#/$defs/Code
+              planVersion:
+                $ref: ../events/common.schema.json#/$defs/Code
+            required:
+            - planCode
+            - planVersion
+        exclusions:
+          type: array
+          items:
+            type: object
+            properties:
+              planCode:
+                $ref: ../events/common.schema.json#/$defs/Code
+              reason:
+                $ref: ../events/common.schema.json#/$defs/Code
+            required:
+            - planCode
+            - reason
+      required:
+      - plans
+      - exclusions
+      description: 'Typed from REQ-BIL-003, REQ-BIL-047. PRD outputs: "plans, exclusions with reasons"'
     PaymentPlanSelectRequest:
       type: object
-      description: 'bil.PaymentPlan.select request. PRD inputs: "term or job, plan, method, due day"'
       properties:
-        termOrJob:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term or job"'
-        plan:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "plan"'
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        planCode:
+          $ref: ../events/common.schema.json#/$defs/Code
         method:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "method"'
+          $ref: ../events/common.schema.json#/$defs/Code
         dueDay:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "due day"'
+          type: integer
+          description: Due day
+          minimum: 1
+          maximum: 31
+      required:
+      - planCode
+      - method
+      oneOf:
+      - required:
+        - termId
+      - required:
+        - jobId
+      description: 'Typed from REQ-BIL-003, REQ-BIL-052. PRD inputs: "term or job, plan, method, due day"'
     PaymentPlanSelectResponse:
       type: object
-      description: 'bil.PaymentPlan.select result. PRD outputs: "plan instance, schedule"'
       properties:
-        planInstance:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "plan instance"'
+        planInstanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        planCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        planVersion:
+          $ref: ../events/common.schema.json#/$defs/Code
+        downPayment:
+          $ref: ../events/common.schema.json#/$defs/Money
         schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
+          type: array
+          items:
+            type: object
+            properties:
+              dueDate:
+                $ref: ../events/common.schema.json#/$defs/LocalDate
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+            required:
+            - dueDate
+            - amount
+      required:
+      - planInstanceId
+      - schedule
+      description: 'Typed from REQ-BIL-003, REQ-BIL-052. PRD outputs: "plan instance, schedule"'
     PaymentPlanChangeRequest:
       type: object
       description: 'bil.PaymentPlan.change request. PRD inputs: "term or job, plan, method, due day"'
       properties:
-        termOrJob:
+        term:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term or job"'
+          description: 'PRD: "term or job" (optional)'
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term or job" (optional)'
         plan:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "plan"'
@@ -6123,6 +6275,11 @@ components:
         dueDay:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "due day"'
+      oneOf:
+      - required:
+        - term
+      - required:
+        - job
     PaymentPlanChangeResponse:
       type: object
       description: 'bil.PaymentPlan.change result. PRD outputs: "plan instance, schedule"'
@@ -6140,9 +6297,17 @@ components:
         quoteJobTerm:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "quote/job/term"'
-        hypotheticalPlanOrDelta:
+        hypotheticalPlan:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "hypothetical plan or delta"'
+          description: 'PRD: "hypothetical plan or delta" (optional)'
+        delta:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "hypothetical plan or delta" (optional)'
+      oneOf:
+      - required:
+        - hypotheticalPlan
+      - required:
+        - delta
     BillingPreviewComputeResponse:
       type: object
       description: 'bil.BillingPreview.compute result. PRD outputs: "full schedule, first due, credits, refund"'
@@ -6161,40 +6326,62 @@ components:
           description: 'PRD: "refund"'
     DownPaymentStatusResponse:
       type: object
-      description: 'bil.DownPayment.status result. PRD outputs: "status, amount, reference/QR/link"'
       properties:
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum:
+          - NOT_REQUIRED
+          - PENDING
+          - CLEARED
+          - DEFERRED
+          description: REQ-BIL-003
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amount"'
-        referenceQrLink:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reference/QR/link"'
+          description: Down payment required (REQ-BIL-054)
+      required:
+      - status
+      description: 'Typed from REQ-BIL-003, REQ-BIL-054. PRD outputs: "status, amount, reference/QR/link"'
     DownPaymentInitiateRequest:
       type: object
-      description: 'bil.DownPayment.initiate request. PRD inputs: "job or term; method"'
       properties:
-        jobOrTerm:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job or term"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        quoteId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         method:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "method"'
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - method
+      oneOf:
+      - required:
+        - jobId
+      - required:
+        - quoteId
+      description: 'Typed from REQ-BIL-055. PRD inputs: "job or term; method"'
     DownPaymentInitiateResponse:
       type: object
-      description: 'bil.DownPayment.initiate result. PRD outputs: "status, amount, reference/QR/link"'
       properties:
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum:
+          - NOT_REQUIRED
+          - PENDING
+          - CLEARED
+          - DEFERRED
+          description: REQ-BIL-003
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amount"'
-        referenceQrLink:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reference/QR/link"'
+        paymentReference:
+          type: string
+        qrPayload:
+          type: string
+        paymentLink:
+          type: string
+          format: uri
+      required:
+      - status
+      - amount
+      description: 'Typed from REQ-BIL-055. PRD outputs: "status, amount, reference/QR/link"'
     InvoiceGetResponse:
       type: object
       description: 'bil.Invoice.get result. PRD outputs: "invoice with items, allocations, fiscal and delivery status"'
@@ -6205,7 +6392,10 @@ components:
         allocations:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "allocations"'
-        fiscalAndDeliveryStatus:
+        fiscalStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "fiscal and delivery status"'
+        deliveryStatus:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "fiscal and delivery status"'
     InvoiceListItem:
@@ -6218,7 +6408,10 @@ components:
         allocations:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "allocations"'
-        fiscalAndDeliveryStatus:
+        fiscalStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "fiscal and delivery status"'
+        deliveryStatus:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "fiscal and delivery status"'
     InvoiceListPage:
@@ -6253,7 +6446,10 @@ components:
         allocations:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "allocations"'
-        fiscalAndDeliveryStatus:
+        fiscalStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "fiscal and delivery status"'
+        deliveryStatus:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "fiscal and delivery status"'
     InvoiceDisputeRequest:
@@ -6278,14 +6474,20 @@ components:
         allocations:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "allocations"'
-        fiscalAndDeliveryStatus:
+        fiscalStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "fiscal and delivery status"'
+        deliveryStatus:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "fiscal and delivery status"'
     PaymentInstrumentAddRequest:
       type: object
       description: 'bil.PaymentInstrument.add request. PRD inputs: "IBAN and holder, or card token"'
       properties:
-        ibanAndHolder:
+        iban:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "IBAN and holder"'
+        holder:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "IBAN and holder"'
         orCardToken:
@@ -6305,7 +6507,10 @@ components:
       type: object
       description: 'bil.PaymentInstrument.remove request. PRD inputs: "IBAN and holder, or card token"'
       properties:
-        ibanAndHolder:
+        iban:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "IBAN and holder"'
+        holder:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "IBAN and holder"'
         orCardToken:
@@ -6589,14 +6794,22 @@ components:
       type: object
       description: 'bil.Allocation.allocate request. PRD inputs: "receipt or suspense, lines"'
       properties:
-        receiptOrSuspense:
+        receipt:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or suspense"'
+          description: 'PRD: "receipt or suspense" (optional)'
+        suspense:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "receipt or suspense" (optional)'
         lines:
           type: array
           items:
             $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "lines"'
+      oneOf:
+      - required:
+        - receipt
+      - required:
+        - suspense
     AllocationAllocateResponse:
       type: object
       description: 'bil.Allocation.allocate result. PRD outputs: "allocations"'
@@ -6608,14 +6821,22 @@ components:
       type: object
       description: 'bil.Allocation.unallocate request. PRD inputs: "receipt or suspense, lines"'
       properties:
-        receiptOrSuspense:
+        receipt:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or suspense"'
+          description: 'PRD: "receipt or suspense" (optional)'
+        suspense:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "receipt or suspense" (optional)'
         lines:
           type: array
           items:
             $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "lines"'
+      oneOf:
+      - required:
+        - receipt
+      - required:
+        - suspense
     AllocationUnallocateResponse:
       type: object
       description: 'bil.Allocation.unallocate result. PRD outputs: "allocations"'
@@ -6627,14 +6848,22 @@ components:
       type: object
       description: 'bil.Allocation.reallocate request. PRD inputs: "receipt or suspense, lines"'
       properties:
-        receiptOrSuspense:
+        receipt:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or suspense"'
+          description: 'PRD: "receipt or suspense" (optional)'
+        suspense:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "receipt or suspense" (optional)'
         lines:
           type: array
           items:
             $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "lines"'
+      oneOf:
+      - required:
+        - receipt
+      - required:
+        - suspense
     AllocationReallocateResponse:
       type: object
       description: 'bil.Allocation.reallocate result. PRD outputs: "allocations"'
@@ -6997,34 +7226,101 @@ components:
           description: 'PRD: "refund"'
     DisbursementRequestRequest:
       type: object
-      description: 'bil.Disbursement.request request. PRD inputs: "source type and id, payee, amount, method, approval evidence,
-        statement or return reference"'
       properties:
-        sourceTypeAndId:
+        sourceType:
+          $ref: ../events/common.schema.json#/$defs/DisbursementSourceType
+          description: Open code (D-CON-24), registered in the source register (REQ-BIL-354)
+        sourceId:
+          type: string
+          description: Id of the source object
+        payeePartyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "source type and id"'
-        payee:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payee"'
+        adHocPayee:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Ad hoc payee (name, birth date, nationality, country, identifiers)
+        coPayees:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amount"'
         method:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "method"'
-        approvalEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval evidence"'
-        statementOrReturnReference:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statement or return reference"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: REQ-BIL-209; defaults from the source
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: BIL payee account (REQ-BIL-343)
+        cardToken:
+          type: string
+        offsetInstruction:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: REQ-BIL-347
+        requestedValueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        approvalEvidenceRef:
+          type: string
+          description: Source approval evidence, verified against the content hash (REQ-BIL-198)
+        purposeText:
+          type: string
+        statementReference:
+          type: string
+        returnReference:
+          type: string
+      required:
+      - sourceType
+      - sourceId
+      - amount
+      - method
+      oneOf:
+      - required:
+        - payeePartyId
+      - required:
+        - adHocPayee
+      description: 'Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method,
+        approval evidence, statement or return reference"'
     DisbursementRequestResponse:
       type: object
-      description: 'bil.Disbursement.request result. PRD outputs: "disbursement"'
       properties:
-        disbursement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "disbursement"'
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - Requested
+          - PendingApproval
+          - Approved
+          - Released
+          - Issued
+          - Cleared
+          - Rejected
+          - Stopped
+          - Voided
+          - Returned
+          description: Canonical disbursement state (REQ-BIL-009)
+        sourceType:
+          $ref: ../events/common.schema.json#/$defs/DisbursementSourceType
+        sourceId:
+          type: string
+          description: Id of the source object in the source module
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        method:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: 'Disbursement method (REQ-BIL-209: SEPA credit transfer, SEPA instant, card refund, intermediary account,
+            CLEARING)'
+        requestedValueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        maskedPayeeAccount:
+          type: string
+          description: Masked payee account (REQ-BIL-213)
+      required:
+      - disbursementId
+      - status
+      - sourceType
+      - sourceId
+      - amount
+      description: 'Disbursement (REQ-BIL-009, REQ-BIL-213) Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD outputs:
+        "disbursement"'
     DisbursementGetResponse:
       type: object
       description: 'bil.Disbursement.get result. PRD outputs: "disbursement"'
@@ -7051,64 +7347,139 @@ components:
       description: Page of bil.Disbursement.list results (cursor pagination, contract §3.5.5)
     DisbursementStopRequest:
       type: object
-      description: 'bil.Disbursement.stop request. PRD inputs: "source type and id, payee, amount, method, approval evidence,
-        statement or return reference"'
       properties:
-        sourceTypeAndId:
+        disbursementId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "source type and id"'
-        payee:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payee"'
-        amount:
-          $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amount"'
-        method:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "method"'
-        approvalEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval evidence"'
-        statementOrReturnReference:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statement or return reference"'
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - disbursementId
+      - reason
+      description: 'Typed from REQ-BIL-009, REQ-CLM-126. PRD inputs: "source type and id, payee, amount, method, approval
+        evidence, statement or return reference"'
     DisbursementStopResponse:
       type: object
-      description: 'bil.Disbursement.stop result. PRD outputs: "disbursement"'
       properties:
         disbursement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "disbursement"'
+          type: object
+          properties:
+            disbursementId:
+              $ref: ../events/common.schema.json#/$defs/Uuid
+            status:
+              type: string
+              enum:
+              - Requested
+              - PendingApproval
+              - Approved
+              - Released
+              - Issued
+              - Cleared
+              - Rejected
+              - Stopped
+              - Voided
+              - Returned
+              description: Canonical disbursement state (REQ-BIL-009)
+            sourceType:
+              $ref: ../events/common.schema.json#/$defs/DisbursementSourceType
+            sourceId:
+              type: string
+              description: Id of the source object in the source module
+            amount:
+              $ref: ../events/common.schema.json#/$defs/Money
+            method:
+              $ref: ../events/common.schema.json#/$defs/Code
+              description: 'Disbursement method (REQ-BIL-209: SEPA credit transfer, SEPA instant, card refund, intermediary
+                account, CLEARING)'
+            requestedValueDate:
+              $ref: ../events/common.schema.json#/$defs/LocalDate
+            maskedPayeeAccount:
+              type: string
+              description: Masked payee account (REQ-BIL-213)
+          required:
+          - disbursementId
+          - status
+          - sourceType
+          - sourceId
+          - amount
+          description: Disbursement (REQ-BIL-009, REQ-BIL-213)
+        stoppable:
+          type: boolean
+          description: 'Dry-run: stoppability'
+        reversalEntries:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+        sourcePayableRestored:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - disbursement
+      description: 'Typed from REQ-BIL-009, REQ-CLM-126. PRD outputs: "disbursement"'
     DisbursementVoidRequest:
       type: object
-      description: 'bil.Disbursement.void request. PRD inputs: "source type and id, payee, amount, method, approval evidence,
-        statement or return reference"'
       properties:
-        sourceTypeAndId:
+        disbursementId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "source type and id"'
-        payee:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payee"'
-        amount:
-          $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amount"'
-        method:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "method"'
-        approvalEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval evidence"'
-        statementOrReturnReference:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statement or return reference"'
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - disbursementId
+      - reason
+      description: 'Typed from REQ-BIL-009, REQ-CLM-125. PRD inputs: "source type and id, payee, amount, method, approval
+        evidence, statement or return reference"'
     DisbursementVoidResponse:
       type: object
-      description: 'bil.Disbursement.void result. PRD outputs: "disbursement"'
       properties:
         disbursement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "disbursement"'
+          type: object
+          properties:
+            disbursementId:
+              $ref: ../events/common.schema.json#/$defs/Uuid
+            status:
+              type: string
+              enum:
+              - Requested
+              - PendingApproval
+              - Approved
+              - Released
+              - Issued
+              - Cleared
+              - Rejected
+              - Stopped
+              - Voided
+              - Returned
+              description: Canonical disbursement state (REQ-BIL-009)
+            sourceType:
+              $ref: ../events/common.schema.json#/$defs/DisbursementSourceType
+            sourceId:
+              type: string
+              description: Id of the source object in the source module
+            amount:
+              $ref: ../events/common.schema.json#/$defs/Money
+            method:
+              $ref: ../events/common.schema.json#/$defs/Code
+              description: 'Disbursement method (REQ-BIL-209: SEPA credit transfer, SEPA instant, card refund, intermediary
+                account, CLEARING)'
+            requestedValueDate:
+              $ref: ../events/common.schema.json#/$defs/LocalDate
+            maskedPayeeAccount:
+              type: string
+              description: Masked payee account (REQ-BIL-213)
+          required:
+          - disbursementId
+          - status
+          - sourceType
+          - sourceId
+          - amount
+          description: Disbursement (REQ-BIL-009, REQ-BIL-213)
+        reversalEntries:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+        sourcePayableRestored:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - disbursement
+      description: 'Typed from REQ-BIL-009, REQ-CLM-125. PRD outputs: "disbursement"'
     ReceivableRegisterRequest:
       type: object
       description: 'bil.Receivable.register request. PRD inputs: "source, counterparty, references, amount, currency, due
@@ -7290,7 +7661,7 @@ components:
         entriesPreview:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "entries preview"'
-    CommissionCalculationsResponse:
+    CommissionCalculationsItem:
       type: object
       description: 'bil.Commission.calculations result. PRD outputs: "lines, statements, run"'
       properties:
@@ -7305,13 +7676,33 @@ components:
         run:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "run"'
-    CommissionStatementsResponse:
+    CommissionCalculationsPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/CommissionCalculationsItem'
+      description: Page of bil.Commission.calculations results (cursor pagination, contract §3.5.5)
+    CommissionStatementsItem:
       type: object
       description: 'bil.Commission.statements result. PRD outputs: "statements with lines"'
       properties:
         statementsLines:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "statements with lines"'
+    CommissionStatementsPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/CommissionStatementsItem'
+      description: Page of bil.Commission.statements results (cursor pagination, contract §3.5.5)
     CommissionDisputeRequest:
       type: object
       description: 'bil.Commission.dispute request. PRD inputs: "statement id, line ids, reason"'
@@ -7504,7 +7895,10 @@ components:
         accountingDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
           description: 'PRD: "accounting date"'
-        subLedgerAccountAndEventType:
+        subLedgerAccount:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "optional sub-ledger account and event type" (optional)'
+        eventType:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "optional sub-ledger account and event type" (optional)'
     ReconciliationFinResponse:
@@ -7521,9 +7915,17 @@ components:
       type: object
       description: 'bil.Import.reverse request. PRD inputs: "batch id or source key"'
       properties:
-        batchIdOrSourceKey:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id or source key" (optional)'
+        sourceKey:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "batch id or source key"'
+          description: 'PRD: "batch id or source key" (optional)'
+      oneOf:
+      - required:
+        - batchId
+      - required:
+        - sourceKey
     ImportReverseResponse:
       type: object
       description: 'bil.Import.reverse result. PRD outputs: "reversal report per object"'

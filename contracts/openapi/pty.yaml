@@ -56,6 +56,7 @@ paths:
       x-work-packages:
       - W2-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -126,6 +127,7 @@ paths:
       x-work-packages:
       - W2-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -160,6 +162,12 @@ paths:
           type: string
       - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/KnownAt
+      - name: partyNumber
+        in: query
+        required: false
+        description: 'PRD: "party_id or number" (optional)'
+        schema:
+          type: string
       - name: profile
         in: query
         required: false
@@ -206,6 +214,7 @@ paths:
       x-work-packages:
       - W2-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -291,6 +300,7 @@ paths:
       x-work-packages:
       - W2-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -368,6 +378,7 @@ paths:
       - W2-PTY-01
       - W2-PTY-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -421,6 +432,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -493,6 +505,7 @@ paths:
       - W2-PTY-02
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -565,6 +578,7 @@ paths:
       x-work-packages:
       - W2-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -631,6 +645,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -699,6 +714,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -764,6 +780,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -822,6 +839,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -884,6 +902,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -946,6 +965,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1000,6 +1020,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1072,6 +1093,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -1140,6 +1162,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -1199,6 +1222,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1267,6 +1291,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1335,6 +1360,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1403,6 +1429,7 @@ paths:
       x-work-packages:
       - W2-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1471,6 +1498,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1539,6 +1567,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1607,6 +1636,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1677,6 +1707,7 @@ paths:
       x-work-packages:
       - W2-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1744,6 +1775,7 @@ paths:
       x-work-packages:
       - W2-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1814,6 +1846,7 @@ paths:
       x-work-packages:
       - W2-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1876,6 +1909,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1939,6 +1973,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2002,6 +2037,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2068,6 +2104,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2134,6 +2171,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -2201,6 +2239,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2267,6 +2306,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2286,11 +2326,14 @@ paths:
         status: 422
       x-source:
       - PRD-01 §9.1 l.1649
+      x-prd-param-names:
+        validAt: date
       x-superseded-names:
       - pty.Preferences.query (XRF-004a)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -2333,6 +2376,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -2399,6 +2443,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2455,6 +2500,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2517,6 +2563,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2579,6 +2626,8 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-PTY-006, REQ-PTY-174
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -2649,6 +2698,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2714,6 +2764,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2777,6 +2828,7 @@ paths:
       x-work-packages:
       - W2-PTY-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -2827,7 +2879,8 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: full
-      x-io-shared: 2
+      x-maturity: pre-release
+      x-typed: REQ-PTY-008
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2846,11 +2899,14 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-01 §9.1 l.1653
+      x-prd-param-names:
+        validAt: date
       x-superseded-names:
       - pty.Intermediary.validate (XRF-004b)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -2891,6 +2947,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2902,9 +2959,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-01 §9.1 l.1653
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
       - name: code
@@ -2925,12 +2985,6 @@ paths:
         description: 'PRD: "transaction type"'
         schema:
           type: string
-      - name: date
-        in: query
-        required: false
-        description: 'PRD: "date"'
-        schema:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
       - name: actingPerson
         in: query
         required: false
@@ -2969,6 +3023,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3031,6 +3086,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3101,6 +3157,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3163,6 +3220,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3226,6 +3284,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3291,6 +3350,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -3358,6 +3418,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3424,6 +3485,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3492,6 +3554,7 @@ paths:
       x-work-packages:
       - W2-PTY-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3557,6 +3620,7 @@ paths:
       x-work-packages:
       - W6-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -3622,6 +3686,7 @@ paths:
       x-work-packages:
       - W6-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -3686,6 +3751,7 @@ paths:
       x-work-packages:
       - W6-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -3754,6 +3820,7 @@ paths:
       x-work-packages:
       - W6-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -3822,6 +3889,7 @@ paths:
       x-work-packages:
       - W6-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -3891,6 +3959,7 @@ paths:
       x-work-packages:
       - W6-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -3947,6 +4016,7 @@ paths:
       x-work-packages:
       - W6-PTY-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -4007,6 +4077,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4071,6 +4142,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4136,6 +4208,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -4203,6 +4276,7 @@ paths:
       x-work-packages:
       - W6-PTY-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4264,6 +4338,7 @@ paths:
       - REQ-PTY-282
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4325,6 +4400,7 @@ x-operation-families:
   - REQ-PTY-204..REQ-PTY-206
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-01 §9.1 l.1655
@@ -4336,6 +4412,7 @@ x-operation-families:
   - REQ-PTY-204..REQ-PTY-206
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-01 §9.1 l.1655
@@ -4347,6 +4424,7 @@ x-operation-families:
   - REQ-PTY-243..REQ-PTY-252
   x-wave: W6
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-01 §9.1 l.1658
@@ -4358,6 +4436,7 @@ x-operation-families:
   - REQ-PTY-253..REQ-PTY-258
   x-wave: unscheduled
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-01 §9.1 l.1659
@@ -4369,6 +4448,7 @@ x-operation-families:
   - REQ-PTY-013
   x-wave: W9
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-01 §9.1 l.1665
@@ -4946,9 +5026,6 @@ components:
         purpose:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "purpose"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
     CommunicationPreferenceResolveResponse:
       type: object
       description: 'pty.CommunicationPreference.resolve result. PRD outputs: "channel, language, medium, proof"'
@@ -5059,33 +5136,70 @@ components:
           description: 'PRD: "trusted contacts"'
     ScreeningScreenRequest:
       type: object
-      description: 'pty.Screening.screen request. PRD inputs: "party_id or ad-hoc payee, caller ref"'
       properties:
-        partyIdOrAdHocPayee:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party_id or ad-hoc payee"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        adHocPayee:
+          type: object
+          properties:
+            name:
+              type: string
+            birthDate:
+              $ref: ../events/common.schema.json#/$defs/LocalDate
+            nationality:
+              $ref: ../events/common.schema.json#/$defs/CountryCode
+            country:
+              $ref: ../events/common.schema.json#/$defs/CountryCode
+            identifiers:
+              type: array
+              items:
+                type: object
+                properties:
+                  scheme:
+                    $ref: ../events/common.schema.json#/$defs/Code
+                  value:
+                    type: string
+                required:
+                - scheme
+                - value
+          required:
+          - name
         callerRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "caller ref"'
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: Calling object (refund, disbursement, bind, claim payment)
+      required:
+      - callerRef
+      oneOf:
+      - required:
+        - partyId
+      - required:
+        - adHocPayee
+      description: 'Typed from REQ-PTY-006, REQ-PTY-174. PRD inputs: "party_id or ad-hoc payee, caller ref"'
     ScreeningScreenResponse:
       type: object
-      description: 'pty.Screening.screen result. PRD outputs: "Clear / PotentialHit / Blocked, case, block"'
       properties:
-        clear:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "Clear"'
-        potentialHit:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "PotentialHit"'
-        blocked:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "Blocked"'
-        case:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "case"'
-        block:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "block"'
+        result:
+          type: string
+          enum:
+          - Clear
+          - PotentialHit
+          - Blocked
+          description: REQ-PTY-006
+        caseNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: When not Clear
+        listVersions:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        paymentBlock:
+          type: boolean
+          description: Payment block
+      required:
+      - result
+      - listVersions
+      - paymentBlock
+      description: 'Typed from REQ-PTY-006, REQ-PTY-174. PRD outputs: "Clear / PotentialHit / Blocked, case, block"'
     ScreeningBulkRequest:
       type: object
       description: 'pty.Screening.bulk request. PRD inputs: "list"'
@@ -5132,36 +5246,71 @@ components:
           description: 'PRD: "decision → case"'
     ProducerCodeValidateRequest:
       type: object
-      description: 'pty.ProducerCode.validate request. PRD inputs: "code, product, transaction type, date, acting person"'
       properties:
-        code:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "code"'
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
         product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
+          $ref: ../events/common.schema.json#/$defs/Code
         transactionType:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transaction type"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
-        actingPerson:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "acting person"'
+          $ref: ../events/common.schema.json#/$defs/Code
+        actingPersonId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Acting person (PRD-01 §9.1)
+      required:
+      - producerCode
+      - product
+      - transactionType
+      description: 'Typed from REQ-PTY-008. PRD inputs: "code, product, transaction type, date, acting person"'
     ProducerCodeValidateResponse:
       type: object
-      description: 'pty.ProducerCode.validate result. PRD outputs: "validity, reasons, intermediary data"'
       properties:
-        validity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validity"'
+        valid:
+          type: boolean
+          description: Validity
         reasons:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reasons"'
+          type: array
+          items:
+            allOf:
+            - $ref: ../events/common.schema.json#/$defs/Code
+            examples:
+            - REGISTER_INACTIVE
+            - NOT_APPOINTED
+            - CPD_NON_COMPLIANT
+            - TRAINING_MISSING
+        intermediaryType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        registerNumber:
+          type: string
+        registerStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+        licenceStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+        licenceExpiry:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        appointedForProduct:
+          type: boolean
+          description: Appointment for the product
+        authorities:
+          type: object
+          properties:
+            collectPremium:
+              type: boolean
+              description: Collect premium
+            issueCoverNotes:
+              type: boolean
+              description: Issue cover notes
+            bindWithinAuthority:
+              type: boolean
+              description: Bind within authority
+            limits:
+              $ref: ../events/common.schema.json#/$defs/OpenObject
         intermediaryData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "intermediary data"'
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Data that must appear on applications and policies
+      required:
+      - valid
+      - reasons
+      description: 'Typed from REQ-PTY-008. PRD outputs: "validity, reasons, intermediary data"'
     ProducerCodeSearchItem:
       type: object
       description: 'pty.ProducerCode.search result. PRD outputs: "validity, reasons, intermediary data"'
@@ -5422,11 +5571,19 @@ components:
       type: object
       description: 'pty.Import.reverse request. PRD inputs: "import batch id or object ids, dryRun"'
       properties:
-        importBatchIdOrObjectIds:
+        importBatchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "import batch id or object ids" (optional)'
+        objectIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "import batch id or object ids"'
+          description: 'PRD: "import batch id or object ids" (optional)'
+      oneOf:
+      - required:
+        - importBatchId
+      - required:
+        - objectIds
     ImportReverseResponse:
       type: object
       description: 'pty.Import.reverse result. PRD outputs: "per-object outcome (reversed, blocked with reason)"'

@@ -58,6 +58,8 @@ paths:
       x-work-packages:
       - W5-CMP-01
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-CMP-001, REQ-CMP-030..033
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -131,6 +133,7 @@ paths:
       x-work-packages:
       - W5-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -199,6 +202,7 @@ paths:
       - W5-CMP-01
       - W9-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -218,6 +222,8 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       - name: sourceType
         in: query
         required: false
@@ -236,7 +242,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FiscalDocumentListBySourceResponse'
+                $ref: '#/components/schemas/FiscalDocumentListBySourcePage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -269,6 +275,7 @@ paths:
       x-work-packages:
       - W5-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -326,6 +333,7 @@ paths:
       x-work-packages:
       - W5-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -395,6 +403,7 @@ paths:
       x-work-packages:
       - W5-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -465,11 +474,13 @@ paths:
       x-work-packages:
       - W5-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: bulkResubmit: Yes; PRD idempotency: Required'
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: bulkResubmit: Yes; PRD idempotency: Required; dry-run added under contract §3.5.3 (changes
+        the fiscal legal status of a document); the PRD row lists dry-run only for bulkResubmit'
       x-exposure:
       - ui
       x-permission: cmp.FiscalDocument.correct
@@ -487,6 +498,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -534,11 +546,13 @@ paths:
       x-work-packages:
       - W5-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: bulkResubmit: Yes; PRD idempotency: Required'
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: bulkResubmit: Yes; PRD idempotency: Required; dry-run added under contract §3.5.3 (changes
+        the fiscal legal status of a document); the PRD row lists dry-run only for bulkResubmit'
       x-exposure:
       - ui
       x-permission: cmp.FiscalDocument.cancel
@@ -556,6 +570,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -599,6 +614,7 @@ paths:
       x-work-packages:
       - W5-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -661,6 +677,7 @@ paths:
       x-work-packages:
       - W5-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -675,6 +692,8 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       - name: date
         in: query
         required: false
@@ -693,7 +712,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FiscalReconciliationBreaksResponse'
+                $ref: '#/components/schemas/FiscalReconciliationBreaksPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -724,6 +743,7 @@ paths:
       x-work-packages:
       - W5-CMP-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -741,10 +761,16 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - name: policyIdOrPlate
+      - name: policyId
         in: query
         required: false
-        description: 'PRD: "policy id or plate"'
+        description: 'PRD: "policy id or plate" (optional)'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: plate
+        in: query
+        required: false
+        description: 'PRD: "policy id or plate" (optional)'
         schema:
           type: string
       responses:
@@ -786,6 +812,7 @@ paths:
       x-work-packages:
       - W5-CMP-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -855,6 +882,7 @@ paths:
       x-work-packages:
       - W5-CMP-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -926,6 +954,7 @@ paths:
       x-work-packages:
       - W5-CMP-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -997,6 +1026,7 @@ paths:
       x-work-packages:
       - W5-CMP-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1056,6 +1086,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1136,6 +1167,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1212,6 +1244,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1291,6 +1324,7 @@ paths:
       - W2-CMP-01
       - W8-CMP-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -1371,6 +1405,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1446,6 +1481,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1517,6 +1553,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1539,6 +1576,12 @@ paths:
         in: path
         required: true
         description: 'Identifier of the Clock (PRD input: "id or subject")'
+        schema:
+          type: string
+      - name: subject
+        in: query
+        required: false
+        description: 'PRD: "id or subject" (optional)'
         schema:
           type: string
       - name: code
@@ -1594,6 +1637,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1613,10 +1657,16 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: idOrSubject
+      - name: id
         in: query
         required: false
-        description: 'PRD: "id or subject"'
+        description: 'PRD: "id or subject" (optional)'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: subject
+        in: query
+        required: false
+        description: 'PRD: "id or subject" (optional)'
         schema:
           type: string
       - name: code
@@ -1670,6 +1720,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1721,6 +1772,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1776,6 +1828,7 @@ paths:
       x-work-packages:
       - W2-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1841,6 +1894,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -1917,6 +1971,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -1989,6 +2044,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -2063,6 +2119,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -2135,6 +2192,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -2207,6 +2265,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -2279,6 +2338,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -2351,6 +2411,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -2423,6 +2484,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -2495,6 +2557,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: query
       x-idempotency: none
@@ -2563,6 +2626,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: query
       x-idempotency: none
@@ -2625,6 +2689,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2687,6 +2752,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2759,6 +2825,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2829,6 +2896,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2900,6 +2968,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2970,6 +3039,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -3040,6 +3110,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -3110,6 +3181,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -3180,6 +3252,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -3250,6 +3323,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: query
       x-idempotency: none
@@ -3316,6 +3390,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: query
       x-idempotency: none
@@ -3371,6 +3446,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -3431,6 +3507,7 @@ paths:
       x-work-packages:
       - W8-CMP-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -3491,6 +3568,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3554,6 +3632,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3617,6 +3696,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3679,6 +3759,7 @@ paths:
       - REQ-CMP-177..REQ-CMP-184
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -3740,6 +3821,7 @@ paths:
       - REQ-CMP-177..REQ-CMP-184
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -3794,6 +3876,7 @@ paths:
       - REQ-CMP-177..REQ-CMP-184
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -3854,6 +3937,7 @@ paths:
       - REQ-CMP-177..REQ-CMP-184
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -3914,6 +3998,7 @@ paths:
       - REQ-CMP-177..REQ-CMP-184
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -3974,6 +4059,7 @@ paths:
       - REQ-CMP-177..REQ-CMP-184
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -4034,6 +4120,7 @@ paths:
       - REQ-CMP-185..REQ-CMP-188
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4093,6 +4180,7 @@ paths:
       - REQ-CMP-185..REQ-CMP-188
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4152,6 +4240,7 @@ paths:
       - REQ-CMP-185..REQ-CMP-188
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4210,6 +4299,7 @@ paths:
       - REQ-CMP-185..REQ-CMP-188
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4275,6 +4365,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -4350,6 +4441,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -4419,6 +4511,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -4488,6 +4581,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -4560,6 +4654,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -4640,6 +4735,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -4709,6 +4805,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -4779,6 +4876,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -4852,6 +4950,7 @@ paths:
       x-work-packages:
       - W8-CMP-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -4917,6 +5016,7 @@ paths:
       - REQ-CMP-258
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4979,6 +5079,7 @@ paths:
       - REQ-CMP-258
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -5039,6 +5140,7 @@ paths:
       - REQ-CMP-258
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -5090,6 +5192,7 @@ paths:
       - REQ-CMP-260
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -5149,6 +5252,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -5218,6 +5322,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -5285,6 +5390,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -5358,6 +5464,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -5427,6 +5534,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -5496,6 +5604,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -5565,6 +5674,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -5634,6 +5744,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -5704,6 +5815,7 @@ paths:
       x-work-packages:
       - W8-CMP-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -5770,6 +5882,7 @@ paths:
       - W8-CMP-03
       - W9-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -5841,6 +5954,7 @@ paths:
       - W8-CMP-03
       - W9-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -5912,6 +6026,7 @@ paths:
       - W8-CMP-03
       - W9-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -5988,6 +6103,7 @@ paths:
       - W8-CMP-03
       - W9-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -6063,6 +6179,7 @@ paths:
       - W8-CMP-03
       - W9-CMP-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -6122,6 +6239,7 @@ x-operation-families:
   - REQ-CMP-006
   x-wave: W8
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-11 §9.1 l.1246
@@ -6136,6 +6254,7 @@ x-operation-families:
   - REQ-CMP-006
   x-wave: W8
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-11 §9.1 l.1246
@@ -6147,6 +6266,7 @@ x-operation-families:
   - REQ-CMP-226..REQ-CMP-236
   x-wave: W8
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-11 §9.1 l.1247
@@ -6157,36 +6277,87 @@ components:
   schemas:
     FiscalDocumentRequestRequest:
       type: object
-      description: 'cmp.FiscalDocument.request request. PRD inputs: "source type and id, role, lines (fiscal-category key,
-        amount, charge or payment id), counterparty party id, issue date"'
       properties:
-        sourceTypeAndId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "source type and id"'
+        sourceType:
+          allOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          description: Fiscal source type. REQ-CMP-030 lists TRANSACTION, INVOICE, CREDIT, FEE, COMMISSION, CLAIM_PAYMENT;
+            integration review XRF-001 names BIL_INVOICE / BIL_CREDIT / BIL_COMMISSION. Open code until CMP settles one list.
+          examples:
+          - TRANSACTION
+          - INVOICE
+          - CREDIT
+          - FEE
+          - COMMISSION
+          - CLAIM_PAYMENT
+        sourceId:
+          type: string
+          description: Id of the source object
         role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
+          type: string
+          enum:
+          - ISSUE
+          - CREDIT
+          - CANCELLATION
+          description: Document role (REQ-CMP-031)
+        revision:
+          type: integer
+          description: Revision (fiscal idempotency key component, REQ-CMP-031)
+          minimum: 0
+        originalFiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Credits and cancellations (REQ-CMP-032)
         lines:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines (fiscal-category key, amount, charge or payment id)"'
+            type: object
+            properties:
+              fiscalCategoryKey:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: PFC fiscal-category key (REQ-CMP-035)
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+              chargeId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              paymentId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+            required:
+            - fiscalCategoryKey
+            - amount
+          minItems: 1
         counterpartyPartyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "counterparty party id"'
         issueDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "issue date"'
+      required:
+      - sourceType
+      - sourceId
+      - role
+      - lines
+      - counterpartyPartyId
+      - issueDate
+      description: 'Typed from REQ-CMP-001, REQ-CMP-030..033. PRD inputs: "source type and id, role, lines (fiscal-category
+        key, amount, charge or payment id), counterparty party id, issue date"'
     FiscalDocumentRequestResponse:
       type: object
-      description: 'cmp.FiscalDocument.request result. PRD outputs: "fiscal document id, status"'
       properties:
         fiscalDocumentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "fiscal document id"'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Pending on creation (REQ-CMP-030)
+        documentType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: 'Dry-run: built document type'
+        classifications:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'Dry-run: line classifications (REQ-CMP-035)'
+      required:
+      - fiscalDocumentId
+      - status
+      description: 'Typed from REQ-CMP-001, REQ-CMP-030..033. PRD outputs: "fiscal document id, status"'
     FiscalDocumentGetResponse:
       type: object
       description: 'cmp.FiscalDocument.get result. PRD outputs: "document, identifiers"'
@@ -6197,7 +6368,7 @@ components:
         identifiers:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "identifiers"'
-    FiscalDocumentListBySourceResponse:
+    FiscalDocumentListBySourceItem:
       type: object
       description: 'cmp.FiscalDocument.listBySource result. PRD outputs: "documents"'
       properties:
@@ -6206,6 +6377,16 @@ components:
           items:
             $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "documents"'
+    FiscalDocumentListBySourcePage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/FiscalDocumentListBySourceItem'
+      description: Page of cmp.FiscalDocument.listBySource results (cursor pagination, contract §3.5.5)
     FiscalDocumentQrPayloadResponse:
       type: object
       description: 'cmp.FiscalDocument.qrPayload result. PRD outputs: "document, identifiers"'
@@ -6321,13 +6502,23 @@ components:
         breaks:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "breaks"'
-    FiscalReconciliationBreaksResponse:
+    FiscalReconciliationBreaksItem:
       type: object
       description: 'cmp.FiscalReconciliation.breaks result. PRD outputs: "breaks"'
       properties:
         breaks:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "breaks"'
+    FiscalReconciliationBreaksPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/FiscalReconciliationBreaksItem'
+      description: Page of cmp.FiscalReconciliation.breaks results (cursor pagination, contract §3.5.5)
     BureauStatusResponse:
       type: object
       description: 'cmp.Bureau.status result. PRD outputs: "latest fact, acknowledgement, lag"'
@@ -7507,7 +7698,10 @@ components:
       type: object
       description: 'cmp.Submission.renderXbrl result. PRD outputs: "instance reference and hash; validation report"'
       properties:
-        instanceReferenceAndHash:
+        instanceReference:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "instance reference and hash"'
+        instanceHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "instance reference and hash"'
         validationReport:
@@ -7524,7 +7718,10 @@ components:
       type: object
       description: 'cmp.Submission.validateTaxonomy result. PRD outputs: "instance reference and hash; validation report"'
       properties:
-        instanceReferenceAndHash:
+        instanceReference:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "instance reference and hash"'
+        instanceHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "instance reference and hash"'
         validationReport:

@@ -70,6 +70,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -135,6 +136,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -199,6 +201,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -272,6 +275,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -332,6 +336,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -399,6 +404,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -466,6 +472,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -532,6 +539,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -596,6 +604,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -664,6 +673,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -714,6 +724,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -790,6 +801,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -846,6 +858,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -913,6 +926,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -980,6 +994,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1047,6 +1062,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1114,6 +1130,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1181,6 +1198,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1250,6 +1268,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1300,6 +1319,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1344,6 +1364,7 @@ paths:
       - REQ-RI-045
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1395,6 +1416,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1464,6 +1486,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1533,6 +1556,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1590,6 +1614,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1658,6 +1683,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1715,6 +1741,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1726,9 +1753,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-08 §9.1 l.1506
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -1765,6 +1795,7 @@ paths:
       - REQ-RI-036
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1826,6 +1857,7 @@ paths:
       - REQ-RI-036
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1895,6 +1927,7 @@ paths:
       - REQ-RI-002
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1949,6 +1982,7 @@ paths:
       - REQ-RI-002
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1967,6 +2001,8 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/KnownAt
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       - name: policy
         in: query
         required: false
@@ -1985,7 +2021,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CessionListByPolicyResponse'
+                $ref: '#/components/schemas/CessionListByPolicyPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -2014,6 +2050,7 @@ paths:
       - REQ-RI-002
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2085,6 +2122,7 @@ paths:
       - REQ-RI-002
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -2145,6 +2183,7 @@ paths:
       - REQ-RI-093..REQ-RI-100
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2193,6 +2232,7 @@ paths:
       - REQ-RI-093..REQ-RI-100
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2258,6 +2298,7 @@ paths:
       - REQ-RI-093..REQ-RI-100
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2324,6 +2365,7 @@ paths:
       - REQ-RI-093..REQ-RI-100
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2389,6 +2431,7 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2455,6 +2498,7 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2521,6 +2565,7 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2587,6 +2632,7 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2653,6 +2699,7 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2720,6 +2767,7 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2786,6 +2834,7 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2852,11 +2901,13 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
-      x-dry-run-note: 'PRD: Key; DR (bind)'
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR (bind); dry-run added under contract §3.5.3 (changes facultative cover); the PRD row lists
+        dry-run only for bind'
       x-exposure:
       - ui
       x-permission: ri.Fac.cancel
@@ -2878,6 +2929,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -2918,6 +2970,7 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: query
       x-idempotency: none
@@ -2976,6 +3029,7 @@ paths:
       - REQ-RI-101..REQ-RI-112
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: query
       x-idempotency: none
@@ -3035,7 +3089,8 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
-      x-io-shared: 3
+      x-maturity: pre-release
+      x-typed: REQ-RI-136
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3048,17 +3103,28 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-08 §9.1 l.1513
+      x-prd-param-names:
+        knownAt: asOf ("as of a record time", REQ-RI-136)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: claimId
+        in: query
+        required: true
+        description: Claim id
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecoveryListByClaimResponse'
+                $ref: '#/components/schemas/RecoveryListByClaimPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -3089,6 +3155,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -3100,17 +3167,22 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-08 §9.1 l.1513
+      x-prd-param-names:
+        knownAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecoveryListByContractResponse'
+                $ref: '#/components/schemas/RecoveryListByContractPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -3141,6 +3213,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -3152,10 +3225,13 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-08 §9.1 l.1513
+      x-prd-param-names:
+        knownAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
       responses:
         '200':
           description: Success
@@ -3193,6 +3269,8 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-RI-003, REQ-RI-128
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3252,6 +3330,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -3315,6 +3394,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -3383,6 +3463,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3449,6 +3530,7 @@ paths:
       - REQ-RI-219
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3518,6 +3600,7 @@ paths:
       - REQ-RI-219
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3587,6 +3670,7 @@ paths:
       - REQ-RI-219
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3656,6 +3740,7 @@ paths:
       - REQ-RI-219
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -3714,6 +3799,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3769,6 +3855,7 @@ paths:
       - REQ-RI-153..REQ-RI-159
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -3821,6 +3908,7 @@ paths:
       - REQ-RI-153..REQ-RI-159
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3880,6 +3968,7 @@ paths:
       - REQ-RI-153..REQ-RI-159
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3939,6 +4028,7 @@ paths:
       - REQ-RI-153..REQ-RI-159
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3998,6 +4088,7 @@ paths:
       - REQ-RI-160..REQ-RI-166
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4057,6 +4148,7 @@ paths:
       - REQ-RI-160..REQ-RI-166
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4116,6 +4208,7 @@ paths:
       - REQ-RI-160..REQ-RI-166
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -4130,13 +4223,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommissionHistoryResponse'
+                $ref: '#/components/schemas/CommissionHistoryPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -4162,6 +4257,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4222,6 +4318,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4282,6 +4379,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4343,6 +4441,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -4398,6 +4497,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -4451,6 +4551,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4515,6 +4616,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4579,6 +4681,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4643,6 +4746,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4707,6 +4811,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -4773,6 +4878,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -4839,6 +4945,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -4905,6 +5012,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -4971,6 +5079,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -5037,6 +5146,7 @@ paths:
       - REQ-RI-006
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -5101,6 +5211,7 @@ paths:
       - REQ-RI-188
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5161,6 +5272,7 @@ paths:
       - REQ-RI-188
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5221,6 +5333,7 @@ paths:
       - REQ-RI-188
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5281,6 +5394,7 @@ paths:
       - REQ-RI-188
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5342,6 +5456,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5411,6 +5526,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5480,6 +5596,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5549,6 +5666,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5618,6 +5736,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5678,6 +5797,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -5726,6 +5846,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5787,6 +5908,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5849,6 +5971,7 @@ paths:
       - REQ-RI-005
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -5864,10 +5987,12 @@ paths:
         status: 422
       x-source:
       - PRD-08 §9.1 l.1528
+      x-prd-param-names:
+        validAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
       responses:
         '200':
           description: Success
@@ -5903,6 +6028,7 @@ paths:
       - REQ-RI-005
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -5918,10 +6044,12 @@ paths:
         status: 422
       x-source:
       - PRD-08 §9.1 l.1528
+      x-prd-param-names:
+        validAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
       responses:
@@ -5959,6 +6087,7 @@ paths:
       - REQ-RI-005
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -5974,10 +6103,12 @@ paths:
         status: 422
       x-source:
       - PRD-08 §9.1 l.1528
+      x-prd-param-names:
+        validAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
       responses:
         '200':
           description: Success
@@ -6013,6 +6144,7 @@ paths:
       - REQ-RI-005
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -6026,10 +6158,12 @@ paths:
         status: 422
       x-source:
       - PRD-08 §9.1 l.1528
+      x-prd-param-names:
+        validAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -6070,6 +6204,7 @@ paths:
       - REQ-RI-222
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -6130,6 +6265,7 @@ paths:
       - REQ-RI-222
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -6190,6 +6326,7 @@ paths:
       - REQ-RI-222
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -6250,6 +6387,7 @@ paths:
       x-work-packages:
       - W8-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -6310,6 +6448,7 @@ paths:
       x-work-packages:
       - W8-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -6377,6 +6516,7 @@ paths:
       x-work-packages:
       - W8-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -6438,6 +6578,7 @@ paths:
       x-work-packages:
       - W8-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -6479,18 +6620,13 @@ paths:
       tags:
       - Reconciliation
       x-requirement:
-      - REQ-RI-004
       - REQ-RI-236
       - REQ-RI-237
-      x-anchor:
-      - REQ-RI-004
-      x-anchor-mapped:
-      - REQ-RI-004
-      x-wave: W7
+      x-wave: W8
       x-work-packages:
-      - W7-RI-02
       - W8-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -6551,6 +6687,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -6613,6 +6750,7 @@ paths:
       x-work-packages:
       - W7-RI-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -6679,6 +6817,7 @@ paths:
       - W7-RI-01
       - W9-RI-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -6749,6 +6888,7 @@ paths:
       - W7-RI-01
       - W9-RI-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -6819,6 +6959,7 @@ paths:
       - W7-RI-01
       - W9-RI-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -6889,6 +7030,7 @@ paths:
       - W7-RI-01
       - W9-RI-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -6959,6 +7101,7 @@ paths:
       - W7-RI-01
       - W9-RI-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -7029,6 +7172,7 @@ paths:
       - W7-RI-01
       - W9-RI-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -7093,6 +7237,7 @@ paths:
       - REQ-RI-261
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -7158,6 +7303,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -7221,6 +7367,7 @@ paths:
       x-work-packages:
       - W7-RI-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -7823,9 +7970,6 @@ components:
         rules:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "rules"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
     SecurityReportResponse:
       type: object
       description: 'ri.Security.report result. PRD outputs: "rules; report"'
@@ -7879,7 +8023,7 @@ components:
         gaps:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "gaps"'
-    CessionListByPolicyResponse:
+    CessionListByPolicyItem:
       type: object
       description: 'ri.Cession.listByPolicy result. PRD outputs: "intervals, shares, deltas"'
       properties:
@@ -7892,6 +8036,16 @@ components:
         deltas:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "deltas"'
+    CessionListByPolicyPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/CessionListByPolicyItem'
+      description: Page of ri.Cession.listByPolicy results (cursor pagination, contract §3.5.5)
     CessionGetResponse:
       type: object
       description: 'ri.Cession.get result. PRD outputs: "intervals, shares, deltas"'
@@ -8018,7 +8172,10 @@ components:
       type: object
       description: 'ri.Fac.request request. PRD inputs: "request and quote data"'
       properties:
-        requestAndQuoteData:
+        requestData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request and quote data"'
+        quoteData:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "request and quote data"'
     FacRequestResponse:
@@ -8035,7 +8192,10 @@ components:
       type: object
       description: 'ri.Fac.generateSlip request. PRD inputs: "request and quote data"'
       properties:
-        requestAndQuoteData:
+        requestData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request and quote data"'
+        quoteData:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "request and quote data"'
     FacGenerateSlipResponse:
@@ -8052,7 +8212,10 @@ components:
       type: object
       description: 'ri.Fac.recordQuote request. PRD inputs: "request and quote data"'
       properties:
-        requestAndQuoteData:
+        requestData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request and quote data"'
+        quoteData:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "request and quote data"'
     FacRecordQuoteResponse:
@@ -8069,7 +8232,10 @@ components:
       type: object
       description: 'ri.Fac.importQuotes request. PRD inputs: "request and quote data"'
       properties:
-        requestAndQuoteData:
+        requestData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request and quote data"'
+        quoteData:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "request and quote data"'
     FacImportQuotesResponse:
@@ -8086,7 +8252,10 @@ components:
       type: object
       description: 'ri.Fac.bind request. PRD inputs: "request and quote data"'
       properties:
-        requestAndQuoteData:
+        requestData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request and quote data"'
+        quoteData:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "request and quote data"'
     FacBindResponse:
@@ -8103,7 +8272,10 @@ components:
       type: object
       description: 'ri.Fac.issueCertificate request. PRD inputs: "request and quote data"'
       properties:
-        requestAndQuoteData:
+        requestData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request and quote data"'
+        quoteData:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "request and quote data"'
     FacIssueCertificateResponse:
@@ -8120,7 +8292,10 @@ components:
       type: object
       description: 'ri.Fac.decline request. PRD inputs: "request and quote data"'
       properties:
-        requestAndQuoteData:
+        requestData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request and quote data"'
+        quoteData:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "request and quote data"'
     FacDeclineResponse:
@@ -8137,7 +8312,10 @@ components:
       type: object
       description: 'ri.Fac.cancel request. PRD inputs: "request and quote data"'
       properties:
-        requestAndQuoteData:
+        requestData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request and quote data"'
+        quoteData:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "request and quote data"'
     FacCancelResponse:
@@ -8180,17 +8358,38 @@ components:
             items:
               $ref: '#/components/schemas/FacListItem'
       description: Page of ri.Fac.list results (cursor pagination, contract §3.5.5)
-    RecoveryListByClaimResponse:
+    RecoveryListByClaimItem:
       type: object
-      description: 'ri.Recovery.listByClaim result. PRD outputs: "recoverables, trace"'
       properties:
-        recoverables:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "recoverables"'
-        trace:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "trace"'
-    RecoveryListByContractResponse:
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        layerId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        participantId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recoverableIncurred:
+          $ref: ../events/common.schema.json#/$defs/Money
+        recoverablePaid:
+          $ref: ../events/common.schema.json#/$defs/Money
+        recoverableOutstanding:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - contractId
+      - recoverableIncurred
+      - recoverablePaid
+      - recoverableOutstanding
+      description: 'Typed from REQ-RI-136. PRD outputs: "recoverables, trace"'
+    RecoveryListByClaimPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RecoveryListByClaimItem'
+      description: Page of ri.Recovery.listByClaim results (cursor pagination, contract §3.5.5)
+    RecoveryListByContractItem:
       type: object
       description: 'ri.Recovery.listByContract result. PRD outputs: "recoverables, trace"'
       properties:
@@ -8200,6 +8399,16 @@ components:
         trace:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "trace"'
+    RecoveryListByContractPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RecoveryListByContractItem'
+      description: Page of ri.Recovery.listByContract results (cursor pagination, contract §3.5.5)
     RecoveryTraceResponse:
       type: object
       description: 'ri.Recovery.trace result. PRD outputs: "recoverables, trace"'
@@ -8212,21 +8421,31 @@ components:
           description: 'PRD: "trace"'
     RecoveryRecalculateRequest:
       type: object
-      description: 'ri.Recovery.recalculate request. PRD inputs: "contract, year or cat code"'
       properties:
-        contract:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract"'
-        yearOrCatCode:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "year or cat code"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractYear:
+          type: integer
+          description: Contract year
+          minimum: 1900
+        catEventCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - contractId
+      oneOf:
+      - required:
+        - contractYear
+      - required:
+        - catEventCode
+      description: 'Typed from REQ-RI-003, REQ-RI-128. PRD inputs: "contract, year or cat code"'
     RecoveryRecalculateResponse:
       type: object
-      description: 'ri.Recovery.recalculate result. PRD outputs: "batch id"'
       properties:
         batchId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "batch id"'
+      required:
+      - batchId
+      description: 'Typed from REQ-RI-003, REQ-RI-128. PRD outputs: "batch id"'
     OccurrenceLinkRequest:
       type: object
       description: 'ri.Occurrence.link request. PRD inputs: "claim ids, reason"'
@@ -8500,20 +8719,38 @@ components:
         adjustment:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "adjustment"'
-    CommissionHistoryResponse:
+    CommissionHistoryItem:
       type: object
       description: 'ri.Commission.history result. PRD outputs: "adjustment"'
       properties:
         adjustment:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "adjustment"'
+    CommissionHistoryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/CommissionHistoryItem'
+      description: Page of ri.Commission.history results (cursor pagination, contract §3.5.5)
     NoticeDraftRequest:
       type: object
       description: 'ri.Notice.draft request. PRD inputs: "occurrence or event"'
       properties:
-        occurrenceOrEvent:
+        occurrence:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence or event"'
+          description: 'PRD: "occurrence or event" (optional)'
+        event:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "occurrence or event" (optional)'
+      oneOf:
+      - required:
+        - occurrence
+      - required:
+        - event
     NoticeDraftResponse:
       type: object
       description: 'ri.Notice.draft result. PRD outputs: "notice"'
@@ -8525,9 +8762,17 @@ components:
       type: object
       description: 'ri.Notice.send request. PRD inputs: "occurrence or event"'
       properties:
-        occurrenceOrEvent:
+        occurrence:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence or event"'
+          description: 'PRD: "occurrence or event" (optional)'
+        event:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "occurrence or event" (optional)'
+      oneOf:
+      - required:
+        - occurrence
+      - required:
+        - event
     NoticeSendResponse:
       type: object
       description: 'ri.Notice.send result. PRD outputs: "notice"'
@@ -8539,9 +8784,17 @@ components:
       type: object
       description: 'ri.Notice.acknowledge request. PRD inputs: "occurrence or event"'
       properties:
-        occurrenceOrEvent:
+        occurrence:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence or event"'
+          description: 'PRD: "occurrence or event" (optional)'
+        event:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "occurrence or event" (optional)'
+      oneOf:
+      - required:
+        - occurrence
+      - required:
+        - event
     NoticeAcknowledgeResponse:
       type: object
       description: 'ri.Notice.acknowledge result. PRD outputs: "notice"'
@@ -9117,15 +9370,20 @@ components:
         scheme:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "scheme"'
-        zonesOrArea:
+        zones:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "zones or area"'
-        asOf:
+          description: 'PRD: "zones or area" (optional)'
+        area:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "asOf"'
+          description: 'PRD: "zones or area" (optional)'
         pendingIncrement:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "pending increment"'
+      oneOf:
+      - required:
+        - zones
+      - required:
+        - area
     AccumulationEstimateResponse:
       type: object
       description: 'ri.Accumulation.estimate result. PRD outputs: "aggregates, capacity, band, timestamp"'
@@ -9287,9 +9545,17 @@ components:
       type: object
       description: 'ri.Exchange.send request. PRD inputs: "message or file"'
       properties:
-        messageOrFile:
+        message:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "message or file"'
+          description: 'PRD: "message or file" (optional)'
+        file:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "message or file" (optional)'
+      oneOf:
+      - required:
+        - message
+      - required:
+        - file
     ExchangeSendResponse:
       type: object
       description: 'ri.Exchange.send result. PRD outputs: "status"'
@@ -9301,9 +9567,17 @@ components:
       type: object
       description: 'ri.Exchange.receive request. PRD inputs: "message or file"'
       properties:
-        messageOrFile:
+        message:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "message or file"'
+          description: 'PRD: "message or file" (optional)'
+        file:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "message or file" (optional)'
+      oneOf:
+      - required:
+        - message
+      - required:
+        - file
     ExchangeReceiveResponse:
       type: object
       description: 'ri.Exchange.receive result. PRD outputs: "status"'

@@ -65,6 +65,7 @@ paths:
       x-work-packages:
       - W8-DAT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -135,6 +136,7 @@ paths:
       x-work-packages:
       - W8-DAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -200,6 +202,7 @@ paths:
       x-work-packages:
       - W8-DAT-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -265,6 +268,7 @@ paths:
       x-work-packages:
       - W8-DAT-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -337,6 +341,7 @@ paths:
       - W8-DAT-01
       - W8-DAT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -402,6 +407,7 @@ paths:
       x-work-packages:
       - W8-DAT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -470,6 +476,7 @@ paths:
       - W8-DAT-02
       - W8-DAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -533,6 +540,7 @@ paths:
       - W8-DAT-02
       - W8-DAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -613,6 +621,7 @@ paths:
       x-work-packages:
       - W8-DAT-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -683,6 +692,7 @@ paths:
       x-work-packages:
       - W8-DAT-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -755,6 +765,7 @@ paths:
       - W8-DAT-02
       - W8-DAT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -815,6 +826,7 @@ paths:
       - W8-DAT-02
       - W8-DAT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -867,6 +879,7 @@ paths:
       - W8-DAT-02
       - W8-DAT-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -918,6 +931,7 @@ paths:
       x-work-packages:
       - W8-DAT-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -986,6 +1000,7 @@ paths:
       x-work-packages:
       - W8-DAT-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1054,6 +1069,7 @@ paths:
       x-work-packages:
       - W8-DAT-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1115,6 +1131,7 @@ paths:
       - REQ-DAT-300
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1180,6 +1197,7 @@ paths:
       - REQ-DAT-300
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1245,6 +1263,7 @@ paths:
       - REQ-DAT-300
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1314,6 +1333,7 @@ paths:
       x-work-packages:
       - W8-DAT-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1375,6 +1395,7 @@ paths:
       - REQ-DAT-008
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1386,9 +1407,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-15 §9.1 l.1461
+      x-prd-param-names:
+        validAt: as-at
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       responses:
         '200':
           description: Success
@@ -1424,6 +1448,7 @@ paths:
       - REQ-DAT-008
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1435,9 +1460,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-15 §9.1 l.1461
+      x-prd-param-names:
+        validAt: as-at
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       responses:
         '200':
           description: Success
@@ -1473,6 +1501,7 @@ paths:
       - REQ-DAT-008
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1484,9 +1513,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-15 §9.1 l.1461
+      x-prd-param-names:
+        validAt: as-at
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       responses:
         '200':
           description: Success
@@ -1524,6 +1556,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1600,6 +1633,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -1667,6 +1701,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1739,6 +1774,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1811,6 +1847,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1883,6 +1920,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1955,6 +1993,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2015,6 +2054,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -2084,6 +2124,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -2155,6 +2196,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2230,6 +2272,7 @@ paths:
       x-work-packages:
       - W8-DAT-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -2299,6 +2342,7 @@ paths:
       x-work-packages:
       - W8-DAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2370,6 +2414,7 @@ paths:
       x-work-packages:
       - W8-DAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2442,6 +2487,7 @@ paths:
       x-work-packages:
       - W8-DAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2515,6 +2561,7 @@ paths:
       x-work-packages:
       - W8-DAT-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2586,6 +2633,7 @@ paths:
       x-work-packages:
       - W8-DAT-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2658,6 +2706,7 @@ paths:
       x-work-packages:
       - W8-DAT-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2730,6 +2779,7 @@ paths:
       x-work-packages:
       - W8-DAT-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2797,6 +2847,7 @@ paths:
       x-work-packages:
       - W8-DAT-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2861,6 +2912,7 @@ paths:
       x-work-packages:
       - W8-DAT-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2925,6 +2977,7 @@ paths:
       x-work-packages:
       - W8-DAT-06
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2990,6 +3043,7 @@ paths:
       x-work-packages:
       - W8-DAT-06
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3051,6 +3105,7 @@ paths:
       - REQ-DAT-234
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3158,9 +3213,19 @@ components:
       type: object
       description: 'dat.Quarantine.release request. PRD inputs: "ids or filter"'
       properties:
-        idsOrFilter:
+        ids:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "ids or filter" (optional)'
+        filter:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "ids or filter"'
+          description: 'PRD: "ids or filter" (optional)'
+      oneOf:
+      - required:
+        - ids
+      - required:
+        - filter
     QuarantineReleaseResponse:
       type: object
       description: 'dat.Quarantine.release result. PRD outputs: "outcome per record"'
@@ -3555,7 +3620,10 @@ components:
         governed:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "Governed"'
-        ungovernedReasons:
+        ungoverned:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "Ungoverned + reasons"'
+        reasons:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "Ungoverned + reasons"'
     MonitorMetricsRequest:
@@ -3582,12 +3650,20 @@ components:
       type: object
       description: 'dat.BiasTest.run request. PRD inputs: "feature or artefact, population ref"'
       properties:
-        featureOrArtefact:
+        feature:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "feature or artefact"'
+          description: 'PRD: "feature or artefact" (optional)'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "feature or artefact" (optional)'
         populationRef:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "population ref"'
+      oneOf:
+      - required:
+        - feature
+      - required:
+        - artefact
     BiasTestRunResponse:
       type: object
       description: 'dat.BiasTest.run result. PRD outputs: "BiasReport id, ratios"'

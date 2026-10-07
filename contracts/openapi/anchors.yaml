@@ -226,9 +226,8 @@ anchors:
     basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
   REQ-CLM-005:
     text: Claim financial events feed to RI and FIN.
-    mappedTo:
-    - clm.Financials.dailyTotals
-    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+    notApi: 'event contract (claim financial events in contracts/events/clm); secondary: clm.Financials.dailyTotals for FIN
+      reconciliation'
   REQ-CLM-006:
     text: Catastrophe event coding.
   REQ-CLM-007:
@@ -258,9 +257,7 @@ anchors:
     basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
   REQ-RI-004:
     text: Cession and recovery business events to FIN.
-    mappedTo:
-    - ri.Reconciliation.fin
-    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+    notApi: 'event contract (cession and recovery business events in contracts/events/ri); secondary: ri.Reconciliation.fin'
   REQ-RI-005:
     text: Accumulation data API (consumed by UW, DAT).
   REQ-RI-006:

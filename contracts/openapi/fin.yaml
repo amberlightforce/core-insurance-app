@@ -60,6 +60,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -120,6 +121,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -187,6 +189,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -208,6 +211,12 @@ paths:
         in: path
         required: true
         description: 'Identifier of the Ifrs17Group (PRD input: "group id or filters")'
+        schema:
+          type: string
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "group id or filters" (optional)'
         schema:
           type: string
       responses:
@@ -247,6 +256,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -263,10 +273,16 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: groupIdOrFilters
+      - name: groupId
         in: query
         required: false
-        description: 'PRD: "group id or filters"'
+        description: 'PRD: "group id or filters" (optional)'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "group id or filters" (optional)'
         schema:
           type: string
       responses:
@@ -301,6 +317,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -363,6 +380,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -430,6 +448,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -504,6 +523,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -590,6 +610,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -672,6 +693,7 @@ paths:
       x-work-packages:
       - W5-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -733,6 +755,7 @@ paths:
       x-work-packages:
       - W5-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -804,6 +827,7 @@ paths:
       x-work-packages:
       - W5-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -875,6 +899,7 @@ paths:
       x-work-packages:
       - W5-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -947,6 +972,7 @@ paths:
       x-work-packages:
       - W5-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1019,6 +1045,7 @@ paths:
       x-work-packages:
       - W5-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1090,6 +1117,7 @@ paths:
       x-work-packages:
       - W5-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1162,6 +1190,7 @@ paths:
       - W5-FIN-01
       - W5-FIN-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1220,6 +1249,7 @@ paths:
       - W5-FIN-01
       - W5-FIN-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1289,6 +1319,7 @@ paths:
       - W5-FIN-01
       - W5-FIN-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1357,6 +1388,7 @@ paths:
       - W5-FIN-01
       - W5-FIN-02
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1419,6 +1451,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1491,6 +1524,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -1549,6 +1583,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1621,6 +1656,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1693,11 +1729,13 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: create (preview); PRD idempotency: Yes'
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: create (preview); PRD idempotency: Yes; dry-run added under contract §3.5.3 (approval
+        posts money to the books); the PRD row lists dry-run only for create'
       x-exposure:
       - ui
       x-permission: fin.ManualJournal.decide
@@ -1723,6 +1761,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -1765,6 +1804,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -1833,6 +1873,7 @@ paths:
       x-work-packages:
       - W5-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1904,6 +1945,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1971,6 +2013,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2026,6 +2069,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2087,6 +2131,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2154,7 +2199,8 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
-      x-io-shared: 2
+      x-maturity: pre-release
+      x-typed: REQ-FIN-232
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2167,21 +2213,18 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-09 §9.1 l.1537
+      x-prd-param-names:
+        validAt: date (accounting date)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - name: entity
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - name: legalEntity
         in: query
-        required: false
-        description: 'PRD: "entity"'
+        required: true
+        description: Legal entity
         schema:
-          type: string
-      - name: date
-        in: query
-        required: false
-        description: 'PRD: "date"'
-        schema:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
+          $ref: ../events/common.schema.json#/$defs/Code
       responses:
         '200':
           description: Success
@@ -2219,6 +2262,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2230,9 +2274,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-09 §9.1 l.1537
+      x-prd-param-names:
+        validAt: date
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
       - name: entity
@@ -2241,12 +2288,6 @@ paths:
         description: 'PRD: "entity"'
         schema:
           type: string
-      - name: date
-        in: query
-        required: false
-        description: 'PRD: "date"'
-        schema:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
       responses:
         '200':
           description: Success
@@ -2284,6 +2325,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -2341,6 +2383,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2410,6 +2453,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2479,6 +2523,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2549,6 +2594,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2619,6 +2665,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2688,6 +2735,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2752,6 +2800,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -2816,6 +2865,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2866,6 +2916,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2882,13 +2933,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReconciliationBreaksResponse'
+                $ref: '#/components/schemas/ReconciliationBreaksPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -2916,6 +2969,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2979,6 +3033,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3047,6 +3102,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -3109,6 +3165,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -3177,6 +3234,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -3250,6 +3308,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -3322,6 +3381,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -3395,6 +3455,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -3461,6 +3522,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -3533,6 +3595,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -3605,6 +3668,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -3661,6 +3725,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -3723,6 +3788,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -3791,6 +3857,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -3859,6 +3926,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -3927,6 +3995,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -3987,6 +4056,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -4055,6 +4125,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -4117,6 +4188,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -4177,6 +4249,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -4191,10 +4264,18 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - name: dateOrMonth
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: date
         in: query
         required: false
-        description: 'PRD: "date or month"'
+        description: 'PRD: "date or month" (optional)'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      - name: month
+        in: query
+        required: false
+        description: 'PRD: "date or month" (optional)'
         schema:
           type: string
       responses:
@@ -4203,7 +4284,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FiscalReconciliationResultsResponse'
+                $ref: '#/components/schemas/FiscalReconciliationResultsPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -4235,6 +4316,7 @@ paths:
       - W5-FIN-02
       - W8-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4306,6 +4388,7 @@ paths:
       - W5-FIN-02
       - W8-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4377,6 +4460,7 @@ paths:
       - W5-FIN-02
       - W8-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -4395,13 +4479,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FxRunsResponse'
+                $ref: '#/components/schemas/FxRunsPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -4437,6 +4523,7 @@ paths:
       - W5-FIN-02
       - W8-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -4501,6 +4588,7 @@ paths:
       x-work-packages:
       - W8-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -4569,6 +4657,7 @@ paths:
       x-work-packages:
       - W8-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -4636,6 +4725,7 @@ paths:
       x-work-packages:
       - W8-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -4703,6 +4793,7 @@ paths:
       x-work-packages:
       - W8-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -4770,6 +4861,7 @@ paths:
       x-work-packages:
       - W8-FIN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -4826,6 +4918,7 @@ paths:
       - W5-FIN-03
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -4896,6 +4989,7 @@ paths:
       - W5-FIN-03
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -4960,6 +5054,7 @@ paths:
       - W5-FIN-03
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -5028,6 +5123,7 @@ paths:
       - W5-FIN-03
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -5096,6 +5192,7 @@ paths:
       - W5-FIN-03
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -5158,6 +5255,7 @@ paths:
       x-work-packages:
       - W5-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -5210,6 +5308,7 @@ paths:
       x-work-packages:
       - W8-FIN-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -5265,6 +5364,7 @@ paths:
       - REQ-FIN-296
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5333,6 +5433,7 @@ paths:
       - W8-FIN-03
       - W9-FIN-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5404,6 +5505,7 @@ paths:
       - W8-FIN-03
       - W9-FIN-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5473,6 +5575,7 @@ paths:
       - W8-FIN-03
       - W9-FIN-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5542,6 +5645,7 @@ paths:
       - W8-FIN-03
       - W9-FIN-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -5605,6 +5709,7 @@ paths:
       - REQ-FIN-307
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5668,6 +5773,7 @@ paths:
       - REQ-FIN-306
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -5733,6 +5839,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -5798,6 +5905,7 @@ paths:
       x-work-packages:
       - W8-FIN-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5861,6 +5969,7 @@ x-operation-families:
   - REQ-FIN-004
   x-wave: W5
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-09 §9.1 l.1550
@@ -5875,6 +5984,7 @@ x-operation-families:
   - REQ-FIN-004
   x-wave: W5
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-09 §9.1 l.1550
@@ -5889,6 +5999,7 @@ x-operation-families:
   - REQ-FIN-004
   x-wave: W5
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-09 §9.1 l.1550
@@ -5902,7 +6013,10 @@ components:
       description: 'fin.Ifrs17Group.assignment result. PRD outputs: "group id and code, portfolio, cohort, profitability group,
         model, recognition date, version; or PENDING"'
       properties:
-        groupIdAndCode:
+        groupId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "group id and code"'
+        groupCode:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "group id and code"'
         portfolio:
@@ -6043,7 +6157,10 @@ components:
       type: object
       description: 'fin.PostingRules.list result. PRD outputs: "compile and golden results, preview"'
       properties:
-        compileAndGoldenResults:
+        compileResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compile and golden results"'
+        goldenResults:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "compile and golden results"'
         preview:
@@ -6076,7 +6193,10 @@ components:
       type: object
       description: 'fin.PostingRules.draft result. PRD outputs: "compile and golden results, preview"'
       properties:
-        compileAndGoldenResults:
+        compileResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compile and golden results"'
+        goldenResults:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "compile and golden results"'
         preview:
@@ -6099,7 +6219,10 @@ components:
       type: object
       description: 'fin.PostingRules.compile result. PRD outputs: "compile and golden results, preview"'
       properties:
-        compileAndGoldenResults:
+        compileResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compile and golden results"'
+        goldenResults:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "compile and golden results"'
         preview:
@@ -6122,7 +6245,10 @@ components:
       type: object
       description: 'fin.PostingRules.test result. PRD outputs: "compile and golden results, preview"'
       properties:
-        compileAndGoldenResults:
+        compileResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compile and golden results"'
+        goldenResults:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "compile and golden results"'
         preview:
@@ -6145,7 +6271,10 @@ components:
       type: object
       description: 'fin.PostingRules.previewImpact result. PRD outputs: "compile and golden results, preview"'
       properties:
-        compileAndGoldenResults:
+        compileResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compile and golden results"'
+        goldenResults:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "compile and golden results"'
         preview:
@@ -6168,7 +6297,10 @@ components:
       type: object
       description: 'fin.PostingRules.submit result. PRD outputs: "compile and golden results, preview"'
       properties:
-        compileAndGoldenResults:
+        compileResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compile and golden results"'
+        goldenResults:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "compile and golden results"'
         preview:
@@ -6191,7 +6323,10 @@ components:
       type: object
       description: 'fin.PostingRules.decide result. PRD outputs: "compile and golden results, preview"'
       properties:
-        compileAndGoldenResults:
+        compileResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compile and golden results"'
+        goldenResults:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "compile and golden results"'
         preview:
@@ -6493,11 +6628,22 @@ components:
           description: 'PRD: "results"'
     PeriodStatusResponse:
       type: object
-      description: 'fin.Period.status result. PRD outputs: "state"'
       properties:
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        period:
+          $ref: ../events/common.schema.json#/$defs/Code
         state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: FIN period state (PRD-09 §7.3)
+        closedForPosting:
+          type: boolean
+          description: Closed-period guard for POL
+      required:
+      - legalEntity
+      - period
+      - state
+      description: 'Typed from REQ-FIN-232. PRD outputs: "state"'
     PeriodListItem:
       type: object
       description: 'fin.Period.list result. PRD outputs: "state"'
@@ -6721,7 +6867,7 @@ components:
         matches:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "matches"'
-    ReconciliationBreaksResponse:
+    ReconciliationBreaksItem:
       type: object
       description: 'fin.Reconciliation.breaks result. PRD outputs: "items, matches"'
       properties:
@@ -6733,6 +6879,16 @@ components:
         matches:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "matches"'
+    ReconciliationBreaksPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ReconciliationBreaksItem'
+      description: Page of fin.Reconciliation.breaks results (cursor pagination, contract §3.5.5)
     ReconciliationMatchRequest:
       type: object
       description: 'fin.Reconciliation.match request. PRD inputs: "key, date, items"'
@@ -7109,9 +7265,17 @@ components:
       type: object
       description: 'fin.FiscalReconciliation.run request. PRD inputs: "date or month"'
       properties:
-        dateOrMonth:
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "date or month" (optional)'
+        month:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "date or month"'
+          description: 'PRD: "date or month" (optional)'
+      oneOf:
+      - required:
+        - date
+      - required:
+        - month
     FiscalReconciliationRunResponse:
       type: object
       description: 'fin.FiscalReconciliation.run result. PRD outputs: "legs, breaks"'
@@ -7122,7 +7286,7 @@ components:
         breaks:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "breaks"'
-    FiscalReconciliationResultsResponse:
+    FiscalReconciliationResultsItem:
       type: object
       description: 'fin.FiscalReconciliation.results result. PRD outputs: "legs, breaks"'
       properties:
@@ -7132,6 +7296,16 @@ components:
         breaks:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "breaks"'
+    FiscalReconciliationResultsPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/FiscalReconciliationResultsItem'
+      description: Page of fin.FiscalReconciliation.results results (cursor pagination, contract §3.5.5)
     FxRevalueRequest:
       type: object
       description: 'fin.Fx.revalue request. PRD inputs: "entity, books, period end"'
@@ -7178,7 +7352,7 @@ components:
         journals:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "journals"'
-    FxRunsResponse:
+    FxRunsItem:
       type: object
       description: 'fin.Fx.runs result. PRD outputs: "run, journals"'
       properties:
@@ -7188,6 +7362,16 @@ components:
         journals:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "journals"'
+    FxRunsPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/FxRunsItem'
+      description: Page of fin.Fx.runs results (cursor pagination, contract §3.5.5)
     GroupPackExportRequest:
       type: object
       description: 'fin.GroupPack.export request. PRD inputs: "entity, period"'

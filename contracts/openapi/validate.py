@@ -16,7 +16,13 @@ Checks
     command requires the Idempotency-Key header; GET operations are queries
   * x-dry-run: true ⇒ the dryRun parameter is declared; every operation declares traceparent
   * every 4xx/5xx response is application/problem+json with the shared Problem schema; at least one 2xx response
-  * error codes match `<MOD>-ERR-...`; x-in-process: true ⇒ x-exposure is [internal]
+  * error codes match `<MOD>-ERR-...`; x-in-process: true ⇒ x-exposure is [internal]; x-maturity is
+    pre-release or stable (D-API-06)
+  * D-API-08: no parameter or schema property is named asOf / asAt (valid time is `validAt`, transaction time `knownAt`)
+  * D-API-09: no request body carries `validAt` / `knownAt`; they are query parameters only
+  * list-style queries (list*, search, query, history, ...) are paginated (cursor + limit + page envelope) or carry
+    `x-bounded` with the reason
+  * warning: schema property names that join two concepts with And/Or (split them, review D-5)
   * security: each document has a security requirement and every scheme it names is declared
   * path template parameters are declared as path parameters
   * x-operation-families: family name `<module>.<Resource>.*`, non-empty x-requirement
@@ -50,6 +56,11 @@ METHODS = ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
 REQ_RE = re.compile(r"^REQ-[A-Z]+-\d{3,4}(\.\.REQ-[A-Z]+-\d{3,4})?$")
 ERR_RE = re.compile(r"^(%s)-ERR-[A-Z0-9]+(-[A-Z0-9]+)*$" % "|".join(MODCODES))
 IDEMPOTENCY_REF = "common.yaml#/components/parameters/IdempotencyKey"
+FORBIDDEN_TIME_NAMES = {"asof", "asat"}
+TIME_PARAMS = {"validAt", "knownAt"}
+PAGE_VERBS = {"list", "search", "query", "history", "deliveries", "outcomes", "runs", "statements", "changes",
+              "calculations", "breaks", "results"}
+JOINED = re.compile(r"[a-z0-9](And|Or)[A-Z]")
 PROBLEM_REF = "common.yaml#/components/schemas/Problem"
 
 
@@ -205,6 +216,8 @@ def check_module(m: str, rep: Report, seen_ids: dict, seen_refs: set) -> None:
             rep.error(f"{w}: x-exposure must be a non-empty subset of ui, partner, internal")
         if op.get("x-in-process") and exp != ["internal"]:
             rep.error(f"{w}: x-in-process operations must have x-exposure [internal]")
+        if op.get("x-maturity") not in ("pre-release", "stable"):
+            rep.error(f"{w}: x-maturity must be pre-release or stable (D-API-06)")
         if not op.get("x-permission"):
             rep.error(f"{w}: x-permission missing")
         if not op.get("x-source"):
@@ -240,6 +253,42 @@ def check_module(m: str, rep: Report, seen_ids: dict, seen_refs: set) -> None:
                 rep.error(f"{w}: command must have x-idempotency: required")
             if not any(str(e.get("code", "")).endswith("-ERR-IDEMPOTENCY-MISMATCH") for e in op.get("x-error-codes") or []):
                 rep.error(f"{w}: command must list <MOD>-ERR-IDEMPOTENCY-MISMATCH")
+        for (pin, pname) in names:
+            if str(pname).lower() in FORBIDDEN_TIME_NAMES:
+                rep.error(f"{w}: parameter {pname!r} is forbidden; use validAt / knownAt (D-API-08)")
+        # D-API-09: time-travel inputs never in the body
+        rb = op.get("requestBody")
+        if rb:
+            try:
+                rbn, rbb = deref(rb, f)
+                sch = ((rbn.get("content") or {}).get("application/json") or {}).get("schema")
+                if sch is not None:
+                    sch, _ = deref(sch, rbb)
+                    props = set((sch or {}).get("properties") or {})
+                    dup = props & (TIME_PARAMS | {"asOf", "asAt"})
+                    if dup:
+                        rep.error(f"{w}: request body carries time-travel input(s) {sorted(dup)}; use the query "
+                                  f"parameter only (D-API-09)")
+            except Exception:  # noqa: BLE001
+                pass
+        # pagination
+        verb = oid.split(".")[-1]
+        if kind == "query" and (verb.startswith("list") or verb in PAGE_VERBS) and not op.get("x-bounded"):
+            if ("query", "cursor") not in names or ("query", "limit") not in names:
+                rep.error(f"{w}: list query without cursor/limit (paginate or set x-bounded with the reason)")
+            else:
+                ok2 = [r for c, r in (op.get("responses") or {}).items() if str(c).startswith("2")]
+                paged = False
+                for r in ok2:
+                    try:
+                        rn, rb2 = deref(r, f)
+                        sch = (((rn or {}).get("content") or {}).get("application/json") or {}).get("schema") or {}
+                        sch, _ = deref(sch, rb2)
+                        paged = any("PageEnvelope" in str(x.get("$ref", "")) for x in (sch or {}).get("allOf", []))
+                    except Exception:  # noqa: BLE001
+                        pass
+                if not paged:
+                    rep.error(f"{w}: list query response must use the page envelope")
         if op.get("x-dry-run") and ("query", "dryRun") not in names:
             rep.error(f"{w}: x-dry-run true but no dryRun parameter")
         if op.get("x-dry-run") and kind != "command":
@@ -278,12 +327,30 @@ def check_module(m: str, rep: Report, seen_ids: dict, seen_refs: set) -> None:
             for name in req:
                 if name not in schemes:
                     rep.error(f"{w}: security scheme {name!r} not declared in {m}.yaml")
+    # schema property names: forbidden time names and joined concepts
+    def walk_props(node, where):
+        if isinstance(node, dict):
+            props = node.get("properties")
+            if isinstance(props, dict):
+                for k in props:
+                    if k.lower() in FORBIDDEN_TIME_NAMES:
+                        rep.error(f"{where}: property {k!r} is forbidden; use validAt / knownAt (D-API-08)")
+                    elif JOINED.search(k):
+                        rep.warn(f"{where}: property {k!r} may join two concepts (And/Or); split it")
+            for k, v in node.items():
+                walk_props(v, where)
+        elif isinstance(node, list):
+            for v in node:
+                walk_props(v, where)
+    walk_props((doc.get("components") or {}).get("schemas") or {}, f"{m}.yaml components")
     for fam in doc.get("x-operation-families") or []:
         name = fam.get("family", "")
         if not re.match(rf"^{m}\.[A-Z][A-Za-z0-9]*\.\*$", name):
             rep.error(f"{m}.yaml family {name!r}: must be {m}.<Resource>.*")
         if not fam.get("x-requirement") or not all(REQ_RE.match(str(r)) for r in fam["x-requirement"]):
             rep.error(f"{m}.yaml family {name!r}: bad or missing x-requirement")
+        if fam.get("x-maturity") not in ("pre-release", "stable"):
+            rep.error(f"{m}.yaml family {name!r}: x-maturity must be pre-release or stable")
         if fam.get("x-wave") not in WAVES:
             rep.error(f"{m}.yaml family {name!r}: bad x-wave")
 
@@ -293,7 +360,10 @@ def check_common(rep: Report, seen_refs: set) -> None:
     doc = load(f)
     check_refs(doc, f, rep, "common.yaml", seen_refs)
     comps = doc.get("components") or {}
-    for need in ("IdempotencyKey", "Traceparent", "ValidAt", "AsOf", "KnownAt", "DryRun", "Cursor", "Limit"):
+    for name, prm in (comps.get("parameters") or {}).items():
+        if str(prm.get("name", "")).lower() in FORBIDDEN_TIME_NAMES:
+            rep.error(f"common.yaml: parameter {name} uses a forbidden time name (D-API-08)")
+    for need in ("IdempotencyKey", "Traceparent", "ValidAt", "KnownAt", "DryRun", "Cursor", "Limit"):
         if need not in (comps.get("parameters") or {}):
             rep.error(f"common.yaml: parameter {need} missing")
     idem = comps["parameters"]["IdempotencyKey"]

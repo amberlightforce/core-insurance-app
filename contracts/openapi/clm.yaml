@@ -56,7 +56,8 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
-      x-io-shared: 4
+      x-maturity: pre-release
+      x-typed: REQ-CLM-001
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -131,6 +132,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -205,6 +207,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -272,6 +275,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -344,6 +348,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -407,6 +412,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -485,6 +491,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -556,6 +563,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -627,6 +635,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -697,6 +706,7 @@ paths:
       x-work-packages:
       - W7-CLM-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -759,6 +769,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -824,6 +835,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -897,6 +909,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -962,6 +975,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1031,6 +1045,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1104,6 +1119,7 @@ paths:
       x-work-packages:
       - W7-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1179,7 +1195,8 @@ paths:
       - W7-CLM-02
       - W7-CLM-03
       x-status: full
-      x-io-shared: 5
+      x-maturity: pre-release
+      x-typed: REQ-CLM-003, REQ-CLM-107
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1258,7 +1275,8 @@ paths:
       - W7-CLM-02
       - W7-CLM-03
       x-status: full
-      x-io-shared: 5
+      x-maturity: pre-release
+      x-typed: REQ-CLM-108, REQ-CLM-109
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1337,7 +1355,8 @@ paths:
       - W7-CLM-02
       - W7-CLM-03
       x-status: full
-      x-io-shared: 5
+      x-maturity: pre-release
+      x-typed: REQ-CLM-110..113, REQ-CLM-004
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1418,7 +1437,8 @@ paths:
       - W7-CLM-02
       - W7-CLM-03
       x-status: full
-      x-io-shared: 5
+      x-maturity: pre-release
+      x-typed: REQ-CLM-111
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1497,6 +1517,7 @@ paths:
       - W7-CLM-02
       - W7-CLM-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -1574,7 +1595,8 @@ paths:
       x-work-packages:
       - W7-CLM-03
       x-status: full
-      x-io-shared: 3
+      x-maturity: pre-release
+      x-typed: REQ-CLM-125
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1643,7 +1665,8 @@ paths:
       x-work-packages:
       - W7-CLM-03
       x-status: full
-      x-io-shared: 3
+      x-maturity: pre-release
+      x-typed: REQ-CLM-126
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1712,7 +1735,8 @@ paths:
       x-work-packages:
       - W7-CLM-03
       x-status: full
-      x-io-shared: 3
+      x-maturity: pre-release
+      x-typed: REQ-CLM-127
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1773,6 +1797,7 @@ paths:
       - REQ-CLM-265
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1843,6 +1868,7 @@ paths:
       x-work-packages:
       - W7-CLM-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1855,10 +1881,13 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-07 §9.1 l.1475
+      x-prd-param-names:
+        knownAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
       - name: claim
         in: query
         required: false
@@ -1892,16 +1921,12 @@ paths:
       tags:
       - Financials
       x-requirement:
-      - REQ-CLM-005
       - REQ-CLM-106
-      x-anchor:
-      - REQ-CLM-005
-      x-anchor-mapped:
-      - REQ-CLM-005
       x-wave: W7
       x-work-packages:
       - W7-CLM-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1967,6 +1992,7 @@ paths:
       x-work-packages:
       - W7-CLM-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2037,6 +2063,7 @@ paths:
       x-work-packages:
       - W7-CLM-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2109,6 +2136,7 @@ paths:
       x-work-packages:
       - W7-CLM-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2175,6 +2203,7 @@ paths:
       x-work-packages:
       - W7-CLM-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2243,6 +2272,7 @@ paths:
       x-work-packages:
       - W7-CLM-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2309,6 +2339,7 @@ paths:
       x-work-packages:
       - W7-CLM-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2374,6 +2405,7 @@ paths:
       x-work-packages:
       - W7-CLM-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2407,10 +2439,16 @@ paths:
         description: 'PRD: "claim"'
         schema:
           type: string
-      - name: partyOrPolicy
+      - name: party
         in: query
         required: false
-        description: 'PRD: "party or policy"'
+        description: 'PRD: "party or policy" (optional)'
+        schema:
+          type: string
+      - name: policy
+        in: query
+        required: false
+        description: 'PRD: "party or policy" (optional)'
         schema:
           type: string
       responses:
@@ -2451,6 +2489,7 @@ paths:
       x-work-packages:
       - W7-CLM-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2476,10 +2515,16 @@ paths:
         description: 'PRD: "claim"'
         schema:
           type: string
-      - name: partyOrPolicy
+      - name: party
         in: query
         required: false
-        description: 'PRD: "party or policy"'
+        description: 'PRD: "party or policy" (optional)'
+        schema:
+          type: string
+      - name: policy
+        in: query
+        required: false
+        description: 'PRD: "party or policy" (optional)'
         schema:
           type: string
       responses:
@@ -2514,6 +2559,7 @@ paths:
       x-work-packages:
       - W7-CLM-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2526,10 +2572,12 @@ paths:
       x-error-codes: []
       x-source:
       - PRD-07 §9.1 l.1483
+      x-prd-param-names:
+        validAt: asOf
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/AsOf
+      - $ref: common.yaml#/components/parameters/ValidAt
       - name: catCode
         in: query
         required: false
@@ -2568,6 +2616,7 @@ paths:
       x-work-packages:
       - W7-CLM-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2638,6 +2687,7 @@ paths:
       x-work-packages:
       - W7-CLM-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2712,6 +2762,7 @@ paths:
       x-work-packages:
       - W7-CLM-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2778,6 +2829,7 @@ paths:
       x-work-packages:
       - W7-CLM-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2848,6 +2900,7 @@ paths:
       x-work-packages:
       - W7-CLM-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2914,6 +2967,7 @@ paths:
       x-work-packages:
       - W7-CLM-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -2976,6 +3030,7 @@ paths:
       x-work-packages:
       - W7-CLM-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3042,6 +3097,7 @@ paths:
       x-work-packages:
       - W7-CLM-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3106,6 +3162,7 @@ paths:
       x-work-packages:
       - W7-CLM-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -3164,6 +3221,7 @@ paths:
       x-work-packages:
       - W9-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3236,6 +3294,7 @@ paths:
       x-work-packages:
       - W9-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3308,6 +3367,7 @@ paths:
       x-work-packages:
       - W9-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3378,6 +3438,7 @@ paths:
       x-work-packages:
       - W9-CLM-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3444,6 +3505,7 @@ paths:
       x-work-packages:
       - W7-CLM-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3508,6 +3570,7 @@ paths:
       x-work-packages:
       - W7-CLM-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3573,6 +3636,7 @@ paths:
       x-work-packages:
       - W7-CLM-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3639,6 +3703,7 @@ paths:
       x-work-packages:
       - W7-CLM-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3696,6 +3761,7 @@ x-operation-families:
   - REQ-CLM-143..REQ-CLM-151
   x-wave: W7
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-07 §9.1 l.1477
@@ -3708,6 +3774,7 @@ x-operation-families:
   - REQ-CLM-264
   x-wave: W7
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-07 §9.1 l.1478
@@ -3720,6 +3787,7 @@ x-operation-families:
   - REQ-CLM-210..REQ-CLM-215
   x-wave: W7
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-07 §9.1 l.1482
@@ -3731,6 +3799,7 @@ x-operation-families:
   - REQ-CLM-201..REQ-CLM-209
   x-wave: W7
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-07 §9.1 l.1485
@@ -3742,6 +3811,7 @@ x-operation-families:
   - REQ-CLM-218..REQ-CLM-223
   x-wave: W7
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-07 §9.1 l.1486
@@ -3758,27 +3828,99 @@ components:
   schemas:
     FnolSubmitRequest:
       type: object
-      description: 'clm.Fnol.submit request. PRD inputs: "FNOL payload"'
       properties:
-        fnolPayload:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "FNOL payload"'
+        lineOfBusiness:
+          $ref: ../events/common.schema.json#/$defs/Code
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        lossAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Loss date and time (business fact, not a time-travel input)
+        lossData:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Line-specific loss data
+        reporter:
+          type: object
+          properties:
+            partyId:
+              $ref: ../events/common.schema.json#/$defs/Uuid
+            adHoc:
+              $ref: ../events/common.schema.json#/$defs/OpenObject
+        involvedParties:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/OpenObject
+        incidents:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/OpenObject
+        attachmentRefs:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+        channelMetadata:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+      required:
+      - lineOfBusiness
+      - lossAt
+      - lossData
+      - reporter
+      - channel
+      oneOf:
+      - required:
+        - policyId
+      - required:
+        - policyNumber
+      description: 'Typed from REQ-CLM-001. PRD inputs: "FNOL payload"'
     FnolSubmitResponse:
       type: object
-      description: 'clm.Fnol.submit result. PRD outputs: "claim, exposures, checklist, assignment"'
       properties:
-        claim:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
         exposures:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposures"'
-        checklist:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checklist"'
+          type: array
+          items:
+            type: object
+            properties:
+              exposureId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              exposureType:
+                $ref: ../events/common.schema.json#/$defs/Code
+            required:
+            - exposureId
+        coverageIndications:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+        handlingSegment:
+          $ref: ../events/common.schema.json#/$defs/Code
         assignment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "assignment"'
+          type: object
+          properties:
+            assigneeType:
+              type: string
+              enum:
+              - USER
+              - GROUP
+              - QUEUE
+              description: WRK assignee kind
+            assigneeId:
+              type: string
+        requiredDocuments:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - claimId
+      - claimNumber
+      - exposures
+      description: 'Typed from REQ-CLM-001. PRD outputs: "claim, exposures, checklist, assignment"'
     FnolSaveDraftRequest:
       type: object
       description: 'clm.Fnol.saveDraft request. PRD inputs: "FNOL payload"'
@@ -4019,9 +4161,17 @@ components:
         reasons:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "reasons"'
-        adoptOrKeep:
+        adopt:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adopt or keep"'
+          description: 'PRD: "adopt or keep" (optional)'
+        keep:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "adopt or keep" (optional)'
+      oneOf:
+      - required:
+        - adopt
+      - required:
+        - keep
     CoverageDecideResponse:
       type: object
       description: 'clm.Coverage.decide result. PRD outputs: "decision record"'
@@ -4039,9 +4189,17 @@ components:
         reasons:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "reasons"'
-        adoptOrKeep:
+        adopt:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adopt or keep"'
+          description: 'PRD: "adopt or keep" (optional)'
+        keep:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "adopt or keep" (optional)'
+      oneOf:
+      - required:
+        - adopt
+      - required:
+        - keep
     CoverageReverifyResponse:
       type: object
       description: 'clm.Coverage.reverify result. PRD outputs: "decision record"'
@@ -4051,84 +4209,176 @@ components:
           description: 'PRD: "decision record"'
     TransactionSetBuildRequest:
       type: object
-      description: 'clm.TransactionSet.build request. PRD inputs: "transactions"'
       properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         transactions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transactions"'
+          type: array
+          items:
+            type: object
+            properties:
+              kind:
+                type: string
+                enum:
+                - RESERVE
+                - PAYMENT
+                - RECOVERY_RESERVE
+                - RECOVERY
+                description: Claim financial transaction kind (REQ-CLM-003)
+              exposureId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              costType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              costCategory:
+                $ref: ../events/common.schema.json#/$defs/Code
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+              payeePartyId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+                description: Payment transactions
+              payeeAccountId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+                description: BIL payee account (REQ-BIL-343)
+              reason:
+                $ref: ../events/common.schema.json#/$defs/Code
+            required:
+            - kind
+            - exposureId
+            - costType
+            - costCategory
+            - amount
+            description: Claim financial transaction on a reserve line (exposure × cost type × cost category)
+          minItems: 1
+      required:
+      - claimId
+      - transactions
+      description: 'Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions"'
     TransactionSetBuildResponse:
       type: object
-      description: 'clm.TransactionSet.build result. PRD outputs: "set with preview, checks, approval request"'
       properties:
-        setPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "set with preview"'
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+        contentHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        preview:
+          type: array
+          items:
+            type: object
+            properties:
+              exposureId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              costType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              costCategory:
+                $ref: ../events/common.schema.json#/$defs/Code
+              before:
+                $ref: ../events/common.schema.json#/$defs/Money
+              after:
+                $ref: ../events/common.schema.json#/$defs/Money
+          description: Balances before → after per line
         checks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checks"'
-        approvalRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval request"'
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+      required:
+      - setId
+      - status
+      - preview
+      description: 'Typed from REQ-CLM-003, REQ-CLM-107. PRD outputs: "set with preview, checks, approval request"'
     TransactionSetSubmitRequest:
       type: object
-      description: 'clm.TransactionSet.submit request. PRD inputs: "transactions"'
       properties:
-        transactions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transactions"'
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - setId
+      description: 'Typed from REQ-CLM-108, REQ-CLM-109. PRD inputs: "transactions"'
     TransactionSetSubmitResponse:
       type: object
-      description: 'clm.TransactionSet.submit result. PRD outputs: "set with preview, checks, approval request"'
       properties:
-        setPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "set with preview"'
-        checks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checks"'
-        approvalRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval request"'
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        authorityChecks:
+          type: array
+          items:
+            type: object
+            properties:
+              checkId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              decision:
+                type: string
+                enum:
+                - ALLOW
+                - REFER
+                - DENY
+                description: plt.Authority.check
+      required:
+      - setId
+      - status
+      description: 'Typed from REQ-CLM-108, REQ-CLM-109. PRD outputs: "set with preview, checks, approval request"'
     TransactionSetApproveRequest:
       type: object
-      description: 'clm.TransactionSet.approve request. PRD inputs: "transactions"'
       properties:
-        transactions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transactions"'
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contentHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Bound content hash
+        comment:
+          type: string
+      required:
+      - setId
+      - contentHash
+      description: 'Typed from REQ-CLM-110..113, REQ-CLM-004. PRD inputs: "transactions"'
     TransactionSetApproveResponse:
       type: object
-      description: 'clm.TransactionSet.approve result. PRD outputs: "set with preview, checks, approval request"'
       properties:
-        setPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "set with preview"'
-        checks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checks"'
-        approvalRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval request"'
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+        disbursementIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: BIL disbursements requested for approved payments
+      required:
+      - setId
+      - status
+      description: 'Typed from REQ-CLM-110..113, REQ-CLM-004. PRD outputs: "set with preview, checks, approval request"'
     TransactionSetRejectRequest:
       type: object
-      description: 'clm.TransactionSet.reject request. PRD inputs: "transactions"'
       properties:
-        transactions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transactions"'
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Code
+        comment:
+          type: string
+      required:
+      - setId
+      - reason
+      description: 'Typed from REQ-CLM-111. PRD inputs: "transactions"'
     TransactionSetRejectResponse:
       type: object
-      description: 'clm.TransactionSet.reject result. PRD outputs: "set with preview, checks, approval request"'
       properties:
-        setPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "set with preview"'
-        checks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checks"'
-        approvalRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval request"'
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+        copySetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Copy returned to the maker
+      required:
+      - setId
+      - status
+      description: 'Typed from REQ-CLM-111. PRD outputs: "set with preview, checks, approval request"'
     TransactionSetReturnRequest:
       type: object
       description: 'clm.TransactionSet.return request. PRD inputs: "transactions"'
@@ -4151,55 +4401,78 @@ components:
           description: 'PRD: "approval request"'
     PaymentVoidRequest:
       type: object
-      description: 'clm.Payment.void request. PRD inputs: "payment id, reason"'
       properties:
         paymentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "payment id"'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - paymentId
+      - reason
+      description: 'Typed from REQ-CLM-125. PRD inputs: "payment id, reason"'
     PaymentVoidResponse:
       type: object
-      description: 'clm.Payment.void result. PRD outputs: "updated payment"'
       properties:
-        updatedPayment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "updated payment"'
+        paymentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+        reversalTransactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - paymentId
+      - status
+      description: 'Typed from REQ-CLM-125. PRD outputs: "updated payment"'
     PaymentStopRequest:
       type: object
-      description: 'clm.Payment.stop request. PRD inputs: "payment id, reason"'
       properties:
         paymentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "payment id"'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - paymentId
+      - reason
+      description: 'Typed from REQ-CLM-126. PRD inputs: "payment id, reason"'
     PaymentStopResponse:
       type: object
-      description: 'clm.Payment.stop result. PRD outputs: "updated payment"'
-      properties:
-        updatedPayment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "updated payment"'
-    PaymentReissueRequest:
-      type: object
-      description: 'clm.Payment.reissue request. PRD inputs: "payment id, reason"'
       properties:
         paymentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "payment id"'
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - paymentId
+      - status
+      description: 'Typed from REQ-CLM-126. PRD outputs: "updated payment"'
+    PaymentReissueRequest:
+      type: object
+      properties:
+        paymentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: ../events/common.schema.json#/$defs/Code
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - paymentId
+      - reason
+      description: 'Typed from REQ-CLM-127. PRD inputs: "payment id, reason"'
     PaymentReissueResponse:
       type: object
-      description: 'clm.Payment.reissue result. PRD outputs: "updated payment"'
       properties:
-        updatedPayment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "updated payment"'
+        originalPaymentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        newPaymentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - originalPaymentId
+      - newPaymentId
+      description: 'Typed from REQ-CLM-127. PRD outputs: "updated payment"'
     RedressRequestRequest:
       type: object
       description: 'clm.Redress.request request. PRD inputs: "complaint id, claim id, payee, amount, reason"'
@@ -4703,9 +4976,17 @@ components:
       type: object
       description: 'clm.Dsar.purge request. PRD inputs: "party or scope"'
       properties:
-        partyOrScope:
+        party:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party or scope"'
+          description: 'PRD: "party or scope" (optional)'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party or scope" (optional)'
+      oneOf:
+      - required:
+        - party
+      - required:
+        - scope
     DsarPurgeResponse:
       type: object
       description: 'clm.Dsar.purge result. PRD outputs: "result"'

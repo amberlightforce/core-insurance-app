@@ -63,6 +63,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -119,6 +120,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -184,6 +186,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -249,6 +252,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -314,6 +318,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -379,6 +384,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -444,6 +450,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -505,6 +512,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -569,6 +577,7 @@ paths:
       - W4-CHN-02
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -643,6 +652,7 @@ paths:
       - W4-CHN-02
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -717,6 +727,7 @@ paths:
       - W4-CHN-02
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -791,6 +802,7 @@ paths:
       - W4-CHN-02
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -865,6 +877,7 @@ paths:
       - W4-CHN-02
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -941,6 +954,7 @@ paths:
       - W4-CHN-02
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1005,6 +1019,7 @@ paths:
       x-work-packages:
       - W4-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1071,6 +1086,7 @@ paths:
       x-work-packages:
       - W4-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1123,6 +1139,7 @@ paths:
       x-work-packages:
       - W4-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1199,6 +1216,7 @@ paths:
       - W4-CHN-02
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1273,6 +1291,7 @@ paths:
       - W6-CHN-01
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1342,6 +1361,7 @@ paths:
       - W6-CHN-01
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1418,6 +1438,7 @@ paths:
       - W6-CHN-01
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1487,6 +1508,7 @@ paths:
       x-work-packages:
       - W6-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -1546,6 +1568,7 @@ paths:
       x-work-packages:
       - W6-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1566,6 +1589,12 @@ paths:
         in: path
         required: true
         description: 'Identifier of the Withdrawal (PRD input: "request number or identity")'
+        schema:
+          type: string
+      - name: identity
+        in: query
+        required: false
+        description: 'PRD: "request number or identity" (optional)'
         schema:
           type: string
       responses:
@@ -1602,6 +1631,7 @@ paths:
       x-work-packages:
       - W6-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1620,10 +1650,16 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: requestNumberOrIdentity
+      - name: requestNumber
         in: query
         required: false
-        description: 'PRD: "request number or identity"'
+        description: 'PRD: "request number or identity" (optional)'
+        schema:
+          type: string
+      - name: identity
+        in: query
+        required: false
+        description: 'PRD: "request number or identity" (optional)'
         schema:
           type: string
       responses:
@@ -1663,6 +1699,7 @@ paths:
       x-work-packages:
       - W6-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -1714,6 +1751,7 @@ paths:
       x-work-packages:
       - W6-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1777,6 +1815,7 @@ paths:
       x-work-packages:
       - W6-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -1837,6 +1876,7 @@ paths:
       x-work-packages:
       - W6-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1899,6 +1939,7 @@ paths:
       x-work-packages:
       - W6-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1974,6 +2015,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2036,6 +2078,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -2087,6 +2130,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2150,6 +2194,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2213,6 +2258,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2276,6 +2322,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -2334,6 +2381,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2399,6 +2447,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2464,6 +2513,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2529,6 +2579,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2594,6 +2645,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2657,6 +2709,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2719,6 +2772,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2781,6 +2835,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2843,6 +2898,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2905,6 +2961,7 @@ paths:
       x-work-packages:
       - W4-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -2921,13 +2978,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookDeliveriesResponse'
+                $ref: '#/components/schemas/WebhookDeliveriesPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -2955,6 +3014,7 @@ paths:
       - REQ-CHN-248
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3016,6 +3076,7 @@ paths:
       - REQ-CHN-255
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3078,6 +3139,7 @@ paths:
       x-work-packages:
       - W8-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -3141,6 +3203,7 @@ paths:
       x-work-packages:
       - W8-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3206,6 +3269,7 @@ paths:
       x-work-packages:
       - W8-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3271,6 +3335,7 @@ paths:
       x-work-packages:
       - W8-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -3326,6 +3391,7 @@ paths:
       x-work-packages:
       - W8-CHN-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -3376,6 +3442,7 @@ paths:
       - REQ-CHN-307
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -3436,6 +3503,7 @@ paths:
       - REQ-CHN-307
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -3498,6 +3566,7 @@ paths:
       x-work-packages:
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3564,6 +3633,7 @@ paths:
       x-work-packages:
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3631,6 +3701,7 @@ paths:
       x-work-packages:
       - W6-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3705,6 +3776,7 @@ paths:
       x-work-packages:
       - W4-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -3774,6 +3846,7 @@ paths:
       x-work-packages:
       - W4-CHN-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -3850,6 +3923,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerProduct.describe
@@ -3916,6 +3990,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerProduct.getIpid
@@ -3988,6 +4063,8 @@ paths:
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
+      x-dry-run-note: 'D-API-07: mirrors the dry-run of pol.Submission.create, pol.Job.updateDraft, pol.Job.quote'
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerQuote.create
@@ -4066,6 +4143,7 @@ paths:
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerQuote.newVersion
@@ -4145,6 +4223,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerQuote.compareVersions
@@ -4210,6 +4289,8 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
+      x-bounded: issues of one quote (uw.Issue.listForChannel, REQ-UW-084)
       x-exposure:
       - partner
       x-permission: chn.PartnerQuote.listIssues
@@ -4276,6 +4357,7 @@ paths:
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerQuote.requestReferral
@@ -4357,7 +4439,9 @@ paths:
       x-name-derived: true
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
+      x-dry-run: true
+      x-dry-run-note: 'D-API-07: mirrors the dry-run of pol.Job.bind, bil.PaymentPlan.select'
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerQuote.bind
@@ -4377,6 +4461,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       - name: id
         in: path
         required: true
@@ -4439,6 +4524,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerPolicy.getCoverNote
@@ -4505,6 +4591,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerPolicy.get
@@ -4574,6 +4661,8 @@ paths:
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
+      x-dry-run-note: 'D-API-07: mirrors the dry-run of pol.PolicyChange.create, pol.Job.bind'
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerPolicy.change
@@ -4656,7 +4745,9 @@ paths:
       x-name-derived: true
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
+      x-dry-run: true
+      x-dry-run-note: 'D-API-07: mirrors the dry-run of pol.Cancellation.create, wrk.Request.submit'
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerPolicy.requestCancellation
@@ -4676,6 +4767,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       - name: 'no'
         in: path
         required: true
@@ -4739,6 +4831,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerDocument.listForObject
@@ -4765,13 +4858,15 @@ paths:
         schema:
           type: string
         description: Quote or object identifier
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PartnerDocumentListForObjectResponse'
+                $ref: '#/components/schemas/PartnerDocumentListForObjectPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -4811,6 +4906,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerBillingAccount.get
@@ -4876,7 +4972,9 @@ paths:
       x-name-derived: true
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
+      x-dry-run: true
+      x-dry-run-note: 'D-API-07: mirrors the dry-run of bil.Payment.take'
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerInvoice.createPaymentLink
@@ -4895,6 +4993,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       - name: 'no'
         in: path
         required: true
@@ -4956,7 +5055,9 @@ paths:
       x-name-derived: true
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
+      x-dry-run: true
+      x-dry-run-note: 'D-API-07: mirrors the dry-run of bil.IntermediaryCollection.report'
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerCollection.report
@@ -4975,6 +5076,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -5032,6 +5134,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerAccountCurrent.get
@@ -5091,6 +5194,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerCommissionStatement.list
@@ -5104,13 +5208,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PartnerCommissionStatementListResponse'
+                $ref: '#/components/schemas/PartnerCommissionStatementListPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -5149,7 +5255,9 @@ paths:
       x-name-derived: true
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
+      x-dry-run: true
+      x-dry-run-note: 'D-API-07: mirrors the dry-run of clm.Fnol.submit'
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerClaim.report
@@ -5168,6 +5276,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -5224,6 +5333,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerClaim.getTracking
@@ -5290,6 +5400,7 @@ paths:
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerDocument.upload
@@ -5365,6 +5476,7 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerBook.changes
@@ -5388,7 +5500,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PartnerBookChangesResponse'
+                $ref: '#/components/schemas/PartnerBookChangesPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -5428,7 +5540,9 @@ paths:
       x-name-derived: true
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
+      x-dry-run: true
+      x-dry-run-note: 'D-API-07: mirrors the dry-run of clm.Service.request'
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerVendorService.request
@@ -5447,6 +5561,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -5503,7 +5618,9 @@ paths:
       x-name-derived: true
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
+      x-dry-run: true
+      x-dry-run-note: 'D-API-07: mirrors the dry-run of clm.VendorInvoice.submit'
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.PartnerVendorInvoice.submit
@@ -5522,6 +5639,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -5714,6 +5832,7 @@ paths:
       x-idempotency: required
       x-dry-run: false
       x-dry-run-note: DRY_RUN tools (quote_motor_dry_run, policy_change_preview) call owner operations with dryRun
+      x-maturity: pre-release
       x-exposure:
       - partner
       x-permission: chn.Agent.mcp
@@ -5767,6 +5886,7 @@ x-operation-families:
   - REQ-CHN-240
   x-wave: W4
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-12 §9.1 l.1837
@@ -5778,6 +5898,7 @@ x-operation-families:
   - REQ-CHN-315
   x-wave: unscheduled
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-12 §9.1 l.1849
@@ -6115,7 +6236,7 @@ components:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "describe model"'
         indicativePrice:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Money
           description: 'PRD: "indicative price"'
     QuoteStartHomeRequest:
       type: object
@@ -6141,7 +6262,7 @@ components:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "describe model"'
         indicativePrice:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Money
           description: 'PRD: "indicative price"'
     WalletStartRequest:
       type: object
@@ -6766,7 +6887,7 @@ components:
         deliveries:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "deliveries"'
-    WebhookDeliveriesResponse:
+    WebhookDeliveriesItem:
       type: object
       description: 'chn.Webhook.deliveries result. PRD outputs: "subscription, deliveries"'
       properties:
@@ -6776,6 +6897,16 @@ components:
         deliveries:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "deliveries"'
+    WebhookDeliveriesPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/WebhookDeliveriesItem'
+      description: Page of chn.Webhook.deliveries results (cursor pagination, contract §3.5.5)
     AggregatorQuoteRequest:
       type: object
       description: 'chn.Aggregator.quote request. PRD inputs: "partner payload"'
@@ -6788,7 +6919,7 @@ components:
       description: 'chn.Aggregator.quote result. PRD outputs: "price, IPID link, deep link"'
       properties:
         price:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Money
           description: 'PRD: "price"'
         ipidLink:
           $ref: common.yaml#/components/schemas/Unspecified
@@ -7105,6 +7236,16 @@ components:
       type: object
       x-status: minimal
       description: Result of doc.Document.listForObject in partner (ACORD-aligned) shape
+    PartnerDocumentListForObjectPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PartnerDocumentListForObjectResponse'
+      description: Page of chn.PartnerDocument.listForObject results
     PartnerBillingAccountGetResponse:
       type: object
       x-status: minimal
@@ -7133,6 +7274,16 @@ components:
       type: object
       x-status: minimal
       description: Result of bil.Commission.statements in partner (ACORD-aligned) shape
+    PartnerCommissionStatementListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PartnerCommissionStatementListResponse'
+      description: Page of chn.PartnerCommissionStatement.list results
     PartnerClaimReportRequest:
       type: object
       x-status: minimal
@@ -7157,6 +7308,16 @@ components:
       type: object
       x-status: minimal
       description: Result of pol.Policy.search, pol.Segment.changes in partner (ACORD-aligned) shape
+    PartnerBookChangesPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PartnerBookChangesResponse'
+      description: Page of chn.PartnerBook.changes results
     PartnerVendorServiceRequestRequest:
       type: object
       x-status: minimal

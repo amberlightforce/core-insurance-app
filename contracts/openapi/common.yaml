@@ -142,18 +142,10 @@ components:
       name: validAt
       in: query
       required: false
-      description: Valid (business) time for bitemporal reads, contract §3.5.5. Default now. Date or RFC 3339 instant.
-      schema:
-        anyOf:
-          - $ref: '../events/common.schema.json#/$defs/LocalDate'
-          - $ref: '../events/common.schema.json#/$defs/Instant'
-    AsOf:
-      name: asOf
-      in: query
-      required: false
       description: |
-        Valid-time "as of" used by PRD operations that name it `asOf` (PLAN §4.2). Same meaning as `validAt`; the
-        operation uses the name its PRD row uses. Default now.
+        Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+        including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+        as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
       schema:
         anyOf:
           - $ref: '../events/common.schema.json#/$defs/LocalDate'
@@ -162,7 +154,9 @@ components:
       name: knownAt
       in: query
       required: false
-      description: Transaction (record) time for bitemporal reads, contract §3.5.5. Default now.
+      description: |
+        Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+        PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
       schema:
         $ref: '../events/common.schema.json#/$defs/Instant'
     DryRun:

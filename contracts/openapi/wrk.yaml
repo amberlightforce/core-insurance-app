@@ -55,6 +55,8 @@ paths:
       x-work-packages:
       - W2-WRK-01
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-WRK-001, REQ-WRK-185
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -138,6 +140,7 @@ paths:
       x-work-packages:
       - W2-WRK-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -202,6 +205,7 @@ paths:
       x-work-packages:
       - W2-WRK-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -264,6 +268,7 @@ paths:
       x-work-packages:
       - W2-WRK-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -339,6 +344,7 @@ paths:
       x-work-packages:
       - W2-WRK-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -404,6 +410,7 @@ paths:
       x-work-packages:
       - W2-WRK-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -480,6 +487,7 @@ paths:
       x-work-packages:
       - W2-WRK-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -550,6 +558,7 @@ paths:
       x-work-packages:
       - W2-WRK-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -620,6 +629,7 @@ paths:
       x-work-packages:
       - W2-WRK-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -682,6 +692,7 @@ paths:
       x-work-packages:
       - W2-WRK-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -735,6 +746,7 @@ paths:
       x-work-packages:
       - W2-WRK-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -788,6 +800,7 @@ paths:
       x-work-packages:
       - W2-WRK-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -849,6 +862,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -906,6 +920,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -968,6 +983,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1049,6 +1065,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -1117,6 +1134,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -1179,6 +1197,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1250,6 +1269,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1321,6 +1341,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1392,6 +1413,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1463,6 +1485,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1534,6 +1557,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1604,6 +1628,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -1665,6 +1690,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -1731,6 +1757,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -1791,6 +1818,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1861,6 +1889,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -1931,6 +1960,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: query
       x-idempotency: none
@@ -1952,13 +1982,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NoteHistoryResponse'
+                $ref: '#/components/schemas/NoteHistoryPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -1989,6 +2021,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
@@ -2060,6 +2093,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -2134,6 +2168,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: query
       x-idempotency: none
@@ -2201,6 +2236,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: query
       x-idempotency: none
@@ -2265,6 +2301,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2335,6 +2372,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2404,6 +2442,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2473,6 +2512,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2542,6 +2582,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2611,6 +2652,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2680,6 +2722,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2749,6 +2792,7 @@ paths:
       x-work-packages:
       - W2-WRK-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 10
       x-operation-kind: command
       x-idempotency: required
@@ -2822,6 +2866,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -2892,6 +2937,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -2947,6 +2993,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -3000,6 +3047,7 @@ paths:
       x-work-packages:
       - W2-WRK-03
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3065,6 +3113,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3119,6 +3168,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3189,6 +3239,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -3242,7 +3293,9 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
+      x-bounded: recent items of the current user (REQ-WRK-006)
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3256,15 +3309,13 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/Cursor
-      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecentItemListPage'
+                $ref: '#/components/schemas/RecentItemListResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -3293,6 +3344,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3355,6 +3407,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3419,6 +3472,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3484,6 +3538,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3548,6 +3603,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3615,6 +3671,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3682,6 +3739,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3749,6 +3807,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3816,6 +3875,7 @@ paths:
       x-work-packages:
       - W2-WRK-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3875,6 +3935,7 @@ x-operation-families:
   - REQ-WRK-100..REQ-WRK-115
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2111
@@ -3887,6 +3948,7 @@ x-operation-families:
   - REQ-WRK-100..REQ-WRK-115
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-consumers:
   - PLT
@@ -3901,6 +3963,7 @@ x-operation-families:
   - REQ-WRK-100..REQ-WRK-115
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2111
@@ -3913,6 +3976,7 @@ x-operation-families:
   - REQ-WRK-100..REQ-WRK-115
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2111
@@ -3924,6 +3988,7 @@ x-operation-families:
   - REQ-WRK-002
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2112
@@ -3937,6 +4002,7 @@ x-operation-families:
   - REQ-WRK-187
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2113
@@ -3953,6 +4019,7 @@ x-operation-families:
   - REQ-WRK-009
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2113
@@ -3966,6 +4033,7 @@ x-operation-families:
   - REQ-WRK-187
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2113
@@ -3977,6 +4045,7 @@ x-operation-families:
   - REQ-WRK-150..REQ-WRK-158
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2114
@@ -3988,6 +4057,7 @@ x-operation-families:
   - REQ-WRK-150..REQ-WRK-158
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2114
@@ -4000,6 +4070,7 @@ x-operation-families:
   - REQ-WRK-325..REQ-WRK-340
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2123
@@ -4012,6 +4083,7 @@ x-operation-families:
   - REQ-WRK-345..REQ-WRK-354
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2124
@@ -4024,6 +4096,7 @@ x-operation-families:
   - REQ-WRK-345..REQ-WRK-354
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2124
@@ -4036,6 +4109,7 @@ x-operation-families:
   - REQ-WRK-345..REQ-WRK-354
   x-wave: W2
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-13 §9.1 l.2124
@@ -4046,46 +4120,63 @@ components:
   schemas:
     ActivityCreateRequest:
       type: object
-      description: 'wrk.Activity.create request. PRD inputs: "pattern code, primary object, secondary objects, overrides,
-        cause ref, suggested assignee, amount band"'
       properties:
         patternCode:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pattern code"'
+          $ref: ../events/common.schema.json#/$defs/Code
         primaryObject:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "primary object"'
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
         secondaryObjects:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "secondary objects"'
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/ObjectRef
         overrides:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "overrides"'
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+        raisingModule:
+          $ref: ../events/common.schema.json#/$defs/ModuleCode
         causeRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "cause ref"'
+          type: string
+          description: Event id or object state (REQ-WRK-185)
         suggestedAssignee:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "suggested assignee"'
+          type: string
         amountBand:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "amount band"'
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - patternCode
+      - primaryObject
+      - raisingModule
+      description: 'Typed from REQ-WRK-001, REQ-WRK-185. PRD inputs: "pattern code, primary object, secondary objects, overrides,
+        cause ref, suggested assignee, amount band"'
     ActivityCreateResponse:
       type: object
-      description: 'wrk.Activity.create result. PRD outputs: "activity id, number, dates, assignment"'
       properties:
         activityId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "activity id"'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
-        dates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "dates"'
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        targetAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        escalationAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
         assignment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "assignment"'
+          type: object
+          properties:
+            assigneeType:
+              type: string
+              enum:
+              - USER
+              - GROUP
+              - QUEUE
+              description: REQ-WRK-001
+            assigneeId:
+              type: string
+          required:
+          - assigneeType
+          - assigneeId
+      required:
+      - activityId
+      - number
+      - assignment
+      description: 'Typed from REQ-WRK-001, REQ-WRK-185. PRD outputs: "activity id, number, dates, assignment"'
     ActivityGetItem:
       type: object
       description: 'wrk.Activity.get result. PRD outputs: "activity / page"'
@@ -4156,12 +4247,20 @@ components:
         id:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "id"'
-        targetOrRulesOrMe:
+        target:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "target or "rules" or "me""'
+          description: 'PRD: "target or "rules" or "me"" (optional)'
+        rulesOrMe:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target or "rules" or "me"" (optional)'
         reason:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "reason"'
+      oneOf:
+      - required:
+        - target
+      - required:
+        - rulesOrMe
     ActivityAssignResponse:
       type: object
       description: 'wrk.Activity.assign result. PRD outputs: "assignment"'
@@ -4246,15 +4345,23 @@ components:
         selection:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "selection (filter or ids)"'
-        targetOrRules:
+        target:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "target or rules"'
+          description: 'PRD: "target or rules" (optional)'
+        rules:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target or rules" (optional)'
         includeParticipants:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "include participants"'
         reason:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "reason"'
+      oneOf:
+      - required:
+        - target
+      - required:
+        - rules
     ActivityBulkReassignResponse:
       type: object
       description: 'wrk.Activity.bulkReassign result. PRD outputs: "job id; preview when dry-run"'
@@ -4494,13 +4601,23 @@ components:
         note:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "note(s)"'
-    NoteHistoryResponse:
+    NoteHistoryItem:
       type: object
       description: 'wrk.Note.history result. PRD outputs: "note(s)"'
       properties:
         note:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "note(s)"'
+    NoteHistoryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/NoteHistoryItem'
+      description: Page of wrk.Note.history results (cursor pagination, contract §3.5.5)
     NoteExportRequest:
       type: object
       description: 'wrk.Note.export request. PRD inputs: "per operation"'
@@ -4529,7 +4646,10 @@ components:
         sender:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "sender"'
-        suggestedClassAndLink:
+        suggestedClass:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "suggested class and link"'
+        link:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "suggested class and link"'
     InboundDocumentSubmitResponse:
@@ -4737,23 +4857,13 @@ components:
             items:
               $ref: '#/components/schemas/PaletteQueryItem'
       description: Page of wrk.Palette.query results (cursor pagination, contract §3.5.5)
-    RecentItemListItem:
+    RecentItemListResponse:
       type: object
       description: 'wrk.RecentItem.list result. PRD outputs: "grouped results"'
       properties:
         groupedResults:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "grouped results"'
-    RecentItemListPage:
-      allOf:
-      - $ref: common.yaml#/components/schemas/PageEnvelope
-      - type: object
-        properties:
-          items:
-            type: array
-            items:
-              $ref: '#/components/schemas/RecentItemListItem'
-      description: Page of wrk.RecentItem.list results (cursor pagination, contract §3.5.5)
     CommandRegistryRegisterRequest:
       type: object
       description: 'wrk.CommandRegistry.register request. PRD inputs: "query, context"'

@@ -58,6 +58,8 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-UW-001, REQ-UW-055..058
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -130,6 +132,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -194,6 +197,8 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-UW-002
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -211,16 +216,20 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - name: jobRef
         in: query
-        required: false
-        description: 'PRD: "job ref"'
+        required: true
+        description: POL job id
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/Uuid
       - name: blockingPoint
         in: query
-        required: false
-        description: 'PRD: "blocking point"'
+        required: true
+        description: Blocking point
         schema:
           type: string
+          enum:
+          - PRE_QUOTE
+          - PRE_BIND
+          - PRE_ISSUE
       responses:
         '200':
           description: Success
@@ -254,6 +263,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -305,6 +315,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -326,13 +337,15 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IssueListForChannelResponse'
+                $ref: '#/components/schemas/IssueListForChannelPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -361,6 +374,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -418,6 +432,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -475,6 +490,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -549,6 +565,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -612,6 +629,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -675,6 +693,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -742,6 +761,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -755,6 +775,8 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       - name: jobRef
         in: query
         required: false
@@ -773,7 +795,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApprovalHistoryResponse'
+                $ref: '#/components/schemas/ApprovalHistoryPage'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -804,6 +826,7 @@ paths:
       - W3-UW-02
       - W3-UW-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -881,6 +904,7 @@ paths:
       - W3-UW-02
       - W3-UW-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -950,6 +974,7 @@ paths:
       - W3-UW-02
       - W3-UW-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -1015,6 +1040,7 @@ paths:
       - W3-UW-02
       - W3-UW-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -1074,6 +1100,7 @@ paths:
       - W3-UW-02
       - W3-UW-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1143,6 +1170,7 @@ paths:
       - W3-UW-02
       - W3-UW-03
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1207,6 +1235,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1269,6 +1298,7 @@ paths:
       x-work-packages:
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1335,6 +1365,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1406,6 +1437,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1471,6 +1503,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1547,6 +1580,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -1610,6 +1644,7 @@ paths:
       - REQ-UW-229..REQ-UW-231
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1688,6 +1723,7 @@ paths:
       - REQ-UW-229..REQ-UW-231
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1752,6 +1788,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1820,6 +1857,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1845,10 +1883,16 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: termOrPolicyRef
+      - name: termRef
         in: query
         required: false
-        description: 'PRD: "term or policy ref"'
+        description: 'PRD: "term or policy ref" (optional)'
+        schema:
+          type: string
+      - name: policyRef
+        in: query
+        required: false
+        description: 'PRD: "term or policy ref" (optional)'
         schema:
           type: string
       - name: filters
@@ -1899,6 +1943,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1974,6 +2019,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2041,6 +2087,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2108,6 +2155,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2175,6 +2223,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -2242,6 +2291,8 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-UW-007
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2296,6 +2347,7 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2360,6 +2412,7 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2432,6 +2485,7 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2496,6 +2550,7 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2560,6 +2615,7 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2624,6 +2680,7 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -2689,6 +2746,7 @@ paths:
       - REQ-UW-008
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2750,6 +2808,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -2821,6 +2880,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -2886,6 +2946,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -2945,6 +3006,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3014,6 +3076,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 5
       x-operation-kind: command
       x-idempotency: required
@@ -3080,6 +3143,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3142,6 +3206,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3204,6 +3269,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -3266,6 +3332,7 @@ paths:
       x-work-packages:
       - W3-UW-04
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -3322,6 +3389,7 @@ paths:
       - REQ-UW-208..REQ-UW-212
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3381,6 +3449,7 @@ paths:
       - REQ-UW-165..REQ-UW-180
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -3445,6 +3514,7 @@ paths:
       - REQ-UW-165..REQ-UW-180
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -3505,6 +3575,7 @@ paths:
       - REQ-UW-165..REQ-UW-180
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -3567,6 +3638,7 @@ paths:
       - REQ-UW-165..REQ-UW-180
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -3629,6 +3701,7 @@ paths:
       - REQ-UW-165..REQ-UW-180
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -3692,6 +3765,7 @@ paths:
       - REQ-UW-165..REQ-UW-180
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -3754,6 +3828,7 @@ paths:
       - REQ-UW-176
       x-wave: unscheduled
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3809,6 +3884,7 @@ paths:
       x-work-packages:
       - W6-UW-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -3872,6 +3948,7 @@ paths:
       x-work-packages:
       - W6-UW-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -3938,6 +4015,7 @@ paths:
       x-work-packages:
       - W6-UW-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -4006,6 +4084,7 @@ paths:
       - W3-UW-05
       - W6-UW-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4076,6 +4155,7 @@ paths:
       - W3-UW-05
       - W6-UW-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
@@ -4143,6 +4223,7 @@ paths:
       - W3-UW-05
       - W6-UW-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -4205,6 +4286,7 @@ paths:
       - W3-UW-05
       - W6-UW-01
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -4257,6 +4339,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -4327,6 +4410,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -4397,6 +4481,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -4467,6 +4552,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: query
       x-idempotency: none
@@ -4531,6 +4617,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -4601,6 +4688,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: query
       x-idempotency: none
@@ -4665,6 +4753,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -4735,6 +4824,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -4805,6 +4895,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -4875,6 +4966,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -4945,6 +5037,7 @@ paths:
       x-work-packages:
       - W3-UW-01
       x-status: minimal
+      x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
       x-idempotency: required
@@ -5017,6 +5110,7 @@ paths:
       - W3-UW-01
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -5067,6 +5161,7 @@ paths:
       - W3-UW-01
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -5123,6 +5218,7 @@ paths:
       - W3-UW-01
       - W3-UW-02
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -5184,6 +5280,7 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: full
+      x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -5248,6 +5345,7 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5314,6 +5412,7 @@ paths:
       x-work-packages:
       - W3-UW-05
       x-status: full
+      x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5370,6 +5469,7 @@ x-operation-families:
   - REQ-UW-268
   x-wave: unscheduled
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-04 §9.1 l.1591
@@ -5383,6 +5483,7 @@ x-operation-families:
   - REQ-UW-137
   x-wave: W3
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-04 §9.1 l.1595
@@ -5396,6 +5497,7 @@ x-operation-families:
   - REQ-UW-137
   x-wave: W3
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-04 §9.1 l.1595
@@ -5407,6 +5509,7 @@ x-operation-families:
   - REQ-UW-295
   x-wave: W3
   x-status: unexpanded
+  x-maturity: pre-release
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-04 §9.1 l.1597
@@ -5417,35 +5520,78 @@ components:
   schemas:
     RulesEvaluateRequest:
       type: object
-      description: 'uw.Rules.evaluate request. PRD inputs: "job ref, checkpoint, snapshot ref, signals, dryRun"'
       properties:
         jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: POL job id
         checkpoint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checkpoint"'
+          type: string
+          enum:
+          - PRE_QUOTE
+          - PRE_BIND
+          - PRE_ISSUE
+          - RENEWAL
+          description: REQ-UW-001
         snapshotRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "snapshot ref"'
+          type: string
+          description: POL risk snapshot reference (REQ-POL-002)
+        snapshotHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Idempotency is job ref + snapshot hash (PRD-04 §9.1)
         signals:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "signals"'
-    RulesEvaluateResponse:
-      type: object
-      description: 'uw.Rules.evaluate result. PRD outputs: "issues, lane, evaluation id"'
-      properties:
-        issues:
           type: array
           items:
             $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
-        lane:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lane"'
+          description: RAT referral signals (REQ-RAT-006)
+      required:
+      - jobRef
+      - checkpoint
+      - snapshotRef
+      description: 'Typed from REQ-UW-001, REQ-UW-055..058. PRD inputs: "job ref, checkpoint, snapshot ref, signals, dryRun"'
+    RulesEvaluateResponse:
+      type: object
+      properties:
         evaluationId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "evaluation id"'
+        lane:
+          $ref: ../events/common.schema.json#/$defs/Code
+        issues:
+          type: array
+          items:
+            type: object
+            properties:
+              issueId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              issueType:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: Issue type code
+              severity:
+                $ref: ../events/common.schema.json#/$defs/Code
+              blockingPoint:
+                $ref: ../events/common.schema.json#/$defs/BlockingPoint
+              issueKey:
+                type: string
+                description: Issue key, e.g. `driver:<driverRef>` (REQ-UW-001)
+              lane:
+                $ref: ../events/common.schema.json#/$defs/Code
+              explanationKeys:
+                type: array
+                items:
+                  type: string
+              approvalStatus:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: Issue state (PRD-04 §7.3)
+            required:
+            - issueId
+            - issueType
+            - blockingPoint
+            - issueKey
+            - approvalStatus
+            description: UW issue as returned by evaluate (REQ-UW-001)
+      required:
+      - evaluationId
+      - issues
+      description: 'Typed from REQ-UW-001, REQ-UW-055..058. PRD outputs: "issues, lane, evaluation id"'
     RulesEvaluateBatchRequest:
       type: object
       description: 'uw.Rules.evaluateBatch request. PRD inputs: "selection, checkpoint, rule set"'
@@ -5471,16 +5617,48 @@ components:
           description: 'PRD: "results"'
     IssueBlockingStatusResponse:
       type: object
-      description: 'uw.Issue.blockingStatus result. PRD outputs: "blocked, issues"'
       properties:
         blocked:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "blocked"'
+          type: boolean
+          description: True when any Open, Rejected or Invalidated issue blocks the point (REQ-UW-002)
         issues:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
+            type: object
+            properties:
+              issueId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              issueType:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: Issue type code
+              severity:
+                $ref: ../events/common.schema.json#/$defs/Code
+              blockingPoint:
+                $ref: ../events/common.schema.json#/$defs/BlockingPoint
+              issueKey:
+                type: string
+                description: Issue key, e.g. `driver:<driverRef>` (REQ-UW-001)
+              lane:
+                $ref: ../events/common.schema.json#/$defs/Code
+              explanationKeys:
+                type: array
+                items:
+                  type: string
+              approvalStatus:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: Issue state (PRD-04 §7.3)
+            required:
+            - issueId
+            - issueType
+            - blockingPoint
+            - issueKey
+            - approvalStatus
+            description: UW issue as returned by evaluate (REQ-UW-001)
+          description: Blocking issues
+      required:
+      - blocked
+      - issues
+      description: 'Typed from REQ-UW-002. PRD outputs: "blocked, issues"'
     IssueListItem:
       type: object
       description: 'uw.Issue.list result. PRD outputs: "issues, explanation"'
@@ -5503,7 +5681,7 @@ components:
             items:
               $ref: '#/components/schemas/IssueListItem'
       description: Page of uw.Issue.list results (cursor pagination, contract §3.5.5)
-    IssueListForChannelResponse:
+    IssueListForChannelItem:
       type: object
       description: 'uw.Issue.listForChannel result. PRD outputs: "issues, explanation"'
       properties:
@@ -5515,6 +5693,16 @@ components:
         explanation:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "explanation"'
+    IssueListForChannelPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/IssueListForChannelItem'
+      description: Page of uw.Issue.listForChannel results (cursor pagination, contract §3.5.5)
     IssueGetResponse:
       type: object
       description: 'uw.Issue.get result. PRD outputs: "issues, explanation"'
@@ -5654,7 +5842,7 @@ components:
         issue:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "issue"'
-    ApprovalHistoryResponse:
+    ApprovalHistoryItem:
       type: object
       description: 'uw.Approval.history result. PRD outputs: "rows"'
       properties:
@@ -5663,6 +5851,16 @@ components:
           items:
             $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "rows"'
+    ApprovalHistoryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApprovalHistoryItem'
+      description: Page of uw.Approval.history results (cursor pagination, contract §3.5.5)
     ReferralRequestRequest:
       type: object
       description: 'uw.Referral.request request. PRD inputs: "job ref, issue ids, comment, attachments"'
@@ -5819,9 +6017,12 @@ components:
       type: object
       description: 'uw.Decline.create request. PRD inputs: "job or intake ref, scope, reasons, pairs, wording"'
       properties:
-        jobOrIntakeRef:
+        jobRef:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job or intake ref"'
+          description: 'PRD: "job or intake ref" (optional)'
+        intakeRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job or intake ref" (optional)'
         scope:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "scope"'
@@ -5834,6 +6035,11 @@ components:
         wording:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "wording"'
+      oneOf:
+      - required:
+        - jobRef
+      - required:
+        - intakeRef
     DeclineCreateResponse:
       type: object
       description: 'uw.Decline.create result. PRD outputs: "decline, refusal requirement"'
@@ -5878,9 +6084,12 @@ components:
       type: object
       description: 'uw.Decline.decideReview request. PRD inputs: "job or intake ref, scope, reasons, pairs, wording"'
       properties:
-        jobOrIntakeRef:
+        jobRef:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job or intake ref"'
+          description: 'PRD: "job or intake ref" (optional)'
+        intakeRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job or intake ref" (optional)'
         scope:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "scope"'
@@ -5893,6 +6102,11 @@ components:
         wording:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "wording"'
+      oneOf:
+      - required:
+        - jobRef
+      - required:
+        - intakeRef
     DeclineDecideReviewResponse:
       type: object
       description: 'uw.Decline.decideReview result. PRD outputs: "decline, refusal requirement"'
@@ -5912,7 +6126,10 @@ components:
           items:
             $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "entries"'
-        fileRefManifest:
+        fileRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file ref + manifest"'
+        manifest:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "file ref + manifest"'
     RefusalRegisterQueryPage:
@@ -5953,7 +6170,10 @@ components:
           items:
             $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "entries"'
-        fileRefManifest:
+        fileRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file ref + manifest"'
+        manifest:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "file ref + manifest"'
     ContingencyCreateRequest:
@@ -6041,27 +6261,58 @@ components:
       description: Page of uw.Contingency.list results (cursor pagination, contract §3.5.5)
     PolicyHoldCheckRequest:
       type: object
-      description: 'uw.PolicyHold.check request. PRD inputs: "job attributes, risk locations, dates"'
       properties:
-        jobAttributes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job attributes"'
+        jobType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        lineOfBusiness:
+          $ref: ../events/common.schema.json#/$defs/Code
+        coverages:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
         riskLocations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "risk locations"'
-        dates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "dates"'
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: Risk locations (postcode, geocode)
+        transactionDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        effectiveDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      required:
+      - jobType
+      - product
+      - lineOfBusiness
+      - coverages
+      - riskLocations
+      - transactionDate
+      - effectiveDate
+      description: 'Signature of REQ-UW-007 Typed from REQ-UW-007. PRD inputs: "job attributes, risk locations, dates"'
     PolicyHoldCheckResponse:
       type: object
-      description: 'uw.PolicyHold.check result. PRD outputs: "holds, issue type"'
       properties:
         holds:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "holds"'
+          type: array
+          items:
+            type: object
+            properties:
+              holdId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              holdCode:
+                $ref: ../events/common.schema.json#/$defs/Code
+              description:
+                type: string
+            required:
+            - holdId
+            - holdCode
         issueType:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issue type"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Issue type to raise, e.g. UW_POLICY_HOLD
+      required:
+      - holds
+      description: 'Typed from REQ-UW-007. PRD outputs: "holds, issue type"'
     PolicyHoldCreateRequest:
       type: object
       description: 'uw.PolicyHold.create request. PRD inputs: "per operation"'
@@ -6534,14 +6785,25 @@ components:
         findingId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "finding id"'
-        termOrClaimRef:
+        termRef:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term or claim ref"'
+          description: 'PRD: "term or claim ref" (optional)'
+        claimRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term or claim ref" (optional)'
+      oneOf:
+      - required:
+        - termRef
+      - required:
+        - claimRef
     DisclosureFindingRecordResponse:
       type: object
       description: 'uw.DisclosureFinding.record result. PRD outputs: "finding(s) incl. decision and reduction factor"'
       properties:
-        findingSInclDecisionAndReduction:
+        findingSInclDecision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "finding(s) incl. decision and reduction factor"'
+        reductionFactor:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "finding(s) incl. decision and reduction factor"'
     DisclosureFindingDecideRequest:
@@ -6564,28 +6826,45 @@ components:
         findingId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "finding id"'
-        termOrClaimRef:
+        termRef:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term or claim ref"'
+          description: 'PRD: "term or claim ref" (optional)'
+        claimRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term or claim ref" (optional)'
+      oneOf:
+      - required:
+        - termRef
+      - required:
+        - claimRef
     DisclosureFindingDecideResponse:
       type: object
       description: 'uw.DisclosureFinding.decide result. PRD outputs: "finding(s) incl. decision and reduction factor"'
       properties:
-        findingSInclDecisionAndReduction:
+        findingSInclDecision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "finding(s) incl. decision and reduction factor"'
+        reductionFactor:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "finding(s) incl. decision and reduction factor"'
     DisclosureFindingGetResponse:
       type: object
       description: 'uw.DisclosureFinding.get result. PRD outputs: "finding(s) incl. decision and reduction factor"'
       properties:
-        findingSInclDecisionAndReduction:
+        findingSInclDecision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "finding(s) incl. decision and reduction factor"'
+        reductionFactor:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "finding(s) incl. decision and reduction factor"'
     DisclosureFindingListItem:
       type: object
       description: 'uw.DisclosureFinding.list result. PRD outputs: "finding(s) incl. decision and reduction factor"'
       properties:
-        findingSInclDecisionAndReduction:
+        findingSInclDecision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "finding(s) incl. decision and reduction factor"'
+        reductionFactor:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "finding(s) incl. decision and reduction factor"'
     DisclosureFindingListPage:

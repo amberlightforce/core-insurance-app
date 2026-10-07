@@ -178,7 +178,7 @@ captured outbox rows, against their schema and the semantic rules above.
 
 ```
 contracts/openapi/
-  common.yaml          shared components: Problem Details, parameters (Idempotency-Key, traceparent, validAt/asOf,
+  common.yaml          shared components: Problem Details, parameters (Idempotency-Key, traceparent, validAt,
                        knownAt, dryRun, cursor/limit), page envelope, value types ($ref to ../events/common.schema.json),
                        security schemes (Entra ID, Entra External ID, partner client credentials, provider signature)
   <module>.yaml        one OpenAPI 3.1 document per module (pty … mkt): every operation of the module PRD §9.1
@@ -218,9 +218,14 @@ serves the UI, partners and tests only; one module never calls another over HTTP
   never a business key), `retryable` and field `errors[]`. `x-error-codes` lists the codes the PRD names with the HTTP
   status they map to (not found 404; stale/lock/duplicate 409; permission/authority/SoD 403; unavailable 503; other
   business preconditions 422). Business-rule outcomes that are not errors (UW issues) are results, not errors.
-- **Time travel**: `validAt` (valid time) and `knownAt` (record time) per contract §3.5.5; operations whose PRD names
-  the valid-time input `asOf` use the `asOf` parameter (same meaning). Lists use cursor pagination (`cursor`, `limit`
-  ≤ 200) and the shared page envelope, filtered by the caller's legal entity and ABAC scope.
+- **Time travel** (D-API-02, D-API-08, D-API-09): the valid-time instant is always `validAt` and the transaction-time
+  instant always `knownAt`, contract §3.5.5. PRD spellings (`asOf`, `asAt`, `date`, "as of record time") are recorded
+  only in the operation's `x-prd-param-names`; operation and error names from the PRDs (`dat.Query.asOf`,
+  `doc.Document.renderAsOf`, `DOC-ERR-ASOF-UNSUPPORTED`) stay (D-API-03). Each time-travel input appears exactly once,
+  as a query parameter, never in the request body.
+- **Lists**: every list-style query (`list*`, `search`, `query`, `history`, …) uses cursor pagination (`cursor`,
+  `limit` ≤ 200) and the shared page envelope, filtered by the caller's legal entity and ABAC scope; a list with a
+  PRD-stated natural bound carries `x-bounded` with the reason instead.
 - **Security**: Entra ID bearer tokens (staff), Entra External ID (customers, intermediaries), client credentials with
   certificate for partners (D-ARC-03). `x-permission` names the permission (by convention the operationId) that app
   roles map to; `x-authority-types` lists the authority types the PRD associates with the operation's requirements
@@ -236,7 +241,11 @@ serves the UI, partners and tests only; one module never calls another over HTTP
 - **Status**: `x-status: full` = inputs and outputs are taken from the PRD row (field names from the PRD; types only where
   the name makes them unambiguous: ids, dates, instants, hashes, Money, currency, language, flags; otherwise
   `Unspecified`); `minimal` = the PRD row gives only names ("as named", "per operation"). `x-io-shared: N` = the PRD row
-  states one input/output list for N operations; the owning work package narrows it per operation.
+  states one input/output list for N operations; the owning work package narrows it per operation. PRD fields that
+  join two concepts are split (`source type and id` → `sourceType` + `sourceId`; `product or hash` → `product` |
+  `hash` with a `oneOf` rule). `x-typed` marks the critical-chain anchor operations (PLAN §2: quote, bind, money,
+  claims and lifecycle chains) that are fully typed now (D-API-06): required lists, PRD-stated enums, booleans, Money,
+  and ids with patterns, citing the requirements they were typed from.
   `x-operation-families` lists `Resource.*` families whose members the PRD does not name; they are completed by the
   owning work package. No business rule is invented in either case.
 - `x-excluded` records PRD rows deliberately not modelled (OIDC endpoints and SCIM under D-ARC-03; the PLT-internal
@@ -250,9 +259,15 @@ and path; their names are derived (`x-name-derived: true`), `x-delegates-to` lis
 `x-partner-scopes` the PRD-12 §9.1.2 scopes. The MCP agent facade is one JSON-RPC operation `chn.Agent.mcp` carrying
 `tools/list`, `tools/call` and `resources/read`; `x-mcp-tools` reproduces the PRD-12 §9.1.4 tool catalogue.
 
-### Versioning
+### Versioning and maturity (D-API-06)
 
-The major version is in the path (`/v1/`). Within a major, changes are additive: new operations, new optional request
+Every operation carries `x-maturity`. **`pre-release`** (all operations today): the published v1 operation may still
+be tightened by its owner until the first consumer work package that calls it merges: typing `Unspecified` members,
+adding required inputs and enums, splitting fields. When that consumer merges, the owner sets **`stable`** and the
+normal rule applies. Critical-chain anchor operations are already fully typed (`x-typed`) so their consumers build
+against the final shape.
+
+The major version is in the path (`/v1/`). For `stable` operations, changes within a major are additive: new operations, new optional request
 fields, new response fields, new error codes, defining an `Unspecified` member or expanding a family. Removing or
 renaming an operation or field, making a field required, or changing semantics needs a new major served in parallel;
 deprecation notice ≥ 6 months for external (partner) operations and ≥ 1 release internally (contract §3.5.2).
@@ -270,5 +285,7 @@ It validates every document against the OpenAPI 3.1 schema (`openapi-spec-valida
 `x-requirement` on every operation and family; every state-changing operation is a command with a required
 `Idempotency-Key` and lists `<MOD>-ERR-IDEMPOTENCY-MISMATCH`; dry-run operations declare `dryRun`; every operation
 declares `traceparent`; every 4xx/5xx response is Problem Details; error-code format; exposure consistency; declared
-security schemes and path parameters; anchor coverage (`anchors.yaml`); the 40 SPIs in `spi.md`; and that `INDEX.md`
-is current.
+security schemes and path parameters; `x-maturity`; no parameter or property named `asOf` / `asAt` and no
+time-travel input repeated in the body (D-API-08/09); pagination or `x-bounded` on list queries; anchor coverage
+(`anchors.yaml`); the 40 SPIs in `spi.md`; and that `INDEX.md` is current. It warns about property names that join two
+concepts with `And` / `Or`.

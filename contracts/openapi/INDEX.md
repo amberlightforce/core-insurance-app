@@ -27,7 +27,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [MKT](#mkt) | 48 | 32 | 16 | 17 | 31 | 1 | 0 | 5 |
 | **Total** | 1110 | 890 | 220 | 727 | 383 | 127 | 69 | 65 |
 
-Contract anchors: 174; covered by operations or families: 166; not an API (reason in `anchors.yaml`): 8.
+Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
 ## pty
 
@@ -490,7 +490,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `clm.Exposure.create` | POST `/api/clm/v1/exposures` | C | yes | ui |  | W7 | full | REQ-CLM-062, REQ-CLM-063, REQ-CLM-072 |
 | `clm.Exposure.reopen` | POST `/api/clm/v1/exposures/reopen` | C | yes | ui |  | W7 | full | REQ-CLM-062, REQ-CLM-063, REQ-CLM-072 |
 | `clm.Exposure.update` | PATCH `/api/clm/v1/exposures/{id}` | C | yes | ui |  | W7 | full | REQ-CLM-062, REQ-CLM-063, REQ-CLM-072 |
-| `clm.Financials.dailyTotals` | GET `/api/clm/v1/financials/daily-totals` | Q |  | internal |  | W7 | full | REQ-CLM-005, REQ-CLM-106 |
+| `clm.Financials.dailyTotals` | GET `/api/clm/v1/financials/daily-totals` | Q |  | internal |  | W7 | full | REQ-CLM-106 |
 | `clm.Financials.get` | GET `/api/clm/v1/financials/get` | Q |  | ui | RI | W7 | full | REQ-CLM-101 |
 | `clm.Fnol.get` | GET `/api/clm/v1/fnol/{id}` | Q |  | ui |  | W7 | full | REQ-CLM-001 |
 | `clm.Fnol.saveDraft` | POST `/api/clm/v1/fnol/save-draft` | C | yes | ui, partner | CHN | W7 | full | REQ-CLM-001 |
@@ -596,7 +596,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `ri.Exchange.receive` | POST `/api/ri/v1/exchanges/receive` | C |  | ui |  | W7 | full | REQ-RI-241..REQ-RI-246 |
 | `ri.Exchange.send` | POST `/api/ri/v1/exchanges/send` | C |  | ui |  | W7 | full | REQ-RI-241..REQ-RI-246 |
 | `ri.Fac.bind` | POST `/api/ri/v1/facs/bind` | C | yes | ui |  | unscheduled | full | REQ-RI-101..REQ-RI-112 |
-| `ri.Fac.cancel` | POST `/api/ri/v1/facs/cancel` | C |  | ui |  | unscheduled | full | REQ-RI-101..REQ-RI-112 |
+| `ri.Fac.cancel` | POST `/api/ri/v1/facs/cancel` | C | yes | ui |  | unscheduled | full | REQ-RI-101..REQ-RI-112 |
 | `ri.Fac.decline` | POST `/api/ri/v1/facs/decline` | C |  | ui |  | unscheduled | full | REQ-RI-101..REQ-RI-112 |
 | `ri.Fac.generateSlip` | POST `/api/ri/v1/facs/generate-slip` | C |  | ui |  | unscheduled | full | REQ-RI-101..REQ-RI-112 |
 | `ri.Fac.get` | GET `/api/ri/v1/facs/{id}` | Q |  | ui |  | unscheduled | full | REQ-RI-101..REQ-RI-112 |
@@ -632,7 +632,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `ri.Programme.return` | POST `/api/ri/v1/programmes/return` | C |  | ui |  | W7 | full | REQ-RI-030, REQ-RI-057, REQ-RI-060 |
 | `ri.Programme.submit` | POST `/api/ri/v1/programmes/submit` | C | yes | ui |  | W7 | full | REQ-RI-030, REQ-RI-057, REQ-RI-060 |
 | `ri.Programme.update` | PATCH `/api/ri/v1/programmes/{id}` | C |  | ui |  | W7 | full | REQ-RI-030, REQ-RI-057, REQ-RI-060 |
-| `ri.Reconciliation.fin` | POST `/api/ri/v1/reconciliation/fin` | C |  | ui |  | W7 | full | REQ-RI-004, REQ-RI-236, REQ-RI-237 |
+| `ri.Reconciliation.fin` | POST `/api/ri/v1/reconciliation/fin` | C |  | ui |  | W8 | full | REQ-RI-236, REQ-RI-237 |
 | `ri.Recovery.adjust` | POST `/api/ri/v1/recoveries/adjust` | C | yes | ui |  | W7 | full | REQ-RI-003, REQ-RI-135 |
 | `ri.Recovery.listByClaim` | GET `/api/ri/v1/recoveries/list-by-claim` | Q |  | ui | CLM | W7 | full | REQ-RI-003, REQ-RI-136 |
 | `ri.Recovery.listByContract` | GET `/api/ri/v1/recoveries/list-by-contract` | Q |  | ui |  | W7 | full | REQ-RI-003, REQ-RI-136 |
@@ -718,7 +718,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `fin.LevyReturn.requestPayment` | POST `/api/fin/v1/levy-returns/request-payment` | C |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
 | `fin.LevyReturn.transition` | POST `/api/fin/v1/levy-returns/transition` | Q |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
 | `fin.ManualJournal.create` | POST `/api/fin/v1/manual-journals` | C | yes | ui |  | W5 | full | REQ-FIN-215..REQ-FIN-226 |
-| `fin.ManualJournal.decide` | POST `/api/fin/v1/manual-journals/decide` | C |  | ui |  | W5 | full | REQ-FIN-215..REQ-FIN-226 |
+| `fin.ManualJournal.decide` | POST `/api/fin/v1/manual-journals/decide` | C | yes | ui |  | W5 | full | REQ-FIN-215..REQ-FIN-226 |
 | `fin.ManualJournal.get` | GET `/api/fin/v1/manual-journals/{id}` | Q |  | ui |  | W5 | full | REQ-FIN-215..REQ-FIN-226 |
 | `fin.ManualJournal.list` | GET `/api/fin/v1/manual-journals` | Q |  | ui |  | W5 | full | REQ-FIN-215..REQ-FIN-226 |
 | `fin.ManualJournal.submit` | POST `/api/fin/v1/manual-journals/submit` | C |  | ui |  | W5 | full | REQ-FIN-215..REQ-FIN-226 |
@@ -878,8 +878,8 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `cmp.EnfiaConfirmation.transmit` | POST `/api/cmp/v1/enfia-confirmations/transmit` | C |  | ui |  | unscheduled | full | REQ-CMP-185..REQ-CMP-188 |
 | `cmp.Evidence.submit` | POST `/api/cmp/v1/evidence/submit` | C |  | ui | PFC | W8 | minimal | REQ-CMP-006, REQ-CMP-208..REQ-CMP-225 |
 | `cmp.FiscalDocument.bulkResubmit` | POST `/api/cmp/v1/fiscal-documents/bulk-resubmit` | C | yes | ui |  | W5 | full | REQ-CMP-001, REQ-CMP-049..REQ-CMP-052 |
-| `cmp.FiscalDocument.cancel` | POST `/api/cmp/v1/fiscal-documents/cancel` | C |  | ui |  | W5 | full | REQ-CMP-001, REQ-CMP-049..REQ-CMP-052 |
-| `cmp.FiscalDocument.correct` | POST `/api/cmp/v1/fiscal-documents/correct` | C |  | ui |  | W5 | full | REQ-CMP-001, REQ-CMP-049..REQ-CMP-052 |
+| `cmp.FiscalDocument.cancel` | POST `/api/cmp/v1/fiscal-documents/cancel` | C | yes | ui |  | W5 | full | REQ-CMP-001, REQ-CMP-049..REQ-CMP-052 |
+| `cmp.FiscalDocument.correct` | POST `/api/cmp/v1/fiscal-documents/correct` | C | yes | ui |  | W5 | full | REQ-CMP-001, REQ-CMP-049..REQ-CMP-052 |
 | `cmp.FiscalDocument.get` | GET `/api/cmp/v1/fiscal-documents/{id}` | Q |  | ui | BIL, DOC | W5 | full | REQ-CMP-001, REQ-CMP-054 |
 | `cmp.FiscalDocument.import` | POST `/api/cmp/v1/fiscal-documents/import` | C | yes | internal | MIG | W5 | minimal | REQ-CMP-009, REQ-CMP-001, REQ-CMP-086 … |
 | `cmp.FiscalDocument.listBySource` | GET `/api/cmp/v1/fiscal-documents/list-by-source` | Q |  | ui | BIL, CLM | W5 | full | REQ-CMP-009, REQ-CMP-001, REQ-CMP-054 |
@@ -956,26 +956,26 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `chn.PartnerBillingAccount.get` | GET `/api/chn/v1/billing-accounts/{no}` | Q |  | partner |  | W5 | minimal | REQ-CHN-001, REQ-BIL-001 |
 | `chn.PartnerBook.changes` | GET `/api/chn/v1/book/changes` | Q |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-POL-014, REQ-POL-094 |
 | `chn.PartnerClaim.getTracking` | GET `/api/chn/v1/claims/{no}/tracking` | Q |  | partner |  | W7 | minimal | REQ-CHN-001, REQ-CLM-009 |
-| `chn.PartnerClaim.report` | POST `/api/chn/v1/claims` | C |  | partner |  | W7 | minimal | REQ-CHN-001, REQ-CLM-001 |
-| `chn.PartnerCollection.report` | POST `/api/chn/v1/collections` | C |  | partner |  | W6 | minimal | REQ-CHN-001, REQ-BIL-237 |
+| `chn.PartnerClaim.report` | POST `/api/chn/v1/claims` | C | yes | partner |  | W7 | minimal | REQ-CHN-001, REQ-CLM-001 |
+| `chn.PartnerCollection.report` | POST `/api/chn/v1/collections` | C | yes | partner |  | W6 | minimal | REQ-CHN-001, REQ-BIL-237 |
 | `chn.PartnerCommissionStatement.list` | GET `/api/chn/v1/commission-statements` | Q |  | partner |  | W4 | minimal | REQ-CHN-001 |
 | `chn.PartnerDocument.listForObject` | GET `/api/chn/v1/{object}/{id}/documents` | Q |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-DOC-008, REQ-DOC-289 |
 | `chn.PartnerDocument.upload` | POST `/api/chn/v1/documents` | C |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-WRK-260 |
-| `chn.PartnerInvoice.createPaymentLink` | POST `/api/chn/v1/invoices/{no}/payment-links` | C |  | partner |  | W5 | minimal | REQ-CHN-001, REQ-BIL-144 |
+| `chn.PartnerInvoice.createPaymentLink` | POST `/api/chn/v1/invoices/{no}/payment-links` | C | yes | partner |  | W5 | minimal | REQ-CHN-001, REQ-BIL-144 |
 | `chn.PartnerPolicy.change` | POST `/api/chn/v1/policies/{no}/changes` | C | yes | partner |  | W6 | minimal | REQ-CHN-001, REQ-POL-001, REQ-POL-190 … |
 | `chn.PartnerPolicy.get` | GET `/api/chn/v1/policies/{no}` | Q |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-POL-002 |
 | `chn.PartnerPolicy.getCoverNote` | GET `/api/chn/v1/policies/{no}/cover-note` | Q |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-DOC-224 |
-| `chn.PartnerPolicy.requestCancellation` | POST `/api/chn/v1/policies/{no}/cancellation-requests` | C |  | partner |  | W6 | minimal | REQ-CHN-001, REQ-POL-012, REQ-WRK-211 |
+| `chn.PartnerPolicy.requestCancellation` | POST `/api/chn/v1/policies/{no}/cancellation-requests` | C | yes | partner |  | W6 | minimal | REQ-CHN-001, REQ-POL-012, REQ-WRK-211 |
 | `chn.PartnerProduct.describe` | GET `/api/chn/v1/products/{code}/describe` | Q |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-PFC-222, REQ-PFC-231 |
 | `chn.PartnerProduct.getIpid` | GET `/api/chn/v1/products/{code}/ipid` | Q |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-DOC-220 |
-| `chn.PartnerQuote.bind` | POST `/api/chn/v1/quotes/{id}/bind` | C |  | partner |  | W5 | minimal | REQ-CHN-001, REQ-POL-001, REQ-POL-003 … |
+| `chn.PartnerQuote.bind` | POST `/api/chn/v1/quotes/{id}/bind` | C | yes | partner |  | W5 | minimal | REQ-CHN-001, REQ-POL-001, REQ-POL-003 … |
 | `chn.PartnerQuote.compareVersions` | GET `/api/chn/v1/quotes/{id}/compare` | Q |  | partner |  | W4 | minimal | REQ-CHN-001 |
 | `chn.PartnerQuote.create` | POST `/api/chn/v1/quotes` | C | yes | partner |  | W4 | minimal | REQ-CHN-001, REQ-POL-001, REQ-POL-145 … |
 | `chn.PartnerQuote.listIssues` | GET `/api/chn/v1/quotes/{id}/issues` | Q |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-UW-084 |
 | `chn.PartnerQuote.newVersion` | POST `/api/chn/v1/quotes/{id}/versions` | C |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-POL-150, REQ-POL-151 |
 | `chn.PartnerQuote.requestReferral` | POST `/api/chn/v1/quotes/{id}/referral-requests` | C |  | partner |  | W4 | minimal | REQ-CHN-001, REQ-UW-085 |
-| `chn.PartnerVendorInvoice.submit` | POST `/api/chn/v1/vendor/invoices` | C |  | partner |  | W7 | minimal | REQ-CHN-001, REQ-CLM-188, REQ-CLM-200 |
-| `chn.PartnerVendorService.request` | POST `/api/chn/v1/vendor/services` | C |  | partner |  | W7 | minimal | REQ-CHN-001, REQ-CLM-188, REQ-CLM-200 |
+| `chn.PartnerVendorInvoice.submit` | POST `/api/chn/v1/vendor/invoices` | C | yes | partner |  | W7 | minimal | REQ-CHN-001, REQ-CLM-188, REQ-CLM-200 |
+| `chn.PartnerVendorService.request` | POST `/api/chn/v1/vendor/services` | C | yes | partner |  | W7 | minimal | REQ-CHN-001, REQ-CLM-188, REQ-CLM-200 |
 | `chn.Permission.evaluate` | POST `/api/chn/v1/permissions/evaluate` | Q |  | ui |  | W4 | full | REQ-CHN-002, REQ-CHN-049 |
 | `chn.PermissionMatrix.createDraft` | POST `/api/chn/v1/permission-matrices/create-draft` | C |  | ui |  | W4 | full | REQ-CHN-048, REQ-CHN-056..REQ-CHN-058 |
 | `chn.PermissionMatrix.diff` | GET `/api/chn/v1/permission-matrices/diff` | Q |  | ui |  | W4 | full | REQ-CHN-048, REQ-CHN-056..REQ-CHN-058 |
@@ -1455,7 +1455,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-CLM-002 | `clm.Coverage.decide`, `clm.Coverage.reverify` | mapped by builder |
 | REQ-CLM-003 | `clm.TransactionSet.approve`, `clm.TransactionSet.build`, `clm.TransactionSet.reject`, `clm.TransactionSet.return` (+1) |  |
 | REQ-CLM-004 | `clm.Payment.reissue`, `clm.Payment.stop`, `clm.Payment.void`, `clm.TransactionSet.approve` (+4) | mapped by builder |
-| REQ-CLM-005 | `clm.Financials.dailyTotals` | mapped by builder |
+| REQ-CLM-005 | — | event contract (claim financial events in contracts/events/clm); secondary: clm.Financials.dailyTotals for FIN reconciliation |
 | REQ-CLM-006 | `clm.CatEvent.*` |  |
 | REQ-CLM-007 | `clm.StatutoryOffer.issue`, `clm.StatutoryOffer.recordAcceptance`, `clm.StatutoryOffer.recordRepairAgreement` | mapped by builder |
 | REQ-CLM-008 | `clm.Certificate.assemble`, `clm.Certificate.issue`, `clm.Certificate.request` |  |
@@ -1465,7 +1465,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-RI-001 | `ri.Contract.applicable`, `ri.Contract.get`, `ri.Contract.list`, `ri.Contract.versionAt` (+2) |  |
 | REQ-RI-002 | `ri.Cession.get`, `ri.Cession.listByPolicy`, `ri.Cession.preview`, `ri.Cession.rerun` | mapped by builder |
 | REQ-RI-003 | `ri.Recovery.adjust`, `ri.Recovery.listByClaim`, `ri.Recovery.listByContract`, `ri.Recovery.recalculate` (+1) | mapped by builder |
-| REQ-RI-004 | `ri.Reconciliation.fin` | mapped by builder |
+| REQ-RI-004 | — | event contract (cession and recovery business events in contracts/events/ri); secondary: ri.Reconciliation.fin |
 | REQ-RI-005 | `ri.Accumulation.estimate`, `ri.Accumulation.footprint`, `ri.Accumulation.query`, `ri.Accumulation.zone` |  |
 | REQ-RI-006 | `ri.Bordereau.approve`, `ri.Bordereau.generate`, `ri.Bordereau.issue`, `ri.Bordereau.submit` (+6) |  |
 | REQ-RI-007 | `ri.Import.aggregateTracker`, `ri.Import.cessionHistory`, `ri.Import.contract`, `ri.Import.openItems` (+2) |  |
