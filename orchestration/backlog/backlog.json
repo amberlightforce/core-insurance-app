@@ -167,8 +167,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "in review",
-   "owner": "builder: final minor fixes before merge",
+   "status": "building",
+   "owner": "events + OpenAPI MERGED; C# contract records after F-1b",
    "reviewAttempts": 2,
    "blockers": []
   },
@@ -205,8 +205,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "not started",
-   "owner": null,
+   "status": "building",
+   "owner": "builder: Greek cross-cutting (worktree)",
    "reviewAttempts": 0,
    "blockers": []
   },
@@ -224,8 +224,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "failed",
-   "owner": "builder: final fix attempt (bounded outputs)",
+   "status": "in review",
+   "owner": "reviewer: rule engine (final attempt 3)",
    "reviewAttempts": 2,
    "blockers": []
   },
