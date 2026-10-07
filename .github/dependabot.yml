@@ -5,6 +5,9 @@ updates:
     directory: /
     schedule: { interval: weekly, day: monday }
     open-pull-requests-limit: 10
+    ignore:
+      # Analyzer packages must match the Roslyn version shipped with the pinned SDK; bumped together with global.json.
+      - dependency-name: "Microsoft.CodeAnalysis*"
     groups:
       dotnet-platform:
         patterns: ["Microsoft.*", "System.*"]
