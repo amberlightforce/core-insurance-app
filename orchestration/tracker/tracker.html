@@ -251,7 +251,7 @@ function render(){
   document.getElementById("waves").innerHTML = WAVES.map(([id,name])=>{
     const ws=all.filter(w=>w.wave===id && w.status!=="deferred");
     const tot=ws.reduce((a,w)=>a+Math.max((w.reqs||[]).length,1),0);
-    const done=ws.reduce((a,w)=>a+((w.reqs||[]).length? reqDone(w) : (w.status==="merged"?1:0)),0);
+    const done=ws.reduce((a,w)=>a+((w.reqs||[]).length? reqDone(w) : (w.status==="merged"?1:(w.progress||0)/100)),0);
     const p= tot? Math.round(done/tot*100):0;
     const merged=ws.filter(w=>w.status==="merged").length;
     return `<button type="button" class="wave ${cur===id?"active":""}" data-wave="${id}" aria-pressed="${state.waveF===id}">
@@ -275,7 +275,7 @@ function render(){
     const tot=live.reduce((a,w)=>a+(w.reqs||[]).length,0);
     const done=live.reduce((a,w)=>a+reqDone(w),0);
     const wpTot=live.length, wpDone=live.filter(w=>w.status==="merged").length;
-    const p100 = tot? Math.round(done/tot*100) : (wpTot? Math.round(wpDone/wpTot*100):0);
+    const p100 = tot? Math.round(done/tot*100) : (wpTot? Math.round(live.reduce((a,w)=>a+(w.status==="merged"?1:(w.progress||0)/100),0)/wpTot*100):0);
     const waves=[...new Set(ws.map(w=>w.wave))].join(" ");
     const isOpen = state.open.has(p.prd) || (filtering && vis.length);
     const wpRows = vis.map(w=>{
@@ -288,7 +288,7 @@ function render(){
         <td class="mono">${esc(w.id)}</td>
         <td>${esc(w.wave)}</td>
         <td><div class="wp-title">${esc(w.title)}</div>${w.summary?`<div class="wp-sum">${esc(w.summary)}</div>`:""}${blk}${reqHtml}</td>
-        <td class="num">${n? `${d}/${n}`:"–"}</td>
+        <td class="num">${n? `${d}/${n}`: (w.status==="merged"?"100%":(w.progress?w.progress+"%":"–"))}</td>
         <td><span class="pill ${s.cls}"><i></i>${s.label}</span>${w.reviewAttempts?`<div class="note">Review ${w.reviewAttempts}/3</div>`:""}</td>
         <td class="note">${esc(w.owner||"")}</td>
       </tr>`;

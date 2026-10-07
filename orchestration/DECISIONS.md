@@ -155,3 +155,11 @@ co-signing access (OI-UW-04, OI-DOC-05) · BoG DORA channel (OI-CMP-09) · SMS s
 | D-CON-28 | Each event declares its required lineage keys (`x-business-keys` in catalog.json), and the validator enforces them | D5 lineage must be checkable | Made |
 | D-CON-29 | Lineage keys belong in the envelope `businessKeys` and need not appear in the payload. PolicyBound carries jobId + quoteId so that quote → job → transaction is traceable | D5 | Made |
 | D-CON-30 | Follow-ups from the F-1c review, to be fixed by the owning WPs: (M1) JournalPosted business key should name the posting batch or run, since its payload is a journal array (W5-FIN); (M2) CessionCalculated and BillingEntryPosted should add a charge-side lineage key (transactionId or sourceCorrelationKey) (W5-BIL, W7-RI) | Non-blocking review notes | Made |
+
+## L. Documents spike result (F-1f a)
+
+| ID | Decision | Reason | Status |
+|---|---|---|---|
+| D-ARC-07a | **Refines D-ARC-07.** Gotenberg is used only for its Chromium route (`generateTaggedPdf`, `failOnConsoleExceptions`, `failOnResourceLoadingFailed`, `preferCssPageSize`). Its `pdfa`/`pdfua`/`metadata`/`embeds` options are NOT used for archive copies. An in-house .NET ArchiveFinaliser (no PDF library) produces PDF/A-3a + PDF/UA-1, embeds the payload, normalises bytes deterministically and applies the PAdES seal. Headers and footers use CSS `@page` margin boxes, not Chromium header templates. Glyph gates: a pre-render cmap check, a Gotenberg image with declared fonts only, and a post-render PdfPig font check. Documents over ~150 pages render in chunks (the merge is still to be built in W2-DOC). veraPDF runs in CI | Spike evidence: veraPDF 3a/3b/3u/UA-1 pass; identical SHA-256 across 9 renders | Made |
+| D-ARC-07b | Approved dependencies: PdfPig 0.1.11 (Apache-2.0), System.Security.Cryptography.Pkcs (MIT), BouncyCastle.Cryptography (MIT, for LTV), the official ICC sRGB profile, Noto Sans 2.015 (OFL), veraPDF CLI (CI only, external process), EU DSS (LGPL sidecar, optional, validation). iText excluded | ADR rule 11 | Made |
+| D-ARC-07c | Infra delta: the 2 GiB Gotenberg container cannot render 500+ page documents in one call (Chromium peaked at 5.6 GiB). Use chunking by default; a large-document Gotenberg pool is a Stage-2 option | Measured | Made |
