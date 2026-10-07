@@ -1,5 +1,6 @@
 using CoreIns.Modules.Finance.Domain;
 using CoreIns.Modules.Finance.Persistence;
+using CoreIns.Platform.Events;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
@@ -13,7 +14,7 @@ namespace CoreIns.Modules.Finance.Posting;
 /// The slice exposes no API for it: journals sourced from other modules' events are corrected by the source module
 /// (fin.Journal.reverse answers FIN-ERR-SOURCE-OWNED for them, W5-FIN-02).
 /// </summary>
-internal sealed class JournalReversal(FinanceDbContext db, JournalWriter writer)
+internal sealed class JournalReversal(FinanceDbContext db, JournalWriter writer, IEventPublisher events)
 {
     public async Task<Result<WrittenJournal>> ReverseAsync(LegalEntityId legalEntity, Guid journalId, BusinessDate accountingDate, string reason, CancellationToken cancellationToken)
     {
@@ -23,6 +24,11 @@ internal sealed class JournalReversal(FinanceDbContext db, JournalWriter writer)
             return DomainError.Of(ModuleCode.FIN, "NOT-FOUND", "The journal does not exist.");
         }
 
+        if (entry.SourceType == SourceTypes.Reversal)
+        {
+            return DomainError.Of(ModuleCode.FIN, "ALREADY-REVERSED", $"Journal {entry.JournalNumber} is itself a reversal and cannot be reversed (REQ-FIN-073).");
+        }
+
         if (await db.Journals.AnyAsync(j => j.ReversesJournalId == journalId, cancellationToken).ConfigureAwait(false))
         {
             return DomainError.Of(ModuleCode.FIN, "ALREADY-REVERSED", $"Journal {entry.JournalNumber} is already reversed.");
@@ -30,6 +36,8 @@ internal sealed class JournalReversal(FinanceDbContext db, JournalWriter writer)
 
         var draft = new JournalDraft(entry.Book, accountingDate, accountingDate, SourceTypes.Reversal, entry.RuleSetId, entry.RuleSetVersion, entry.RuleCodes, Journals.Reverse(lines));
         var source = new JournalSource(legalEntity, entry.LegalEntityCode, entry.Jurisdiction, entry.SourceModule, entry.SourceEventType, entry.SourceEventIds, entry.SourceRef);
-        return await writer.WriteAsync(draft, source, Currency.FromCode(entry.FunctionalCurrency.Trim()), journalId, reason, cancellationToken).ConfigureAwait(false);
+        var written = await writer.WriteAsync(draft, source, Currency.FromCode(entry.FunctionalCurrency.Trim()), journalId, reason, cancellationToken).ConfigureAwait(false);
+        events.Publish(written.Posted);
+        return written;
     }
 }

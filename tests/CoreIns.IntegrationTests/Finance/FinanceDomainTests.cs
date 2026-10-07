@@ -55,7 +55,7 @@ public sealed class FinanceDomainTests
     }
 
     // Pinned when gr-test.finance.v1 was applied by migration InitialFinance.
-    private const string PinnedV1Hash = "9e67c1e116d547aba3895eff71198c8c056002d98bf86763e4185699460d29b9";
+    private const string PinnedV1Hash = "c2aebbf2b46b1cfce32372c5b6f3a797d7267667973e47e5ff05aff69ac0c4ba";
 
     [Fact]
     public void REQ_FIN_049_the_most_specific_rule_wins_and_ties_or_gaps_are_reported()

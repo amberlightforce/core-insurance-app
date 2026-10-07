@@ -102,7 +102,7 @@ internal sealed class JournalReader(DbSession session)
 
         var lines = (await connection.QueryAsync<LineRecord>(new CommandDefinition(
             """
-            SELECT l.journal_id AS JournalId, l.line_no AS LineNo, l.account_code AS Account, a.name_el AS NameEl, a.name_en AS NameEn, l.side AS Side,
+            SELECT l.journal_id AS JournalId, l.line_no AS LineNo, l.account_code AS Account, a.name_el AS NameEl, a.name_en AS NameEn, a.code_origin AS CodeOrigin, l.side AS Side,
                    l.amount AS Amount, l.currency AS Currency, l.amount_functional AS AmountFunctional, l.functional_currency AS FunctionalCurrency,
                    l.rule_code AS RuleCode, l.product_code AS ProductCode, l.product_version AS ProductVersion, l.coverage_code AS CoverageCode,
                    l.charge_type AS ChargeType, l.charge_category AS ChargeCategory, l.gl_key AS GlKey, l.policy_id AS PolicyId,
@@ -152,6 +152,7 @@ internal sealed class JournalReader(DbSession session)
         LineNo = l.LineNo,
         Account = l.Account,
         AccountName = new FinLocalizedText { El = l.NameEl ?? l.Account, En = l.NameEn ?? l.Account },
+        AccountOrigin = Origin(l.CodeOrigin) ?? FinAccountCodeOrigin.TechnicalPlaceholder,
         Side = l.Side == "DEBIT" ? JournalLineView.SideValue.Debit : JournalLineView.SideValue.Credit,
         Amount = Minor(l.Amount, l.Currency),
         FunctionalAmount = Minor(l.AmountFunctional, l.FunctionalCurrency),
@@ -181,6 +182,14 @@ internal sealed class JournalReader(DbSession session)
         var currency = Currency.FromCode(currencyCode.Trim());
         return new Money(decimal.Round(amount, currency.MinorUnits), currency);
     }
+
+    /// <summary>The chart's code origin (PRD-09 illustrative code or technical placeholder).</summary>
+    internal static FinAccountCodeOrigin? Origin(string? code) => code switch
+    {
+        "PRD09_ILLUSTRATIVE" => FinAccountCodeOrigin.Prd09Illustrative,
+        "TECHNICAL_PLACEHOLDER" => FinAccountCodeOrigin.TechnicalPlaceholder,
+        _ => null,
+    };
 
     private static string EncodeCursor(string date, string number) =>
         Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{date}|{number}"));
@@ -257,6 +266,8 @@ internal sealed class JournalReader(DbSession session)
         public string? NameEl { get; set; }
 
         public string? NameEn { get; set; }
+
+        public string? CodeOrigin { get; set; }
 
         public string Side { get; set; } = string.Empty;
 

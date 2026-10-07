@@ -27,8 +27,9 @@ internal sealed class PostingRuleReader(DbSession session)
             SELECT s.rule_set_id AS RuleSetId, s.version_no AS VersionNo, s.status AS Status, s.legal_entity_code AS LegalEntityCode, s.book AS Book,
                    s.effective_from::text AS EffectiveFrom, trim(s.content_hash) AS ContentHash, r.rule_code AS RuleCode, r.source_event AS SourceEvent,
                    r.entry_type AS EntryType, r.source_account AS SourceAccount, r.charge_category AS ChargeCategory, r.charge_type AS ChargeType,
-                   r.specificity AS Specificity, r.account_code AS Account, r.derive_from AS DeriveFrom, r.description_el AS DescriptionEl, r.description_en AS DescriptionEn
+                   r.specificity AS Specificity, r.account_code AS Account, r.derive_from AS DeriveFrom, a.code_origin AS CodeOrigin, r.description_el AS DescriptionEl, r.description_en AS DescriptionEn
               FROM in_force s JOIN fin.posting_rule r ON r.rule_set_id = s.rule_set_id
+              LEFT JOIN fin.gl_account a ON a.legal_entity_code = s.legal_entity_code AND a.book = s.book AND a.account_code = r.account_code
              ORDER BY s.book, r.source_event, r.entry_type, r.source_account, r.specificity DESC, r.rule_code
             OFFSET @offset LIMIT @take
             """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
@@ -59,6 +60,7 @@ internal sealed class PostingRuleReader(DbSession session)
                 ChargeType = r.ChargeType,
                 Specificity = r.Specificity,
                 Account = r.Account,
+                AccountOrigin = JournalReader.Origin(r.CodeOrigin),
                 DeriveFrom = r.DeriveFrom is null ? null : PostingRulesListItem.DeriveFromValue.GlKey,
                 Description = new FinLocalizedText { El = r.DescriptionEl, En = r.DescriptionEn },
             })],
@@ -100,6 +102,8 @@ internal sealed class PostingRuleReader(DbSession session)
         public string? Account { get; set; }
 
         public string? DeriveFrom { get; set; }
+
+        public string? CodeOrigin { get; set; }
 
         public string DescriptionEl { get; set; } = string.Empty;
 

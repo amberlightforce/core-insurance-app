@@ -117,6 +117,7 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
         // Account balances after the whole path: premium and IPT stay, receivables and clearing net to zero, cash in bank.
         (await NetAsync(policy, "GL-2110")).ShouldBe(-400.00m);
         (await NetAsync(policy, "GL-2410")).ShouldBe(-60.00m);
+        (await ScalarAsync<string>(_db, $"SELECT gl_key FROM fin.journal_line WHERE policy_number = '{policy.Number}' AND account_code = 'GL-2410'")).ShouldBe("TAX-IPT");
         (await NetAsync(policy, "GL-2411")).ShouldBe(0m);
         (await NetAsync(policy, "GL-1215")).ShouldBe(0m);
         (await NetAsync(policy, "GL-1210")).ShouldBe(0m);
@@ -160,6 +161,7 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
         first["totals"]![0]!.Text("amount").ShouldBe(first["lines"]![0]!["amount"]!.Text("amount"));
         var premiumLine = page["items"]!.AsArray().SelectMany(i => i!["journal"]!["lines"]!.AsArray()).First(l => l!.Text("account") == "GL-2110")!;
         premiumLine.Text("accountName.el").ShouldBe("ΥΕΚ εκτός συνιστώσας ζημίας");
+        premiumLine.Text("accountOrigin").ShouldBe("PRD09_ILLUSTRATIVE");
         premiumLine.Text("dimensions.policyNumber").ShouldBe(policy.Number);
         premiumLine.Text("amount.amount").ShouldBe("240.00");
 
@@ -188,6 +190,54 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
             .ShouldBe("POSTED/1");
         (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_line WHERE policy_number = '{policy.Number}'")).ShouldBe(2);
         (await ScalarAsync<string>(_db, $"SELECT status FROM fin.business_event WHERE event_type = 'PolicyBound' AND policy_id = '{policy.PolicyId}'")).ShouldBe("NO_POSTING");
+    }
+
+    [Fact]
+    public async Task REQ_FIN_040_a_released_entry_that_fails_is_suspended_alone_and_the_policy_context_still_commits()
+    {
+        var policy = NewPolicy();
+        var account = Guid.CreateVersion7();
+        var failing = await _slice.EntryAsync(account, "WRITTEN", Day,
+            Line("LA-01", "DEBIT", "13.13", policy, account, "PREM-MTPL", "PREMIUM", "MTPL"),
+            Line("LA-04", "CREDIT", "13.13", policy, account, "PREM-MTPL", "PREMIUM", "MTPL"));
+        var healthy = await _slice.EntryAsync(account, "WRITTEN", Day,
+            Line("LA-01", "DEBIT", "160.00", policy, account, "PREM-OD", "PREMIUM", "OWN-DAMAGE"),
+            Line("LA-04", "CREDIT", "160.00", policy, account, "PREM-OD", "PREMIUM", "OWN-DAMAGE"));
+        await _slice.DrainAsync();
+
+        // An injected database failure for one of the two waiting entries (test-only trigger, dropped afterwards).
+        await database.ExecuteAsSuperuserAsync("""
+            CREATE OR REPLACE FUNCTION fin.test_injected_failure() RETURNS trigger LANGUAGE plpgsql AS $$
+            BEGIN IF NEW.amount = 13.13 THEN RAISE EXCEPTION 'injected failure'; END IF; RETURN NEW; END $$;
+            CREATE TRIGGER trg_test_injected_failure BEFORE INSERT ON fin.journal_line FOR EACH ROW EXECUTE FUNCTION fin.test_injected_failure();
+            """, TestContext.Current.CancellationToken);
+        try
+        {
+            await _slice.PolicyBoundAsync(policy);
+            await _slice.DrainAsync();
+        }
+        finally
+        {
+            await database.ExecuteAsSuperuserAsync(
+                "DROP TRIGGER trg_test_injected_failure ON fin.journal_line; DROP FUNCTION fin.test_injected_failure();", TestContext.Current.CancellationToken);
+        }
+
+        (await ScalarAsync<string>(_db, $"SELECT status || '/' || exception_reason FROM fin.business_event WHERE source_event_id = '{failing.EventId.Value}'"))
+            .ShouldBe("SUSPENDED/POSTING_ERROR");
+        (await ScalarAsync<string>(_db, $"SELECT status FROM fin.business_event WHERE source_event_id = '{healthy.EventId.Value}'")).ShouldBe("POSTED");
+        (await ScalarAsync<string>(_db, $"SELECT status FROM fin.business_event WHERE event_type = 'PolicyBound' AND policy_id = '{policy.PolicyId}'")).ShouldBe("NO_POSTING");
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.policy_context WHERE policy_term_id = '{policy.TermId}'")).ShouldBe(1);
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_line WHERE policy_number = '{policy.Number}'")).ShouldBe(2);
+
+        // No JournalPosted for the rolled-back attempt: one event per journal that exists.
+        (await ScalarAsync<long>(_db, $"""
+            SELECT count(*) FROM plt.event_archive e WHERE e.event_type = 'JournalPosted'
+               AND NOT EXISTS (SELECT 1 FROM fin.journal_entry j WHERE j.journal_id = (e.business_keys->>'journalId')::uuid)
+            """)).ShouldBe(0);
+        (await ScalarAsync<long>(_db, $"""
+            SELECT count(*) FROM plt.event_archive WHERE event_type = 'BusinessEventSuspended'
+               AND business_keys->>'businessEventId' = (SELECT business_event_id::text FROM fin.business_event WHERE source_event_id = '{failing.EventId.Value}')
+            """)).ShouldBe(1);
     }
 
     [Fact]
@@ -269,7 +319,7 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
         var (response, body) = await PartyApi.SendAsync(_client, HttpMethod.Get, $"/api/fin/v1/posting-rules?book=IFRS17&validAt={Day}&limit=200", roles: FinanceRole);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         var items = body!["items"]!.AsArray();
-        items.Count.ShouldBe(14);
+        items.Count.ShouldBe(16);
         var premium = items.Single(i => i.Text("ruleCode") == "WR-PREMIUM")!;
         premium.Text("entryType").ShouldBe("WRITTEN");
         premium.Text("sourceAccount").ShouldBe("LA-04");
@@ -278,7 +328,12 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
         premium.Text("specificity").ShouldBe("1");
         premium.Text("ruleSetVersion").ShouldBe("1");
         premium.Text("contentHash").ShouldMatch("^[0-9a-f]{64}$");
-        items.Single(i => i.Text("ruleCode") == "RC-CASH")!.Text("account").ShouldBe("GL-1110");
+        premium.Text("accountOrigin").ShouldBe("null");
+        var cash = items.Single(i => i.Text("ruleCode") == "RC-CASH")!;
+        cash.Text("account").ShouldBe("GL-1110");
+        cash.Text("accountOrigin").ShouldBe("PRD09_ILLUSTRATIVE");
+        items.Single(i => i.Text("ruleCode") == "RC-UNALLOCATED")!.Text("accountOrigin").ShouldBe("TECHNICAL_PLACEHOLDER");
+        items.Single(i => i.Text("ruleCode") == "ID-PAYABLE")!.Text("deriveFrom").ShouldBe("GL_KEY");
 
         var (before, empty) = await PartyApi.SendAsync(_client, HttpMethod.Get, "/api/fin/v1/posting-rules?validAt=2025-12-31", roles: FinanceRole);
         before.StatusCode.ShouldBe(HttpStatusCode.OK);

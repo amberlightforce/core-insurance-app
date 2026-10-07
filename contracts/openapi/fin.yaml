@@ -6225,6 +6225,8 @@ components:
           $ref: ../events/common.schema.json#/$defs/Code
         accountName:
           $ref: '#/components/schemas/FinLocalizedText'
+        accountOrigin:
+          $ref: '#/components/schemas/FinAccountCodeOrigin'
         side:
           type: string
           enum:
@@ -6242,6 +6244,7 @@ components:
       - lineNo
       - account
       - accountName
+      - accountOrigin
       - side
       - amount
       - functionalAmount
@@ -6307,6 +6310,12 @@ components:
           oneOf:
           - $ref: ../events/common.schema.json#/$defs/Uuid
           - type: 'null'
+    FinAccountCodeOrigin:
+      type: string
+      description: 'Where an account code comes from: PRD09_ILLUSTRATIVE (illustrative code of the PRD-09 §7.1.4 reference chart) or TECHNICAL_PLACEHOLDER (not in the PRD). Neither is the Greek statutory chart (OI-FIN-11).'
+      enum:
+      - PRD09_ILLUSTRATIVE
+      - TECHNICAL_PLACEHOLDER
     FinLocalizedText:
       type: object
       description: Greek and English text (NFR-FIN-016)
@@ -6401,6 +6410,11 @@ components:
           description: Fixed book account; null when derived
           oneOf:
           - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        accountOrigin:
+          description: Origin of the fixed account's code; null when derived
+          oneOf:
+          - $ref: '#/components/schemas/FinAccountCodeOrigin'
           - type: 'null'
         deriveFrom:
           description: Account derivation source (REQ-FIN-050); null when the account is fixed

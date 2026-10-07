@@ -20,20 +20,20 @@ internal sealed record JournalSource(
     LegalEntityId LegalEntityId, string LegalEntityCode, string Jurisdiction, string SourceModule, string SourceEventType,
     IReadOnlyList<Guid> SourceEventIds, string SourceRef);
 
-/// <summary>A journal as written.</summary>
-internal sealed record WrittenJournal(Guid JournalId, string JournalNumber);
+/// <summary>A journal as written, with its <c>JournalPosted</c> event (the caller publishes it once its unit of work cannot fail any more).</summary>
+internal sealed record WrittenJournal(Guid JournalId, string JournalNumber, OutgoingEvent Posted);
 
 /// <summary>
 /// Writes journals (REQ-FIN-067): checks the double-entry invariant in code (the deferred database constraint checks it
 /// again at commit, REQ-FIN-068), takes a gapless journal number from PLT inside the transaction (REQ-FIN-069), assigns
-/// the calendar-month period, inserts header and lines (append-only, REQ-FIN-070) and publishes <c>JournalPosted</c>
+/// the calendar-month period, inserts header and lines (append-only, REQ-FIN-070), runs the database balance check at
+/// once (so a failure surfaces inside the caller's savepoint), and returns <c>JournalPosted</c> for the caller to publish
 /// through the outbox in the same transaction (REQ-FIN-085).
 /// </summary>
 internal sealed class JournalWriter(
     FinanceDbContext db,
     DbSession session,
     INumberingService numbering,
-    IEventPublisher events,
     RequestContext context,
     IClock clock)
 {
@@ -113,8 +113,10 @@ internal sealed class JournalWriter(
 
         // Insert now: the header must exist before a later journal of this transaction reverses it, and the caller reads its own writes.
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        await connection.ExecuteAsync(new CommandDefinition(FinanceSql.CheckBalanceNow, transaction: session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
 
-        events.Publish(new OutgoingEvent(
+        var posted = new OutgoingEvent(
             EventDescriptor.From(JournalPostedV1.Descriptor), "LegalEntity", source.LegalEntityCode,
             new JournalPostedV1
             {
@@ -126,9 +128,9 @@ internal sealed class JournalWriter(
                 SourceRefs = [source.SourceRef, .. source.SourceEventIds.Select(id => id.ToString("D"))],
                 TotalsPerCurrency = draft.Totals,
             },
-            BusinessKeys.Empty.With("journalId", journalId.ToString("D")).With("periodId", periodId.ToString("D"))));
+            BusinessKeys.Empty.With("journalId", journalId.ToString("D")).With("periodId", periodId.ToString("D")));
 
-        return new WrittenJournal(journalId, number.Value);
+        return new WrittenJournal(journalId, number.Value, posted);
     }
 
     private async Task<Guid> PeriodAsync(LegalEntityId legalEntity, string periodCode, Instant now, CancellationToken cancellationToken)

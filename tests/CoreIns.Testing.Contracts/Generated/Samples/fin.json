@@ -494,6 +494,7 @@
               "el": "Sample text",
               "en": "Sample text"
             },
+            "accountOrigin": "PRD09_ILLUSTRATIVE",
             "side": "DEBIT",
             "amount": {
               "amount": "120.50",
@@ -547,6 +548,7 @@
         "el": "Sample text",
         "en": "Sample text"
       },
+      "accountOrigin": "PRD09_ILLUSTRATIVE",
       "side": "DEBIT",
       "amount": {
         "amount": "120.50",
@@ -613,6 +615,7 @@
               "el": "Sample text",
               "en": "Sample text"
             },
+            "accountOrigin": "PRD09_ILLUSTRATIVE",
             "side": "DEBIT",
             "amount": {
               "amount": "120.50",
@@ -684,6 +687,7 @@
                   "el": "Sample text",
                   "en": "Sample text"
                 },
+                "accountOrigin": "PRD09_ILLUSTRATIVE",
                 "side": "DEBIT",
                 "amount": {
                   "amount": "120.50",
@@ -764,6 +768,7 @@
             "el": "Sample text",
             "en": "Sample text"
           },
+          "accountOrigin": "PRD09_ILLUSTRATIVE",
           "side": "DEBIT",
           "amount": {
             "amount": "120.50",
@@ -990,6 +995,7 @@
       "chargeType": "SAMPLE_CODE",
       "specificity": 1,
       "account": "SAMPLE_CODE",
+      "accountOrigin": "PRD09_ILLUSTRATIVE",
       "deriveFrom": "GL_KEY",
       "description": {
         "el": "Sample text",
@@ -1014,6 +1020,7 @@
           "chargeType": "SAMPLE_CODE",
           "specificity": 1,
           "account": "SAMPLE_CODE",
+          "accountOrigin": "PRD09_ILLUSTRATIVE",
           "deriveFrom": "GL_KEY",
           "description": {
             "el": "Sample text",

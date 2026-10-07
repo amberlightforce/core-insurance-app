@@ -52,7 +52,12 @@ public sealed class FinanceDatabaseTests(PostgresFixture database) : IClassFixtu
         return await ScalarAsync<Guid>(_super, $"SELECT DISTINCT journal_id FROM fin.journal_line WHERE receipt_id = '{receipt}'");
     }
 
-    private async Task<PostgresException> InsertJournalAsAppAsync(params (string Side, decimal Amount)[] lines)
+    /// <summary>A journal number in the format of the PLT JOURNAL series that the series will not issue in these tests.</summary>
+    private static string FreeNumber() => "JNL2026" + Random.Shared.NextInt64(9_000_000_000, 9_999_999_999).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    private async Task<PostgresException> InsertJournalAsAppAsync(params (string Side, decimal Amount)[] lines) => await InsertJournalAsAppAsync(FreeNumber(), lines);
+
+    private async Task<PostgresException> InsertJournalAsAppAsync(string number, params (string Side, decimal Amount)[] lines)
     {
         var ruleSet = await ScalarAsync<Guid>(_super, "SELECT rule_set_id FROM fin.posting_rule_set WHERE version_no = 1");
         var period = await ScalarAsync<Guid>(_super, "SELECT period_id FROM fin.financial_period LIMIT 1");
@@ -62,7 +67,7 @@ public sealed class FinanceDatabaseTests(PostgresFixture database) : IClassFixtu
             INSERT INTO fin.journal_entry (journal_id, journal_number, legal_entity_id, legal_entity_code, jurisdiction, book, accounting_date, business_date,
                 period_id, source_type, source_module, source_event_type, source_event_ids, source_ref, rule_set_id, rule_set_version, rule_codes,
                 functional_currency, correlation_id, posted_at, posted_by)
-            VALUES ('{journal}', 'TEST-{journal:N}', '{ApiHostFactory.LegalEntityId}', 'GR-TEST', 'GR', 'IFRS17', DATE '2026-11-03', DATE '2026-11-03',
+            VALUES ('{journal}', '{number}', '{ApiHostFactory.LegalEntityId}', 'GR-TEST', 'GR', 'IFRS17', DATE '2026-11-03', DATE '2026-11-03',
                 '{period}', 'EVENT', 'BIL', 'BillingEntryPosted', ARRAY[]::uuid[], 'raw', '{ruleSet}', 1, ARRAY['RAW'], 'EUR', 'x', now(), 'test');
             """;
         var no = 0;
@@ -88,6 +93,39 @@ public sealed class FinanceDatabaseTests(PostgresFixture database) : IClassFixtu
         (await InsertJournalAsAppAsync(("DEBIT", 10m), ("CREDIT", 9.99m))).SqlState.ShouldBe(PostgresErrorCodes.CheckViolation);
         (await InsertJournalAsAppAsync(("DEBIT", 10m))).SqlState.ShouldBe(PostgresErrorCodes.CheckViolation);
         (await ScalarAsync<long>(_super, "SELECT count(*) FROM fin.journal_entry WHERE source_ref = 'raw'")).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task REQ_FIN_069_a_journal_number_outside_the_PLT_JOURNAL_series_format_is_refused()
+    {
+        await PostReceiptAsync();
+        (await InsertJournalAsAppAsync("ANY-NUMBER-1", ("DEBIT", 10m), ("CREDIT", 10m))).SqlState.ShouldBe(PostgresErrorCodes.CheckViolation);
+        (await InsertJournalAsAppAsync("JNL20250000000001", ("DEBIT", 10m), ("CREDIT", 10m))).SqlState.ShouldBe(PostgresErrorCodes.CheckViolation, "year must be the accounting year");
+        (await ScalarAsync<long>(_super, "SELECT count(*) FROM fin.journal_entry WHERE source_ref = 'raw'")).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task REQ_FIN_002_070_M1_lines_cannot_be_added_to_a_posted_journal_by_any_role()
+    {
+        var journal = await PostReceiptAsync("21.00");
+        string Append(string side) => $"""
+            INSERT INTO fin.journal_line (line_id, journal_id, line_no, legal_entity_id, book, account_code, side, amount, currency, amount_functional,
+                functional_currency, rule_code, business_date)
+            VALUES (gen_random_uuid(), '{journal}', (SELECT max(line_no) + 1 + floor(random() * 1000)::int FROM fin.journal_line WHERE journal_id = '{journal}'),
+                '{ApiHostFactory.LegalEntityId}', 'IFRS17', 'GL-1110', '{side}', 5, 'EUR', 5, 'EUR', 'RAW', DATE '2026-11-03');
+            """;
+        var balancedAppend = "BEGIN;" + Append("DEBIT") + Append("CREDIT") + "COMMIT;";
+
+        await using (var connection = await _app.OpenConnectionAsync(TestContext.Current.CancellationToken))
+        await using (var command = new NpgsqlCommand(balancedAppend, connection))
+        {
+            (await Should.ThrowAsync<PostgresException>(() => command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken))).SqlState
+                .ShouldBe(PostgresErrorCodes.ObjectNotInPrerequisiteState);
+        }
+
+        (await Should.ThrowAsync<PostgresException>(() => database.ExecuteAsSuperuserAsync(balancedAppend, TestContext.Current.CancellationToken))).SqlState
+            .ShouldBe(PostgresErrorCodes.ObjectNotInPrerequisiteState);
+        (await ScalarAsync<string>(_super, $"SELECT count(*) || '/' || sum(amount) FROM fin.journal_line WHERE journal_id = '{journal}'")).ShouldBe("2/42.0000");
     }
 
     [Fact]
@@ -150,12 +188,35 @@ public sealed class FinanceDatabaseTests(PostgresFixture database) : IClassFixtu
             """)).ShouldBe("GL-1110:CREDIT:33.3000,GL-2540:DEBIT:33.3000");
         (await ScalarAsync<long>(_super, $"SELECT count(*) FROM fin.journal_entry WHERE reverses_journal_id = '{journal}'")).ShouldBe(1);
 
+        // A reversal is never reversed (REQ-FIN-073): refused in code and by the database.
+        var reversalId = await ScalarAsync<Guid>(_super, $"SELECT journal_id FROM fin.journal_entry WHERE reverses_journal_id = '{journal}'");
+        await using (var scope = Scope(out var services))
+        {
+            var session = services.GetRequiredService<DbSession>();
+            await using var transaction = await session.BeginTransactionAsync(TestContext.Current.CancellationToken);
+            var refused = await services.GetRequiredService<JournalReversal>().ReverseAsync(
+                new LegalEntityId(Guid.Parse(ApiHostFactory.LegalEntityId)), reversalId, new BusinessDate(2026, 11, 5), "reverse the reversal", TestContext.Current.CancellationToken);
+            refused.IsFailure.ShouldBeTrue();
+            refused.Error.Code.Value.ShouldBe("FIN-ERR-ALREADY-REVERSED");
+            await transaction.RollbackAsync(TestContext.Current.CancellationToken);
+        }
+
+        (await Should.ThrowAsync<PostgresException>(() => database.ExecuteAsSuperuserAsync($"""
+            INSERT INTO fin.journal_entry (journal_id, journal_number, legal_entity_id, legal_entity_code, jurisdiction, book, accounting_date,
+                business_date, period_id, source_type, source_module, source_event_type, source_event_ids, source_ref, rule_set_id, rule_set_version,
+                rule_codes, reverses_journal_id, reason, functional_currency, correlation_id, posted_at, posted_by)
+            SELECT gen_random_uuid(), '{FreeNumber()}', legal_entity_id, legal_entity_code, jurisdiction, book, accounting_date,
+                business_date, period_id, 'REVERSAL', source_module, source_event_type, source_event_ids, source_ref, rule_set_id, rule_set_version,
+                rule_codes, '{reversalId}', 'reverse a reversal', functional_currency, correlation_id, posted_at, posted_by
+              FROM fin.journal_entry WHERE journal_id = '{reversalId}'
+            """, TestContext.Current.CancellationToken))).SqlState.ShouldBe(PostgresErrorCodes.CheckViolation);
+
         // The unique index stops a second reversal even past the code check.
         var error = await Should.ThrowAsync<PostgresException>(() => database.ExecuteAsSuperuserAsync($"""
             INSERT INTO fin.journal_entry (journal_id, journal_number, legal_entity_id, legal_entity_code, jurisdiction, book, accounting_date,
                 business_date, period_id, source_type, source_module, source_event_type, source_event_ids, source_ref, rule_set_id, rule_set_version,
                 rule_codes, reverses_journal_id, reason, functional_currency, correlation_id, posted_at, posted_by)
-            SELECT gen_random_uuid(), 'DUP-1', legal_entity_id, legal_entity_code, jurisdiction, book, accounting_date,
+            SELECT gen_random_uuid(), '{FreeNumber()}', legal_entity_id, legal_entity_code, jurisdiction, book, accounting_date,
                 business_date, period_id, 'REVERSAL', source_module, source_event_type, source_event_ids, source_ref, rule_set_id, rule_set_version,
                 rule_codes, '{journal}', 'dup', functional_currency, correlation_id, posted_at, posted_by
               FROM fin.journal_entry WHERE journal_id = '{journal}'

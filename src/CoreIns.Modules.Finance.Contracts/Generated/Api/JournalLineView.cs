@@ -20,6 +20,10 @@ public sealed record JournalLineView
     [global::System.Text.Json.Serialization.JsonPropertyName("accountName")]
     public required global::CoreIns.Modules.Finance.Contracts.Api.FinLocalizedText AccountName { get; init; }
 
+    /// <summary>Contract member 'accountOrigin'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accountOrigin")]
+    public required global::CoreIns.Modules.Finance.Contracts.Api.FinAccountCodeOrigin AccountOrigin { get; init; }
+
     /// <summary>Contract member 'side'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("side")]
     public required SideValue Side { get; init; }

@@ -70,14 +70,77 @@ internal static class FinanceSql
         CREATE TRIGGER trg_posting_rule_append_only BEFORE UPDATE OR DELETE ON fin.posting_rule
             FOR EACH ROW EXECUTE FUNCTION fin.forbid_change();
 
+        -- REQ-FIN-002, -070: a line may only join a journal whose header this transaction (or one of its
+        -- subtransactions) inserted, so a posted journal can never gain lines. A visible header whose inserting
+        -- transaction is still in progress can only be our own (other transactions' uncommitted rows are invisible).
+        CREATE FUNCTION fin.check_line_joins_open_journal() RETURNS trigger LANGUAGE plpgsql AS $$
+        DECLARE
+            header_xmin bigint;
+            top_xid bigint := pg_current_xact_id()::text::bigint;
+            full_xid bigint;
+            xact_status text;
+        BEGIN
+            SELECT xmin::text::bigint INTO header_xmin FROM fin.journal_entry WHERE journal_id = NEW.journal_id;
+            IF header_xmin IS NOT NULL THEN
+                -- Widen the 32-bit xmin to the 64-bit id nearest our own (live xids are within 2^31 of each other;
+                -- our subtransactions' xids are just above our top-level id).
+                full_xid := ((top_xid >> 32) << 32) + header_xmin;
+                IF full_xid > top_xid + 2147483648 THEN
+                    full_xid := full_xid - 4294967296;
+                ELSIF full_xid < top_xid - 2147483648 THEN
+                    full_xid := full_xid + 4294967296;
+                END IF;
+                IF full_xid >= 3 THEN
+                    xact_status := pg_xact_status(full_xid::text::xid8);
+                END IF;
+            END IF;
+            IF xact_status IS DISTINCT FROM 'in progress' THEN
+                RAISE EXCEPTION 'FIN: journal % is posted or unknown; lines can only be added in the transaction that posts it (REQ-FIN-070)', NEW.journal_id
+                    USING ERRCODE = '55000';
+            END IF;
+            RETURN NEW;
+        END $$;
+
+        CREATE TRIGGER trg_journal_line_open_journal BEFORE INSERT ON fin.journal_line
+            FOR EACH ROW EXECUTE FUNCTION fin.check_line_joins_open_journal();
+
+        -- REQ-FIN-073: only an original journal can be reversed; a reversal is never reversed.
+        CREATE FUNCTION fin.check_reversal_target() RETURNS trigger LANGUAGE plpgsql AS $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM fin.journal_entry WHERE journal_id = NEW.reverses_journal_id AND source_type = 'REVERSAL') THEN
+                RAISE EXCEPTION 'FIN-ERR-ALREADY-REVERSED: journal % is itself a reversal and cannot be reversed', NEW.reverses_journal_id
+                    USING ERRCODE = '23514';
+            END IF;
+            RETURN NEW;
+        END $$;
+
+        CREATE TRIGGER trg_journal_entry_reversal_target BEFORE INSERT ON fin.journal_entry
+            FOR EACH ROW WHEN (NEW.reverses_journal_id IS NOT NULL) EXECUTE FUNCTION fin.check_reversal_target();
+
+        -- REQ-FIN-069: journal numbers follow the PLT JOURNAL series (Platform:Numbering, technical default D-SLC-08:
+        -- prefix JNL, yearly reset on the accounting date, 10 digits). Changing that series needs a new migration.
+        ALTER TABLE fin.journal_entry ADD CONSTRAINT ck_journal_entry_number
+            CHECK (journal_number ~ '^JNL[0-9]{14}$' AND substr(journal_number, 4, 4) = extract(year FROM accounting_date)::int::text);
+
         -- REQ-FIN-049: one rule per key and qualifier combination within a rule-set version.
         CREATE UNIQUE INDEX ux_posting_rule_key ON fin.posting_rule
             (rule_set_id, source_event, entry_type, source_account, coalesce(charge_category, ''), coalesce(charge_type, ''));
         """;
 
+    /// <summary>Runs the deferred balance checks of the journals written so far now (inside the caller's savepoint), then defers them again.</summary>
+    public const string CheckBalanceNow = """
+        SET CONSTRAINTS fin.trg_journal_line_balanced, fin.trg_journal_entry_balanced IMMEDIATE;
+        SET CONSTRAINTS fin.trg_journal_line_balanced, fin.trg_journal_entry_balanced DEFERRED;
+        """;
+
     /// <summary>Drops what <see cref="Objects"/> created (migration Down).</summary>
     public const string DropObjects = """
         DROP INDEX IF EXISTS fin.ux_posting_rule_key;
+        ALTER TABLE fin.journal_entry DROP CONSTRAINT IF EXISTS ck_journal_entry_number;
+        DROP TRIGGER IF EXISTS trg_journal_entry_reversal_target ON fin.journal_entry;
+        DROP TRIGGER IF EXISTS trg_journal_line_open_journal ON fin.journal_line;
+        DROP FUNCTION IF EXISTS fin.check_reversal_target();
+        DROP FUNCTION IF EXISTS fin.check_line_joins_open_journal();
         DROP TRIGGER IF EXISTS trg_posting_rule_append_only ON fin.posting_rule;
         DROP TRIGGER IF EXISTS trg_journal_line_no_truncate ON fin.journal_line;
         DROP TRIGGER IF EXISTS trg_journal_line_append_only ON fin.journal_line;

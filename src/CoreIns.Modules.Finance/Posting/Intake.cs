@@ -5,6 +5,7 @@ using CoreIns.Modules.Finance.Domain;
 using CoreIns.Modules.Finance.Persistence;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Persistence;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
@@ -36,6 +37,7 @@ internal sealed partial class Intake(
     JournalWriter writer,
     ILegalEntityDirectory legalEntities,
     IEventPublisher events,
+    DbSession session,
     IClock clock,
     ILogger<Intake> logger)
 {
@@ -199,17 +201,23 @@ internal sealed partial class Intake(
         }
 
         var source = new JournalSource(legalEntity, row.LegalEntityCode, row.Jurisdiction, row.SourceModule, row.EventType, [row.SourceEventId], entry.EntryId.ToString("D"));
-        var journals = new List<Guid>();
+        var written = new List<WrittenJournal>();
         foreach (var (draft, functional) in drafts)
         {
-            journals.Add((await writer.WriteAsync(draft, source, functional, null, null, cancellationToken).ConfigureAwait(false)).JournalId);
+            written.Add(await writer.WriteAsync(draft, source, functional, null, null, cancellationToken).ConfigureAwait(false));
         }
 
         row.Status = BusinessEventStatus.Posted;
         row.WaitingOn = null;
-        row.JournalIds = [.. journals];
+        row.JournalIds = [.. written.Select(w => w.JournalId)];
         Touch(row);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        // Last step: nothing after this can fail, so a rolled-back savepoint never leaves an event for a journal that does not exist.
+        foreach (var journal in written)
+        {
+            events.Publish(journal.Posted);
+        }
     }
 
     /// <summary>Re-attempts every event waiting on one of <paramref name="dependencies"/> (REQ-FIN-040: "dependency arrived").</summary>
@@ -220,16 +228,35 @@ internal sealed partial class Intake(
             await reference.LockAsync(dependency, cancellationToken).ConfigureAwait(false);
         }
 
-        var waiting = await db.BusinessEvents
+        var waiting = await db.BusinessEvents.AsNoTracking()
             .Where(b => b.Status == BusinessEventStatus.Waiting && b.WaitingOn != null && dependencies.Contains(b.WaitingOn))
             .OrderBy(b => b.ReceivedAt).ThenBy(b => b.AggregateSequence)
+            .Select(b => b.BusinessEventId)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
-        foreach (var row in waiting)
+        var transaction = session.Transaction ?? throw new InvalidOperationException("Release runs inside the handler's transaction.");
+        foreach (var id in waiting)
         {
-            row.Status = BusinessEventStatus.Received;
-            row.WaitingOn = null;
-            row.Attempts++;
-            await PostAsync(row, cancellationToken).ConfigureAwait(false);
+            // Each released entry is isolated: a failure rolls back only its own work and suspends it, so the context
+            // event that released it still commits and no other waiting entry is stranded.
+            var savepoint = "fin_release_" + id.ToString("N");
+            await transaction.SaveAsync(savepoint, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var row = await db.BusinessEvents.SingleAsync(b => b.BusinessEventId == id, cancellationToken).ConfigureAwait(false);
+                row.Status = BusinessEventStatus.Received;
+                row.WaitingOn = null;
+                row.Attempts++;
+                await PostAsync(row, cancellationToken).ConfigureAwait(false);
+                await transaction.ReleaseAsync(savepoint, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                await transaction.RollbackAsync(savepoint, cancellationToken).ConfigureAwait(false);
+                db.ChangeTracker.Clear();
+                var row = await db.BusinessEvents.SingleAsync(b => b.BusinessEventId == id, cancellationToken).ConfigureAwait(false);
+                row.Attempts++;
+                await SuspendAsync(row, ExceptionReasons.PostingError, $"{ex.GetType().Name}: {ex.GetBaseException().Message}", TryNormalise(row.Payload), cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 
@@ -242,6 +269,18 @@ internal sealed partial class Intake(
         payload.AccountingDate,
         payload.BusinessDate,
         [.. payload.Lines.Select(l => new SourceLine(l.Account, l.Side.ToString().ToUpperInvariant(), l.Amount, Dimensions(l.Dimensions)))]);
+
+    private static SourceEntry? TryNormalise(string payload)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<BillingEntryPostedV1>(payload, SharedKernelJson.Options) is { } entry ? Normalise(entry) : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
 
     private static Dictionary<string, string?> Dimensions(JsonElement element)
     {
@@ -273,6 +312,8 @@ internal sealed partial class Intake(
         Touch(row);
         LogSuspended(logger, row.RegistryName, row.SourceEventId, reason);
 
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
         // BusinessEventSuspended (contract event, R-47) needs an amount; publish it when the fact carries one.
         var amount = entry?.Lines.Where(l => l.Side == Sides.Debit).Select(l => l.Amount).GroupBy(m => m.Currency)
             .Select(g => Money.Sum(g, g.Key)).FirstOrDefault();
@@ -287,8 +328,6 @@ internal sealed partial class Intake(
                 Jurisdiction = jurisdiction,
             });
         }
-
-        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private void Touch(BusinessEventRow row)

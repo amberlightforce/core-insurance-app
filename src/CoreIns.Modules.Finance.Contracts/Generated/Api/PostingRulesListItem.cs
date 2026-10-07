@@ -71,6 +71,10 @@ public sealed record PostingRulesListItem
     [global::System.Text.Json.Serialization.JsonPropertyName("account")]
     public string? Account { get; init; }
 
+    /// <summary>Origin of the fixed account's code; null when derived</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accountOrigin")]
+    public global::CoreIns.Modules.Finance.Contracts.Api.FinAccountCodeOrigin? AccountOrigin { get; init; }
+
     /// <summary>Account derivation source (REQ-FIN-050); null when the account is fixed</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("deriveFrom")]
     public DeriveFromValue? DeriveFrom { get; init; }

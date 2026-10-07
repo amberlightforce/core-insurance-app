@@ -41,6 +41,7 @@ internal static class ExceptionReasons
     public const string Precision = "PRECISION";
     public const string Unbalanced = "UNBALANCED";
     public const string Empty = "EMPTY";
+    public const string PostingError = "POSTING_ERROR";
 }
 
 /// <summary>Journal-line side.</summary>
