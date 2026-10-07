@@ -90,16 +90,18 @@ public sealed record PolicyBoundV1 : global::CoreIns.Platform.Contracts.Events.I
     [global::System.Text.Json.Serialization.JsonPropertyName("configurationHash")]
     public required global::CoreIns.SharedKernel.Identifiers.ConfigurationHash ConfigurationHash { get; init; }
 
-    /// <summary>Producer code of record</summary>
+    /// <summary>Producer code of record; absent for direct business</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("producerOfRecord")]
-    public required string ProducerOfRecord { get; init; }
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProducerOfRecord { get; init; }
 
-    /// <summary>Contract member 'accountId'.</summary>
+    /// <summary>PTY account; absent until pty.Account exists (SL-POL, pre-release)</summary>
     /// <remarks>
     /// <para>Personal data, class P1 (x-classification).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("accountId")]
-    public required global::CoreIns.SharedKernel.Identifiers.AccountId AccountId { get; init; }
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.AccountId? AccountId { get; init; }
 
     /// <summary>Contract member 'payerPartyId'.</summary>
     /// <remarks>

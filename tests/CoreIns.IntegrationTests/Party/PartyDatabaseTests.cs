@@ -13,6 +13,7 @@ public sealed class PartyDatabaseTests(PostgresFixture database) : IClassFixture
     {
         ModuleCatalog.Databases.Select(d => d.Schema).ShouldContain("pty");
         ModuleCatalog.Databases.Select(d => d.Schema).ShouldContain("plt");
+        ModuleCatalog.Databases.Select(d => d.Schema).ShouldContain("pol");
 
         // A second run (every deployment runs the migrate job) changes nothing and does not fail.
         await DatabaseMigrator.MigrateAsync(database.MigratorConnectionString, DatabaseMigrator.DefaultAppRole, NullLogger.Instance, TestContext.Current.CancellationToken);

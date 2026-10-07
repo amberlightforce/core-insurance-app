@@ -1,15 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- PRD-05 Policy administration: implementation of the Policy module (PostgreSQL schema `pol`). -->
+  <!--
+    PRD-05 Policy administration: implementation of the Policy module (PostgreSQL schema `pol`).
+    SL-POL: quote → bind → policy on the SL-0 module pattern (docs/module-pattern.md). Other modules are reached only
+    through their generated *.Contracts interfaces.
+  -->
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Party.Contracts\CoreIns.Modules.Party.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Rating.Contracts\CoreIns.Modules.Rating.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Underwriting.Contracts\CoreIns.Modules.Underwriting.Contracts.csproj" />
+    <!-- Rounding service and country-pack SPIs (IdValidator VEHICLE_PLATE): contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
+    <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
   </ItemGroup>
 
 </Project>
