@@ -1,0 +1,69 @@
+/* IB-05 split pane: list | separator | detail. Detail min 560 px, else stacked. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.list,
+.detail {
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+}
+
+.detail {
+  container-type: inline-size;
+}
+
+.separator {
+  position: relative;
+  inline-size: var(--space-2);
+  margin: var(--space-0) calc(var(--space-1) * -1);
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+
+/* 1 px border.subtle line; hover or focus shows a 2 px focus line. */
+.separator::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: var(--border-width-hairline);
+  background-color: var(--color-border-subtle);
+  transform: translateX(-50%);
+}
+
+.separator:hover::before,
+.separator:focus-visible::before {
+  inline-size: var(--border-width-thick);
+  background-color: var(--color-border-focus);
+}
+
+.back {
+  padding: var(--space-2) var(--space-0);
+}
+
+.split[data-stacked] .detail {
+  animation: detail-in var(--motion-duration-transition-sm) var(--motion-ease-enter);
+}
+
+@keyframes detail-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--space-6));
+  }
+}
+
+@media (forced-colors: active) {
+  .separator::before {
+    background-color: CanvasText;
+  }
+
+  .separator:focus-visible::before {
+    background-color: Highlight;
+  }
+}

@@ -1,0 +1,319 @@
+/*
+ * Button (Part 2 §4.1) with the v3 option-17 gradient-border primary (DESIGN-A §8, D-FE-04).
+ * MI-01 hover, MI-02 press, MI-03 focus, MI-67 commit sweep. Shadows animate by fading a pseudo-element.
+ */
+.button {
+  --_height: var(--size-control-md);
+  --_pad: calc(var(--space-2) + var(--space-0_5));
+  --_fill: var(--color-interactive-secondary-bg);
+  --_fill-hover: var(--color-interactive-secondary-bg-hover);
+  --_fill-pressed: var(--color-interactive-secondary-bg-pressed);
+  --_border: var(--color-border-control);
+  --_fg: var(--color-text-primary);
+  --_shadow: none;
+  --_glow: none;
+
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-block-size: var(--_height);
+  min-inline-size: 64px;
+  padding: var(--space-0) var(--_pad);
+  border: var(--border-width-hairline) solid var(--_border);
+  border-radius: var(--radius-md);
+  background-color: var(--_fill);
+  box-shadow: var(--_shadow);
+  color: var(--_fg);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  transition:
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    border-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    transform var(--motion-duration-feedback-xs) var(--motion-ease-standard);
+}
+
+/* Hover glow layer (opacity only). */
+.button::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--border-width-control) * -1);
+  z-index: calc(var(--z-raised) * -1);
+  border-radius: inherit;
+  box-shadow: var(--_glow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.content {
+  display: inline-flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  display: inline-block;
+}
+
+.spinner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.button[data-pending] .content {
+  visibility: hidden;
+}
+
+/* Sizes (height compact / comfortable / touch come from the density tokens). */
+.button[data-size='sm'] {
+  --_height: var(--size-control-sm);
+  --_pad: var(--space-2);
+
+  min-inline-size: var(--size-control-sm);
+}
+
+.button[data-size='lg'] {
+  --_height: var(--size-control-lg);
+  --_pad: var(--space-3);
+
+  min-inline-size: 88px;
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+}
+
+:global([data-density='comfortable']) .button {
+  --_pad: var(--space-3);
+
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+}
+
+:global([data-density='comfortable']) .button[data-size='sm'] {
+  --_pad: var(--space-2);
+
+  font: var(--type-label);
+}
+
+:global([data-density='comfortable']) .button[data-size='lg'] {
+  --_pad: var(--space-4);
+}
+
+@media (pointer: coarse) {
+  .button {
+    --_pad: var(--space-4);
+  }
+
+  .button[data-size='lg'] {
+    --_pad: var(--space-5);
+  }
+}
+
+.iconOnly,
+.button.iconOnly[data-size] {
+  --_pad: var(--space-0);
+
+  min-inline-size: var(--_height);
+  inline-size: var(--_height);
+}
+
+/* Variants. */
+.button[data-variant='primary'],
+.button[data-variant='commit'] {
+  --_fill: var(--color-interactive-primary-bg);
+  --_fill-hover: var(--color-interactive-primary-bg-hover);
+  --_fill-pressed: var(--color-interactive-primary-bg-pressed);
+  --_fg: var(--color-text-on-primary);
+  --_shadow: var(--shadow-button-rest);
+  --_glow: var(--shadow-button-hover);
+
+  border: var(--border-width-control) solid transparent;
+  background:
+    linear-gradient(var(--_fill), var(--_fill)) padding-box,
+    var(--gradient-cta) border-box;
+  font-weight: 600;
+}
+
+.button[data-variant='commit'] {
+  --_shadow: var(--shadow-button-commit);
+}
+
+.button[data-variant='ghost'] {
+  --_fill: transparent;
+  --_fill-hover: var(--color-interactive-ghost-bg-hover);
+  --_fill-pressed: var(--color-interactive-ghost-bg-pressed);
+  --_border: transparent;
+}
+
+.button[data-variant='danger'] {
+  --_fill: var(--color-interactive-danger-bg);
+  --_fill-hover: var(--color-interactive-danger-bg-hover);
+  --_fill-pressed: var(--color-interactive-danger-bg-pressed);
+  --_border: transparent;
+  --_fg: var(--color-text-on-accent);
+
+  font-weight: 600;
+}
+
+.button[data-variant='danger-ghost'] {
+  --_fill: transparent;
+  --_fill-hover: var(--color-interactive-ghost-bg-hover);
+  --_fill-pressed: var(--color-interactive-ghost-bg-pressed);
+  --_border: transparent;
+  --_fg: var(--color-status-danger-fg);
+}
+
+.button[data-variant='link'] {
+  --_fill: transparent;
+  --_fill-hover: transparent;
+  --_fill-pressed: transparent;
+  --_border: transparent;
+  --_fg: var(--color-text-link);
+  --_pad: var(--space-0);
+
+  min-inline-size: 0;
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-0_5);
+}
+
+.button[data-variant='link'][data-hovered] {
+  --_fg: var(--color-text-link-hover);
+}
+
+.button[data-variant='ai'] {
+  --_fill: var(--color-status-ai-bg);
+  --_fill-hover: var(--color-status-ai-bg);
+  --_fill-pressed: var(--color-status-ai-bg);
+  --_fg: var(--color-status-ai-fg);
+
+  border-color: transparent;
+  background:
+    linear-gradient(var(--_fill), var(--_fill)) padding-box,
+    var(--gradient-iris) border-box;
+}
+
+/* States: hover (pointer only), pressed, focus. */
+.button[data-hovered] {
+  background-color: var(--_fill-hover);
+}
+
+.button[data-variant='primary'][data-hovered],
+.button[data-variant='commit'][data-hovered] {
+  background:
+    linear-gradient(var(--_fill-hover), var(--_fill-hover)) padding-box,
+    var(--gradient-cta) border-box;
+}
+
+.button[data-hovered]::before {
+  opacity: 1;
+}
+
+.button[data-pressed] {
+  background-color: var(--_fill-pressed);
+  transform: scale(0.97);
+}
+
+.button[data-variant='primary'][data-pressed],
+.button[data-variant='commit'][data-pressed] {
+  background:
+    linear-gradient(var(--_fill-pressed), var(--_fill-pressed)) padding-box,
+    var(--gradient-cta) border-box;
+}
+
+.button[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.button[data-variant='commit'][data-focus-visible] {
+  box-shadow:
+    var(--_shadow),
+    0 0 0 calc(var(--space-1)) var(--color-surface-sheet);
+}
+
+/* Disabled (native or with a reason): flat, no gradient, no glow, focusable when a reason exists. */
+.button[data-disabled],
+.button[data-soft-disabled] {
+  --_glow: none;
+
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  background: var(--color-interactive-disabled-bg);
+  box-shadow: none;
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button[data-variant='primary'][data-soft-disabled],
+.button[data-variant='commit'][data-soft-disabled],
+.button[data-variant='primary'][data-disabled],
+.button[data-variant='commit'][data-disabled] {
+  border-width: var(--border-width-control);
+}
+
+.button[data-variant='ghost'][data-soft-disabled],
+.button[data-variant='ghost'][data-disabled],
+.button[data-variant='link'][data-soft-disabled],
+.button[data-variant='link'][data-disabled],
+.button[data-variant='danger-ghost'][data-soft-disabled],
+.button[data-variant='danger-ghost'][data-disabled] {
+  border-color: transparent;
+  background: transparent;
+}
+
+.button[data-pending] {
+  cursor: progress;
+}
+
+/* MI-67: commit-ready sweep, once, v3 sheen colour (D-FE-06). */
+.button[data-sweep]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    var(--color-interactive-primary-sheen) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: sweep var(--motion-duration-sweep) var(--motion-ease-standard) 1 both;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (forced-colors: active) {
+  .button,
+  .button[data-variant] {
+    border: var(--border-width-control) solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  .button[data-disabled],
+  .button[data-soft-disabled] {
+    border-color: GrayText;
+    color: GrayText;
+  }
+}

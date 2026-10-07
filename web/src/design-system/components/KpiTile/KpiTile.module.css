@@ -1,0 +1,379 @@
+/*
+ * KPI tile and hero metric (Part 2 §4.27), sparkline (Part 3 §6.5). Values are tabular and never animate
+ * (D-FE-05). MI-56 draws the sparkline on first render for non-money KPIs only.
+ */
+.tile {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: var(--space-1_5);
+  align-content: start;
+  min-inline-size: 0;
+  padding: var(--space-inset-card);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-primary);
+  transition: transform var(--motion-duration-feedback-xs) var(--motion-ease-standard);
+}
+
+.tile::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--border-width-hairline) * -1);
+  z-index: calc(var(--z-raised) * -1);
+  border-radius: inherit;
+  box-shadow: var(--elevation-2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-feedback-lg) var(--motion-ease-feedback);
+}
+
+.tile[data-linked]:has(.reportLink[data-hovered])::before {
+  opacity: 1;
+}
+
+.tile[data-linked]:has(.reportLink[data-pressed]) {
+  transform: scale(0.995);
+}
+
+.tile:has(.reportLink[data-focus-visible]) {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.labelRow {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-inline-size: 0;
+}
+
+.label {
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  color: var(--color-text-secondary);
+}
+
+.help {
+  position: relative;
+  z-index: var(--z-raised);
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 24px;
+  min-block-size: 24px;
+  padding: var(--space-0);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  outline: none;
+}
+
+.help[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+  color: var(--color-text-secondary);
+}
+
+.help[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.popover {
+  z-index: var(--z-dropdown);
+  inline-size: min(320px, calc(100vw - var(--space-8)));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-3);
+}
+
+.dialog {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  outline: none;
+}
+
+.popoverTitle {
+  margin: var(--space-0);
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+}
+
+.definition {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-0);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.definition dt {
+  color: var(--color-text-secondary);
+}
+
+.definition dd {
+  margin: var(--space-0);
+}
+
+.mono {
+  font: var(--type-mono-sm);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.valueRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  align-items: baseline;
+}
+
+.value {
+  font: var(--type-numeric-kpi);
+  letter-spacing: var(--type-numeric-kpi-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.raised {
+  position: relative;
+  z-index: var(--z-raised);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.raised:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Delta chip (v3: 22 px, radius 11, 600). */
+.delta {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-block-size: 22px;
+  padding: var(--space-0) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-status-neutral-border);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-bg);
+  color: var(--color-status-neutral-fg);
+  font: var(--type-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.delta[data-tone='success'] {
+  border-color: var(--color-status-success-border);
+  background-color: var(--color-status-success-bg);
+  color: var(--color-status-success-fg);
+}
+
+.delta[data-tone='danger'] {
+  border-color: var(--color-status-danger-border);
+  background-color: var(--color-status-danger-bg);
+  color: var(--color-status-danger-fg);
+}
+
+.footerRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: 16px;
+}
+
+.asOf {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-tertiary);
+}
+
+.asOf[data-stale] {
+  color: var(--color-status-warning-fg);
+}
+
+/* «Προβολή αναφοράς →» slides in on hover/focus; its ::after stretches over the tile. */
+.reportLink {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  font: var(--type-caption);
+  font-weight: 500;
+  color: var(--color-text-link);
+  text-decoration: none;
+  opacity: 0;
+  transform: translateX(calc(var(--space-1) * -1));
+  transition:
+    opacity var(--motion-duration-feedback-lg) var(--motion-ease-standard),
+    transform var(--motion-duration-feedback-lg) var(--motion-ease-standard);
+  outline: none;
+  cursor: pointer;
+}
+
+.reportLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+}
+
+.reportLink[data-hovered],
+.reportLink[data-focus-visible] {
+  opacity: 1;
+  transform: none;
+}
+
+.loading {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.error {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  align-items: center;
+}
+
+.errorText {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  font: var(--type-body-compact);
+  color: var(--color-text-secondary);
+}
+
+/* Sparkline. */
+.sparkline {
+  --_line: var(--color-status-brand-solid);
+  --_area: var(--gradient-horizon-positive);
+
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 80px;
+  block-size: var(--_h);
+}
+
+.sparkline[data-tone='adverse'] {
+  --_line: var(--color-status-danger-solid);
+  --_area: var(--gradient-horizon-adverse);
+}
+
+.sparkline[data-tone='neutral'] {
+  --_area: var(--gradient-horizon-neutral);
+}
+
+.sparkSvg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.sparkArea {
+  inline-size: 100%;
+  block-size: 100%;
+  background: var(--_area);
+}
+
+.sparkLine {
+  fill: none;
+  stroke: var(--_line);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.sparkline[data-draw] .sparkLine {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw var(--motion-duration-signature-beat) var(--motion-ease-emphasized) forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.sparkDot {
+  position: absolute;
+  inset-inline-end: calc(var(--space-1) * -1);
+  inline-size: 7px;
+  block-size: 7px;
+  border: var(--border-width-thick) solid var(--color-surface-sheet);
+  border-radius: var(--radius-full);
+  background-color: var(--_line);
+  box-sizing: content-box;
+  transform: translate(0, -50%);
+}
+
+/* Hero metric. */
+.hero {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-inline-size: 0;
+}
+
+.heroLabel {
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+  color: var(--color-text-secondary);
+}
+
+.heroValue {
+  font: var(--type-display-xl);
+  letter-spacing: var(--type-display-xl-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--color-text-primary);
+}
+
+.comparison {
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  color: var(--color-text-secondary);
+}
+
+.hero .sparkline {
+  max-inline-size: 320px;
+}
+
+@media (forced-colors: active) {
+  .tile {
+    border-color: CanvasText;
+  }
+
+  .delta {
+    border-color: CanvasText;
+    color: CanvasText;
+  }
+
+  .sparkLine {
+    stroke: CanvasText;
+  }
+
+  .sparkArea {
+    background: none;
+  }
+
+  .sparkDot {
+    background-color: CanvasText;
+  }
+
+  .reportLink {
+    opacity: 1;
+    color: LinkText;
+  }
+}

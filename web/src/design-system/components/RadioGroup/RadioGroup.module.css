@@ -1,0 +1,348 @@
+/* Radio group and choice cards (Part 2 §4.9). MI-05: the dot scales 0 → 1. */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-label-gap);
+  min-inline-size: 0;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0_5);
+}
+
+.items[data-orientation='horizontal'] {
+  flex-flow: row wrap;
+  column-gap: var(--space-4);
+}
+
+.items[data-variant='cards'] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.field {
+  --_size: var(--size-icon-md);
+  --_dot: var(--space-1_5);
+
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+@media (pointer: coarse) {
+  .field {
+    --_size: var(--size-icon-lg);
+    --_dot: var(--space-2);
+  }
+}
+
+.cardField {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.radio {
+  --_border: var(--color-border-control);
+  --_fill: var(--color-interactive-accent-bg);
+
+  position: relative;
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  align-self: flex-start;
+  min-block-size: var(--size-control-sm);
+  padding-block: var(--space-1);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:global([data-density='comfortable']) .radio {
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.circle {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--_size);
+  block-size: var(--_size);
+  margin-block-start: calc((1lh - var(--_size)) / 2);
+  border: var(--border-width-hairline) solid var(--_border);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-sheet);
+  transition:
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    border-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    transform var(--motion-duration-feedback-xs) var(--motion-ease-standard);
+}
+
+/* The white centre on an accent fill forms the dot. */
+.circle::after {
+  content: '';
+  inline-size: var(--_dot);
+  block-size: var(--_dot);
+  border-radius: var(--radius-full);
+  background-color: var(--color-text-on-accent);
+  transform: scale(0);
+  transition: transform var(--motion-duration-feedback-md) var(--motion-ease-enter);
+}
+
+.radio[data-selected] .circle {
+  --_border: var(--_fill);
+
+  background-color: var(--_fill);
+}
+
+.radio[data-selected] .circle::after {
+  transform: scale(1);
+}
+
+.radio[data-hovered] .circle {
+  --_border: var(--color-border-control-hover);
+}
+
+.radio[data-hovered][data-selected] {
+  --_fill: var(--color-interactive-accent-bg-hover);
+}
+
+.radio[data-pressed] .circle {
+  transform: scale(0.92);
+}
+
+.radio[data-focus-visible] .circle {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.radio[data-invalid] .circle {
+  --_border: var(--color-status-danger-solid);
+
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-status-danger-solid);
+}
+
+.radio[data-invalid][data-selected] .circle {
+  box-shadow: none;
+}
+
+.radio[data-disabled] {
+  --_fill: var(--color-control-disabled-checked);
+
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.radio[data-disabled] .circle {
+  --_border: var(--color-border-subtle);
+
+  background-color: var(--color-interactive-disabled-bg);
+}
+
+.radio[data-disabled][data-selected] .circle {
+  --_border: var(--_fill);
+
+  background-color: var(--_fill);
+}
+
+.radio[data-disabled] .circle::after {
+  background-color: var(--color-control-disabled-glyph);
+}
+
+.label {
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin-block-start: calc(var(--space-1) * -1);
+  padding-inline-start: calc(var(--_size) + var(--space-2));
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+/* Read-only: only the selected label, as text. */
+.group[data-readonly] .field:not([data-selected]),
+.group[data-readonly] .cardField:not([data-selected]) {
+  display: none;
+}
+
+.group[data-readonly] .circle {
+  display: none;
+}
+
+.group[data-readonly] .radio,
+.group[data-readonly] .card {
+  cursor: default;
+}
+
+/* Choice cards. */
+.card {
+  --_border: var(--color-border-default);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-inset-card);
+  border: var(--border-width-hairline) solid var(--_border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    border-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+/* Hover elevation.2 (shadow fades on a pseudo-element). */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--border-width-hairline) * -1);
+  z-index: calc(var(--z-raised) * -1);
+  border-radius: inherit;
+  box-shadow: var(--elevation-2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-feedback-lg) var(--motion-ease-feedback);
+}
+
+.card[data-hovered]::before {
+  opacity: 1;
+}
+
+.card[data-hovered] {
+  --_border: var(--color-border-control-hover);
+}
+
+.card[data-selected] {
+  --_border: var(--color-interactive-accent-bg);
+
+  background-color: var(--color-state-row-selected);
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-interactive-accent-bg);
+}
+
+.card[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.card[data-invalid] {
+  --_border: var(--color-status-danger-solid);
+}
+
+.card[data-disabled] {
+  --_border: var(--color-border-subtle);
+
+  background-color: var(--color-interactive-disabled-bg);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.badge {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-end: var(--space-2);
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--size-icon-lg);
+  block-size: var(--size-icon-lg);
+  border-radius: var(--radius-full);
+  background-color: var(--color-interactive-accent-bg);
+  color: var(--color-text-on-accent);
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity var(--motion-duration-feedback-md) var(--motion-ease-enter),
+    transform var(--motion-duration-feedback-md) var(--motion-ease-enter);
+}
+
+.card[data-selected] .badge {
+  opacity: 1;
+  transform: none;
+}
+
+.tag {
+  color: var(--color-status-brand-fg);
+  font: var(--type-overline);
+  letter-spacing: var(--type-overline-tracking);
+}
+
+.cardTitle {
+  padding-inline-end: var(--space-6);
+  font: var(--type-heading-4);
+  letter-spacing: var(--type-heading-4-tracking);
+}
+
+.price {
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.details {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.priceCaption {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+.bullets {
+  display: grid;
+  gap: var(--space-1);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.bullet {
+  display: flex;
+  gap: var(--space-1_5);
+  align-items: flex-start;
+}
+
+.bulletIcon {
+  flex: none;
+  margin-block-start: var(--space-0_5);
+  color: var(--color-status-success-fg);
+}
+
+@media (forced-colors: active) {
+  .circle {
+    border-color: CanvasText;
+  }
+
+  .radio[data-selected] .circle {
+    background-color: Highlight;
+  }
+
+  .card {
+    border-color: CanvasText;
+  }
+
+  .card[data-selected] {
+    border-color: Highlight;
+    box-shadow: inset 0 0 0 var(--border-width-hairline) Highlight;
+  }
+
+  .badge {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .radio[data-disabled],
+  .card[data-disabled] {
+    color: GrayText;
+  }
+}

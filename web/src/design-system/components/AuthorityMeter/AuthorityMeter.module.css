@@ -1,0 +1,110 @@
+/*
+ * Authority meter (Part 2 §4.6, §4.24; v3 decision bar): 4 px inline / 6 px decision track, status fill,
+ * 2 px limit tick. The fill moves with transform: scaleX only; figures never animate.
+ */
+.meter {
+  --_track-height: var(--space-1);
+  --_fill-color: var(--color-status-success-solid);
+  --_status-fg: var(--color-status-success-fg);
+
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+.meter[data-size='decision'] {
+  --_track-height: var(--space-1_5);
+}
+
+.meter[data-status='warning'] {
+  --_fill-color: var(--color-status-warning-solid);
+  --_status-fg: var(--color-status-warning-fg);
+}
+
+.meter[data-status='danger'] {
+  --_fill-color: var(--color-status-danger-solid);
+  --_status-fg: var(--color-status-danger-fg);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+.value {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  color: var(--color-text-primary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.meter[data-status='warning'] .value,
+.meter[data-status='danger'] .value {
+  color: var(--_status-fg);
+}
+
+.track {
+  position: relative;
+  block-size: var(--_track-height);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-bg);
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: var(--_fill-color);
+  transform: scaleX(var(--_fill));
+  transform-origin: left center;
+  transition:
+    transform var(--motion-duration-transition-md) var(--motion-ease-standard),
+    background-color var(--motion-duration-feedback-lg) var(--motion-ease-feedback);
+}
+
+:global([dir='rtl']) .fill {
+  transform-origin: right center;
+}
+
+.tick {
+  position: absolute;
+  inset-block: calc(var(--space-0_5) * -1);
+  inset-inline-start: var(--_tick);
+  inline-size: var(--border-width-thick);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-text-primary);
+  transform: translateX(-50%);
+}
+
+.over {
+  color: var(--color-status-danger-fg);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+@media (forced-colors: active) {
+  .track {
+    border: var(--border-width-hairline) solid CanvasText;
+    background-color: Canvas;
+  }
+
+  .fill {
+    background-color: Highlight;
+  }
+
+  .tick {
+    background-color: CanvasText;
+  }
+}

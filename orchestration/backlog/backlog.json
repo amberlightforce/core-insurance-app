@@ -146,9 +146,9 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "building",
-   "owner": "builder: shared kernel + platform primitives",
-   "reviewAttempts": 0,
+   "status": "failed",
+   "owner": "builder: fixing review 1 defects",
+   "reviewAttempts": 1,
    "blockers": []
   },
   {
@@ -184,8 +184,8 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "failed",
-   "owner": "builder: fixing review 1 defects",
+   "status": "merged",
+   "owner": "merged (review PASS attempt 2)",
    "reviewAttempts": 1,
    "blockers": []
   },

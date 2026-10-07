@@ -1,0 +1,158 @@
+/*
+ * Drawer (Part 2 §4.19): edge panel below the top bar, `material.overlay`, 48 px header, scroll body,
+ * sticky footer. MI-30: translateX 100%→0 (≈320 ms, spring.smooth fallback), close 240 ms; RM: opacity.
+ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-scrim);
+  background-color: var(--color-surface-scrim-modal);
+}
+
+.overlay[data-entering] {
+  animation: fade var(--motion-duration-transition-sm) var(--motion-ease-standard);
+}
+
+.overlay[data-exiting] {
+  animation: fade var(--motion-duration-transition-md) var(--motion-ease-exit) reverse forwards;
+}
+
+.panel {
+  --_width: 360px;
+  --_from: 100%;
+
+  position: fixed;
+  inset-block: var(--size-topbar) 0;
+  inset-inline-end: 0;
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  inline-size: min(var(--_width), 100vw);
+  color: var(--color-text-primary);
+  outline: none;
+  animation: slide-in var(--motion-duration-transition-lg) var(--motion-ease-enter);
+}
+
+.panel[data-material] {
+  box-shadow:
+    inset 0 0 0 var(--border-width-hairline) var(--_glass-rim),
+    0 0 0 var(--border-width-hairline) var(--_glass-hairline),
+    var(--elevation-4);
+}
+
+.panel[data-modal='true'] {
+  z-index: var(--z-modal);
+}
+
+.panel[data-placement='start'] {
+  --_from: -100%;
+
+  inset-inline: 0 auto;
+}
+
+.panel[data-width='320'] {
+  --_width: 320px;
+}
+
+.panel[data-width='400'] {
+  --_width: 400px;
+}
+
+.panel[data-exiting] {
+  animation: slide-out var(--motion-duration-transition-md) var(--motion-ease-exit) forwards;
+}
+
+.panel:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-width) * -1);
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(var(--_from));
+  }
+}
+
+@keyframes slide-out {
+  to {
+    transform: translateX(var(--_from));
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+:root[data-reduce-motion='true'] .panel {
+  animation-name: fade;
+}
+
+:root[data-reduce-motion='true'] .panel[data-exiting] {
+  animation-direction: reverse;
+}
+
+.dialog {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-block-size: 0;
+  outline: none;
+}
+
+.header {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  align-items: center;
+  block-size: 48px;
+  padding: var(--space-0) var(--space-2) var(--space-0) var(--space-4);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.title {
+  flex: 1;
+  min-inline-size: 0;
+  margin: var(--space-0);
+  overflow: hidden;
+  font: var(--type-heading-4);
+  letter-spacing: var(--type-heading-4-tracking);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.body {
+  display: grid;
+  flex: 1 1 auto;
+  align-content: start;
+  gap: var(--space-3);
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+  font: var(--type-body-compact);
+}
+
+.footer {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-4);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+@media (forced-colors: active) {
+  .overlay {
+    background-color: transparent;
+  }
+
+  .panel {
+    border-inline-start: var(--border-width-hairline) solid CanvasText;
+  }
+}

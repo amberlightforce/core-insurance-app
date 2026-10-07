@@ -12,6 +12,9 @@ Re-read STATUS.md, PLAN.md and DECISIONS.md at the start of every wave.
 2. Docker Desktop will not start (stale `%LOCALAPPDATA%\docker-secrets-engine\engine.sock`). Testcontainers and the image build can't run locally.
 3. Windows App Control blocks freshly built DLLs. Agents build and test in WSL (SDK 10.0.401 at ~/.dotnet-coreins, ICU via ~/dn.sh), with an embedded PostgreSQL 17 at ~/pg17.
 
+## Pending user requests
+- **When Phase 1 (foundations) is done: write a detailed HANDOVER document** (requested 2026-10-07). It must cover what was built, how to run/test it, architecture and conventions, every ruling, known gaps and deferrals, environment issues, the backlog and how W1 starts, and how to operate the orchestration (tracker, briefs, review loop).
+
 ## Phase 1 work packages
 
 | WP | Status | Notes |

@@ -1,0 +1,78 @@
+{
+  "skipLink": "Skip to content",
+  "landmarks": {
+    "primaryNav": "Main navigation",
+    "workViews": "Work views",
+    "context": "Context",
+    "bottomNav": "Module navigation"
+  },
+  "nav": {
+    "home": "Home",
+    "work": "Work",
+    "parties": "Customers",
+    "policies": "Policies",
+    "underwriting": "Underwriting",
+    "claims": "Claims",
+    "billing": "Billing",
+    "reinsurance": "Reinsurance",
+    "finance": "Finance",
+    "documents": "Documents",
+    "compliance": "Compliance",
+    "reports": "Reports",
+    "products": "Products",
+    "admin": "Administration",
+    "more": "More",
+    "expand": "Expand navigation",
+    "collapse": "Collapse navigation"
+  },
+  "topBar": {
+    "search": "Search or run a command…",
+    "searchLabel": "Search or run a command (Ctrl+K)",
+    "help": "Help and shortcuts",
+    "entity": "Legal entity: {name}",
+    "userMenu": "Account: {name}",
+    "notifications": "{count, plural, =0 {Notifications} one {Notifications, # new} other {Notifications, # new}}"
+  },
+  "language": {
+    "label": "Language",
+    "el": "Ελληνικά",
+    "en": "English"
+  },
+  "statusBar": {
+    "online": "Connected",
+    "offline": "Offline",
+    "aiOn": "AI: on",
+    "aiOff": "AI switched off",
+    "jobs": "{count, plural, one {# background job} other {# background jobs}}",
+    "clockLabel": "Athens time"
+  },
+  "envRibbon": {
+    "uat": "Test environment · {env} · Data is not real",
+    "dev": "Development environment · {env} · Data is not real",
+    "shiftedClock": "System date: {date}"
+  },
+  "home": {
+    "greeting": "Good morning",
+    "placeholderTitle": "The «{module}» module is not available yet",
+    "placeholderBody": "The module will appear here when it is ready. Until then, use search to find records.",
+    "goHome": "Back to home"
+  },
+  "settings": {
+    "theme": "Theme",
+    "themeAuto": "Automatic",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "density": "Density",
+    "densityCompact": "Compact",
+    "densityComfortable": "Comfortable"
+  },
+  "help": {
+    "general": "General",
+    "palette": "Search or run a command",
+    "shortcuts": "Keyboard shortcuts",
+    "regions": "Move to the next region",
+    "rail": "Expand or collapse navigation",
+    "toasts": "Go to notifications"
+  },
+  "title": "{page} · {product}"
+}

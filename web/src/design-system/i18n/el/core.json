@@ -1,0 +1,17 @@
+{
+  "spinner": {
+    "label": "Φόρτωση…"
+  },
+  "button": {
+    "busy": "Η ενέργεια εκτελείται…",
+    "disabledBecause": "Μη διαθέσιμο: {reason}"
+  },
+  "kbd": {
+    "ctrl": "Ctrl",
+    "cmd": "⌘",
+    "enter": "↵",
+    "shift": "Shift",
+    "alt": "Alt",
+    "esc": "Esc"
+  }
+}

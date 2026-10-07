@@ -1,0 +1,165 @@
+/* Pagination: range text, page size select, joined secondary button group. */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.range {
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+
+.pageSize {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.pageSizeLabel {
+  white-space: nowrap;
+}
+
+.selectButton {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-block-size: var(--size-control-sm);
+  padding: var(--space-0) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background-color: var(--color-interactive-secondary-bg);
+  color: var(--color-text-primary);
+  font: var(--type-label);
+  font-variant-numeric: tabular-nums lining-nums;
+  cursor: pointer;
+  outline: none;
+}
+
+.selectButton[data-hovered] {
+  border-color: var(--color-border-control-hover);
+}
+
+.selectButton[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.popover {
+  z-index: var(--z-dropdown);
+  min-inline-size: var(--trigger-width);
+  border-radius: var(--radius-lg);
+  outline: none;
+}
+
+.listBox {
+  display: grid;
+  padding: var(--space-1);
+  outline: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--size-row-list);
+  padding: var(--space-0) var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  font-variant-numeric: tabular-nums lining-nums;
+  cursor: pointer;
+  outline: none;
+}
+
+.option[data-focused] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.option[data-selected] {
+  font-weight: 600;
+}
+
+/* Joined group: shared borders, outer corners rounded. */
+.group {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.button {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: var(--size-control-sm);
+  min-block-size: var(--size-control-sm);
+  margin-inline-start: calc(var(--space-px) * -1);
+  padding: var(--space-0) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: 0;
+  background-color: var(--color-interactive-secondary-bg);
+  color: var(--color-text-primary);
+  font: var(--type-label);
+  font-variant-numeric: tabular-nums lining-nums;
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.button:first-child {
+  margin-inline-start: 0;
+  border-start-start-radius: var(--radius-md);
+  border-end-start-radius: var(--radius-md);
+}
+
+.button:last-child {
+  border-start-end-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
+}
+
+.button[data-hovered] {
+  background-color: var(--color-interactive-secondary-bg-hover);
+}
+
+.button[data-pressed] {
+  background-color: var(--color-interactive-secondary-bg-pressed);
+}
+
+.button[data-focus-visible] {
+  position: relative;
+  z-index: var(--z-raised);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.button[data-current] {
+  position: relative;
+  z-index: var(--z-raised);
+  border-color: var(--color-border-strong);
+  background-color: var(--color-surface-sunken);
+  font-weight: 600;
+}
+
+.button[data-disabled] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.gap {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: var(--size-control-sm);
+  margin-inline-start: calc(var(--space-px) * -1);
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  color: var(--color-text-tertiary);
+}
+
+@media (forced-colors: active) {
+  .button[data-current] {
+    border: var(--border-width-thick) solid Highlight;
+  }
+
+  .button[data-disabled] {
+    color: GrayText;
+  }
+}

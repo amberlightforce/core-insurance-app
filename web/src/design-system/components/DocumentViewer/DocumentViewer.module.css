@@ -1,0 +1,363 @@
+/*
+ * Document viewer shell (Part 2 §4.31): 40 px toolbar, sunken canvas, white pages with elevation.1 and a
+ * 16 px gap, optional 96 px thumbnail rail and right panel. Zoom is a CSS variable; fit-page uses container
+ * query units of the canvas.
+ */
+.viewer {
+  display: grid;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  min-block-size: 0;
+  block-size: 100%;
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  min-block-size: 40px;
+  padding: var(--space-1) var(--space-2);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.titleGroup {
+  display: inline-flex;
+  flex: 1 1 auto;
+  gap: var(--space-1_5);
+  align-items: center;
+  min-inline-size: 0;
+}
+
+.title {
+  overflow: hidden;
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pill {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-block-size: 20px;
+  padding: var(--space-0) var(--space-1_5);
+  border: var(--border-width-hairline) solid var(--color-status-neutral-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-status-neutral-bg);
+  color: var(--color-status-neutral-fg);
+  font: var(--type-caption);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pill[data-binding] {
+  border-color: var(--color-status-brand-border);
+  background-color: var(--color-status-brand-bg);
+  color: var(--color-status-brand-fg);
+}
+
+.pageIndicator,
+.zoom {
+  font: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.zoom {
+  min-inline-size: 48px;
+  text-align: center;
+}
+
+.group {
+  display: inline-flex;
+  gap: var(--space-0_5);
+  align-items: center;
+}
+
+.search {
+  display: flex;
+  padding: var(--space-1) var(--space-2);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.searchInput {
+  inline-size: min(320px, 100%);
+  min-block-size: var(--size-control-sm);
+  padding: var(--space-0) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  outline: none;
+}
+
+.searchInput[data-focused] {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 var(--space-0_5) var(--color-state-focus-halo);
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-1_5) var(--space-3);
+  border-block-end: var(--border-width-hairline) solid var(--color-status-info-border);
+  background-color: var(--color-status-info-bg);
+  color: var(--color-status-info-fg);
+  font: var(--type-body-compact);
+}
+
+.banner[data-tone='warning'] {
+  border-color: var(--color-status-warning-border);
+  background-color: var(--color-status-warning-bg);
+  color: var(--color-status-warning-fg);
+}
+
+.body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-row: 5;
+  min-block-size: 0;
+}
+
+.canvas {
+  grid-column: 2;
+  min-block-size: 320px;
+  overflow: auto;
+  background-color: var(--color-surface-sunken);
+  container-type: size;
+  outline: none;
+}
+
+.canvas:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.pages {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.page {
+  inline-size: calc(794px * var(--_zoom, 1));
+  max-inline-size: none;
+  aspect-ratio: var(--_aspect);
+  overflow: hidden;
+  background-color: var(--color-surface-raised);
+  box-shadow: var(--elevation-1);
+}
+
+.pages[data-fit='fit-width'] .page {
+  inline-size: 100%;
+}
+
+.pages[data-fit='fit-page'] .page {
+  inline-size: auto;
+  block-size: calc(100cqb - var(--space-8));
+}
+
+.page[data-placeholder] {
+  inline-size: min(100%, 794px);
+  background-color: var(--color-skeleton);
+}
+
+.pageImage {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  transition: transform var(--motion-duration-transition-sm) var(--motion-ease-standard);
+}
+
+.pageImage[data-rotation='90'] {
+  transform: rotate(90deg);
+}
+
+.pageImage[data-rotation='180'] {
+  transform: rotate(180deg);
+}
+
+.pageImage[data-rotation='270'] {
+  transform: rotate(270deg);
+}
+
+.loadingSpinner {
+  position: absolute;
+  inset-block-start: var(--space-8);
+  color: var(--color-text-secondary);
+}
+
+.message {
+  display: grid;
+  place-items: center;
+  min-block-size: 100%;
+  padding: var(--space-6);
+}
+
+.unsupported {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  max-inline-size: 560px;
+  text-align: center;
+}
+
+.unsupportedIcon {
+  color: var(--color-text-secondary);
+}
+
+.unsupportedTitle {
+  margin: var(--space-0);
+  font: var(--type-heading-3);
+}
+
+.metadata {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-0);
+  font: var(--type-body-compact);
+  text-align: start;
+}
+
+.metadata dt {
+  color: var(--color-text-secondary);
+}
+
+.metadata dd {
+  margin: var(--space-0);
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font: var(--type-mono-sm);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.textPreview {
+  inline-size: 100%;
+  max-block-size: 320px;
+  margin: var(--space-0);
+  padding: var(--space-3);
+  overflow: auto;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sheet);
+  font: var(--type-mono-sm);
+  text-align: start;
+  white-space: pre-wrap;
+}
+
+.thumbnails {
+  grid-column: 1;
+  inline-size: 96px;
+  overflow: auto;
+  border-inline-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.thumbList {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-0);
+  padding: var(--space-2);
+  list-style: none;
+}
+
+.thumb {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: center;
+  inline-size: 100%;
+  padding: var(--space-1);
+  border: var(--border-width-thick) solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: none;
+}
+
+.thumb[aria-current='page'] {
+  border-color: var(--color-interactive-accent-bg);
+  color: var(--color-text-primary);
+}
+
+.thumb[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.thumbImage,
+.thumbBlank {
+  inline-size: 100%;
+  aspect-ratio: 1 / 1.4142;
+  background-color: var(--color-surface-raised);
+  box-shadow: var(--elevation-1);
+  object-fit: contain;
+}
+
+.thumbLabel {
+  font: var(--type-caption);
+}
+
+.panel {
+  grid-column: 3;
+  inline-size: var(--size-context-panel);
+  overflow: auto;
+  padding: var(--space-3);
+  border-inline-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.menuPopover {
+  z-index: var(--z-dropdown);
+  min-inline-size: 200px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-3);
+}
+
+.menu {
+  display: grid;
+  padding: var(--space-1);
+  outline: none;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--size-control-md);
+  padding: var(--space-0) var(--space-2);
+  border-radius: var(--radius-sm);
+  font: var(--type-body-compact);
+  cursor: pointer;
+  outline: none;
+}
+
+.menuItem[data-focused] {
+  background-color: var(--color-state-row-hover);
+}
+
+@media (forced-colors: active) {
+  .page {
+    border: var(--border-width-hairline) solid CanvasText;
+  }
+
+  .thumb[aria-current='page'] {
+    border-color: Highlight;
+  }
+
+  .pill,
+  .banner {
+    border-color: CanvasText;
+  }
+}

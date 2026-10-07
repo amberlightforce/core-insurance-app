@@ -1,0 +1,70 @@
+/*
+ * Percentage input (Part 2 §4.6): right-aligned tabular figures, a visible «%» / «‰» suffix, steppers hidden
+ * in compact density and revealed on hover (or focus) in comfortable.
+ */
+.percent {
+  min-inline-size: 0;
+}
+
+.frame {
+  min-inline-size: calc(var(--space-16) + var(--space-8));
+}
+
+.input {
+  text-align: end;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.unit {
+  flex: none;
+  color: var(--color-text-secondary);
+}
+
+.frame[data-readonly] .unit {
+  color: inherit;
+}
+
+.steppers {
+  display: none;
+  flex-direction: column;
+  margin-inline-end: calc(var(--space-1) * -1);
+}
+
+:global([data-density='comfortable']) .frame[data-hovered] .steppers,
+:global([data-density='comfortable']) .frame[data-focus-within] .steppers {
+  display: inline-flex;
+}
+
+.stepper {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--size-icon-md);
+  block-size: calc(var(--size-control-md) / 2 - var(--space-0_5));
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.stepper[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.stepper[data-pressed] {
+  background-color: var(--color-interactive-ghost-bg-pressed);
+}
+
+.delta {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: active) {
+  .stepper {
+    color: ButtonText;
+  }
+}

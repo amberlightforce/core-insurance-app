@@ -1,0 +1,229 @@
+/*
+ * Notification bell and centre (Part 2 §4.39, DESIGN-B A.10). MI-26: the bell rotates ±12° ×2 and the badge
+ * rolls, 400 ms, once, only for urgent items (reduced motion: badge only). MI-60: unread dot scales to 0 and
+ * fades after 1 s in view.
+ */
+.bell {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--size-control-md);
+  block-size: var(--size-control-md);
+  padding: var(--space-0);
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.bell[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.bell[data-pressed] {
+  background-color: var(--color-interactive-ghost-bg-pressed);
+}
+
+.bell[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.bellIcon {
+  display: inline-flex;
+  transform-origin: top center;
+}
+
+.bellIcon[data-swing] {
+  animation: swing var(--motion-duration-transition-xl) var(--motion-ease-standard) 1;
+}
+
+@keyframes swing {
+  20% {
+    transform: rotate(12deg);
+  }
+
+  40% {
+    transform: rotate(-12deg);
+  }
+
+  60% {
+    transform: rotate(12deg);
+  }
+
+  80% {
+    transform: rotate(-12deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.badge {
+  position: absolute;
+  inset-block-start: calc(var(--space-0_5) * -1);
+  inset-inline-end: calc(var(--space-0_5) * -1);
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 16px;
+  block-size: 16px;
+  padding: var(--space-0) var(--space-1);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-solid);
+  box-shadow: 0 0 0 var(--border-width-thick) var(--color-surface-sheet);
+  color: var(--color-text-on-accent);
+  font: var(--type-overline);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.badge[data-attention] {
+  background-color: var(--color-badge-attention-bg);
+  color: var(--color-badge-attention-fg);
+}
+
+.badge[data-roll] {
+  animation: roll var(--motion-duration-transition-xl) var(--motion-ease-enter) 1;
+}
+
+@keyframes roll {
+  from {
+    transform: translateY(var(--space-1));
+    opacity: 0;
+  }
+}
+
+/* Centre. */
+.list {
+  display: grid;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3) var(--space-0);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.tile {
+  --_bg: var(--color-status-neutral-bg);
+  --_fg: var(--color-status-neutral-fg);
+
+  display: grid;
+  place-items: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--_bg);
+  color: var(--_fg);
+}
+
+.tile[data-family='danger'] {
+  --_bg: var(--color-status-danger-bg);
+  --_fg: var(--color-status-danger-fg);
+}
+
+.tile[data-family='warning'] {
+  --_bg: var(--color-status-warning-bg);
+  --_fg: var(--color-status-warning-fg);
+}
+
+.tile[data-family='info'] {
+  --_bg: var(--color-status-info-bg);
+  --_fg: var(--color-status-info-fg);
+}
+
+.tile[data-family='success'] {
+  --_bg: var(--color-status-success-bg);
+  --_fg: var(--color-status-success-fg);
+}
+
+.tile[data-family='brand'] {
+  --_bg: var(--color-status-brand-bg);
+  --_fg: var(--color-status-brand-fg);
+}
+
+.content {
+  display: grid;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.title {
+  font: var(--type-body-compact);
+}
+
+.item[data-unread]:not([data-seen]) .title {
+  font-weight: 600;
+}
+
+.body {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.time {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-block-start: var(--space-1);
+}
+
+.dot {
+  inline-size: 8px;
+  block-size: 8px;
+  margin-block-start: var(--space-1_5);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-brand-solid);
+  transition:
+    transform var(--motion-duration-transition-sm) var(--motion-ease-exit),
+    opacity var(--motion-duration-transition-sm) var(--motion-ease-exit);
+}
+
+.dot[data-fading] {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.empty {
+  padding: var(--space-6) var(--space-0);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+@media (forced-colors: active) {
+  .badge {
+    border: var(--border-width-hairline) solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .dot {
+    background: Highlight;
+  }
+
+  .tile {
+    border: var(--border-width-hairline) solid CanvasText;
+  }
+}

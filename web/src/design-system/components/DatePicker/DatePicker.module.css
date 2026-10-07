@@ -1,0 +1,443 @@
+/*
+ * Date field, picker, range and date-time (Part 2 §4.5). Segmented dd/mm/yyyy field in the shared field
+ * chrome; calendar popover on the glass `popover` material (elevation 3, radius.lg). Day states: today =
+ * 1 px border.focus ring, selected = accent fill, in range = state.row-selected, unavailable = struck
+ * through, weekend = text.tertiary, holiday = 4 px info dot. MI-28 popover, MI-44 day select.
+ */
+.dateField {
+  position: relative;
+  min-inline-size: 0;
+}
+
+.frame {
+  position: relative;
+  min-inline-size: calc(var(--space-16) * 2);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.dateInput {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  min-inline-size: 0;
+  white-space: nowrap;
+  outline: none;
+}
+
+.dateInput:last-of-type {
+  flex-grow: 1;
+}
+
+.segment {
+  padding: var(--space-0) var(--space-px);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  caret-color: transparent;
+}
+
+.segment[data-type='literal'] {
+  padding: var(--space-0);
+  color: var(--color-text-tertiary);
+}
+
+.segment[data-placeholder] {
+  color: var(--color-text-placeholder);
+}
+
+.segment[data-focused] {
+  background-color: var(--color-interactive-accent-bg);
+  color: var(--color-text-on-accent);
+}
+
+.segment[data-disabled] {
+  color: var(--color-text-disabled);
+}
+
+.rangeDash {
+  flex: none;
+  color: var(--color-text-tertiary);
+}
+
+/* Quick entry box over the segments. */
+.quickEntry {
+  position: absolute;
+  inset: calc(var(--border-width-hairline) * -1);
+  z-index: var(--z-raised);
+  display: flex;
+  align-items: center;
+  padding: var(--space-0) var(--space-inset-control-x);
+  border-radius: inherit;
+  background-color: var(--color-surface-sheet);
+}
+
+.quickEntryField {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.quickEntryInput {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding: var(--space-0);
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  outline: none;
+}
+
+.quickEntryPreview {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline-start: 0;
+  z-index: var(--z-dropdown);
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-raised);
+  box-shadow: var(--elevation-2);
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  white-space: nowrap;
+}
+
+.quickEntryPreview[data-error] {
+  color: var(--color-status-danger-fg);
+}
+
+/* Read-only: the long format as text. */
+.readOnly {
+  cursor: text;
+}
+
+.readOnly:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.empty {
+  color: var(--color-text-tertiary);
+}
+
+/* Calendar popover. */
+.popover {
+  z-index: var(--z-dropdown);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-3);
+  transform-origin: top left;
+  transition:
+    opacity var(--motion-duration-transition-sm) var(--motion-ease-enter),
+    transform var(--motion-duration-transition-sm) var(--motion-ease-enter);
+}
+
+.popover[data-entering] {
+  opacity: 0;
+  transform: translateY(calc(var(--space-1) * -1));
+}
+
+.popover[data-exiting] {
+  opacity: 0;
+  transition-duration: var(--motion-duration-feedback-lg);
+}
+
+.dialog {
+  outline: none;
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.calendar {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.header {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navButton,
+.title {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--size-control-sm);
+  min-inline-size: var(--size-control-sm);
+  padding: var(--space-0) var(--space-1_5);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.title {
+  font: var(--type-heading-4);
+  letter-spacing: var(--type-heading-4-tracking);
+}
+
+.navButton[data-hovered],
+.title[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.navButton[data-pressed],
+.title[data-pressed] {
+  background-color: var(--color-interactive-ghost-bg-pressed);
+}
+
+.navButton[data-focus-visible],
+.title[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-px);
+}
+
+.navButton[data-disabled] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.grid {
+  border-collapse: collapse;
+}
+
+.weekday {
+  padding-block-end: var(--space-1);
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  text-align: center;
+}
+
+.cell,
+.cellEmpty {
+  padding: var(--space-px);
+}
+
+.day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: var(--size-control-md);
+  block-size: var(--size-control-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color var(--motion-duration-feedback-xs) var(--motion-ease-feedback),
+    color var(--motion-duration-feedback-xs) var(--motion-ease-feedback);
+}
+
+@media (pointer: coarse) {
+  .day {
+    inline-size: var(--size-control-lg);
+    block-size: var(--size-control-lg);
+  }
+}
+
+.day[data-weekend] {
+  color: var(--color-text-tertiary);
+}
+
+@media (hover: hover) {
+  .day:hover {
+    background-color: var(--color-interactive-ghost-bg-hover);
+  }
+}
+
+.day[data-today] {
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-border-focus);
+}
+
+.day[data-in-range] {
+  border-radius: var(--radius-none);
+  background-color: var(--color-state-row-selected);
+  color: var(--color-text-primary);
+}
+
+.day[data-selected] {
+  background-color: var(--color-interactive-accent-bg);
+  color: var(--color-text-on-accent);
+}
+
+.day[data-selected]:hover {
+  background-color: var(--color-interactive-accent-bg-hover);
+}
+
+.day[data-pressed] {
+  transform: scale(0.94);
+}
+
+.day[data-focused]:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-px);
+}
+
+.day[data-unavailable],
+.day[data-disabled] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.day[data-unavailable] .dayNumber {
+  text-decoration: line-through;
+}
+
+.day[data-invalid][data-selected] {
+  background-color: var(--color-interactive-danger-bg);
+}
+
+.holidayDot {
+  position: absolute;
+  inset-block-end: var(--space-1);
+  inset-inline-start: 50%;
+  inline-size: var(--space-1);
+  block-size: var(--space-1);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-info-solid);
+  transform: translateX(-50%);
+}
+
+.day[data-selected] .holidayDot {
+  background-color: var(--color-text-on-accent);
+}
+
+/* Month / year quick picker. */
+.monthYear {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: var(--space-3);
+}
+
+.monthGrid,
+.yearGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-1);
+  outline: none;
+}
+
+.yearGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-block-size: calc(var(--size-control-md) * 6);
+  overflow: auto;
+}
+
+.monthItem {
+  display: grid;
+  place-items: center;
+  min-block-size: var(--size-control-md);
+  padding: var(--space-0) var(--space-1);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  cursor: pointer;
+  outline: none;
+}
+
+.monthItem[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.monthItem[data-selected] {
+  background-color: var(--color-interactive-accent-bg);
+  color: var(--color-text-on-accent);
+}
+
+.monthItem[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-px);
+}
+
+/* Footer: quick picks and the business-day note. */
+.footer {
+  display: grid;
+  gap: var(--space-2);
+  padding-block-start: var(--space-2);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.quickPicks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.quickPick {
+  min-block-size: var(--size-control-sm);
+  padding: var(--space-0) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-interactive-secondary-bg);
+  color: var(--color-text-primary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  cursor: pointer;
+  outline: none;
+}
+
+.quickPick[data-hovered] {
+  background-color: var(--color-interactive-secondary-bg-hover);
+}
+
+.quickPick[data-pressed] {
+  background-color: var(--color-interactive-secondary-bg-pressed);
+}
+
+.quickPick[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-px);
+}
+
+.quickPick[data-disabled] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.footerNote {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+@media (forced-colors: active) {
+  .segment[data-focused],
+  .day[data-selected],
+  .monthItem[data-selected] {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .day[data-in-range] {
+    outline: var(--border-width-hairline) dashed Highlight;
+  }
+
+  .day[data-today] {
+    box-shadow: none;
+    outline: var(--border-width-hairline) solid CanvasText;
+  }
+
+  .day[data-unavailable] {
+    color: GrayText;
+  }
+
+  .holidayDot {
+    background-color: CanvasText;
+  }
+}

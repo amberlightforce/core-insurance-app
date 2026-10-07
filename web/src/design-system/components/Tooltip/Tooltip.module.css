@@ -1,0 +1,70 @@
+/* Part 2 §4.15: solid inverse surface, never glass. MI-11: opacity + 4 px from the anchor side. */
+.tooltip {
+  z-index: var(--z-tooltip);
+  max-inline-size: 280px;
+  padding: var(--space-1_5) var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  overflow-wrap: anywhere;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity var(--motion-duration-feedback-md) var(--motion-ease-enter),
+    transform var(--motion-duration-feedback-md) var(--motion-ease-enter);
+}
+
+.tooltip[data-entering] {
+  opacity: 0;
+}
+
+.tooltip[data-placement='top'][data-entering] {
+  transform: translateY(var(--space-1));
+}
+
+.tooltip[data-placement='bottom'][data-entering] {
+  transform: translateY(calc(var(--space-1) * -1));
+}
+
+.tooltip[data-placement='right'][data-entering] {
+  transform: translateX(calc(var(--space-1) * -1));
+}
+
+.tooltip[data-placement='left'][data-entering] {
+  transform: translateX(var(--space-1));
+}
+
+.tooltip[data-exiting] {
+  opacity: 0;
+  transition-duration: var(--motion-duration-feedback-xs);
+}
+
+.content {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.arrow svg {
+  display: block;
+  fill: var(--color-surface-inverse);
+}
+
+.arrow[data-placement='bottom'] svg {
+  transform: rotate(180deg);
+}
+
+.arrow[data-placement='left'] svg {
+  transform: rotate(-90deg);
+}
+
+.arrow[data-placement='right'] svg {
+  transform: rotate(90deg);
+}
+
+@media (forced-colors: active) {
+  .tooltip {
+    border: var(--border-width-hairline) solid CanvasText;
+  }
+}

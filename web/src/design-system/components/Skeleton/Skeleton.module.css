@@ -1,0 +1,87 @@
+/* Part 2 §4.24 skeleton; MI-33 shimmer (30 % highlight sweep every 1,200 ms) and content fade-in. */
+.skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  inline-size: 100%;
+  block-size: 12px;
+  block-size: calc(1lh - var(--space-2));
+  border-radius: var(--radius-sm);
+  background-color: var(--color-skeleton);
+}
+
+.skeleton[data-shape='block'] {
+  block-size: 48px;
+}
+
+.skeleton[data-shape='circle'] {
+  inline-size: var(--size-control-md);
+  block-size: var(--size-control-md);
+  border-radius: var(--radius-full);
+}
+
+/* The highlight starts outside the box, so a zero-duration animation (reduced motion) leaves a static tone. */
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--color-surface-sheet) 55%, transparent) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer var(--motion-duration-shimmer) var(--motion-ease-linear) infinite;
+  animation-fill-mode: none;
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.text {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.region {
+  position: relative;
+}
+
+.fallback {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.content {
+  animation: content-in var(--motion-duration-transition-sm) var(--motion-ease-enter) both;
+}
+
+@keyframes content-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .skeleton {
+    background-color: GrayText;
+  }
+
+  .skeleton::after {
+    display: none;
+  }
+}

@@ -1,0 +1,39 @@
+.kbd {
+  display: inline-flex;
+  gap: var(--space-0_5);
+  align-items: center;
+  flex: none;
+}
+
+.key {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 18px;
+  block-size: 18px;
+  padding: var(--space-0) var(--space-1);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-block-end-width: var(--border-width-thick);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  font: var(--type-mono-sm);
+}
+
+.inverse .key {
+  border-color: transparent;
+  background-color: var(--color-kbd-on-inverse);
+  color: var(--color-text-inverse);
+}
+
+.subtle .key {
+  opacity: 0.55;
+  background-color: transparent;
+  border-color: currentcolor;
+  color: inherit;
+}
+
+@media (forced-colors: active) {
+  .key {
+    border-color: CanvasText;
+  }
+}

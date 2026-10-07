@@ -1,0 +1,121 @@
+/* Breadcrumbs: caption-size trail, current page in text.primary 500, chevron separators. */
+.nav {
+  min-inline-size: 0;
+}
+
+.list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-inline-size: 0;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  min-inline-size: 0;
+  color: var(--color-text-secondary);
+  font: var(--type-body-compact);
+}
+
+.link {
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+}
+
+.link[data-hovered] {
+  color: var(--color-text-link-hover);
+  text-decoration: underline;
+  text-underline-offset: var(--space-0_5);
+}
+
+.link[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.link[data-current] {
+  color: var(--color-text-primary);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: default;
+}
+
+.separator {
+  display: inline-flex;
+  flex: none;
+  margin-inline: var(--space-1);
+  color: var(--color-text-tertiary);
+}
+
+.collapsed {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--size-control-sm);
+  block-size: var(--size-control-sm);
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: none;
+}
+
+.collapsed[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.collapsed[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.popover {
+  z-index: var(--z-dropdown);
+  min-inline-size: 200px;
+  border-radius: var(--radius-lg);
+  outline: none;
+}
+
+.menu {
+  display: grid;
+  padding: var(--space-1);
+  outline: none;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--size-row-list);
+  padding: var(--space-0) var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.menuItem[data-focused] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+@media (forced-colors: active) {
+  .link[data-current] {
+    color: CanvasText;
+  }
+
+  .link {
+    color: LinkText;
+  }
+}

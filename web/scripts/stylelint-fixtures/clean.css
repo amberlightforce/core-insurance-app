@@ -1,0 +1,49 @@
+/* Token-only declarations: the token gate must report nothing here (tokens.stylelint.test.ts). */
+.clean {
+  margin: 0;
+  margin-block: var(--space-2) var(--space-0);
+  padding: var(--space-1_5) calc(var(--space-2) + var(--space-0_5));
+  gap: var(--space-stack-field);
+  inset: 0;
+  inset-inline-start: calc(var(--space-2) * -1);
+  top: 0;
+  left: 50%;
+  border-radius: var(--radius-md);
+  z-index: var(--z-dropdown);
+  font: var(--type-body-compact);
+  font-size: inherit;
+  line-height: 0;
+  letter-spacing: var(--type-heading-1-tracking);
+  color: var(--color-text-primary);
+  background-color: color-mix(in srgb, var(--color-surface-sheet) 60%, transparent);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-border-subtle);
+  transition:
+    transform var(--motion-duration-feedback-sm) var(--motion-ease-standard),
+    opacity var(--motion-duration-feedback-sm) var(--motion-ease-standard);
+  animation: spin var(--motion-duration-spinner) var(--motion-ease-linear) infinite;
+  padding-inline-start: var(--space-2);
+  scroll-margin-top: var(--space-12);
+  scroll-padding-block: var(--space-8);
+  text-indent: 0;
+  border-width: var(--border-width-hairline);
+  border-inline-start-width: var(--border-width-accent);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-block-end: 0;
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+  font-weight: 600;
+}
+
+.cleanWeights {
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: Inter;
+  font-weight: 100 900;
+  src: url('../fonts/inter-latin-opsz-normal.woff2') format('woff2-variations');
+}
+
+.cleanRaised {
+  box-shadow: var(--elevation-2);
+}

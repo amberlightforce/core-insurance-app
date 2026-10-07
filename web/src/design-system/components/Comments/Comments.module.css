@@ -1,0 +1,340 @@
+/*
+ * Comments and pinned comments (Part 2 §4.33), @mention composer (D-FE-08). MI-41 optimistic pending at
+ * 60 % opacity. The thread popover is an overlay, so it uses the popover glass material.
+ */
+
+/* Pin: 16 px speech bubble in brand.solid; resolved = outline neutral. */
+.pin {
+  position: relative;
+  display: inline-flex;
+  gap: var(--space-0_5);
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 24px;
+  min-block-size: 24px;
+  padding: var(--space-0) var(--space-1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-status-brand-solid);
+  font: var(--type-caption);
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.pin svg {
+  fill: currentcolor;
+}
+
+.pin[data-resolved] {
+  color: var(--color-status-neutral-fg);
+}
+
+.pin[data-resolved] svg {
+  fill: none;
+}
+
+.pin[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.pin[data-pressed] {
+  background-color: var(--color-interactive-ghost-bg-pressed);
+}
+
+.pin[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.pinCount {
+  font-variant-numeric: tabular-nums;
+}
+
+.unread {
+  position: absolute;
+  inset-block-start: var(--space-0_5);
+  inset-inline-end: var(--space-0_5);
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-danger-solid);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-surface-sheet);
+}
+
+.popover {
+  z-index: var(--z-dropdown);
+  inline-size: min(360px, calc(100vw - var(--space-8)));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-3);
+}
+
+.thread {
+  display: grid;
+  gap: var(--space-2);
+  max-block-size: min(560px, 70vh);
+  padding: var(--space-3);
+  overflow: auto;
+  outline: none;
+}
+
+.header {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.field {
+  margin: var(--space-0);
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+}
+
+.resolvedNote {
+  margin: var(--space-0);
+  font: var(--type-caption);
+  color: var(--color-text-tertiary);
+}
+
+.comments {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.comment {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+  transition: opacity var(--motion-duration-transition-sm) var(--motion-ease-standard);
+}
+
+.comment[data-pending='sending'] {
+  opacity: 0.6;
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: var(--radius-full);
+  background-color: var(--_avatar, var(--color-avatar-1));
+  color: var(--color-avatar-fg);
+  font: var(--type-caption);
+  font-weight: 600;
+}
+
+.commentMain {
+  display: grid;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.commentHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1_5);
+  align-items: baseline;
+}
+
+.author {
+  font: var(--type-label);
+  color: var(--color-text-primary);
+}
+
+.time {
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-tertiary);
+}
+
+.body {
+  margin: var(--space-0);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.mention {
+  padding: var(--space-0) var(--space-1);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-status-brand-bg);
+  color: var(--color-status-brand-fg);
+  font-weight: 500;
+  text-decoration: none;
+  outline: none;
+}
+
+.mention[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.commentActions {
+  display: flex;
+  gap: var(--space-0_5);
+}
+
+.failed {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  font: var(--type-caption);
+  color: var(--color-status-danger-fg);
+}
+
+.composerBox,
+.editBox {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.composerBox {
+  padding-block-start: var(--space-2);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.composerActions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+/* Composer. */
+.composer {
+  position: relative;
+}
+
+.textarea {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--size-control-lg);
+  padding: var(--space-1_5) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  resize: none;
+  outline: none;
+}
+
+.textarea:hover {
+  border-color: var(--color-border-control-hover);
+}
+
+.textarea:focus-visible,
+.textarea:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 var(--space-0_5) var(--color-state-focus-halo);
+}
+
+.textarea::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.textarea:disabled {
+  background-color: var(--color-interactive-disabled-bg);
+  color: var(--color-text-disabled);
+}
+
+.mentionList {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline-start: 0;
+  z-index: var(--z-dropdown);
+  display: grid;
+  inline-size: min(280px, 100%);
+  max-block-size: 240px;
+  margin: var(--space-0);
+  padding: var(--space-1);
+  overflow: auto;
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--material-popover-solid);
+  box-shadow: var(--elevation-3);
+  list-style: none;
+}
+
+.mentionOption {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-block-size: var(--size-control-md);
+  padding: var(--space-0) var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  cursor: pointer;
+}
+
+.mentionOption[aria-selected='true'] {
+  background-color: var(--color-state-row-selected);
+}
+
+.optionText {
+  display: grid;
+}
+
+.optionMeta {
+  font: var(--type-caption);
+  color: var(--color-text-tertiary);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--size-control-sm);
+  padding: var(--space-0) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background-color: var(--color-interactive-secondary-bg);
+  color: var(--color-text-primary);
+  font: var(--type-label);
+  cursor: pointer;
+  outline: none;
+}
+
+.toggle[data-selected] {
+  border-color: var(--color-interactive-accent-bg);
+  background-color: var(--color-state-row-selected);
+}
+
+.toggle[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (forced-colors: active) {
+  .pin {
+    color: ButtonText;
+  }
+
+  .unread {
+    background-color: Mark;
+    forced-color-adjust: none;
+  }
+
+  .mention {
+    border: var(--border-width-hairline) solid CanvasText;
+  }
+
+  .mentionOption[aria-selected='true'] {
+    outline: var(--border-width-thick) solid Highlight;
+  }
+
+  .textarea {
+    border-color: CanvasText;
+  }
+}

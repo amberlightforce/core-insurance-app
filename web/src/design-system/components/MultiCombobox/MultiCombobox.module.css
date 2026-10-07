@@ -1,0 +1,170 @@
+/*
+ * Multi-select combobox (Part 2 §4.4 multi): chips inside the field, wrapping to at most 3 lines, then «+N».
+ * Chip: radius.sm, 20 px (compact) / 24 px (comfortable), status.neutral.bg, 16 px remove glyph.
+ */
+.multi {
+  min-inline-size: 0;
+}
+
+.frame {
+  --_chip-height: var(--space-5);
+
+  align-items: flex-start;
+  padding-block: calc(
+    (var(--size-control-md) - var(--_chip-height)) / 2 - var(--border-width-hairline)
+  );
+}
+
+:global([data-density='comfortable']) .frame {
+  --_chip-height: var(--size-control-sm);
+}
+
+@media (pointer: coarse) {
+  .frame {
+    --_chip-height: var(--size-control-sm);
+  }
+}
+
+.content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  min-inline-size: 0;
+}
+
+.tagWrap,
+.tagGroup {
+  display: contents;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  min-inline-size: 0;
+  outline: none;
+}
+
+.chip {
+  display: inline-flex;
+  gap: var(--space-0_5);
+  align-items: center;
+  max-inline-size: 100%;
+  block-size: var(--_chip-height);
+  padding-inline: var(--space-1_5) var(--space-0_5);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-status-neutral-bg);
+  color: var(--color-status-neutral-fg);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  cursor: default;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.chip:not(:has(.chipRemove)) {
+  padding-inline-end: var(--space-1_5);
+}
+
+.chip[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-px);
+}
+
+.chip[data-hovered] {
+  background-color: color-mix(
+    in srgb,
+    var(--color-status-neutral-bg),
+    var(--color-text-primary) 6%
+  );
+}
+
+.chipLabel {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chipRemove {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--size-icon-md);
+  block-size: var(--size-icon-md);
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Target size: the 16 px glyph sits in a 24 px hit area (WCAG 2.5.8). */
+.chipRemove::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--space-1) * -1);
+}
+
+.chipRemove[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.chipRemove[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  block-size: var(--_chip-height);
+  padding-inline: var(--space-1_5);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  cursor: pointer;
+  outline: none;
+}
+
+.more[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.more[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-px);
+}
+
+.combo {
+  display: flex;
+  flex: 1 1 var(--space-20);
+  gap: var(--space-1_5);
+  align-items: center;
+  min-inline-size: 0;
+}
+
+.input {
+  min-block-size: var(--_chip-height);
+}
+
+@media (forced-colors: active) {
+  .chip {
+    border: var(--border-width-hairline) solid CanvasText;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+
+  .chip[data-focus-visible],
+  .chipRemove[data-focus-visible],
+  .more[data-focus-visible] {
+    outline-color: Highlight;
+  }
+}
