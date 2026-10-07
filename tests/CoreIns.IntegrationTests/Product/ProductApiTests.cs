@@ -248,8 +248,8 @@ public sealed class ProductApiTests(PostgresFixture database) : IClassFixture<Po
         items["GR-STAMP-AUXF-PH"]["baseChargeCodes"]![0]!.GetValue<string>().ShouldBe("GR-AUXF-PH");
 
         // REQ-PFC-123: rates are MKT pack data; the product references configuration keys only.
-        items["GR-AUXF-PH"]["configKeys"]![0]!.GetValue<string>().ShouldBe("gr.auxfund.ph_rate");
-        items["GR-AUXF-INS"]["configKeys"]![0]!.GetValue<string>().ShouldBe("gr.auxfund.ins_rate");
+        items["GR-AUXF-PH"]["configKeys"]![1]!.GetValue<string>().ShouldBe("tax.levy.auxfund.split.policyholder_share");
+        items["GR-AUXF-INS"]["configKeys"]![1]!.GetValue<string>().ShouldBe("tax.levy.auxfund.split.insurer_share");
         body.ToJsonString().ShouldNotContain("\"rate\"");
 
         var (levies, leviesBody) = await GetAsync(_client, $"/api/pfc/v1/charge-types?hash={hash}&filters=category=LEVY");

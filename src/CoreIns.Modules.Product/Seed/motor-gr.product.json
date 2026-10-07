@@ -333,7 +333,7 @@
       "fiscalCategoryKey": "TAX-IPT",
       "riCedable": false,
       "commissionable": false,
-      "configKeys": [],
+      "configKeys": ["tax.ipt.rate.general", "tax.ipt.motor_class"],
       "legalStatus": "UNVERIFIED",
       "source": "PRD-02 REQ-PFC-117, REQ-PFC-123; rate and treatment are MKT TaxCalculator pack data (Law 5177/2025 Art. 43)",
       "displayOrder": 4
@@ -356,7 +356,7 @@
       "fiscalCategoryKey": "LEVY-AUXF",
       "riCedable": false,
       "commissionable": false,
-      "configKeys": ["gr.auxfund.ph_rate"],
+      "configKeys": ["tax.levy.auxfund.ceiling_rate", "tax.levy.auxfund.split.policyholder_share", "tax.levy.auxfund.base"],
       "legalStatus": "UNVERIFIED",
       "source": "PRD-02 REQ-PFC-124; Law 5113/2024 Art. 14; split pending REQ-MKT-322 (D2)",
       "displayOrder": 5
@@ -377,7 +377,7 @@
       "beneficiary": "GUARANTEE_FUND",
       "riCedable": false,
       "commissionable": false,
-      "configKeys": ["gr.auxfund.ins_rate"],
+      "configKeys": ["tax.levy.auxfund.ceiling_rate", "tax.levy.auxfund.split.insurer_share", "tax.levy.auxfund.base"],
       "legalStatus": "UNVERIFIED",
       "source": "PRD-02 REQ-PFC-125, REQ-PFC-119; Law 5113/2024 Art. 14; split pending REQ-MKT-322 (D2)",
       "displayOrder": 6
@@ -399,7 +399,7 @@
       "fiscalCategoryKey": "TAX-STAMP",
       "riCedable": false,
       "commissionable": false,
-      "configKeys": [],
+      "configKeys": ["tax.levy.auxfund.ph_stamp_duty_rate"],
       "legalStatus": "UNVERIFIED",
       "source": "PRD-02 REQ-PFC-244; Law 5113/2024 Art. 14; rate and applicability are MKT pack data (REQ-MKT-322)",
       "displayOrder": 7
