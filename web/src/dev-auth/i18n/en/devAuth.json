@@ -1,0 +1,12 @@
+{
+  "title": "Local development sign-in",
+  "intro": "Development only: pick a synthetic user. Production sign-in uses Entra ID.",
+  "userLabel": "User",
+  "signIn": "Sign in",
+  "signOut": "Sign out",
+  "signedInAs": "Signed in as {name} (roles: {roles}).",
+  "signInError": "Sign-in failed. Try again.",
+  "loadError": "The development users could not be loaded. Check that the API is running.",
+  "unavailableTitle": "Local sign-in is not available",
+  "unavailableBody": "The API is not running in Development with local sign-in enabled."
+}
