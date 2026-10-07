@@ -19,6 +19,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <!-- Long-transaction guard for key retirement (pg_stat_activity, D-ARC-23a). -->
+    <PackageReference Include="Npgsql" />
     <PackageReference Include="Azure.Security.KeyVault.Keys" />
   </ItemGroup>
 

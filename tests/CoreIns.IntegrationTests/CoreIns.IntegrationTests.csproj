@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CoreIns.Host\CoreIns.Host.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Platform.DataProtection\CoreIns.Platform.DataProtection.csproj" />
   </ItemGroup>
 
 </Project>

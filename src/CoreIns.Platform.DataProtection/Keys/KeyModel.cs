@@ -135,6 +135,10 @@ public interface IDataKeyStore
 /// <summary>
 /// Counts the rows that still use a data-key version (the owning modules' re-encryption / re-index scan). Retirement is
 /// refused while any row remains (D-ARC-23).
+/// <para><b>Contract (D-ARC-23a):</b> an implementation must also <b>refuse</b> (throw) while database transactions
+/// older than MaxStaleForWrite + 2 × RetirementMargin are open, because such a transaction may still commit rows sealed
+/// with the version being retired after the count. Wrap the module scan in <see cref="GuardedRetirementScan"/> (which uses
+/// <see cref="PostgresLongTransactionGuard"/>), and read from the primary, never a lagging replica.</para>
 /// </summary>
 public interface IRetirementScan
 {
