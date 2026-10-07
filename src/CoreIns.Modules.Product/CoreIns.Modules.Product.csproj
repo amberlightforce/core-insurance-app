@@ -1,15 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- PRD-02 Product factory: implementation of the Product module (PostgreSQL schema `pfc`). -->
+  <!--
+    PRD-02 Product factory: implementation of the Product module (PostgreSQL schema `pfc`).
+    SL-PFC slice: one motor product (Motor Private Car), loaded as data, resolved by date. Layout follows docs/module-pattern.md.
+  -->
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The product definition the seed loads (the same document the authoring workflow will submit). -->
+    <EmbeddedResource Include="Seed\motor-gr.product.json" LogicalName="CoreIns.Modules.Product.Seed.motor-gr.product.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
+    <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
   </ItemGroup>
 
 </Project>

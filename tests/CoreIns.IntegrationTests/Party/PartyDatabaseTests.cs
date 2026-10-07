@@ -11,7 +11,7 @@ public sealed class PartyDatabaseTests(PostgresFixture database) : IClassFixture
     [Fact]
     public async Task The_migrate_job_creates_the_pty_tables_idempotently_with_no_delete_for_the_app_role()
     {
-        ModuleCatalog.Databases.Select(d => d.Schema).ShouldBe(["plt", "pty", "mkt"]);
+        ModuleCatalog.Databases.Select(d => d.Schema).ShouldBe(["plt", "pty", "pfc", "mkt"]);
 
         // A second run (every deployment runs the migrate job) changes nothing and does not fail.
         await DatabaseMigrator.MigrateAsync(database.MigratorConnectionString, DatabaseMigrator.DefaultAppRole, NullLogger.Instance, TestContext.Current.CancellationToken);

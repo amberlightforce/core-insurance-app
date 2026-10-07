@@ -4,28 +4,19 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.QuestionSet.evaluate request. PRD inputs: "hash, set, answers"</summary>
+/// <summary>pfc.QuestionSet.evaluate request: artefact hash, question-set code and the answers given so far.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record QuestionSetEvaluateRequest
 {
-    /// <summary>PRD: "hash"</summary>
+    /// <summary>Contract member 'hash'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Hash { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
 
-    /// <summary>PRD: "set"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'set'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("set")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Set { get; init; }
+    public required string Set { get; init; }
 
-    /// <summary>PRD: "answers"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Question code to answer (an answer code for CHOICE questions, an ISO value otherwise)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("answers")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Answers { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyDictionary<string, string> Answers { get; init; }
 }

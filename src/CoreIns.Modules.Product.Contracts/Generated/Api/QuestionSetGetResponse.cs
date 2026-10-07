@@ -4,22 +4,15 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.QuestionSet.get result. PRD outputs: "questions with visible/required flags, knock-out and referral flags"</summary>
+/// <summary>pfc.QuestionSet.get result: the question set of an artefact with all its questions and their answer outcomes. Answers never travel in the query string (D-SLC-05); evaluate them with pfc.QuestionSet.evaluate.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record QuestionSetGetResponse
 {
-    /// <summary>PRD: "questions with visible/required flags"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("questionsVisibleRequiredFlags")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public bool? QuestionsVisibleRequiredFlags { get; init; }
+    /// <summary>Contract member 'artefactHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("artefactHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ArtefactHash { get; init; }
 
-    /// <summary>PRD: "knock-out and referral flags"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("knockOutFlags")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public bool? KnockOutFlags { get; init; }
-
-    /// <summary>PRD: "knock-out and referral flags"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("referralFlags")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public bool? ReferralFlags { get; init; }
+    /// <summary>Contract member 'questionSet'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("questionSet")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.QuestionSetDef QuestionSet { get; init; }
 }

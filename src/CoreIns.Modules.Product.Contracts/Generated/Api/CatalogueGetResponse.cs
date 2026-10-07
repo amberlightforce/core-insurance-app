@@ -4,23 +4,33 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.Catalogue.get result. PRD outputs: "items with terms, finals"</summary>
+/// <summary>pfc.Catalogue.get result: the coverages (with terms and options) and elements of one artefact, plus the final-key bindings. `scope` selects coverages, elements or both (default).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CatalogueGetResponse
 {
-    /// <summary>PRD: "items with terms"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("itemsTerms")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ItemsTerms { get; init; }
+    /// <summary>Contract member 'artefactHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("artefactHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ArtefactHash { get; init; }
 
-    /// <summary>PRD: "finals"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("finals")]
+    /// <summary>Contract member 'product'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("product")]
+    public required string Product { get; init; }
+
+    /// <summary>Contract member 'version'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber Version { get; init; }
+
+    /// <summary>Contract member 'coverages'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coverages")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Finals { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.CatalogueCoverage>? Coverages { get; init; }
+
+    /// <summary>Contract member 'elements'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("elements")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.CatalogueElement>? Elements { get; init; }
+
+    /// <summary>Contract member 'finals'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("finals")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.CatalogueFinal> Finals { get; init; }
 }

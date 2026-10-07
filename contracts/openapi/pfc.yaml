@@ -115,6 +115,86 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/import:
+    post:
+      operationId: pfc.ProductVersion.import
+      summary: Import a product source document
+      description: |-
+        Import a product source document
+
+        Slice operation (SL-PFC): the seed and, later, the authoring workflow load a product version through this path.
+        PRD inputs: product source document, lock flag
+        PRD outputs: product, version, artefact hash
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-031
+      - REQ-PFC-032
+      - REQ-PFC-162
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-01
+      - W2-PFC-04
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-PFC-031, REQ-PFC-032, REQ-PFC-162
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: Not supported in the slice
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.import
+      x-error-codes:
+      - code: PFC-ERR-INVALID-DEFINITION
+        note: the document fails lint; field errors name each finding
+        status: 422
+      - code: PFC-ERR-VERSION-EXISTS
+        note: the version exists with a different artefact (Locked versions are immutable, REQ-PFC-164)
+        status: 409
+      - code: PFC-ERR-WINDOW-OVERLAP
+        note: another Locked version of the product has an intersecting new-business window (BR-PFC-001)
+        status: 409
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §3.3, §7.5
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductVersionImportRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionImportResponse'
+        '200':
+          description: The same version with the same artefact already existed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionImportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/pfc/v1/artifacts/{id}:
     get:
       operationId: pfc.Artifact.get
@@ -501,8 +581,8 @@ paths:
       description: |-
         Question sets and visibility
 
-        PRD inputs: hash, set, answers
-        PRD outputs: questions with visible/required flags, knock-out and referral flags
+        PRD inputs: hash, set (answers are not a query parameter: D-SLC-05, use evaluate)
+        PRD outputs: questions with answer outcomes
       tags:
       - QuestionSet
       x-requirement:
@@ -542,12 +622,6 @@ paths:
         in: query
         required: false
         description: 'PRD: "set"'
-        schema:
-          type: string
-      - name: answers
-        in: query
-        required: false
-        description: 'PRD: "answers"'
         schema:
           type: string
       responses:
@@ -2191,33 +2265,896 @@ components:
         canonicalJsonArtefact:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "canonical JSON artefact"'
+    LocalizedText:
+      type: object
+      description: Greek and English text; the Greek text is the binding master (REQ-PFC-058).
+      properties:
+        el:
+          $ref: ../events/common.schema.json#/$defs/Text
+        en:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - el
+      - en
+    ConfigLegalStatus:
+      type: string
+      enum:
+      - SETTLED
+      - UNVERIFIED
+      - DRAFT
+      description: 'Legal status of a regulatory value (D-REG-01): only SETTLED values may reach production.'
+    CoverageExistence:
+      type: string
+      enum:
+      - REQUIRED
+      - ELECTABLE
+      - SUGGESTED
+      description: Whether a coverage is compulsory, optional, or optional and pre-selected (REQ-PFC-069).
+    CoverageRemoval:
+      type: string
+      enum:
+      - BLOCK
+      - ALLOWED
+      description: Removal rule of a coverage (REQ-PFC-071); BLOCK refuses removal with PFC-VAL-REMOVAL-BLOCKED.
+    CoveredParty:
+      type: string
+      enum:
+      - FIRST_PARTY
+      - THIRD_PARTY
+    TermKind:
+      type: string
+      enum:
+      - OPTION_LIST
+      - RANGE
+      - DIRECT
+      - BOOLEAN
+      - ENUMERATION
+      description: Coverage-term kind (REQ-PFC-073).
+    TermValueType:
+      type: string
+      enum:
+      - MONEY
+      - PERCENTAGE
+      - COUNT
+      - DAYS
+      - HOURS
+      - OTHER
+      description: Value type of a term (REQ-PFC-075).
+    TermModelType:
+      type: string
+      enum:
+      - LIMIT
+      - SUB_LIMIT
+      - DEDUCTIBLE
+      - SUM_INSURED
+      - BENEFIT
+      - WAITING_PERIOD
+      - INDEMNITY_PERIOD
+      - CO_INSURANCE
+      description: Term semantics (REQ-PFC-076).
+    AggregationBasis:
+      type: string
+      enum:
+      - PER_INJURED_PERSON
+      - PER_ACCIDENT
+      - PER_CLAIM
+      - AGGREGATE_PER_TERM
+      - PER_ITEM
+      description: Basis on which a limit aggregates (REQ-PFC-076).
+    FinalBinding:
+      type: object
+      description: 'Binding of a term to a final MKT configuration key (REQ-PFC-085). The product holds the KEY, never the statutory
+        value; `valueAtEffectiveDate` is filled from MKT once the configuration resolver is bound (null until then).'
+      properties:
+        key:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: MKT configuration key, for example gr.mtpl.min_bi_per_person
+        layer:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Configuration layer holding the final, for example COUNTRY
+        legalStatus:
+          $ref: '#/components/schemas/ConfigLegalStatus'
+        source:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: PRD requirement or legal source citation (D-REG-01)
+        valueAtEffectiveDate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+      required:
+      - key
+      - layer
+      - legalStatus
+      - source
+    TermOption:
+      type: object
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        value:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        illustrative:
+          type: boolean
+          description: True when the option is test data, not an approved commercial value (D-SLC-04).
+        source:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Where the value comes from (PRD reference), when it is a stated value
+      required:
+      - code
+      - value
+      - name
+    TermRange:
+      type: object
+      properties:
+        minimum:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        maximum:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        step:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        default:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+      required:
+      - minimum
+      - maximum
+    CoverageTerm:
+      type: object
+      description: Coverage term definition (REQ-PFC-073..080).
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        kind:
+          $ref: '#/components/schemas/TermKind'
+        valueType:
+          $ref: '#/components/schemas/TermValueType'
+        modelType:
+          $ref: '#/components/schemas/TermModelType'
+        aggregationBasis:
+          $ref: '#/components/schemas/AggregationBasis'
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        required:
+          type: boolean
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermOption'
+        range:
+          $ref: '#/components/schemas/TermRange'
+        finalBinding:
+          $ref: '#/components/schemas/FinalBinding'
+        displayOrder:
+          type: integer
+      required:
+      - code
+      - name
+      - kind
+      - valueType
+      - modelType
+      - required
+    CatalogueCoverage:
+      type: object
+      description: Coverage definition with its terms, regulatory codes and reinsurance attributes (REQ-PFC-067..094).
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        existence:
+          $ref: '#/components/schemas/CoverageExistence'
+        removal:
+          $ref: '#/components/schemas/CoverageRemoval'
+        coveredElement:
+          $ref: ../events/common.schema.json#/$defs/Code
+        coveredParty:
+          $ref: '#/components/schemas/CoveredParty'
+        perilTags:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        riCedable:
+          type: boolean
+        requires:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        regulatory:
+          type: object
+          additionalProperties:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Regime (SII_LOB, IPT_CLASS, STAT_CLASS, AUTH_CLASS, IFRS17_PORTFOLIO) to code (REQ-PFC-005). A regime
+            with no PRD-stated code is absent.
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoverageTerm'
+        displayOrder:
+          type: integer
+      required:
+      - code
+      - name
+      - existence
+      - removal
+      - coveredElement
+      - terms
+    FieldDataType:
+      type: string
+      enum:
+      - TEXT
+      - INTEGER
+      - DECIMAL
+      - MONEY
+      - DATE
+      - BOOLEAN
+      - CHOICE
+      description: Data types the slice needs from REQ-PFC-051.
+    PiiClass:
+      type: string
+      enum:
+      - P0
+      - P1
+      - P2
+      - P3
+      description: Personal-data class of a field (BR-PFC-078).
+    ElementField:
+      type: object
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        label:
+          $ref: '#/components/schemas/LocalizedText'
+        dataType:
+          $ref: '#/components/schemas/FieldDataType'
+        required:
+          type: boolean
+        requiredAt:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Checkpoints (QUOTE, BIND, ISSUE) at which the field is required (REQ-PFC-056)
+        piiClass:
+          $ref: '#/components/schemas/PiiClass'
+        choices:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Allowed codes of a CHOICE field
+        unit:
+          $ref: ../events/common.schema.json#/$defs/Code
+        minimum:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        maximum:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        displayOrder:
+          type: integer
+      required:
+      - code
+      - label
+      - dataType
+      - required
+      - piiClass
+    CatalogueElement:
+      type: object
+      description: Element type (policy line, vehicle, driver) with its fields (REQ-PFC-048, REQ-PFC-050).
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        parent:
+          $ref: ../events/common.schema.json#/$defs/Code
+        minimum:
+          type: integer
+        maximum:
+          type: integer
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/ElementField'
+      required:
+      - code
+      - name
+      - minimum
+      - maximum
+      - fields
+    CatalogueFinal:
+      type: object
+      properties:
+        coverage:
+          $ref: ../events/common.schema.json#/$defs/Code
+        term:
+          $ref: ../events/common.schema.json#/$defs/Code
+        binding:
+          $ref: '#/components/schemas/FinalBinding'
+      required:
+      - coverage
+      - term
+      - binding
     CatalogueGetResponse:
       type: object
-      description: 'pfc.Catalogue.get result. PRD outputs: "items with terms, finals"'
+      description: 'pfc.Catalogue.get result: the coverages (with terms and options) and elements of one artefact, plus the
+        final-key bindings. `scope` selects coverages, elements or both (default).'
       properties:
-        itemsTerms:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items with terms"'
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        coverages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogueCoverage'
+        elements:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogueElement'
         finals:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "finals"'
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogueFinal'
+      required:
+      - artefactHash
+      - product
+      - version
+      - finals
     CatalogueGetItemResponse:
       type: object
-      description: 'pfc.Catalogue.getItem result. PRD outputs: "items with terms, finals"'
+      description: 'pfc.Catalogue.getItem result: one coverage or element by code, with the final bindings of its terms.'
       properties:
-        itemsTerms:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items with terms"'
+        coverage:
+          $ref: '#/components/schemas/CatalogueCoverage'
+        element:
+          $ref: '#/components/schemas/CatalogueElement'
         finals:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "finals"'
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogueFinal'
+      required:
+      - finals
+    ChargeCategory:
+      type: string
+      enum:
+      - PREMIUM
+      - TAX
+      - LEVY
+      - FEE
+      - SURCHARGE
+      - DISCOUNT
+      - CREDIT
+      description: Charge-type category (REQ-PFC-113).
+    ChargeHandling:
+      type: string
+      enum:
+      - PRO_RATA
+      - FLAT
+      - FULLY_EARNED
+      description: REQ-PFC-114.
+    EarningPattern:
+      type: string
+      enum:
+      - DAILY_PRO_RATA
+      - AT_INCEPTION
+      description: REQ-PFC-115.
+    CancellationTreatment:
+      type: string
+      enum:
+      - FOLLOW_PRODUCT_REFUND
+      - PRO_RATA
+      - SHORT_RATE
+      - NON_REFUNDABLE
+      - PACK_TAX_TREATMENT
+      description: REQ-PFC-116; every tax and levy charge type is PACK_TAX_TREATMENT (answered by MKT TaxCalculator.treatment).
+    BillingTreatment:
+      type: string
+      enum:
+      - BILLED
+      - ACCRUED_NOT_BILLED
+      description: REQ-PFC-119.
+    ChargeBeneficiary:
+      type: string
+      enum:
+      - INSURER
+      - TAX_AUTHORITY
+      - GUARANTEE_FUND
+      - THIRD_PARTY
+      description: REQ-PFC-120.
+    ChargeComputedBy:
+      type: string
+      enum:
+      - RATING
+      - TAX_CALCULATOR
+      description: Premium-like charges come from RAT; tax and levy charges from the MKT TaxCalculator (REQ-PFC-123).
     ChargeTypeListItem:
       type: object
-      description: 'pfc.ChargeType.list result. PRD outputs: "charge types"'
+      description: 'One charge type of a version (REQ-PFC-004, -113..-125, -250). Tax and levy charge types hold no rate: the
+        rate lives in MKT pack data, referenced through `configKeys` (REQ-PFC-123).'
       properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        category:
+          $ref: '#/components/schemas/ChargeCategory'
+        writtenPremium:
+          type: boolean
+          description: Derived from the category, never authored (REQ-PFC-250)
+        computedBy:
+          $ref: '#/components/schemas/ChargeComputedBy'
+        coverage:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Coverage the charge is premium for, when it is a premium charge
+        baseChargeCodes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: For tax and levy charges, the charge types forming the base
+        handling:
+          $ref: '#/components/schemas/ChargeHandling'
+        earningPattern:
+          $ref: '#/components/schemas/EarningPattern'
+        cancellationTreatment:
+          $ref: '#/components/schemas/CancellationTreatment'
+        reemitOnReapply:
+          type: boolean
+        billingTreatment:
+          $ref: '#/components/schemas/BillingTreatment'
+        taxClass:
+          $ref: ../events/common.schema.json#/$defs/Code
+        includedInTaxBases:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Tax and levy charge types whose base contains this charge (REQ-PFC-117)
+        glKey:
+          $ref: ../events/common.schema.json#/$defs/Code
+        beneficiary:
+          $ref: '#/components/schemas/ChargeBeneficiary'
+        fiscalCategoryKey:
+          $ref: ../events/common.schema.json#/$defs/Code
+        riCedable:
+          type: boolean
+        commissionable:
+          type: boolean
+        configKeys:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Text
+          description: MKT configuration keys the charge's computation reads (references only, no values)
+        legalStatus:
+          $ref: '#/components/schemas/ConfigLegalStatus'
+        source:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: PRD requirement that states the charge type
+        displayOrder:
+          type: integer
+      required:
+      - code
+      - name
+      - category
+      - writtenPremium
+      - computedBy
+      - handling
+      - earningPattern
+      - cancellationTreatment
+      - reemitOnReapply
+      - billingTreatment
+      - glKey
+      - beneficiary
+      - riCedable
+      - commissionable
+      - configKeys
+    QuestionSetType:
+      type: string
+      enum:
+      - PRE_QUALIFICATION
+      - UNDERWRITING
+      - DEMANDS_AND_NEEDS
+      - OFFERING_SELECTION
+      - PORTAL
+      description: Question-set type (REQ-PFC-109).
+    QuestionAnswerType:
+      type: string
+      enum:
+      - CHOICE
+      - INTEGER
+      - DECIMAL
+      - DATE
+      - TEXT
+      description: Answer types the slice needs (yes/no is a CHOICE with codes YES and NO).
+    AnswerOutcome:
+      type: string
+      enum:
+      - NONE
+      - KNOCK_OUT
+      - REFERRAL
+      description: Per-answer outcome (REQ-PFC-006, REQ-PFC-109); KNOCK_OUT stops the quote, REFERRAL sends it to UW.
+    QuestionAnswer:
+      type: object
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        label:
+          $ref: '#/components/schemas/LocalizedText'
+        outcome:
+          $ref: '#/components/schemas/AnswerOutcome'
+        reasonKey:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Message key explaining a knock-out or referral
+        uwRuleCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: UW rule that handles a referral; null in the slice (UW content is owned by UW)
+      required:
+      - code
+      - label
+      - outcome
+    QuestionCondition:
+      type: object
+      description: 'Declarative display/requiredness rule: the question applies when another question was answered with one of
+        the listed answer codes (REQ-PFC-061).'
+      properties:
+        question:
+          $ref: ../events/common.schema.json#/$defs/Code
+        answeredWith:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - question
+      - answeredWith
+    Question:
+      type: object
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        text:
+          $ref: '#/components/schemas/LocalizedText'
+        answerType:
+          $ref: '#/components/schemas/QuestionAnswerType'
+        required:
+          type: boolean
+        customerVisible:
+          type: boolean
+          description: REQ-PFC-059
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAnswer'
+          description: Allowed answers of a CHOICE question
+        mapsToField:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Element field the answer feeds, as element.field (REQ-PFC-109)
+        visibleWhen:
+          $ref: '#/components/schemas/QuestionCondition'
+        requiredWhen:
+          $ref: '#/components/schemas/QuestionCondition'
+        illustrative:
+          type: boolean
+          description: True when the question or its outcomes are test data, not approved underwriting content (D-SLC-04).
+        displayOrder:
+          type: integer
+      required:
+      - code
+      - text
+      - answerType
+      - required
+      - customerVisible
+    QuestionSetDef:
+      type: object
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        type:
+          $ref: '#/components/schemas/QuestionSetType'
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+      required:
+      - code
+      - type
+      - name
+      - questions
+    QuestionSetGetResponse:
+      type: object
+      description: 'pfc.QuestionSet.get result: the question set of an artefact with all its questions and their answer
+        outcomes. Answers never travel in the query string (D-SLC-05); evaluate them with pfc.QuestionSet.evaluate.'
+      properties:
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        questionSet:
+          $ref: '#/components/schemas/QuestionSetDef'
+      required:
+      - artefactHash
+      - questionSet
+    QuestionSetEvaluateRequest:
+      type: object
+      description: 'pfc.QuestionSet.evaluate request: artefact hash, question-set code and the answers given so far.'
+      properties:
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        set:
+          $ref: ../events/common.schema.json#/$defs/Code
+        answers:
+          type: object
+          additionalProperties:
+            $ref: ../events/common.schema.json#/$defs/Text
+          description: Question code to answer (an answer code for CHOICE questions, an ISO value otherwise)
+      required:
+      - hash
+      - set
+      - answers
+    QuestionState:
+      type: object
+      properties:
+        question:
+          $ref: ../events/common.schema.json#/$defs/Code
+        visible:
+          type: boolean
+        required:
+          type: boolean
+        answered:
+          type: boolean
+      required:
+      - question
+      - visible
+      - required
+      - answered
+    QuestionOutcomeHit:
+      type: object
+      properties:
+        question:
+          $ref: ../events/common.schema.json#/$defs/Code
+        answer:
+          $ref: ../events/common.schema.json#/$defs/Code
+        reasonKey:
+          $ref: ../events/common.schema.json#/$defs/Code
+        uwRuleCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - question
+      - answer
+    QuestionSetEvaluateResponse:
+      type: object
+      description: 'pfc.QuestionSet.evaluate result: visible/required flag per question, knock-out and referral hits, and
+        the visible required questions still unanswered.'
+      properties:
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionState'
+        knockOuts:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionOutcomeHit'
+        referrals:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionOutcomeHit'
+        missingRequired:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        complete:
+          type: boolean
+          description: True when no visible required question is unanswered
+      required:
+      - questions
+      - knockOuts
+      - referrals
+      - missingRequired
+      - complete
+    ProductLineDef:
+      type: object
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        family:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: motor, property, liability, accident, assistance or other (REQ-PFC-030)
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - code
+      - family
+      - name
+    ProductHeader:
+      type: object
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        abbreviation:
+          $ref: ../events/common.schema.json#/$defs/Code
+        productType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: PERSONAL or COMMERCIAL
+        customerType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: PERSON, ORGANISATION or ANY
+      required:
+      - code
+      - name
+      - productType
+      - customerType
+    ProductWindows:
+      type: object
+      description: New-business and renewal windows of a version (REQ-PFC-166); half-open, `to` null when open.
+      properties:
+        newBusiness:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        renewal:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+      required:
+      - newBusiness
+      - renewal
+    ProductTerms:
+      type: object
+      properties:
+        allowed:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Duration
+        default:
+          $ref: ../events/common.schema.json#/$defs/Duration
+      required:
+      - allowed
+      - default
+    UwRuleSetReference:
+      type: object
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        range:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - code
+      - range
+    ProductReferences:
+      type: object
+      description: References to artefacts owned by other modules (REQ-PFC-010, -129..-133).
+      properties:
+        rating:
+          $ref: ../events/common.schema.json#/$defs/RatingSlotDeclaration
+        uwRuleSets:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/UwRuleSetReference'
+          description: Checkpoint (PRE_QUOTE, PRE_BIND) to rule-set reference
+        paymentPlans:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: ../events/common.schema.json#/$defs/Code
+          description: Channel to the payment-plan codes offered (REQ-PFC-133)
+      required:
+      - rating
+    ProductArtefact:
+      type: object
+      description: 'The compiled product version (PRD-02 §7.6): the canonical JSON whose SHA-256 is the artefact hash. The
+        same document, hand-authored, is the product source the import path accepts (the seed and, later, the authoring
+        workflow). The slice carries the policy line, elements, coverages, question sets, charge types and references; the
+        rest of the PRD-02 hierarchy arrives with its work packages.'
+      properties:
+        schemaVersion:
+          type: integer
+          description: Product schema version (1)
+        productLine:
+          $ref: '#/components/schemas/ProductLineDef'
+        product:
+          $ref: '#/components/schemas/ProductHeader'
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        jurisdiction:
+          $ref: ../events/common.schema.json#/$defs/CountryCode
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        isAbstract:
+          type: boolean
+        channels:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        contractCurrency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        languages:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/LanguageCode
+        terms:
+          $ref: '#/components/schemas/ProductTerms'
+        offeringRequired:
+          type: boolean
+        dayCount:
+          $ref: ../events/common.schema.json#/$defs/Code
+        windows:
+          $ref: '#/components/schemas/ProductWindows'
+        elements:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogueElement'
+        coverages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogueCoverage'
+        questionSets:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionSetDef'
         chargeTypes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "charge types"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeTypeListItem'
+        references:
+          $ref: '#/components/schemas/ProductReferences'
+      required:
+      - schemaVersion
+      - productLine
+      - product
+      - legalEntity
+      - jurisdiction
+      - version
+      - isAbstract
+      - channels
+      - contractCurrency
+      - languages
+      - terms
+      - offeringRequired
+      - windows
+      - elements
+      - coverages
+      - questionSets
+      - chargeTypes
+      - references
+    ProductVersionImportRequest:
+      type: object
+      description: 'pfc.ProductVersion.import request: a product source document. The import validates and compiles it
+        (canonical JSON, SHA-256), stores the product, version and artefact, and, with `lock`, takes the version through
+        Submitted and Approved to Locked in one step (the seed path; the approval workflow replaces `lock` later).'
+      properties:
+        definition:
+          $ref: '#/components/schemas/ProductArtefact'
+        lock:
+          type: boolean
+          description: Publish the version (Locked) in the same call
+      required:
+      - definition
+      - lock
+    ProductVersionImportResponse:
+      type: object
+      properties:
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - LOCKED
+        created:
+          type: boolean
+          description: False when the same version with the same artefact already existed (idempotent import)
+      required:
+      - product
+      - version
+      - artefactHash
+      - status
+      - created
     ChargeTypeListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -2235,47 +3172,6 @@ components:
         codesListVersions:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "codes with list versions"'
-    QuestionSetGetResponse:
-      type: object
-      description: 'pfc.QuestionSet.get result. PRD outputs: "questions with visible/required flags, knock-out and referral
-        flags"'
-      properties:
-        questionsVisibleRequiredFlags:
-          type: boolean
-          description: 'PRD: "questions with visible/required flags"'
-        knockOutFlags:
-          type: boolean
-          description: 'PRD: "knock-out and referral flags"'
-        referralFlags:
-          type: boolean
-          description: 'PRD: "knock-out and referral flags"'
-    QuestionSetEvaluateRequest:
-      type: object
-      description: 'pfc.QuestionSet.evaluate request. PRD inputs: "hash, set, answers"'
-      properties:
-        hash:
-          $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash"'
-        set:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "set"'
-        answers:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "answers"'
-    QuestionSetEvaluateResponse:
-      type: object
-      description: 'pfc.QuestionSet.evaluate result. PRD outputs: "questions with visible/required flags, knock-out and referral
-        flags"'
-      properties:
-        questionsVisibleRequiredFlags:
-          type: boolean
-          description: 'PRD: "questions with visible/required flags"'
-        knockOutFlags:
-          type: boolean
-          description: 'PRD: "knock-out and referral flags"'
-        referralFlags:
-          type: boolean
-          description: 'PRD: "knock-out and referral flags"'
     PogGetResponse:
       type: object
       description: 'pfc.Pog.get result. PRD outputs: "target market, negative, strategy, testing summary, review status"'
