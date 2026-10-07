@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Shared value types (Money, DateRange, strongly typed IDs, ...) used by every module. Filled by F-1b.
+    Rule: references nothing internal (checked by CoreIns.ArchitectureTests).
+  -->
+
+</Project>

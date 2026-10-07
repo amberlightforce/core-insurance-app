@@ -1,0 +1,121 @@
+# Manual deployment of one stamp to Azure (INFRASTRUCTURE §6.5). OIDC federation, no stored Azure credentials.
+#
+# Required per GitHub environment (`dev`, `prod`):
+#   vars.AZURE_CLIENT_ID              - app registration / user-assigned identity with a federated credential for this repo
+#   vars.AZURE_TENANT_ID              - Entra tenant
+#   vars.AZURE_SUBSCRIPTION_ID        - target subscription
+#   vars.AZURE_RESOURCE_GROUP         - rg-coreins-<env>-<region>, pre-created; the identity needs Owner (role assignments)
+#                                       or Contributor + User Access Administrator on it
+#   vars.ENTRA_CLIENT_ID              - staff app registration used by Container Apps built-in authentication
+#   secrets.PG_ADMIN_PASSWORD         - PostgreSQL server administrator password
+#   secrets.APP_DB_PASSWORD           - password of the `app` database role
+#   secrets.MIGRATOR_DB_PASSWORD      - password of the `migrator` database role
+# Additionally for `prod`:
+#   vars.STAMP_LEGAL_ENTITY           - legal entity code of the stamp
+#   vars.IMMUTABILITY_RETENTION_DAYS  - blob immutability retention from the PLT retention catalogue
+# Key Vault secret `entra-client-secret` (the app registration client secret) is created manually after provisioning.
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target stamp
+        type: choice
+        options: [dev, prod]
+        default: dev
+      provision:
+        description: Run the Bicep deployment before updating the apps
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: ${{ inputs.environment }}
+    env:
+      RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      IMAGE_TAG: ${{ github.sha }}
+      PG_ADMIN_PASSWORD: ${{ secrets.PG_ADMIN_PASSWORD }}
+      APP_DB_PASSWORD: ${{ secrets.APP_DB_PASSWORD }}
+      MIGRATOR_DB_PASSWORD: ${{ secrets.MIGRATOR_DB_PASSWORD }}
+      ENTRA_CLIENT_ID: ${{ vars.ENTRA_CLIENT_ID }}
+      STAMP_LEGAL_ENTITY: ${{ vars.STAMP_LEGAL_ENTITY }}
+      IMMUTABILITY_RETENTION_DAYS: ${{ vars.IMMUTABILITY_RETENTION_DAYS }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Provision infrastructure (registry first, apps after the image exists)
+        if: ${{ inputs.provision }}
+        run: |
+          az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "coreins-infra-${{ github.run_id }}" \
+            --template-file infra/azure/main.bicep \
+            --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
+            --parameters deployApps=false
+
+      - name: Build and push the image
+        run: |
+          ACR_LOGIN_SERVER=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].loginServer" -o tsv)
+          az acr login --name "${ACR_LOGIN_SERVER%%.*}"
+          docker build --tag "$ACR_LOGIN_SERVER/coreins:$IMAGE_TAG" .
+          docker push "$ACR_LOGIN_SERVER/coreins:$IMAGE_TAG"
+
+      - name: Run database migrations with the new image (job `migrate`) and wait
+        run: |
+          set -euo pipefail
+          ACR_LOGIN_SERVER=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].loginServer" -o tsv)
+          if az containerapp job show --name migrate --resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
+            az containerapp job update --name migrate --resource-group "$RESOURCE_GROUP" \
+              --image "$ACR_LOGIN_SERVER/coreins:$IMAGE_TAG" > /dev/null
+          else
+            # First deployment: create the job (and the apps) from the templates.
+            az deployment group create \
+              --resource-group "$RESOURCE_GROUP" \
+              --name "coreins-first-${{ github.run_id }}" \
+              --template-file infra/azure/main.bicep \
+              --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
+              --parameters deployApps=true imageTag="$IMAGE_TAG"
+          fi
+          EXECUTION=$(az containerapp job start --name migrate --resource-group "$RESOURCE_GROUP" --query name -o tsv)
+          for _ in $(seq 1 90); do
+            STATUS=$(az containerapp job execution show --name migrate --resource-group "$RESOURCE_GROUP" \
+              --job-execution-name "$EXECUTION" --query properties.status -o tsv)
+            echo "migrate: $STATUS"
+            case "$STATUS" in
+              Succeeded) exit 0 ;;
+              Failed|Stopped|Degraded) exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo "migrate did not finish in time" && exit 1
+
+      - name: Update gotenberg, worker and api to the new image
+        run: |
+          az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "coreins-apps-${{ github.run_id }}" \
+            --template-file infra/azure/main.bicep \
+            --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
+            --parameters deployApps=true imageTag="$IMAGE_TAG"
+
+      - name: Smoke test
+        run: |
+          FQDN=$(az containerapp show --name api --resource-group "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv)
+          curl --fail --silent --show-error "https://$FQDN/health/live"

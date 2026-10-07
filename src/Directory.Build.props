@@ -1,0 +1,20 @@
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!--
+    Production code rules.
+    COREINS001 (tools/CoreIns.Analyzers) forbids floating point - System.Double / System.Single, i.e. `double` and
+    `float` - anywhere in production code: declarations, literals, conversions and generic arguments. Money, rates and
+    percentages are decimal (ARCHITECTURE-DECISIONS §2 rule 2). Violations are build errors.
+    (Microsoft.CodeAnalysis.BannedApiAnalyzers was evaluated and rejected: RS0030 does not report keyword types,
+    literals or implicit conversions, so `double x = 1.5;` passes it.)
+  -->
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\tools\CoreIns.Analyzers\CoreIns.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/coverage/
+**/TestResults/
+**/.vs/
+**/.idea/
+**/*.user
+**/.env
+.git/
+.github/
+.claude/
+orchestration/
+artifacts/
+infra/
+tests/

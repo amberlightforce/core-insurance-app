@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Cyprus stub country pack, run in CI to prove core code is country-neutral. Implements interfaces from module
+    Contracts. Core code never references a country pack; only the Host composes it (checked by CoreIns.ArchitectureTests).
+  -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>
