@@ -10,7 +10,7 @@ public static class BillingErrorCodes
 {
     /// <summary>BIL-ERR-AMOUNT-MISMATCH (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void.</para>
+    /// <para>Declared by 6 operation(s): bil.Allocation.allocate, bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void.</para>
     /// </remarks>
     public const string AmountMismatch = "BIL-ERR-AMOUNT-MISMATCH";
 
@@ -40,7 +40,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-CURRENCY (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): bil.BillingAccount.attachTerm, bil.BillingAccount.moveTerm.</para>
+    /// <para>Declared by 4 operation(s): bil.Allocation.allocate, bil.BillingAccount.attachTerm, bil.BillingAccount.moveTerm, bil.Payment.take.</para>
     /// </remarks>
     public const string Currency = "BIL-ERR-CURRENCY";
 
@@ -100,7 +100,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-METHOD-NOT-ALLOWED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void.</para>
+    /// <para>Declared by 6 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Payment.take.</para>
     /// </remarks>
     public const string MethodNotAllowed = "BIL-ERR-METHOD-NOT-ALLOWED";
 
@@ -127,6 +127,12 @@ public static class BillingErrorCodes
     /// <para>Declared by 2 operation(s): bil.PaymentPlan.change, bil.PaymentPlan.select.</para>
     /// </remarks>
     public const string NotEligible = "BIL-ERR-NOT-ELIGIBLE";
+
+    /// <summary>BIL-ERR-NOT-FOUND (HTTP 404).</summary>
+    /// <remarks>
+    /// <para>Declared by 5 operation(s): bil.Allocation.allocate, bil.BillingAccount.get, bil.Invoice.get, bil.Payment.take, bil.Receipt.get.</para>
+    /// </remarks>
+    public const string NotFound = "BIL-ERR-NOT-FOUND";
 
     /// <summary>BIL-ERR-NOT-PERMITTED (HTTP 403).</summary>
     /// <remarks>
@@ -188,6 +194,18 @@ public static class BillingErrorCodes
     /// </remarks>
     public const string Source = "BIL-ERR-SOURCE";
 
+    /// <summary>BIL-ERR-STALE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): bil.Allocation.allocate.</para>
+    /// </remarks>
+    public const string Stale = "BIL-ERR-STALE";
+
+    /// <summary>BIL-ERR-VALIDATION (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): bil.Allocation.allocate, bil.Payment.take.</para>
+    /// </remarks>
+    public const string Validation = "BIL-ERR-VALIDATION";
+
     /// <summary>BIL-ERR-VOP-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): bil.PayeeAccount.verify.</para>
@@ -198,7 +216,7 @@ public static class BillingErrorCodes
     public const string Prefix = "BIL-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AmountMismatch, ApprovalMismatch, ApprovalRequired, BalanceNotZero, Charset, Currency, DayNotClosed, Duplicate, Entity, HeldItems, IbanInvalid, IdempotencyMismatch, LegalHold, LiveActivity, MandateState, MethodNotAllowed, MethodUnavailable, NoCollectAuthority, NoCredit, NotEligible, NotPermitted, NotStoppable, NoticeClockRunning, OpenObligation, OverAllocation, PayeeBlocked, PayerRole, Plan, RedressRoute, Source, VopUnavailable];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AmountMismatch, ApprovalMismatch, ApprovalRequired, BalanceNotZero, Charset, Currency, DayNotClosed, Duplicate, Entity, HeldItems, IbanInvalid, IdempotencyMismatch, LegalHold, LiveActivity, MandateState, MethodNotAllowed, MethodUnavailable, NoCollectAuthority, NoCredit, NotEligible, NotFound, NotPermitted, NotStoppable, NoticeClockRunning, OpenObligation, OverAllocation, PayeeBlocked, PayerRole, Plan, RedressRoute, Source, Stale, Validation, VopUnavailable];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -223,6 +241,7 @@ public static class BillingErrorCodes
         [NoCollectAuthority] = 403,
         [NoCredit] = 422,
         [NotEligible] = 422,
+        [NotFound] = 404,
         [NotPermitted] = 403,
         [NotStoppable] = 422,
         [NoticeClockRunning] = 422,
@@ -233,6 +252,8 @@ public static class BillingErrorCodes
         [Plan] = 422,
         [RedressRoute] = 422,
         [Source] = 422,
+        [Stale] = 409,
+        [Validation] = 422,
         [VopUnavailable] = 503,
     };
 }

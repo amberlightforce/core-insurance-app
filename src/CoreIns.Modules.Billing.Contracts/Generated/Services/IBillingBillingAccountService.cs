@@ -26,9 +26,9 @@ public interface IBillingBillingAccountService
     /// <remarks>
     /// <para>Operation bil.BillingAccount.get (query; HTTP GET /api/bil/v1/billing-accounts/{id}).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-001, REQ-BIL-030, REQ-BIL-031 (SL-BIL). Wave W5.</para>
     /// <para>Exposure: ui, partner; consumers: CHN, DOC, POL, PTY.</para>
-    /// <para>Errors: BIL-ERR-BALANCE-NOT-ZERO (422), BIL-ERR-PAYER-ROLE (422).</para>
+    /// <para>Errors: BIL-ERR-NOT-FOUND (404), BIL-ERR-BALANCE-NOT-ZERO (422), BIL-ERR-PAYER-ROLE (422).</para>
     /// </remarks>
     /// <param name="id">Identifier of the BillingAccount</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.BillingAccountGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);

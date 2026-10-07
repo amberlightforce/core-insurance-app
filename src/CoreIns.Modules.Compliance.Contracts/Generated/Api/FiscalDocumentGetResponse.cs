@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.FiscalDocument.get result. PRD outputs: "document, identifiers"</summary>
+/// <summary>Typed from REQ-CMP-054. PRD outputs: "document, identifiers"</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalDocumentGetResponse
 {
-    /// <summary>PRD: "document"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'document'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("document")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Document { get; init; }
+    public required global::CoreIns.Modules.Compliance.Contracts.Api.FiscalDocumentView Document { get; init; }
 
-    /// <summary>PRD: "identifiers"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'identifiers'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("identifiers")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Identifiers { get; init; }
+    public required global::CoreIns.Modules.Compliance.Contracts.Api.FiscalDocumentIdentifiers Identifiers { get; init; }
 }

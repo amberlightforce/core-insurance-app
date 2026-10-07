@@ -156,8 +156,44 @@
       "file": "unspecified"
     },
     "cmp.FiscalDocument.get": {
-      "document": "unspecified",
-      "identifiers": "unspecified"
+      "document": {
+        "fiscalDocumentId": "01926e81-f57d-78f0-8497-a350a8b72b2e",
+        "status": "PENDING",
+        "sourceType": "SAMPLE_CODE",
+        "sourceId": "Sample text",
+        "role": "ISSUE",
+        "revision": 1,
+        "documentType": "SAMPLE_CODE",
+        "documentTypeIsPlaceholder": true,
+        "issueDate": "2026-10-07",
+        "counterpartyPartyId": "0192eec8-ffb6-7ffd-8f58-90f3c1a35e25",
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "lines": [
+          {
+            "fiscalCategoryKey": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "chargeId": "01926359-438d-7ca6-81a5-b4382d091b4c"
+          }
+        ],
+        "rejectionCodes": [
+          "SAMPLE_CODE"
+        ]
+      },
+      "identifiers": {
+        "series": "Sample text",
+        "number": "Sample text",
+        "mark": "Sample text",
+        "uid": "Sample text",
+        "qrPayloadRef": "Sample text",
+        "channel": "SAMPLE_CODE",
+        "stub": true
+      }
     },
     "cmp.FiscalDocument.import": {
       "key": "value"
@@ -738,8 +774,53 @@
       "status": "unspecified"
     },
     "FiscalDocumentGetResponse": {
-      "document": "unspecified",
-      "identifiers": "unspecified"
+      "document": {
+        "fiscalDocumentId": "0192907e-35c8-7adc-8bcc-e992cda051d2",
+        "status": "PENDING",
+        "sourceType": "SAMPLE_CODE",
+        "sourceId": "Sample text",
+        "role": "ISSUE",
+        "revision": 1,
+        "documentType": "SAMPLE_CODE",
+        "documentTypeIsPlaceholder": true,
+        "issueDate": "2026-10-07",
+        "counterpartyPartyId": "0192e0cd-c400-7bdd-8558-57c1f5044493",
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "lines": [
+          {
+            "fiscalCategoryKey": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "chargeId": "0192a10f-010d-79af-8580-17b2db0b3060"
+          }
+        ],
+        "rejectionCodes": [
+          "SAMPLE_CODE"
+        ]
+      },
+      "identifiers": {
+        "series": "Sample text",
+        "number": "Sample text",
+        "mark": "Sample text",
+        "uid": "Sample text",
+        "qrPayloadRef": "Sample text",
+        "channel": "SAMPLE_CODE",
+        "stub": true
+      }
+    },
+    "FiscalDocumentIdentifiers": {
+      "series": "Sample text",
+      "number": "Sample text",
+      "mark": "Sample text",
+      "uid": "Sample text",
+      "qrPayloadRef": "Sample text",
+      "channel": "SAMPLE_CODE",
+      "stub": true
     },
     "FiscalDocumentImportRequest": {
       "legacyRecords": "unspecified",
@@ -802,6 +883,35 @@
     },
     "FiscalDocumentResubmitResponse": {
       "status": "unspecified"
+    },
+    "FiscalDocumentView": {
+      "fiscalDocumentId": "019256dd-a7f0-7151-861f-255b47aba9ed",
+      "status": "PENDING",
+      "sourceType": "SAMPLE_CODE",
+      "sourceId": "Sample text",
+      "role": "ISSUE",
+      "revision": 1,
+      "documentType": "SAMPLE_CODE",
+      "documentTypeIsPlaceholder": true,
+      "issueDate": "2026-10-07",
+      "counterpartyPartyId": "01923800-a4f1-7e5d-8c10-ebdab4825f6d",
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "lines": [
+        {
+          "fiscalCategoryKey": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "chargeId": "01921c63-fd9c-7a05-8129-421aef3a86c9"
+        }
+      ],
+      "rejectionCodes": [
+        "SAMPLE_CODE"
+      ]
     },
     "FiscalReconciliationBreaksItem": {
       "breaks": "unspecified"

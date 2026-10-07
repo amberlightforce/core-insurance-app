@@ -15,8 +15,9 @@ public interface IBillingReceiptService
     /// <remarks>
     /// <para>Operation bil.Receipt.get (query; HTTP GET /api/bil/v1/receipts/{id}).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-004, REQ-BIL-126 (SL-BIL). Wave W5.</para>
     /// <para>Exposure: ui; consumers: DOC.</para>
+    /// <para>Errors: BIL-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     /// <param name="id">Identifier of the Receipt (PRD input: "ids")</param>
     /// <param name="filters">PRD: "filters"</param>

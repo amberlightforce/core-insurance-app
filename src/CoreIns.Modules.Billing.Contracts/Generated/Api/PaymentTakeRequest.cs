@@ -4,28 +4,53 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Payment.take request. PRD inputs: "account, amount, method"</summary>
+/// <summary>Typed from REQ-BIL-004, REQ-BIL-126, REQ-BIL-127. PRD inputs: "account, amount, method". SL-BIL records money already received by bank transfer or at a cashier; card and link payments need the acquirer (OI-BIL-07).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PaymentTakeRequest
 {
-    /// <summary>PRD: "account"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("account")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Account { get; init; }
+    /// <summary>Contract member 'billingAccountId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("billingAccountId")]
+    public required global::CoreIns.SharedKernel.Identifiers.BillingAccountId BillingAccountId { get; init; }
 
-    /// <summary>PRD: "amount"</summary>
+    /// <summary>Amount received, in the account currency, rounded to minor units</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Money? Amount { get; init; }
+    public required global::CoreIns.SharedKernel.Money Amount { get; init; }
 
-    /// <summary>PRD: "method"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'method'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("method")]
+    public required MethodValue Method { get; init; }
+
+    /// <summary>Value date of the money; defaults to today's business date</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("valueDate")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Method { get; init; }
+    public global::CoreIns.SharedKernel.BusinessDate? ValueDate { get; init; }
+
+    /// <summary>Invoice the payer referenced (matching rule REFERENCED_INVOICE, REQ-BIL-127)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("invoiceId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.InvoiceId? InvoiceId { get; init; }
+
+    /// <summary>Bank transaction reference (no personal data)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("bankReference")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? BankReference { get; init; }
+
+    /// <summary>Match and allocate deterministically at once (REQ-BIL-127, REQ-BIL-129)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("autoAllocate")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? AutoAllocate { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<MethodValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum MethodValue
+    {
+        /// <summary><c>BANK_TRANSFER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BANK_TRANSFER")]
+        BankTransfer,
+
+        /// <summary><c>CASHIER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CASHIER")]
+        Cashier,
+    }
 }
