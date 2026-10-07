@@ -20,6 +20,10 @@ if (role == AppRole.Migrate)
 {
     builder.Services.AddSingleton<DatabaseBootstrapper>();
     builder.Services.AddSingleton<DatabaseMigrator>();
+
+    // The migrate role resolves only the bootstrapper and the migrator; module services (which need the api/worker data
+    // source and data protection) are registered but never built, so Development's build-time DI validation is skipped here.
+    builder.Host.UseDefaultServiceProvider(options => options.ValidateOnBuild = false);
     await using var migrateApp = builder.Build();
     var stopping = migrateApp.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping;
 

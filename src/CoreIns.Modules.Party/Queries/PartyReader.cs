@@ -143,9 +143,9 @@ internal sealed class PartyReader(DbSession session, PartyProtection protection)
         var rows = (await connection.QueryAsync<SearchItemRecord>(new CommandDefinition(
             """
             SELECT p.party_id AS PartyId, p.party_number AS PartyNumber, p.party_type AS PartyType, p.status AS Status,
-                   coalesce(n.organisation_name, concat_ws(' ', n.given_names, n.family_name)) AS DisplayName,
-                   coalesce(d.organisation_name, concat_ws(' ', d.given_names, d.family_name),
-                            g.organisation_name, concat_ws(' ', g.given_names, g.family_name)) AS DisplayNameLatin,
+                   coalesce(n.organisation_name, nullif(concat_ws(' ', n.given_names, n.family_name), '')) AS DisplayName,
+                   coalesce(d.organisation_name, nullif(concat_ws(' ', d.given_names, d.family_name), ''),
+                            g.organisation_name, nullif(concat_ws(' ', g.given_names, g.family_name), '')) AS DisplayNameLatin,
                    i.scheme AS IdentifierScheme, i.display_suffix AS IdentifierSuffix,
                    a.postcode AS Postcode, a.locality AS Locality
               FROM pty.party p

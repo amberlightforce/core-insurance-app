@@ -99,6 +99,8 @@ public sealed class PartyApiTests(PostgresFixture database) : IClassFixture<Post
         exactPage.Text("items.0.matchQuality").ShouldBe("EXACT");
         exactPage.Text("items.0.maskedIdentifier.maskedValue").ShouldBe("******114");
         exactPage.Text("items.0.primaryPostcode").ShouldBe("11526");
+        exactPage.Text("items.0.displayName").ShouldBe("Ελένη Σωτηροπούλου");
+        exactPage.Text("items.0.displayNameLatin").ShouldBe("Eleni Sotiropoulou");
 
         var (tooShort, problem) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/parties/search?name=Σ");
         tooShort.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
@@ -160,6 +162,10 @@ public sealed class PartyApiTests(PostgresFixture database) : IClassFixture<Post
         var (shape, shapeBody) = await SendAsync(_client, HttpMethod.Post, "/api/pty/v1/parties", new { partyType = "PERSON" });
         shape.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         shapeBody.Text("code").ShouldBe("PTY-ERR-VALIDATION");
+
+        var (unreadable, unreadableBody) = await SendAsync(_client, HttpMethod.Post, "/api/pty/v1/parties", new { partyType = "PERSON", person = new { familyName = 42 } });
+        unreadable.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        unreadableBody.Text("code").ShouldBe("PTY-ERR-VALIDATION");
     }
 
     [Fact]

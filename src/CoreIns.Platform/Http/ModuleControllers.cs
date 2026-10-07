@@ -1,4 +1,6 @@
 using System.Reflection;
+using CoreIns.Platform.Errors;
+using CoreIns.SharedKernel.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,20 @@ public static class ModuleControllers
         }
 
         builder.ConfigureApplicationPartManager(manager => manager.FeatureProviders.Add(new InternalControllerFeatureProvider(assemblies)));
+
+        // A body that cannot be read (malformed JSON, wrong types) becomes <MOD>-ERR-VALIDATION Problem Details like
+        // every other refusal, instead of MVC's default validation response.
+        builder.Services.Configure<ApiBehaviorOptions>(options => options.InvalidModelStateResponseFactory = context =>
+        {
+            var error = new DomainError(ErrorCode.For(ApiRoutes.ModuleOf(context.HttpContext.Request.Path), PlatformErrors.Validation), "The request could not be read.")
+            {
+                FieldErrors = [.. context.ModelState
+                    .Where(entry => entry.Value is { Errors.Count: > 0 })
+                    .Select(entry => new FieldError(entry.Key, "UNREADABLE", "request.unreadable"))],
+            };
+            var problem = context.HttpContext.RequestServices.GetRequiredService<ProblemDetailsMapper>().Create(error, context.HttpContext);
+            return new ObjectResult(problem) { StatusCode = problem.Status, ContentTypes = { "application/problem+json" } };
+        });
         return builder;
     }
 
