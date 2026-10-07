@@ -18,35 +18,51 @@ namespace CoreIns.IntegrationTests.Rating;
 /// <summary>Shared fixtures of the rating and underwriting tests. Every number and name here is synthetic test data.</summary>
 internal static class RatingTestSupport
 {
-    public const string MotorProduct = "MOTOR_PRIVATE_CAR";
+    public const string MotorProduct = "MOTOR-GR";
     public static readonly ConfigurationHash TestConfigurationHash = ConfigurationHash.Parse(new string('c', 64));
 
     /// <summary>
-    /// An MKT configuration double (the generated fake) answering with SYNTHETIC test rates: IPT 15% general / 20% fire as the PRDs
-    /// state (D-REG-04) and a made-up 5% levy. The real values come from the MKT module; nothing here is a regulatory value.
+    /// An MKT configuration double (the generated fake) answering with the GR pack's key shapes: IPT 15% general / 20% fire (Settled,
+    /// as the PRDs state, D-REG-04), the motor class, and the Auxiliary Fund 6% ceiling as Pending opinion / provisional. Test fixture only.
     /// </summary>
-    public static FakeMarketConfigurationService MarketFake(bool withLevy = true, string iptJson = """{"GENERAL":"0.15","FIRE":"0.20"}""")
+    public static FakeMarketConfigurationService MarketFake(bool withIpt = true, bool iptSettled = true)
     {
         var fake = new FakeMarketConfigurationService();
         fake.Setup<ConfigurationResolveResponse>("mkt.Configuration.resolve", _ =>
         {
-            var values = new List<ConfigurationResolveResponse.ValueItem>
+            var values = new List<ConfigurationResolveResponse.ValueItem>();
+            var missing = new List<string>();
+            if (withIpt)
             {
-                Item("tax.ipt.rate", JsonDocument.Parse(iptJson).RootElement.Clone()),
-            };
-            if (withLevy)
+                values.Add(Item("tax.ipt.rate.general", "\"0.15\"", settled: iptSettled));
+                values.Add(Item("tax.ipt.rate.fire", "\"0.20\"", settled: iptSettled));
+                values.Add(Item("tax.ipt.motor_class", "\"general\"", settled: false));
+            }
+            else
             {
-                values.Add(Item("tax.levy.auxfund.rate", JsonDocument.Parse("\"0.05\"").RootElement.Clone()));
+                missing.AddRange(["tax.ipt.rate.general", "tax.ipt.rate.fire"]);
             }
 
-            return new ConfigurationResolveResponse { ConfigurationHash = TestConfigurationHash, Values = values };
+            values.Add(Item("tax.levy.auxfund.ceiling_rate", "\"0.06\"", settled: false)); // present, but RAT must not turn it into a line
+
+            return new ConfigurationResolveResponse
+            {
+                ConfigurationHash = TestConfigurationHash, Values = values, MissingKeys = missing, HasProvisionalValues = values.Any(v => v.Provisional),
+            };
         });
         return fake;
     }
 
-    private static ConfigurationResolveResponse.ValueItem Item(string key, JsonElement value) => new()
+    private static ConfigurationResolveResponse.ValueItem Item(string key, string json, bool settled) => new()
     {
-        Key = key, Value = value, SourceLayer = "L3", ValueVersionId = Guid.Parse("0192f0c4-0000-7000-8000-0000000000aa"), Final = true,
+        Key = key,
+        Value = JsonDocument.Parse(json).RootElement.Clone(),
+        SourceLayer = "L3",
+        ValueVersionId = Guid.Parse("0192f0c4-0000-7000-8000-0000000000aa"),
+        Final = true,
+        LegalStatus = settled ? ConfigurationResolveResponse.ValueItem.LegalStatusValue.Settled : ConfigurationResolveResponse.ValueItem.LegalStatusValue.PendingOpinion,
+        LegalSourceRef = "test fixture",
+        Provisional = !settled,
     };
 
     /// <summary>The host with the MKT double in place of MKT (MKT is built in parallel).</summary>
@@ -71,12 +87,20 @@ internal static class RatingTestSupport
 
     /// <summary>A motor risk tree: a 2020 car worth 15,000, one driver born 1985, no claims, four coverages.</summary>
     public static JsonObject RiskTree(
-        string firstRegistration = "2020-03-01", string value = "15000.00", int cc = 1400, string usage = "PRIVATE", string birthDate = "1985-06-15",
+        string firstRegistration = "2020", string? value = "15000.00", int cc = 1400, string usage = "PRIVATE", string birthDate = "1985-06-15",
         int claims = 0, params string[] coverages) => new()
         {
-            ["vehicle"] = new JsonObject { ["elementId"] = "veh-1", ["firstRegistrationDate"] = firstRegistration, ["engineCc"] = cc, ["value"] = value, ["usage"] = usage },
-            ["drivers"] = new JsonArray(new JsonObject { ["elementId"] = "drv-1", ["birthDate"] = birthDate, ["claimsLast3Years"] = claims }),
-            ["coverages"] = new JsonArray((coverages.Length == 0 ? ["MTPL", "OWN_DAMAGE", "THEFT", "WINDSCREEN"] : coverages).Select(c => (JsonNode)c).ToArray()),
+            ["vehicle"] = new JsonObject
+            {
+                ["elementId"] = "veh-1",
+                ["registrationNumber"] = "YAA1234",
+                ["firstRegistrationYear"] = int.Parse(firstRegistration, System.Globalization.CultureInfo.InvariantCulture),
+                ["engineCapacityCc"] = cc,
+                ["vehicleValue"] = value,
+                ["usage"] = usage,
+            },
+            ["driver"] = new JsonObject { ["elementId"] = "drv-1", ["dateOfBirth"] = birthDate, ["claimsLast5Years"] = claims },
+            ["coverages"] = new JsonArray((coverages.Length == 0 ? ["MTPL", "OWN-DAMAGE", "WINDSCREEN"] : coverages).Select(c => (JsonNode)c).ToArray()),
         };
 
     public static RateRateRequest RateRequest(

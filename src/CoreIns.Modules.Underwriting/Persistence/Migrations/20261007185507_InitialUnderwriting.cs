@@ -22,6 +22,7 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                     rule_set_code = table.Column<string>(type: "text", nullable: false),
                     version_no = table.Column<string>(type: "text", nullable: false),
                     product_code = table.Column<string>(type: "text", nullable: false),
+                    checkpoint = table.Column<string>(type: "text", nullable: false),
                     content_hash = table.Column<string>(type: "char(64)", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false),
                     effective_from = table.Column<DateOnly>(type: "date", nullable: false),
@@ -33,6 +34,7 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_rule_set_version", x => new { x.rule_set_code, x.version_no });
+                    table.CheckConstraint("ck_rule_set_version_checkpoint", "checkpoint IN ('PRE_QUOTE', 'PRE_BIND')");
                     table.CheckConstraint("ck_rule_set_version_data", "data_status IN ('ILLUSTRATIVE_TEST_DATA', 'APPROVED')");
                     table.CheckConstraint("ck_rule_set_version_status", "status IN ('Draft', 'Submitted', 'Approved', 'Active', 'Superseded', 'Retired')");
                 });
@@ -146,7 +148,7 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                 name: "ix_rule_set_version_product",
                 schema: "uw",
                 table: "rule_set_version",
-                columns: new[] { "product_code", "status", "effective_from" });
+                columns: new[] { "product_code", "checkpoint", "status", "effective_from" });
         }
 
         /// <inheritdoc />

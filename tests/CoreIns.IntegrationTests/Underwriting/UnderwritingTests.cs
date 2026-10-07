@@ -77,7 +77,7 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
         body.Text("outcome").ShouldBe("ACCEPT");
         body.Text("lane").ShouldBe("STRAIGHT_THROUGH");
         body!["issues"]!.AsArray().Count.ShouldBe(0);
-        body.Text("ruleSetCode").ShouldBe("UW_MOTOR_PRIVATE_CAR");
+        body.Text("ruleSetCode").ShouldBe("UW-MOTOR-GR-B");
         body.Text("ruleSetVersion").ShouldBe("1.0");
         var hash = body.Text("ruleSetHash");
         hash.Length.ShouldBe(64);
@@ -139,7 +139,7 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
     {
         var job = Guid.CreateVersion7();
 
-        var (response, body) = await EvaluateAsync(EvaluateBody(job, RiskTree(usage: "TAXI", birthDate: "2007-06-15")));
+        var (response, body) = await EvaluateAsync(EvaluateBody(job, RiskTree(usage: "BUSINESS", birthDate: "2007-06-15")));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("outcome").ShouldBe("DECLINE");
@@ -150,10 +150,10 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
     }
 
     [Theory]
-    [InlineData("2009-06-15", 0, "PRIVATE", "2020-03-01", "15000.00", "DECLINE-UNDERAGE-DRIVER")]
-    [InlineData("1985-06-15", 5, "PRIVATE", "2020-03-01", "15000.00", "DECLINE-CLAIMS-HISTORY")]
-    [InlineData("1985-06-15", 0, "PRIVATE", "2001-03-01", "3000.00", "REFER-OLD-VEHICLE")]
-    [InlineData("1985-06-15", 0, "PRIVATE", "2025-03-01", "120000.00", "REFER-HIGH-VALUE")]
+    [InlineData("2009-06-15", 0, "PRIVATE", "2020", "15000.00", "DECLINE-UNDERAGE-DRIVER")]
+    [InlineData("1985-06-15", 5, "PRIVATE", "2020", "15000.00", "DECLINE-CLAIMS-HISTORY")]
+    [InlineData("1985-06-15", 0, "PRIVATE", "2001", "3000.00", "REFER-OLD-VEHICLE")]
+    [InlineData("1985-06-15", 0, "PRIVATE", "2025", "120000.00", "REFER-HIGH-VALUE")]
     public async Task REQ_UW_032_each_rule_of_the_decision_table_hits_on_its_condition(string birth, int claims, string usage, string firstRegistration, string value, string expectedRule)
     {
         var (response, body) = await EvaluateAsync(EvaluateBody(Guid.CreateVersion7(), RiskTree(firstRegistration, value, 1400, usage, birth, claims)));
@@ -243,7 +243,7 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
         noSnapshotBody.Text("code").ShouldBe("UW-ERR-SNAPSHOT");
 
         var broken = RiskTree();
-        broken["drivers"] = new JsonArray();
+        broken.Remove("driver");
         var (empty, emptyBody) = await EvaluateAsync(EvaluateBody(Guid.CreateVersion7(), broken));
         empty.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         emptyBody.Text("code").ShouldBe("UW-ERR-SNAPSHOT");
@@ -258,6 +258,26 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
         });
         invalid.StatusCode.ShouldBe(HttpStatusCode.BadRequest, invalidBody?.ToJsonString());
         invalidBody.Text("code").ShouldBe("UW-ERR-VALIDATION");
+    }
+
+    // The product names two rule sets (PFC uwRuleSets): -Q at PRE_QUOTE (declines), -B at PRE_BIND (declines and referrals).
+    [Fact]
+    public async Task REQ_UW_043_the_pre_quote_checkpoint_uses_the_quote_rule_set_and_does_not_close_a_bind_referral()
+    {
+        var job = Guid.CreateVersion7();
+        var young = RiskTree(birthDate: "2007-06-15");
+        var (_, atBind) = await EvaluateAsync(EvaluateBody(job, young, "PRE_BIND"));
+        var (_, atQuote) = await EvaluateAsync(EvaluateBody(job, young, "PRE_QUOTE"));
+
+        atBind.Text("outcome").ShouldBe("REFER");
+        atBind.Text("ruleSetCode").ShouldBe("UW-MOTOR-GR-B");
+        atQuote.Text("outcome").ShouldBe("ACCEPT"); // referrals are a bind-time rule
+        atQuote.Text("ruleSetCode").ShouldBe("UW-MOTOR-GR-Q");
+        (await ScalarAsync<string>($"SELECT status FROM uw.issue WHERE job_id = '{job}'")).ShouldBe("Open");
+        (await BlockedAsync(job, "PRE_BIND")).ShouldBeTrue();
+
+        var (_, declined) = await EvaluateAsync(EvaluateBody(Guid.CreateVersion7(), RiskTree(birthDate: "2009-06-15"), "PRE_QUOTE"));
+        declined.Text("outcome").ShouldBe("DECLINE");
     }
 
     [Fact]
@@ -292,7 +312,7 @@ public sealed class RuleSetTests
     [Fact]
     public void REQ_UW_038_the_built_in_rule_set_passes_its_own_test_cases_and_covers_every_rule()
     {
-        var compiled = CompiledRuleSet.Compile(BuiltInRuleSets.Motor("MOTOR_PRIVATE_CAR"));
+        var compiled = CompiledRuleSet.Compile(BuiltInRuleSets.Bind("MOTOR-GR"));
 
         compiled.Hash.Length.ShouldBe(64);
         compiled.Dto.TestCases.SelectMany(c => c.ExpectedRuleIds).Distinct().Order().ShouldBe(compiled.Dto.Rules.Select(r => r.Id).Order());
@@ -303,7 +323,7 @@ public sealed class RuleSetTests
     [Fact]
     public void REQ_UW_038_a_version_with_a_wrong_test_expectation_is_refused()
     {
-        var dto = BuiltInRuleSets.Motor("MOTOR_PRIVATE_CAR");
+        var dto = BuiltInRuleSets.Bind("MOTOR-GR");
         var cases = dto.TestCases.ToList();
         cases[1] = cases[1] with { ExpectedRuleIds = ["REFER-HIGH-VALUE"] };
 
@@ -315,7 +335,7 @@ public sealed class RuleSetTests
     [Fact]
     public void REQ_UW_038_a_version_with_a_rule_no_test_covers_is_refused()
     {
-        var dto = BuiltInRuleSets.Motor("MOTOR_PRIVATE_CAR");
+        var dto = BuiltInRuleSets.Bind("MOTOR-GR");
 
         Should.Throw<DomainException>(() => CompiledRuleSet.Compile(dto with { TestCases = [.. dto.TestCases.Where(c => c.Name != "refer-high-value")] }));
     }
@@ -323,7 +343,7 @@ public sealed class RuleSetTests
     [Fact]
     public void REQ_UW_036_a_rule_that_does_not_type_check_is_refused_on_compile()
     {
-        var dto = BuiltInRuleSets.Motor("MOTOR_PRIVATE_CAR");
+        var dto = BuiltInRuleSets.Bind("MOTOR-GR");
         var rules = dto.Rules.ToList();
         rules[0] = rules[0] with { Conditions = ["< \"eighteen\"", "-", "-", "-", "-"] };
 
@@ -333,15 +353,13 @@ public sealed class RuleSetTests
     [Fact]
     public void REQ_UW_042_the_content_hash_is_stable_and_changes_with_a_threshold()
     {
-        var a = CompiledRuleSet.Compile(BuiltInRuleSets.Motor("MOTOR_PRIVATE_CAR")).Hash;
-        var b = CompiledRuleSet.Compile(BuiltInRuleSets.Motor("MOTOR_PRIVATE_CAR")).Hash;
-        var dto = BuiltInRuleSets.Motor("MOTOR_PRIVATE_CAR");
+        var a = CompiledRuleSet.Compile(BuiltInRuleSets.Bind("MOTOR-GR")).Hash;
+        var b = CompiledRuleSet.Compile(BuiltInRuleSets.Bind("MOTOR-GR")).Hash;
+        var dto = BuiltInRuleSets.Bind("MOTOR-GR");
         var rules = dto.Rules.ToList();
         var index = rules.FindIndex(r => r.Id == "REFER-HIGH-VALUE");
         rules[index] = rules[index] with { Conditions = ["-", "-", "> 90000", "-", "-"] };
-        var changed = new RuleSetDto(
-            dto.Code, dto.Version, dto.ProductCode, dto.EffectiveFrom, dto.DataStatus, dto.Note, dto.HitPolicy, dto.Variables, dto.Inputs, dto.Outputs, rules,
-            [.. dto.TestCases.Select(c => c.Name == "refer-high-value" ? c : c)]);
+        var changed = dto with { Rules = rules };
 
         b.ShouldBe(a);
         CompiledRuleSet.Compile(changed).Hash.ShouldNotBe(a);

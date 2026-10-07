@@ -225,6 +225,11 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("version_no");
 
+                    b.Property<string>("Checkpoint")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("checkpoint");
+
                     b.Property<string>("ContentHash")
                         .IsRequired()
                         .HasColumnType("char(64)")
@@ -266,11 +271,13 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                     b.HasKey("RuleSetCode", "VersionNo")
                         .HasName("pk_rule_set_version");
 
-                    b.HasIndex("ProductCode", "Status", "EffectiveFrom")
+                    b.HasIndex("ProductCode", "Checkpoint", "Status", "EffectiveFrom")
                         .HasDatabaseName("ix_rule_set_version_product");
 
                     b.ToTable("rule_set_version", "uw", t =>
                         {
+                            t.HasCheckConstraint("ck_rule_set_version_checkpoint", "checkpoint IN ('PRE_QUOTE', 'PRE_BIND')");
+
                             t.HasCheckConstraint("ck_rule_set_version_data", "data_status IN ('ILLUSTRATIVE_TEST_DATA', 'APPROVED')");
 
                             t.HasCheckConstraint("ck_rule_set_version_status", "status IN ('Draft', 'Submitted', 'Approved', 'Active', 'Superseded', 'Retired')");

@@ -71,7 +71,10 @@
           },
           "roundingRule": "sample",
           "configurationKey": "sample",
-          "configurationValueVersionId": "01920644-bcdd-740a-8999-0d8ecaff457c"
+          "configurationValueVersionId": "01920644-bcdd-740a-8999-0d8ecaff457c",
+          "legalStatus": "sample",
+          "legalSourceRef": "sample",
+          "provisional": true
         }
       ],
       "coveragePremiumTotal": {
@@ -479,7 +482,10 @@
           },
           "roundingRule": "sample",
           "configurationKey": "sample",
-          "configurationValueVersionId": "0192207f-90fa-7293-879b-1a5a8be98fc5"
+          "configurationValueVersionId": "0192207f-90fa-7293-879b-1a5a8be98fc5",
+          "legalStatus": "sample",
+          "legalSourceRef": "sample",
+          "provisional": true
         }
       ],
       "coveragePremiumTotal": {

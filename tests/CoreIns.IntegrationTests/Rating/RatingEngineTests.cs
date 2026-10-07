@@ -25,15 +25,14 @@ public sealed class RatingEngineTests
         return CompiledArtefact.Compile(definition, h => byHash[h]);
     }
 
-    private static MotorRisk Risk(string birthDate = "1985-06-15", int claims = 0, string firstRegistration = "2020-03-01", string value = "15000.00", params string[] coverages) =>
+    private static MotorRisk Risk(string birthDate = "1985-06-15", int claims = 0, string firstRegistration = "2020", string? value = "15000.00", params string[] coverages) =>
         MotorRisk.Parse(JsonSerializer.SerializeToElement(RatingTestSupport.RiskTree(firstRegistration, value, 1400, "PRIVATE", birthDate, claims, coverages)), "seg-1");
 
     // REQ-RAT-077, -078, -086/-087 (minimum), -100, -102 (explicit rounding): the premium of each coverage is table lookups
     // combined by decimal arithmetic in the rule engine and rounded once, half up, to two places.
     [Theory]
     [InlineData("MTPL", "121.50")] // 135.00 base (1400 cc) x 1.0000 (age 41) x 0.9000 (no claims); minimum 80.00 does not apply
-    [InlineData("OWN_DAMAGE", "283.50")] // 15000.00 x 0.0210 = 315.00 x 1.0000 x 1.0000 (6-year-old car) x 0.9000
-    [InlineData("THEFT", "67.50")] // 15000.00 x 0.0045; vehicle age 1.0000; no driver or claims factor for theft
+    [InlineData("OWN-DAMAGE", "283.50")] // 15000.00 x 0.0210 = 315.00 x 1.0000 x 1.0000 (6-year-old car) x 0.9000
     [InlineData("WINDSCREEN", "25.00")] // flat; no factor and no minimum row apply
     public void REQ_RAT_077_the_premium_of_a_coverage_is_the_steps_of_the_artefact_applied_in_order(string coverage, string expected)
     {
@@ -46,20 +45,20 @@ public sealed class RatingEngineTests
     [Fact]
     public void REQ_RAT_086_the_minimum_premium_lifts_a_lower_result_and_the_trace_says_so()
     {
-        // FIRE on a 2,000 car: 2000.00 x 0.0020 = 4.00, below the 15.00 minimum.
-        var premium = RatingEngine.RateCoverage(Artefact(), Risk(value: "2000.00"), "FIRE", Basis);
+        // Own damage on a 1,000 car: 1000.00 x 0.0210 x 0.9000 = 18.90, below the 90.00 minimum.
+        var premium = RatingEngine.RateCoverage(Artefact(), Risk(value: "1000.00"), "OWN-DAMAGE", Basis);
 
-        premium.Premium.ShouldBe(15.00m);
+        premium.Premium.ShouldBe(90.00m);
         var minimum = premium.Steps.Single(s => s.StepId == "MINIMUM_PREMIUM");
         minimum.Applied.ShouldBeTrue();
-        D(minimum.Before).ShouldBe(4.00m);
-        D(minimum.After).ShouldBe(15.00m);
+        D(minimum.Before).ShouldBe(18.90m);
+        D(minimum.After).ShouldBe(90.00m);
     }
 
     [Fact]
     public void REQ_RAT_104_every_step_has_a_greek_and_english_explanation_and_names_the_table_and_row_it_used()
     {
-        var premium = RatingEngine.RateCoverage(Artefact(), Risk(), "OWN_DAMAGE", Basis);
+        var premium = RatingEngine.RateCoverage(Artefact(), Risk(), "OWN-DAMAGE", Basis);
 
         premium.Steps.Select(s => s.StepId).ShouldBe(["BASE_RATE", "DRIVER_AGE", "VEHICLE_AGE", "CLAIMS", "MINIMUM_PREMIUM", "ROUND_PREMIUM"]);
         premium.Steps.ShouldAllBe(s => s.ExplanationEn.Length > 0 && s.ExplanationEl.Length > 0);
@@ -97,8 +96,8 @@ public sealed class RatingEngineTests
     public void REQ_RAT_046_the_same_artefact_input_and_date_give_the_same_premium_and_trace()
     {
         var artefact = Artefact();
-        var first = RatingEngine.RateCoverage(artefact, Risk(claims: 2), "OWN_DAMAGE", Basis);
-        var second = RatingEngine.RateCoverage(artefact, Risk(claims: 2), "OWN_DAMAGE", Basis);
+        var first = RatingEngine.RateCoverage(artefact, Risk(claims: 2), "OWN-DAMAGE", Basis);
+        var second = RatingEngine.RateCoverage(artefact, Risk(claims: 2), "OWN-DAMAGE", Basis);
 
         second.Premium.ShouldBe(first.Premium);
         second.Steps.ShouldBe(first.Steps);
@@ -150,14 +149,32 @@ public sealed class RatingEngineTests
         var ex = Should.Throw<DomainException>(() => MotorRisk.Parse(JsonSerializer.SerializeToElement(tree), "seg-1"));
 
         ex.Error.Code.Value.ShouldBe("RAT-ERR-INPUT");
-        ex.Error.Detail!.ShouldContain("vehicle.value");
+        ex.Error.Detail!.ShouldContain("vehicle.vehicleValue");
+    }
+
+    [Fact]
+    public void A_vehicle_value_is_only_needed_by_a_coverage_rated_on_it_and_unused_product_fields_never_reach_the_hash()
+    {
+        var withoutValue = RatingTestSupport.RiskTree(value: null);
+        var risk = MotorRisk.Parse(JsonSerializer.SerializeToElement(withoutValue), "seg-1");
+
+        RatingEngine.RateCoverage(Artefact(), risk, "MTPL", Basis).Premium.ShouldBe(121.50m);
+        var ex = Should.Throw<DomainException>(() => RatingEngine.RateCoverage(Artefact(), risk, "OWN-DAMAGE", Basis));
+        ex.Error.Code.Value.ShouldBe("RAT-ERR-INPUT");
+        ex.Error.Detail!.ShouldContain("vehicleValue");
+
+        var other = RatingTestSupport.RiskTree();
+        other["vehicle"]!["registrationNumber"] = "ZZZ9999"; // P2 and not used in pricing
+        MotorRisk.Parse(JsonSerializer.SerializeToElement(other), "seg-1").ToNormalised().ToJsonString()
+            .ShouldBe(MotorRisk.Parse(JsonSerializer.SerializeToElement(RatingTestSupport.RiskTree()), "seg-1").ToNormalised().ToJsonString());
+        MotorRisk.Parse(JsonSerializer.SerializeToElement(other), "seg-1").ToNormalised().ToJsonString().ShouldNotContain("ZZZ9999");
     }
 
     [Fact]
     public void REQ_RAT_032_the_normalised_input_does_not_depend_on_the_order_of_coverages()
     {
-        var a = Risk(coverages: ["THEFT", "MTPL"]).ToNormalised().ToJsonString();
-        var b = Risk(coverages: ["MTPL", "THEFT"]).ToNormalised().ToJsonString();
+        var a = Risk(coverages: ["WINDSCREEN", "MTPL"]).ToNormalised().ToJsonString();
+        var b = Risk(coverages: ["MTPL", "WINDSCREEN"]).ToNormalised().ToJsonString();
 
         a.ShouldBe(b);
     }

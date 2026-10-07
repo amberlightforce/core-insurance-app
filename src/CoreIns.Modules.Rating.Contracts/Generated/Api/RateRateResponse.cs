@@ -196,6 +196,21 @@ public sealed record RateRateResponse
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::System.Guid? ConfigurationValueVersionId { get; init; }
 
+        /// <summary>Legal status of the configuration value as MKT reports it (carried unchanged, D-REG-01)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? LegalStatus { get; init; }
+
+        /// <summary>Contract member 'legalSourceRef'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("legalSourceRef")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? LegalSourceRef { get; init; }
+
+        /// <summary>True when the value is not Settled; such a line is provisional and refused in production (D-REG-02)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public bool? Provisional { get; init; }
+
         /// <summary>Generated contract member.</summary>
         [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CategoryValue>))]
         [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

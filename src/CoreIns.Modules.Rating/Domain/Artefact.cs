@@ -57,7 +57,33 @@ internal sealed record TaxPlanDto(
     string DefaultClass,
     Dictionary<string, string> CoverageClasses,
     int Places,
-    string Mode);
+    string Mode,
+    bool Required,
+    List<string> Classes,
+    string? ClassKey)
+{
+    /// <summary>The configuration key holding the rate of a tax class.</summary>
+    public string KeyFor(string taxClass) => RateKey.Replace("{class}", taxClass, StringComparison.Ordinal);
+
+    /// <summary>Every configuration key the plan may read (asked from MKT in one call).</summary>
+    public IEnumerable<string> Keys()
+    {
+        if (Classes.Count == 0)
+        {
+            yield return RateKey;
+        }
+
+        foreach (var taxClass in Classes)
+        {
+            yield return KeyFor(taxClass);
+        }
+
+        if (ClassKey is not null)
+        {
+            yield return ClassKey;
+        }
+    }
+}
 
 internal sealed record ArtefactMetadata(string DataStatus, bool NotATariff, string Note);
 
@@ -74,7 +100,8 @@ internal sealed record ArtefactDefinition(
     bool AnnualTermsOnly,
     List<StepDto> Steps,
     Dictionary<string, string> Tables,
-    List<TaxPlanDto> TaxPlan);
+    List<TaxPlanDto> TaxPlan,
+    Dictionary<string, string> ChargeTypes);
 
 /// <summary>A compiled rate table with the SHA-256 content hash the artefact pins.</summary>
 internal sealed record CompiledTable(TableDto Dto, string Hash, CompiledDecisionTable Table);

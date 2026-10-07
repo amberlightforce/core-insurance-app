@@ -3363,6 +3363,14 @@ components:
                 description: MKT configuration key the rate came from
               configurationValueVersionId:
                 $ref: ../events/common.schema.json#/$defs/Uuid
+              legalStatus:
+                type: string
+                description: Legal status of the configuration value as MKT reports it (carried unchanged, D-REG-01)
+              legalSourceRef:
+                type: string
+              provisional:
+                type: boolean
+                description: True when the value is not Settled; such a line is provisional and refused in production (D-REG-02)
             required:
             - segmentId
             - chargeType

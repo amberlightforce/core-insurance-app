@@ -4,24 +4,33 @@ using System.Text.Json.Nodes;
 using CoreIns.Platform.Errors;
 using CoreIns.Rules;
 using CoreIns.SharedKernel;
-using CoreIns.SharedKernel.Identifiers;
 
 namespace CoreIns.Modules.Rating.Domain;
 
-/// <summary>A driver in the motor risk tree.</summary>
-internal sealed record DriverInput(string ElementId, DateOnly BirthDate, int ClaimsLast3Years);
-
-/// <summary>The motor private car risk tree RAT rates (the artefact's input schema, REQ-RAT-031).</summary>
+/// <summary>
+/// The motor private car risk tree RAT rates (the artefact's input schema, REQ-RAT-031). It follows the PFC product MOTOR-GR
+/// elements and field codes (<c>vehicle</c> and <c>driver</c>); the coverage codes are the product's (MTPL, OWN-DAMAGE, WINDSCREEN).
+/// Fields the product declares but pricing does not use are accepted and ignored (and never reach the worksheet or its hash);
+/// anything else is rejected.
+/// </summary>
 internal sealed record MotorRisk(
     string VehicleElementId,
     DateOnly FirstRegistrationDate,
     int EngineCc,
-    decimal VehicleValue,
+    decimal? VehicleValue,
     string Usage,
-    string? Territory,
-    IReadOnlyList<DriverInput> Drivers,
+    DateOnly DriverBirthDate,
+    int ClaimsLast5Years,
     IReadOnlyList<string> Coverages)
 {
+    private static readonly string[] VehicleFields =
+    [
+        "elementId", "registrationNumber", "make", "model", "firstRegistrationYear", "engineCapacityCc", "powerKw", "fuelType", "vehicleValue",
+        "usage", "garagingPostcode", "ownerType",
+    ];
+
+    private static readonly string[] DriverFields = ["elementId", "dateOfBirth", "licenceIssueDate", "bonusMalusClass", "claimsLast5Years"];
+
     /// <summary>
     /// Parses and validates a risk tree. Attributes the schema does not declare are rejected (REQ-RAT-033, RAT-ERR-INPUT-UNDECLARED);
     /// missing or malformed values are RAT-ERR-INPUT. The result is the normalised input.
@@ -30,36 +39,19 @@ internal sealed record MotorRisk(
     {
         var path = $"segments[{segmentId}].riskTree";
         var root = Object(tree, path);
-        Declared(root, path, "vehicle", "drivers", "coverages");
+        Declared(root, path, "vehicle", "driver", "coverages");
         var vehicle = Object(Required(root, "vehicle", path), path + ".vehicle");
-        Declared(vehicle, path + ".vehicle", "elementId", "firstRegistrationDate", "engineCc", "value", "usage", "territory");
-        var drivers = new List<DriverInput>();
-        var driverArray = Required(root, "drivers", path);
-        if (driverArray.ValueKind != JsonValueKind.Array || driverArray.GetArrayLength() == 0)
-        {
-            throw Input(path + ".drivers", "At least one driver is required.");
-        }
+        Declared(vehicle, path + ".vehicle", VehicleFields);
+        var driver = Object(Required(root, "driver", path), path + ".driver");
+        Declared(driver, path + ".driver", DriverFields);
 
-        var index = 0;
-        foreach (var d in driverArray.EnumerateArray())
-        {
-            var dp = $"{path}.drivers[{index}]";
-            var driver = Object(d, dp);
-            Declared(driver, dp, "elementId", "birthDate", "claimsLast3Years");
-            drivers.Add(new DriverInput(
-                OptionalString(driver, "elementId") ?? $"driver-{index + 1}",
-                Date(Required(driver, "birthDate", dp), dp + ".birthDate"),
-                Integer(Required(driver, "claimsLast3Years", dp), dp + ".claimsLast3Years", 0, 50)));
-            index++;
-        }
-
-        var coverages = new List<string>();
         var coverageArray = Required(root, "coverages", path);
         if (coverageArray.ValueKind != JsonValueKind.Array || coverageArray.GetArrayLength() == 0)
         {
             throw Input(path + ".coverages", "Select at least one coverage.");
         }
 
+        var coverages = new List<string>();
         foreach (var c in coverageArray.EnumerateArray())
         {
             var code = c.ValueKind == JsonValueKind.String ? c.GetString() : null;
@@ -71,36 +63,37 @@ internal sealed record MotorRisk(
             coverages.Add(code);
         }
 
+        var year = Integer(Required(vehicle, "firstRegistrationYear", path + ".vehicle"), path + ".vehicle.firstRegistrationYear", 1950, 2100);
         return new MotorRisk(
             OptionalString(vehicle, "elementId") ?? "vehicle-1",
-            Date(Required(vehicle, "firstRegistrationDate", path + ".vehicle"), path + ".vehicle.firstRegistrationDate"),
-            Integer(Required(vehicle, "engineCc", path + ".vehicle"), path + ".vehicle.engineCc", 1, 20000),
-            Money(Required(vehicle, "value", path + ".vehicle"), path + ".vehicle.value"),
+            new DateOnly(year, 1, 1),
+            Integer(Required(vehicle, "engineCapacityCc", path + ".vehicle"), path + ".vehicle.engineCapacityCc", 1, 20000),
+            vehicle.TryGetProperty("vehicleValue", out var value) && value.ValueKind != JsonValueKind.Null ? Money(value, path + ".vehicle.vehicleValue") : null,
             OptionalString(vehicle, "usage") ?? "PRIVATE",
-            OptionalString(vehicle, "territory"),
-            drivers,
+            Date(Required(driver, "dateOfBirth", path + ".driver"), path + ".driver.dateOfBirth"),
+            driver.TryGetProperty("claimsLast5Years", out var claims) && claims.ValueKind != JsonValueKind.Null
+                ? Integer(claims, path + ".driver.claimsLast5Years", 0, 50)
+                : 0,
             [.. coverages.Order(StringComparer.Ordinal)]);
     }
 
-    /// <summary>The normalised input as canonical-JSON friendly nodes (decimals as strings), for the input hash (REQ-RAT-032).</summary>
+    /// <summary>The normalised input as canonical-JSON friendly nodes (decimals as strings), for the input hash (REQ-RAT-032). Only fields pricing uses.</summary>
     public JsonObject ToNormalised() => new()
     {
         ["vehicle"] = new JsonObject
         {
             ["elementId"] = VehicleElementId,
-            ["firstRegistrationDate"] = FirstRegistrationDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-            ["engineCc"] = EngineCc,
-            ["value"] = VehicleValue.ToString(CultureInfo.InvariantCulture),
+            ["firstRegistrationYear"] = FirstRegistrationDate.Year,
+            ["engineCapacityCc"] = EngineCc,
+            ["vehicleValue"] = VehicleValue?.ToString(CultureInfo.InvariantCulture),
             ["usage"] = Usage,
-            ["territory"] = Territory,
         },
-        ["drivers"] = new JsonArray(Drivers.Select(d => (JsonNode)new JsonObject
+        ["driver"] = new JsonObject
         {
-            ["elementId"] = d.ElementId,
-            ["birthDate"] = d.BirthDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-            ["claimsLast3Years"] = d.ClaimsLast3Years,
-        }).ToArray()),
-        ["coverages"] = new JsonArray(Coverages.OrderBy(c => c, StringComparer.Ordinal).Select(c => (JsonNode)c).ToArray()),
+            ["dateOfBirth"] = DriverBirthDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ["claimsLast5Years"] = ClaimsLast5Years,
+        },
+        ["coverages"] = new JsonArray(Coverages.Select(c => (JsonNode)c).ToArray()),
     };
 
     private static JsonElement Object(JsonElement element, string path) =>
@@ -134,8 +127,14 @@ internal sealed record MotorRisk(
             ? value
             : throw Input(path, $"A whole number from {min} to {max} is expected.");
 
+    /// <summary>An amount as a number, a decimal string, or a money object with an <c>amount</c> (the wire form of a PFC MONEY field).</summary>
     private static decimal Money(JsonElement element, string path)
     {
+        if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty("amount", out var amount))
+        {
+            element = amount;
+        }
+
         decimal value;
         var ok = element.ValueKind switch
         {
@@ -161,7 +160,7 @@ internal static class RatingFacts
         .Variable("engineCc", RuleType.Int)
         .Variable("usage", RuleType.String)
         .Variable("driverBirthDates", RuleType.ListOf(RuleType.Date))
-        .Variable("claimsLast3Years", RuleType.Int)
+        .Variable("claimsLast5Years", RuleType.Int)
         .Build();
 
     public static InputSchema StepSchema { get; } = InputSchema.Define()
@@ -176,10 +175,10 @@ internal static class RatingFacts
         .Set("coverage", coverage)
         .Set("effectiveDate", effectiveDate)
         .Set("vehicleFirstRegistration", risk.FirstRegistrationDate)
-        .Set("vehicleValue", risk.VehicleValue)
+        .Set("vehicleValue", risk.VehicleValue ?? 0m)
         .Set("engineCc", risk.EngineCc)
         .Set("usage", risk.Usage)
-        .Set("driverBirthDates", RuleValue.List(risk.Drivers.Select(d => (RuleValue)d.BirthDate)))
-        .Set("claimsLast3Years", risk.Drivers.Sum(d => d.ClaimsLast3Years))
+        .Set("driverBirthDates", RuleValue.List((RuleValue)risk.DriverBirthDate))
+        .Set("claimsLast5Years", risk.ClaimsLast5Years)
         .Build();
 }

@@ -14,6 +14,8 @@ internal sealed class RuleSetVersionRow
 
     public string ProductCode { get; set; } = string.Empty;
 
+    public string Checkpoint { get; set; } = string.Empty;
+
     public string ContentHash { get; set; } = string.Empty;
 
     public string Status { get; set; } = string.Empty;
@@ -121,12 +123,14 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.ToTable("rule_set_version", table =>
             {
                 table.HasCheckConstraint("ck_rule_set_version_status", "status IN ('Draft', 'Submitted', 'Approved', 'Active', 'Superseded', 'Retired')");
+                table.HasCheckConstraint("ck_rule_set_version_checkpoint", "checkpoint IN ('PRE_QUOTE', 'PRE_BIND')");
                 table.HasCheckConstraint("ck_rule_set_version_data", "data_status IN ('ILLUSTRATIVE_TEST_DATA', 'APPROVED')");
             });
             entity.HasKey(e => new { e.RuleSetCode, e.VersionNo }).HasName("pk_rule_set_version");
             entity.Property(e => e.RuleSetCode).HasColumnName("rule_set_code");
             entity.Property(e => e.VersionNo).HasColumnName("version_no");
             entity.Property(e => e.ProductCode).HasColumnName("product_code");
+            entity.Property(e => e.Checkpoint).HasColumnName("checkpoint");
             entity.Property(e => e.ContentHash).HasColumnName("content_hash").HasColumnType("char(64)");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.EffectiveFrom).HasColumnName("effective_from");
@@ -134,7 +138,7 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.Property(e => e.Definition).HasColumnName("definition").HasColumnType("jsonb");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
-            entity.HasIndex(e => new { e.ProductCode, e.Status, e.EffectiveFrom }).HasDatabaseName("ix_rule_set_version_product");
+            entity.HasIndex(e => new { e.ProductCode, e.Checkpoint, e.Status, e.EffectiveFrom }).HasDatabaseName("ix_rule_set_version_product");
         });
 
         modelBuilder.Entity<EvaluationRow>(entity =>

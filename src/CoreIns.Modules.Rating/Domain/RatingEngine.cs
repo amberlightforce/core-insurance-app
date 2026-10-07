@@ -77,6 +77,10 @@ internal static class RatingEngine
                     lookup = ((DecimalValue)result.Match.Output("value")).Value;
                     value = Format(lookup);
                     basis = step.Kind == "BASE" ? ((StringValue)result.Match.Output("basis")).Value : string.Empty;
+                    if (basis == "VEHICLE_VALUE" && risk.VehicleValue is null)
+                    {
+                        throw new DomainException(DomainError.Of(ModuleCode.RAT, "INPUT", $"vehicle.vehicleValue is required to rate {coverage}."));
+                    }
                 }
             }
 
@@ -84,7 +88,7 @@ internal static class RatingEngine
             {
                 var inputs = RatingFacts.StepSchema.NewInputs()
                     .Set("coverage", coverage)
-                    .Set("vehicleValue", risk.VehicleValue)
+                    .Set("vehicleValue", risk.VehicleValue ?? 0m)
                     .Set("running", running)
                     .Set("value", lookup)
                     .Set("basis", basis)

@@ -60,7 +60,7 @@ internal sealed class EvaluateRulesHandler(
             var effective = request.EffectiveDate?.Value ?? today;
             var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.")).Value;
             await store.EnsureSeededAsync(cancellationToken).ConfigureAwait(false);
-            var ruleSet = await store.ResolveAsync(request.ProductCode!, effective, cancellationToken).ConfigureAwait(false)
+            var ruleSet = await store.ResolveAsync(request.ProductCode!, request.Checkpoint == RulesEvaluateRequest.CheckpointValue.PreQuote ? "PRE_QUOTE" : "PRE_BIND", effective, cancellationToken).ConfigureAwait(false)
                 ?? throw new DomainException(DomainError.Of(ModuleCode.UW, "RULESET-UNRESOLVED", $"No rule set is active for {request.ProductCode} on {effective:yyyy-MM-dd}."));
 
             var result = ruleSet.Table.Evaluate(CompiledRuleSet.Facts(risk, effective), effective);
@@ -102,7 +102,9 @@ internal sealed class EvaluateRulesHandler(
                 }), actor, cancellationToken).ConfigureAwait(false);
 
             // Reconcile with the job's open issues by issue key (REQ-UW-059): new key → raise, same key → keep, key gone → close.
-            var open = await store.OpenIssuesAsync(legalEntity, jobId, cancellationToken).ConfigureAwait(false);
+            // Only issues raised by this rule set are reconciled: a PRE_QUOTE evaluation must not close a PRE_BIND referral.
+            var ruleIds = ruleSet.Dto.Rules.Select(r => r.Id).ToHashSet(StringComparer.Ordinal);
+            var open = (await store.OpenIssuesAsync(legalEntity, jobId, cancellationToken).ConfigureAwait(false)).Where(i => ruleIds.Contains(i.RuleId)).ToList();
             var items = new List<RulesEvaluateResponse.IssueItem>();
             foreach (var hit in hits)
             {

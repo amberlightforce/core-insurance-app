@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CoreIns.Modules.Rating.Persistence.Migrations
 {
     [DbContext(typeof(RatingDbContext))]
-    [Migration("20261007181506_InitialRating")]
+    [Migration("20261007185431_InitialRating")]
     partial class InitialRating
     {
         /// <inheritdoc />

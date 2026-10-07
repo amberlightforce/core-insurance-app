@@ -76,6 +76,11 @@ internal sealed class RatingRateService(
             }
 
             var risk = MotorRisk.Parse(segment.RiskTree, segment.SegmentId);
+            foreach (var coverage in risk.Coverages.Where(c => !artefact.Definition.ChargeTypes.ContainsKey(c)))
+            {
+                throw Error("INPUT", $"Coverage {coverage} is not rated by this product version.");
+            }
+
             var premiums = risk.Coverages.Select(c => RatingEngine.RateCoverage(artefact, risk, c, basis)).ToList();
             segments.Add((segment.SegmentId, risk, premiums));
         }
@@ -84,6 +89,7 @@ internal sealed class RatingRateService(
         var taxPoint = envelope.TaxPointDate ?? envelope.RatingBasisDate;
         var rates = await ResolveTaxRatesAsync(artefact, envelope, version, taxPoint, cancellationToken).ConfigureAwait(false);
         var taxes = new List<RateRateResponse.TaxeItem>();
+        var warnings = new List<RateRateResponse.WarningItem>();
         foreach (var (segmentId, _, premiums) in segments)
         {
             foreach (var premium in premiums)
@@ -91,10 +97,23 @@ internal sealed class RatingRateService(
                 var baseAmount = new Money(premium.Premium, currency);
                 foreach (var plan in artefact.Definition.TaxPlan.Where(p => p.Coverages is null || p.Coverages.Contains(premium.Coverage)))
                 {
-                    var taxClass = plan.CoverageClasses.GetValueOrDefault(premium.Coverage, plan.DefaultClass);
-                    var value = rates.Values.FirstOrDefault(v => v.Key == plan.RateKey)
-                        ?? throw Error("TAX", $"MKT configuration returned no value for {plan.RateKey}; rating fails closed.");
-                    var rate = RatingEngine.ReadRate(value.Value, taxClass, plan.RateKey);
+                    var taxClass = plan.CoverageClasses.GetValueOrDefault(premium.Coverage)
+                        ?? (plan.ClassKey is { } classKey && rates.Values.FirstOrDefault(v => v.Key == classKey) is { } configured
+                            && configured.Value.ValueKind == JsonValueKind.String ? configured.Value.GetString()!.ToLowerInvariant() : plan.DefaultClass);
+                    var key = plan.Classes.Count == 0 ? plan.RateKey : plan.KeyFor(taxClass);
+                    var value = rates.Values.FirstOrDefault(v => v.Key == key);
+                    if (value is null)
+                    {
+                        if (plan.Required)
+                        {
+                            throw Error("TAX", $"MKT configuration returned no value for {key}; rating fails closed.");
+                        }
+
+                        warnings.Add(new RateRateResponse.WarningItem { Code = $"RAT-WARN-{plan.ChargeType}-UNAVAILABLE" });
+                        continue;
+                    }
+
+                    var rate = RatingEngine.ReadRate(value.Value, taxClass, key);
                     taxes.Add(new RateRateResponse.TaxeItem
                     {
                         SegmentId = segmentId,
@@ -106,11 +125,19 @@ internal sealed class RatingRateService(
                         Rate = rate,
                         Amount = RatingEngine.TaxAmount(baseAmount, rate, plan),
                         RoundingRule = $"{plan.Places}:{plan.Mode}",
-                        ConfigurationKey = plan.RateKey,
+                        ConfigurationKey = key,
                         ConfigurationValueVersionId = value.ValueVersionId,
+                        LegalStatus = value.LegalStatus.ToString(),
+                        LegalSourceRef = value.LegalSourceRef,
+                        Provisional = value.Provisional,
                     });
                 }
             }
+        }
+
+        if (taxes.Any(t => t.Provisional == true))
+        {
+            warnings.Add(new RateRateResponse.WarningItem { Code = "RAT-WARN-PROVISIONAL-TAX" });
         }
 
         // 3. Totals, the canonical worksheet and its hash.
@@ -118,7 +145,7 @@ internal sealed class RatingRateService(
         {
             SegmentId = s.SegmentId,
             ElementId = s.Risk.VehicleElementId,
-            ChargeType = "PREMIUM",
+            ChargeType = artefact.Definition.ChargeTypes[p.Coverage],
             ChargeCategory = "PREMIUM",
             CoverageCode = p.Coverage,
             AnnualRate = p.Premium,
@@ -138,7 +165,6 @@ internal sealed class RatingRateService(
         var worksheet = BuildWorksheet(artefact, envelope, request, segments, taxes, premiumTotal, taxTotal, inputHash, configurationHash, taxPoint, dataStatus);
         var worksheetId = CanonicalJson.Hash(worksheet);
 
-        var warnings = new List<RateRateResponse.WarningItem>();
         if (dataStatus == DataStatus.Illustrative)
         {
             warnings.Add(new RateRateResponse.WarningItem { Code = "RAT-WARN-ILLUSTRATIVE-TARIFF" });
@@ -237,7 +263,7 @@ internal sealed class RatingRateService(
             Channel = envelope.Channel,
             TimeBasisDates = new Dictionary<string, BusinessDate> { ["TAX_POINT_DATE"] = taxPoint, ["EFFECTIVE_DATE"] = envelope.RatingBasisDate },
             ConfigurationHash = envelope.ConfigurationHash,
-            Keys = [.. artefact.Definition.TaxPlan.Select(p => p.RateKey).Distinct(StringComparer.Ordinal)],
+            Keys = [.. artefact.Definition.TaxPlan.SelectMany(p => p.Keys()).Distinct(StringComparer.Ordinal)],
         };
         try
         {
@@ -304,7 +330,7 @@ internal sealed class RatingRateService(
                 ["segmentId"] = s.SegmentId,
                 ["elementId"] = s.Risk.VehicleElementId,
                 ["coverageCode"] = p.Coverage,
-                ["chargeType"] = "PREMIUM",
+                ["chargeType"] = artefact.Definition.ChargeTypes[p.Coverage],
                 ["annualPremium"] = RatingEngine.Format(p.Premium),
                 ["steps"] = RatingEngine.TraceJson(p.Steps),
             })).ToArray()),
@@ -321,6 +347,9 @@ internal sealed class RatingRateService(
                 ["rounding"] = t.RoundingRule,
                 ["configurationKey"] = t.ConfigurationKey,
                 ["configurationValueVersionId"] = t.ConfigurationValueVersionId?.ToString(),
+                ["legalStatus"] = t.LegalStatus,
+                ["legalSourceRef"] = t.LegalSourceRef,
+                ["provisional"] = t.Provisional,
             }).ToArray()),
             ["totals"] = new JsonObject
             {
