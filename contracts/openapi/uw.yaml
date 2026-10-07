@@ -5628,6 +5628,14 @@ components:
             - messageEn
             - messageEl
           description: SL-RAT-UW - why the outcome is not ACCEPT, in both languages (REQ-UW-061)
+        dataStatus:
+          type: string
+          description: ILLUSTRATIVE_TEST_DATA when the rule set is made-up test data, not an underwriting guideline (D-SLC-04)
+        warnings:
+          type: array
+          items:
+            type: string
+          description: e.g. UW-WARN-ILLUSTRATIVE-RULES
         ruleSetCode:
           $ref: ../events/common.schema.json#/$defs/Code
         ruleSetVersion:

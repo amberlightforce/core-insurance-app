@@ -165,16 +165,16 @@ public sealed class RatingEngineTests
 
         var other = RatingTestSupport.RiskTree();
         other["vehicle"]!["registrationNumber"] = "ZZZ9999"; // P2 and not used in pricing
-        MotorRisk.Parse(JsonSerializer.SerializeToElement(other), "seg-1").ToNormalised().ToJsonString()
-            .ShouldBe(MotorRisk.Parse(JsonSerializer.SerializeToElement(RatingTestSupport.RiskTree()), "seg-1").ToNormalised().ToJsonString());
-        MotorRisk.Parse(JsonSerializer.SerializeToElement(other), "seg-1").ToNormalised().ToJsonString().ShouldNotContain("ZZZ9999");
+        MotorRisk.Parse(JsonSerializer.SerializeToElement(other), "seg-1").ToNormalised(Basis).ToJsonString()
+            .ShouldBe(MotorRisk.Parse(JsonSerializer.SerializeToElement(RatingTestSupport.RiskTree()), "seg-1").ToNormalised(Basis).ToJsonString());
+        MotorRisk.Parse(JsonSerializer.SerializeToElement(other), "seg-1").ToNormalised(Basis).ToJsonString().ShouldNotContain("ZZZ9999");
     }
 
     [Fact]
     public void REQ_RAT_032_the_normalised_input_does_not_depend_on_the_order_of_coverages()
     {
-        var a = Risk(coverages: ["WINDSCREEN", "MTPL"]).ToNormalised().ToJsonString();
-        var b = Risk(coverages: ["MTPL", "WINDSCREEN"]).ToNormalised().ToJsonString();
+        var a = Risk(coverages: ["WINDSCREEN", "MTPL"]).ToNormalised(Basis).ToJsonString();
+        var b = Risk(coverages: ["MTPL", "WINDSCREEN"]).ToNormalised(Basis).ToJsonString();
 
         a.ShouldBe(b);
     }

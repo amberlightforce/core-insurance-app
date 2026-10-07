@@ -3328,6 +3328,7 @@ components:
             - segmentId
             - elementId
             - chargeType
+            - coverageCode
             - annualRate
             - currency
         taxes:
@@ -3368,13 +3369,26 @@ components:
                 description: Legal status of the configuration value as MKT reports it (carried unchanged, D-REG-01)
               legalSourceRef:
                 type: string
+              chargeCategory:
+                type: string
+                description: TAX or LEVY, the same as category (D-SLC-11; POL reads this name)
+              classConfigurationKey:
+                type: string
+                description: MKT key that decided the tax class (for example tax.ipt.motor_class)
+              classConfigurationValueVersionId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              classLegalStatus:
+                type: string
+                description: Legal status of the class value; the line's legalStatus is the weaker of class and rate
               provisional:
                 type: boolean
                 description: True when the value is not Settled; such a line is provisional and refused in production (D-REG-02)
             required:
             - segmentId
+            - coverageCode
             - chargeType
             - category
+            - chargeCategory
             - base
             - rate
             - amount

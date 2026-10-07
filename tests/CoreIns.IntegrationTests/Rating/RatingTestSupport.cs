@@ -25,7 +25,7 @@ internal static class RatingTestSupport
     /// An MKT configuration double (the generated fake) answering with the GR pack's key shapes: IPT 15% general / 20% fire (Settled,
     /// as the PRDs state, D-REG-04), the motor class, and the Auxiliary Fund 6% ceiling as Pending opinion / provisional. Test fixture only.
     /// </summary>
-    public static FakeMarketConfigurationService MarketFake(bool withIpt = true, bool iptSettled = true)
+    public static FakeMarketConfigurationService MarketFake(bool withIpt = true, bool iptSettled = true, string? classJson = "\"general\"", bool classSettled = true)
     {
         var fake = new FakeMarketConfigurationService();
         fake.Setup<ConfigurationResolveResponse>("mkt.Configuration.resolve", _ =>
@@ -36,7 +36,10 @@ internal static class RatingTestSupport
             {
                 values.Add(Item("tax.ipt.rate.general", "\"0.15\"", settled: iptSettled));
                 values.Add(Item("tax.ipt.rate.fire", "\"0.20\"", settled: iptSettled));
-                values.Add(Item("tax.ipt.motor_class", "\"general\"", settled: false));
+                if (classJson is not null)
+                {
+                    values.Add(Item("tax.ipt.motor_class", classJson, settled: classSettled, status: classSettled ? null : ConfigurationResolveResponse.ValueItem.LegalStatusValue.Verify));
+                }
             }
             else
             {
@@ -53,14 +56,14 @@ internal static class RatingTestSupport
         return fake;
     }
 
-    private static ConfigurationResolveResponse.ValueItem Item(string key, string json, bool settled) => new()
+    private static ConfigurationResolveResponse.ValueItem Item(string key, string json, bool settled, ConfigurationResolveResponse.ValueItem.LegalStatusValue? status = null) => new()
     {
         Key = key,
         Value = JsonDocument.Parse(json).RootElement.Clone(),
         SourceLayer = "L3",
         ValueVersionId = Guid.Parse("0192f0c4-0000-7000-8000-0000000000aa"),
         Final = true,
-        LegalStatus = settled ? ConfigurationResolveResponse.ValueItem.LegalStatusValue.Settled : ConfigurationResolveResponse.ValueItem.LegalStatusValue.PendingOpinion,
+        LegalStatus = status ?? (settled ? ConfigurationResolveResponse.ValueItem.LegalStatusValue.Settled : ConfigurationResolveResponse.ValueItem.LegalStatusValue.PendingOpinion),
         LegalSourceRef = "test fixture",
         Provisional = !settled,
     };

@@ -56,8 +56,8 @@ internal sealed class EvaluateRulesHandler(
             }
 
             var risk = UwRisk.Parse(snapshot);
-            var today = DateOnly.FromDateTime(clock.Now.ToUtcDateTime());
-            var effective = request.EffectiveDate?.Value ?? today;
+            // The business date of a Greek legal entity is the Europe/Athens date, not the UTC date.
+            var effective = request.EffectiveDate?.Value ?? clock.Now.ToBusinessDate(AthensOrUtc()).Value;
             var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.")).Value;
             await store.EnsureSeededAsync(cancellationToken).ConfigureAwait(false);
             var ruleSet = await store.ResolveAsync(request.ProductCode!, request.Checkpoint == RulesEvaluateRequest.CheckpointValue.PreQuote ? "PRE_QUOTE" : "PRE_BIND", effective, cancellationToken).ConfigureAwait(false)
@@ -96,8 +96,6 @@ internal sealed class EvaluateRulesHandler(
                     ruleSet = new { code = ruleSet.Dto.Code, version = ruleSet.Dto.Version, hash = ruleSet.Hash, dataStatus = ruleSet.Dto.DataStatus },
                     effectiveDate = effective.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
                     matchedRules = result.MatchedRuleIds,
-                    inputs = result.Trace.Inputs.Select(i => new { i.Name, value = i.Value.ToString() }),
-                    variables = result.Trace.Variables.Select(v => new { v.Name, value = v.Value.ToString() }),
                     stepsUsed = result.Trace.StepsUsed,
                 }), actor, cancellationToken).ConfigureAwait(false);
 
@@ -182,11 +180,25 @@ internal sealed class EvaluateRulesHandler(
                 RuleSetCode = ruleSet.Dto.Code,
                 RuleSetVersion = ruleSet.Dto.Version,
                 RuleSetHash = Sha256Hash.Parse(ruleSet.Hash),
+                DataStatus = ruleSet.Dto.DataStatus,
+                Warnings = ruleSet.Dto.DataStatus == "ILLUSTRATIVE_TEST_DATA" ? ["UW-WARN-ILLUSTRATIVE-RULES"] : [],
             };
         }
         catch (DomainException ex)
         {
             return ex.Error;
+        }
+    }
+
+    private static TimeZoneInfo AthensOrUtc()
+    {
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens");
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return TimeZoneInfo.Utc;
         }
     }
 

@@ -149,7 +149,7 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
     }
 
     /// <summary>Stores the worksheet (content-addressed) and its index row.</summary>
-    public async Task SaveWorksheetAsync(
+    public async Task<bool> SaveWorksheetAsync(
         string worksheetId, Guid legalEntity, string jurisdiction, string artefactHash, string configurationHash, string inputHash,
         string dataStatus, string body, QuoteId? quote, JobId? job, PolicyTransactionId? transaction, string mode, CancellationToken cancellationToken)
     {
@@ -163,6 +163,18 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
             """,
             new { worksheetId, legalEntity, jurisdiction, artefactHash, configurationHash, inputHash, engine = EngineVersion.Current, dataStatus, body, now, actor = context.Actor.ToString() },
             session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        var seen = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            """
+            SELECT EXISTS (SELECT 1 FROM rat.worksheet_index WHERE worksheet_id = @worksheetId AND legal_entity_id = @legalEntity
+               AND quote_id IS NOT DISTINCT FROM @quote AND job_id IS NOT DISTINCT FROM @job AND transaction_id IS NOT DISTINCT FROM @transaction AND mode = @mode)
+            """,
+            new { worksheetId, legalEntity, quote = quote?.Value, job = job?.Value, transaction = transaction?.Value, mode },
+            session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        if (seen)
+        {
+            return false; // a retry for the same lineage: no second index row and no second event
+        }
+
         await connection.ExecuteAsync(new CommandDefinition(
             """
             INSERT INTO rat.worksheet_index (worksheet_id, legal_entity_id, quote_id, job_id, transaction_id, mode, retention_state, created_at)
@@ -174,6 +186,7 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
                 retention = transaction is null ? "QUOTE" : "ATTACHED", now,
             },
             session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        return true;
     }
 
     /// <summary>The stored worksheet body of the caller's legal entity; null when unknown (another entity's worksheet is "not found").</summary>

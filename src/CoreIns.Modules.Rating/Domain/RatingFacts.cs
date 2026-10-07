@@ -77,24 +77,33 @@ internal sealed record MotorRisk(
             [.. coverages.Order(StringComparer.Ordinal)]);
     }
 
-    /// <summary>The normalised input as canonical-JSON friendly nodes (decimals as strings), for the input hash (REQ-RAT-032). Only fields pricing uses.</summary>
-    public JsonObject ToNormalised() => new()
+    /// <summary>
+    /// The normalised input as canonical-JSON friendly nodes, for the input hash (REQ-RAT-032): only what pricing uses, decimals at a canonical
+    /// scale, and the derived ages on <paramref name="basis"/> instead of birth date and registration year (the price depends on the age, not the date).
+    /// </summary>
+    public JsonObject ToNormalised(DateOnly basis) => new()
     {
         ["vehicle"] = new JsonObject
         {
             ["elementId"] = VehicleElementId,
-            ["firstRegistrationYear"] = FirstRegistrationDate.Year,
+            ["ageYears"] = WholeYears(FirstRegistrationDate, basis),
             ["engineCapacityCc"] = EngineCc,
-            ["vehicleValue"] = VehicleValue?.ToString(CultureInfo.InvariantCulture),
+            ["vehicleValue"] = VehicleValue?.ToString("F2", CultureInfo.InvariantCulture),
             ["usage"] = Usage,
         },
         ["driver"] = new JsonObject
         {
-            ["dateOfBirth"] = DriverBirthDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ["ageYears"] = WholeYears(DriverBirthDate, basis),
             ["claimsLast5Years"] = ClaimsLast5Years,
         },
         ["coverages"] = new JsonArray(Coverages.Select(c => (JsonNode)c).ToArray()),
     };
+
+    private static int WholeYears(DateOnly from, DateOnly to)
+    {
+        var years = to.Year - from.Year;
+        return from.AddYears(years) > to ? years - 1 : years;
+    }
 
     private static JsonElement Object(JsonElement element, string path) =>
         element.ValueKind == JsonValueKind.Object ? element : throw Input(path, "An object is expected.");
@@ -135,14 +144,22 @@ internal sealed record MotorRisk(
             element = amount;
         }
 
-        decimal value;
-        var ok = element.ValueKind switch
+        var text = element.ValueKind switch
         {
-            JsonValueKind.Number => element.TryGetDecimal(out value),
-            JsonValueKind.String => decimal.TryParse(element.GetString(), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value),
-            _ => (value = 0m) != 0m,
+            JsonValueKind.Number => element.GetRawText(),
+            JsonValueKind.String => element.GetString(),
+            _ => null,
         };
-        return ok && value is > 0m and <= 100_000_000m ? value : throw Input(path, "A positive amount is expected.");
+
+        // Exact or rejected (D-ARC-27): plain decimal digits only, at most two decimals, no rounding on the way in.
+        // The value is normalised to scale 2 so that 70004 and 70004.00 are the same input.
+        if (text is null || !System.Text.RegularExpressions.Regex.IsMatch(text, @"^[0-9]{1,9}(\.[0-9]{1,2}0*)?$", System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromMilliseconds(50))
+            || !decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value) || value is <= 0m or > 100_000_000m)
+        {
+            throw Input(path, "A positive amount with at most two decimals is expected.");
+        }
+
+        return decimal.Round(value, 2) + 0.00m;
     }
 
     private static DomainException Input(string path, string message) =>
