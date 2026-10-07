@@ -1,0 +1,121 @@
+{
+  "skeleton": {
+    "loading": "Φόρτωση…"
+  },
+  "progress": {
+    "count": "{value} από {max}"
+  },
+  "banner": {
+    "dismiss": "Απόκρυψη"
+  },
+  "avatar": {
+    "label": "{name}, {presence, select, viewing {βλέπει} editing {επεξεργάζεται} idle {αδρανής} other {εκτός σύνδεσης}}",
+    "stackLabel": "Άτομα σε αυτή την εγγραφή",
+    "more": "{count, plural, one {# ακόμη άτομο βλέπει αυτή την εγγραφή} other {# ακόμη άτομα βλέπουν αυτή την εγγραφή}}",
+    "moreShort": "+{count}",
+    "listTitle": "Σε αυτή την εγγραφή",
+    "row": "{name} · {presence, select, editing {επεξεργάζεται} viewing {βλέπει} other {αδρανής}} · από {since}",
+    "rowSection": "{name} · {presence, select, editing {επεξεργάζεται: {section}} viewing {βλέπει: {section}} other {αδρανής: {section}}} · από {since}",
+    "fieldLock": "{gender, select, female {Επεξεργάζεται η {name}} male {Επεξεργάζεται ο {name}} other {Επεξεργάζεται: {name}}}"
+  },
+  "popover": {
+    "close": "Κλείσιμο",
+    "loading": "Φόρτωση…",
+    "loadError": "Δεν ήταν δυνατή η φόρτωση",
+    "retry": "Επανάληψη"
+  },
+  "explainWhy": {
+    "trigger": "Γιατί;",
+    "title": "Γιατί {value};",
+    "factors": "Βασικοί παράγοντες",
+    "sources": "Πηγές",
+    "fullSheet": "Προβολή πλήρους φύλλου υπολογισμού"
+  },
+  "menu": {
+    "overflow": "Περισσότερες ενέργειες",
+    "splitMore": "Περισσότερες επιλογές",
+    "contextLabel": "Ενέργειες",
+    "disabledBecause": "Μη διαθέσιμο: {reason}"
+  },
+  "dialog": {
+    "close": "Κλείσιμο",
+    "cancel": "Άκυρο",
+    "busy": "Η ενέργεια εκτελείται…",
+    "errorTitle": "Η ενέργεια δεν ολοκληρώθηκε",
+    "genericError": "Τα στοιχεία σας διατηρήθηκαν. Δοκιμάστε ξανά."
+  },
+  "confirmDialog": {
+    "consequences": "Συνέπειες",
+    "reasonLabel": "Αιτία",
+    "reasonPlaceholder": "Επιλέξτε αιτία",
+    "reasonRequired": "Επιλέξτε αιτία για να συνεχίσετε",
+    "typeToConfirm": "Πληκτρολογήστε {token} για επιβεβαίωση",
+    "sendForApproval": "Αποστολή για έγκριση",
+    "approvalNote": "Η ενέργεια ολοκληρώνεται μόνο μετά από έγκριση από άλλο χρήστη.",
+    "approvalNoteGroup": "Θα σταλεί για έγκριση στην ομάδα «{group}». Η ενέργεια ολοκληρώνεται μόνο μετά την έγκριση."
+  },
+  "unsavedChanges": {
+    "title": "Υπάρχουν μη αποθηκευμένες αλλαγές",
+    "intro": "Έχετε αλλάξει τα εξής πεδία:",
+    "more": "και {count} ακόμη",
+    "continue": "Συνέχεια επεξεργασίας",
+    "discard": "Απόρριψη αλλαγών",
+    "saveAndExit": "Αποθήκευση και έξοδος"
+  },
+  "drawer": {
+    "close": "Κλείσιμο",
+    "loadError": "Δεν ήταν δυνατή η φόρτωση",
+    "retry": "Επανάληψη"
+  },
+  "sideSheet": {
+    "close": "Κλείσιμο",
+    "cancel": "Άκυρο",
+    "save": "Αποθήκευση",
+    "edit": "Επεξεργασία",
+    "unsaved": "Μη αποθηκευμένες αλλαγές",
+    "context": "για {context}",
+    "errorTitle": "Η αποθήκευση δεν ολοκληρώθηκε"
+  },
+  "toast": {
+    "region": "Ειδοποιήσεις",
+    "dismiss": "Κλείσιμο ειδοποίησης"
+  },
+  "commandPalette": {
+    "label": "Παλέτα εντολών",
+    "placeholder": "Αναζήτηση ή εντολή…",
+    "groups": {
+      "actions": "Ενέργειες",
+      "navigation": "Μετάβαση σε",
+      "records": "Εγγραφές",
+      "recent": "Πρόσφατα",
+      "fullText": "Πλήρες κείμενο"
+    },
+    "scope": "{scope, select, policy {Σε: Ασφαλιστήρια} claim {Σε: Ζημίες} customer {Σε: Πελάτες} actions {Σε: Ενέργειες} other {Σε: Αναγνωριστικά}}",
+    "removeScope": "Αφαίρεση φίλτρου",
+    "noResults": "Καμία αντιστοιχία · Αναζήτηση σε πλήρες κείμενο (↵)",
+    "error": "Η αναζήτηση δεν είναι διαθέσιμη",
+    "open": "Άνοιγμα",
+    "count": "{count, plural, =0 {Κανένα αποτέλεσμα} one {# αποτέλεσμα} other {# αποτελέσματα}}",
+    "hints": {
+      "label": "Συντομεύσεις",
+      "navigate": "πλοήγηση",
+      "open": "άνοιγμα",
+      "newTab": "νέα καρτέλα",
+      "filter": "φίλτρο τύπου",
+      "close": "κλείσιμο"
+    }
+  },
+  "shortcutOverlay": {
+    "title": "Συντομεύσεις πληκτρολογίου",
+    "search": "Αναζήτηση συντόμευσης",
+    "empty": "Καμία συντόμευση για «{query}»"
+  },
+  "notifications": {
+    "bell": "{count, plural, =0 {Ειδοποιήσεις} one {Ειδοποιήσεις, # νέα} other {Ειδοποιήσεις, # νέες}}",
+    "title": "Ειδοποιήσεις",
+    "markAllRead": "Σήμανση όλων ως αναγνωσμένων",
+    "empty": "Δεν υπάρχουν ειδοποιήσεις",
+    "unread": "Μη αναγνωσμένη",
+    "cap": "99+"
+  }
+}

@@ -1,0 +1,42 @@
+/* Floating bulk-action bar (Part 2 §4.35, MI-24): material.float, radius.xl, 48 px, max 720 px. */
+.wrap {
+  position: sticky;
+  inset-block-end: var(--space-6);
+  z-index: var(--z-float-action-bar);
+  display: flex;
+  justify-content: center;
+  margin-block-start: calc(var(--size-bulk-bar) * -1 - var(--space-6));
+  pointer-events: none;
+}
+
+.bar {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  max-inline-size: min(720px, 100%);
+  min-block-size: var(--size-bulk-bar);
+  padding: var(--space-0) var(--space-2) var(--space-0) var(--space-4);
+  border-radius: var(--radius-xl);
+  pointer-events: auto;
+}
+
+.count {
+  color: var(--color-text-primary);
+  font: var(--type-label);
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+
+.divider {
+  inline-size: var(--border-width-hairline);
+  block-size: var(--space-5);
+  margin-inline: var(--space-2);
+  background-color: var(--color-border-subtle);
+}
+
+@media (forced-colors: active) {
+  .bar {
+    border: var(--border-width-hairline) solid CanvasText;
+    background: Canvas;
+  }
+}

@@ -29,7 +29,13 @@ describe('preferences', () => {
   it('writes data attributes on <html>', () => {
     const root = document.createElement('div');
     applyPreferences(
-      { ...defaultPreferences, theme: 'dark', density: 'comfortable', reduceMotion: 'on', reduceTransparency: 'off' },
+      {
+        ...defaultPreferences,
+        theme: 'dark',
+        density: 'comfortable',
+        reduceMotion: 'on',
+        reduceTransparency: 'off',
+      },
       root,
     );
     expect(root.dataset.theme).toBe('dark');

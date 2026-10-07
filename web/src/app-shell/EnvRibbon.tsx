@@ -10,7 +10,9 @@ import type { Environment } from './navigation';
  */
 export function EnvRibbon({ environment }: { environment: NonNullable<Environment> }) {
   const { t, i18n } = useTranslation('shell');
-  const text = t(environment.kind === 'uat' ? 'envRibbon.uat' : 'envRibbon.dev', { env: environment.name });
+  const text = t(environment.kind === 'uat' ? 'envRibbon.uat' : 'envRibbon.dev', {
+    env: environment.name,
+  });
   const locale = i18n.language === 'en' ? 'en-GB' : 'el-GR';
   return (
     <div className={styles.envRibbon} data-kind={environment.kind} role="note">

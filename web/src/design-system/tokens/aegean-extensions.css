@@ -89,6 +89,9 @@
   --color-control-disabled-glyph: #ffffff;
   --color-switch-track-off: #b9c0cb;
   --color-switch-track-off-hover: #98a1b0;
+
+  /* Mirror of elevation.pinned-column for right-pinned (actions) columns (Part 2 §4.35). */
+  --elevation-pinned-column-end: -4px 0 8px -4px rgba(15, 23, 42, 0.12);
   --color-skeleton: #eef0f3;
   --color-kbd-on-inverse: rgba(255, 255, 255, 0.14);
 
@@ -134,6 +137,7 @@
   --color-control-disabled-glyph: #98a1b0;
   --color-switch-track-off: #3d4452;
   --color-switch-track-off-hover: #4a5262;
+  --elevation-pinned-column-end: -4px 0 8px -4px rgba(0, 0, 0, 0.5);
   --color-skeleton: #1f242d;
   --color-kbd-on-inverse: rgba(0, 0, 0, 0.08);
   --color-ambient-1: rgba(46, 79, 214, 0.22);
@@ -156,6 +160,7 @@
     --color-control-disabled-glyph: #98a1b0;
     --color-switch-track-off: #3d4452;
     --color-switch-track-off-hover: #4a5262;
+    --elevation-pinned-column-end: -4px 0 8px -4px rgba(0, 0, 0, 0.5);
     --color-skeleton: #1f242d;
     --color-kbd-on-inverse: rgba(0, 0, 0, 0.08);
     --color-ambient-1: rgba(46, 79, 214, 0.22);

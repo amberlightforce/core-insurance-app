@@ -136,6 +136,7 @@ export const tokenNames = [
   'elevation-4',
   'elevation-5',
   'elevation-pinned-column',
+  'elevation-pinned-column-end',
   'field-full',
   'field-lg',
   'field-md',

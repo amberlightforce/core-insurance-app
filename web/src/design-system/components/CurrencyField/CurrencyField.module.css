@@ -1,0 +1,48 @@
+/*
+ * Currency input (Part 2 §4.6): value right-aligned in tabular figures, visible «€» unit, width `field.sm`
+ * (999.999.999,99 € fits). Negative adverse amounts use `text.adverse`. Money never animates: no transitions
+ * on the value.
+ */
+.currency {
+  min-inline-size: 0;
+}
+
+.frame {
+  min-inline-size: calc(var(--space-16) * 2 + var(--space-6));
+}
+
+.input {
+  text-align: end;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.unit {
+  flex: none;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.frame[data-adverse] .input,
+.frame[data-adverse] .unit {
+  color: var(--color-text-adverse);
+}
+
+.frame[data-readonly] .unit {
+  color: inherit;
+}
+
+.words {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+@media (forced-colors: active) {
+  .frame[data-adverse] .input,
+  .frame[data-adverse] .unit {
+    color: CanvasText;
+    text-decoration: underline;
+  }
+}

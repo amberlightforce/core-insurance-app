@@ -1,6 +1,13 @@
 import { Ellipsis, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link, Menu, MenuItem, MenuTrigger, Popover, Button as AriaButton } from 'react-aria-components';
+import {
+  Link,
+  Menu,
+  MenuItem,
+  MenuTrigger,
+  Popover,
+  Button as AriaButton,
+} from 'react-aria-components';
 import { useLocation } from 'react-router';
 
 import { Button } from '../design-system/components/Button';
@@ -41,7 +48,13 @@ export function NavRail({ items, expanded, onToggleExpanded }: NavRailProps) {
     );
     return (
       <li key={item.id} className={cx(styles.railItem)}>
-        {expanded ? link : <Tooltip content={label} placement="end">{link}</Tooltip>}
+        {expanded ? (
+          link
+        ) : (
+          <Tooltip content={label} placement="end">
+            {link}
+          </Tooltip>
+        )}
       </li>
     );
   };
@@ -61,7 +74,9 @@ export function NavRail({ items, expanded, onToggleExpanded }: NavRailProps) {
         Α
       </span>
       <ul className={cx(styles.railList)}>
-        {items.map((item, index) => renderLink(item, index >= bottomBarSlots ? styles.railOverflowItem : undefined))}
+        {items.map((item, index) =>
+          renderLink(item, index >= bottomBarSlots ? styles.railOverflowItem : undefined),
+        )}
         <li className={cx(styles.railMore)}>
           <MenuTrigger>
             <AriaButton className={cx(styles.railLink)} aria-label={t('nav.more')}>
@@ -71,7 +86,12 @@ export function NavRail({ items, expanded, onToggleExpanded }: NavRailProps) {
             <Popover className={cx(styles.menuPopover)} data-material="popover" placement="top end">
               <Menu className={cx(styles.menu)} aria-label={t('nav.more')}>
                 {overflow.map((item) => (
-                  <MenuItem key={item.id} id={item.id} href={item.to} className={cx(styles.menuItem)}>
+                  <MenuItem
+                    key={item.id}
+                    id={item.id}
+                    href={item.to}
+                    className={cx(styles.menuItem)}
+                  >
                     <Icon icon={moduleIcons[item.id]} size={16} />
                     {t(`nav.${item.id}`)}
                   </MenuItem>

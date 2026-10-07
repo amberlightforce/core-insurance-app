@@ -71,3 +71,45 @@ import { formatMoney, formatDate, toGreekUpper } from '../../format';
   `npm run tokens:gen`.
 - Placeholders that are known stubs: the 18 custom insurance icons map to Lucide glyphs
   (`icons/insurance-icons.ts`) and the ILL-01…07 illustrations are simple SVGs (D-FE-09).
+
+## Known gaps (planned, not built in F-1d)
+
+- **DataTable (D-FE-16)** — added by the first feature work package that needs them: drag-to-reorder columns
+  (move buttons exist), saved views (IB-03), inline cell edit, typed number/date/person filters and the
+  histogram brush, the G V / E / F shortcuts, the row context menu, hover quick actions, and bulk actions over
+  500 rows as background jobs.
+- **DocumentViewer**: pdf.js rendering and the extraction overlay are deferred to W2-DOC (the shell renders
+  page images or a pluggable `renderPage`).
+- **Microinteractions not built**: MI-52 (diff-accept strike and FLIP), MI-49 (comment pin pulse), MI-14 form-level
+  shake, MI-19 single sliding highlight pill (each item fades its own), illustration drift; signature moments
+  SM-01…08 are outside this slice.
+- **Other**: GlassBudget service and device-tier probe (popovers inside modals are not yet forced solid),
+  async ΑΦΜ/ΔΟΥ lookup, combobox «Αναζήτηση σε όλο το σύστημα» link, read-only copy button on the advanced
+  inputs, relationship graph (visx), charts (visx), web-vitals RUM.
+
+## Status labels awaiting glossary sign-off (D-FE-14)
+
+Labels follow design guide Part 1 §2.1.4. Only six are backed by an unmarked term in the contract glossary
+(`00-system-contract` §D): job.quoted, job.referred, policyTerm.cancelled, policyTerm.nonRenewed,
+fiscalDocument.registered, complaint.closed. Every other entry in
+`components/StatusPill/statusMap.ts` is marked `// glossary: pending` and needs ROLE-46 confirmation:
+
+- `semantic`: aiGenerated, aiSuggested, breached, conflict, degraded, disabled, error, info, locked, offline, overdue, pendingApproval, readOnly, required, stale, success, warning
+- `job`: bound, declined, draft, expired, notTaken, preempted, rescinded, scheduled, withdrawn
+- `policyTerm`: expired, inForce, lapsed, pendingCancellation, scheduled
+- `uwIssue`: approved, approvedWithConditions, closed, invalidated, open, rejected
+- `claim` / `exposure`: closed, draft, open, reopened
+- `transactionSet`: approved, draft, pendingApproval, posted, rejected, submitted
+- `invoice`: billed, due, overdue, paid, partiallyPaid, planned, reversed, writtenOff
+- `paymentIn`: allocated, partiallyAllocated, received, refunded, reversed, suspense
+- `disbursement`: approved, cleared, issued, pendingApproval, rejected, released, requested, returned, stopped, voided
+- `activity`: cancelled, completed, open, skipped
+- `outboundDocument`: failed, rendered, rendering, requested, superseded
+- `delivery`: bounced, delivered, failed, pending, sent
+- `fiscalDocument`: cancelled, pending, rejected, submitted
+- `clockInstance`: breached, cancelled, met, paused, running, warned
+- `complaint`: acknowledged, answered, escalated, received, underInvestigation
+- `cession`: calculated, exception, posted, reversed
+- `productVersion`: approved, draft, locked, retired, submitted
+- `aiRecommendation`: accepted, edited, expired, proposed, rejected
+- `screeningResult`: clear, falsePositive, potentialHit, trueMatch (trueMatch stays solid, D-FE-15)

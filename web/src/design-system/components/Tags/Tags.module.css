@@ -1,0 +1,152 @@
+/* Filter chips (Part 2 §4.14; v3 .chip): 24 / 28 px, radius.full, brand family. MI-25 chip in. */
+.group {
+  display: flex;
+  min-inline-size: 0;
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1_5);
+  align-items: center;
+}
+
+.chip {
+  --_fg: var(--color-status-brand-fg);
+  --_bg: var(--color-status-brand-bg);
+  --_border: var(--color-status-brand-border);
+  --_border-hover: var(--color-status-brand-solid);
+
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  max-inline-size: 100%;
+  min-block-size: 24px;
+  padding: var(--space-0) var(--space-1) var(--space-0) var(--space-2);
+  border: var(--border-width-hairline) solid var(--_border);
+  border-radius: var(--radius-full);
+  background-color: var(--_bg);
+  color: var(--_fg);
+  font: var(--type-caption);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: default;
+  outline: none;
+  animation: chip-in var(--motion-duration-feedback-lg) var(--motion-ease-overshoot-fallback) both;
+  transition:
+    border-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    transform var(--motion-duration-feedback-xs) var(--motion-ease-standard);
+}
+
+/* MI-25: scale 0.9 → 1 with opacity. */
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:global([data-density='comfortable']) .chip {
+  min-block-size: 28px;
+  font: var(--type-label);
+}
+
+.chip[data-editable] {
+  cursor: pointer;
+}
+
+.chip[data-hovered] {
+  border-color: var(--_border-hover);
+}
+
+.chip[data-pressed] {
+  transform: scale(0.97);
+}
+
+.chip[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.chip[data-state='locked'],
+.chip[data-state='readOnly'] {
+  --_fg: var(--color-status-neutral-fg);
+  --_bg: var(--color-status-neutral-bg);
+  --_border: var(--color-status-neutral-border);
+  --_border-hover: var(--color-status-neutral-border);
+
+  padding-inline-end: var(--space-2);
+}
+
+.chip[data-state='invalid'] {
+  --_fg: var(--color-status-danger-fg);
+  --_bg: var(--color-status-danger-bg);
+  --_border: var(--color-status-danger-border);
+  --_border-hover: var(--color-status-danger-solid);
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.label {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remove {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 20px;
+  block-size: 20px;
+  flex: none;
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.remove[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.remove[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--space-px) * -1);
+}
+
+@media (pointer: coarse) {
+  .remove {
+    inline-size: 24px;
+    block-size: 24px;
+  }
+}
+
+@media (forced-colors: active) {
+  .chip {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .chip[data-state='invalid'] {
+    border-width: var(--border-width-thick);
+  }
+
+  .tooltip {
+    border: var(--border-width-hairline) solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}

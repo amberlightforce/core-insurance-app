@@ -76,13 +76,16 @@ export function toGreekLower(text: string, locale = 'el-GR'): string {
 
 /** Replaces σ with ς at the end of a word and ς with σ inside a word. */
 export function applyFinalSigma(text: string): string {
-  return text.replace(/[σς](?=(\p{M}*)(\P{L}|$))|[σς]/gu, (match, _marks, _next, offset: number) => {
-    const rest = text.slice(offset + match.length);
-    const nextLetter = /^\p{M}*(\p{L})/u.exec(rest);
-    const previousIsLetter = offset > 0 && /\p{L}\p{M}*$/u.test(text.slice(0, offset));
-    if (!nextLetter && previousIsLetter) return 'ς';
-    return 'σ';
-  });
+  return text.replace(
+    /[σς](?=(\p{M}*)(\P{L}|$))|[σς]/gu,
+    (match, _marks, _next, offset: number) => {
+      const rest = text.slice(offset + match.length);
+      const nextLetter = /^\p{M}*(\p{L})/u.exec(rest);
+      const previousIsLetter = offset > 0 && /\p{L}\p{M}*$/u.test(text.slice(0, offset));
+      if (!nextLetter && previousIsLetter) return 'ς';
+      return 'σ';
+    },
+  );
 }
 
 /** Removes Greek accents, breathings and dialytika (NFD strip), keeping the letters. */

@@ -77,7 +77,6 @@ describe('split math', () => {
     expect(widthForKey('ArrowRight', true, 600)).toBe(640);
     expect(widthForKey('a', false, 400)).toBeNull();
   });
-
 });
 
 describe('SplitView stacked (narrow container)', () => {
@@ -86,10 +85,7 @@ describe('SplitView stacked (narrow container)', () => {
     globalThis.ResizeObserver = class {
       constructor(private readonly callback: ResizeObserverCallback) {}
       observe() {
-        this.callback(
-          [{ contentRect: { width: 700 } } as ResizeObserverEntry],
-          this as unknown as ResizeObserver,
-        );
+        this.callback([{ contentRect: { width: 700 } } as ResizeObserverEntry], this);
       }
       unobserve() {
         return undefined;

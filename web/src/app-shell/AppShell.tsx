@@ -100,7 +100,8 @@ export function AppShell({
         return;
       }
       if (event.key === 'F6') {
-        if (shellRef.current && cycleRegion(shellRef.current, event.shiftKey)) event.preventDefault();
+        if (shellRef.current && cycleRegion(shellRef.current, event.shiftKey))
+          event.preventDefault();
         return;
       }
       if (event.ctrlKey || event.metaKey || event.altKey) return;
@@ -141,18 +142,41 @@ export function AppShell({
           notifications={notifications}
           userMenu={userMenu}
         />
-        <NavRail items={navItems} expanded={preferences.railExpanded} onToggleExpanded={toggleRail} />
-        <div className={cx(styles.body, workViews ? styles.withWorkViews : undefined, contextPanel ? styles.withContext : undefined)}>
+        <NavRail
+          items={navItems}
+          expanded={preferences.railExpanded}
+          onToggleExpanded={toggleRail}
+        />
+        <div
+          className={cx(
+            styles.body,
+            workViews ? styles.withWorkViews : undefined,
+            contextPanel ? styles.withContext : undefined,
+          )}
+        >
           {workViews ? (
-            <nav className={styles.workViews} aria-label={t('shell:landmarks.workViews')} data-shell-region="workviews">
+            <nav
+              className={styles.workViews}
+              aria-label={t('shell:landmarks.workViews')}
+              data-shell-region="workviews"
+            >
               {workViews}
             </nav>
           ) : null}
-          <main id="main-content" className={styles.mainSheet} tabIndex={-1} data-shell-region="main">
+          <main
+            id="main-content"
+            className={styles.mainSheet}
+            tabIndex={-1}
+            data-shell-region="main"
+          >
             {children}
           </main>
           {contextPanel ? (
-            <aside className={styles.contextPanel} aria-label={t('shell:landmarks.context')} data-shell-region="context">
+            <aside
+              className={styles.contextPanel}
+              aria-label={t('shell:landmarks.context')}
+              data-shell-region="context"
+            >
               {contextPanel}
             </aside>
           ) : null}

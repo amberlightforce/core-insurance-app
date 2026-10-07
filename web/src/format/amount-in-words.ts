@@ -66,16 +66,75 @@ const ones: Record<Gender, string[]> = {
 };
 
 const teens: Record<Gender, string[]> = {
-  masculine: ['δέκα', 'έντεκα', 'δώδεκα', 'δεκατρείς', 'δεκατέσσερις', 'δεκαπέντε', 'δεκαέξι', 'δεκαεπτά', 'δεκαοκτώ', 'δεκαεννέα'],
-  feminine: ['δέκα', 'έντεκα', 'δώδεκα', 'δεκατρείς', 'δεκατέσσερις', 'δεκαπέντε', 'δεκαέξι', 'δεκαεπτά', 'δεκαοκτώ', 'δεκαεννέα'],
-  neuter: ['δέκα', 'έντεκα', 'δώδεκα', 'δεκατρία', 'δεκατέσσερα', 'δεκαπέντε', 'δεκαέξι', 'δεκαεπτά', 'δεκαοκτώ', 'δεκαεννέα'],
+  masculine: [
+    'δέκα',
+    'έντεκα',
+    'δώδεκα',
+    'δεκατρείς',
+    'δεκατέσσερις',
+    'δεκαπέντε',
+    'δεκαέξι',
+    'δεκαεπτά',
+    'δεκαοκτώ',
+    'δεκαεννέα',
+  ],
+  feminine: [
+    'δέκα',
+    'έντεκα',
+    'δώδεκα',
+    'δεκατρείς',
+    'δεκατέσσερις',
+    'δεκαπέντε',
+    'δεκαέξι',
+    'δεκαεπτά',
+    'δεκαοκτώ',
+    'δεκαεννέα',
+  ],
+  neuter: [
+    'δέκα',
+    'έντεκα',
+    'δώδεκα',
+    'δεκατρία',
+    'δεκατέσσερα',
+    'δεκαπέντε',
+    'δεκαέξι',
+    'δεκαεπτά',
+    'δεκαοκτώ',
+    'δεκαεννέα',
+  ],
 };
 
-const tens = ['', '', 'είκοσι', 'τριάντα', 'σαράντα', 'πενήντα', 'εξήντα', 'εβδομήντα', 'ογδόντα', 'ενενήντα'];
+const tens = [
+  '',
+  '',
+  'είκοσι',
+  'τριάντα',
+  'σαράντα',
+  'πενήντα',
+  'εξήντα',
+  'εβδομήντα',
+  'ογδόντα',
+  'ενενήντα',
+];
 
-const hundredStems = ['', '', 'διακόσι', 'τριακόσι', 'τετρακόσι', 'πεντακόσι', 'εξακόσι', 'επτακόσι', 'οκτακόσι', 'εννιακόσι'];
+const hundredStems = [
+  '',
+  '',
+  'διακόσι',
+  'τριακόσι',
+  'τετρακόσι',
+  'πεντακόσι',
+  'εξακόσι',
+  'επτακόσι',
+  'οκτακόσι',
+  'εννιακόσι',
+];
 const hundredEndings: Record<Gender, string> = { masculine: 'οι', feminine: 'ες', neuter: 'α' };
-const chiliaByGender: Record<Gender, string> = { masculine: 'χίλιοι', feminine: 'χίλιες', neuter: 'χίλια' };
+const chiliaByGender: Record<Gender, string> = {
+  masculine: 'χίλιοι',
+  feminine: 'χίλιες',
+  neuter: 'χίλια',
+};
 
 function digitAt(n: number, place: number): number {
   return Math.floor(n / place) % 10;
@@ -129,8 +188,40 @@ export function integerToGreekWords(value: bigint, gender: Gender = 'neuter'): s
   return words.join(' ');
 }
 
-const enOnes = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
-const enTens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+const enOnes = [
+  '',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+  'ten',
+  'eleven',
+  'twelve',
+  'thirteen',
+  'fourteen',
+  'fifteen',
+  'sixteen',
+  'seventeen',
+  'eighteen',
+  'nineteen',
+];
+const enTens = [
+  '',
+  '',
+  'twenty',
+  'thirty',
+  'forty',
+  'fifty',
+  'sixty',
+  'seventy',
+  'eighty',
+  'ninety',
+];
 
 function enBelowThousand(n: number): string {
   const words: string[] = [];
@@ -164,14 +255,17 @@ export function integerToEnglishWords(value: bigint): string {
 
 /** Parses a decimal string/number into integer minor units, rejecting extra precision (never rounds). */
 export function toMinorUnits(value: number | string, minorDigits: number): bigint {
-  const text = typeof value === 'number' ? value.toFixed(minorDigits) : value.trim().replace('−', '-');
+  const text =
+    typeof value === 'number' ? value.toFixed(minorDigits) : value.trim().replace('−', '-');
   const match = /^([+-])?(\d+)(?:\.(\d+))?$/.exec(text);
   if (!match) throw new RangeError(`Not a decimal amount: ${String(value)}`);
   const [, sign, whole = '0', fraction = ''] = match;
   if (fraction.length > minorDigits && /[1-9]/.test(fraction.slice(minorDigits))) {
     throw new RangeError(`More than ${String(minorDigits)} decimals: ${String(value)}`);
   }
-  const minor = BigInt(whole) * 10n ** BigInt(minorDigits) + BigInt(fraction.slice(0, minorDigits).padEnd(minorDigits, '0') || '0');
+  const minor =
+    BigInt(whole) * 10n ** BigInt(minorDigits) +
+    BigInt(fraction.slice(0, minorDigits).padEnd(minorDigits, '0') || '0');
   return sign === '-' ? -minor : minor;
 }
 
@@ -216,5 +310,7 @@ export function amountInWords(value: number | string, options: AmountInWordsOpti
     if (negative) text = `μείον ${text}`;
   }
 
-  return capitalize ? text.charAt(0).toLocaleUpperCase(language === 'el' ? 'el-GR' : 'en-GB') + text.slice(1) : text;
+  return capitalize
+    ? text.charAt(0).toLocaleUpperCase(language === 'el' ? 'el-GR' : 'en-GB') + text.slice(1)
+    : text;
 }

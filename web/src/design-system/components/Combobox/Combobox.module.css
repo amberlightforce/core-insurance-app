@@ -1,0 +1,255 @@
+/*
+ * Combobox results (Part 2 §4.4). Popover = glass `popover` material, elevation 3, radius.lg. MI-28 popover
+ * open (opacity + 4 px), MI-19 list rows, MI-45 loading bar. Match highlighting: 600 weight on a
+ * `status.brand.bg` underlay.
+ */
+.combobox {
+  min-inline-size: 0;
+}
+
+.popover {
+  z-index: var(--z-dropdown);
+  box-sizing: border-box;
+  min-inline-size: var(--trigger-width);
+  max-inline-size: min(560px, calc(100vw - var(--space-8)));
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-3);
+  transform-origin: top left;
+  transition:
+    opacity var(--motion-duration-transition-sm) var(--motion-ease-enter),
+    transform var(--motion-duration-transition-sm) var(--motion-ease-enter);
+}
+
+.popover[data-entering] {
+  opacity: 0;
+  transform: translateY(calc(var(--space-1) * -1));
+}
+
+.popover[data-exiting] {
+  opacity: 0;
+  transition-duration: var(--motion-duration-feedback-lg);
+}
+
+.listbox {
+  position: relative;
+  max-block-size: min(360px, var(--visual-viewport-height, 100vh));
+  padding: var(--space-1);
+  overflow: auto;
+  outline: none;
+}
+
+.results {
+  transition: opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+/* Old results stay, dimmed, while the next query loads. */
+.results[data-stale] {
+  opacity: 0.6;
+}
+
+/* 2 px indeterminate bar: a 30 % brand segment sliding on a 1.2 s loop. */
+.loadingBar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: var(--z-raised);
+  block-size: var(--border-width-thick);
+  overflow: hidden;
+}
+
+.loadingBar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  inline-size: 30%;
+  background-color: var(--color-status-brand-solid);
+  animation: slide var(--motion-duration-shimmer) var(--motion-ease-linear) infinite;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(340%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingBar::before {
+    inset-inline-start: 35%;
+    animation: pulse var(--motion-duration-shimmer) var(--motion-ease-standard) infinite alternate;
+  }
+}
+
+:global(:root[data-reduce-motion='true']) .loadingBar::before {
+  inset-inline-start: 35%;
+  animation: pulse var(--motion-duration-shimmer) var(--motion-ease-standard) infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.section + .section,
+.footer {
+  margin-block-start: var(--space-1);
+  padding-block-start: var(--space-1);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.listbox > .footer:first-child {
+  margin-block-start: var(--space-0);
+  padding-block-start: var(--space-0);
+  border-block-start: 0;
+}
+
+.sectionHeader,
+.footerHeader {
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  font-weight: 600;
+}
+
+.footerHeader {
+  font-weight: 400;
+}
+
+.option {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-block-size: var(--size-row-list);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  cursor: default;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-xs) var(--motion-ease-feedback);
+}
+
+:global([data-density='comfortable']) .option {
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.option[data-focused],
+.option[data-hovered] {
+  background-color: var(--color-state-row-hover);
+}
+
+.option[data-selected] {
+  background-color: var(--color-state-row-selected);
+  box-shadow: inset var(--border-width-thick) 0 0 var(--color-state-row-selected-indicator);
+}
+
+.option[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.option[data-disabled] {
+  color: var(--color-text-disabled);
+}
+
+.check {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--size-icon-md);
+  block-size: var(--size-icon-md);
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-on-accent);
+}
+
+.check[data-checked] {
+  border-color: var(--color-interactive-accent-bg);
+  background-color: var(--color-interactive-accent-bg);
+}
+
+.action {
+  gap: var(--space-2);
+  color: var(--color-text-link);
+}
+
+.optionText {
+  display: grid;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.optionLabel {
+  overflow-wrap: anywhere;
+}
+
+.optionCaption {
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+.optionMeta {
+  flex: none;
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.optionMono {
+  font: var(--type-mono-sm);
+  letter-spacing: var(--type-mono-sm-tracking);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.mark {
+  border-radius: var(--radius-xs);
+  background-color: var(--color-status-brand-bg);
+  color: inherit;
+  font-weight: 600;
+}
+
+.state {
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-secondary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+@media (forced-colors: active) {
+  .option[data-focused],
+  .option[data-hovered] {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .option[data-selected] {
+    outline: var(--border-width-thick) solid Highlight;
+  }
+
+  .check[data-checked] {
+    border-color: Highlight;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .mark {
+    background-color: Mark;
+    color: MarkText;
+  }
+
+  .loadingBar::before {
+    background-color: Highlight;
+  }
+}

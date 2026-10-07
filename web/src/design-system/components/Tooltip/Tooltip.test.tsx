@@ -68,6 +68,11 @@ describe('shortcuts', () => {
     const event = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true });
     expect(matchesShortcut(event, 'Mod+K')).toBe(true);
     expect(matchesShortcut(new KeyboardEvent('keydown', { key: 'k' }), 'Mod+K')).toBe(false);
-    expect(matchesShortcut(new KeyboardEvent('keydown', { key: 'K', ctrlKey: true, shiftKey: true }), 'Mod+Shift+K')).toBe(true);
+    expect(
+      matchesShortcut(
+        new KeyboardEvent('keydown', { key: 'K', ctrlKey: true, shiftKey: true }),
+        'Mod+Shift+K',
+      ),
+    ).toBe(true);
   });
 });

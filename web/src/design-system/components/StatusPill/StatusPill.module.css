@@ -1,0 +1,269 @@
+/*
+ * Status pill and count badge (Part 2 §4.13; v3 mockup .pill). Colour + icon + text from the status map.
+ * MI-15 status morph. Never interactive.
+ */
+.pill {
+  --_fg: var(--color-status-neutral-fg);
+  --_bg: var(--color-status-neutral-bg);
+  --_border: var(--color-status-neutral-border);
+  --_solid: var(--color-status-neutral-solid);
+  --_height: 20px;
+  --_pad: var(--space-1_5);
+
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  max-inline-size: 100%;
+  min-block-size: var(--_height);
+  padding: var(--space-0) var(--_pad);
+  border: var(--border-width-hairline) solid var(--_border);
+  border-radius: var(--radius-sm);
+  background-color: var(--_bg);
+  color: var(--_fg);
+  font: var(--type-caption);
+  font-weight: 500;
+  white-space: nowrap;
+  vertical-align: middle;
+  transition:
+    background-color var(--motion-duration-feedback-lg) var(--motion-ease-standard),
+    border-color var(--motion-duration-feedback-lg) var(--motion-ease-standard),
+    color var(--motion-duration-feedback-lg) var(--motion-ease-standard);
+}
+
+.pill[data-size='sm'] {
+  --_height: 18px;
+  --_pad: var(--space-1_5);
+}
+
+.pill[data-size='md'] {
+  --_pad: var(--space-2);
+}
+
+:global([data-density='comfortable']) .pill {
+  --_height: 24px;
+
+  border-radius: var(--radius-full);
+  font: var(--type-label);
+}
+
+:global([data-density='comfortable']) .pill[data-size='sm'] {
+  --_height: 20px;
+}
+
+.content {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-inline-size: 0;
+}
+
+/* MI-15: the new pill content rises in from +6 px while the colours cross-fade. */
+.content[data-changed] {
+  animation: pill-in var(--motion-duration-feedback-lg) var(--motion-ease-enter) both;
+}
+
+@keyframes pill-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.icon[data-spins] svg {
+  animation: spin var(--motion-duration-spinner) var(--motion-ease-linear) infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subLabel,
+.countdown {
+  flex: none;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Variants. */
+.pill[data-variant='status-solid'] {
+  border-color: transparent;
+  background-color: var(--color-interactive-danger-bg);
+  box-shadow: var(--elevation-1);
+  color: var(--color-text-on-accent);
+}
+
+.pill[data-variant='status-outline'] {
+  border-color: var(--_solid);
+  background-color: transparent;
+}
+
+/* Families. */
+[data-family='neutral'] {
+  --_fg: var(--color-status-neutral-fg);
+  --_bg: var(--color-status-neutral-bg);
+  --_border: var(--color-status-neutral-border);
+  --_solid: var(--color-status-neutral-solid);
+}
+
+[data-family='success'] {
+  --_fg: var(--color-status-success-fg);
+  --_bg: var(--color-status-success-bg);
+  --_border: var(--color-status-success-border);
+  --_solid: var(--color-status-success-solid);
+}
+
+[data-family='warning'] {
+  --_fg: var(--color-status-warning-fg);
+  --_bg: var(--color-status-warning-bg);
+  --_border: var(--color-status-warning-border);
+  --_solid: var(--color-status-warning-solid);
+}
+
+[data-family='danger'] {
+  --_fg: var(--color-status-danger-fg);
+  --_bg: var(--color-status-danger-bg);
+  --_border: var(--color-status-danger-border);
+  --_solid: var(--color-status-danger-solid);
+}
+
+[data-family='info'] {
+  --_fg: var(--color-status-info-fg);
+  --_bg: var(--color-status-info-bg);
+  --_border: var(--color-status-info-border);
+  --_solid: var(--color-status-info-solid);
+}
+
+[data-family='brand'] {
+  --_fg: var(--color-status-brand-fg);
+  --_bg: var(--color-status-brand-bg);
+  --_border: var(--color-status-brand-border);
+  --_solid: var(--color-status-brand-solid);
+}
+
+[data-family='teal'] {
+  --_fg: var(--color-status-teal-fg);
+  --_bg: var(--color-status-teal-bg);
+  --_border: var(--color-status-teal-border);
+  --_solid: var(--color-status-teal-solid);
+}
+
+[data-family='plum'] {
+  --_fg: var(--color-status-plum-fg);
+  --_bg: var(--color-status-plum-bg);
+  --_border: var(--color-status-plum-border);
+  --_solid: var(--color-status-plum-solid);
+}
+
+[data-family='ai'] {
+  --_fg: var(--color-status-ai-fg);
+  --_bg: var(--color-status-ai-bg);
+  --_border: var(--color-status-ai-border);
+  --_solid: var(--color-status-ai-solid);
+}
+
+[data-family='ochre'] {
+  --_fg: var(--color-status-ochre-fg);
+  --_bg: var(--color-status-ochre-bg);
+  --_border: var(--color-status-ochre-border);
+  --_solid: var(--color-status-ochre-solid);
+}
+
+/* Dot variant: 8 px family dot, label in text.secondary (or in the tooltip and accessible name). */
+.dotTrigger {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 24px;
+  min-inline-size: 24px;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.dotTrigger:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.dotPill {
+  display: inline-flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  white-space: nowrap;
+}
+
+.dot {
+  inline-size: 8px;
+  block-size: 8px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background-color: var(--_solid);
+}
+
+.dotPill[data-changed] .dot {
+  animation: pill-in var(--motion-duration-feedback-lg) var(--motion-ease-enter) both;
+}
+
+.dotLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Count badge. */
+.badge {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-inline-size: 18px;
+  min-block-size: 18px;
+  padding: var(--space-0) var(--space-1);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-bg);
+  color: var(--color-status-neutral-fg);
+  font: var(--type-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1;
+}
+
+.badge[data-tone='attention'] {
+  background-color: var(--color-badge-attention-bg);
+  color: var(--color-badge-attention-fg);
+}
+
+@media (forced-colors: active) {
+  .pill,
+  .badge {
+    border: var(--border-width-hairline) solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .pill[data-variant='status-solid'],
+  .badge[data-tone='attention'] {
+    border-width: var(--border-width-thick);
+    background: Mark;
+    color: MarkText;
+  }
+
+  .dot {
+    background: CanvasText;
+  }
+}

@@ -2,5 +2,43 @@
   "splitView": {
     "resize": "Resize list",
     "back": "Back to the list"
+  },
+  "wizard": {
+    "back": "Back",
+    "next": "Next",
+    "saveDraft": "Save draft",
+    "savedAt": "Saved {time}",
+    "unsaved": "Unsaved changes",
+    "summary": "Summary",
+    "sendForApproval": "Send for approval"
+  },
+  "approval": {
+    "region": "Approval request",
+    "maker": "Submitted by",
+    "submittedAt": "Submitted",
+    "justification": "Justification",
+    "changes": "Changes",
+    "from": "from",
+    "to": "to",
+    "amount": "Amount",
+    "amountInWords": "In words",
+    "authority": "Your authority",
+    "evidence": "Evidence",
+    "history": "Recent history",
+    "pending": "Pending approval · {group} · since {time}",
+    "ownAction": "You cannot approve your own action",
+    "ownActionBody": "Another member of {group} will approve it.",
+    "approve": "Approve",
+    "reject": "Reject…",
+    "returnForChanges": "Return for changes…",
+    "escalate": "Escalate",
+    "noAuthority": "The amount exceeds your authority limit",
+    "rejectTitle": "Reject request",
+    "returnTitle": "Return for changes",
+    "reasonLabel": "Reason",
+    "reasonRequired": "Enter the reason.",
+    "confirmReject": "Reject request",
+    "confirmReturn": "Return to the submitter",
+    "decisions": "Decision"
   }
 }

@@ -1,0 +1,244 @@
+/*
+ * Key–value list (Part 2 §4.29) with IB-14 inline edit (MI-23 editor at identical metrics, MI-09 receipt).
+ */
+.list {
+  display: grid;
+  grid-template-columns: minmax(140px, 40%) minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-0);
+}
+
+:global([data-density='comfortable']) .list {
+  row-gap: var(--space-3);
+}
+
+.row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+}
+
+.label {
+  display: -webkit-box;
+  overflow: hidden;
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  color: var(--color-text-secondary);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.value {
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 0;
+  margin: var(--space-0);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  color: var(--color-text-primary);
+}
+
+.list[data-money-only] .value {
+  justify-items: end;
+  text-align: end;
+}
+
+.row[data-kind='money'] .valueText {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.valueLine {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  min-inline-size: 0;
+}
+
+.valueText {
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font: var(--type-mono);
+  letter-spacing: var(--type-mono-tracking);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.explain {
+  display: inline-flex;
+}
+
+/* Inline edit. */
+.editable {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.editable .valueRow {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.editable .valueText {
+  margin-inline: calc(var(--space-1) * -1);
+  padding-inline: var(--space-1);
+  border-radius: var(--radius-sm);
+  cursor: text;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+@media (hover: hover) {
+  .row[data-editable]:hover .valueText {
+    background-color: var(--color-interactive-ghost-bg-hover);
+  }
+}
+
+/* The pencil shows on row hover or keyboard focus (always on touch). */
+.pencil {
+  opacity: 0;
+  transition: opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.row[data-editable]:hover .pencil,
+.pencil:focus-within,
+.editable[data-saving] .pencil {
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  .pencil {
+    opacity: 1;
+  }
+}
+
+.editable[data-saving] .valueText {
+  opacity: 0.6;
+}
+
+/* MI-09: underline flashes success. */
+.valueText[data-saved] {
+  text-decoration: underline;
+  text-decoration-color: var(--color-status-success-solid);
+  text-decoration-thickness: var(--border-width-thick);
+  text-underline-offset: var(--space-0_5);
+}
+
+.receipt {
+  display: inline-flex;
+  gap: var(--space-0_5);
+  align-items: center;
+  font: var(--type-caption);
+  color: var(--color-status-success-fg);
+  animation: receipt var(--motion-duration-transition-sm) var(--motion-ease-enter) both;
+}
+
+@keyframes receipt {
+  from {
+    opacity: 0;
+  }
+}
+
+.failure {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  font: var(--type-caption);
+  color: var(--color-status-danger-fg);
+}
+
+/* MI-23: the editor occupies the value's exact box. */
+.editor {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.input {
+  inline-size: 100%;
+  margin-inline: calc(var(--space-1) * -1);
+  padding: var(--space-0) var(--space-1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-sheet);
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-border-control);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  outline: none;
+}
+
+.input[data-focused] {
+  box-shadow:
+    inset 0 0 0 var(--border-width-hairline) var(--color-border-focus),
+    0 0 0 var(--space-0_5) var(--color-state-focus-halo);
+}
+
+.input[data-invalid] {
+  box-shadow: inset 0 0 0 var(--border-width-thick) var(--color-status-danger-solid);
+}
+
+.fieldError {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  font: var(--type-caption);
+  color: var(--color-status-danger-fg);
+}
+
+.hint {
+  font: var(--type-caption);
+  color: var(--color-text-tertiary);
+}
+
+.transaction {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-tertiary);
+}
+
+.link {
+  color: var(--color-text-link);
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-0_5);
+  cursor: pointer;
+  outline: none;
+}
+
+.link[data-hovered] {
+  color: var(--color-text-link-hover);
+}
+
+.link[data-focus-visible] {
+  border-radius: var(--radius-xs);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (forced-colors: active) {
+  .input,
+  .input[data-focused] {
+    border: var(--border-width-hairline) solid CanvasText;
+  }
+
+  .input[data-invalid] {
+    border: var(--border-width-thick) solid Mark;
+  }
+
+  .pencil {
+    opacity: 1;
+  }
+
+  .failure,
+  .fieldError {
+    color: CanvasText;
+  }
+}

@@ -30,21 +30,35 @@ function formatter(region: RegionFormat, options: Intl.DateTimeFormatOptions, ti
 }
 
 /** «07/10/2026» */
-export function formatDate(value: DateInput, region: RegionFormat = 'el-GR', timeZone = ATHENS): string {
+export function formatDate(
+  value: DateInput,
+  region: RegionFormat = 'el-GR',
+  timeZone = ATHENS,
+): string {
   return formatter(region, { day: '2-digit', month: '2-digit', year: 'numeric' }, timeZone).format(
     toDate(value),
   );
 }
 
 /** «14:32» (24-hour). */
-export function formatTime(value: DateInput, region: RegionFormat = 'el-GR', timeZone = ATHENS): string {
-  return formatter(region, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }, timeZone).format(
-    toDate(value),
-  );
+export function formatTime(
+  value: DateInput,
+  region: RegionFormat = 'el-GR',
+  timeZone = ATHENS,
+): string {
+  return formatter(
+    region,
+    { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' },
+    timeZone,
+  ).format(toDate(value));
 }
 
 /** «07/10/2026 14:32» (no comma between date and time). */
-export function formatDateTime(value: DateInput, region: RegionFormat = 'el-GR', timeZone = ATHENS): string {
+export function formatDateTime(
+  value: DateInput,
+  region: RegionFormat = 'el-GR',
+  timeZone = ATHENS,
+): string {
   return `${formatDate(value, region, timeZone)} ${formatTime(value, region, timeZone)}`;
 }
 
@@ -78,12 +92,20 @@ export function formatDateLong(
 }
 
 /** «7 Οκτωβρίου» (genitive, no year): sticky day headers and holiday labels. */
-export function formatDayMonth(value: DateInput, region: RegionFormat = 'el-GR', timeZone = ATHENS): string {
+export function formatDayMonth(
+  value: DateInput,
+  region: RegionFormat = 'el-GR',
+  timeZone = ATHENS,
+): string {
   return formatter(region, { day: 'numeric', month: 'long' }, timeZone).format(toDate(value));
 }
 
 /** «Οκτώβριος 2026» — the standalone (nominative) month for calendar headers. */
-export function formatMonthYear(value: DateInput, region: RegionFormat = 'el-GR', timeZone = ATHENS): string {
+export function formatMonthYear(
+  value: DateInput,
+  region: RegionFormat = 'el-GR',
+  timeZone = ATHENS,
+): string {
   return formatter(region, { month: 'long', year: 'numeric' }, timeZone).format(toDate(value));
 }
 

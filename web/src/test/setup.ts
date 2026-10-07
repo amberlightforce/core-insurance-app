@@ -33,6 +33,11 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
   };
 }
 
+// React Aria's SelectionIndicator and exit animations ask for running animations.
+if (typeof Element.prototype.getAnimations !== 'function') {
+  Element.prototype.getAnimations = () => [];
+}
+
 if (typeof Element.prototype.scrollIntoView !== 'function') {
   Element.prototype.scrollIntoView = () => undefined;
 }

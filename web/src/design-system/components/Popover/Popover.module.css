@@ -1,0 +1,280 @@
+/*
+ * Popover, hover card and explain-why (Part 2 §4.16). Glass via data-material="popover" (foundations),
+ * solid inside a modal (data-solid). MI-28: scale .96→1 + translateY 4→0 + opacity, 200 ms in / 150 ms out.
+ */
+.popover {
+  --_width: 320px;
+
+  z-index: var(--z-dropdown);
+  inline-size: var(--_width);
+  max-inline-size: calc(100vw - var(--space-8));
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  outline: none;
+  transform-origin: var(--trigger-anchor-point, top left);
+}
+
+.popover[data-material] {
+  box-shadow:
+    inset 0 0 0 var(--border-width-hairline) var(--_glass-rim),
+    0 0 0 var(--border-width-hairline) var(--_glass-hairline),
+    var(--elevation-3);
+}
+
+.popover[data-size='sm'] {
+  --_width: 240px;
+}
+
+.popover[data-size='lg'] {
+  --_width: 400px;
+}
+
+.popover[data-size='filters'] {
+  --_width: 480px;
+}
+
+.popover[data-entering] {
+  animation: pop-in var(--motion-duration-transition-sm) var(--motion-ease-enter);
+}
+
+.popover[data-exiting] {
+  animation: pop-out var(--motion-duration-feedback-lg) var(--motion-ease-exit) forwards;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1)) scale(0.96);
+  }
+}
+
+@keyframes pop-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* Reduced motion: opacity only (MI-28 RM). */
+:root[data-reduce-motion='true'] .popover[data-entering],
+:root[data-reduce-motion='true'] .popover[data-exiting] {
+  animation-name: fade;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.dialog {
+  position: relative;
+  outline: none;
+}
+
+.frame {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+:global([data-density='comfortable']) .frame {
+  padding: var(--space-4);
+}
+
+.header {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin: var(--space-0);
+  font: var(--type-heading-4);
+  letter-spacing: var(--type-heading-4-tracking);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-2);
+  min-block-size: 0;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.error {
+  justify-items: start;
+  color: var(--color-status-danger-fg);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-end;
+  padding-block-start: var(--space-2);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.arrow svg {
+  display: block;
+  fill: var(--_glass-solid, var(--material-popover-solid));
+}
+
+.arrow[data-placement='bottom'] svg {
+  transform: rotate(180deg);
+}
+
+.arrow[data-placement='left'] svg {
+  transform: rotate(-90deg);
+}
+
+.arrow[data-placement='right'] svg {
+  transform: rotate(90deg);
+}
+
+/* Hover card trigger: a record link (the anchor span only listens for Space, Esc and Ctrl/⌘+Enter). */
+.hoverAnchor {
+  display: inline;
+}
+
+.hoverLink {
+  border-radius: var(--radius-xs);
+  color: var(--color-text-link);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-0_5);
+  cursor: pointer;
+  outline: none;
+}
+
+.hoverLink:hover {
+  color: var(--color-text-link-hover);
+}
+
+.hoverLink[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.hoverBody {
+  font: var(--type-body-compact);
+}
+
+.textLink {
+  color: var(--color-text-link);
+  font: var(--type-label);
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-0_5);
+  cursor: pointer;
+  outline: none;
+}
+
+.textLink[data-hovered] {
+  color: var(--color-text-link-hover);
+}
+
+.textLink[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Explain-why. */
+.basis {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+.factors {
+  display: grid;
+  gap: var(--space-1_5);
+}
+
+.factor {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(48px, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.factorLabel {
+  overflow-wrap: anywhere;
+}
+
+.factorTrack {
+  display: block;
+  block-size: 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-bg);
+}
+
+.factorBar {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background-color: var(--color-chart-positive);
+  transform: scaleX(var(--_share, 0));
+  transform-origin: left center;
+  animation: grow-bar var(--motion-duration-transition-md) var(--motion-ease-enter) both;
+  animation-delay: calc(var(--_i, 0) * var(--motion-duration-stagger-list) * 1.5);
+}
+
+.factorBar[data-sign='negative'] {
+  background-color: var(--color-chart-negative);
+}
+
+/* MI-53: bars scaleX 0 → value, staggered 24 ms. */
+@keyframes grow-bar {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.factorValue {
+  justify-self: end;
+  font: var(--type-label);
+  white-space: nowrap;
+}
+
+.sources {
+  display: grid;
+  gap: var(--space-1);
+  padding-block-start: var(--space-1);
+}
+
+.sourcesTitle {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+}
+
+.sourceList {
+  padding-inline-start: var(--space-4);
+  font: var(--type-caption);
+  list-style: decimal;
+}
+
+@media (forced-colors: active) {
+  .factorTrack {
+    border: var(--border-width-hairline) solid CanvasText;
+    background: Canvas;
+  }
+
+  .factorBar {
+    background: CanvasText;
+  }
+
+  .factorBar[data-sign='negative'] {
+    background: repeating-linear-gradient(
+      45deg,
+      CanvasText 0,
+      CanvasText var(--border-width-thick),
+      Canvas var(--border-width-thick),
+      Canvas var(--space-1)
+    );
+  }
+}

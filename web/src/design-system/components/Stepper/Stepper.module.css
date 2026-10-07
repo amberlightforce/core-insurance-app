@@ -1,0 +1,242 @@
+/* Stepper (Part 2 §4.23). Vertical 220 px with 40 px steps and 24 px nodes; horizontal current ±1 + counter. MI-38. */
+.stepper {
+  --_node: 24px;
+
+  display: flex;
+  min-inline-size: 0;
+}
+
+.stepper[data-orientation='vertical'] {
+  inline-size: 220px;
+  max-inline-size: 100%;
+}
+
+.stepper[data-orientation='horizontal'] {
+  gap: var(--space-4);
+  align-items: center;
+  min-block-size: 48px;
+}
+
+.list {
+  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.stepper[data-orientation='vertical'] .list {
+  flex-direction: column;
+}
+
+.item {
+  position: relative;
+  min-inline-size: 0;
+}
+
+.stepper[data-orientation='vertical'] .item {
+  min-block-size: 40px;
+  padding-block-end: var(--space-2);
+}
+
+.stepper[data-orientation='horizontal'] .item {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+
+.stepper[data-orientation='horizontal'] .item[data-last] {
+  flex: none;
+}
+
+.step {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  max-inline-size: 100%;
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.step[data-blocked] {
+  cursor: not-allowed;
+}
+
+.step[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.node {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--_node);
+  block-size: var(--_node);
+  flex: none;
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  transition:
+    transform var(--motion-duration-feedback-sm) var(--motion-ease-standard),
+    background-color var(--motion-duration-feedback-lg) var(--motion-ease-standard),
+    border-color var(--motion-duration-feedback-lg) var(--motion-ease-standard);
+}
+
+@media (hover: hover) {
+  .step:not([data-blocked], [aria-current])[data-hovered] .node {
+    transform: scale(1.06);
+  }
+
+  .step:not([data-blocked], [aria-current])[data-hovered] .label {
+    text-decoration: underline;
+    text-underline-offset: var(--space-0_5);
+  }
+}
+
+.node[data-state='current'] {
+  border-color: var(--color-interactive-accent-bg);
+  background-color: var(--color-interactive-accent-bg);
+  box-shadow: 0 0 0 var(--space-1) var(--color-step-halo);
+  color: var(--color-text-on-accent);
+}
+
+.node[data-state='complete'] {
+  border-color: var(--color-status-success-solid);
+  background-color: var(--color-status-success-solid);
+  color: var(--color-text-on-accent);
+}
+
+.node[data-state='error'] {
+  border-color: var(--color-status-danger-border);
+  background-color: var(--color-status-danger-bg);
+  color: var(--color-status-danger-fg);
+}
+
+.node[data-state='warning'] {
+  border-color: var(--color-status-warning-border);
+  background-color: var(--color-status-warning-bg);
+  color: var(--color-status-warning-fg);
+}
+
+.node[data-state='locked'] {
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-disabled);
+}
+
+.nodeError {
+  display: inline-flex;
+  gap: var(--space-px);
+  align-items: center;
+}
+
+.text {
+  display: grid;
+  min-inline-size: 0;
+  padding-block-start: var(--space-0_5);
+}
+
+.label {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+  text-overflow: ellipsis;
+}
+
+.step[aria-current] .label {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.step[data-state='locked'] .label {
+  color: var(--color-text-disabled);
+}
+
+.subLabel {
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+}
+
+.step[data-state='error'] .subLabel {
+  color: var(--color-status-danger-fg);
+}
+
+/* Connectors: 2 px track; the fill scales in after a completed step (MI-38, transform only). */
+.connector {
+  position: absolute;
+  overflow: hidden;
+  background-color: var(--color-border-subtle);
+  pointer-events: none;
+}
+
+.stepper[data-orientation='vertical'] .connector {
+  inset-block: calc(var(--_node) + var(--space-1)) var(--space-1);
+  inset-inline-start: calc(var(--_node) / 2 - var(--space-px));
+  inline-size: var(--border-width-thick);
+}
+
+.stepper[data-orientation='horizontal'] .connector {
+  position: relative;
+  flex: 1;
+  block-size: var(--border-width-thick);
+  min-inline-size: var(--space-4);
+  margin-inline: var(--space-2);
+}
+
+.connectorFill {
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-tide);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--motion-duration-transition-lg) var(--motion-ease-emphasized);
+}
+
+.stepper[data-orientation='vertical'] .connectorFill {
+  transform: scaleY(0);
+  transform-origin: center top;
+}
+
+.item[data-complete] .connectorFill,
+.stepper[data-orientation='vertical'] .item[data-complete] .connectorFill {
+  transform: none;
+}
+
+.counter {
+  flex: none;
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: active) {
+  .node {
+    border-color: CanvasText;
+  }
+
+  .node[data-state='current'],
+  .node[data-state='complete'] {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .node[data-state='error'] {
+    border-width: var(--border-width-thick);
+  }
+
+  .connectorFill {
+    background: Highlight;
+  }
+}

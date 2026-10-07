@@ -1,0 +1,368 @@
+/*
+ * Modal dialog (Part 2 §4.18). Scrim `surface.scrim.modal`, `material.overlay` glass, `radius.xl`,
+ * `elevation.4`. MI-29: scrim 0→1 (200 ms); dialog scale .98→1 + translateY 8→0 + opacity (320 ms);
+ * close 240 ms; reduced motion: opacity only.
+ */
+.overlay {
+  --_depth: 0;
+
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-scrim) + var(--_depth) * 10);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background-color: var(--color-surface-scrim-modal);
+}
+
+.overlay[data-depth='2'] {
+  --_depth: 1;
+}
+
+.overlay[data-entering] {
+  animation: scrim-in var(--motion-duration-transition-sm) var(--motion-ease-standard);
+}
+
+.overlay[data-exiting] {
+  animation: scrim-in var(--motion-duration-transition-md) var(--motion-ease-exit) reverse forwards;
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  --_width: 560px;
+
+  z-index: calc(var(--z-modal) + var(--_depth) * 10);
+  display: flex;
+  inline-size: min(var(--_width), 100%);
+  max-block-size: calc(100vh - 96px);
+  border-radius: var(--radius-xl);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.modal[data-material] {
+  box-shadow:
+    inset 0 0 0 var(--border-width-hairline) var(--_glass-rim),
+    0 0 0 var(--border-width-hairline) var(--_glass-hairline),
+    var(--elevation-4);
+}
+
+.modal[data-size='sm'] {
+  --_width: 400px;
+}
+
+.modal[data-size='lg'] {
+  --_width: 720px;
+}
+
+.modal[data-size='xl'] {
+  --_width: min(1040px, 92vw);
+}
+
+.modal[data-entering] {
+  animation: modal-in var(--motion-duration-transition-lg) var(--motion-ease-enter);
+}
+
+.modal[data-exiting] {
+  animation: modal-out var(--motion-duration-transition-md) var(--motion-ease-exit) forwards;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2)) scale(0.98);
+  }
+}
+
+@keyframes modal-out {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+:root[data-reduce-motion='true'] .modal[data-entering],
+:root[data-reduce-motion='true'] .modal[data-exiting] {
+  animation-name: scrim-in;
+}
+
+.dialog {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  outline: none;
+}
+
+.frame {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.header {
+  display: flex;
+  flex: none;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-4) var(--space-4) var(--space-3) var(--space-5);
+  border-block-end: var(--border-width-hairline) solid transparent;
+  transition: border-color var(--motion-duration-feedback-md) var(--motion-ease-standard);
+}
+
+.header[data-scrolled] {
+  border-block-end-color: var(--color-border-subtle);
+}
+
+.headerIcon {
+  --_tone-bg: var(--color-status-brand-bg);
+  --_tone-fg: var(--color-status-brand-fg);
+
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: var(--radius-full);
+  background-color: var(--_tone-bg);
+  color: var(--_tone-fg);
+}
+
+.headerIcon[data-tone='info'] {
+  --_tone-bg: var(--color-status-info-bg);
+  --_tone-fg: var(--color-status-info-fg);
+}
+
+.headerIcon[data-tone='success'] {
+  --_tone-bg: var(--color-status-success-bg);
+  --_tone-fg: var(--color-status-success-fg);
+}
+
+.headerIcon[data-tone='warning'] {
+  --_tone-bg: var(--color-status-warning-bg);
+  --_tone-fg: var(--color-status-warning-fg);
+}
+
+.headerIcon[data-tone='danger'] {
+  --_tone-bg: var(--color-status-danger-bg);
+  --_tone-fg: var(--color-status-danger-fg);
+}
+
+.headerIcon[data-tone='neutral'] {
+  --_tone-bg: var(--color-status-neutral-bg);
+  --_tone-fg: var(--color-status-neutral-fg);
+}
+
+.title {
+  flex: 1;
+  min-inline-size: 0;
+  margin: var(--space-0);
+  font: var(--type-heading-2);
+  letter-spacing: var(--type-heading-2-tracking);
+}
+
+.body {
+  display: grid;
+  flex: 1 1 auto;
+  align-content: start;
+  gap: var(--space-3);
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: var(--space-1) var(--space-5) var(--space-4);
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.body > * {
+  max-inline-size: 72ch;
+}
+
+.footer {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  border-block-start: var(--border-width-hairline) solid transparent;
+  transition: border-color var(--motion-duration-feedback-md) var(--motion-ease-standard);
+}
+
+.footer[data-scrolled] {
+  border-block-start-color: var(--color-border-subtle);
+}
+
+.busy {
+  margin-inline-end: auto;
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+/* Confirmation content. */
+.consequence {
+  color: var(--color-text-primary);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-1_5) var(--space-4);
+  margin: var(--space-0);
+  padding: var(--space-3);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sunken);
+}
+
+.facts dt {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+}
+
+.facts dd {
+  margin: var(--space-0);
+  font: var(--type-body-compact);
+  font-variant-numeric: tabular-nums;
+}
+
+.factsTitle {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-label-gap);
+}
+
+.fieldLabel {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+}
+
+.input,
+.selectButton {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: var(--size-control-md);
+  padding: var(--space-0) var(--space-inset-control-x);
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  text-align: start;
+  outline: none;
+  transition: border-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.input {
+  font: var(--type-mono);
+}
+
+.input[data-hovered],
+.selectButton[data-hovered] {
+  border-color: var(--color-border-control-hover);
+}
+
+.input[data-focused],
+.selectButton[data-focus-visible] {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-state-focus-halo);
+}
+
+.selectValue[data-placeholder] {
+  color: var(--color-text-placeholder);
+}
+
+.listPopover {
+  z-index: var(--z-modal-dropdown);
+  inline-size: var(--trigger-width);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-3);
+}
+
+.listBox {
+  display: grid;
+  max-block-size: 280px;
+  overflow-y: auto;
+  padding: var(--space-1);
+  outline: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--size-row-list);
+  padding: var(--space-0) var(--space-2);
+  border-radius: var(--radius-sm);
+  font: var(--type-body-compact);
+  cursor: pointer;
+  outline: none;
+}
+
+.option[data-focused] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.option[data-selected] {
+  font-weight: 600;
+}
+
+.note {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  color: var(--color-text-secondary);
+  font: var(--type-body-compact);
+}
+
+.changed {
+  display: grid;
+  gap: var(--space-1);
+  padding-inline-start: var(--space-4);
+  list-style: disc;
+}
+
+@media (forced-colors: active) {
+  .overlay {
+    background-color: transparent;
+  }
+
+  .headerIcon {
+    border: var(--border-width-hairline) solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .input,
+  .selectButton {
+    border-color: ButtonText;
+  }
+
+  .input[data-focused],
+  .selectButton[data-focus-visible] {
+    outline: var(--focus-ring-width) solid Highlight;
+  }
+
+  .option[data-focused] {
+    background: Highlight;
+    color: HighlightText;
+  }
+}

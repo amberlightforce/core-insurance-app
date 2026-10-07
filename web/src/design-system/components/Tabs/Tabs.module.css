@@ -1,0 +1,254 @@
+/* Tabs (Part 2 §4.11). MI-12 sliding indicator, MI-37 panel. Overflow into «Περισσότερα ▾», never scroll. */
+.root {
+  min-inline-size: 0;
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.strip {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-inline-size: 0;
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.root[data-variant='contained'] .strip {
+  align-items: center;
+  align-self: flex-start;
+  max-inline-size: 100%;
+  padding: var(--space-0_5);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sunken);
+}
+
+.tabList {
+  display: flex;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  flex: none;
+  min-block-size: var(--size-tab);
+  padding: var(--space-0) var(--space-3);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+  transition:
+    color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+:global([data-density='comfortable']) .tab {
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+}
+
+@media (hover: hover) {
+  .tab[data-hovered] {
+    background-color: var(--color-interactive-ghost-bg-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.tab[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-width) * -1);
+}
+
+.tab[data-selected] {
+  color: var(--color-text-primary);
+}
+
+.tab[data-disabled],
+.tab[data-soft-disabled] {
+  background: transparent;
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* Selected label width reserved with a hidden bold copy so labels never shift. */
+.labelWrap {
+  display: inline-grid;
+}
+
+.label,
+.labelReserve {
+  grid-area: 1 / 1;
+}
+
+.labelReserve {
+  font-weight: 600;
+  visibility: hidden;
+}
+
+.tab[data-selected] .label {
+  font-weight: 600;
+}
+
+.measure .labelReserve {
+  visibility: visible;
+}
+
+.errorDot {
+  inline-size: 6px;
+  block-size: 6px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-danger-solid);
+}
+
+/* MI-12: the 2 px indicator slides between tabs (React Aria SelectionIndicator, translate only). */
+.indicator {
+  position: absolute;
+  inset-inline: var(--space-0);
+  inset-block-end: calc(var(--border-width-hairline) * -1);
+  block-size: var(--border-width-thick);
+  border-radius: var(--radius-full) var(--radius-full) 0 0;
+  background-color: var(--color-interactive-accent-bg);
+  transition: translate var(--motion-duration-feedback-lg) var(--motion-ease-standard);
+  pointer-events: none;
+}
+
+/* Contained: the selected tab is a sheet with elevation.1 on the sunken track. */
+.root[data-variant='contained'] .tab {
+  min-block-size: calc(var(--size-tab) - var(--space-2));
+  border-radius: var(--radius-sm);
+}
+
+.root[data-variant='contained'] .indicator {
+  inset: 0;
+  z-index: calc(var(--z-raised) * -1);
+  block-size: auto;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-sheet);
+  box-shadow: var(--elevation-1);
+}
+
+.root[data-variant='contained'] .tab[data-selected] {
+  isolation: isolate;
+}
+
+.more {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  flex: none;
+  min-block-size: var(--size-tab);
+  padding: var(--space-0) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+}
+
+.more[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.more[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-width) * -1);
+}
+
+/* Off-screen measuring copy (natural widths); never visible, never announced. */
+.measure {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  display: flex;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.popover {
+  z-index: var(--z-dropdown);
+  min-inline-size: 200px;
+  border-radius: var(--radius-lg);
+  outline: none;
+}
+
+.menu {
+  display: grid;
+  padding: var(--space-1);
+  outline: none;
+}
+
+.menuItem {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-block-size: var(--size-row-list);
+  padding: var(--space-0) var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  cursor: pointer;
+  outline: none;
+}
+
+.menuItem[data-focused] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.menuItem[data-disabled] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.menuLabel {
+  flex: 1;
+}
+
+.panels {
+  min-inline-size: 0;
+}
+
+.panel {
+  padding-block-start: var(--space-4);
+  outline: none;
+}
+
+.panel[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (forced-colors: active) {
+  .indicator {
+    background-color: Highlight;
+  }
+
+  .root[data-variant='contained'] .indicator {
+    border: var(--border-width-thick) solid Highlight;
+    background: Canvas;
+  }
+
+  .errorDot {
+    background-color: Mark;
+  }
+
+  .tab[data-soft-disabled],
+  .tab[data-disabled] {
+    color: GrayText;
+  }
+}

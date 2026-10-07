@@ -1,5 +1,12 @@
 import { ArrowLeft } from 'lucide-react';
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '../../components/Button';
@@ -52,8 +59,12 @@ export function SplitView({
   const { t } = useTranslation('ds');
   const { preferences } = usePreferences();
   const densityDefault =
-    preferences.density === 'comfortable' ? splitDefaults.comfortableWidth : splitDefaults.compactWidth;
-  const [width, setWidth] = useState(() => readStoredWidth(storageKey) ?? defaultListWidth ?? densityDefault);
+    preferences.density === 'comfortable'
+      ? splitDefaults.comfortableWidth
+      : splitDefaults.compactWidth;
+  const [width, setWidth] = useState(
+    () => readStoredWidth(storageKey) ?? defaultListWidth ?? densityDefault,
+  );
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ startX: number; startWidth: number } | null>(null);
@@ -117,7 +128,9 @@ export function SplitView({
       ref={containerRef}
       className={cx(styles.split)}
       data-stacked={stacked || undefined}
-      style={stacked ? undefined : { gridTemplateColumns: `${String(width)}px auto minmax(0, 1fr)` }}
+      style={
+        stacked ? undefined : { gridTemplateColumns: `${String(width)}px auto minmax(0, 1fr)` }
+      }
     >
       <section className={cx(styles.list)} aria-label={listLabel} hidden={!showList}>
         {list}
@@ -139,10 +152,21 @@ export function SplitView({
           onPointerCancel={onPointerUp}
         />
       ) : null}
-      <section className={cx(styles.detail)} aria-label={detailLabel} hidden={!showDetail} onKeyDown={onDetailKey}>
+      <section
+        className={cx(styles.detail)}
+        aria-label={detailLabel}
+        hidden={!showDetail}
+        onKeyDown={onDetailKey}
+      >
         {stacked && isDetailOpen ? (
           <div className={cx(styles.back)}>
-            <Button variant="ghost" size="sm" icon={ArrowLeft} shortcut="Alt+←" onPress={onCloseDetail}>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={ArrowLeft}
+              shortcut="Alt+←"
+              onPress={onCloseDetail}
+            >
               {t('splitView.back')}
             </Button>
           </div>

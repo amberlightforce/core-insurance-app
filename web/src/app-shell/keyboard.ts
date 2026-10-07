@@ -13,7 +13,9 @@ export function isTypingTarget(target: EventTarget | null): boolean {
   if (tag === 'TEXTAREA' || tag === 'SELECT') return true;
   if (tag === 'INPUT') {
     const type = (target as HTMLInputElement).type;
-    return !['checkbox', 'radio', 'button', 'submit', 'reset', 'range', 'color', 'file'].includes(type);
+    return !['checkbox', 'radio', 'button', 'submit', 'reset', 'range', 'color', 'file'].includes(
+      type,
+    );
   }
   return target.getAttribute('role') === 'combobox' || target.getAttribute('role') === 'textbox';
 }
@@ -28,7 +30,11 @@ export function cycleRegion(root: ParentNode, backwards: boolean): HTMLElement |
   const currentIndex = regions.findIndex((region) => region === active || region.contains(active));
   const step = backwards ? -1 : 1;
   const nextIndex =
-    currentIndex === -1 ? (backwards ? regions.length - 1 : 0) : (currentIndex + step + regions.length) % regions.length;
+    currentIndex === -1
+      ? backwards
+        ? regions.length - 1
+        : 0
+      : (currentIndex + step + regions.length) % regions.length;
   const next = regions[nextIndex];
   if (!next) return null;
   if (!next.hasAttribute('tabindex')) next.setAttribute('tabindex', '-1');

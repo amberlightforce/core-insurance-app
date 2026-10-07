@@ -1,0 +1,407 @@
+/*
+ * AI surfaces (Part 2 §4.37): 1 px Iris edge via padding-box / border-box, status.ai.bg at 40 % over the
+ * sheet, MI-50 thinking edge (a rotating conic layer, transform only, stops after 10 s), approve-the-diff.
+ */
+.card {
+  --_fill: color-mix(in srgb, var(--color-status-ai-bg) 40%, var(--color-surface-sheet));
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: var(--space-2);
+  min-inline-size: 0;
+  padding: var(--space-inset-card);
+  overflow: hidden;
+  border: var(--border-width-hairline) solid transparent;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(var(--_fill), var(--_fill)) padding-box,
+    var(--gradient-iris) border-box;
+  color: var(--color-text-primary);
+}
+
+/* MI-50: the thinking edge. A large conic layer rotates behind an inset fill that leaves a 1 px rim. */
+.card[data-state='generating'] {
+  border-color: transparent;
+  background: transparent;
+}
+
+.card[data-state='generating']::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  z-index: calc(var(--z-raised) * -2);
+  background: conic-gradient(
+    from 0deg,
+    var(--color-status-ai-solid),
+    var(--color-status-brand-solid),
+    var(--color-status-teal-solid),
+    var(--color-status-ai-solid)
+  );
+  animation: think calc(var(--motion-duration-signature-max) * 1.5) var(--motion-ease-linear)
+    infinite;
+}
+
+.card[data-state='generating']::after {
+  content: '';
+  position: absolute;
+  inset: var(--border-width-hairline);
+  z-index: calc(var(--z-raised) * -1);
+  border-radius: calc(var(--radius-lg) - var(--border-width-hairline));
+  background: var(--_fill);
+}
+
+.card[data-thinking-stopped]::before {
+  animation: none;
+}
+
+@keyframes think {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1_5) var(--space-2);
+  align-items: center;
+}
+
+.sparkle {
+  display: inline-flex;
+  color: var(--color-status-ai-fg);
+}
+
+.title {
+  margin: var(--space-0);
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+}
+
+.chipTrigger {
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.chipTrigger:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.confidence,
+.generatedPill,
+.editedPill {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 20px;
+  padding: var(--space-0) var(--space-1_5);
+  border: var(--border-width-hairline) solid var(--color-status-ai-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-status-ai-bg);
+  color: var(--color-status-ai-fg);
+  font: var(--type-caption);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.confidence[data-level='low'] {
+  border-color: var(--color-status-warning-border);
+  background-color: var(--color-status-warning-bg);
+  color: var(--color-status-warning-fg);
+}
+
+/* «Δημιουργήθηκε με ΤΝ»: outline pill. */
+.generatedPill {
+  background-color: transparent;
+}
+
+.editedPill {
+  border-color: var(--color-status-neutral-border);
+  background-color: var(--color-status-neutral-bg);
+  color: var(--color-status-neutral-fg);
+}
+
+.body {
+  min-inline-size: 0;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.body[data-dimmed] {
+  color: var(--color-text-secondary);
+}
+
+.generating {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.generatingText {
+  font: var(--type-caption);
+  color: var(--color-status-ai-fg);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.receipt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-secondary);
+}
+
+.reason {
+  margin: var(--space-0);
+  font: var(--type-caption);
+  color: var(--color-text-secondary);
+}
+
+.reasonTrigger {
+  justify-self: start;
+  padding: var(--space-0);
+  border: none;
+  background: none;
+  color: var(--color-text-link);
+  font: var(--type-caption);
+  text-decoration: underline;
+  cursor: pointer;
+  outline: none;
+}
+
+.reasonTrigger[data-focus-visible] {
+  border-radius: var(--radius-xs);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.menuPopover {
+  z-index: var(--z-dropdown);
+  min-inline-size: 200px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-3);
+}
+
+.menu {
+  display: grid;
+  padding: var(--space-1);
+  outline: none;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--size-control-md);
+  padding: var(--space-0) var(--space-2);
+  border-radius: var(--radius-sm);
+  font: var(--type-body-compact);
+  cursor: pointer;
+  outline: none;
+}
+
+.menuItem[data-focused] {
+  background-color: var(--color-state-row-hover);
+}
+
+.stale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-status-warning-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-status-warning-bg);
+  font: var(--type-body-compact);
+}
+
+.staleIcon {
+  display: inline-flex;
+  color: var(--color-status-warning-fg);
+}
+
+.unavailable {
+  display: flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width-hairline) solid var(--color-status-ai-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-status-ai-bg);
+  color: var(--color-status-ai-fg);
+  font: var(--type-body-compact);
+}
+
+/* Citations: superscript brand links. */
+.citationSup {
+  line-height: 0;
+}
+
+.citation {
+  color: var(--color-text-link);
+  font: var(--type-caption);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.citation[data-hovered] {
+  text-decoration: underline;
+}
+
+.citation[data-focus-visible] {
+  border-radius: var(--radius-xs);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Approve-the-diff. */
+.diff {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--border-width-hairline) solid var(--color-status-ai-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sheet);
+  container-type: inline-size;
+}
+
+.diff[data-neutral] {
+  border-color: var(--color-border-default);
+}
+
+.diffGroup {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.diffRow {
+  display: grid;
+  grid-template-columns: minmax(120px, 30%) minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.diffLabel {
+  color: var(--color-text-secondary);
+}
+
+.diffValues {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1_5);
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.diffFrom {
+  padding: var(--space-0) var(--space-0_5);
+  border-radius: var(--radius-xs);
+  background-color: color-mix(in srgb, var(--color-status-danger-bg) 50%, transparent);
+  color: var(--color-text-tertiary);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-status-danger-solid);
+}
+
+.diffTo {
+  padding: var(--space-0) var(--space-0_5);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-status-success-bg);
+  color: var(--color-text-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.diff[data-neutral] .diffFrom {
+  background-color: transparent;
+  text-decoration-color: currentcolor;
+}
+
+.diffDelta {
+  color: var(--color-text-secondary);
+}
+
+.diffCheckField {
+  display: inline-flex;
+}
+
+.diffCheck {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 24px;
+  min-block-size: 24px;
+  cursor: pointer;
+  outline: none;
+}
+
+.box {
+  display: grid;
+  place-items: center;
+  inline-size: 16px;
+  block-size: 16px;
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-on-accent);
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.box[data-checked] {
+  border-color: var(--color-interactive-accent-bg);
+  background-color: var(--color-interactive-accent-bg);
+}
+
+.diffCheck[data-hovered] .box[data-checked] {
+  background-color: var(--color-interactive-accent-bg-hover);
+}
+
+.diffCheck[data-focus-visible] .box {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@container (inline-size < 420px) {
+  .diffRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .diffValues {
+    grid-column: 1;
+  }
+}
+
+@media (forced-colors: active) {
+  .card {
+    border: var(--border-width-hairline) solid CanvasText;
+    background: Canvas;
+  }
+
+  .card[data-state='generating']::before,
+  .card[data-state='generating']::after {
+    display: none;
+  }
+
+  .confidence,
+  .generatedPill,
+  .editedPill {
+    border-color: CanvasText;
+  }
+
+  .box[data-checked] {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}

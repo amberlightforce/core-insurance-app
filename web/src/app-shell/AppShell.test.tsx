@@ -149,7 +149,10 @@ describe('AppShell', () => {
   });
 
   it('has no axe violations', async () => {
-    const { container } = renderShell({ workViews: <p>Προβολές</p>, contextPanel: <p>Δραστηριότητα</p> });
+    const { container } = renderShell({
+      workViews: <p>Προβολές</p>,
+      contextPanel: <p>Δραστηριότητα</p>,
+    });
     await expectNoA11yViolations(container);
   });
 });

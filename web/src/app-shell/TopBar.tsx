@@ -39,7 +39,12 @@ export function TopBar({
 }: TopBarProps) {
   const { t } = useTranslation('shell');
   return (
-    <header className={cx(styles.topBar)} data-material="chrome" data-shell-region="banner" data-print="hide">
+    <header
+      className={cx(styles.topBar)}
+      data-material="chrome"
+      data-shell-region="banner"
+      data-print="hide"
+    >
       <div className={cx(styles.crumbs)}>
         {entityName && entityCount > 1 ? (
           <span className={cx(styles.entity)} title={t('topBar.entity', { name: entityName })}>
@@ -48,7 +53,11 @@ export function TopBar({
         ) : null}
         {breadcrumb}
       </div>
-      <AriaButton className={cx(styles.paletteTrigger)} onPress={onOpenPalette} aria-label={t('topBar.searchLabel')}>
+      <AriaButton
+        className={cx(styles.paletteTrigger)}
+        onPress={onOpenPalette}
+        aria-label={t('topBar.searchLabel')}
+      >
         <Icon icon={Search} size={16} />
         <span className={cx(styles.paletteText)}>{t('topBar.search')}</span>
         <span className={cx(styles.paletteKbd)}>
@@ -57,7 +66,13 @@ export function TopBar({
       </AriaButton>
       <div className={cx(styles.topActions)}>
         {notifications}
-        <Button variant="ghost" icon={CircleHelp} label={t('topBar.help')} shortcut="?" onPress={onOpenHelp} />
+        <Button
+          variant="ghost"
+          icon={CircleHelp}
+          label={t('topBar.help')}
+          shortcut="?"
+          onPress={onOpenHelp}
+        />
         <LanguageSwitch />
         {userMenu}
       </div>

@@ -1,0 +1,198 @@
+/*
+ * Statement view (Part 2 §4.28): display headline + direction, line items with right-aligned tabular amounts,
+ * subtotals with a top rule, adverse movements in text.adverse with an arrow (colour from the statement
+ * type's rule, never the sign alone).
+ */
+.statement {
+  display: grid;
+  gap: var(--space-3);
+  min-inline-size: 0;
+  container-type: inline-size;
+}
+
+.title {
+  margin: var(--space-0);
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+}
+
+.headline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+}
+
+.balance {
+  font: var(--type-display);
+  letter-spacing: var(--type-display-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--color-text-primary);
+}
+
+.direction {
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  color: var(--color-text-secondary);
+}
+
+.direction[data-direction='settled'] {
+  color: var(--color-status-success-fg);
+}
+
+.period {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.columns,
+.line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-1) var(--space-4);
+}
+
+.lines[data-running] .line,
+.columns {
+  grid-template-columns: minmax(0, 1fr) auto minmax(96px, auto);
+}
+
+.columns {
+  padding-inline: var(--space-2);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-tertiary);
+  text-align: end;
+}
+
+.lines {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.line {
+  position: relative;
+  align-items: start;
+  padding: var(--space-2);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.line:first-child {
+  border-block-start-color: transparent;
+}
+
+.line[data-linked]:has(.rowLink[data-hovered]) {
+  background-color: var(--color-state-row-hover);
+}
+
+.line:has(.rowLink[data-focus-visible]) {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.line[data-kind='subtotal'] {
+  border-block-start: var(--border-width-hairline) solid var(--color-border-strong);
+  border-radius: var(--radius-none);
+  font-weight: 600;
+}
+
+.description {
+  display: grid;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+  color: var(--color-text-primary);
+}
+
+.rowLink {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.rowLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-tertiary);
+}
+
+.metaPart::before {
+  content: '·';
+  margin-inline-end: var(--space-1);
+}
+
+.amount,
+.running {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  justify-content: flex-end;
+  font-variant-numeric: tabular-nums lining-nums;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.running {
+  color: var(--color-text-secondary);
+}
+
+.line[data-adverse] .amount {
+  color: var(--color-text-adverse);
+}
+
+.empty {
+  margin: var(--space-0);
+  padding: var(--space-4) var(--space-2);
+  font: var(--type-body-compact);
+  color: var(--color-text-secondary);
+}
+
+.loading {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.skeletonRow {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+}
+
+@container (inline-size < 360px) {
+  .lines[data-running] .line,
+  .columns {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .running,
+  .columns span:last-child {
+    grid-column: 2;
+  }
+}
+
+@media (forced-colors: active) {
+  .line[data-adverse] .amount {
+    color: CanvasText;
+    text-decoration: underline;
+  }
+
+  .line:has(.rowLink[data-focus-visible]) {
+    outline-color: Highlight;
+  }
+}

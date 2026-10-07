@@ -52,7 +52,12 @@ export function StatusBar({
   }, [now]);
 
   return (
-    <footer className={styles.statusBar} data-material="chrome" data-shell-region="contentinfo" data-print="hide">
+    <footer
+      className={styles.statusBar}
+      data-material="chrome"
+      data-shell-region="contentinfo"
+      data-print="hide"
+    >
       <span className={styles.statusItem} data-tone={online ? 'success' : 'warning'}>
         <Icon icon={online ? Wifi : WifiOff} size={12} />
         {online ? t('statusBar.online') : t('statusBar.offline')}

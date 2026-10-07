@@ -11,7 +11,11 @@ export const splitDefaults = {
   bigStep: 64,
 } as const;
 
-export function clampWidth(width: number, min: number = splitDefaults.min, max: number = splitDefaults.max): number {
+export function clampWidth(
+  width: number,
+  min: number = splitDefaults.min,
+  max: number = splitDefaults.max,
+): number {
   return Math.min(max, Math.max(min, Math.round(width)));
 }
 

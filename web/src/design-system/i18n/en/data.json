@@ -1,0 +1,264 @@
+{
+  "statusPill": {
+    "announce": "Status: {label}",
+    "countdownShort": "{count} d",
+    "countdownLong": "{count, plural, one {# day} other {# days}}",
+    "semantic": {
+      "readOnly": "Read-only",
+      "disabled": "Unavailable",
+      "required": "Required",
+      "error": "Error",
+      "warning": "Warning",
+      "info": "Information",
+      "success": "Done",
+      "pendingApproval": "Pending approval",
+      "locked": "Locked",
+      "conflict": "Version conflict",
+      "stale": "Newer data available",
+      "offline": "Offline",
+      "degraded": "Limited service",
+      "aiSuggested": "AI suggestion",
+      "aiGenerated": "AI-generated",
+      "overdue": "Overdue",
+      "breached": "Deadline breached"
+    },
+    "job": {
+      "draft": "Draft",
+      "quoted": "Quoted",
+      "bound": "Bound",
+      "withdrawn": "Withdrawn",
+      "declined": "Declined",
+      "notTaken": "Not taken",
+      "expired": "Expired",
+      "scheduled": "Scheduled",
+      "rescinded": "Rescinded",
+      "referred": "Referred",
+      "preempted": "Needs rebase"
+    },
+    "policyTerm": {
+      "scheduled": "Scheduled",
+      "inForce": "In force",
+      "pendingCancellation": "Pending cancellation",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "nonRenewed": "Not renewed",
+      "lapsed": "Lapsed"
+    },
+    "uwIssue": {
+      "open": "Open",
+      "approved": "Approved",
+      "approvedWithConditions": "Approved with conditions",
+      "rejected": "Rejected",
+      "invalidated": "Approval invalidated",
+      "closed": "Closed"
+    },
+    "claim": {
+      "draft": "Draft",
+      "open": "Open",
+      "closed": "Closed",
+      "reopened": "Reopened"
+    },
+    "transactionSet": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "pendingApproval": "Pending approval",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "posted": "Posted"
+    },
+    "invoice": {
+      "planned": "Planned",
+      "billed": "Billed",
+      "due": "Due",
+      "partiallyPaid": "Partially paid",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "writtenOff": "Written off",
+      "reversed": "Reversed"
+    },
+    "paymentIn": {
+      "received": "Received",
+      "allocated": "Allocated",
+      "partiallyAllocated": "Partially allocated",
+      "suspense": "In suspense",
+      "reversed": "Reversed",
+      "refunded": "Refunded"
+    },
+    "disbursement": {
+      "requested": "Requested",
+      "pendingApproval": "Pending approval",
+      "approved": "Approved",
+      "released": "Released",
+      "issued": "Sent to bank",
+      "cleared": "Cleared",
+      "rejected": "Rejected",
+      "stopped": "Stopped",
+      "voided": "Voided",
+      "returned": "Returned by bank"
+    },
+    "activity": {
+      "open": "Open",
+      "completed": "Completed",
+      "skipped": "Skipped",
+      "cancelled": "Cancelled"
+    },
+    "outboundDocument": {
+      "requested": "Requested",
+      "rendering": "Rendering",
+      "rendered": "Rendered",
+      "failed": "Failed",
+      "superseded": "Superseded"
+    },
+    "delivery": {
+      "pending": "Pending",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "failed": "Failed",
+      "bounced": "Bounced"
+    },
+    "fiscalDocument": {
+      "pending": "Pending",
+      "submitted": "Submitted",
+      "registered": "Registered (MARK)",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "clockInstance": {
+      "running": "Running",
+      "paused": "Paused",
+      "warned": "Approaching deadline",
+      "met": "Met",
+      "breached": "Breached",
+      "cancelled": "Cancelled"
+    },
+    "complaint": {
+      "received": "Received",
+      "acknowledged": "Acknowledged",
+      "underInvestigation": "Under investigation",
+      "answered": "Answered",
+      "escalated": "Escalated (ADR)",
+      "closed": "Closed"
+    },
+    "cession": {
+      "calculated": "Calculated",
+      "exception": "Exception",
+      "posted": "Posted",
+      "reversed": "Reversed"
+    },
+    "productVersion": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "locked": "Locked",
+      "retired": "Retired"
+    },
+    "aiRecommendation": {
+      "proposed": "Proposed",
+      "accepted": "Accepted",
+      "edited": "Edited",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "screeningResult": {
+      "clear": "Clear",
+      "potentialHit": "Potential hit",
+      "falsePositive": "False positive",
+      "trueMatch": "True match"
+    }
+  },
+  "badge": {
+    "overflow": "{max}+",
+    "overflowLong": "More than {max}"
+  },
+  "tags": {
+    "groupLabel": "Active filters",
+    "label": "{field}: {values}",
+    "remove": "Remove filter",
+    "locked": "Permission filter, cannot be removed",
+    "invalid": "This field no longer exists",
+    "editHint": "Enter to edit, Delete to remove"
+  },
+  "tabs": {
+    "more": "More",
+    "moreWithSelection": "More tabs",
+    "errorSuffix": ", {count, plural, one {# error} other {# errors}}",
+    "countSuffix": ", {count}"
+  },
+  "breadcrumbs": {
+    "label": "Breadcrumb",
+    "collapsed": "{count, plural, one {# more level} other {# more levels}}"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "range": "{start}–{end} of {total}",
+    "pageSize": "Rows per page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "page": "Page {page}",
+    "pages": "Pages"
+  },
+  "stepper": {
+    "label": "Steps",
+    "stepName": "Step {index}, {label}, {state}",
+    "counter": "{current} / {total}",
+    "counterLong": "Step {current} of {total}",
+    "notReachable": "Complete the previous steps first",
+    "state": {
+      "upcoming": "upcoming",
+      "current": "current",
+      "complete": "complete",
+      "error": "has errors",
+      "warning": "has warnings",
+      "locked": "locked",
+      "loading": "loading"
+    }
+  },
+  "dataTable": {
+    "empty": "No records",
+    "emptyValue": "empty",
+    "yes": "Yes",
+    "isNew": "New",
+    "filteredEmpty": "No results with these filters",
+    "clearFilters": "Clear filters",
+    "loading": "Loading…",
+    "refreshing": "Refreshing data…",
+    "error": "The records could not be loaded.",
+    "retry": "Try again",
+    "permissionLimited": "Some columns are not shown because of your permissions",
+    "stale": "{count, plural, one {{formatted} record changed} other {{formatted} records changed}}",
+    "refresh": "Refresh",
+    "hiddenNormal": "{count, plural, one {{formatted} routine record hidden} other {{formatted} routine records hidden}}",
+    "showAll": "Show all",
+    "footerCount": "{count, plural, one {{formatted} record} other {{formatted} records}}",
+    "footerSelected": "{count, plural, one {{formatted} selected} other {{formatted} selected}}",
+    "selectAll": "Select all",
+    "selectRow": "Select {id}",
+    "selectAllMatching": "Select all {formatted} matching",
+    "pageSelected": "{count, plural, one {{formatted} record on this page selected} other {All {formatted} records on this page selected}}",
+    "sortHint": "Click to sort, Shift+click to sort by more columns",
+    "sortPriority": "sort priority {index}",
+    "search": "Search the table",
+    "filterButton": "Filter: {column}",
+    "filterContains": "Contains",
+    "filterClear": "Clear filter",
+    "filterValues": "Values",
+    "columnsButton": "Columns",
+    "columnsTitle": "Show columns",
+    "columnsSearch": "Search columns",
+    "columnsReset": "Reset to defaults",
+    "moveUp": "Move up: {column}",
+    "moveDown": "Move down: {column}",
+    "resize": "Resize column {column}",
+    "density": "Density",
+    "densityCompact": "Compact",
+    "densityComfortable": "Comfortable",
+    "group": "{value}, {count, plural, one {# record} other {# records}}",
+    "priority": "Priority {value} of {max}",
+    "total": "{label}: {value}"
+  },
+  "bulkActionBar": {
+    "label": "Bulk actions",
+    "count": "{count, plural, one {{formatted} selected} other {{formatted} selected}}",
+    "clear": "Clear selection"
+  }
+}

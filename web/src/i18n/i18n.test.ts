@@ -2,7 +2,13 @@ import { act } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { check } from '../../scripts/check-i18n.mjs';
-import i18n, { changeLanguage, languageStorageKey, mergeMessages, namespaces, resources } from './index';
+import i18n, {
+  changeLanguage,
+  languageStorageKey,
+  mergeMessages,
+  namespaces,
+  resources,
+} from './index';
 
 describe('i18n', () => {
   it('defaults to Greek and builds a namespace per area', () => {

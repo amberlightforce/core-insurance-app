@@ -66,5 +66,13 @@
     "densityCompact": "Compact",
     "densityComfortable": "Comfortable"
   },
+  "help": {
+    "general": "General",
+    "palette": "Search or run a command",
+    "shortcuts": "Keyboard shortcuts",
+    "regions": "Move to the next region",
+    "rail": "Expand or collapse navigation",
+    "toasts": "Go to notifications"
+  },
   "title": "{page} · {product}"
 }

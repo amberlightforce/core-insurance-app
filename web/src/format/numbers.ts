@@ -70,7 +70,12 @@ export interface NumberOptions {
 
 /** «1.234.567,89» / en-GB «1,234,567.89», with U+2212 for negatives. */
 export function formatNumber(value: Numeric, options: NumberOptions = {}): string {
-  const { region = 'el-GR', minimumFractionDigits = 0, maximumFractionDigits = 2, signDisplay } = options;
+  const {
+    region = 'el-GR',
+    minimumFractionDigits = 0,
+    maximumFractionDigits = 2,
+    signDisplay,
+  } = options;
   const formatter = new Intl.NumberFormat(region, {
     minimumFractionDigits,
     maximumFractionDigits: Math.max(minimumFractionDigits, maximumFractionDigits),
