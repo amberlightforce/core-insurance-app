@@ -1,15 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- PRD-11 Compliance: implementation of the Compliance module (PostgreSQL schema `cmp`). -->
+  <!--
+    PRD-11 Compliance: implementation of the Compliance module (PostgreSQL schema `cmp`).
+    SL-BIL: fiscal-document request/get on the FiscalDocumentChannel SPI (W5-CMP-01 subset).
+  -->
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Compliance.Contracts\CoreIns.Modules.Compliance.Contracts.csproj" />
+    <!-- FiscalDocumentChannel SPI: contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
+    <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
   </ItemGroup>
 
 </Project>

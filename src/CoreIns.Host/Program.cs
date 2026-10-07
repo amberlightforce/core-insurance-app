@@ -40,7 +40,7 @@ var connectionString = builder.Configuration.GetRequiredCoreConnectionString();
 builder.Services.AddCoreInsDataSource(connectionString);
 builder.Services.AddCoreInsHealthChecks();
 builder.Services.AddCoreInsJobs(connectionString, role);
-builder.Services.AddCountryPacks(builder.Configuration);
+builder.Services.AddCountryPacks(builder.Configuration, builder.Environment);
 builder.Services.AddCoreInsDataProtection(builder.Configuration, builder.Environment);
 
 if (role == AppRole.Worker)

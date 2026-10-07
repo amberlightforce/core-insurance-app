@@ -15,8 +15,55 @@
       "preview": "unspecified"
     },
     "bil.BillingAccount.get": {
-      "account": "unspecified",
-      "balancesByState": "unspecified"
+      "account": {
+        "billingAccountId": "0192d280-9b3e-77b5-8e95-d75a34339106",
+        "accountNumber": "SAMPLE-000001",
+        "payerPartyId": "01924318-ea8c-7c1c-85d0-6f2030092da8",
+        "currency": "EUR",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "terms": [
+          {
+            "policyTermId": "01927c6c-520a-75b4-8fc6-5022fb54314a",
+            "policyId": "019269de-4bfe-79d7-874a-3679a4f75533",
+            "policyNumber": "SAMPLE-000001",
+            "termNumber": 1,
+            "productCode": "SAMPLE_CODE",
+            "planCode": "SAMPLE_CODE",
+            "billMode": "DIRECT_BILL",
+            "termPeriod": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            }
+          }
+        ]
+      },
+      "balancesByState": {
+        "writtenUnbilled": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "billed": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "overdue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "collected": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unapplied": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "credit": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
     },
     "bil.BillingAccount.moveTerm": {
       "planInstance": "unspecified",
@@ -152,18 +199,145 @@
       "perLineOutcome": "unspecified"
     },
     "bil.Invoice.get": {
-      "invoiceItems": "unspecified",
-      "allocations": "unspecified",
-      "fiscalStatus": "unspecified",
-      "deliveryStatus": "unspecified"
+      "invoice": {
+        "invoiceId": "019293d7-0f7f-7c79-8fe2-9b92689b5e79",
+        "invoiceNumber": "SAMPLE-000001",
+        "kind": "INVOICE",
+        "state": "PLANNED",
+        "billingAccountId": "0192c1a1-4819-7724-856e-d57e001225a4",
+        "policyId": "019283de-8087-7a07-8a6c-3ae17a777561",
+        "policyTermId": "019257dd-b0b2-74e6-89b1-6cf2aa233ec7",
+        "transactionId": "019243ab-5d52-79e8-867f-3dcaf6f66f26",
+        "issueDate": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "method": "SAMPLE_CODE",
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paid": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "open": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalsByCategory": [
+          {
+            "category": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ]
+      },
+      "invoiceItems": [
+        {
+          "invoiceItemId": "01923de3-d99c-7092-871b-c38b16c56249",
+          "chargeId": "019228c5-879a-762b-8c5f-1c6b0f581ec4",
+          "transactionId": "019233cc-b861-7804-84ba-6434bf9354f0",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "fiscalCategoryKey": "SAMPLE_CODE",
+          "validPeriod": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "open": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "state": "PLANNED"
+        }
+      ],
+      "allocations": [
+        {
+          "allocationId": "019223e0-e4e1-738a-88b4-86a985e7e7ce",
+          "receiptId": "0192e631-9feb-7e84-8934-44411e94c1d9",
+          "invoiceId": "0192ecbc-65ed-7208-8a7f-23543d2f199d",
+          "invoiceItemId": "01928cee-9aea-7ee3-84bc-fe64bfc80594",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "fiscalStatus": {
+        "status": "NOT_REQUESTED",
+        "fiscalDocumentId": "0192b2a1-3793-742f-8ba4-7b37f78f505d",
+        "triggerPoint": "TRANSACTION",
+        "series": "Sample text",
+        "number": "Sample text",
+        "mark": "Sample text",
+        "uid": "Sample text",
+        "documentType": "SAMPLE_CODE",
+        "rejectionCodes": [
+          "SAMPLE_CODE"
+        ]
+      },
+      "deliveryStatus": "NOT_REQUESTED"
     },
     "bil.Invoice.list": {
       "items": [
         {
-          "invoiceItems": "unspecified",
-          "allocations": "unspecified",
-          "fiscalStatus": "unspecified",
-          "deliveryStatus": "unspecified"
+          "invoice": {
+            "invoiceId": "019259aa-f00f-7c15-88cc-c6f476cbb6bf",
+            "invoiceNumber": "SAMPLE-000001",
+            "kind": "INVOICE",
+            "state": "PLANNED",
+            "billingAccountId": "0192902f-84a6-7423-8eed-0571c67f0880",
+            "policyId": "01928f67-6005-736b-8747-cd9a784e1b64",
+            "policyTermId": "01925c8b-f7f8-7525-8d6d-22d441b31634",
+            "transactionId": "0192fd95-8356-770b-87d1-fea4c611a8c8",
+            "issueDate": "2026-10-07",
+            "dueDate": "2026-10-07",
+            "method": "SAMPLE_CODE",
+            "total": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "paid": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "open": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "totalsByCategory": [
+              {
+                "category": "SAMPLE_CODE",
+                "amount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                }
+              }
+            ]
+          },
+          "fiscalStatus": {
+            "status": "NOT_REQUESTED",
+            "fiscalDocumentId": "0192908f-ae1a-7f3d-801f-de17cdb50de0",
+            "triggerPoint": "TRANSACTION",
+            "series": "Sample text",
+            "number": "Sample text",
+            "mark": "Sample text",
+            "uid": "Sample text",
+            "documentType": "SAMPLE_CODE",
+            "rejectionCodes": [
+              "SAMPLE_CODE"
+            ]
+          }
         }
       ],
       "nextCursor": "sample",
@@ -211,8 +385,47 @@
       "checkedAt": "2026-10-07T09:00:00Z"
     },
     "bil.Payment.take": {
-      "receiptOrLink": "unspecified",
-      "allocationPreview": "unspecified"
+      "receipt": {
+        "receiptId": "01927a53-e7bd-7f08-84fc-fce8372f22fa",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "019274dc-a47a-7bdc-8dc3-8880714a19b5",
+        "state": "RECEIVED",
+        "channel": "SAMPLE_CODE",
+        "method": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unallocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "valueDate": "2026-10-07",
+        "accountingDate": "2026-10-07",
+        "invoiceId": "01927b9c-ac8e-7e93-8111-aaad7246092c",
+        "suspenseReason": "SAMPLE_CODE",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "allocations": [
+        {
+          "allocationId": "01924ead-f322-77a8-8a39-815f5779d643",
+          "receiptId": "01927f2f-c9cc-7244-8666-b85304636831",
+          "invoiceId": "019290e6-86ce-7238-8425-87b3c0d7cdb5",
+          "invoiceItemId": "01925b3c-5ae5-7b9e-8f69-92dceffd1752",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "allocationOutcome": "ALLOCATED"
     },
     "bil.PaymentPlan.change": {
       "planInstance": "unspecified",
@@ -251,9 +464,51 @@
       ]
     },
     "bil.Receipt.get": {
-      "receipt": "unspecified",
-      "allocations": "unspecified",
-      "reversals": "unspecified"
+      "receipt": {
+        "receiptId": "01923a35-605b-7c97-8541-a5faf15de218",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "0192a1b1-8a8b-700e-8cd8-e107944cdb8d",
+        "state": "RECEIVED",
+        "channel": "SAMPLE_CODE",
+        "method": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unallocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "valueDate": "2026-10-07",
+        "accountingDate": "2026-10-07",
+        "invoiceId": "01928282-185b-71f1-8052-010b2b406645",
+        "suspenseReason": "SAMPLE_CODE",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "allocations": [
+        {
+          "allocationId": "01921762-6fbb-7533-83d3-95c940148c04",
+          "receiptId": "0192bf3f-4598-7183-842a-4a38d09194b9",
+          "invoiceId": "0192bfcb-8284-7a3d-8b7c-52cc343fd95f",
+          "invoiceItemId": "01926d24-aeac-705a-80c9-d2b068a9c076",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "reversals": [
+        {
+          "note": "sample"
+        }
+      ]
     },
     "bil.Receivable.register": {
       "receivableId": "0192116f-7bd7-7332-858b-c8592b07491f",
@@ -325,13 +580,58 @@
       "limit": 1
     },
     "AllocationAllocateRequest": {
-      "receipt": "unspecified",
+      "receiptId": "0192d1dc-77d0-7972-893d-584c44ca3dd9",
       "lines": [
-        "unspecified"
+        {
+          "invoiceId": "01929152-379f-7377-86e4-6b139e5fa378",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
       ]
     },
     "AllocationAllocateResponse": {
-      "allocations": "unspecified"
+      "allocations": [
+        {
+          "allocationId": "0192ce03-1d0c-7e56-8058-082c7fc6d87f",
+          "receiptId": "0192db34-ea86-7059-8c19-52fdbc1ca1f4",
+          "invoiceId": "01922358-b47c-7237-8daa-7897b34802a3",
+          "invoiceItemId": "0192df32-53bd-7c11-86bb-66843a5fb087",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "receipt": {
+        "receiptId": "019203f5-3829-797a-8c39-7d67a68acaed",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "01922594-30bd-7fce-833b-07f368f2d1f4",
+        "state": "RECEIVED",
+        "channel": "SAMPLE_CODE",
+        "method": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unallocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "valueDate": "2026-10-07",
+        "accountingDate": "2026-10-07",
+        "invoiceId": "0192440e-337c-74aa-8e2a-7884100ce452",
+        "suspenseReason": "SAMPLE_CODE",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "AllocationReallocateRequest": {
       "receipt": "unspecified",
@@ -351,6 +651,19 @@
     "AllocationUnallocateResponse": {
       "allocations": "unspecified"
     },
+    "AllocationView": {
+      "allocationId": "01923619-8672-71b3-8e1e-0d4b2b1ff901",
+      "receiptId": "0192c901-577d-7284-8cb0-2d38d0907663",
+      "invoiceId": "01926baa-039c-7df3-8a3a-c22b929f5ce0",
+      "invoiceItemId": "01926614-3c8e-7238-8ab9-44377b40cf5d",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ruleId": "SAMPLE_CODE",
+      "source": "RULE",
+      "recordedAt": "2026-10-07T09:00:00Z"
+    },
     "BillingAccountAttachTermRequest": {
       "termRef": "unspecified",
       "targetAccount": "unspecified",
@@ -359,6 +672,32 @@
     "BillingAccountAttachTermResponse": {
       "planInstance": "unspecified",
       "preview": "unspecified"
+    },
+    "BillingAccountBalances": {
+      "writtenUnbilled": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "billed": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "overdue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "collected": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "unapplied": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "credit": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
     },
     "BillingAccountChangePayerRequest": {
       "newPayer": "unspecified",
@@ -390,8 +729,55 @@
       "balancesByState": "unspecified"
     },
     "BillingAccountGetResponse": {
-      "account": "unspecified",
-      "balancesByState": "unspecified"
+      "account": {
+        "billingAccountId": "01924f62-7fb4-72e7-8a86-8288314ba414",
+        "accountNumber": "SAMPLE-000001",
+        "payerPartyId": "01922044-7d8b-7d68-893d-be2966e279cd",
+        "currency": "EUR",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "terms": [
+          {
+            "policyTermId": "01922869-9b18-74fc-8786-6d8cd4d346eb",
+            "policyId": "019247a7-38bc-75e7-8eae-f89745c6fd21",
+            "policyNumber": "SAMPLE-000001",
+            "termNumber": 1,
+            "productCode": "SAMPLE_CODE",
+            "planCode": "SAMPLE_CODE",
+            "billMode": "DIRECT_BILL",
+            "termPeriod": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            }
+          }
+        ]
+      },
+      "balancesByState": {
+        "writtenUnbilled": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "billed": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "overdue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "collected": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unapplied": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "credit": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
     },
     "BillingAccountMoveTermRequest": {
       "termRef": "unspecified",
@@ -436,6 +822,29 @@
       "account": "unspecified",
       "balancesByState": "unspecified"
     },
+    "BillingAccountView": {
+      "billingAccountId": "019239a3-8b9f-7338-859d-8f8583ea7167",
+      "accountNumber": "SAMPLE-000001",
+      "payerPartyId": "0192211c-c56d-751d-8035-93ba4829787a",
+      "currency": "EUR",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "terms": [
+        {
+          "policyTermId": "0192a6ba-f22b-7f2c-8372-7becb41d8bc3",
+          "policyId": "01928abe-3e63-7de9-8948-26cf00520e0d",
+          "policyNumber": "SAMPLE-000001",
+          "termNumber": 1,
+          "productCode": "SAMPLE_CODE",
+          "planCode": "SAMPLE_CODE",
+          "billMode": "DIRECT_BILL",
+          "termPeriod": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          }
+        }
+      ]
+    },
     "BillingPreviewComputeRequest": {
       "quoteJobTerm": "unspecified",
       "hypotheticalPlan": "unspecified"
@@ -445,6 +854,19 @@
       "firstDue": "unspecified",
       "credits": "unspecified",
       "refund": "unspecified"
+    },
+    "BillingTermView": {
+      "policyTermId": "019262fd-5d13-7722-8fb8-56e4a50dbd09",
+      "policyId": "01924ff7-6d6c-7920-8a62-89c35b45cb01",
+      "policyNumber": "SAMPLE-000001",
+      "termNumber": 1,
+      "productCode": "SAMPLE_CODE",
+      "planCode": "SAMPLE_CODE",
+      "billMode": "DIRECT_BILL",
+      "termPeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      }
     },
     "CommissionCalculationsItem": {
       "lines": [
@@ -759,25 +1181,231 @@
       "fiscalStatus": "unspecified",
       "deliveryStatus": "unspecified"
     },
+    "InvoiceFiscalStatus": {
+      "status": "NOT_REQUESTED",
+      "fiscalDocumentId": "0192c1b9-5b36-795d-8928-1635f723c152",
+      "triggerPoint": "TRANSACTION",
+      "series": "Sample text",
+      "number": "Sample text",
+      "mark": "Sample text",
+      "uid": "Sample text",
+      "documentType": "SAMPLE_CODE",
+      "rejectionCodes": [
+        "SAMPLE_CODE"
+      ]
+    },
     "InvoiceGetResponse": {
-      "invoiceItems": "unspecified",
-      "allocations": "unspecified",
-      "fiscalStatus": "unspecified",
-      "deliveryStatus": "unspecified"
+      "invoice": {
+        "invoiceId": "019214fd-7b2f-76b6-8104-f843f4bb5e9a",
+        "invoiceNumber": "SAMPLE-000001",
+        "kind": "INVOICE",
+        "state": "PLANNED",
+        "billingAccountId": "01928df9-9b05-7c04-8196-312ad9b1a2a4",
+        "policyId": "019246c2-0b78-767b-88a0-df084c96ae13",
+        "policyTermId": "019264cc-6ac3-7388-8d35-a9d2c5b91542",
+        "transactionId": "0192e085-ad4b-7d02-8188-e64d03578eee",
+        "issueDate": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "method": "SAMPLE_CODE",
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paid": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "open": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalsByCategory": [
+          {
+            "category": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ]
+      },
+      "invoiceItems": [
+        {
+          "invoiceItemId": "019249a4-82ff-7339-83b8-40f1f7eb1543",
+          "chargeId": "0192a1bc-ddbd-706d-8a14-cea3795b0cf7",
+          "transactionId": "0192c349-ada9-7af2-8b51-c0367573838a",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "fiscalCategoryKey": "SAMPLE_CODE",
+          "validPeriod": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "open": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "state": "PLANNED"
+        }
+      ],
+      "allocations": [
+        {
+          "allocationId": "01929b38-d2ba-72eb-8e5a-ab5c4e2a1d83",
+          "receiptId": "0192f57b-13f9-72d1-8a30-77778fcd08cd",
+          "invoiceId": "01929e95-d2c0-76f7-8d59-f7d7fbbdf8b2",
+          "invoiceItemId": "01929ea7-1379-772a-8915-025cfe00b746",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "fiscalStatus": {
+        "status": "NOT_REQUESTED",
+        "fiscalDocumentId": "01924fea-68ce-75f3-843a-c6cad42a19cf",
+        "triggerPoint": "TRANSACTION",
+        "series": "Sample text",
+        "number": "Sample text",
+        "mark": "Sample text",
+        "uid": "Sample text",
+        "documentType": "SAMPLE_CODE",
+        "rejectionCodes": [
+          "SAMPLE_CODE"
+        ]
+      },
+      "deliveryStatus": "NOT_REQUESTED"
+    },
+    "InvoiceItemView": {
+      "invoiceItemId": "0192d011-37e9-7288-82d0-82d833fba744",
+      "chargeId": "019274f8-b5c9-7421-802e-050825bd38a1",
+      "transactionId": "01925a7c-8f89-7a76-8c2e-f1aa2730f83e",
+      "elementLocator": "Sample text",
+      "coverageCode": "SAMPLE_CODE",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "fiscalCategoryKey": "SAMPLE_CODE",
+      "validPeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "open": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "state": "PLANNED"
     },
     "InvoiceListItem": {
-      "invoiceItems": "unspecified",
-      "allocations": "unspecified",
-      "fiscalStatus": "unspecified",
-      "deliveryStatus": "unspecified"
+      "invoice": {
+        "invoiceId": "0192d82a-5d71-71b5-8a10-642a6873580f",
+        "invoiceNumber": "SAMPLE-000001",
+        "kind": "INVOICE",
+        "state": "PLANNED",
+        "billingAccountId": "019272f8-f903-78fc-8dcd-bc12dd9c77b8",
+        "policyId": "0192b1e3-4041-7309-8683-c57b33d876dc",
+        "policyTermId": "01927475-d6e8-788e-8026-c6a64dbdacb7",
+        "transactionId": "0192b335-7f97-7ced-8229-eb6807208d88",
+        "issueDate": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "method": "SAMPLE_CODE",
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paid": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "open": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalsByCategory": [
+          {
+            "category": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ]
+      },
+      "fiscalStatus": {
+        "status": "NOT_REQUESTED",
+        "fiscalDocumentId": "0192e107-bf3f-78fa-8e34-91061e3be124",
+        "triggerPoint": "TRANSACTION",
+        "series": "Sample text",
+        "number": "Sample text",
+        "mark": "Sample text",
+        "uid": "Sample text",
+        "documentType": "SAMPLE_CODE",
+        "rejectionCodes": [
+          "SAMPLE_CODE"
+        ]
+      }
     },
     "InvoiceListPage": {
       "items": [
         {
-          "invoiceItems": "unspecified",
-          "allocations": "unspecified",
-          "fiscalStatus": "unspecified",
-          "deliveryStatus": "unspecified"
+          "invoice": {
+            "invoiceId": "0192cf24-265c-7225-8e84-575fcad5cf68",
+            "invoiceNumber": "SAMPLE-000001",
+            "kind": "INVOICE",
+            "state": "PLANNED",
+            "billingAccountId": "0192ef5a-5397-7f82-89d6-6b95760eb25b",
+            "policyId": "0192c844-a489-70ff-8b59-cf3db7384956",
+            "policyTermId": "0192949a-d63c-7d82-8e3c-e894722021c5",
+            "transactionId": "0192f0fe-3362-7d95-8199-04d04ea8b007",
+            "issueDate": "2026-10-07",
+            "dueDate": "2026-10-07",
+            "method": "SAMPLE_CODE",
+            "total": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "paid": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "open": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "totalsByCategory": [
+              {
+                "category": "SAMPLE_CODE",
+                "amount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                }
+              }
+            ]
+          },
+          "fiscalStatus": {
+            "status": "NOT_REQUESTED",
+            "fiscalDocumentId": "01927861-2fbb-7833-8c29-e481971b04ce",
+            "triggerPoint": "TRANSACTION",
+            "series": "Sample text",
+            "number": "Sample text",
+            "mark": "Sample text",
+            "uid": "Sample text",
+            "documentType": "SAMPLE_CODE",
+            "rejectionCodes": [
+              "SAMPLE_CODE"
+            ]
+          }
         }
       ],
       "nextCursor": "sample",
@@ -794,6 +1422,40 @@
       "allocations": "unspecified",
       "fiscalStatus": "unspecified",
       "deliveryStatus": "unspecified"
+    },
+    "InvoiceView": {
+      "invoiceId": "0192e507-5e90-7bc4-89f6-b4e67fe20c27",
+      "invoiceNumber": "SAMPLE-000001",
+      "kind": "INVOICE",
+      "state": "PLANNED",
+      "billingAccountId": "0192188b-aa23-7d41-87e3-f2cd8b8c576f",
+      "policyId": "0192910a-1ed0-7da7-8ddc-5b6d8a382dcb",
+      "policyTermId": "0192c46b-0597-7b78-8dfa-ee7e1c0781e6",
+      "transactionId": "01929ab0-cdfe-78ce-8c01-14d5961112df",
+      "issueDate": "2026-10-07",
+      "dueDate": "2026-10-07",
+      "method": "SAMPLE_CODE",
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paid": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "open": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "totalsByCategory": [
+        {
+          "category": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "LedgerBalanceResponse": {
       "entries": [
@@ -979,21 +1641,106 @@
       ]
     },
     "PaymentTakeRequest": {
-      "account": "unspecified",
+      "billingAccountId": "0192cf8b-721d-7963-8e8f-32a771d31920",
       "amount": {
         "amount": "120.50",
         "currency": "EUR"
       },
-      "method": "unspecified"
+      "method": "BANK_TRANSFER",
+      "valueDate": "2026-10-07",
+      "invoiceId": "0192c5c0-0307-7cff-83a3-44b0f86138f4",
+      "bankReference": "sample",
+      "autoAllocate": true
     },
     "PaymentTakeResponse": {
-      "receiptOrLink": "unspecified",
-      "allocationPreview": "unspecified"
+      "receipt": {
+        "receiptId": "01924b06-c801-7ad5-84ed-a9592cb6f4c0",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "019218d2-aa5d-70d2-81d8-83c38dfc0e59",
+        "state": "RECEIVED",
+        "channel": "SAMPLE_CODE",
+        "method": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unallocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "valueDate": "2026-10-07",
+        "accountingDate": "2026-10-07",
+        "invoiceId": "01924141-7a7a-70af-8c00-7b28161eb864",
+        "suspenseReason": "SAMPLE_CODE",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "allocations": [
+        {
+          "allocationId": "01923222-e187-7ed4-8c8a-53c16bd6ec4c",
+          "receiptId": "01926281-2735-7fea-8b59-2378384c9174",
+          "invoiceId": "0192c102-1f92-778d-8388-22b369e3b575",
+          "invoiceItemId": "01928c3f-21fc-7572-89e7-bbb3a9081c73",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "allocationOutcome": "ALLOCATED"
     },
     "ReceiptGetResponse": {
-      "receipt": "unspecified",
-      "allocations": "unspecified",
-      "reversals": "unspecified"
+      "receipt": {
+        "receiptId": "0192a7b8-41df-7284-8858-4686f73a49fc",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "01920d2b-c51c-71ca-8e4e-2d015edb0f20",
+        "state": "RECEIVED",
+        "channel": "SAMPLE_CODE",
+        "method": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unallocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "valueDate": "2026-10-07",
+        "accountingDate": "2026-10-07",
+        "invoiceId": "019212ca-c35f-7c69-895b-c17cfab74b35",
+        "suspenseReason": "SAMPLE_CODE",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "allocations": [
+        {
+          "allocationId": "0192b474-5193-7528-89b8-12a508424283",
+          "receiptId": "0192b0e1-0348-75b4-83f8-218c6fc2003b",
+          "invoiceId": "019254ab-1fb7-701a-874e-dce8a72348b5",
+          "invoiceItemId": "019285f5-c52b-79a7-87a5-c1eb55c12402",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "reversals": [
+        {
+          "note": "sample"
+        }
+      ]
     },
     "ReceiptListItem": {
       "receipt": "unspecified",
@@ -1010,6 +1757,31 @@
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "ReceiptView": {
+      "receiptId": "0192f4f3-f907-7bcf-8e7d-9e2504cac575",
+      "receiptNumber": "SAMPLE-000001",
+      "billingAccountId": "0192cc82-b38b-7ac1-836d-7942447ade03",
+      "state": "RECEIVED",
+      "channel": "SAMPLE_CODE",
+      "method": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "allocated": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "unallocated": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "valueDate": "2026-10-07",
+      "accountingDate": "2026-10-07",
+      "invoiceId": "01921514-368e-7515-8a47-8253f79aa045",
+      "suspenseReason": "SAMPLE_CODE",
+      "recordedAt": "2026-10-07T09:00:00Z"
     },
     "ReceivableRegisterRequest": {
       "source": "unspecified",

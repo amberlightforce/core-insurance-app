@@ -142,9 +142,15 @@ public static class ComplianceErrorCodes
 
     /// <summary>CMP-ERR-TRANSPORT-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): cmp.Bureau.reconcile, cmp.Bureau.retransmit, cmp.BureauManualFile.generate, cmp.BureauManualFile.recordResponse.</para>
+    /// <para>Declared by 5 operation(s): cmp.Bureau.reconcile, cmp.Bureau.retransmit, cmp.BureauManualFile.generate, cmp.BureauManualFile.recordResponse, cmp.FiscalDocument.request.</para>
     /// </remarks>
     public const string TransportUnavailable = "CMP-ERR-TRANSPORT-UNAVAILABLE";
+
+    /// <summary>CMP-ERR-VALIDATION (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): cmp.FiscalDocument.request.</para>
+    /// </remarks>
+    public const string Validation = "CMP-ERR-VALIDATION";
 
     /// <summary>CMP-ERR-VALIDATION-BLOCKING (HTTP 422).</summary>
     /// <remarks>
@@ -156,7 +162,7 @@ public static class ComplianceErrorCodes
     public const string Prefix = "CMP-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiChecklistIncomplete, AiProhibited, ApprovalRequired, ApprovalSameUser, ClockCancelReason, ClockNoValue, ClockState, ClockUnknown, DatapointUnmapped, ExtensionNotAllowed, FiscalTotal, Held, IdempotencyMismatch, IdentityNotVerified, NotAComplaint, NotFound, NotRejected, ReqUnknown, RulesMissing, Sod, SourceUnknown, TaxonomyUnknown, TransportUnavailable, ValidationBlocking];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiChecklistIncomplete, AiProhibited, ApprovalRequired, ApprovalSameUser, ClockCancelReason, ClockNoValue, ClockState, ClockUnknown, DatapointUnmapped, ExtensionNotAllowed, FiscalTotal, Held, IdempotencyMismatch, IdentityNotVerified, NotAComplaint, NotFound, NotRejected, ReqUnknown, RulesMissing, Sod, SourceUnknown, TaxonomyUnknown, TransportUnavailable, Validation, ValidationBlocking];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -184,6 +190,7 @@ public static class ComplianceErrorCodes
         [SourceUnknown] = 422,
         [TaxonomyUnknown] = 422,
         [TransportUnavailable] = 503,
+        [Validation] = 422,
         [ValidationBlocking] = 422,
     };
 }

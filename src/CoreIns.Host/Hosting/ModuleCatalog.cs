@@ -56,6 +56,8 @@ internal static class ModuleCatalog
         .. ProductModule.Databases,
         .. MarketModule.Databases,
         .. PolicyModule.Databases,
+        .. BillingModule.Databases,
+        .. ComplianceModule.Databases,
         .. FinanceModule.Databases,
     ];
 
@@ -68,6 +70,8 @@ internal static class ModuleCatalog
         typeof(ProductModule).Assembly,
         typeof(MarketModule).Assembly,
         typeof(PolicyModule).Assembly,
+        typeof(BillingModule).Assembly,
+        typeof(ComplianceModule).Assembly,
         typeof(FinanceModule).Assembly,
     ];
 

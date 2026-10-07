@@ -1,11 +1,29 @@
+using CoreIns.Modules.Billing.Commands;
+using CoreIns.Modules.Billing.Contracts;
+using CoreIns.Modules.Billing.Contracts.Api;
+using CoreIns.Modules.Billing.Events;
+using CoreIns.Modules.Billing.Persistence;
+using CoreIns.Modules.Billing.Queries;
+using CoreIns.Modules.Billing.Services;
+using CoreIns.Modules.Compliance.Contracts.Events;
+using CoreIns.Modules.Policy.Contracts.Events;
+using CoreIns.Platform;
+using CoreIns.Platform.Commands;
+using CoreIns.Platform.Errors;
+using CoreIns.Platform.Events;
+using CoreIns.Platform.Persistence;
+using CoreIns.SharedKernel.Identifiers;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoreIns.Modules.Billing;
 
 /// <summary>
-/// Composition entry point of the Billing module (PRD-06 Billing).
-/// The Host calls <see cref="AddBillingModule"/>; the module registers its own services here.
+/// Composition entry point of the Billing module (PRD-06 Billing and collections). The Host calls
+/// <see cref="AddBillingModule"/>; the migrate job applies <see cref="Databases"/>. SL-BIL builds the E2E-01 path:
+/// charge intake from POL, billing account and ANNUAL plan instance, invoice with a gapless number, the fiscal request to
+/// CMP, payment receipt and allocation, and the append-only billing sub-ledger with <c>BillingEntryPosted</c> for FIN.
 /// </summary>
 public static class BillingModule
 {
@@ -15,11 +33,100 @@ public static class BillingModule
     /// <summary>All PostgreSQL schemas owned by this module, created by the migrate job.</summary>
     public static IReadOnlyList<string> Schemas { get; } = [Schema];
 
-    /// <summary>Registers the module's services. The module has no services yet (placeholder until its feature package).</summary>
+    /// <summary>
+    /// The module database for the migrate job. Least privilege per table: working rows get SELECT, INSERT, UPDATE; the
+    /// sub-ledger (<c>ledger_entry</c>, <c>ledger_line</c>) and <c>allocation</c> are append-only and get SELECT, INSERT
+    /// (REQ-BIL-281; triggers refuse UPDATE/DELETE/TRUNCATE for every role as well); the chart and the rule table are
+    /// read-only to the app (maker-checker changes are a later package). Nothing gets DELETE.
+    /// </summary>
+    public static IReadOnlyList<ModuleDatabaseDefinition> Databases { get; } =
+    [
+        new(
+            ModuleCode.BIL,
+            Schema,
+            connectionString => ModuleDbContextRegistration.CreateForMigration<BillingDbContext>(connectionString, Schema),
+            appRole =>
+            [
+                $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.billing_account, {Schema}.plan_instance, {Schema}.charge, {Schema}.invoice, {Schema}.invoice_item, {Schema}.receipt, {Schema}.intake_exception TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.allocation, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
+                $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
+                $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
+            ]),
+    ];
+
+    /// <summary>Registers the module's services: DbContext, commands, queries, event handlers, in-process contracts, errors.</summary>
     public static IServiceCollection AddBillingModule(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
+
+        services.AddOptions<BillingOptions>().Bind(configuration.GetSection(BillingOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
+        services.AddModuleDbContext<BillingDbContext>(Schema);
+
+        services.AddScoped<LedgerWriter>();
+        services.AddScoped<TermBilling>();
+        services.AddScoped<Allocator>();
+        services.AddScoped<BillingReader>();
+
+        // Internal commands run by the event handlers (audited; no Idempotency-Key: they are idempotent on the charge,
+        // term and fiscal document themselves).
+        var intake = CommandDescriptor.For("bil.Charge.intake") with { RequiresIdempotencyKey = false, Idempotent = false };
+        services.AddCommandAuditor<IntakeCharge, IntakeOutcome, IntakeChargeAuditor>();
+        services.AddCommand<IntakeCharge, IntakeOutcome, IntakeChargeHandler>(intake);
+        services.AddCommandAuditor<AttachTerm, IntakeOutcome, AttachTermAuditor>();
+        services.AddCommand<AttachTerm, IntakeOutcome, AttachTermHandler>(
+            CommandDescriptor.For("bil.BillingAccount.attachTerm") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddCommandAuditor<RecordFiscalOutcome, int, RecordFiscalOutcomeAuditor>();
+        services.AddCommand<RecordFiscalOutcome, int, RecordFiscalOutcomeHandler>(
+            CommandDescriptor.For("bil.Invoice.recordFiscal") with { RequiresIdempotencyKey = false, Idempotent = false });
+
+        // API commands.
+        services.AddScoped<IValidator<TakePayment>, TakePaymentValidator>();
+        services.AddCommandAuditor<TakePayment, PaymentTakeResponse, TakePaymentAuditor>();
+        services.AddCommand<TakePayment, PaymentTakeResponse, TakePaymentHandler>(CommandDescriptor.For("bil.Payment.take") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<AllocateReceipt>, AllocateReceiptValidator>();
+        services.AddCommandAuditor<AllocateReceipt, AllocationAllocateResponse, AllocateReceiptAuditor>();
+        services.AddCommand<AllocateReceipt, AllocationAllocateResponse, AllocateReceiptHandler>(
+            CommandDescriptor.For("bil.Allocation.allocate") with { SupportsDryRun = true });
+
+        // Consumers (worker): POL charges and bind, CMP fiscal outcomes.
+        services.AddEventHandler<ChargeDeltaEmittedV1, ChargeDeltaEmittedHandler>(
+            EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), ChargeDeltaEmittedHandler.Name, ModuleCode.BIL);
+        services.AddEventHandler<PolicyBoundV1, PolicyBoundHandler>(EventDescriptor.From(PolicyBoundV1.Descriptor), PolicyBoundHandler.Name, ModuleCode.BIL);
+        services.AddEventHandler<FiscalDocRegisteredV1, FiscalDocRegisteredHandler>(
+            EventDescriptor.From(FiscalDocRegisteredV1.Descriptor), FiscalDocRegisteredHandler.Name, ModuleCode.BIL);
+        services.AddEventHandler<FiscalDocRejectedV1, FiscalDocRejectedHandler>(
+            EventDescriptor.From(FiscalDocRejectedV1.Descriptor), FiscalDocRejectedHandler.Name, ModuleCode.BIL);
+
+        // In-process contracts other modules call (D-ARC-16).
+        services.AddScoped<IBillingBillingAccountService, BillingAccountService>();
+        services.AddScoped<IBillingInvoiceService, InvoiceService>();
+        services.AddScoped<IBillingPaymentService, PaymentService>();
+        services.AddScoped<IBillingReceiptService, ReceiptService>();
+
+        services.AddErrorDefinitions(Errors);
         return services;
     }
+
+    /// <summary>Status, bilingual title and description of every BIL-ERR code the module raises (RFC 9457, D-API-15).</summary>
+    internal static ErrorDefinition[] Errors { get; } =
+    [
+        ErrorDefinition.For(ModuleCode.BIL, "NOT-FOUND", 404, "Δεν βρέθηκε", "Not found")
+            .Describe("Η εγγραφή δεν υπάρχει στη νομική σας οντότητα.", "The record does not exist in your legal entity."),
+        ErrorDefinition.For(ModuleCode.BIL, "CURRENCY", 422, "Λάθος νόμισμα", "Wrong currency")
+            .Describe("Το ποσό πρέπει να είναι στο νόμισμα του λογαριασμού χρέωσης.", "The amount must be in the billing account's currency."),
+        ErrorDefinition.For(ModuleCode.BIL, "AMOUNT-MISMATCH", 422, "Το ποσό δεν αντιστοιχεί στο ανοιχτό υπόλοιπο", "The amount does not match the open balance")
+            .Describe("Κατανέμεται μόνο το ακριβές ανοιχτό ποσό της ειδοποίησης πληρωμής· το υπόλοιπο μένει αδιάθετο.", "Only the payment notice's exact open amount is allocated; the rest stays unapplied."),
+        ErrorDefinition.For(ModuleCode.BIL, "OVER-ALLOCATION", 422, "Υπέρβαση κατανομής", "Over-allocation")
+            .Describe("Η κατανομή υπερβαίνει την είσπραξη ή το ανοιχτό ποσό.", "The allocation exceeds the receipt or the open amount."),
+        ErrorDefinition.For(ModuleCode.BIL, "STALE", 409, "Η εγγραφή άλλαξε στο μεταξύ", "The record changed meanwhile")
+            .Describe("Κάποιος άλλος άλλαξε την εγγραφή. Φορτώστε τη νεότερη έκδοση και επαναλάβετε.", "Someone else changed the record. Load the newer version and try again."),
+        ErrorDefinition.For(ModuleCode.BIL, "METHOD-NOT-ALLOWED", 422, "Η πληρωμή δεν επιτρέπεται", "The payment is not allowed")
+            .Describe("Ο λογαριασμός χρέωσης δεν δέχεται πληρωμές σε αυτή την κατάσταση.", "The billing account does not accept payments in this state."),
+        ErrorDefinition.For(ModuleCode.BIL, "NO-RULE", 422, "Δεν υπάρχει κανόνας λογιστικής εγγραφής", "No billing-ledger rule")
+            .Describe("Κανένας κανόνας του βοηθητικού καθολικού δεν αντιστοιχεί· δεν γίνεται εγγραφή σε προεπιλεγμένο λογαριασμό.", "No sub-ledger rule matches; nothing is posted to a default account."),
+        ErrorDefinition.For(ModuleCode.BIL, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
+            .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
+    ];
 }

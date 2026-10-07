@@ -4,31 +4,22 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Receipt.get result. PRD outputs: "receipt, allocations, reversals"</summary>
+/// <summary>Typed from REQ-BIL-004, REQ-BIL-126. PRD outputs: "receipt, allocations, reversals"</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReceiptGetResponse
 {
-    /// <summary>PRD: "receipt"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'receipt'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("receipt")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Receipt { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.ReceiptView Receipt { get; init; }
 
-    /// <summary>PRD: "allocations"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'allocations'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("allocations")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Allocations { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.AllocationView> Allocations { get; init; }
 
-    /// <summary>PRD: "reversals"</summary>
+    /// <summary>Reversals (none in SL-BIL)</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("reversals")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reversals { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement> Reversals { get; init; }
 }

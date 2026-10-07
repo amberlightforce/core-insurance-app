@@ -15,7 +15,7 @@ public interface IComplianceFiscalDocumentService
     /// <remarks>
     /// <para>Operation cmp.FiscalDocument.get (query; HTTP GET /api/cmp/v1/fiscal-documents/{id}).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-CMP-054 (SL-BIL). Wave W5.</para>
     /// <para>Exposure: ui; consumers: BIL, DOC.</para>
     /// <para>Errors: CMP-ERR-NOT-FOUND (404).</para>
     /// </remarks>
@@ -61,10 +61,10 @@ public interface IComplianceFiscalDocumentService
     /// <remarks>
     /// <para>Operation cmp.FiscalDocument.request (command; HTTP POST /api/cmp/v1/fiscal-documents/request).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full; fully typed from REQ-CMP-001, REQ-CMP-030..033. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-CMP-001, REQ-CMP-030..033, REQ-CMP-038, REQ-CMP-046 (SL-BIL stub channel). Wave W5.</para>
     /// <para>Exposure: ui; consumers: BIL, CLM.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: CMP-ERR-FISCAL-TOTAL (422), CMP-ERR-SOURCE-UNKNOWN (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CMP-ERR-VALIDATION (422), CMP-ERR-TRANSPORT-UNAVAILABLE (503), CMP-ERR-FISCAL-TOTAL (422), CMP-ERR-SOURCE-UNKNOWN (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.FiscalDocumentRequestResponse> RequestAsync(global::CoreIns.Modules.Compliance.Contracts.Api.FiscalDocumentRequestRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

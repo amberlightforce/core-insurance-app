@@ -4,23 +4,37 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Payment.take result. PRD outputs: "receipt or link, allocation preview"</summary>
+/// <summary>Typed from REQ-BIL-004, REQ-BIL-129, REQ-BIL-135. PRD outputs: "receipt or link, allocation preview". An amount that does not equal the matched invoice's open amount is never allocated: it stays as unapplied cash in suspense with a reason (REQ-BIL-135).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PaymentTakeResponse
 {
-    /// <summary>PRD: "receipt or link"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("receiptOrLink")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ReceiptOrLink { get; init; }
+    /// <summary>Contract member 'receipt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receipt")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.ReceiptView Receipt { get; init; }
 
-    /// <summary>PRD: "allocation preview"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("allocationPreview")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? AllocationPreview { get; init; }
+    /// <summary>Contract member 'allocations'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("allocations")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.AllocationView> Allocations { get; init; }
+
+    /// <summary>Contract member 'allocationOutcome'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("allocationOutcome")]
+    public required AllocationOutcomeValue AllocationOutcome { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<AllocationOutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum AllocationOutcomeValue
+    {
+        /// <summary><c>ALLOCATED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ALLOCATED")]
+        Allocated,
+
+        /// <summary><c>SUSPENSE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUSPENSE")]
+        Suspense,
+
+        /// <summary><c>NOT_REQUESTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NOT_REQUESTED")]
+        NotRequested,
+    }
 }
