@@ -1,0 +1,78 @@
+<Project>
+
+  <!--
+    Central package management. Every package version is pinned here and nowhere else; Dependabot proposes
+    updates weekly. Each package needs a stated reason (ARCHITECTURE-DECISIONS §2 rule 11).
+    Forbidden (commercial licences since 2025): MediatR, AutoMapper, MassTransit, FluentAssertions.
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- A PackageVersion below also pins that package when it arrives transitively (used for security floors). -->
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <!-- Transitive security floors (not referenced directly) -->
+  <ItemGroup>
+    <!-- Hangfire.Core allows Newtonsoft.Json 11.0.1, which has GHSA-5crp-9r3c-p9vr; pin the fixed line. -->
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <!-- Production packages -->
+  <ItemGroup>
+    <!-- OpenAPI 3.1 document generated from the ASP.NET Core controllers (ADR §1 web framework; feeds openapi-typescript). -->
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <!-- EF Core: data access and versioned schema migrations run by the migrate job (ADR §1 data access). -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    <!-- EF Core provider for PostgreSQL 17 (ADR §1 data access). -->
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <!-- ADO.NET driver for PostgreSQL: data source for health checks, Dapper and the migrate job. -->
+    <PackageVersion Include="Npgsql" Version="10.0.3" />
+    <!-- Dapper: performance-critical and set-based SQL (ledger, reporting marts) (ADR §1 data access). -->
+    <PackageVersion Include="Dapper" Version="2.1.89" />
+    <!-- Hangfire: background, delayed and recurring jobs with a dashboard (ADR §1 background jobs). -->
+    <PackageVersion Include="Hangfire.Core" Version="1.8.25" />
+    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.25" />
+    <!-- Hangfire storage in PostgreSQL (schema `hangfire`) (ADR §1 background jobs). -->
+    <PackageVersion Include="Hangfire.PostgreSql" Version="1.21.1" />
+    <!-- FluentValidation: request validation at the API boundary (ADR §1 validation). -->
+    <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <!-- Serilog: structured logging configured from appsettings / environment (ADR §1 logging). -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <!-- OpenTelemetry: vendor-neutral traces, metrics and logs (ADR §1 monitoring). -->
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
+    <!-- OTLP exporter for the local Aspire Dashboard (INFRASTRUCTURE §5 OTEL_EXPORTER_OTLP_ENDPOINT). -->
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
+    <!-- Azure Monitor OpenTelemetry Distro: export to Application Insights in Azure (INFRASTRUCTURE §5). -->
+    <PackageVersion Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
+    <!-- Microsoft.Identity.Web: Entra ID token validation and app roles (ADR §1 identity). -->
+    <PackageVersion Include="Microsoft.Identity.Web" Version="4.16.0" />
+  </ItemGroup>
+
+  <!-- Build-time tooling -->
+  <ItemGroup>
+    <!-- Roslyn API for the in-repo analyser COREINS001 (no double/float in production code, ADR §2 rule 2).
+         5.0.0 = the compiler of the minimum SDK in global.json (10.0.100), so the analyser loads in every allowed SDK. -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+  </ItemGroup>
+
+  <!-- Test packages -->
+  <ItemGroup>
+    <!-- xUnit v3: test framework (ADR §1 testing); runs on Microsoft.Testing.Platform (global.json). -->
+    <PackageVersion Include="xunit.v3" Version="4.0.1" />
+    <!-- Shouldly: assertions (ADR §1 replaces FluentAssertions). -->
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
+    <!-- FsCheck: property-based tests on financial invariants (ADR §3). -->
+    <PackageVersion Include="FsCheck.Xunit.v3" Version="3.4.0" />
+    <!-- NetArchTest: module-boundary rules in CI (ADR §2 rule 8). -->
+    <PackageVersion Include="NetArchTest.Rules" Version="1.3.2" />
+    <!-- Testcontainers: integration tests against a real PostgreSQL 17 (ADR §3). -->
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.15.0" />
+    <!-- In-memory test server to boot the Host in integration tests (part of ASP.NET Core). -->
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>
