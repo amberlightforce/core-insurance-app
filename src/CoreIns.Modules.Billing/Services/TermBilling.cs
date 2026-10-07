@@ -389,8 +389,8 @@ internal sealed class TermBilling(
     }
 
     /// <summary>
-    /// The rule qualifier of MKT key <c>tax.ipt.liability_point</c> (DUE / WRITTEN), resolved once per unit of work at the
-    /// configuration state pinned in the request context; null when the key is missing (fail closed, D-REG-01).
+    /// The rule qualifier of MKT key <c>tax.ipt.liability_point</c> (DUE / WRITTEN), resolved once per unit of work at MKT's
+    /// current configuration state; null when the key is missing (fail closed, D-REG-01).
     /// </summary>
     private async Task<string?> LiabilityQualifierAsync(CancellationToken cancellationToken)
     {
@@ -407,7 +407,9 @@ internal sealed class TermBilling(
                 LegalEntity = (context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.")).Value,
                 Jurisdiction = ledger.Jurisdiction.Value,
                 Keys = [key],
-                ConfigurationHash = context.ConfigurationHash,
+
+                // Not pinned to the envelope's configuration hash: that hash is the producer's pinned state, which MKT's
+                // resolver does not accept until configuration history exists (W1-MKT-01); the current state is used.
             },
             cancellationToken: cancellationToken).ConfigureAwait(false);
         var value = resolved.Values.FirstOrDefault(v => v.Key == key)?.Value;
