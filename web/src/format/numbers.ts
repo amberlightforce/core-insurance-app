@@ -160,14 +160,34 @@ export interface CompactOptions {
   currency?: string;
 }
 
+const COMPACT_SUFFIXES: Record<RegionFormat, readonly string[]> = {
+  'el-GR': ['', `${NBSP}χιλ.`, `${NBSP}εκ.`, `${NBSP}δισ.`, `${NBSP}τρισ.`],
+  'en-GB': ['', 'K', 'M', 'B', 'T'],
+};
+
+/**
+ * Magnitude suffix chosen here, not by Intl: the CLDR compact patterns differ between ICU versions
+ * (newer ICU yields «1.28m»). Intl is used only for digits, grouping and the decimal separator.
+ */
+function compactNumber(value: number, region: RegionFormat, maximumFractionDigits: number): string {
+  const suffixes = COMPACT_SUFFIXES[region];
+  const factor = 10 ** maximumFractionDigits;
+  let tier = 0;
+  let scaled = value;
+  while (tier < suffixes.length - 1 && Math.round(Math.abs(scaled) * factor) / factor >= 1000) {
+    scaled /= 1000;
+    tier += 1;
+  }
+  return `${formatNumber(scaled, { region, maximumFractionDigits })}${suffixes[tier] ?? ''}`;
+}
+
 /**
  * Abbreviated figures for KPI tiles (Part 2 §4.27): «1,23 χιλ.», «1,28 εκ.», «12,35 δισ.»; en-GB «1.28M».
  * Always give the full value in the tooltip and the accessible name.
  */
 export function formatCompact(value: number, options: CompactOptions = {}): string {
   const { region = 'el-GR', maximumFractionDigits = 2, currency } = options;
-  const formatter = new Intl.NumberFormat(region, { notation: 'compact', maximumFractionDigits });
-  const number = withTrueMinus(formatter.formatToParts(value));
+  const number = compactNumber(value, region, maximumFractionDigits);
   if (!currency) return number;
   const symbol =
     new Intl.NumberFormat(region, { style: 'currency', currency })
