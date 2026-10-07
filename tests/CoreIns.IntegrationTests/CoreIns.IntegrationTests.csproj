@@ -13,6 +13,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\CoreIns.Host\CoreIns.Host.csproj" />
     <ProjectReference Include="..\..\src\CoreIns.Platform.DataProtection\CoreIns.Platform.DataProtection.csproj" />
+    <!-- Sandbox doubles of modules built in parallel (PFC, RAT, UW, MKT) for the POL slice tests. -->
+    <ProjectReference Include="..\CoreIns.Testing.Contracts\CoreIns.Testing.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
