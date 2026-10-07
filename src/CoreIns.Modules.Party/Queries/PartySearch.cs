@@ -174,14 +174,16 @@ internal sealed class PartySearch(
         var ctes = new List<string>();
         for (var i = 0; i < parts.Count; i++)
         {
-            args.Add($"k{i}", (await names.QueryPartKeysAsync(parts[i], cancellationToken).ConfigureAwait(false)).ToArray());
+            var keys = (await names.QueryPartKeysAsync(parts[i], cancellationToken).ConfigureAwait(false)).ToArray();
+            args.Add($"k{i}", keys);
+            args.Add($"l{i}", keys.Select(key => NameForms.EscapeLike(key) + "%").ToArray());
             ctes.Add($"""
                 p{i} AS (
                   SELECT k.party_id,
-                         max(CASE WHEN k.search_key = q.key THEN 3 WHEN k.search_key LIKE q.key || '%' THEN 2 ELSE 1 END) AS tier,
+                         max(CASE WHEN k.search_key = q.key THEN 3 WHEN k.search_key LIKE q.pattern THEN 2 ELSE 1 END) AS tier,
                          max(similarity(k.search_key, q.key))::numeric AS sim
                     FROM pty.party_search_key k
-                    JOIN unnest(@k{i}::text[]) AS q(key) ON (k.search_key LIKE q.key || '%' OR k.search_key % q.key)
+                    JOIN unnest(@k{i}::text[], @l{i}::text[]) AS q(key, pattern) ON (k.search_key LIKE q.pattern OR k.search_key % q.key)
                    WHERE k.legal_entity_id = @le AND k.recorded_to IS NULL AND k.key_kind = 'PART'
                    GROUP BY k.party_id)
                 """);

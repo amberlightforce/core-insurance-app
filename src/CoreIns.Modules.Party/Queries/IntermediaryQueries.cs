@@ -90,13 +90,13 @@ internal sealed class IntermediaryQueries(DbSession session, RequestContext cont
             $"""
              {Select}
               WHERE i.legal_entity_id = @le
-                AND (@code::text IS NULL OR c.code LIKE @code || '%')
+                AND (@code::text IS NULL OR c.code LIKE @codePattern)
                 AND (@name::text IS NULL OR EXISTS (SELECT 1 FROM pty.party_search_key k
-                     WHERE k.party_id = i.party_id AND k.recorded_to IS NULL AND k.key_kind = 'PART' AND k.search_key LIKE @name || '%'))
+                     WHERE k.party_id = i.party_id AND k.recorded_to IS NULL AND k.key_kind = 'PART' AND k.search_key LIKE @namePattern))
               ORDER BY c.code
               LIMIT @limit OFFSET @offset
              """,
-            new { le = Le(), code, name, limit, offset }, cancellationToken).ConfigureAwait(false);
+            new { le = Le(), code, name, codePattern = code is null ? null : NameForms.EscapeLike(code) + "%", namePattern = name is null ? null : NameForms.EscapeLike(name) + "%", limit, offset }, cancellationToken).ConfigureAwait(false);
         return [.. rows.Select(r => new ProducerCodeSearchItem
         {
             ProducerCode = r.ProducerCode,

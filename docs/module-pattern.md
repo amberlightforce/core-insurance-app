@@ -84,7 +84,10 @@ services.AddCommand<CreateParty, PartyCreateResponse, CreatePartyHandler>(Comman
   typed error (`CreatePartyHandler`); otherwise the pipeline's commit saves.
 - Lifecycles go through a `StateMachine` (`IntermediaryStateModel.Machine.Fire(...)`); optimistic concurrency with
   `record_version` → `<MOD>-ERR-STALE` (`UpdateIntermediaryHandler`).
-- Audited reads (e.g. revealing P2 data) are commands too, with `RequiresIdempotencyKey = false` (`RevealParty`).
+- Audited reads (e.g. revealing P2 data) are commands too, with `RequiresIdempotencyKey = false, Idempotent = false`
+  (`RevealParty`). `Idempotent = false` skips the idempotency decorator entirely: a caller's key (HTTP header or an
+  in-process caller's unit of work) must never cause a result holding personal data to be stored in
+  `plt.idempotency_record`. Never return P2 data from a command that keeps `Idempotent = true`.
 - Business numbers come from `INumberingService.NextAsync(new NumberRequest(NumberingSchemes.Party, validAt))`
   inside the handler (gapless series allocate in your transaction; formats per `Platform:Numbering`).
 

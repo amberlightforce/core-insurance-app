@@ -123,7 +123,7 @@ internal sealed class CreatePartyHandler(
                 Scheme = input.Scheme,
                 ValueEncrypted = await protection.EncryptIdentifierAsync(legalEntity, identifierId, normalised, cancellationToken).ConfigureAwait(false),
                 ValueBlindIndex = await protection.IndexAsync(legalEntity, input.Scheme, normalised, cancellationToken).ConfigureAwait(false),
-                DisplaySuffix = normalised.Length <= 3 ? normalised : normalised[^3..],
+                DisplaySuffix = NameForms.MaskSuffix(normalised),
                 IssuingCountry = input.IssuingCountry,
                 VerificationStatus = Codes.Of(VerificationStatus.SelfDeclared),
                 VerificationSource = UserEntry,

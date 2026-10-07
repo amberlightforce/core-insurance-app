@@ -12,7 +12,7 @@ public sealed record PartySearchCriteria
     [global::System.Text.Json.Serialization.JsonPropertyName("criteria")]
     public string? Criteria { get; init; }
 
-    /// <summary>Contract member 'name'.</summary>
+    /// <summary>Person or organisation name in any script; accent-, case- and script-insensitive (REQ-PTY-065..067)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("name")]
     public string? Name { get; init; }
 

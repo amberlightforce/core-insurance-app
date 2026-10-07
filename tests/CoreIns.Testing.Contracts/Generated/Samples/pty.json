@@ -1358,6 +1358,10 @@
       "bindWithinAuthority": true,
       "serviceOnly": true
     },
+    "ProducerCodeSearchCriteria": {
+      "code": "sample",
+      "name": "sample"
+    },
     "ProducerCodeSearchItem": {
       "producerCode": "SAMPLE_CODE",
       "status": "ACTIVE",

@@ -29,26 +29,26 @@ services:
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.37.0
     command: azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck
-    ports: ["127.0.0.1:10000:10000"]
+    ports: ["127.0.0.1:${AZURITE_HOST_PORT:-10000}:10000"]
 
   gotenberg:
     image: gotenberg/gotenberg:8.37.0
-    ports: ["127.0.0.1:3000:3000"]
+    ports: ["127.0.0.1:${GOTENBERG_HOST_PORT:-3000}:3000"]
 
   mailpit:
     image: axllent/mailpit:v1.31.4
-    ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
+    ports: ["127.0.0.1:${MAILPIT_UI_HOST_PORT:-8025}:8025", "127.0.0.1:${MAILPIT_SMTP_HOST_PORT:-1025}:1025"]
 
   wiremock:
     image: wiremock/wiremock:3.13.2
     volumes: ["./wiremock:/home/wiremock"]
-    ports: ["127.0.0.1:8089:8080"]
+    ports: ["127.0.0.1:${WIREMOCK_HOST_PORT:-8089}:8080"]
 
   otel:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:13.6.0
     environment:
       ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true" # local only; bound to 127.0.0.1
-    ports: ["127.0.0.1:18888:18888", "127.0.0.1:${OTEL_HOST_PORT:-4317}:18889"]
+    ports: ["127.0.0.1:${OTEL_UI_HOST_PORT:-18888}:18888", "127.0.0.1:${OTEL_HOST_PORT:-4317}:18889"]
 
   # Bootstrap (server administrator credential, idempotent): roles, privileges, extensions and the Greek search
   # objects, the same code path as the Azure "bootstrap" job. pg-init does the same on a fresh volume; this service

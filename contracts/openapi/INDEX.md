@@ -8,7 +8,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 
 | Module | Operations | Full | Minimal | Commands | Queries | In-process only | Partner-facing | Unexpanded families |
 |---|---|---|---|---|---|---|---|---|
-| [PTY](#pty) | 66 | 46 | 20 | 47 | 19 | 5 | 0 | 5 |
+| [PTY](#pty) | 67 | 47 | 20 | 47 | 20 | 5 | 0 | 5 |
 | [PFC](#pfc) | 32 | 29 | 3 | 16 | 16 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
@@ -25,7 +25,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 20 | 20 | 0 | 12 | 8 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 32 | 16 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1112 | 894 | 218 | 728 | 384 | 127 | 69 | 65 |
+| **Total** | 1113 | 895 | 218 | 728 | 385 | 127 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -86,6 +86,7 @@ Contract anchors: 174; covered by operations or families: 164; not an API (reaso
 | `pty.PartyRole.end` | POST `/api/pty/v1/party-roles/end` | C |  | ui |  | W2 | full | REQ-PTY-002 |
 | `pty.PartyRole.query` | GET `/api/pty/v1/party-roles/query` | Q |  | ui | BIL, CHN, POL, RI | W2 | full | REQ-PTY-002 |
 | `pty.ProducerCode.search` | GET `/api/pty/v1/producer-codes/search` | Q |  | ui |  | W2 | full | REQ-PTY-008 |
+| `pty.ProducerCode.searchByCriteria` | POST `/api/pty/v1/producer-codes/search` | Q |  | ui |  | W2 | full | REQ-PTY-207 |
 | `pty.ProducerCode.validate` | POST `/api/pty/v1/producer-codes/validate` | Q |  | ui | BIL, CHN, DOC, PFC, PLT, POL, UW | W2 | full | REQ-PTY-008 |
 | `pty.ProducerOfRecord.bulkTransfer` | POST `/api/pty/v1/producer-of-records/bulk-transfer` | C | yes | ui | CHN | W2 | full | REQ-PTY-009 |
 | `pty.ProducerOfRecord.cancel` | POST `/api/pty/v1/producer-of-records/cancel` | C | yes | ui |  | W2 | full | REQ-PTY-009 |

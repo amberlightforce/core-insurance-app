@@ -94,7 +94,7 @@ public sealed class IntermediaryApiTests(PostgresFixture database) : IClassFixtu
             early.Reasons.ShouldBe(["CODE_NOT_ACTIVE"]);
         }
 
-        var (search, page) = await SendAsync(_client, HttpMethod.Get, "/api/pty/v1/producer-codes/search?name=Αιγαιου");
+        var (search, page) = await SendAsync(_client, HttpMethod.Post, "/api/pty/v1/producer-codes/search", new { name = "Αιγαιου" }, withKey: false);
         search.StatusCode.ShouldBe(HttpStatusCode.OK);
         page.Text("items.0.producerCode").ShouldBe(code);
         page.Text("items.0.intermediaryStatus").ShouldBe("ACTIVE");
@@ -128,7 +128,7 @@ public sealed class IntermediaryApiTests(PostgresFixture database) : IClassFixtu
 
         var read = await parties.GetAsync(created.Party.PartyId.Value.ToString(), revealPurpose: "RATING", cancellationToken: TestContext.Current.CancellationToken);
         read.Party.BirthDate.ShouldBe(new CoreIns.SharedKernel.BusinessDate(1990, 2, 28));
-        var found = await parties.SearchAsync(name: "Bakogiannis", cancellationToken: TestContext.Current.CancellationToken);
+        var found = await parties.SearchByCriteriaAsync(new PartySearchCriteria { Name = "Bakogiannis" }, cancellationToken: TestContext.Current.CancellationToken);
         found.Items.Select(i => i.PartyId).ShouldContain(created.Party.PartyId);
         await Should.ThrowAsync<CoreIns.Platform.Errors.DomainException>(() =>
             parties.UpdateAsync(created.Party.PartyId.Value.ToString(), new PartyUpdateRequest(), CommandOptions.New(), TestContext.Current.CancellationToken));
