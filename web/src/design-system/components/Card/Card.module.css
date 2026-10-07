@@ -1,0 +1,271 @@
+/*
+ * Card (Part 2 §4.26). On a sheet: 1 px border, no shadow. On canvas: raised surface + elevation.1.
+ * Interactive cards use a stretched link; the hover shadow (elevation.2) fades in on a pseudo-element.
+ */
+.card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-inline-size: 0;
+  padding: var(--space-inset-card);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-primary);
+  transition:
+    border-color var(--motion-duration-feedback-lg) var(--motion-ease-feedback),
+    transform var(--motion-duration-feedback-xs) var(--motion-ease-standard);
+}
+
+/* Hover elevation layer (opacity only). */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--border-width-hairline) * -1);
+  z-index: calc(var(--z-raised) * -1);
+  border-radius: inherit;
+  box-shadow: var(--elevation-2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-feedback-lg) var(--motion-ease-feedback);
+}
+
+.card[data-on-canvas] {
+  border-color: transparent;
+  background-color: var(--color-surface-raised);
+  box-shadow: var(--elevation-1);
+}
+
+.card[data-variant='interactive']:has(.link[data-hovered]),
+.card[data-variant='work-left']:has(.link[data-hovered]) {
+  border-color: var(--color-border-control);
+}
+
+.card[data-variant='interactive']:has(.link[data-hovered])::before,
+.card[data-variant='work-left']:has(.link[data-hovered])::before {
+  opacity: 1;
+}
+
+.card[data-variant='interactive']:has(.link[data-pressed]) {
+  transform: scale(0.995);
+}
+
+.card:has(.link[data-focus-visible]) {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.card[data-variant='selectable'][data-selected] {
+  border-color: var(--color-interactive-accent-bg);
+  background-color: var(--color-state-row-selected);
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-interactive-accent-bg);
+}
+
+.card[data-busy] {
+  cursor: progress;
+}
+
+/* Header: heading.3 + meta + actions. */
+.header {
+  display: flex;
+  gap: var(--space-2) var(--space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+  min-inline-size: 0;
+}
+
+.titleBlock {
+  display: grid;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.title {
+  margin: var(--space-0);
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-secondary);
+}
+
+/* Explicit secondary buttons sit above the stretched link. */
+.actions {
+  position: relative;
+  z-index: var(--z-raised);
+  display: flex;
+  flex: none;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+}
+
+.link[data-hovered] {
+  color: inherit;
+}
+
+.body {
+  min-inline-size: 0;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding-block-start: var(--space-3);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+/* Work-left (IB-11): 8 px family dot with an 18 % halo and a 10 px glow, title indented 16 px. */
+.card[data-variant='work-left'] .header {
+  padding-inline-start: var(--space-4);
+}
+
+.dot {
+  --_dot: var(--color-status-neutral-solid);
+
+  position: absolute;
+  inset-block-start: calc(var(--space-inset-card) + var(--space-2));
+  inset-inline-start: var(--space-inset-card);
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--_dot);
+  box-shadow:
+    0 0 0 var(--space-1) color-mix(in srgb, var(--_dot) 18%, transparent),
+    0 0 calc(var(--space-2) + var(--space-0_5)) color-mix(in srgb, var(--_dot) 40%, transparent);
+}
+
+.dot[data-family='success'] {
+  --_dot: var(--color-status-success-solid);
+}
+
+.dot[data-family='warning'] {
+  --_dot: var(--color-status-warning-solid);
+}
+
+.dot[data-family='danger'] {
+  --_dot: var(--color-status-danger-solid);
+}
+
+.dot[data-family='info'] {
+  --_dot: var(--color-status-info-solid);
+}
+
+.dot[data-family='brand'] {
+  --_dot: var(--color-status-brand-solid);
+}
+
+.dot[data-family='teal'] {
+  --_dot: var(--color-status-teal-solid);
+}
+
+.dot[data-family='plum'] {
+  --_dot: var(--color-status-plum-solid);
+}
+
+.dot[data-family='ai'] {
+  --_dot: var(--color-status-ai-solid);
+}
+
+.dot[data-family='ochre'] {
+  --_dot: var(--color-status-ochre-solid);
+}
+
+.count {
+  font: var(--type-heading-2);
+  letter-spacing: var(--type-heading-2-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--color-text-primary);
+}
+
+.items {
+  display: grid;
+  gap: var(--space-1_5);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  min-inline-size: 0;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  color: var(--color-text-secondary);
+}
+
+.itemLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemMeta {
+  position: relative;
+  z-index: var(--z-raised);
+  flex: none;
+}
+
+.continue {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  align-self: flex-start;
+  font: var(--type-label);
+  color: var(--color-text-link);
+}
+
+@media (forced-colors: active) {
+  .card {
+    border-color: CanvasText;
+  }
+
+  .card[data-variant='selectable'][data-selected] {
+    border-color: Highlight;
+    box-shadow: inset 0 0 0 var(--border-width-hairline) Highlight;
+  }
+
+  .card:has(.link[data-focus-visible]) {
+    outline-color: Highlight;
+  }
+
+  .dot {
+    background-color: CanvasText;
+    box-shadow: none;
+    forced-color-adjust: none;
+  }
+}

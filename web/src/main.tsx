@@ -1,16 +1,16 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
-import { I18nProvider } from 'react-aria';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 
-import { App } from './App';
+import { DesignSystemProvider } from './design-system/DesignSystemProvider';
+import './design-system/styles.css';
 import './i18n';
-import './index.css';
+import { routes } from './routes';
 
 const queryClient = new QueryClient();
 
-const router = createBrowserRouter([{ path: '/', element: <App /> }]);
+const router = createBrowserRouter(routes);
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -19,10 +19,10 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <I18nProvider locale="el-GR">
+    <DesignSystemProvider>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>
-    </I18nProvider>
+    </DesignSystemProvider>
   </StrictMode>,
 );

@@ -1,0 +1,80 @@
+/*
+ * "Cycladic line" illustration placeholders (Part 3 §7.3, D-FE-09). Line = text.secondary (the guide's
+ * neutral.700 / neutral.300 pair), at most 3 tints from the status bg tokens, one gradient accent built from
+ * solid status tokens. Theme-aware through CSS variables only.
+ */
+.illustration {
+  display: block;
+  flex: none;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+.line {
+  fill: none;
+  stroke: var(--color-text-secondary);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.dashed {
+  stroke-dasharray: 4 4;
+}
+
+.tint1 {
+  fill: var(--color-status-brand-bg);
+}
+
+.tint2 {
+  fill: var(--color-status-teal-bg);
+}
+
+.tint3 {
+  fill: var(--color-status-neutral-bg);
+}
+
+.accent {
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Gradient stops: tide (teal → blue), iris (violet → blue), laurel (green → teal). */
+.tideStart {
+  stop-color: var(--color-status-teal-solid);
+}
+
+.tideEnd {
+  stop-color: var(--color-status-brand-solid);
+}
+
+.irisStart {
+  stop-color: var(--color-status-ai-solid);
+}
+
+.irisEnd {
+  stop-color: var(--color-status-brand-solid);
+}
+
+.laurelStart {
+  stop-color: var(--color-status-success-solid);
+}
+
+.laurelEnd {
+  stop-color: var(--color-status-teal-solid);
+}
+
+@media (forced-colors: active) {
+  .line {
+    stroke: CanvasText;
+  }
+
+  .tint1,
+  .tint2,
+  .tint3 {
+    fill: Canvas;
+  }
+}

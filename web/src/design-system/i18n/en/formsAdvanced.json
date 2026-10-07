@@ -1,0 +1,75 @@
+{
+  "fieldChrome": {
+    "required": "required"
+  },
+  "combobox": {
+    "count": "{count, plural, one {# result} other {# results}}",
+    "empty": "No results for “{query}”",
+    "noOptions": "No options",
+    "create": "Create new…",
+    "error": "The search failed. Try again.",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "tooShort": "{count, plural, one {Type at least # character} other {Type at least # characters}}",
+    "noSelection": "No value selected",
+    "clear": "Clear"
+  },
+  "multiCombobox": {
+    "selected": "Selected: {label}",
+    "remove": "Remove",
+    "removed": "Removed: {label}",
+    "added": "Added: {label}",
+    "more": "+{count}",
+    "showAll": "{count, plural, one {Show # more selection} other {Show # more selections}}"
+  },
+  "authorityMeter": {
+    "valueText": "{value} of {limit} limit",
+    "valueTextOver": "{value} of {limit} limit, over the limit",
+    "overLimit": "Over the limit"
+  },
+  "currencyField": {
+    "unit": "euros",
+    "tooManyDecimals": "{count, plural, one {The amount accepts up to # decimal place. Correct the amount.} other {The amount accepts up to # decimal places. Correct the amount.}}",
+    "invalid": "Not a valid amount. Type the amount like the example {example}.",
+    "negativeNotAllowed": "The amount cannot be negative. Remove the minus sign.",
+    "interpreted": "Read as {amount}",
+    "overAuthority": "Above your authority limit ({limit}) · it will be sent for approval"
+  },
+  "percentField": {
+    "unit": "percent",
+    "unitPerMille": "per mille",
+    "increase": "Increase",
+    "decrease": "Decrease",
+    "delta": "{percent} = {amount}",
+    "authority": "Your limit ±{limit}",
+    "overAuthority": "Above your authority limit · it will be sent for approval"
+  },
+  "dateField": {
+    "quickEntry": "Quick date entry",
+    "preview": "→ {date}",
+    "notRecognised": "Date not recognised. Try for example 7/10, t or +30.",
+    "hint": "e.g. t, tomorrow, +30, +6m, eom, 7/10"
+  },
+  "datePicker": {
+    "chooseMonthYear": "{title}, choose month and year",
+    "quickPicks": "Quick picks",
+    "quickToday": "Today",
+    "quickTomorrow": "Tomorrow",
+    "quickFirstOfNextMonth": "1st of next month",
+    "beforeMin": "The date is before {date}. Choose {date} or a later date.",
+    "afterMax": "The date is after {date}. Choose {date} or an earlier date.",
+    "unavailable": "The date is not available. Choose another date.",
+    "formatHint": "dd/mm/yyyy",
+    "dateTime": "{date}, {time}",
+    "empty": "—"
+  },
+  "dateRangePicker": {
+    "quickLast7Days": "Last 7 days",
+    "quickCurrentMonth": "This month",
+    "quickPreviousQuarter": "Previous quarter",
+    "quickYearToDate": "Year to date",
+    "endBeforeStart": "The end date is before the start date. Correct one of them.",
+    "formatHint": "dd/mm/yyyy – dd/mm/yyyy",
+    "range": "{start} to {end}"
+  }
+}

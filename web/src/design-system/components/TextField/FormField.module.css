@@ -1,0 +1,208 @@
+/*
+ * FormField (Part 2 §4.2): label above the control, wrapping to 2 lines; helper or error below.
+ * MI-14 field error: the message row expands (grid rows 0fr → 1fr) and fades; the icon scales 0.8 → 1.
+ */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-label-gap);
+  min-inline-size: 0;
+}
+
+.labelRow {
+  display: flex;
+  gap: var(--space-1);
+  align-items: flex-start;
+  min-inline-size: 0;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  overflow-wrap: anywhere;
+}
+
+.required {
+  color: var(--color-status-danger-fg);
+}
+
+.helpButton {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: var(--size-icon-md);
+  block-size: var(--size-icon-md);
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+/* Target size: the 16 px glyph sits in a 24 px hit area (WCAG 2.5.8). */
+.helpButton::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  inline-size: 24px;
+  block-size: 24px;
+}
+
+.helpButton[data-hovered],
+.helpButton[data-pressed] {
+  color: var(--color-text-primary);
+}
+
+.helpButton[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* MI-28 popover open. */
+.popover {
+  z-index: var(--z-dropdown);
+  max-inline-size: 320px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-3);
+  transform-origin: top left;
+  transition:
+    opacity var(--motion-duration-transition-sm) var(--motion-ease-enter),
+    transform var(--motion-duration-transition-sm) var(--motion-ease-enter);
+}
+
+.popover[data-entering] {
+  opacity: 0;
+  transform: translateY(var(--space-1)) scale(0.96);
+}
+
+.popover[data-exiting] {
+  opacity: 0;
+  transition-duration: var(--motion-duration-feedback-lg);
+}
+
+.helpDialog {
+  position: relative;
+  padding: var(--space-3);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  outline: none;
+}
+
+.messages {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.messageStack {
+  display: grid;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.helper,
+.error,
+.warning,
+.transient {
+  display: flex;
+  gap: var(--space-1);
+  align-items: flex-start;
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  overflow-wrap: anywhere;
+}
+
+.helper,
+.transient {
+  color: var(--color-text-secondary);
+}
+
+.transient {
+  color: var(--color-status-info-fg);
+}
+
+.error {
+  color: var(--color-status-danger-fg);
+  animation: message-in var(--motion-duration-feedback-lg) var(--motion-ease-enter) both;
+}
+
+.warning {
+  color: var(--color-status-warning-fg);
+}
+
+.messageIcon {
+  flex: none;
+  margin-block-start: var(--space-px);
+}
+
+.error .messageIcon {
+  animation: icon-in var(--motion-duration-feedback-lg) var(--motion-ease-enter) both;
+}
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--space-1) * -1));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes icon-in {
+  from {
+    transform: scale(0.8);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+/* Tooltip anchored to a non-button control (disabled reason, MI-10 «Αντιγράφηκε»). Solid inverse. */
+.tooltip {
+  z-index: var(--z-tooltip);
+  max-inline-size: 280px;
+  padding: var(--space-1_5) var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  overflow-wrap: anywhere;
+  transition: opacity var(--motion-duration-feedback-md) var(--motion-ease-enter);
+}
+
+.tooltip[data-entering] {
+  opacity: 0;
+}
+
+.tooltip[data-exiting] {
+  opacity: 0;
+  transition-duration: var(--motion-duration-feedback-xs);
+}
+
+@media (forced-colors: active) {
+  .required,
+  .error,
+  .warning {
+    color: CanvasText;
+  }
+
+  .tooltip {
+    border: var(--border-width-hairline) solid CanvasText;
+  }
+
+  .helpButton {
+    color: ButtonText;
+  }
+}

@@ -1,0 +1,209 @@
+/* Part 2 §4.24 progress: linear (4/6/8 px), indeterminate (2 px), circular ring. MI-43 end-cap check. */
+.linear {
+  --_track: 6px;
+
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 64px;
+}
+
+.linear[data-size='sm'] {
+  --_track: 4px;
+}
+
+.linear[data-size='lg'] {
+  --_track: 8px;
+}
+
+.linear[data-size='indeterminate'] {
+  --_track: 2px;
+}
+
+.header {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+}
+
+.value,
+.count {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+.track {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  block-size: var(--_track);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-bg);
+}
+
+.linear[data-complete] .track {
+  overflow: visible;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--gradient-tide);
+  transform: scaleX(var(--_fraction, 0));
+  transform-origin: left center;
+  transition:
+    transform var(--motion-duration-transition-xl) var(--motion-ease-standard),
+    background-color var(--motion-duration-transition-lg) var(--motion-ease-standard);
+}
+
+.linear[data-complete] .fill {
+  background: var(--color-status-success-solid);
+}
+
+/* MI-43: the end-cap check draws once the bar reaches 100 %. */
+.check {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: calc(var(--space-1_5) * -1);
+  transform: translateY(-50%);
+}
+
+.checkDisc {
+  fill: var(--color-status-success-solid);
+}
+
+.checkMark {
+  fill: none;
+  stroke: var(--color-text-on-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-check var(--motion-duration-transition-lg) var(--motion-ease-enter) both;
+}
+
+@keyframes draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Indeterminate: a 30 % brand segment sliding on a 1.2 s loop. */
+.segment {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 30%;
+  border-radius: inherit;
+  background-color: var(--color-status-brand-solid);
+  animation: slide var(--motion-duration-shimmer) var(--motion-ease-standard) infinite;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(340%);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion: a static segment pulsing 0.4 ↔ 1 over 1.6 s (beats the global zero-duration rule). */
+:root[data-reduce-motion='true'] .segment {
+  inset-inline-start: 35%;
+  animation-name: pulse !important;
+  animation-duration: var(--motion-duration-signature-max) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-reduce-motion='false']) .segment {
+    inset-inline-start: 35%;
+    animation-name: pulse !important;
+    animation-duration: var(--motion-duration-signature-max) !important;
+  }
+}
+
+/* Ring. */
+.ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+
+.ring svg {
+  display: block;
+}
+
+.ringTrack {
+  stroke: var(--color-status-neutral-bg);
+}
+
+.ringArc {
+  transition: stroke-dashoffset var(--motion-duration-transition-xl) var(--motion-ease-standard);
+}
+
+.stopStart {
+  stop-color: var(--color-status-teal-solid);
+}
+
+.stopEnd {
+  stop-color: var(--color-status-brand-solid);
+}
+
+.ringValue {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-text-primary);
+  font: var(--type-caption);
+  font-weight: 600;
+}
+
+.ring[data-ring-size='64'] .ringValue {
+  font: var(--type-label-lg);
+  font-weight: 600;
+}
+
+@media (forced-colors: active) {
+  .track {
+    border: var(--border-width-hairline) solid CanvasText;
+    background: Canvas;
+  }
+
+  .fill,
+  .segment,
+  .linear[data-complete] .fill {
+    background: Highlight;
+  }
+
+  .ringTrack {
+    stroke: GrayText;
+  }
+
+  .ringArc {
+    stroke: Highlight;
+  }
+}

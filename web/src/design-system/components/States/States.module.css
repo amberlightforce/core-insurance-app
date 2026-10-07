@@ -1,0 +1,300 @@
+/*
+ * Canonical empty, loading, error and permission states (Part 3 §5.11, DESIGN-B A.11). MI-33 skeleton shimmer.
+ */
+
+/* Skeleton block (Part 2 §4.24): colour token, radius.sm, MI-33 shimmer as a translating highlight. */
+.skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-skeleton);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--color-surface-sheet) 55%, transparent) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer var(--motion-duration-shimmer) var(--motion-ease-linear) infinite;
+}
+
+.skeleton[data-shape='circle'] {
+  border-radius: var(--radius-full);
+}
+
+.skeleton[data-shape='block'] {
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Loading. */
+.loading {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.loading[data-hidden] {
+  visibility: hidden;
+}
+
+.long {
+  display: grid;
+  gap: var(--space-2);
+  max-inline-size: 480px;
+  padding: var(--space-4);
+}
+
+.stageText {
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  color: var(--color-text-primary);
+}
+
+.estimate {
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-tertiary);
+}
+
+.track {
+  position: relative;
+  overflow: hidden;
+  block-size: 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-bg);
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-tide);
+  transform-origin: left center;
+  transform: scaleX(var(--_value, 0));
+  transition: transform var(--motion-duration-transition-xl) var(--motion-ease-standard);
+}
+
+/* Empty states. */
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+}
+
+.empty[data-kind='filtered'] {
+  justify-items: start;
+  padding: var(--space-4);
+  text-align: start;
+}
+
+.empty[data-kind='done'] {
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+}
+
+.headline {
+  margin: var(--space-0);
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+  color: var(--color-text-primary);
+  text-wrap: balance;
+}
+
+.description {
+  max-inline-size: 48ch;
+  margin: var(--space-0);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  color: var(--color-text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+}
+
+.empty[data-kind='filtered'] .actions {
+  justify-content: start;
+}
+
+.link {
+  font: var(--type-label);
+  color: var(--color-text-link);
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-0_5);
+  cursor: pointer;
+  outline: none;
+}
+
+.link[data-hovered] {
+  color: var(--color-text-link-hover);
+}
+
+.link[data-focus-visible] {
+  border-radius: var(--radius-xs);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Region error banner (Part 2 §4.22 look, scoped to the failing region). */
+.banner {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-2);
+  align-items: start;
+  padding: var(--space-3);
+  border: var(--border-width-hairline) solid var(--color-status-danger-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-status-danger-bg);
+  color: var(--color-text-primary);
+}
+
+.banner[data-tone='warning'] {
+  border-color: var(--color-status-warning-border);
+  background-color: var(--color-status-warning-bg);
+}
+
+.bannerIcon {
+  margin-block-start: var(--space-0_5);
+  color: var(--color-status-danger-fg);
+}
+
+.banner[data-tone='warning'] .bannerIcon {
+  color: var(--color-status-warning-fg);
+}
+
+.bannerBody {
+  display: grid;
+  gap: var(--space-2);
+  min-inline-size: 0;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.bannerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.disclosureTrigger {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  padding: var(--space-0);
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  cursor: pointer;
+  outline: none;
+}
+
+.disclosureTrigger[data-focus-visible] {
+  border-radius: var(--radius-xs);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.chevron {
+  transition: transform var(--motion-duration-feedback-md) var(--motion-ease-standard);
+}
+
+.disclosure[data-expanded] .chevron {
+  transform: rotate(90deg);
+}
+
+.code {
+  font: var(--type-mono-sm);
+  letter-spacing: var(--type-mono-sm-tracking);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums slashed-zero;
+  overflow-wrap: anywhere;
+}
+
+/* Page-level error and permission denied: a full sheet. */
+.page {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--space-12) var(--space-4);
+  text-align: center;
+}
+
+.pageTitle {
+  margin: var(--space-0);
+  font: var(--type-heading-2);
+  letter-spacing: var(--type-heading-2-tracking);
+  color: var(--color-text-primary);
+  text-wrap: balance;
+}
+
+.receipt {
+  display: inline-flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  font: var(--type-body-compact);
+  color: var(--color-status-success-fg);
+}
+
+/* Permission-limited caption (masked, never blank). */
+.limited {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-1_5);
+  align-items: center;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.masked {
+  font: var(--type-mono);
+  font-variant-numeric: tabular-nums slashed-zero;
+  color: var(--color-text-primary);
+}
+
+.limitedCaption {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-tertiary);
+}
+
+@media (forced-colors: active) {
+  .skeleton {
+    border: var(--border-width-hairline) solid GrayText;
+    background: Canvas;
+  }
+
+  .banner {
+    border-color: CanvasText;
+  }
+
+  .bannerIcon {
+    color: CanvasText;
+  }
+
+  .fill {
+    background: Highlight;
+  }
+}

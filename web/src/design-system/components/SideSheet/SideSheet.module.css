@@ -1,0 +1,142 @@
+/*
+ * Side sheet (Part 2 §4.20): opaque sheet inside the main sheet region (the parent must be positioned),
+ * left-edge `elevation.4`, non-blocking dim layer on the record. MI-30 slide in; MI-64 unsaved dot.
+ */
+.dim {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-panel-context);
+
+  /* The record dims to ≈ rgba(14,17,22,.12) but stays readable and scrollable (no pointer capture). */
+  background-color: color-mix(in srgb, var(--color-surface-scrim-modal) 30%, transparent);
+  pointer-events: none;
+  animation: fade var(--motion-duration-transition-sm) var(--motion-ease-standard);
+}
+
+.sheet {
+  --_width: 480px;
+
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: var(--z-panel-context);
+  display: flex;
+  flex-direction: column;
+  inline-size: min(var(--_width), 100%);
+  border-inline-start: var(--border-width-hairline) solid var(--color-border-subtle);
+  background-color: var(--color-surface-sheet);
+  box-shadow: var(--elevation-4);
+  color: var(--color-text-primary);
+  outline: none;
+  animation: slide-in var(--motion-duration-transition-lg) var(--motion-ease-enter);
+}
+
+.sheet[data-size='lg'] {
+  --_width: 640px;
+}
+
+.sheet[data-size='split'] {
+  --_width: 50%;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+:root[data-reduce-motion='true'] .sheet {
+  animation-name: fade;
+}
+
+.header {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  min-block-size: 48px;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.title {
+  display: inline-flex;
+  flex: 1;
+  gap: var(--space-1_5);
+  align-items: center;
+  min-inline-size: 0;
+  margin: var(--space-0);
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+}
+
+/* MI-64: 6 px warning dot scales in. */
+.dirty {
+  flex: none;
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-warning-solid);
+  animation: dot-in var(--motion-duration-feedback-lg) var(--motion-ease-overshoot-fallback);
+}
+
+@keyframes dot-in {
+  from {
+    transform: scale(0);
+  }
+}
+
+.chip {
+  padding: var(--space-0_5) var(--space-2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-bg);
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.body {
+  display: grid;
+  flex: 1 1 auto;
+  align-content: start;
+  gap: var(--space-stack-field);
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+  font: var(--type-body-compact);
+}
+
+.footer {
+  position: sticky;
+  inset-block-end: 0;
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-4);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+  background-color: var(--color-surface-sheet);
+}
+
+@media (forced-colors: active) {
+  .dim {
+    display: none;
+  }
+
+  .sheet {
+    border-inline-start-color: CanvasText;
+  }
+
+  .dirty {
+    background: Mark;
+    outline: var(--border-width-hairline) solid CanvasText;
+  }
+}

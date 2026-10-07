@@ -1,0 +1,949 @@
+/*
+ * Data table (Part 2 §4.35, Part 4 §11.7, v3 queue). Opaque sheet, never glass.
+ * MI-07 hover, MI-08 row select, MI-22 pinned edge, MI-33 skeleton, MI-41 refetch bar, MI-48 live insert.
+ */
+.root {
+  --_row-height: var(--size-row-table);
+  --_row-bg: var(--color-surface-sheet);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+}
+
+.root[data-row-variant='queue'] {
+  --_row-height: var(--size-row-queue);
+}
+
+:global([data-density='comfortable']) .root,
+.root[data-density='comfortable'] {
+  font: var(--type-body);
+}
+
+/* Toolbar 48 / 56 px. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  min-block-size: var(--size-topbar);
+  padding: var(--space-2) var(--space-inset-cell-x);
+}
+
+.toolbarSpacer {
+  flex: 1;
+}
+
+.search {
+  display: inline-flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  min-inline-size: 200px;
+  min-block-size: var(--size-control-md);
+  padding: var(--space-0) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-tertiary);
+}
+
+.search:focus-within {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 var(--space-0_5) var(--color-state-focus-halo);
+}
+
+.input {
+  flex: 1;
+  min-inline-size: 0;
+  min-block-size: var(--size-control-sm);
+  padding: var(--space-0) var(--space-1);
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  outline: none;
+}
+
+.popoverSearch .input,
+.filterGroup .input {
+  border: var(--border-width-hairline) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+}
+
+.input::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.segmented {
+  display: inline-flex;
+  padding: var(--space-0_5);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sunken);
+}
+
+.segment {
+  min-block-size: var(--size-control-sm);
+  padding: var(--space-0) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  cursor: pointer;
+  outline: none;
+}
+
+.segment[data-selected] {
+  background-color: var(--color-surface-sheet);
+  box-shadow: var(--elevation-1);
+  color: var(--color-text-primary);
+}
+
+.segment[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-0);
+}
+
+.caption {
+  margin: var(--space-0);
+  padding: var(--space-0) var(--space-inset-cell-x) var(--space-2);
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.banner {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin: var(--space-0) var(--space-inset-cell-x) var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width-hairline) solid var(--color-status-neutral-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-status-neutral-bg);
+  color: var(--color-status-neutral-fg);
+  font: var(--type-body-compact);
+}
+
+.banner[data-tone='danger'] {
+  border-color: var(--color-status-danger-border);
+  background-color: var(--color-status-danger-bg);
+  color: var(--color-status-danger-fg);
+}
+
+.banner[data-tone='warning'] {
+  border-color: var(--color-status-warning-border);
+  background-color: var(--color-status-warning-bg);
+  color: var(--color-status-warning-fg);
+}
+
+.selectAllStrip {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--size-control-md);
+  background-color: var(--color-status-brand-bg);
+  color: var(--color-status-brand-fg);
+  font: var(--type-caption);
+}
+
+/* Scroll viewport: the only scroller; the header sticks inside it (content never scrolls under glass). */
+.viewport {
+  position: relative;
+  min-inline-size: 0;
+  container-type: inline-size;
+}
+
+.scroller {
+  max-block-size: var(--_height, 70vh);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.grid {
+  min-inline-size: var(--_row-width);
+  outline: none;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--_cols);
+  min-inline-size: var(--_row-width);
+  min-block-size: var(--_row-height);
+  background-color: var(--_row-bg);
+  box-shadow: inset 0 calc(var(--border-width-hairline) * -1) 0 var(--color-border-subtle);
+  contain: layout style;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.virtualRow {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: var(--_row-height);
+}
+
+.spanRow.virtualRow {
+  block-size: var(--size-row-table);
+}
+
+.body {
+  position: relative;
+}
+
+.body > .row:last-child {
+  box-shadow: none;
+}
+
+/* Header: 38 px, caption 500 tertiary, single line; sorted column text.primary + arrow. */
+.head {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--z-sticky-table-header);
+}
+
+.headerRow {
+  --_row-bg: var(--color-surface-sheet);
+
+  min-block-size: var(--size-table-header);
+}
+
+.cell {
+  display: flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  min-inline-size: 0;
+  padding: var(--space-inset-cell-y) var(--space-inset-cell-x);
+  overflow: hidden;
+}
+
+.cell[data-align='end'] {
+  justify-content: flex-end;
+  text-align: end;
+}
+
+.cell[data-align='center'] {
+  justify-content: center;
+}
+
+.headerCell {
+  position: relative;
+  padding-block: var(--space-0);
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.headerCell[data-sorted] {
+  color: var(--color-text-primary);
+}
+
+.headerLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sortButton {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: var(--size-control-sm);
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+.sortButton:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-px);
+}
+
+.sortIndicator {
+  display: inline-flex;
+  gap: var(--space-px);
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.sortHover {
+  display: inline-flex;
+  opacity: 0;
+  transition: opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.sortButton:hover .sortHover,
+.sortButton:focus-visible .sortHover {
+  opacity: 1;
+}
+
+.headerIconButton {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--size-control-sm);
+  block-size: var(--size-control-sm);
+  flex: none;
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  outline: none;
+}
+
+.headerIconButton[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.headerIconButton[data-active] {
+  color: var(--color-interactive-accent-bg);
+}
+
+.headerIconButton[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-0);
+}
+
+/* Resize handle: 8 px hit area, 2 px guide line on hover/focus/drag. */
+.resizer {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: var(--space-2);
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+
+.resizer::after {
+  content: '';
+  position: absolute;
+  inset-block: var(--space-2);
+  inset-inline-end: var(--space-0);
+  inline-size: var(--border-width-thick);
+  background-color: var(--color-border-focus);
+  opacity: 0;
+  transition: opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.resizer:hover::after,
+.resizer:focus-visible::after,
+.resizer[data-resizing]::after {
+  opacity: 1;
+}
+
+/* Pinned columns: opaque, sticky; the edge shadow fades in only while scrolled (MI-22). */
+.pinned {
+  position: sticky;
+  z-index: var(--z-sticky-pinned-column);
+  background-color: var(--_row-bg);
+}
+
+.headerCell.pinned {
+  z-index: var(--z-sticky-table-corner);
+}
+
+.pinnedEdge::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: calc(var(--space-2) * -1);
+  inline-size: var(--space-2);
+  box-shadow: var(--elevation-pinned-column);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.pinnedEdge[data-pinned='right']::after {
+  inset-inline: calc(var(--space-2) * -1) auto;
+  box-shadow: var(--elevation-pinned-column-end);
+}
+
+.root[data-scrolled-start] .pinnedEdge[data-pinned='left']::after,
+.root[data-scrolled-end] .pinnedEdge[data-pinned='right']::after {
+  opacity: 1;
+}
+
+.selectCell {
+  justify-content: center;
+  padding-inline: var(--space-0);
+}
+
+/* Row states (§11.7). */
+@media (hover: hover) {
+  .body .row:hover {
+    --_row-bg: var(--color-state-row-hover);
+  }
+
+  .body .row[data-selected]:hover {
+    --_row-bg: var(--color-state-row-selected-hover);
+  }
+}
+
+.body .row[data-selected] {
+  --_row-bg: var(--color-state-row-selected);
+}
+
+/* MI-08: 2 px selected indicator scales in from the centre. */
+.body .row::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: var(--z-sticky-pinned-column);
+  inline-size: var(--border-width-thick);
+  background-color: var(--color-state-row-selected-indicator);
+  transform: scaleY(0);
+  transition: transform var(--motion-duration-feedback-lg) var(--motion-ease-enter);
+  pointer-events: none;
+}
+
+.body .row[data-selected]::before {
+  transform: scaleY(1);
+}
+
+/* Error row: 3 px danger bar. */
+.body .row[data-error]::before {
+  inline-size: var(--border-width-accent);
+  background-color: var(--color-status-danger-solid);
+  transform: scaleY(1);
+}
+
+.body .row:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-width) * -1);
+}
+
+/* Cursor row (J/K): the ring at 50 % even when focus is elsewhere. */
+.body .row[data-cursor]:not(:focus-visible) {
+  outline: var(--focus-ring-width) solid
+    color-mix(in srgb, var(--color-border-focus) 50%, transparent);
+  outline-offset: calc(var(--focus-ring-width) * -1);
+}
+
+.body .row[data-locked] {
+  color: var(--color-text-tertiary);
+}
+
+/* MI-48: live insert flash over 1,200 ms; the «Νέο» dot stays while the row is new. */
+.body .row[data-new] {
+  animation: row-flash var(--motion-duration-shimmer) var(--motion-ease-standard) 1 both;
+}
+
+@keyframes row-flash {
+  from {
+    background-color: var(--color-status-brand-bg);
+  }
+
+  to {
+    background-color: var(--_row-bg);
+  }
+}
+
+.newDot {
+  inline-size: 6px;
+  block-size: 6px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-brand-solid);
+}
+
+.lockIcon {
+  display: inline-flex;
+  flex: none;
+  color: var(--color-text-tertiary);
+}
+
+/* Selection checkbox: 16 px, 55 % until hover/selected/focus; full under hover: none. */
+.rowCheckbox {
+  inline-size: 16px;
+  block-size: 16px;
+  margin: var(--space-0);
+  accent-color: var(--color-interactive-accent-bg);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.row:hover .rowCheckbox,
+.row[data-selected] .rowCheckbox,
+.row:focus-within .rowCheckbox,
+.row[data-cursor] .rowCheckbox,
+.headerRow .rowCheckbox,
+.card .rowCheckbox {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .rowCheckbox {
+    opacity: 1;
+  }
+}
+
+/* Spanning rows: group, error message, hidden-normal, empty. */
+.spanRow {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.spanCell {
+  position: sticky;
+  inset-inline-start: 0;
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  max-inline-size: 100cqi;
+  padding: var(--space-inset-cell-y) var(--space-inset-cell-x);
+}
+
+.spanRow[data-kind='group'] {
+  --_row-bg: var(--color-surface-sunken);
+
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.groupChevron {
+  display: inline-flex;
+  transition: transform var(--motion-duration-feedback-md) var(--motion-ease-standard);
+}
+
+.groupChevron[data-expanded] {
+  transform: rotate(90deg);
+}
+
+.groupLabel {
+  font-variant-numeric: tabular-nums;
+}
+
+.spanRow[data-kind='message'] {
+  --_row-bg: var(--color-status-danger-bg);
+
+  color: var(--color-status-danger-fg);
+}
+
+.messageIcon {
+  display: inline-flex;
+}
+
+.spanRow[data-kind='hiddenNormal'] {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.spanRow[data-kind='empty'] {
+  min-block-size: 160px;
+}
+
+.emptyBlock {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding-block: var(--space-6);
+}
+
+.emptyTitle {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-heading-4);
+}
+
+/* MI-33 skeleton. */
+.skeletonBlock {
+  inline-size: 70%;
+  block-size: 8px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-skeleton);
+  animation: skeleton-pulse var(--motion-duration-shimmer) var(--motion-ease-standard) infinite
+    alternate;
+}
+
+@keyframes skeleton-pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.5;
+  }
+}
+
+/* MI-41: 2 px bar under the header while refetching. */
+.refetchBar {
+  position: absolute;
+  inset-block-start: var(--size-table-header);
+  inset-inline: 0;
+  z-index: var(--z-sticky-table-header);
+  block-size: var(--border-width-thick);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.refetchBar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  inline-size: 30%;
+  background-color: var(--color-status-brand-solid);
+  animation: refetch var(--motion-duration-shimmer) var(--motion-ease-linear) infinite;
+}
+
+@keyframes refetch {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(340%);
+  }
+}
+
+/* Footer 36 px: «1–50 από 4.812 · 3 επιλεγμένα» + labelled total. */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  min-block-size: var(--size-table-footer);
+  padding: var(--space-1) var(--space-inset-cell-x);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.footerCount {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.footerTotal {
+  margin-inline-start: auto;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Cells. */
+.truncate {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mono {
+  font: var(--type-mono);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.numeric,
+.tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+
+.numeric[data-adverse] {
+  color: var(--color-text-adverse);
+}
+
+.empty {
+  color: var(--color-text-tertiary);
+}
+
+.boolean {
+  display: inline-flex;
+  color: var(--color-status-success-fg);
+}
+
+.priority {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.priorityTrack {
+  position: relative;
+  inline-size: 64px;
+  block-size: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-bg);
+}
+
+.priorityFill {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-interactive-accent-bg);
+  transform-origin: left center;
+}
+
+.queue {
+  display: grid;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.queuePrimary {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queueSecondary {
+  display: flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  min-inline-size: 0;
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+}
+
+.queueId {
+  flex: none;
+  color: var(--color-text-secondary);
+  font: var(--type-mono-sm);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.queueDot {
+  inline-size: 3px;
+  block-size: 3px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background-color: currentcolor;
+}
+
+/* Popovers (filters, column settings). Glass is allowed on overlays only. */
+.popover {
+  z-index: var(--z-dropdown);
+  min-inline-size: 240px;
+  border-radius: var(--radius-lg);
+  outline: none;
+}
+
+.settingsPopover {
+  inline-size: 320px;
+}
+
+.dialog {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  outline: none;
+}
+
+.settingsList {
+  display: grid;
+  gap: var(--space-0_5);
+  max-block-size: 320px;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  overflow: auto;
+  list-style: none;
+}
+
+.settingsItem {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.settingsItem .checkboxField {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.checkboxField {
+  display: flex;
+}
+
+.checkbox {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: var(--size-row-list);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.checkboxBox {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 16px;
+  block-size: 16px;
+  flex: none;
+  border: var(--border-width-control) solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-on-accent);
+}
+
+.checkbox[data-selected] .checkboxBox {
+  border-color: var(--color-interactive-accent-bg);
+  background-color: var(--color-interactive-accent-bg);
+}
+
+.checkbox[data-focus-visible] .checkboxBox {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.checkbox[data-disabled] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--size-control-sm);
+  block-size: var(--size-control-sm);
+  flex: none;
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: none;
+}
+
+.iconButton[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.iconButton[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-0);
+}
+
+.iconButton[data-disabled] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.filterGroup {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.filterLabel {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+}
+
+/* Card list below 600 px. */
+.cards {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-0);
+  padding: var(--space-2) var(--space-inset-cell-x);
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+}
+
+.card[data-selected] {
+  border-color: var(--color-state-row-selected-indicator);
+  background-color: var(--color-state-row-selected);
+}
+
+.cardHead {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-inline-size: 0;
+}
+
+.cardTitle {
+  min-inline-size: 0;
+  padding: var(--space-0);
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: var(--type-heading-4);
+  text-align: start;
+  cursor: pointer;
+}
+
+.cardTitle:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.cardFacts {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-0);
+}
+
+.cardFact {
+  display: grid;
+  grid-template-columns: minmax(120px, 40%) 1fr;
+  gap: var(--space-2);
+}
+
+.cardFact dt {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.cardFact dd {
+  min-inline-size: 0;
+  margin: var(--space-0);
+}
+
+@media (forced-colors: active) {
+  .body .row[data-selected] {
+    outline: var(--border-width-thick) solid Highlight;
+    outline-offset: calc(var(--border-width-thick) * -1);
+  }
+
+  .body .row::before {
+    background-color: Highlight;
+  }
+
+  .body .row[data-error]::before {
+    background-color: Mark;
+  }
+
+  .numeric[data-adverse] {
+    color: CanvasText;
+    text-decoration: underline;
+  }
+
+  .priorityFill,
+  .refetchBar::before,
+  .skeletonBlock {
+    background-color: CanvasText;
+  }
+
+  .pinned {
+    background-color: Canvas;
+  }
+}

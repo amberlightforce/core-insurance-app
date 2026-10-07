@@ -1,0 +1,281 @@
+/*
+ * Field chrome shared by the advanced form controls (Combobox, MultiCombobox, date fields, CurrencyField,
+ * PercentField). It mirrors the text input (Part 2 §4.2, DESIGN-A §7.2) so every field looks identical:
+ * label above, 1 px control border, focus = border.focus + 3 px halo on ANY focus, error = 2 px danger
+ * (1 px border + 1 px inset, no shift), disabled with a reason, read-only without chrome. MI-01, MI-03, MI-14.
+ */
+.field {
+  display: grid;
+  grid-auto-rows: auto;
+  gap: var(--space-label-gap);
+  min-inline-size: 0;
+  align-content: start;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  overflow-wrap: anywhere;
+}
+
+.requiredMark {
+  margin-inline-start: var(--space-0_5);
+  color: var(--color-status-danger-fg);
+}
+
+/* The control frame (a React Aria Group): border, halo, states. */
+.frame {
+  --_border: var(--color-border-control);
+  --_halo: var(--color-state-focus-halo);
+  --_inset: transparent;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1_5);
+  min-block-size: var(--size-control-md);
+  min-inline-size: 0;
+  padding: var(--space-0) var(--space-inset-control-x);
+  border: var(--border-width-hairline) solid var(--_border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sheet);
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--_inset);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  cursor: text;
+  transition:
+    border-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+/* Focus halo layer: shown on any focus inside the field (not only focus-visible); opacity only. */
+.frame::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--border-width-hairline) * -1);
+  border-radius: inherit;
+  box-shadow: 0 0 0 calc(var(--space-0_5) + var(--space-px)) var(--_halo);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+:global([data-density='comfortable']) .frame {
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+@media (pointer: coarse) {
+  .frame {
+    font: var(--type-body-lg);
+    letter-spacing: var(--type-body-lg-tracking);
+  }
+}
+
+@media (hover: hover) {
+  .frame[data-hovered] {
+    --_border: var(--color-border-control-hover);
+  }
+}
+
+.frame[data-focus-within] {
+  --_border: var(--color-border-focus);
+}
+
+.frame[data-focus-within]::after {
+  opacity: 1;
+}
+
+.frame[data-warning] {
+  --_border: var(--color-status-warning-solid);
+}
+
+.frame[data-invalid] {
+  --_border: var(--color-status-danger-solid);
+  --_inset: var(--color-status-danger-solid);
+  --_halo: var(--color-danger-halo);
+}
+
+.frame[data-disabled],
+.frame[data-soft-disabled] {
+  --_border: var(--color-border-subtle);
+  --_inset: transparent;
+
+  background-color: var(--color-interactive-disabled-bg);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.frame[data-soft-disabled][data-focus-within] {
+  --_border: var(--color-border-focus);
+}
+
+/* Read-only: value as text, no border or background; padding kept so columns align. */
+.frame[data-readonly] {
+  --_border: transparent;
+  --_inset: transparent;
+
+  background-color: transparent;
+  cursor: default;
+}
+
+.frame[data-readonly]::after {
+  opacity: 0;
+}
+
+.frame[data-readonly][data-focus-visible]::after,
+.frame[data-readonly][data-focus-within]:has(:focus-visible)::after {
+  opacity: 1;
+}
+
+/* A bare input inside the frame. */
+.input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding: var(--space-0);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-text-placeholder);
+  opacity: 1;
+}
+
+.input:disabled,
+.input[aria-disabled='true'] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* Trailing / leading adornments (icons, units, buttons). */
+.adornment {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  color: var(--color-text-tertiary);
+}
+
+.frame[data-readonly] .hideWhenReadOnly,
+.frame[data-soft-disabled] .hideWhenReadOnly,
+.frame[data-disabled] .hideWhenReadOnly {
+  display: none;
+}
+
+.statusIcon {
+  display: inline-flex;
+  flex: none;
+  color: var(--color-status-danger-fg);
+}
+
+/* Small square ghost button inside a field (clear, chevron, calendar). */
+.fieldButton {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--size-control-sm);
+  block-size: var(--size-control-sm);
+  margin-inline-end: calc(var(--space-1) * -1);
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.fieldButton[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.fieldButton[data-pressed] {
+  background-color: var(--color-interactive-ghost-bg-pressed);
+}
+
+.fieldButton[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.fieldButton[data-disabled] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* Messages under the control. */
+.message {
+  display: flex;
+  gap: var(--space-1);
+  align-items: flex-start;
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  overflow-wrap: anywhere;
+}
+
+.messageIcon {
+  flex: none;
+  margin-block-start: var(--space-px);
+}
+
+.helper {
+  color: var(--color-text-secondary);
+}
+
+.error {
+  color: var(--color-status-danger-fg);
+}
+
+.warning {
+  color: var(--color-status-warning-fg);
+}
+
+.info {
+  color: var(--color-status-info-fg);
+}
+
+@media (forced-colors: active) {
+  .frame {
+    border-color: CanvasText;
+    background-color: Field;
+    color: FieldText;
+  }
+
+  .frame[data-focus-within] {
+    outline: var(--focus-ring-width) solid Highlight;
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .frame[data-invalid] {
+    border-width: var(--border-width-thick);
+    border-color: Mark;
+    box-shadow: none;
+  }
+
+  .frame[data-disabled],
+  .frame[data-soft-disabled] {
+    border-color: GrayText;
+    color: GrayText;
+  }
+
+  .frame::after {
+    display: none;
+  }
+
+  .error,
+  .warning {
+    color: CanvasText;
+  }
+
+  .requiredMark {
+    color: CanvasText;
+  }
+}

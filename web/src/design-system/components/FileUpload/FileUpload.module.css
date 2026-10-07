@@ -1,0 +1,275 @@
+/*
+ * File upload (Part 2 §4.30): dashed 1.5 px zone, MI-18 drop target (marching ants), 48 px rows, MI-42
+ * completion flash.
+ */
+.upload {
+  display: grid;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.zone {
+  --_ants: var(--color-border-control);
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-1_5);
+  min-block-size: 120px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sunken);
+  text-align: center;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+/* Dashed border drawn as a background so it can march (MI-18) with transform-free motion. */
+.zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: var(--border-width-control) dashed var(--_ants);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.zone[data-size='lg'] {
+  min-block-size: 160px;
+}
+
+.zone[data-drop-target] {
+  --_ants: var(--color-border-focus);
+
+  background-color: var(--color-state-drop-target);
+}
+
+.zone[data-drop-target]::before {
+  animation: ants var(--motion-duration-signature-max) var(--motion-ease-linear) infinite;
+}
+
+@keyframes ants {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.zone[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.zone[data-disabled] {
+  background-color: var(--color-interactive-disabled-bg);
+}
+
+.zoneIcon {
+  color: var(--color-text-secondary);
+}
+
+.choose {
+  padding: var(--space-0_5) var(--space-1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-primary);
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+  cursor: pointer;
+  outline: none;
+}
+
+.choose[data-hovered] {
+  color: var(--color-text-link-hover);
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-0_5);
+}
+
+.choose[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.choose[aria-disabled='true'] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.caption {
+  margin: var(--space-0);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-tertiary);
+}
+
+.list {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  min-block-size: 48px;
+  padding: var(--space-1) var(--space-2);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+/* MI-42: the row flashes success.bg once when the file is ready. */
+.row[data-status='done'] {
+  animation: ready var(--motion-duration-signature-beat) var(--motion-ease-standard) both;
+}
+
+@keyframes ready {
+  from {
+    background-color: var(--color-status-success-bg);
+  }
+
+  to {
+    background-color: transparent;
+  }
+}
+
+.typeIcon {
+  display: grid;
+  place-items: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+}
+
+.thumb {
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.info {
+  display: grid;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.name {
+  overflow: hidden;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.meta,
+.statusRow,
+.progress {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1_5);
+  align-items: center;
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--color-text-tertiary);
+}
+
+.size {
+  font-variant-numeric: tabular-nums;
+}
+
+.size::after {
+  content: '·';
+  margin-inline-start: var(--space-1_5);
+}
+
+.status {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ring {
+  inline-size: 16px;
+  block-size: 16px;
+  transform: rotate(-90deg);
+}
+
+.ringTrack,
+.ringFill {
+  fill: none;
+  stroke-width: 2.5;
+}
+
+.ringTrack {
+  stroke: var(--color-status-neutral-bg);
+}
+
+.ringFill {
+  stroke: var(--color-status-brand-solid);
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--_progress, 0));
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--motion-duration-transition-sm) var(--motion-ease-standard);
+}
+
+.ai {
+  display: inline-flex;
+  color: var(--color-status-ai-fg);
+}
+
+.done {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  color: var(--color-status-success-fg);
+}
+
+.chip {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-block-size: 20px;
+  padding: var(--space-0) var(--space-1_5);
+  border: var(--border-width-hairline) solid var(--color-status-ai-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-status-ai-bg);
+  color: var(--color-status-ai-fg);
+}
+
+.error {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  color: var(--color-status-danger-fg);
+}
+
+.actions {
+  display: inline-flex;
+  gap: var(--space-0_5);
+  align-items: center;
+}
+
+@media (forced-colors: active) {
+  .zone::before {
+    border-color: CanvasText;
+  }
+
+  .zone[data-drop-target]::before {
+    border-color: Highlight;
+  }
+
+  .ringFill {
+    stroke: Highlight;
+  }
+
+  .error,
+  .done {
+    color: CanvasText;
+  }
+}

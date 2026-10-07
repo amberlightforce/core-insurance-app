@@ -1,0 +1,33 @@
+/* Search field (Part 2 §4.2): leading search icon, clear button while there is text. */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-label-gap);
+  min-inline-size: 0;
+}
+
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-decoration {
+  appearance: none;
+}
+
+.root[data-empty] .clear {
+  display: none;
+}
+
+.shortcut {
+  display: inline-flex;
+  flex: none;
+}
+
+.root:not([data-empty]) .shortcut,
+.control:focus-within .shortcut {
+  display: none;
+}
+
+.root[data-disabled] .control {
+  --_border: var(--color-border-subtle);
+  --_fill: var(--color-interactive-disabled-bg);
+
+  color: var(--color-text-disabled);
+}

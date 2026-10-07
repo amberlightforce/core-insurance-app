@@ -1,0 +1,585 @@
+/*
+ * Staff app shell (Part 1 §3.4–3.5, v3 mockup `.app`). Breakpoints are the bp.* tokens (D-FE-07):
+ * bp.sm 600, bp.md 905, bp.lg 1240, bp.xl 1440. Media queries cannot read custom properties, so the numbers
+ * are repeated here with their token names.
+ */
+.shell {
+  --_rail: var(--size-rail);
+  --_inset: var(--space-2);
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template:
+    'ribbon ribbon' auto
+    'rail top' var(--size-topbar)
+    'rail body' minmax(0, 1fr)
+    'rail status' var(--size-statusbar)
+    / var(--_rail) minmax(0, 1fr);
+  block-size: 100vh;
+  block-size: 100dvh;
+  overflow: hidden;
+  background-color: var(--color-surface-canvas);
+}
+
+:global([data-density='comfortable']) .shell {
+  --_inset: var(--space-3);
+}
+
+/* Ambient canvas: the static gradient blooms; chrome refracts only this (C-01). */
+.ambient {
+  position: absolute;
+  inset: 0;
+  z-index: calc(var(--z-raised) * -1);
+  background: var(--gradient-ambient);
+  pointer-events: none;
+}
+
+.skipLink {
+  position: fixed;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: var(--z-skip-link);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sheet);
+  box-shadow: var(--elevation-3);
+  color: var(--color-text-link);
+  font: var(--type-label-lg);
+  transform: translateY(calc(-100% - var(--space-4)));
+}
+
+.skipLink:focus {
+  transform: none;
+}
+
+/* Environment ribbon: solid, never glass. */
+.envRibbon {
+  grid-area: ribbon;
+  z-index: var(--z-env-ribbon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--size-env-ribbon);
+  padding: var(--space-0) var(--space-4);
+  background-color: var(--color-env-ribbon-uat-bg);
+  color: var(--color-env-ribbon-fg);
+  font: var(--type-overline);
+  letter-spacing: var(--type-overline-tracking);
+  text-align: center;
+}
+
+.envRibbon[data-kind='dev'] {
+  background-color: var(--color-env-ribbon-dev-bg);
+}
+
+/* Rail. */
+.rail {
+  grid-area: rail;
+  z-index: var(--z-shell-rail);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-1);
+  inline-size: var(--_rail);
+  padding: var(--space-2) var(--space-2);
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  inline-size: 32px;
+  block-size: 32px;
+  margin: var(--space-0) auto var(--space-2);
+  border: var(--border-width-control) solid transparent;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(var(--color-surface-sheet), var(--color-surface-sheet)) padding-box,
+    var(--gradient-cta) border-box;
+  color: var(--color-text-primary);
+  font: var(--type-heading-4);
+}
+
+.railList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.railItem {
+  display: flex;
+}
+
+.railGrow {
+  flex: 1;
+}
+
+.railLink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  inline-size: 100%;
+  min-block-size: 40px;
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: var(--type-label-lg);
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.railLink[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.railLink[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* Selected: brand tile + 3 px left indicator (v3 mockup; M6 kept until design confirms). */
+.railLink[aria-current='page'] {
+  background-color: var(--color-status-brand-bg);
+  color: var(--color-status-brand-fg);
+}
+
+.railLink[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  inset-block: calc(var(--space-2) + var(--space-0_5));
+  inset-inline-start: calc(var(--space-2) * -1);
+  inline-size: var(--border-width-accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background-color: var(--color-state-row-selected-indicator);
+}
+
+.railLabel {
+  display: none;
+  flex: 1;
+  text-align: start;
+}
+
+.rail[data-expanded] {
+  inline-size: var(--size-rail-expanded);
+}
+
+.rail[data-expanded] .railLink {
+  justify-content: flex-start;
+  padding: var(--space-0) var(--space-3);
+}
+
+.rail[data-expanded] .railLabel {
+  display: block;
+}
+
+.railMore {
+  display: none;
+}
+
+.railToggle {
+  display: flex;
+  justify-content: center;
+}
+
+.rail[data-expanded] .railToggle {
+  justify-content: flex-end;
+}
+
+/* ≥ bp.xl the expanded rail pushes the content; below it overlays. */
+@media (width >= 1440px) {
+  .shell[data-rail-expanded] {
+    --_rail: var(--size-rail-expanded);
+  }
+}
+
+@media (width < 1440px) {
+  .rail[data-expanded] {
+    box-shadow: var(--elevation-4);
+  }
+}
+
+/* Top bar. */
+.topBar {
+  grid-area: top;
+  z-index: var(--z-shell-topbar);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-inline-size: 0;
+  padding: var(--space-0) var(--space-3) var(--space-0) var(--space-4);
+}
+
+.crumbs {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: var(--space-3);
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.entity {
+  padding: var(--space-0_5) var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font: var(--type-caption);
+}
+
+.paletteTrigger {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--space-2);
+  inline-size: min(440px, 40vw);
+  min-inline-size: 280px;
+  block-size: 30px;
+  padding: var(--space-0) calc(var(--space-2) + var(--space-0_5));
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.paletteTrigger[data-hovered] {
+  border-color: var(--color-border-control);
+}
+
+.paletteTrigger[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.paletteText {
+  flex: 1;
+  overflow: hidden;
+  font: var(--type-body-compact);
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paletteKbd {
+  display: inline-flex;
+}
+
+.topActions {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.language {
+  display: inline-flex;
+  padding: var(--space-0_5);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sunken);
+}
+
+.languageOption {
+  min-inline-size: 32px;
+  block-size: calc(var(--size-control-sm) - var(--space-1));
+  padding: var(--space-0) var(--space-1_5);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  cursor: pointer;
+  outline: none;
+}
+
+.languageOption[data-hovered] {
+  color: var(--color-text-primary);
+}
+
+.languageOption[data-selected] {
+  background-color: var(--color-surface-sheet);
+  box-shadow: var(--elevation-1);
+  color: var(--color-text-primary);
+}
+
+.languageOption[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--space-px);
+}
+
+/* Body: work views | main sheet | context panel. */
+.body {
+  grid-area: body;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-block-size: 0;
+}
+
+.body.withWorkViews {
+  grid-template-columns: var(--size-work-views) minmax(0, 1fr);
+}
+
+.body.withContext {
+  grid-template-columns: minmax(0, 1fr) var(--size-context-panel);
+}
+
+.body.withWorkViews.withContext {
+  grid-template-columns: var(--size-work-views) minmax(0, 1fr) var(--size-context-panel);
+}
+
+.workViews {
+  min-block-size: 0;
+  padding: var(--_inset) var(--space-0) var(--_inset) var(--_inset);
+  overflow: auto;
+}
+
+/* The only content scroll container; opaque sheet (C-01). */
+.mainSheet {
+  min-block-size: 0;
+  margin: var(--_inset);
+  padding: var(--space-6);
+  overflow: auto;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-border-subtle);
+  scroll-padding-block: var(--space-12);
+  outline: none;
+}
+
+.mainSheet:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.contextPanel {
+  min-block-size: 0;
+  margin: var(--_inset) var(--_inset) var(--_inset) var(--space-0);
+  overflow: auto;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+}
+
+/* Status bar. */
+.statusBar {
+  grid-area: status;
+  z-index: var(--z-shell-statusbar);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-inline-size: 0;
+  padding: var(--space-0) var(--space-4);
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  white-space: nowrap;
+}
+
+.statusItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.statusItem[data-tone='success'] svg {
+  color: var(--color-status-success-solid);
+}
+
+.statusItem[data-tone='warning'] {
+  color: var(--color-status-warning-fg);
+}
+
+.statusItem[data-tone='ai'] svg {
+  color: var(--color-status-ai-solid);
+}
+
+.statusSpacer {
+  flex: 1;
+}
+
+/* Overflow menu used by the bottom tab bar. */
+.menuPopover {
+  z-index: var(--z-dropdown);
+  min-inline-size: 200px;
+  padding: var(--space-1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-3);
+}
+
+.menu {
+  outline: none;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--size-row-list);
+  padding: var(--space-0) var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  outline: none;
+}
+
+.menuItem[data-focused] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+/* bp.lg–bp.xl: context panel becomes an overlay sheet (closed by default). */
+@media (width < 1440px) {
+  .body.withContext,
+  .body.withWorkViews.withContext {
+    grid-template-columns: var(--size-work-views) minmax(0, 1fr);
+  }
+
+  .body.withContext:not(.withWorkViews) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contextPanel {
+    position: absolute;
+    inset-block: var(--size-topbar) var(--size-statusbar);
+    inset-inline-end: 0;
+    z-index: var(--z-panel-context);
+    inline-size: var(--size-context-panel);
+    box-shadow: var(--elevation-4);
+  }
+}
+
+/* < bp.lg: work views collapse into the page (dropdown), expanded rail overlays. */
+@media (width < 1240px) {
+  .body.withWorkViews,
+  .body.withWorkViews.withContext {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workViews {
+    display: none;
+  }
+
+  .rail[data-expanded] {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+  }
+}
+
+/* < bp.md: bottom tab bar with ≤ 5 destinations + «Περισσότερα»; status bar hidden; search icon only. */
+@media (width < 905px) {
+  .shell {
+    grid-template:
+      'ribbon' auto
+      'top' var(--size-topbar)
+      'body' minmax(0, 1fr)
+      'rail' 56px
+      / minmax(0, 1fr);
+  }
+
+  .rail,
+  .rail[data-expanded] {
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    inline-size: auto;
+    padding: var(--space-0) var(--space-2);
+    box-shadow: none;
+  }
+
+  .railList {
+    flex: 1;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .logo,
+  .railGrow,
+  .railToggle,
+  .railOverflowItem {
+    display: none;
+  }
+
+  .railMore {
+    display: flex;
+  }
+
+  .railItem,
+  .railMore {
+    flex: 1;
+  }
+
+  .rail .railLabel {
+    display: none;
+  }
+
+  .railLink[aria-current='page']::after {
+    inset-block: auto calc(var(--space-1_5) * -1);
+    inset-inline: calc(var(--space-2) + var(--space-0_5));
+    inline-size: auto;
+    block-size: var(--border-width-accent);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  }
+
+  .statusBar {
+    display: none;
+  }
+
+  .paletteTrigger {
+    inline-size: auto;
+    min-inline-size: 0;
+  }
+
+  .paletteText,
+  .paletteKbd,
+  .crumbs {
+    display: none;
+  }
+
+  .mainSheet {
+    margin: var(--space-0);
+    padding: var(--space-4);
+    border-radius: var(--radius-none);
+  }
+}
+
+@media print {
+  .shell {
+    display: block;
+    block-size: auto;
+    overflow: visible;
+  }
+
+  .mainSheet {
+    margin: var(--space-0);
+    overflow: visible;
+    box-shadow: none;
+  }
+
+  .ambient,
+  .skipLink {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .railLink[aria-current='page'] {
+    outline: var(--border-width-thick) solid Highlight;
+  }
+
+  .envRibbon {
+    border-block-end: var(--border-width-hairline) solid CanvasText;
+  }
+}

@@ -1,0 +1,184 @@
+/*
+ * Switch (Part 2 §4.10). Track 32×18 (44×24 touch), thumb 14 (20). MI-06 throw: the thumb translates with
+ * the track colour tween and widens 14 → 18 px toward the travel direction while pressed.
+ */
+.switch {
+  --_track-w: 32px;
+  --_track-h: 18px;
+  --_thumb: 14px;
+  --_track: var(--color-switch-track-off);
+
+  position: relative;
+  display: inline-flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-block-size: var(--size-control-sm);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:global([data-density='comfortable']) .switch {
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+@media (pointer: coarse) {
+  .switch {
+    --_track-w: 44px;
+    --_track-h: 24px;
+    --_thumb: 20px;
+  }
+}
+
+.field {
+  display: inline-flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.label {
+  overflow-wrap: anywhere;
+}
+
+.description {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+.track {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  inline-size: var(--_track-w);
+  block-size: var(--_track-h);
+  padding: var(--space-0_5);
+  border-radius: var(--radius-full);
+  background-color: var(--_track);
+
+  /* 1 px inset border.control on the off track to reach 3:1. */
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-border-control);
+  transition: background-color var(--motion-duration-feedback-lg) var(--motion-ease-standard);
+}
+
+.thumb {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--_thumb);
+  block-size: var(--_thumb);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-sheet);
+  box-shadow: var(--shadow-switch-thumb);
+  color: var(--color-interactive-accent-bg);
+  transform-origin: left center;
+  transition: transform var(--motion-duration-feedback-lg) var(--motion-ease-overshoot-fallback);
+}
+
+.switch[data-selected] {
+  --_track: var(--color-interactive-accent-bg);
+}
+
+.switch[data-selected] .track {
+  box-shadow: none;
+}
+
+.switch[data-selected] .thumb {
+  transform: translateX(calc(var(--_track-w) - var(--_thumb) - var(--space-0_5) * 2));
+  transform-origin: right center;
+}
+
+/* Hover: one step darker; on → accent.bg-hover (D-FE-06). */
+.switch[data-hovered] {
+  --_track: var(--color-switch-track-off-hover);
+}
+
+.switch[data-hovered][data-selected] {
+  --_track: var(--color-interactive-accent-bg-hover);
+}
+
+/* Squash: 14 → 18 px toward the travel direction. */
+.switch[data-pressed] .thumb {
+  transform: scaleX(calc(18 / 14));
+}
+
+.switch[data-pressed][data-selected] .thumb {
+  transform: translateX(calc(var(--_track-w) - var(--_thumb) - var(--space-0_5) * 2))
+    scaleX(calc(18 / 14));
+}
+
+.switch[data-focus-visible] .track {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Disabled: 40 % opacity (+ reason when soft-disabled, still focusable). */
+.switch[data-disabled],
+.switch[data-soft-disabled] {
+  cursor: not-allowed;
+}
+
+.switch[data-disabled] .track,
+.switch[data-soft-disabled] .track {
+  opacity: 0.4;
+}
+
+.switch[data-disabled] .label,
+.switch[data-soft-disabled] .label {
+  color: var(--color-text-disabled);
+}
+
+.switch[data-pending] {
+  cursor: progress;
+}
+
+.stateText {
+  min-inline-size: 6ch;
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+}
+
+.readOnly {
+  display: inline-flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-block-size: var(--size-control-sm);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.readOnlyState {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  color: var(--color-text-secondary);
+}
+
+@media (forced-colors: active) {
+  .track {
+    border: var(--border-width-hairline) solid CanvasText;
+    background-color: Canvas;
+  }
+
+  .switch[data-selected] .track {
+    background-color: Highlight;
+  }
+
+  .thumb {
+    background-color: CanvasText;
+  }
+
+  .switch[data-selected] .thumb {
+    background-color: HighlightText;
+  }
+
+  .switch[data-disabled] .track,
+  .switch[data-soft-disabled] .track {
+    border-color: GrayText;
+  }
+}

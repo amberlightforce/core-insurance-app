@@ -1,0 +1,75 @@
+{
+  "fieldChrome": {
+    "required": "υποχρεωτικό"
+  },
+  "combobox": {
+    "count": "{count, plural, one {# αποτέλεσμα} other {# αποτελέσματα}}",
+    "empty": "Δεν βρέθηκαν αποτελέσματα για «{query}»",
+    "noOptions": "Δεν υπάρχουν επιλογές",
+    "create": "Δημιουργία νέου…",
+    "error": "Η αναζήτηση απέτυχε. Δοκιμάστε ξανά.",
+    "retry": "Επανάληψη",
+    "loading": "Φόρτωση…",
+    "tooShort": "{count, plural, one {Πληκτρολογήστε τουλάχιστον # χαρακτήρα} other {Πληκτρολογήστε τουλάχιστον # χαρακτήρες}}",
+    "noSelection": "Δεν επιλέχθηκε τιμή",
+    "clear": "Καθαρισμός"
+  },
+  "multiCombobox": {
+    "selected": "Επιλεγμένα: {label}",
+    "remove": "Αφαίρεση",
+    "removed": "Αφαιρέθηκε: {label}",
+    "added": "Προστέθηκε: {label}",
+    "more": "+{count}",
+    "showAll": "{count, plural, one {Εμφάνιση # ακόμη επιλογής} other {Εμφάνιση # ακόμη επιλογών}}"
+  },
+  "authorityMeter": {
+    "valueText": "{value} από {limit} όριο",
+    "valueTextOver": "{value} από {limit} όριο, πάνω από το όριο",
+    "overLimit": "Πάνω από το όριο"
+  },
+  "currencyField": {
+    "unit": "ευρώ",
+    "tooManyDecimals": "{count, plural, one {Το ποσό δέχεται έως # δεκαδικό. Διορθώστε το ποσό.} other {Το ποσό δέχεται έως # δεκαδικά. Διορθώστε το ποσό.}}",
+    "invalid": "Μη έγκυρο ποσό. Πληκτρολογήστε το ποσό όπως στο παράδειγμα {example}.",
+    "negativeNotAllowed": "Το ποσό δεν μπορεί να είναι αρνητικό. Αφαιρέστε το πρόσημο μείον.",
+    "interpreted": "Ερμηνεύτηκε ως {amount}",
+    "overAuthority": "Πάνω από το όριο εξουσιοδότησής σας ({limit}) · θα σταλεί για έγκριση"
+  },
+  "percentField": {
+    "unit": "τοις εκατό",
+    "unitPerMille": "τοις χιλίοις",
+    "increase": "Αύξηση",
+    "decrease": "Μείωση",
+    "delta": "{percent} = {amount}",
+    "authority": "Όριο σας ±{limit}",
+    "overAuthority": "Πάνω από το όριο εξουσιοδότησής σας · θα σταλεί για έγκριση"
+  },
+  "dateField": {
+    "quickEntry": "Γρήγορη εισαγωγή ημερομηνίας",
+    "preview": "→ {date}",
+    "notRecognised": "Δεν αναγνωρίστηκε ημερομηνία. Δοκιμάστε π.χ. 7/10, σ ή +30.",
+    "hint": "π.χ. σ, α, +30, +6μ, τμ, 7/10"
+  },
+  "datePicker": {
+    "chooseMonthYear": "{title}, επιλογή μήνα και έτους",
+    "quickPicks": "Γρήγορες επιλογές",
+    "quickToday": "Σήμερα",
+    "quickTomorrow": "Αύριο",
+    "quickFirstOfNextMonth": "1η επόμενου μήνα",
+    "beforeMin": "Η ημερομηνία είναι πριν από τις {date}. Επιλέξτε {date} ή μεταγενέστερη ημερομηνία.",
+    "afterMax": "Η ημερομηνία είναι μετά τις {date}. Επιλέξτε {date} ή προγενέστερη ημερομηνία.",
+    "unavailable": "Η ημερομηνία δεν είναι διαθέσιμη. Επιλέξτε άλλη ημερομηνία.",
+    "formatHint": "ηη/μμ/εεεε",
+    "dateTime": "{date}, {time}",
+    "empty": "—"
+  },
+  "dateRangePicker": {
+    "quickLast7Days": "Τελευταίες 7 ημέρες",
+    "quickCurrentMonth": "Τρέχων μήνας",
+    "quickPreviousQuarter": "Προηγούμενο τρίμηνο",
+    "quickYearToDate": "Από αρχή έτους",
+    "endBeforeStart": "Η ημερομηνία λήξης είναι πριν από την ημερομηνία έναρξης. Διορθώστε μία από τις δύο.",
+    "formatHint": "ηη/μμ/εεεε – ηη/μμ/εεεε",
+    "range": "{start} έως {end}"
+  }
+}

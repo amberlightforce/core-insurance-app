@@ -1,0 +1,219 @@
+/*
+ * Menu (Part 2 §4.17): `material.popover`, groups divided by 1 px `border.subtle` with 4 px margin,
+ * items at `size.row.list`, highlight pill (MI-19), MI-28 open.
+ */
+.popover {
+  z-index: var(--z-dropdown);
+  min-inline-size: max(200px, var(--trigger-width, 0px));
+  max-inline-size: min(360px, calc(100vw - var(--space-8)));
+  border-radius: var(--radius-lg);
+  outline: none;
+  transform-origin: var(--trigger-anchor-point, top left);
+}
+
+.popover[data-material] {
+  box-shadow:
+    inset 0 0 0 var(--border-width-hairline) var(--_glass-rim),
+    0 0 0 var(--border-width-hairline) var(--_glass-hairline),
+    var(--elevation-3);
+}
+
+.popover[data-entering] {
+  animation: pop-in var(--motion-duration-transition-sm) var(--motion-ease-enter);
+}
+
+.popover[data-exiting] {
+  animation: pop-out var(--motion-duration-feedback-lg) var(--motion-ease-exit) forwards;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1)) scale(0.96);
+  }
+}
+
+@keyframes pop-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.menu {
+  display: grid;
+  max-block-size: min(480px, 70vh);
+  overflow-y: auto;
+  padding: var(--space-1);
+  outline: none;
+}
+
+.section {
+  display: grid;
+}
+
+.section + .section,
+.separator + .section {
+  margin-block-start: var(--space-1);
+  padding-block-start: var(--space-1);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.separator {
+  block-size: var(--border-width-hairline);
+  margin: var(--space-1) var(--space-0);
+  border: none;
+  background-color: var(--color-border-subtle);
+}
+
+.header {
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text-secondary);
+  font: var(--type-overline);
+  letter-spacing: var(--type-overline-tracking);
+}
+
+.item {
+  --_fg: var(--color-text-primary);
+
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-block-size: var(--size-row-list);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--_fg);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--motion-duration-feedback-sm) var(--motion-ease-standard);
+}
+
+/* Highlight pill: the pill is the focus indicator (Part 2 §4.17). */
+.item[data-focused],
+.item[data-open] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+}
+
+.item[data-pressed] {
+  background-color: var(--color-interactive-ghost-bg-pressed);
+}
+
+.item[data-destructive] {
+  --_fg: var(--color-status-danger-fg);
+}
+
+.item[data-disabled],
+.item[data-soft-disabled] {
+  --_fg: var(--color-text-disabled);
+
+  cursor: not-allowed;
+}
+
+.leading {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.leading:empty {
+  display: none;
+}
+
+.menu[data-selection-mode] .leading:empty {
+  display: inline-grid;
+}
+
+.text {
+  display: grid;
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.label {
+  overflow-wrap: anywhere;
+}
+
+.description {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+.item[data-soft-disabled] .description {
+  color: var(--color-text-disabled);
+}
+
+.chevron {
+  display: inline-flex;
+  flex: none;
+  color: var(--color-text-secondary);
+}
+
+.marker {
+  display: none;
+}
+
+.tooltip {
+  z-index: var(--z-tooltip);
+  max-inline-size: 280px;
+  padding: var(--space-1_5) var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  pointer-events: none;
+}
+
+/* Split button: two focus stops joined by a `border.strong` divider (D-FE-06). */
+.split {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.split > :first-child {
+  border-start-end-radius: var(--radius-none);
+  border-end-end-radius: var(--radius-none);
+}
+
+.split > :last-child {
+  border-inline-start: var(--border-width-hairline) solid var(--color-border-strong);
+  border-start-start-radius: var(--radius-none);
+  border-end-start-radius: var(--radius-none);
+}
+
+/* Context menu target and the zero-size pointer anchor. */
+.contextTarget {
+  position: relative;
+}
+
+.point {
+  position: fixed;
+  inline-size: 0;
+  block-size: 0;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  .item[data-focused] {
+    background: Highlight;
+    color: HighlightText;
+    box-shadow: inset var(--border-width-thick) 0 0 0 HighlightText;
+  }
+
+  .item[data-destructive] {
+    color: CanvasText;
+  }
+
+  .item[data-disabled],
+  .item[data-soft-disabled] {
+    color: GrayText;
+  }
+
+  .tooltip {
+    border: var(--border-width-hairline) solid CanvasText;
+  }
+}

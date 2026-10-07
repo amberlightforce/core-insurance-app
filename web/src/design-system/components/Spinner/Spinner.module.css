@@ -1,0 +1,19 @@
+.spinner {
+  flex: none;
+  animation: spin var(--motion-duration-spinner) var(--motion-ease-linear) infinite;
+}
+
+.track {
+  stroke: currentcolor;
+  opacity: 0.2;
+}
+
+.arc {
+  stroke: currentcolor;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

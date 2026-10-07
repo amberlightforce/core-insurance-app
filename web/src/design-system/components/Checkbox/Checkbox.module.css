@@ -1,0 +1,234 @@
+/*
+ * Checkbox (Part 2 §4.8). MI-04 tick: fill scales 0.8 → 1 (70 ms), the check draws with
+ * stroke-dashoffset 14 → 0 (120 ms from 30 ms). Active: box scale 0.92.
+ */
+.field {
+  --_size: var(--size-icon-md);
+
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+@media (pointer: coarse) {
+  .field {
+    --_size: var(--size-icon-lg);
+  }
+}
+
+.checkbox {
+  --_border: var(--color-border-control);
+  --_fill: var(--color-interactive-accent-bg);
+  --_glyph: var(--color-text-on-accent);
+
+  position: relative;
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  align-self: flex-start;
+  min-block-size: var(--size-control-sm);
+  padding-block: var(--space-1);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:global([data-density='comfortable']) .checkbox {
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.box {
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--_size);
+  block-size: var(--_size);
+  margin-block-start: calc((1lh - var(--_size)) / 2);
+  border: var(--border-width-hairline) solid var(--_border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-sheet);
+  transition:
+    border-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    transform var(--motion-duration-feedback-xs) var(--motion-ease-standard);
+}
+
+/* Fill layer: scales in when checked. */
+.box::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--border-width-hairline) * -1);
+  z-index: calc(var(--z-raised) * -1);
+  border-radius: inherit;
+  background-color: var(--_fill);
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity var(--motion-duration-feedback-xs) var(--motion-ease-enter),
+    transform var(--motion-duration-feedback-xs) var(--motion-ease-enter),
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.glyph {
+  inline-size: 100%;
+  block-size: 100%;
+  stroke: var(--_glyph);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tick {
+  stroke-dasharray: 14;
+  stroke-dashoffset: 14;
+  transition: stroke-dashoffset var(--motion-duration-feedback-md) var(--motion-ease-enter);
+}
+
+.checkbox[data-selected] .box,
+.checkbox[data-indeterminate] .box {
+  --_border: var(--_fill);
+}
+
+.checkbox[data-selected] .box::before,
+.checkbox[data-indeterminate] .box::before {
+  opacity: 1;
+  transform: none;
+}
+
+.checkbox[data-selected] .tick {
+  stroke-dashoffset: 0;
+  transition-delay: calc(var(--motion-duration-feedback-xs) * 3 / 7);
+}
+
+/* Hover: border hover; checked → accent.bg-hover (D-FE-06). */
+.checkbox[data-hovered] .box {
+  --_border: var(--color-border-control-hover);
+}
+
+.checkbox[data-hovered][data-selected],
+.checkbox[data-hovered][data-indeterminate] {
+  --_fill: var(--color-interactive-accent-bg-hover);
+}
+
+.checkbox[data-pressed] .box {
+  transform: scale(0.92);
+}
+
+.checkbox[data-focus-visible] .box {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Error: 2 px danger border (1 px border + 1 px inset). */
+.checkbox[data-invalid] .box {
+  --_border: var(--color-status-danger-solid);
+
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-status-danger-solid);
+}
+
+.checkbox[data-invalid][data-selected] .box {
+  box-shadow: none;
+}
+
+/* Disabled: subtle border + disabled fill; checked uses the disabled-checked fill and glyph. */
+.checkbox[data-disabled] {
+  --_fill: var(--color-control-disabled-checked);
+  --_glyph: var(--color-control-disabled-glyph);
+
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.checkbox[data-disabled] .box {
+  --_border: var(--color-border-subtle);
+
+  background-color: var(--color-interactive-disabled-bg);
+}
+
+.checkbox[data-disabled][data-selected] .box,
+.checkbox[data-disabled][data-indeterminate] .box {
+  --_border: var(--_fill);
+}
+
+/* Read-only: a check icon or «—» + label, no box. */
+.checkbox[data-readonly] {
+  cursor: default;
+}
+
+.readOnlyGlyph {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--_size);
+  color: var(--color-text-secondary);
+}
+
+.checkbox[data-readonly][data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+.label {
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin-block-start: calc(var(--space-1) * -1);
+  padding-inline-start: calc(var(--_size) + var(--space-2));
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+}
+
+.field[data-disabled] .description {
+  color: var(--color-text-disabled);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-label-gap);
+  min-inline-size: 0;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0_5);
+}
+
+.items[data-orientation='horizontal'] {
+  flex-flow: row wrap;
+  column-gap: var(--space-4);
+}
+
+@media (forced-colors: active) {
+  .box {
+    border-color: CanvasText;
+  }
+
+  .box::before {
+    background-color: Highlight;
+  }
+
+  .glyph {
+    stroke: HighlightText;
+  }
+
+  .checkbox[data-disabled] .box {
+    border-color: GrayText;
+  }
+
+  .checkbox[data-disabled] .box::before {
+    background-color: GrayText;
+  }
+
+  .checkbox[data-invalid] .box {
+    border-color: Mark;
+  }
+}

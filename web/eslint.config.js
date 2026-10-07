@@ -7,7 +7,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig([
-  globalIgnores(['dist', 'coverage', 'src/api/schema.d.ts']),
+  globalIgnores(['dist', 'coverage', 'storybook-static', 'src/api/schema.d.ts']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -27,7 +27,12 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.js'],
+    // Stories and the Storybook preview are not hot-reloaded app modules.
+    files: ['.storybook/**/*.{ts,tsx}', 'src/**/*.stories.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
+  {
+    files: ['**/*.{js,mjs}'],
     extends: [js.configs.recommended],
     languageOptions: { globals: globals.node },
   },

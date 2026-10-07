@@ -1,0 +1,134 @@
+/*
+ * Wizard (Part 1 §3.4): stepper left at ≥ bp.lg (220 px), on top below; body max 960 px (forms) or full;
+ * summary 320 px at ≥ bp.xl, a bottom bar below; opaque sticky footer 56 / 64 px.
+ */
+.wizard {
+  display: grid;
+  grid-template:
+    'stepper' auto
+    'main' 1fr
+    'summary' auto
+    'footer' auto
+    / minmax(0, 1fr);
+  gap: var(--space-stack-section) var(--space-6);
+  min-block-size: 100%;
+}
+
+.wizard[data-wide] {
+  grid-template:
+    'stepper main' 1fr
+    'stepper summary' auto
+    'footer footer' auto
+    / 220px minmax(0, 1fr);
+}
+
+@media (width >= 1440px) {
+  .wizard[data-wide][data-summary] {
+    grid-template:
+      'stepper main summary' 1fr
+      'footer footer footer' auto
+      / 220px minmax(0, 1fr) 320px;
+  }
+}
+
+.stepper {
+  grid-area: stepper;
+  min-inline-size: 0;
+}
+
+.main {
+  grid-area: main;
+  min-inline-size: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-field);
+  outline: none;
+  animation: step-in var(--motion-duration-transition-lg) var(--motion-ease-enter);
+}
+
+.body[data-width='form'] {
+  max-inline-size: 960px;
+}
+
+.body:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* MI-38: the step body slides 24 px and fades in; reduced motion zeroes the duration. */
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--space-6));
+  }
+}
+
+.summary {
+  grid-area: summary;
+  align-self: start;
+  padding: var(--space-inset-card);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+}
+
+@media (width >= 1440px) {
+  .wizard[data-wide] .summary {
+    position: sticky;
+    inset-block-start: var(--space-0);
+  }
+}
+
+/* Opaque, never glass. */
+.footer {
+  grid-area: footer;
+  position: sticky;
+  inset-block-end: 0;
+  z-index: var(--z-sticky-record-header);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-block-size: var(--size-wizard-footer);
+  padding: var(--space-2) var(--space-0);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+  background-color: var(--color-surface-sheet);
+}
+
+:global([data-density='comfortable']) .footer {
+  min-block-size: calc(var(--size-wizard-footer) + var(--space-2));
+}
+
+.footerStart,
+.footerEnd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.saved {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1_5);
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+/* MI-64 unsaved dot. */
+.dirtyDot {
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-warning-solid);
+}
+
+@media (forced-colors: active) {
+  .dirtyDot {
+    background-color: CanvasText;
+  }
+}

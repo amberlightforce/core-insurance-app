@@ -1,0 +1,264 @@
+{
+  "statusPill": {
+    "announce": "Κατάσταση: {label}",
+    "countdownShort": "{count} ημ.",
+    "countdownLong": "{count, plural, one {# ημέρα} other {# ημέρες}}",
+    "semantic": {
+      "readOnly": "Μόνο ανάγνωση",
+      "disabled": "Μη διαθέσιμο",
+      "required": "Υποχρεωτικό",
+      "error": "Σφάλμα",
+      "warning": "Προειδοποίηση",
+      "info": "Πληροφορία",
+      "success": "Επιτυχία",
+      "pendingApproval": "Αναμένει έγκριση",
+      "locked": "Κλειδωμένο",
+      "conflict": "Σύγκρουση εκδόσεων",
+      "stale": "Υπάρχουν νεότερα δεδομένα",
+      "offline": "Εκτός σύνδεσης",
+      "degraded": "Περιορισμένη λειτουργία",
+      "aiSuggested": "Πρόταση ΤΝ",
+      "aiGenerated": "Δημιουργήθηκε με ΤΝ",
+      "overdue": "Εκπρόθεσμο",
+      "breached": "Παραβίαση προθεσμίας"
+    },
+    "job": {
+      "draft": "Πρόχειρο",
+      "quoted": "Προσφορά",
+      "bound": "Συνάφθηκε",
+      "withdrawn": "Αποσύρθηκε",
+      "declined": "Απορρίφθηκε",
+      "notTaken": "Δεν έγινε αποδεκτή",
+      "expired": "Έληξε",
+      "scheduled": "Προγραμματισμένη",
+      "rescinded": "Ανακλήθηκε",
+      "referred": "Σε παραπομπή",
+      "preempted": "Απαιτεί επανευθυγράμμιση"
+    },
+    "policyTerm": {
+      "scheduled": "Σε αναμονή έναρξης",
+      "inForce": "Σε ισχύ",
+      "pendingCancellation": "Σε εκκρεμή ακύρωση",
+      "cancelled": "Ακυρώθηκε",
+      "expired": "Έληξε",
+      "nonRenewed": "Μη ανανέωση",
+      "lapsed": "Έληξε λόγω μη πληρωμής"
+    },
+    "uwIssue": {
+      "open": "Ανοιχτό",
+      "approved": "Εγκρίθηκε",
+      "approvedWithConditions": "Εγκρίθηκε με όρους",
+      "rejected": "Απορρίφθηκε",
+      "invalidated": "Ακυρώθηκε η έγκριση",
+      "closed": "Κλειστό"
+    },
+    "claim": {
+      "draft": "Πρόχειρο",
+      "open": "Ανοιχτή",
+      "closed": "Κλειστή",
+      "reopened": "Επανανοίχτηκε"
+    },
+    "transactionSet": {
+      "draft": "Πρόχειρο",
+      "submitted": "Υποβλήθηκε",
+      "pendingApproval": "Αναμένει έγκριση",
+      "approved": "Εγκρίθηκε",
+      "rejected": "Απορρίφθηκε",
+      "posted": "Καταχωρίστηκε"
+    },
+    "invoice": {
+      "planned": "Προγραμματισμένο",
+      "billed": "Εκδόθηκε",
+      "due": "Πληρωτέο",
+      "partiallyPaid": "Μερικώς εξοφλημένο",
+      "paid": "Εξοφλήθηκε",
+      "overdue": "Ληξιπρόθεσμο",
+      "writtenOff": "Διαγράφηκε",
+      "reversed": "Αντιλογίστηκε"
+    },
+    "paymentIn": {
+      "received": "Εισπράχθηκε",
+      "allocated": "Αντιστοιχίστηκε",
+      "partiallyAllocated": "Μερικώς αντιστοιχισμένη",
+      "suspense": "Σε αναμονή αντιστοίχισης",
+      "reversed": "Αντιλογίστηκε",
+      "refunded": "Επιστράφηκε"
+    },
+    "disbursement": {
+      "requested": "Ζητήθηκε",
+      "pendingApproval": "Αναμένει έγκριση",
+      "approved": "Εγκρίθηκε",
+      "released": "Αποδεσμεύτηκε",
+      "issued": "Εστάλη στην τράπεζα",
+      "cleared": "Εκκαθαρίστηκε",
+      "rejected": "Απορρίφθηκε",
+      "stopped": "Διακόπηκε",
+      "voided": "Ακυρώθηκε",
+      "returned": "Επιστράφηκε από τράπεζα"
+    },
+    "activity": {
+      "open": "Ανοιχτή",
+      "completed": "Ολοκληρώθηκε",
+      "skipped": "Παραλείφθηκε",
+      "cancelled": "Ακυρώθηκε"
+    },
+    "outboundDocument": {
+      "requested": "Ζητήθηκε",
+      "rendering": "Δημιουργείται",
+      "rendered": "Δημιουργήθηκε",
+      "failed": "Απέτυχε",
+      "superseded": "Αντικαταστάθηκε"
+    },
+    "delivery": {
+      "pending": "Σε αναμονή",
+      "sent": "Εστάλη",
+      "delivered": "Παραδόθηκε",
+      "failed": "Απέτυχε",
+      "bounced": "Επεστράφη"
+    },
+    "fiscalDocument": {
+      "pending": "Σε αναμονή",
+      "submitted": "Υποβλήθηκε",
+      "registered": "Καταχωρίστηκε (ΜΑΡΚ)",
+      "rejected": "Απορρίφθηκε",
+      "cancelled": "Ακυρώθηκε"
+    },
+    "clockInstance": {
+      "running": "Σε εξέλιξη",
+      "paused": "Σε παύση",
+      "warned": "Πλησιάζει η λήξη",
+      "met": "Τηρήθηκε",
+      "breached": "Παραβίαση προθεσμίας",
+      "cancelled": "Ακυρώθηκε"
+    },
+    "complaint": {
+      "received": "Παραλήφθηκε",
+      "acknowledged": "Επιβεβαιώθηκε",
+      "underInvestigation": "Υπό διερεύνηση",
+      "answered": "Απαντήθηκε",
+      "escalated": "Κλιμακώθηκε (ΕΔΕ)",
+      "closed": "Κλειστή"
+    },
+    "cession": {
+      "calculated": "Υπολογίστηκε",
+      "exception": "Εξαίρεση",
+      "posted": "Καταχωρίστηκε",
+      "reversed": "Αντιλογίστηκε"
+    },
+    "productVersion": {
+      "draft": "Πρόχειρο",
+      "submitted": "Υποβλήθηκε",
+      "approved": "Εγκρίθηκε",
+      "locked": "Δημοσιευμένη (κλειδωμένη)",
+      "retired": "Αποσύρθηκε"
+    },
+    "aiRecommendation": {
+      "proposed": "Προτάθηκε",
+      "accepted": "Έγινε αποδεκτή",
+      "edited": "Τροποποιήθηκε",
+      "rejected": "Απορρίφθηκε",
+      "expired": "Έληξε"
+    },
+    "screeningResult": {
+      "clear": "Καθαρό",
+      "potentialHit": "Πιθανή αντιστοίχιση",
+      "falsePositive": "Ψευδώς θετικό",
+      "trueMatch": "Επιβεβαιωμένη αντιστοίχιση"
+    }
+  },
+  "badge": {
+    "overflow": "{max}+",
+    "overflowLong": "Περισσότερα από {max}"
+  },
+  "tags": {
+    "groupLabel": "Ενεργά φίλτρα",
+    "label": "{field}: {values}",
+    "remove": "Αφαίρεση φίλτρου",
+    "locked": "Φίλτρο δικαιωμάτων, δεν αφαιρείται",
+    "invalid": "Το πεδίο δεν υπάρχει πλέον",
+    "editHint": "Enter για επεξεργασία, Delete για αφαίρεση"
+  },
+  "tabs": {
+    "more": "Περισσότερα",
+    "moreWithSelection": "Περισσότερες καρτέλες",
+    "errorSuffix": ", {count, plural, one {# σφάλμα} other {# σφάλματα}}",
+    "countSuffix": ", {count}"
+  },
+  "breadcrumbs": {
+    "label": "Διαδρομή πλοήγησης",
+    "collapsed": "{count, plural, one {# ακόμη επίπεδο} other {# ακόμη επίπεδα}}"
+  },
+  "pagination": {
+    "label": "Σελιδοποίηση",
+    "range": "{start}–{end} από {total}",
+    "pageSize": "Εγγραφές ανά σελίδα",
+    "previous": "Προηγούμενη σελίδα",
+    "next": "Επόμενη σελίδα",
+    "page": "Σελίδα {page}",
+    "pages": "Σελίδες"
+  },
+  "stepper": {
+    "label": "Βήματα",
+    "stepName": "Βήμα {index}, {label}, {state}",
+    "counter": "{current} / {total}",
+    "counterLong": "Βήμα {current} από {total}",
+    "notReachable": "Ολοκληρώστε πρώτα τα προηγούμενα βήματα",
+    "state": {
+      "upcoming": "επόμενο",
+      "current": "τρέχον",
+      "complete": "ολοκληρωμένο",
+      "error": "με σφάλματα",
+      "warning": "με προειδοποιήσεις",
+      "locked": "κλειδωμένο",
+      "loading": "φορτώνει"
+    }
+  },
+  "dataTable": {
+    "empty": "Δεν υπάρχουν εγγραφές",
+    "emptyValue": "κενό",
+    "yes": "Ναι",
+    "isNew": "Νέο",
+    "filteredEmpty": "Κανένα αποτέλεσμα με αυτά τα φίλτρα",
+    "clearFilters": "Εκκαθάριση φίλτρων",
+    "loading": "Φόρτωση…",
+    "refreshing": "Ανανέωση δεδομένων…",
+    "error": "Δεν ήταν δυνατή η φόρτωση των εγγραφών.",
+    "retry": "Επανάληψη",
+    "permissionLimited": "Ορισμένες στήλες δεν εμφανίζονται λόγω δικαιωμάτων",
+    "stale": "{count, plural, one {{formatted} εγγραφή άλλαξε} other {{formatted} εγγραφές άλλαξαν}}",
+    "refresh": "Ανανέωση",
+    "hiddenNormal": "{count, plural, one {{formatted} κανονική εγγραφή κρυμμένη} other {{formatted} κανονικές εγγραφές κρυμμένες}}",
+    "showAll": "Εμφάνιση όλων",
+    "footerCount": "{count, plural, one {{formatted} εγγραφή} other {{formatted} εγγραφές}}",
+    "footerSelected": "{count, plural, one {{formatted} επιλεγμένο} other {{formatted} επιλεγμένα}}",
+    "selectAll": "Επιλογή όλων",
+    "selectRow": "Επιλογή {id}",
+    "selectAllMatching": "Επιλογή και των {formatted} που ταιριάζουν",
+    "pageSelected": "{count, plural, one {Επιλέχθηκε {formatted} εγγραφή} other {Επιλέχθηκαν {formatted} εγγραφές}}",
+    "sortHint": "Κλικ για ταξινόμηση, Shift+κλικ για ταξινόμηση με περισσότερες στήλες",
+    "sortPriority": "προτεραιότητα ταξινόμησης {index}",
+    "search": "Αναζήτηση στον πίνακα",
+    "filterButton": "Φίλτρο: {column}",
+    "filterContains": "Περιέχει",
+    "filterClear": "Εκκαθάριση φίλτρου",
+    "filterValues": "Τιμές",
+    "columnsButton": "Στήλες",
+    "columnsTitle": "Εμφάνιση στηλών",
+    "columnsSearch": "Αναζήτηση στήλης",
+    "columnsReset": "Επαναφορά προεπιλογών",
+    "moveUp": "Μετακίνηση πάνω: {column}",
+    "moveDown": "Μετακίνηση κάτω: {column}",
+    "resize": "Αλλαγή πλάτους στήλης {column}",
+    "density": "Πυκνότητα",
+    "densityCompact": "Συμπαγής",
+    "densityComfortable": "Άνετη",
+    "group": "{value}, {count, plural, one {# εγγραφή} other {# εγγραφές}}",
+    "priority": "Προτεραιότητα {value} από {max}",
+    "total": "{label}: {value}"
+  },
+  "bulkActionBar": {
+    "label": "Μαζικές ενέργειες",
+    "count": "{count, plural, one {{formatted} επιλεγμένο} other {{formatted} επιλεγμένα}}",
+    "clear": "Εκκαθάριση επιλογής"
+  }
+}

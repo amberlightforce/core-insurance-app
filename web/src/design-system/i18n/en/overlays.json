@@ -1,0 +1,121 @@
+{
+  "skeleton": {
+    "loading": "Loading…"
+  },
+  "progress": {
+    "count": "{value} of {max}"
+  },
+  "banner": {
+    "dismiss": "Dismiss"
+  },
+  "avatar": {
+    "label": "{name}, {presence, select, viewing {viewing} editing {editing} idle {idle} other {offline}}",
+    "stackLabel": "People on this record",
+    "more": "{count, plural, one {# more person is viewing this record} other {# more people are viewing this record}}",
+    "moreShort": "+{count}",
+    "listTitle": "On this record",
+    "row": "{name} · {presence, select, editing {editing} viewing {viewing} other {idle}} · since {since}",
+    "rowSection": "{name} · {presence, select, editing {editing: {section}} viewing {viewing: {section}} other {idle: {section}}} · since {since}",
+    "fieldLock": "{name} is editing"
+  },
+  "popover": {
+    "close": "Close",
+    "loading": "Loading…",
+    "loadError": "Couldn't load this",
+    "retry": "Try again"
+  },
+  "explainWhy": {
+    "trigger": "Why?",
+    "title": "Why {value}?",
+    "factors": "Key factors",
+    "sources": "Sources",
+    "fullSheet": "View full calculation sheet"
+  },
+  "menu": {
+    "overflow": "More actions",
+    "splitMore": "More options",
+    "contextLabel": "Actions",
+    "disabledBecause": "Unavailable: {reason}"
+  },
+  "dialog": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "busy": "Working…",
+    "errorTitle": "The action didn't complete",
+    "genericError": "Your input has been kept. Try again."
+  },
+  "confirmDialog": {
+    "consequences": "Consequences",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "Choose a reason",
+    "reasonRequired": "Choose a reason to continue",
+    "typeToConfirm": "Type {token} to confirm",
+    "sendForApproval": "Send for approval",
+    "approvalNote": "The action completes only after another user approves it.",
+    "approvalNoteGroup": "This will be sent for approval to the “{group}” group. The action completes only after approval."
+  },
+  "unsavedChanges": {
+    "title": "You have unsaved changes",
+    "intro": "You changed these fields:",
+    "more": "and {count} more",
+    "continue": "Keep editing",
+    "discard": "Discard changes",
+    "saveAndExit": "Save and exit"
+  },
+  "drawer": {
+    "close": "Close",
+    "loadError": "Couldn't load this",
+    "retry": "Try again"
+  },
+  "sideSheet": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "unsaved": "Unsaved changes",
+    "context": "for {context}",
+    "errorTitle": "Couldn't save"
+  },
+  "toast": {
+    "region": "Notifications",
+    "dismiss": "Dismiss notification"
+  },
+  "commandPalette": {
+    "label": "Command palette",
+    "placeholder": "Search or run a command…",
+    "groups": {
+      "actions": "Actions",
+      "navigation": "Go to",
+      "records": "Records",
+      "recent": "Recent",
+      "fullText": "Full text"
+    },
+    "scope": "{scope, select, policy {In: Policies} claim {In: Claims} customer {In: Customers} actions {In: Actions} other {In: Identifiers}}",
+    "removeScope": "Remove filter",
+    "noResults": "No matches · Search full text (↵)",
+    "error": "Search isn't available",
+    "open": "Open",
+    "count": "{count, plural, =0 {No results} one {# result} other {# results}}",
+    "hints": {
+      "label": "Shortcuts",
+      "navigate": "navigate",
+      "open": "open",
+      "newTab": "new tab",
+      "filter": "type filter",
+      "close": "close"
+    }
+  },
+  "shortcutOverlay": {
+    "title": "Keyboard shortcuts",
+    "search": "Search shortcuts",
+    "empty": "No shortcuts for “{query}”"
+  },
+  "notifications": {
+    "bell": "{count, plural, =0 {Notifications} one {Notifications, # new} other {Notifications, # new}}",
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "empty": "No notifications",
+    "unread": "Unread",
+    "cap": "99+"
+  }
+}
