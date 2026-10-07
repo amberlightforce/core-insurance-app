@@ -13,7 +13,8 @@ public sealed class SearchDatabaseFixture : IAsyncLifetime
 {
     public const string ExternalServerVariable = "COREINS_TEST_PG";
 
-    private const string ScratchDatabase = "coreins_greek_search_test";
+    // One scratch database per fixture instance: several test classes use this fixture in parallel.
+    private readonly string _scratchDatabase = "coreins_greek_search_test_" + Guid.NewGuid().ToString("N")[..12];
 
     private PostgreSqlContainer? _container;
     private string? _adminConnectionString;
@@ -33,9 +34,9 @@ public sealed class SearchDatabaseFixture : IAsyncLifetime
         else
         {
             _adminConnectionString = external;
-            await ExecuteAsync(external, $"DROP DATABASE IF EXISTS {ScratchDatabase}").ConfigureAwait(false);
-            await ExecuteAsync(external, $"CREATE DATABASE {ScratchDatabase} ENCODING 'UTF8' TEMPLATE template0").ConfigureAwait(false);
-            ConnectionString = new NpgsqlConnectionStringBuilder(external) { Database = ScratchDatabase }.ConnectionString;
+            await ExecuteAsync(external, $"DROP DATABASE IF EXISTS {_scratchDatabase}").ConfigureAwait(false);
+            await ExecuteAsync(external, $"CREATE DATABASE {_scratchDatabase} ENCODING 'UTF8' TEMPLATE template0").ConfigureAwait(false);
+            ConnectionString = new NpgsqlConnectionStringBuilder(external) { Database = _scratchDatabase }.ConnectionString;
         }
 
         var script = await File.ReadAllTextAsync(Path.Combine(RepositoryPaths.DatabaseScripts, "greek-search.sql")).ConfigureAwait(false);
@@ -53,7 +54,7 @@ public sealed class SearchDatabaseFixture : IAsyncLifetime
         if (_adminConnectionString is not null)
         {
             NpgsqlConnection.ClearAllPools();
-            await ExecuteAsync(_adminConnectionString, $"DROP DATABASE IF EXISTS {ScratchDatabase} WITH (FORCE)").ConfigureAwait(false);
+            await ExecuteAsync(_adminConnectionString, $"DROP DATABASE IF EXISTS {_scratchDatabase} WITH (FORCE)").ConfigureAwait(false);
         }
     }
 

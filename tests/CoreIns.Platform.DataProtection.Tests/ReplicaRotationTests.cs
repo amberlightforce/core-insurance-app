@@ -171,6 +171,52 @@ public sealed class ReplicaRotationTests
         Should.Throw<KeyRingStaleException>(() => new FieldEncryptor(ring).Encrypt(Entity, Field, "x", null));
     }
 
+    /// <summary>D-ARC-23a (4): a retired version can be brought back (Retired → Retiring) when its rows turn up.</summary>
+    [Fact]
+    public async Task Unretire_makes_a_retired_version_readable_again_and_restarts_the_wait()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var keys = new TestKeys(_time);
+        var forgottenRow = await keys.Encryptor.EncryptAsync(Entity, Field, "123456783", cancellationToken: ct);
+        await keys.Ring.RotateAsync(Entity, KeyPurpose.FieldEncryption, ct);
+        await Retirement.RetireAsync(keys.Ring, _time, Entity, KeyPurpose.FieldEncryption, 1, ct);
+        await Should.ThrowAsync<CryptographicException>(async () => await keys.Encryptor.DecryptAsync(forgottenRow, Field, cancellationToken: ct));
+
+        await keys.Ring.UnretireAsync(Entity, KeyPurpose.FieldEncryption, 1, ct);
+
+        var stored = (await keys.Store.ListAsync(Entity, KeyPurpose.FieldEncryption, ct)).Single(key => key.Version == 1);
+        stored.Status.ShouldBe(DataKeyStatus.Retiring);
+        stored.RetiringAt.ShouldBe(_time.GetUtcNow());
+        (await keys.Encryptor.DecryptAsync(forgottenRow, Field, cancellationToken: ct)).ShouldBe("123456783");
+        FieldEncryptor.ReadHeader(await keys.Encryptor.EncryptAsync(Entity, Field, "x", cancellationToken: ct)).KeyVersion.ShouldBe(2);
+
+        // Completing again waits the full bound; un-retiring a non-retired version is refused.
+        await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await keys.Ring.CompleteRetirementAsync(Entity, KeyPurpose.FieldEncryption, 1, new FixedScan(0), ct));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await keys.Ring.UnretireAsync(Entity, KeyPurpose.FieldEncryption, 1, ct));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await keys.Ring.UnretireAsync(Entity, KeyPurpose.FieldEncryption, 2, ct));
+        _time.Advance(Retirement.Grace(keys.Ring));
+        await keys.Ring.CompleteRetirementAsync(Entity, KeyPurpose.FieldEncryption, 1, new FixedScan(0), ct);
+    }
+
+    /// <summary>Review R4: a synchronous decrypt of a version not yet loaded does not block beyond SyncReloadTimeout.</summary>
+    [Fact]
+    public async Task Synchronous_cold_version_decrypt_is_bounded_by_the_timeout()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var writer = new TestKeys(_time);
+        var row = await writer.Encryptor.EncryptAsync(Entity, Field, "123456783", cancellationToken: ct);
+
+        var store = new HangingStore(writer.Store) { Hang = true };
+        var coldReplica = new KeyRing(writer.Provider, store, _time, new KeyRingOptions { SyncReloadTimeout = TimeSpan.FromMilliseconds(200) });
+        var started = DateTime.UtcNow;
+        Should.Throw<KeyRingStaleException>(() => new FieldEncryptor(coldReplica).Decrypt(row, Field, null));
+        (DateTime.UtcNow - started).ShouldBeLessThan(TimeSpan.FromSeconds(10));
+
+        store.Hang = false;
+        new FieldEncryptor(coldReplica).Decrypt(row, Field, null).ShouldBe("123456783");
+    }
+
     private (TestKeys A, TestKeys B, IDataKeyStore Store) TwoReplicas()
     {
         var a = new TestKeys(_time);

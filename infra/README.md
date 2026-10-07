@@ -38,6 +38,22 @@ its own user-assigned identity:
 vault-scope assignment, any Key Vault role outside the Key Vault module, any reader outside the table above, and any
 app or job that references another workload's secret or identity.
 
+## Field-encryption key rotation: operating constraints (D-ARC-23, D-ARC-23a)
+
+`CoreIns.Platform.DataProtection` (`KeyRing`) rotates and retires data keys without downtime only under these
+constraints (defaults: `MaxStaleForWrite` 5 min, `RetirementMargin` 1 min, so the bound below is 7 min):
+
+1. **Write-transaction duration.** Every transaction that writes encrypted or blind-indexed columns must finish within
+   `MaxStaleForWrite + 2 × RetirementMargin`. Enforce it in PostgreSQL for the `app` role
+   (`idle_in_transaction_session_timeout` and `statement_timeout` well below the bound). The retirement scan also refuses
+   while older transactions are open: wrap each module's `IRetirementScan` in `GuardedRetirementScan`
+   (`PostgresLongTransactionGuard`, `pg_stat_activity.xact_start`; its role needs `pg_read_all_stats`).
+2. **One clock.** Hosts are NTP-synchronised (skew well under `RetirementMargin`), and both retirement steps
+   (`BeginRetirementAsync`, then `CompleteRetirementAsync` at least the bound later) run from one operator job.
+3. **Primary only.** The key store is always read from the PostgreSQL primary, never a read replica.
+4. **Recovery.** If rows sealed with a retired version turn up, `UnretireAsync` (Retired → Retiring) makes the version
+   readable again; completing the retirement then needs a new clean scan after the full bound.
+
 ## Statement logging must stay off
 
 `log_statement` must remain `none` and `log_min_duration_statement` `-1` on every stamp (set explicitly in
