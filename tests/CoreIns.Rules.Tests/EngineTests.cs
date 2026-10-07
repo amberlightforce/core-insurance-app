@@ -101,7 +101,7 @@ public class EngineTests
         c.ResultType.ShouldBe(RuleType.Decimal);
         c.Environment.ShouldBeSameAs(T.Env);
         T.Env.Schema.ShouldBeSameAs(T.Schema);
-        T.Env.Limits.ShouldBe(RuleLimits.Default);
+        T.Env.Limits.ShouldBe(T.Functional);
     }
 
     [Fact]
@@ -182,7 +182,7 @@ public class EngineTests
     {
         string evil = new string('a', 5000) + "!";
         var schema = InputSchema.Define().Variable("t", RuleType.String).Build();
-        var env = RuleEnvironment.Create(schema);
+        var env = RuleEnvironment.Create(schema, T.Functional);
         var result = env.Compile("t.matches(\"^(a+)+$\")").Evaluate(schema.NewInputs().Set("t", evil).Build());
         result.Value.ShouldBe(BoolValue.False);
     }

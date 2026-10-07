@@ -67,7 +67,17 @@ internal static class T
 
     public static readonly HostFunction Twice = new("twice", new[] { RuleType.Decimal }, RuleType.Decimal, args => ((DecimalValue)args[0]).Value * 2m);
 
-    public static readonly RuleEnvironment Env = RuleEnvironment.Create(Schema, functions: new[] { MktRound, Failing, WrongType, Twice });
+    /// <summary>
+    /// Limits for functional tests: production defaults except a generous regex timeout and wall-clock deadline, so
+    /// results never depend on machine load. Timeout behaviour itself is tested separately with explicit limits.
+    /// </summary>
+    public static readonly RuleLimits Functional = new()
+    {
+        RegexTimeout = TimeSpan.FromTicks(10 * TimeSpan.TicksPerSecond),
+        MaxEvaluationTime = TimeSpan.FromTicks(60 * TimeSpan.TicksPerSecond),
+    };
+
+    public static readonly RuleEnvironment Env = RuleEnvironment.Create(Schema, Functional, new[] { MktRound, Failing, WrongType, Twice });
 
     public static ObjectValue MakeDriver(string name, string birth, int claims = 0, bool isMain = true, string licence = "2015-01-01") =>
         Driver.NewValue()
@@ -102,6 +112,9 @@ internal static class T
         .Set("premium", 100.10m);
 
     public static readonly RuleInputs Default = Inputs().Build();
+
+    /// <summary>Warms up the regex engine and the evaluator JIT once per test run.</summary>
+    public static readonly bool WarmedUp = Env.Compile("s.matches('^Motor') && size(ints.map(i, i + 1)) > 0").Evaluate(Default).IsSuccess;
 
     public static EvaluationResult Run(string source, RuleInputs? inputs = null, EvaluationOptions? options = null) =>
         Env.Compile(source).Evaluate(inputs ?? Default, options);

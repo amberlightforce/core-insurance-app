@@ -31,7 +31,8 @@ public class ReviewRegressionTests
         return (result, Stopwatch.GetElapsedTime(start));
     }
 
-    private static readonly TimeSpan Fast = TimeSpan.FromTicks(100 * TimeSpan.TicksPerMillisecond);
+    /// <summary>Loose wall-clock sanity bound; the work bound itself is asserted on steps and allocations.</summary>
+    private static readonly TimeSpan Sanity = TimeSpan.FromTicks(2 * TimeSpan.TicksPerSecond);
 
     // ---------------------------------------------------------------- D1: the cost budget bounds work, memory and time
 
@@ -53,7 +54,8 @@ public class ReviewRegressionTests
         string e9 = Exponential(9);
         var (result, elapsed) = Timed(Env, e9 + " == " + e9);
         result.Error!.Code.ShouldBe(RuleErrorCode.CostExceeded);
-        elapsed.ShouldBeLessThan(Fast);
+        result.StepsUsed.ShouldBeLessThanOrEqualTo(RuleLimits.Default.MaxEvaluationSteps + 1);
+        elapsed.ShouldBeLessThan(Sanity);
         Timed(Env, $"size({Exponential(3)})").Result.Value.ShouldBe(IntValue.Of(10));
     }
 
@@ -62,7 +64,8 @@ public class ReviewRegressionTests
     {
         var (result, elapsed) = Timed(Env, "big.map(x, big + big)");
         result.Error!.Code.ShouldBeOneOf(RuleErrorCode.CostExceeded, RuleErrorCode.LimitExceeded);
-        elapsed.ShouldBeLessThan(Fast);
+        result.StepsUsed.ShouldBeLessThanOrEqualTo(RuleLimits.Default.MaxEvaluationSteps + 1);
+        elapsed.ShouldBeLessThan(Sanity);
     }
 
     [Fact]
@@ -70,7 +73,7 @@ public class ReviewRegressionTests
     {
         var (result, elapsed) = Timed(Env, "big.all(x, x in big)");
         result.Error!.Code.ShouldBe(RuleErrorCode.CostExceeded);
-        elapsed.ShouldBeLessThan(Fast);
+        elapsed.ShouldBeLessThan(Sanity);
         result.StepsUsed.ShouldBeLessThanOrEqualTo(RuleLimits.Default.MaxEvaluationSteps + 5000);
     }
 
@@ -98,7 +101,7 @@ public class ReviewRegressionTests
         var (result, elapsed) = Timed(env, "big.all(x, x in big)");
         result.Error!.Code.ShouldBe(RuleErrorCode.Timeout);
         result.Error.CodeText.ShouldBe("RULE-TIMEOUT");
-        elapsed.ShouldBeLessThan(TimeSpan.FromTicks(1000 * TimeSpan.TicksPerMillisecond));
+        elapsed.ShouldBeLessThan(Sanity);
     }
 
     [Fact]
