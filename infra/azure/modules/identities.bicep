@@ -1,10 +1,11 @@
-// One user-assigned managed identity per app (INFRASTRUCTURE §6.2).
+// One user-assigned managed identity per app and job (INFRASTRUCTURE §6.2). `bootstrap` is the only identity that can
+// read the PostgreSQL administrator credential.
 
 param location string
 param namePrefix string
 param tags object
 
-var apps = ['api', 'worker', 'migrate', 'gotenberg']
+var apps = ['api', 'worker', 'migrate', 'gotenberg', 'bootstrap']
 
 resource identities 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = [
   for app in apps: {
@@ -33,4 +34,9 @@ output gotenberg object = {
   id: identities[3].id
   principalId: identities[3].properties.principalId
   clientId: identities[3].properties.clientId
+}
+output bootstrap object = {
+  id: identities[4].id
+  principalId: identities[4].properties.principalId
+  clientId: identities[4].properties.clientId
 }

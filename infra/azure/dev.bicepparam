@@ -28,6 +28,7 @@ param apiMaxReplicas = 3
 param gotenbergMaxReplicas = 2
 
 param entraClientId = readEnvironmentVariable('ENTRA_CLIENT_ID')
+param entraClientSecret = readEnvironmentVariable('ENTRA_CLIENT_SECRET')
 
 param logDailyQuotaGb = '0.15'
 param logRetentionDays = 30

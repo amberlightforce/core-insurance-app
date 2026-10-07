@@ -10,10 +10,11 @@
 #   secrets.PG_ADMIN_PASSWORD         - PostgreSQL server administrator password
 #   secrets.APP_DB_PASSWORD           - password of the `app` database role
 #   secrets.MIGRATOR_DB_PASSWORD      - password of the `migrator` database role
+#   secrets.ENTRA_CLIENT_SECRET       - client secret of the staff app registration (stored in Key Vault, api only)
+# Role passwords must be printable ASCII (the bootstrap computes SCRAM-SHA-256 verifiers from them).
 # Additionally for `prod`:
 #   vars.STAMP_LEGAL_ENTITY           - legal entity code of the stamp
 #   vars.IMMUTABILITY_RETENTION_DAYS  - blob immutability retention from the PLT retention catalogue
-# Key Vault secret `entra-client-secret` (the app registration client secret) is created manually after stage 1.
 # Order per run: infrastructure -> image -> jobs -> bootstrap -> migrate -> apps, so api/worker never run on an
 # image whose migrations have not completed (INFRASTRUCTURE §6.5).
 name: Deploy
@@ -51,6 +52,7 @@ jobs:
       APP_DB_PASSWORD: ${{ secrets.APP_DB_PASSWORD }}
       MIGRATOR_DB_PASSWORD: ${{ secrets.MIGRATOR_DB_PASSWORD }}
       ENTRA_CLIENT_ID: ${{ vars.ENTRA_CLIENT_ID }}
+      ENTRA_CLIENT_SECRET: ${{ secrets.ENTRA_CLIENT_SECRET }}
       STAMP_LEGAL_ENTITY: ${{ vars.STAMP_LEGAL_ENTITY }}
       IMMUTABILITY_RETENTION_DAYS: ${{ vars.IMMUTABILITY_RETENTION_DAYS }}
     steps:

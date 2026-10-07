@@ -7,8 +7,11 @@
 -- The database itself must already exist (Bicep creates it on Azure; the runners create it locally).
 --
 -- Inputs are session settings, set by the runner before this script, so no password appears in this file:
---   coreins.app_password       password of the runtime role `app`      (api, worker)
---   coreins.migrator_password  password of the DDL role `migrator`     (migrate job)
+--   coreins.app_password       credential of the runtime role `app`      (api, worker)
+--   coreins.migrator_password  credential of the DDL role `migrator`     (migrate job)
+-- The Host bootstrap (Azure, integration tests) passes SCRAM-SHA-256 verifiers computed in .NET, so no plaintext
+-- password reaches the server. Local pg-init passes the synthetic .env passwords inside the container; PostgreSQL
+-- hashes them with SCRAM-SHA-256 (password_encryption default). Statement logging must stay off (infra/README.md).
 
 DO $bootstrap$
 DECLARE
@@ -38,6 +41,23 @@ BEGIN
   EXECUTE format('GRANT CONNECT, TEMPORARY, CREATE ON DATABASE %I TO migrator', current_database());
 END
 $bootstrap$;
+
+-- The maintenance database `postgres` is for administrators only. Skipped with a NOTICE where this role may not
+-- change it (e.g. a managed server whose `postgres` database belongs to the platform).
+DO $maintenance$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'postgres') THEN
+    RAISE NOTICE 'coreins bootstrap: no database "postgres"; CONNECT revoke skipped';
+  ELSIF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = current_user AND rolsuper)
+     OR EXISTS (SELECT 1 FROM pg_database WHERE datname = 'postgres' AND pg_has_role(current_user, datdba, 'MEMBER')) THEN
+    REVOKE CONNECT ON DATABASE postgres FROM PUBLIC;
+  ELSE
+    RAISE NOTICE 'coreins bootstrap: % may not change database "postgres"; CONNECT revoke skipped', current_user;
+  END IF;
+EXCEPTION WHEN insufficient_privilege THEN
+  RAISE NOTICE 'coreins bootstrap: not permitted to revoke CONNECT on database "postgres"; skipped';
+END
+$maintenance$;
 
 -- Extension set, identical everywhere (on Azure these must also be allow-listed in `azure.extensions`).
 CREATE EXTENSION IF NOT EXISTS pg_trgm;            -- Greek name search (trigram similarity)

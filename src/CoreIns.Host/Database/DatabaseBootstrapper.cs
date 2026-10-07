@@ -69,16 +69,21 @@ internal sealed partial class DatabaseBootstrapper(IConfiguration configuration,
         await using var dataSource = NpgsqlDataSource.Create(target);
         await using var session = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
 
+        // Only SCRAM-SHA-256 verifiers reach the server; the plaintext passwords never leave this process.
         await using (var settings = new NpgsqlCommand(
             "SELECT set_config('coreins.app_password', $1, false), set_config('coreins.migrator_password', $2, false)", session))
         {
-            settings.Parameters.Add(new NpgsqlParameter { Value = appPassword });
-            settings.Parameters.Add(new NpgsqlParameter { Value = migratorPassword });
+            settings.Parameters.Add(new NpgsqlParameter { Value = ToVerifier(appPassword) });
+            settings.Parameters.Add(new NpgsqlParameter { Value = ToVerifier(migratorPassword) });
             await settings.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
 
         await ExecuteAsync(session, ReadScript(), cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>Empty stays empty (the script then refuses to run); anything else becomes a SCRAM verifier.</summary>
+    private static string ToVerifier(string password) =>
+        string.IsNullOrEmpty(password) || ScramVerifier.IsVerifier(password) ? password : ScramVerifier.Create(password);
 
     /// <summary>The embedded copy of infra/database/bootstrap.sql.</summary>
     public static string ReadScript()
@@ -95,7 +100,7 @@ internal sealed partial class DatabaseBootstrapper(IConfiguration configuration,
             : throw new InvalidOperationException($"Bootstrap needs {variable}.");
 
     [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities",
-        Justification = "Repository script or DDL with a validated identifier; passwords travel as bind parameters.")]
+        Justification = "Repository script or DDL with a validated identifier; role credentials travel as SCRAM verifiers in bind parameters.")]
     private static async Task ExecuteAsync(NpgsqlConnection connection, string sql, CancellationToken cancellationToken)
     {
         await using var command = new NpgsqlCommand(sql, connection);

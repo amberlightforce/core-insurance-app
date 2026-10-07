@@ -70,8 +70,9 @@ param entraTenantId string = subscription().tenantId
 @minLength(36)
 @maxLength(36)
 param entraClientId string
-@description('Name of the Key Vault secret holding the app registration client secret (created manually).')
-param entraClientSecretName string = 'entra-client-secret'
+@secure()
+@description('Client secret of the staff app registration; stored in Key Vault as entra-client-secret, readable by api only.')
+param entraClientSecret string
 
 // Monitoring
 param logDailyQuotaGb string = '0.15'
@@ -116,6 +117,7 @@ module registry 'modules/registry.bicep' = {
       identities.outputs.api.principalId
       identities.outputs.worker.principalId
       identities.outputs.migrate.principalId
+      identities.outputs.bootstrap.principalId
     ]
   }
 }
@@ -157,11 +159,15 @@ module keyVault 'modules/keyvault.bicep' = {
     name: 'kv-${compactPrefix}'
     tags: tags
     appsSubnetId: network.outputs.appsSubnetId
-    secretReaderPrincipalIds: [
+    // Per-secret access only; see modules/keyvault.bicep and scripts/check-keyvault-rbac.py.
+    coreReaderPrincipalIds: [
       identities.outputs.api.principalId
       identities.outputs.worker.principalId
-      identities.outputs.migrate.principalId
     ]
+    authReaderPrincipalIds: [identities.outputs.api.principalId]
+    migratorReaderPrincipalIds: [identities.outputs.migrate.principalId]
+    bootstrapReaderPrincipalIds: [identities.outputs.bootstrap.principalId]
+    entraClientSecret: entraClientSecret
     coreConnectionString: 'Host=${pgHost};Database=coreins;Username=app;Password=${appDbPassword};SslMode=Require'
     migratorConnectionString: 'Host=${pgHost};Database=coreins;Username=migrator;Password=${migratorDbPassword};SslMode=Require'
     adminConnectionString: 'Host=${pgHost};Database=postgres;Username=${postgresAdminLogin};Password=${postgresAdminPassword};SslMode=Require'
@@ -245,30 +251,31 @@ module bootstrapJob 'modules/migrate-job.bicep' = if (deployJobs) {
     name: 'bootstrap'
     tags: tags
     environmentId: environment.outputs.id
-    identityId: identities.outputs.migrate.id
+    identityId: identities.outputs.bootstrap.id
     image: appImage
     registryServer: registry.outputs.loginServer
     secrets: [
       {
         name: 'connectionstrings-admin'
         keyVaultUrl: keyVault.outputs.adminSecretUri
-        identity: identities.outputs.migrate.id
+        identity: identities.outputs.bootstrap.id
       }
       {
         name: 'db-app-password'
         keyVaultUrl: keyVault.outputs.appRoleSecretUri
-        identity: identities.outputs.migrate.id
+        identity: identities.outputs.bootstrap.id
       }
       {
         name: 'db-migrator-password'
         keyVaultUrl: keyVault.outputs.migratorRoleSecretUri
-        identity: identities.outputs.migrate.id
+        identity: identities.outputs.bootstrap.id
       }
     ]
     // Runs infra/database/bootstrap.sql as the server administrator: roles, privileges, extensions. Idempotent.
     env: [
       { name: 'APP_ROLE', value: 'migrate' }
       { name: 'Migrate__Bootstrap', value: 'true' }
+      { name: 'AZURE_CLIENT_ID', value: identities.outputs.bootstrap.clientId }
       { name: 'Database__Name', value: 'coreins' }
       { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
       { name: 'ConnectionStrings__Admin', secretRef: 'connectionstrings-admin' }
@@ -352,7 +359,7 @@ module api 'modules/container-app.bicep' = if (deployApps) {
       }
       {
         name: 'microsoft-provider-authentication-secret'
-        keyVaultUrl: '${keyVault.outputs.uri}secrets/${entraClientSecretName}'
+        keyVaultUrl: keyVault.outputs.entraSecretUri
         identity: identities.outputs.api.id
       }
     ]

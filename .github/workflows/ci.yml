@@ -97,6 +97,25 @@ jobs:
           name: sbom-web
           path: artifacts/sbom/web.cdx.json
 
+  infra:
+    name: Bicep build, lint and Key Vault least-privilege guard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install a pinned Bicep CLI
+        run: az bicep install --version v0.48.1
+
+      - name: Build and lint
+        run: |
+          mkdir -p artifacts
+          az bicep build --file infra/azure/main.bicep --outfile artifacts/main.json
+          az bicep lint --file infra/azure/main.bicep
+
+      - name: Key Vault access is per secret and per workload
+        run: python3 scripts/check-keyvault-rbac.py artifacts/main.json
+
   image:
     name: Container image builds
     runs-on: ubuntu-24.04
