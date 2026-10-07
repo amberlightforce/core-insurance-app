@@ -14,7 +14,7 @@ public sealed class FakeUnderwritingIssueService : global::CoreIns.Testing.Contr
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueBlockingStatusResponse> BlockingStatusAsync(global::CoreIns.SharedKernel.Identifiers.JobId jobRef, global::CoreIns.Modules.Underwriting.Contracts.Api.IssueBlockingStatusBlockingPoint blockingPoint, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueBlockingStatusResponse>("uw.Issue.blockingStatus", [jobRef, blockingPoint], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueBlockingStatusResponse> BlockingStatusAsync(global::CoreIns.SharedKernel.Identifiers.JobId jobRef, global::CoreIns.Platform.Contracts.Common.BlockingPoint blockingPoint, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueBlockingStatusResponse>("uw.Issue.blockingStatus", [jobRef, blockingPoint], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueListForChannelPage> ListForChannelAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueListForChannelPage>("uw.Issue.listForChannel", [cursor, limit], cancellationToken);

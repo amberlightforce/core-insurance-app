@@ -152,6 +152,12 @@ public static class UnderwritingErrorCodes
     /// </remarks>
     public const string RulesetUnresolved = "UW-ERR-RULESET-UNRESOLVED";
 
+    /// <summary>UW-ERR-SNAPSHOT (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): uw.Rules.evaluate.</para>
+    /// </remarks>
+    public const string Snapshot = "UW-ERR-SNAPSHOT";
+
     /// <summary>UW-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): uw.Issue.decide.</para>
@@ -198,7 +204,7 @@ public static class UnderwritingErrorCodes
     public const string Prefix = "UW-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AuthorityDenied, AuthorityRefer, CodeDuplicate, ConsentMissing, Duplicate, EvalUnavailable, HumanDecisionRequired, IdempotencyMismatch, IssueTransition, LicenceInvalid, LimitExceeded, LockedByOther, NotAutomated, NotReferrable, NoticeDeadlinePassed, PackRuleMissing, Permission, ProtectedInput, ProviderInactive, ReasonRequired, ReviewOpen, RiUnavailable, RuleUntested, RulesetUnresolved, Sod, Stale, State, TableUnresolved, TranslationMissing, UnverifiedValues, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AuthorityDenied, AuthorityRefer, CodeDuplicate, ConsentMissing, Duplicate, EvalUnavailable, HumanDecisionRequired, IdempotencyMismatch, IssueTransition, LicenceInvalid, LimitExceeded, LockedByOther, NotAutomated, NotReferrable, NoticeDeadlinePassed, PackRuleMissing, Permission, ProtectedInput, ProviderInactive, ReasonRequired, ReviewOpen, RiUnavailable, RuleUntested, RulesetUnresolved, Snapshot, Sod, Stale, State, TableUnresolved, TranslationMissing, UnverifiedValues, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -227,6 +233,7 @@ public static class UnderwritingErrorCodes
         [RiUnavailable] = 503,
         [RuleUntested] = 422,
         [RulesetUnresolved] = 422,
+        [Snapshot] = 422,
         [Sod] = 403,
         [Stale] = 409,
         [State] = 422,

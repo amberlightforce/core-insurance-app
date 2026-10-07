@@ -20,7 +20,7 @@ public interface IUnderwritingIssueService
     /// </remarks>
     /// <param name="jobRef">POL job id</param>
     /// <param name="blockingPoint">Blocking point</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueBlockingStatusResponse> BlockingStatusAsync(global::CoreIns.SharedKernel.Identifiers.JobId jobRef, global::CoreIns.Modules.Underwriting.Contracts.Api.IssueBlockingStatusBlockingPoint blockingPoint, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueBlockingStatusResponse> BlockingStatusAsync(global::CoreIns.SharedKernel.Identifiers.JobId jobRef, global::CoreIns.Platform.Contracts.Common.BlockingPoint blockingPoint, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Read issues</summary>
     /// <remarks>
