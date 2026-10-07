@@ -1,0 +1,3818 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: MKT — Multi-market configuration and country packs API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by MKT (PRD-17 §9.1)
+  description: 'Contract of the operations MKT exposes (PRD-17 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: MKT
+  x-prd: PRD-17
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: Configuration
+- name: ConfigChangeRequest
+- name: Spi
+- name: Pack
+- name: Capability
+- name: L10n
+- name: L10nUiLanguage
+- name: Translation
+- name: Terminology
+- name: Rounding
+- name: Currency
+- name: Changeover
+- name: RegimeCode
+- name: RiskLocation
+- name: CrossBorder
+- name: StatutoryClockSet
+paths:
+  /api/mkt/v1/configuration/resolve:
+    post:
+      operationId: mkt.Configuration.resolve
+      summary: Effective values
+      description: |-
+        Effective values
+
+        PRD inputs: entity, jurisdiction(+subdivision), product, channel, dates by time basis, hash or knownAt, keys/namespace
+        PRD outputs: values with source, version, validity, final, trace; hash
+      tags:
+      - Configuration
+      x-requirement:
+      - REQ-MKT-001
+      - REQ-MKT-044
+      x-anchor:
+      - REQ-MKT-001
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a (query)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - CLM
+      - DOC
+      - FIN
+      - MIG
+      - PFC
+      - PLT
+      - POL
+      - PTY
+      - RAT
+      - RI
+      - UW
+      x-permission: mkt.Configuration.resolve
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1499
+      x-superseded-names:
+      - mkt.Config.resolve (XRF-002)
+      - mkt.Config.resolveModel (XRF-002)
+      - 'plt.Config.resolve (XMR-F-102: PLT-internal)'
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurationResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/configuration/current-hash:
+    get:
+      operationId: mkt.Configuration.currentHash
+      summary: Hash in force for the stamp
+      description: |-
+        Hash in force for the stamp
+
+        PRD inputs: —
+        PRD outputs: hash, activated_at
+      tags:
+      - Configuration
+      x-requirement:
+      - REQ-MKT-047
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: minimal
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      - PLT
+      - POL
+      x-permission: mkt.Configuration.currentHash
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1500
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationCurrentHashResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/configuration/explain:
+    get:
+      operationId: mkt.Configuration.explain
+      summary: Lineage
+      description: |-
+        Lineage
+
+        PRD inputs: key, context
+        PRD outputs: layer contributions, merge steps, CR and approvers
+      tags:
+      - Configuration
+      x-requirement:
+      - REQ-MKT-065
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.Configuration.explain
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1501
+      x-superseded-names:
+      - 'plt.Config.trace (XMR-F-102: PLT-internal)'
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: key
+        in: query
+        required: false
+        description: 'PRD: "key"'
+        schema:
+          type: string
+      - name: context
+        in: query
+        required: false
+        description: 'PRD: "context"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationExplainResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/configuration/compare:
+    get:
+      operationId: mkt.Configuration.compare
+      summary: Diff two hashes
+      description: |-
+        Diff two hashes
+
+        PRD inputs: hash A, hash B, filter
+        PRD outputs: changes
+      tags:
+      - Configuration
+      x-requirement:
+      - REQ-MKT-064
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.Configuration.compare
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1502
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: hash
+        in: query
+        required: false
+        description: 'PRD: "hash A"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+      - name: hashB
+        in: query
+        required: false
+        description: 'PRD: "hash B"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+      - name: filter
+        in: query
+        required: false
+        description: 'PRD: "filter"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationCompareResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/configuration/export:
+    post:
+      operationId: mkt.Configuration.export
+      summary: Export state
+      description: |-
+        Export state
+
+        PRD inputs: hash, optional context
+        PRD outputs: signed canonical JSON
+      tags:
+      - Configuration
+      x-requirement:
+      - REQ-MKT-063
+      x-wave: unscheduled
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; classified query by the contract builder (PRD purpose is a read or pure computation)'
+      x-exposure:
+      - ui
+      x-permission: mkt.Configuration.export
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1503
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurationExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests:
+    post:
+      operationId: mkt.ConfigChangeRequest.create
+      summary: Change workflow
+      description: |-
+        Change workflow
+
+        PRD inputs: request body / decision
+        PRD outputs: request
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: minimal
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: create, schedule'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.create
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests/{id}:
+    patch:
+      operationId: mkt.ConfigChangeRequest.update
+      summary: Change workflow
+      description: |-
+        Change workflow
+
+        PRD inputs: request body / decision
+        PRD outputs: request
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: minimal
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create, schedule'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.update
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the ConfigChangeRequest
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests/submit:
+    post:
+      operationId: mkt.ConfigChangeRequest.submit
+      summary: Change workflow
+      description: |-
+        Change workflow
+
+        PRD inputs: request body / decision
+        PRD outputs: request
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: minimal
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create, schedule'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.submit
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests/approve:
+    post:
+      operationId: mkt.ConfigChangeRequest.approve
+      summary: Change workflow
+      description: |-
+        Change workflow
+
+        PRD inputs: request body / decision
+        PRD outputs: request
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: minimal
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create, schedule'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.approve
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestApproveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestApproveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests/reject:
+    post:
+      operationId: mkt.ConfigChangeRequest.reject
+      summary: Change workflow
+      description: |-
+        Change workflow
+
+        PRD inputs: request body / decision
+        PRD outputs: request
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: minimal
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create, schedule'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.reject
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestRejectRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestRejectResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests/schedule:
+    post:
+      operationId: mkt.ConfigChangeRequest.schedule
+      summary: Change workflow
+      description: |-
+        Change workflow
+
+        PRD inputs: request body / decision
+        PRD outputs: request
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: minimal
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: create, schedule'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.schedule
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestScheduleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestScheduleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests/withdraw:
+    post:
+      operationId: mkt.ConfigChangeRequest.withdraw
+      summary: Change workflow
+      description: |-
+        Change workflow
+
+        PRD inputs: request body / decision
+        PRD outputs: request
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: minimal
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create, schedule'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.withdraw
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestWithdrawRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestWithdrawResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests/rebase:
+    post:
+      operationId: mkt.ConfigChangeRequest.rebase
+      summary: Change workflow
+      description: |-
+        Change workflow
+
+        PRD inputs: request body / decision
+        PRD outputs: request
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: minimal
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create, schedule'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.rebase
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestRebaseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestRebaseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests/preview:
+    post:
+      operationId: mkt.ConfigChangeRequest.preview
+      summary: Impact preview
+      description: |-
+        Impact preview
+
+        PRD inputs: request id
+        PRD outputs: preview run
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-054
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.preview
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1505
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestPreviewRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestPreviewResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/config-change-requests/import:
+    post:
+      operationId: mkt.ConfigChangeRequest.import
+      summary: Bulk import
+      description: |-
+        Bulk import
+
+        PRD inputs: file
+        PRD outputs: validation report
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-062
+      x-wave: unscheduled
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.import
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1506
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigChangeRequestImportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestImportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/spis/catalogue:
+    get:
+      operationId: mkt.Spi.catalogue
+      summary: SPI list
+      description: |-
+        SPI list
+
+        PRD inputs: filters
+        PRD outputs: SPIs, status
+      tags:
+      - Spi
+      x-requirement:
+      - REQ-MKT-081
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-02
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PTY
+      x-permission: mkt.Spi.catalogue
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1507
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpiCatalogueResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/spis/bind:
+    post:
+      operationId: mkt.Spi.bind
+      summary: Binding resolution (in-process only)
+      description: |-
+        Binding resolution (in-process only)
+
+        PRD inputs: entity, SPI, axis value, qualifier, date, hash
+        PRD outputs: implementation handle, pack version, binding id
+      tags:
+      - Spi
+      x-requirement:
+      - REQ-MKT-002
+      - REQ-MKT-083
+      - REQ-MKT-087
+      - REQ-MKT-330
+      x-anchor:
+      - REQ-MKT-002
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-02
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD dry-run: n/a (pure); classified query by the contract builder (PRD purpose is
+        a read or pure computation)'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CHN
+      - PFC
+      - PLT
+      - RAT
+      x-permission: mkt.Spi.bind
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1508
+      - PRD-17 §9.1 l.1518
+      x-superseded-names:
+      - mkt.Spi.binding (XRF-004i)
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpiBindRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpiBindResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/spis/suspend:
+    post:
+      operationId: mkt.Spi.suspend
+      summary: Emergency suspension
+      description: |-
+        Emergency suspension
+
+        PRD inputs: entity, SPI, reason, expiry
+        PRD outputs: binding
+      tags:
+      - Spi
+      x-requirement:
+      - REQ-MKT-124
+      x-wave: unscheduled
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-permission: mkt.Spi.suspend
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1509
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpiSuspendRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpiSuspendResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/packs:
+    get:
+      operationId: mkt.Pack.list
+      summary: Pack lifecycle
+      description: |-
+        Pack lifecycle
+
+        PRD inputs: per operation
+        PRD outputs: pack/version/activation
+      tags:
+      - Pack
+      x-requirement:
+      - REQ-MKT-003
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-003
+      x-anchor-mapped:
+      - REQ-MKT-003
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-03
+      x-status: minimal
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: schedule, rollback'
+      x-exposure:
+      - ui
+      x-permission: mkt.Pack.list
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1510
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/packs/{id}:
+    get:
+      operationId: mkt.Pack.get
+      summary: Pack lifecycle
+      description: |-
+        Pack lifecycle
+
+        PRD inputs: per operation
+        PRD outputs: pack/version/activation
+      tags:
+      - Pack
+      x-requirement:
+      - REQ-MKT-003
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-003
+      x-anchor-mapped:
+      - REQ-MKT-003
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-03
+      x-status: minimal
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: schedule, rollback'
+      x-exposure:
+      - ui
+      x-permission: mkt.Pack.get
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1510
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Pack
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/packs/certify:
+    post:
+      operationId: mkt.Pack.certify
+      summary: Pack lifecycle
+      description: |-
+        Pack lifecycle
+
+        PRD inputs: per operation
+        PRD outputs: pack/version/activation
+      tags:
+      - Pack
+      x-requirement:
+      - REQ-MKT-003
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-003
+      x-anchor-mapped:
+      - REQ-MKT-003
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-03
+      x-status: minimal
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: schedule, rollback'
+      x-exposure:
+      - ui
+      x-permission: mkt.Pack.certify
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1510
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackCertifyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackCertifyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/packs/publish:
+    post:
+      operationId: mkt.Pack.publish
+      summary: Pack lifecycle
+      description: |-
+        Pack lifecycle
+
+        PRD inputs: per operation
+        PRD outputs: pack/version/activation
+      tags:
+      - Pack
+      x-requirement:
+      - REQ-MKT-003
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-003
+      x-anchor-mapped:
+      - REQ-MKT-003
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-03
+      x-status: minimal
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: schedule, rollback'
+      x-exposure:
+      - ui
+      x-permission: mkt.Pack.publish
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1510
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackPublishRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackPublishResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/packs/schedule-activation:
+    post:
+      operationId: mkt.Pack.scheduleActivation
+      summary: Pack lifecycle
+      description: |-
+        Pack lifecycle
+
+        PRD inputs: per operation
+        PRD outputs: pack/version/activation
+      tags:
+      - Pack
+      x-requirement:
+      - REQ-MKT-003
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-003
+      x-anchor-mapped:
+      - REQ-MKT-003
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-03
+      x-status: minimal
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: schedule, rollback'
+      x-exposure:
+      - ui
+      x-permission: mkt.Pack.scheduleActivation
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1510
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackScheduleActivationRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackScheduleActivationResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/packs/rollback:
+    post:
+      operationId: mkt.Pack.rollback
+      summary: Pack lifecycle
+      description: |-
+        Pack lifecycle
+
+        PRD inputs: per operation
+        PRD outputs: pack/version/activation
+      tags:
+      - Pack
+      x-requirement:
+      - REQ-MKT-003
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-003
+      x-anchor-mapped:
+      - REQ-MKT-003
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-03
+      x-status: minimal
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: schedule, rollback'
+      x-exposure:
+      - ui
+      x-permission: mkt.Pack.rollback
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1510
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackRollbackRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackRollbackResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/packs/deprecate:
+    post:
+      operationId: mkt.Pack.deprecate
+      summary: Pack lifecycle
+      description: |-
+        Pack lifecycle
+
+        PRD inputs: per operation
+        PRD outputs: pack/version/activation
+      tags:
+      - Pack
+      x-requirement:
+      - REQ-MKT-003
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-003
+      x-anchor-mapped:
+      - REQ-MKT-003
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-03
+      x-status: minimal
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: schedule, rollback'
+      x-exposure:
+      - ui
+      x-permission: mkt.Pack.deprecate
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1510
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackDeprecateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackDeprecateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/capabilities/get:
+    get:
+      operationId: mkt.Capability.get
+      summary: Switch state
+      description: |-
+        Switch state
+
+        PRD inputs: switch, scope, date
+        PRD outputs: state, source
+      tags:
+      - Capability
+      x-requirement:
+      - REQ-MKT-004
+      - REQ-MKT-071
+      x-anchor:
+      - REQ-MKT-004
+      x-anchor-mapped:
+      - REQ-MKT-004
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: mkt.Capability.get
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1511
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: switch
+        in: query
+        required: false
+        description: 'PRD: "switch"'
+        schema:
+          type: string
+      - name: scope
+        in: query
+        required: false
+        description: 'PRD: "scope"'
+        schema:
+          type: string
+      - name: date
+        in: query
+        required: false
+        description: 'PRD: "date"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapabilityGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/l10n/bundle:
+    get:
+      operationId: mkt.L10n.bundle
+      summary: Translations and formatting
+      description: |-
+        Translations and formatting
+
+        PRD inputs: language, version / value, region format
+        PRD outputs: bundle / formatted string
+      tags:
+      - L10n
+      x-requirement:
+      - REQ-MKT-005
+      - REQ-MKT-189
+      x-anchor:
+      - REQ-MKT-005
+      x-anchor-mapped:
+      - REQ-MKT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: mkt.L10n.bundle
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1512
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: language
+        in: query
+        required: false
+        description: 'PRD: "language"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      - name: version
+        in: query
+        required: false
+        description: 'PRD: "version"'
+        schema:
+          type: string
+      - name: value
+        in: query
+        required: false
+        description: 'PRD: "value"'
+        schema:
+          type: string
+      - name: regionFormat
+        in: query
+        required: false
+        description: 'PRD: "region format"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/L10nBundleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/l10n/format:
+    get:
+      operationId: mkt.L10n.format
+      summary: Translations and formatting
+      description: |-
+        Translations and formatting
+
+        PRD inputs: language, version / value, region format
+        PRD outputs: bundle / formatted string
+      tags:
+      - L10n
+      x-requirement:
+      - REQ-MKT-005
+      - REQ-MKT-189
+      x-anchor:
+      - REQ-MKT-005
+      x-anchor-mapped:
+      - REQ-MKT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - DOC
+      x-permission: mkt.L10n.format
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1512
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: language
+        in: query
+        required: false
+        description: 'PRD: "language"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      - name: version
+        in: query
+        required: false
+        description: 'PRD: "version"'
+        schema:
+          type: string
+      - name: value
+        in: query
+        required: false
+        description: 'PRD: "value"'
+        schema:
+          type: string
+      - name: regionFormat
+        in: query
+        required: false
+        description: 'PRD: "region format"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/L10nFormatResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/l10n/search-keys:
+    get:
+      operationId: mkt.L10n.searchKeys
+      summary: Cross-script search keys with the language rules
+      description: |-
+        Cross-script search keys with the language rules
+
+        PRD inputs: text, language, script
+        PRD outputs: normalised keys
+      tags:
+      - L10n
+      x-requirement:
+      - REQ-MKT-005
+      - REQ-MKT-178
+      - REQ-MKT-340
+      x-anchor:
+      - REQ-MKT-005
+      x-anchor-mapped:
+      - REQ-MKT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.L10n.searchKeys
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1513
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: text
+        in: query
+        required: false
+        description: 'PRD: "text"'
+        schema:
+          type: string
+      - name: language
+        in: query
+        required: false
+        description: 'PRD: "language"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      - name: script
+        in: query
+        required: false
+        description: 'PRD: "script"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/L10nSearchKeysResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/l10n/case-map:
+    get:
+      operationId: mkt.L10n.caseMap
+      summary: Language-correct case mapping
+      description: |-
+        Language-correct case mapping
+
+        PRD inputs: text, language, mode (UPPER, LOWER, TITLE)
+        PRD outputs: mapped text, rule version
+      tags:
+      - L10n
+      x-requirement:
+      - REQ-MKT-005
+      - REQ-MKT-340
+      x-anchor:
+      - REQ-MKT-005
+      x-anchor-mapped:
+      - REQ-MKT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.L10n.caseMap
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1514
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: text
+        in: query
+        required: false
+        description: 'PRD: "text"'
+        schema:
+          type: string
+      - name: language
+        in: query
+        required: false
+        description: 'PRD: "language"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      - name: mode
+        in: query
+        required: false
+        description: 'PRD: "mode (UPPER, LOWER, TITLE)"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/L10nCaseMapResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/l10n-ui-languages/resolve:
+    post:
+      operationId: mkt.L10nUiLanguage.resolve
+      summary: UI language for a user or visitor (R-101)
+      description: |-
+        UI language for a user or visitor (R-101)
+
+        PRD inputs: user id or device choice, browser languages, legal entity
+        PRD outputs: language, source (PROFILE, DEVICE, BROWSER, ENTITY_DEFAULT), allowed languages
+      tags:
+      - L10nUiLanguage
+      x-requirement:
+      - REQ-MKT-005
+      - REQ-MKT-333
+      x-anchor:
+      - REQ-MKT-005
+      x-anchor-mapped:
+      - REQ-MKT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.L10nUiLanguage.resolve
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1515
+      x-prd-name:
+      - mkt.L10n.uiLanguage.resolve
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/L10nUiLanguageResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/L10nUiLanguageResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/translations/gate:
+    post:
+      operationId: mkt.Translation.gate
+      summary: Translation-completeness release gate
+      description: |-
+        Translation-completeness release gate
+
+        PRD inputs: release candidate (module or pack, version, build id)
+        PRD outputs: result, failures, bundle versions, evidence ref
+      tags:
+      - Translation
+      x-requirement:
+      - REQ-MKT-005
+      - REQ-MKT-335
+      x-anchor:
+      - REQ-MKT-005
+      x-anchor-mapped:
+      - REQ-MKT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a (check)'
+      x-exposure:
+      - ui
+      x-permission: mkt.Translation.gate
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1516
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslationGateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationGateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/terminology:
+    get:
+      operationId: mkt.Terminology.list
+      summary: Terminology base of record
+      description: |-
+        Terminology base of record
+
+        PRD inputs: term, renderings / decision
+        PRD outputs: entries
+      tags:
+      - Terminology
+      x-requirement:
+      - REQ-MKT-005
+      - REQ-MKT-342
+      x-anchor:
+      - REQ-MKT-005
+      x-anchor-mapped:
+      - REQ-MKT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: propose'
+      x-exposure:
+      - ui
+      x-permission: mkt.Terminology.list
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1517
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminologyListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/terminology/propose:
+    post:
+      operationId: mkt.Terminology.propose
+      summary: Terminology base of record
+      description: |-
+        Terminology base of record
+
+        PRD inputs: term, renderings / decision
+        PRD outputs: entries
+      tags:
+      - Terminology
+      x-requirement:
+      - REQ-MKT-005
+      - REQ-MKT-342
+      x-anchor:
+      - REQ-MKT-005
+      x-anchor-mapped:
+      - REQ-MKT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: propose'
+      x-exposure:
+      - ui
+      x-permission: mkt.Terminology.propose
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1517
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TerminologyProposeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminologyProposeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/terminology/approve:
+    post:
+      operationId: mkt.Terminology.approve
+      summary: Terminology base of record
+      description: |-
+        Terminology base of record
+
+        PRD inputs: term, renderings / decision
+        PRD outputs: entries
+      tags:
+      - Terminology
+      x-requirement:
+      - REQ-MKT-005
+      - REQ-MKT-342
+      x-anchor:
+      - REQ-MKT-005
+      x-anchor-mapped:
+      - REQ-MKT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: propose'
+      x-exposure:
+      - ui
+      x-permission: mkt.Terminology.approve
+      x-error-codes:
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1517
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TerminologyApproveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminologyApproveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/rounding/apply:
+    post:
+      operationId: mkt.Rounding.apply
+      summary: Rounding
+      description: |-
+        Rounding
+
+        PRD inputs: amount, currency, purpose, context
+        PRD outputs: amount after rounding, rule id, residual
+      tags:
+      - Rounding
+      x-requirement:
+      - REQ-MKT-006
+      - REQ-MKT-195
+      x-anchor:
+      - REQ-MKT-006
+      x-anchor-mapped:
+      - REQ-MKT-006
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; classified query by the contract builder (PRD purpose is a read or pure computation)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CLM
+      - FIN
+      - PFC
+      - POL
+      - RAT
+      - RI
+      x-permission: mkt.Rounding.apply
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1520
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoundingApplyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoundingApplyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/currencies/rule:
+    get:
+      operationId: mkt.Currency.rule
+      summary: Currency roles and rate types
+      description: |-
+        Currency roles and rate types
+
+        PRD inputs: entity, purpose
+        PRD outputs: rule
+      tags:
+      - Currency
+      x-requirement:
+      - REQ-MKT-006
+      - REQ-MKT-190
+      - REQ-MKT-196
+      x-anchor:
+      - REQ-MKT-006
+      x-anchor-mapped:
+      - REQ-MKT-006
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      x-permission: mkt.Currency.rule
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1521
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: entity
+        in: query
+        required: false
+        description: 'PRD: "entity"'
+        schema:
+          type: string
+      - name: purpose
+        in: query
+        required: false
+        description: 'PRD: "purpose"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyRuleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/currencies/convert-fixed:
+    post:
+      operationId: mkt.Currency.convertFixed
+      summary: Fixed-rate conversion
+      description: |-
+        Fixed-rate conversion
+
+        PRD inputs: amount, from, to, plan
+        PRD outputs: converted, rule
+      tags:
+      - Currency
+      x-requirement:
+      - REQ-MKT-006
+      - REQ-MKT-199
+      x-anchor:
+      - REQ-MKT-006
+      x-anchor-mapped:
+      - REQ-MKT-006
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - MIG
+      x-permission: mkt.Currency.convertFixed
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1522
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurrencyConvertFixedRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyConvertFixedResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/changeover/configuration:
+    get:
+      operationId: mkt.Changeover.configuration
+      summary: MKT changeover keys bound to a MIG plan id
+      description: |-
+        MKT changeover keys bound to a MIG plan id
+
+        PRD inputs: plan id
+        PRD outputs: keys, values, activation state
+      tags:
+      - Changeover
+      x-requirement:
+      - REQ-MKT-198
+      - REQ-MKT-200
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.Changeover.configuration
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1523
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: planId
+        in: query
+        required: false
+        description: 'PRD: "plan id"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeoverConfigurationResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/regime-codes:
+    get:
+      operationId: mkt.RegimeCode.list
+      summary: Code lists
+      description: |-
+        Code lists
+
+        PRD inputs: regime, version/date, code
+        PRD outputs: codes / validity
+      tags:
+      - RegimeCode
+      x-requirement:
+      - REQ-MKT-007
+      - REQ-MKT-208
+      x-anchor:
+      - REQ-MKT-007
+      x-anchor-mapped:
+      - REQ-MKT-007
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - DAT
+      - PFC
+      x-permission: mkt.RegimeCode.list
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1524
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegimeCodeListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/regime-codes/{id}:
+    get:
+      operationId: mkt.RegimeCode.get
+      summary: Code lists
+      description: |-
+        Code lists
+
+        PRD inputs: regime, version/date, code
+        PRD outputs: codes / validity
+      tags:
+      - RegimeCode
+      x-requirement:
+      - REQ-MKT-007
+      - REQ-MKT-208
+      x-anchor:
+      - REQ-MKT-007
+      x-anchor-mapped:
+      - REQ-MKT-007
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - DAT
+      x-permission: mkt.RegimeCode.get
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1524
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the RegimeCode
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegimeCodeGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/regime-codes/validate:
+    post:
+      operationId: mkt.RegimeCode.validate
+      summary: Code lists
+      description: |-
+        Code lists
+
+        PRD inputs: regime, version/date, code
+        PRD outputs: codes / validity
+      tags:
+      - RegimeCode
+      x-requirement:
+      - REQ-MKT-007
+      - REQ-MKT-208
+      x-anchor:
+      - REQ-MKT-007
+      x-anchor-mapped:
+      - REQ-MKT-007
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - DAT
+      x-permission: mkt.RegimeCode.validate
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1524
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegimeCodeValidateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegimeCodeValidateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/regime-codes/crosswalk:
+    get:
+      operationId: mkt.RegimeCode.crosswalk
+      summary: Code lists
+      description: |-
+        Code lists
+
+        PRD inputs: regime, version/date, code
+        PRD outputs: codes / validity
+      tags:
+      - RegimeCode
+      x-requirement:
+      - REQ-MKT-007
+      - REQ-MKT-208
+      x-anchor:
+      - REQ-MKT-007
+      x-anchor-mapped:
+      - REQ-MKT-007
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.RegimeCode.crosswalk
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1524
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegimeCodeCrosswalkResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/risk-locations/resolve:
+    post:
+      operationId: mkt.RiskLocation.resolve
+      summary: Risk location
+      description: |-
+        Risk location
+
+        PRD inputs: risk type, attributes, policyholder
+        PRD outputs: jurisdiction(+subdivision), rule applied
+      tags:
+      - RiskLocation
+      x-requirement:
+      - REQ-MKT-216
+      x-wave: W8
+      x-work-packages:
+      - W8-MKT-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - POL
+      x-permission: mkt.RiskLocation.resolve
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1525
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskLocationResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskLocationResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/cross-borders/check:
+    post:
+      operationId: mkt.CrossBorder.check
+      summary: Authorisation check; business basis
+      description: |-
+        Authorisation check; business basis
+
+        PRD inputs: entity, host State, class, date
+        PRD outputs: authorised + reason; DOMESTIC/FOS/FOE
+      tags:
+      - CrossBorder
+      x-requirement:
+      - REQ-MKT-221
+      - REQ-MKT-222
+      x-wave: W8
+      x-work-packages:
+      - W8-MKT-01
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - POL
+      x-permission: mkt.CrossBorder.check
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1526
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrossBorderCheckRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrossBorderCheckResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/cross-borders/basis:
+    get:
+      operationId: mkt.CrossBorder.basis
+      summary: Authorisation check; business basis
+      description: |-
+        Authorisation check; business basis
+
+        PRD inputs: entity, host State, class, date
+        PRD outputs: authorised + reason; DOMESTIC/FOS/FOE
+      tags:
+      - CrossBorder
+      x-requirement:
+      - REQ-MKT-221
+      - REQ-MKT-222
+      x-wave: W8
+      x-work-packages:
+      - W8-MKT-01
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.CrossBorder.basis
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1526
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: entity
+        in: query
+        required: false
+        description: 'PRD: "entity"'
+        schema:
+          type: string
+      - name: hostState
+        in: query
+        required: false
+        description: 'PRD: "host State"'
+        schema:
+          type: string
+      - name: class
+        in: query
+        required: false
+        description: 'PRD: "class"'
+        schema:
+          type: string
+      - name: date
+        in: query
+        required: false
+        description: 'PRD: "date"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrossBorderBasisResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/statutory-clock-sets/{id}:
+    get:
+      operationId: mkt.StatutoryClockSet.get
+      summary: Clock values
+      description: |-
+        Clock values
+
+        PRD inputs: clock code, jurisdiction, date
+        PRD outputs: values
+      tags:
+      - StatutoryClockSet
+      x-requirement:
+      - REQ-MKT-009
+      - REQ-MKT-291
+      x-anchor:
+      - REQ-MKT-009
+      x-anchor-mapped:
+      - REQ-MKT-009
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-06
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CMP
+      x-permission: mkt.StatutoryClockSet.get
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1527
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the StatutoryClockSet
+        schema:
+          type: string
+      - name: clockCode
+        in: query
+        required: false
+        description: 'PRD: "clock code"'
+        schema:
+          type: string
+      - name: jurisdiction
+        in: query
+        required: false
+        description: 'PRD: "jurisdiction"'
+        schema:
+          type: string
+      - name: date
+        in: query
+        required: false
+        description: 'PRD: "date"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatutoryClockSetGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/statutory-clock-sets:
+    get:
+      operationId: mkt.StatutoryClockSet.list
+      summary: Clock values
+      description: |-
+        Clock values
+
+        PRD inputs: clock code, jurisdiction, date
+        PRD outputs: values
+      tags:
+      - StatutoryClockSet
+      x-requirement:
+      - REQ-MKT-009
+      - REQ-MKT-291
+      x-anchor:
+      - REQ-MKT-009
+      x-anchor-mapped:
+      - REQ-MKT-009
+      x-wave: W1
+      x-work-packages:
+      - W1-MKT-06
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CMP
+      x-permission: mkt.StatutoryClockSet.list
+      x-error-codes: []
+      x-source:
+      - PRD-17 §9.1 l.1527
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: clockCode
+        in: query
+        required: false
+        description: 'PRD: "clock code"'
+        schema:
+          type: string
+      - name: jurisdiction
+        in: query
+        required: false
+        description: 'PRD: "jurisdiction"'
+        schema:
+          type: string
+      - name: date
+        in: query
+        required: false
+        description: 'PRD: "date"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatutoryClockSetListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+x-operation-families:
+- family: mkt.Translation.*
+  summary: Translation workflow
+  inputs: entries
+  outputs: entries
+  x-requirement:
+  - REQ-MKT-005
+  - REQ-MKT-171..REQ-MKT-173
+  - REQ-MKT-186
+  x-anchor-mapped:
+  - REQ-MKT-005
+  x-wave: W1
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-17 §9.1 l.1519
+- family: mkt.LegalEntity.*
+  summary: Registries
+  inputs: per operation
+  outputs: records
+  x-requirement:
+  - REQ-MKT-151..REQ-MKT-164
+  - REQ-MKT-218
+  - REQ-MKT-275
+  x-wave: W1
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-17 §9.1 l.1528
+- family: mkt.Partition.*
+  summary: Registries
+  inputs: per operation
+  outputs: records
+  x-requirement:
+  - REQ-MKT-151..REQ-MKT-164
+  - REQ-MKT-218
+  - REQ-MKT-275
+  x-wave: W1
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-17 §9.1 l.1528
+- family: mkt.CrossBorderAuthorisation.*
+  summary: Registries
+  inputs: per operation
+  outputs: records
+  x-requirement:
+  - REQ-MKT-151..REQ-MKT-164
+  - REQ-MKT-218
+  - REQ-MKT-275
+  x-wave: W1
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-17 §9.1 l.1528
+- family: mkt.Market.*
+  summary: Registries
+  inputs: per operation
+  outputs: records
+  x-requirement:
+  - REQ-MKT-151..REQ-MKT-164
+  - REQ-MKT-218
+  - REQ-MKT-275
+  x-wave: W1
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-17 §9.1 l.1528
+x-excluded:
+- name: TaxCalculator.calculate / treatment
+  requirement:
+  - REQ-MKT-087
+  - REQ-MKT-330
+  reason: SPI, reached through mkt.Spi.bind in-process; documented in spi.md
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+  schemas:
+    ConfigurationResolveRequest:
+      type: object
+      description: 'mkt.Configuration.resolve request. PRD inputs: "entity, jurisdiction(+subdivision), product, channel,
+        dates by time basis, hash or knownAt, keys/namespace"'
+      properties:
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        jurisdiction:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "jurisdiction(+subdivision)"'
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+        datesByTimeBasis:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "dates by time basis"'
+        hashOrKnownat:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash or knownAt"'
+        keysNamespace:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "keys/namespace"'
+    ConfigurationResolveResponse:
+      type: object
+      description: 'mkt.Configuration.resolve result. PRD outputs: "values with source, version, validity, final, trace; hash"'
+      properties:
+        valuesSource:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "values with source"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        validity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validity"'
+        final:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "final"'
+        trace:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "trace"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+    ConfigurationCurrentHashResponse:
+      type: object
+      description: 'mkt.Configuration.currentHash result. PRD outputs: "hash, activated_at"'
+      properties:
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+        activatedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "activated_at"'
+    ConfigurationExplainResponse:
+      type: object
+      description: 'mkt.Configuration.explain result. PRD outputs: "layer contributions, merge steps, CR and approvers"'
+      properties:
+        layerContributions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "layer contributions"'
+        mergeSteps:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "merge steps"'
+        crAndApprovers:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "CR and approvers"'
+    ConfigurationCompareResponse:
+      type: object
+      description: 'mkt.Configuration.compare result. PRD outputs: "changes"'
+      properties:
+        changes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "changes"'
+    ConfigurationExportRequest:
+      type: object
+      description: 'mkt.Configuration.export request. PRD inputs: "hash, optional context"'
+      properties:
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+        context:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "optional context" (optional)'
+    ConfigurationExportResponse:
+      type: object
+      description: 'mkt.Configuration.export result. PRD outputs: "signed canonical JSON"'
+      properties:
+        signedCanonicalJson:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "signed canonical JSON"'
+    ConfigChangeRequestCreateRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.create request. PRD inputs: "request body / decision"'
+      x-status: minimal
+    ConfigChangeRequestCreateResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.create result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    ConfigChangeRequestUpdateRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.update request. PRD inputs: "request body / decision"'
+      x-status: minimal
+    ConfigChangeRequestUpdateResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.update result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    ConfigChangeRequestSubmitRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.submit request. PRD inputs: "request body / decision"'
+      x-status: minimal
+    ConfigChangeRequestSubmitResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.submit result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    ConfigChangeRequestApproveRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.approve request. PRD inputs: "request body / decision"'
+      x-status: minimal
+    ConfigChangeRequestApproveResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.approve result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    ConfigChangeRequestRejectRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.reject request. PRD inputs: "request body / decision"'
+      x-status: minimal
+    ConfigChangeRequestRejectResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.reject result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    ConfigChangeRequestScheduleRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.schedule request. PRD inputs: "request body / decision"'
+      x-status: minimal
+    ConfigChangeRequestScheduleResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.schedule result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    ConfigChangeRequestWithdrawRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.withdraw request. PRD inputs: "request body / decision"'
+      x-status: minimal
+    ConfigChangeRequestWithdrawResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.withdraw result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    ConfigChangeRequestRebaseRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.rebase request. PRD inputs: "request body / decision"'
+      x-status: minimal
+    ConfigChangeRequestRebaseResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.rebase result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    ConfigChangeRequestPreviewRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.preview request. PRD inputs: "request id"'
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "request id"'
+    ConfigChangeRequestPreviewResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.preview result. PRD outputs: "preview run"'
+      properties:
+        previewRun:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "preview run"'
+    ConfigChangeRequestImportRequest:
+      type: object
+      description: 'mkt.ConfigChangeRequest.import request. PRD inputs: "file"'
+      properties:
+        file:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file"'
+    ConfigChangeRequestImportResponse:
+      type: object
+      description: 'mkt.ConfigChangeRequest.import result. PRD outputs: "validation report"'
+      properties:
+        validationReport:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation report"'
+    SpiCatalogueResponse:
+      type: object
+      description: 'mkt.Spi.catalogue result. PRD outputs: "SPIs, status"'
+      properties:
+        sPIs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "SPIs"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    SpiBindRequest:
+      type: object
+      description: 'mkt.Spi.bind request. PRD inputs: "entity, SPI, axis value, qualifier, date, hash"'
+      properties:
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        spi:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "SPI"'
+        axisValue:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "axis value"'
+        qualifier:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "qualifier"'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "date"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+    SpiBindResponse:
+      type: object
+      description: 'mkt.Spi.bind result. PRD outputs: "implementation handle, pack version, binding id"'
+      properties:
+        implementationHandle:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "implementation handle"'
+        packVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pack version"'
+        bindingId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "binding id"'
+    SpiSuspendRequest:
+      type: object
+      description: 'mkt.Spi.suspend request. PRD inputs: "entity, SPI, reason, expiry"'
+      properties:
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        spi:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "SPI"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        expiry:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "expiry"'
+    SpiSuspendResponse:
+      type: object
+      description: 'mkt.Spi.suspend result. PRD outputs: "binding"'
+      properties:
+        binding:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binding"'
+    PackListItem:
+      type: object
+      description: 'mkt.Pack.list result. PRD outputs: "pack/version/activation"'
+      properties:
+        packVersionActivation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pack/version/activation"'
+    PackListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PackListItem'
+      description: Page of mkt.Pack.list results (cursor pagination, contract §3.5.5)
+    PackGetResponse:
+      type: object
+      description: 'mkt.Pack.get result. PRD outputs: "pack/version/activation"'
+      properties:
+        packVersionActivation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pack/version/activation"'
+    PackCertifyRequest:
+      type: object
+      description: 'mkt.Pack.certify request. PRD inputs: "per operation"'
+      x-status: minimal
+    PackCertifyResponse:
+      type: object
+      description: 'mkt.Pack.certify result. PRD outputs: "pack/version/activation"'
+      properties:
+        packVersionActivation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pack/version/activation"'
+    PackPublishRequest:
+      type: object
+      description: 'mkt.Pack.publish request. PRD inputs: "per operation"'
+      x-status: minimal
+    PackPublishResponse:
+      type: object
+      description: 'mkt.Pack.publish result. PRD outputs: "pack/version/activation"'
+      properties:
+        packVersionActivation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pack/version/activation"'
+    PackScheduleActivationRequest:
+      type: object
+      description: 'mkt.Pack.scheduleActivation request. PRD inputs: "per operation"'
+      x-status: minimal
+    PackScheduleActivationResponse:
+      type: object
+      description: 'mkt.Pack.scheduleActivation result. PRD outputs: "pack/version/activation"'
+      properties:
+        packVersionActivation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pack/version/activation"'
+    PackRollbackRequest:
+      type: object
+      description: 'mkt.Pack.rollback request. PRD inputs: "per operation"'
+      x-status: minimal
+    PackRollbackResponse:
+      type: object
+      description: 'mkt.Pack.rollback result. PRD outputs: "pack/version/activation"'
+      properties:
+        packVersionActivation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pack/version/activation"'
+    PackDeprecateRequest:
+      type: object
+      description: 'mkt.Pack.deprecate request. PRD inputs: "per operation"'
+      x-status: minimal
+    PackDeprecateResponse:
+      type: object
+      description: 'mkt.Pack.deprecate result. PRD outputs: "pack/version/activation"'
+      properties:
+        packVersionActivation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pack/version/activation"'
+    CapabilityGetResponse:
+      type: object
+      description: 'mkt.Capability.get result. PRD outputs: "state, source"'
+      properties:
+        state:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "state"'
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source"'
+    L10nBundleResponse:
+      type: object
+      description: 'mkt.L10n.bundle result. PRD outputs: "bundle / formatted string"'
+      properties:
+        bundle:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "bundle"'
+        formattedString:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "formatted string"'
+    L10nFormatResponse:
+      type: object
+      description: 'mkt.L10n.format result. PRD outputs: "bundle / formatted string"'
+      properties:
+        bundle:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "bundle"'
+        formattedString:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "formatted string"'
+    L10nSearchKeysResponse:
+      type: object
+      description: 'mkt.L10n.searchKeys result. PRD outputs: "normalised keys"'
+      properties:
+        normalisedKeys:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "normalised keys"'
+    L10nCaseMapResponse:
+      type: object
+      description: 'mkt.L10n.caseMap result. PRD outputs: "mapped text, rule version"'
+      properties:
+        mappedText:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "mapped text"'
+        ruleVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rule version"'
+    L10nUiLanguageResolveRequest:
+      type: object
+      description: 'mkt.L10nUiLanguage.resolve request. PRD inputs: "user id or device choice, browser languages, legal entity"'
+      properties:
+        userIdOrDeviceChoice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "user id or device choice"'
+        browserLanguages:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "browser languages"'
+        legalEntity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legal entity"'
+    L10nUiLanguageResolveResponse:
+      type: object
+      description: 'mkt.L10nUiLanguage.resolve result. PRD outputs: "language, source (PROFILE, DEVICE, BROWSER, ENTITY_DEFAULT),
+        allowed languages"'
+      properties:
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+          description: 'PRD: "language"'
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source (PROFILE, DEVICE, BROWSER, ENTITY_DEFAULT)"'
+        allowedLanguages:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "allowed languages"'
+    TranslationGateRequest:
+      type: object
+      description: 'mkt.Translation.gate request. PRD inputs: "release candidate (module or pack, version, build id)"'
+      properties:
+        releaseCandidate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "release candidate (module or pack, version, build id)"'
+    TranslationGateResponse:
+      type: object
+      description: 'mkt.Translation.gate result. PRD outputs: "result, failures, bundle versions, evidence ref"'
+      properties:
+        result:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result"'
+        failures:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "failures"'
+        bundleVersions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "bundle versions"'
+        evidenceRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidence ref"'
+    TerminologyListItem:
+      type: object
+      description: 'mkt.Terminology.list result. PRD outputs: "entries"'
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entries"'
+    TerminologyListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/TerminologyListItem'
+      description: Page of mkt.Terminology.list results (cursor pagination, contract §3.5.5)
+    TerminologyProposeRequest:
+      type: object
+      description: 'mkt.Terminology.propose request. PRD inputs: "term, renderings / decision"'
+      properties:
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        renderings:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "renderings"'
+        decision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision"'
+    TerminologyProposeResponse:
+      type: object
+      description: 'mkt.Terminology.propose result. PRD outputs: "entries"'
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entries"'
+    TerminologyApproveRequest:
+      type: object
+      description: 'mkt.Terminology.approve request. PRD inputs: "term, renderings / decision"'
+      properties:
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        renderings:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "renderings"'
+        decision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision"'
+    TerminologyApproveResponse:
+      type: object
+      description: 'mkt.Terminology.approve result. PRD outputs: "entries"'
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entries"'
+    RoundingApplyRequest:
+      type: object
+      description: 'mkt.Rounding.apply request. PRD inputs: "amount, currency, purpose, context"'
+      properties:
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: 'PRD: "amount"'
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+          description: 'PRD: "currency"'
+        purpose:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "purpose"'
+        context:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "context"'
+    RoundingApplyResponse:
+      type: object
+      description: 'mkt.Rounding.apply result. PRD outputs: "amount after rounding, rule id, residual"'
+      properties:
+        amountAfterRounding:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "amount after rounding"'
+        ruleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "rule id"'
+        residual:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "residual"'
+    CurrencyRuleResponse:
+      type: object
+      description: 'mkt.Currency.rule result. PRD outputs: "rule"'
+      properties:
+        rule:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rule"'
+    CurrencyConvertFixedRequest:
+      type: object
+      description: 'mkt.Currency.convertFixed request. PRD inputs: "amount, from, to, plan"'
+      properties:
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: 'PRD: "amount"'
+        from:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "from"'
+        to:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "to"'
+        plan:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "plan"'
+    CurrencyConvertFixedResponse:
+      type: object
+      description: 'mkt.Currency.convertFixed result. PRD outputs: "converted, rule"'
+      properties:
+        converted:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "converted"'
+        rule:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rule"'
+    ChangeoverConfigurationResponse:
+      type: object
+      description: 'mkt.Changeover.configuration result. PRD outputs: "keys, values, activation state"'
+      properties:
+        keys:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "keys"'
+        values:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "values"'
+        activationState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activation state"'
+    RegimeCodeListItem:
+      type: object
+      description: 'mkt.RegimeCode.list result. PRD outputs: "codes / validity"'
+      properties:
+        codes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "codes"'
+        validity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validity"'
+    RegimeCodeListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RegimeCodeListItem'
+      description: Page of mkt.RegimeCode.list results (cursor pagination, contract §3.5.5)
+    RegimeCodeGetResponse:
+      type: object
+      description: 'mkt.RegimeCode.get result. PRD outputs: "codes / validity"'
+      properties:
+        codes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "codes"'
+        validity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validity"'
+    RegimeCodeValidateRequest:
+      type: object
+      description: 'mkt.RegimeCode.validate request. PRD inputs: "regime, version/date, code"'
+      properties:
+        regime:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "regime"'
+        versionDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "version/date"'
+        code:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "code"'
+    RegimeCodeValidateResponse:
+      type: object
+      description: 'mkt.RegimeCode.validate result. PRD outputs: "codes / validity"'
+      properties:
+        codes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "codes"'
+        validity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validity"'
+    RegimeCodeCrosswalkResponse:
+      type: object
+      description: 'mkt.RegimeCode.crosswalk result. PRD outputs: "codes / validity"'
+      properties:
+        codes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "codes"'
+        validity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validity"'
+    RiskLocationResolveRequest:
+      type: object
+      description: 'mkt.RiskLocation.resolve request. PRD inputs: "risk type, attributes, policyholder"'
+      properties:
+        riskType:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "risk type"'
+        attributes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "attributes"'
+        policyholder:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policyholder"'
+    RiskLocationResolveResponse:
+      type: object
+      description: 'mkt.RiskLocation.resolve result. PRD outputs: "jurisdiction(+subdivision), rule applied"'
+      properties:
+        jurisdiction:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "jurisdiction(+subdivision)"'
+        ruleApplied:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rule applied"'
+    CrossBorderCheckRequest:
+      type: object
+      description: 'mkt.CrossBorder.check request. PRD inputs: "entity, host State, class, date"'
+      properties:
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        hostState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "host State"'
+        class:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "class"'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "date"'
+    CrossBorderCheckResponse:
+      type: object
+      description: 'mkt.CrossBorder.check result. PRD outputs: "authorised + reason; DOMESTIC/FOS/FOE"'
+      properties:
+        authorisedReason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "authorised + reason"'
+        domesticFosFoe:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "DOMESTIC/FOS/FOE"'
+    CrossBorderBasisResponse:
+      type: object
+      description: 'mkt.CrossBorder.basis result. PRD outputs: "authorised + reason; DOMESTIC/FOS/FOE"'
+      properties:
+        authorisedReason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "authorised + reason"'
+        domesticFosFoe:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "DOMESTIC/FOS/FOE"'
+    StatutoryClockSetGetResponse:
+      type: object
+      description: 'mkt.StatutoryClockSet.get result. PRD outputs: "values"'
+      properties:
+        values:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "values"'
+    StatutoryClockSetListItem:
+      type: object
+      description: 'mkt.StatutoryClockSet.list result. PRD outputs: "values"'
+      properties:
+        values:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "values"'
+    StatutoryClockSetListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/StatutoryClockSetListItem'
+      description: Page of mkt.StatutoryClockSet.list results (cursor pagination, contract §3.5.5)

@@ -1,0 +1,2659 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: PFC — Product factory and configuration API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by PFC (PRD-02 §9.1)
+  description: 'Contract of the operations PFC exposes (PRD-02 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: PFC
+  x-prd: PRD-02
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: ProductVersion
+- name: Artifact
+- name: Catalogue
+- name: ChargeType
+- name: RegulatoryMapping
+- name: QuestionSet
+- name: Pog
+- name: RenewalConversion
+- name: Availability
+- name: Product
+- name: PolicyDraft
+- name: ChangeSet
+- name: ImpactAnalysis
+- name: ProductImport
+- name: LegacyXref
+- name: ReferenceTable
+paths:
+  /api/pfc/v1/product-versions/resolve:
+    post:
+      operationId: pfc.ProductVersion.resolve
+      summary: Resolve Locked version for a transaction
+      description: |-
+        Resolve Locked version for a transaction
+
+        PRD inputs: jurisdiction, legalEntity, product, channel, transactionType (NewBusiness, Renewal), date, optional knownAt, optional predecessorHash (renewal)
+        PRD outputs: version, artefactHash, resolutionManifest, resolutionHash
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-001
+      - REQ-PFC-167
+      - REQ-PFC-221
+      x-anchor:
+      - REQ-PFC-001
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - DOC
+      - MIG
+      - MKT
+      - POL
+      - RAT
+      x-permission: pfc.ProductVersion.resolve
+      x-error-codes:
+      - code: PFC-ERR-NO-VERSION
+        note: reason
+        status: 422
+      - code: PFC-ERR-UNKNOWN-PRODUCT
+        status: 422
+      - code: PFC-ERR-ABSTRACT
+        status: 422
+      - code: PFC-ERR-NO-RATING
+        status: 422
+      x-source:
+      - PRD-02 §9.1 l.1460
+      x-superseded-names:
+      - pfc.Product.resolve (XRF-004d)
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/KnownAt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductVersionResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/artifacts/{id}:
+    get:
+      operationId: pfc.Artifact.get
+      summary: Retrieve artefact by hash
+      description: |-
+        Retrieve artefact by hash
+
+        PRD inputs: hash, optional parts
+        PRD outputs: canonical JSON artefact
+      tags:
+      - Artifact
+      x-requirement:
+      - REQ-PFC-002
+      - REQ-PFC-010
+      - REQ-PFC-227
+      x-anchor:
+      - REQ-PFC-002
+      - REQ-PFC-010
+      x-anchor-mapped:
+      - REQ-PFC-010
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-03
+      - W2-PFC-04
+      - W2-PFC-05
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - POL
+      - RAT
+      - RI
+      x-permission: pfc.Artifact.get
+      x-error-codes:
+      - code: PFC-ERR-UNKNOWN-HASH
+        status: 404
+      x-source:
+      - PRD-02 §9.1 l.1461
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Artifact (PRD input: "hash")'
+        schema:
+          type: string
+      - name: parts
+        in: query
+        required: false
+        description: 'PRD: "optional parts" (optional)'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtifactGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/catalogue/{id}:
+    get:
+      operationId: pfc.Catalogue.get
+      summary: Catalogue queries
+      description: |-
+        Catalogue queries
+
+        PRD inputs: hash, scope, code
+        PRD outputs: items with terms, finals
+      tags:
+      - Catalogue
+      x-requirement:
+      - REQ-PFC-003
+      - REQ-PFC-226
+      x-anchor:
+      - REQ-PFC-003
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-04
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - DAT
+      - DOC
+      - POL
+      - RAT
+      - RI
+      x-permission: pfc.Catalogue.get
+      x-error-codes:
+      - code: PFC-ERR-UNKNOWN-ITEM
+        status: 422
+      x-source:
+      - PRD-02 §9.1 l.1462
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Catalogue (PRD input: "hash")'
+        schema:
+          type: string
+      - name: scope
+        in: query
+        required: false
+        description: 'PRD: "scope"'
+        schema:
+          type: string
+      - name: code
+        in: query
+        required: false
+        description: 'PRD: "code"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogueGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/catalogue/get-item:
+    get:
+      operationId: pfc.Catalogue.getItem
+      summary: Catalogue queries
+      description: |-
+        Catalogue queries
+
+        PRD inputs: hash, scope, code
+        PRD outputs: items with terms, finals
+      tags:
+      - Catalogue
+      x-requirement:
+      - REQ-PFC-003
+      - REQ-PFC-226
+      x-anchor:
+      - REQ-PFC-003
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-04
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - RAT
+      x-permission: pfc.Catalogue.getItem
+      x-error-codes:
+      - code: PFC-ERR-UNKNOWN-ITEM
+        status: 422
+      x-source:
+      - PRD-02 §9.1 l.1462
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: hash
+        in: query
+        required: false
+        description: 'PRD: "hash"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+      - name: scope
+        in: query
+        required: false
+        description: 'PRD: "scope"'
+        schema:
+          type: string
+      - name: code
+        in: query
+        required: false
+        description: 'PRD: "code"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogueGetItemResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/charge-types:
+    get:
+      operationId: pfc.ChargeType.list
+      summary: Charge-type catalogue
+      description: |-
+        Charge-type catalogue
+
+        PRD inputs: hash, filters
+        PRD outputs: charge types
+      tags:
+      - ChargeType
+      x-requirement:
+      - REQ-PFC-004
+      x-anchor:
+      - REQ-PFC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-03
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - FIN
+      - POL
+      - PTY
+      - RAT
+      - RI
+      x-permission: pfc.ChargeType.list
+      x-error-codes: []
+      x-source:
+      - PRD-02 §9.1 l.1463
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: hash
+        in: query
+        required: false
+        description: 'PRD: "hash"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargeTypeListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/regulatory-mappings/{id}:
+    get:
+      operationId: pfc.RegulatoryMapping.get
+      summary: Coverage-grain mapping
+      description: |-
+        Coverage-grain mapping
+
+        PRD inputs: hash, coverage, regime, taxonomy version
+        PRD outputs: codes with list versions
+      tags:
+      - RegulatoryMapping
+      x-requirement:
+      - REQ-PFC-005
+      x-anchor:
+      - REQ-PFC-005
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-03
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - DAT
+      - POL
+      - RAT
+      - RI
+      x-permission: pfc.RegulatoryMapping.get
+      x-error-codes: []
+      x-source:
+      - PRD-02 §9.1 l.1464
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the RegulatoryMapping (PRD input: "hash")'
+        schema:
+          type: string
+      - name: coverage
+        in: query
+        required: false
+        description: 'PRD: "coverage"'
+        schema:
+          type: string
+      - name: regime
+        in: query
+        required: false
+        description: 'PRD: "regime"'
+        schema:
+          type: string
+      - name: taxonomyVersion
+        in: query
+        required: false
+        description: 'PRD: "taxonomy version"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegulatoryMappingGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/question-sets/{id}:
+    get:
+      operationId: pfc.QuestionSet.get
+      summary: Question sets and visibility
+      description: |-
+        Question sets and visibility
+
+        PRD inputs: hash, set, answers
+        PRD outputs: questions with visible/required flags, knock-out and referral flags
+      tags:
+      - QuestionSet
+      x-requirement:
+      - REQ-PFC-006
+      x-anchor:
+      - REQ-PFC-006
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-02
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query (pure)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - POL
+      x-permission: pfc.QuestionSet.get
+      x-error-codes:
+      - code: PFC-ERR-UNKNOWN-ITEM
+        status: 422
+      x-source:
+      - PRD-02 §9.1 l.1465
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the QuestionSet (PRD input: "hash")'
+        schema:
+          type: string
+      - name: set
+        in: query
+        required: false
+        description: 'PRD: "set"'
+        schema:
+          type: string
+      - name: answers
+        in: query
+        required: false
+        description: 'PRD: "answers"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionSetGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/question-sets/evaluate:
+    post:
+      operationId: pfc.QuestionSet.evaluate
+      summary: Question sets and visibility
+      description: |-
+        Question sets and visibility
+
+        PRD inputs: hash, set, answers
+        PRD outputs: questions with visible/required flags, knock-out and referral flags
+      tags:
+      - QuestionSet
+      x-requirement:
+      - REQ-PFC-006
+      x-anchor:
+      - REQ-PFC-006
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-02
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query (pure)'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - POL
+      x-permission: pfc.QuestionSet.evaluate
+      x-error-codes:
+      - code: PFC-ERR-UNKNOWN-ITEM
+        status: 422
+      x-source:
+      - PRD-02 §9.1 l.1465
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionSetEvaluateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionSetEvaluateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/pogs/get:
+    get:
+      operationId: pfc.Pog.get
+      summary: POG record
+      description: |-
+        POG record
+
+        PRD inputs: product, version, includeDistributorPack
+        PRD outputs: target market, negative, strategy, testing summary, review status
+      tags:
+      - Pog
+      x-requirement:
+      - REQ-PFC-007
+      x-anchor:
+      - REQ-PFC-007
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-03
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pfc.Pog.get
+      x-error-codes: []
+      x-source:
+      - PRD-02 §9.1 l.1466
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: product
+        in: query
+        required: false
+        description: 'PRD: "product"'
+        schema:
+          type: string
+      - name: version
+        in: query
+        required: false
+        description: 'PRD: "version"'
+        schema:
+          type: string
+      - name: includeDistributorPack
+        in: query
+        required: false
+        description: 'PRD: "includeDistributorPack"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PogGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/renewal-conversions/convert:
+    post:
+      operationId: pfc.RenewalConversion.convert
+      summary: Convert a term's selections
+      description: |-
+        Convert a term's selections
+
+        PRD inputs: sourceHash or `LEGACY:<code>`, targetHash, term selections, renewal date
+        PRD outputs: converted selections, grandfathered items, referrals, non-renew decision
+      tags:
+      - RenewalConversion
+      x-requirement:
+      - REQ-PFC-008
+      x-anchor:
+      - REQ-PFC-008
+      x-wave: W6
+      x-work-packages:
+      - W6-PFC-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Pure; dry-run by nature'
+      x-exposure:
+      - ui
+      x-consumers:
+      - POL
+      x-permission: pfc.RenewalConversion.convert
+      x-error-codes:
+      - code: PFC-ERR-NO-CONVERSION-RULES
+        status: 422
+      x-source:
+      - PRD-02 §9.1 l.1467
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalConversionConvertRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenewalConversionConvertResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/availability/check:
+    post:
+      operationId: pfc.Availability.check
+      summary: Availability of any item
+      description: |-
+        Availability of any item
+
+        PRD inputs: hash, item, context (region, channel, transaction type, producer, element data, date)
+        PRD outputs: available, reason, winning rule id
+      tags:
+      - Availability
+      x-requirement:
+      - REQ-PFC-011
+      x-anchor:
+      - REQ-PFC-011
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-02
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - POL
+      x-permission: pfc.Availability.check
+      x-error-codes: []
+      x-source:
+      - PRD-02 §9.1 l.1468
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityCheckRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityCheckResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/products/describe:
+    post:
+      operationId: pfc.Product.describe
+      summary: UI and partner description
+      description: |-
+        UI and partner description
+
+        PRD inputs: product or hash, channel, transactionType, language, date
+        PRD outputs: ordered steps, fields, rules, offerings, coverages, payment plans
+      tags:
+      - Product
+      x-requirement:
+      - REQ-PFC-222
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - BIL
+      - CHN
+      - POL
+      x-partner-routes:
+      - CHN facade GET /api/chn/v1/products/{code}/describe
+      - MCP tool product_info
+      x-permission: pfc.Product.describe
+      x-error-codes:
+      - code: PFC-ERR-NO-VERSION
+        status: 422
+      x-source:
+      - PRD-02 §9.1 l.1469
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDescribeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDescribeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/policy-drafts/validate:
+    post:
+      operationId: pfc.PolicyDraft.validate
+      summary: Validate a draft
+      description: |-
+        Validate a draft
+
+        PRD inputs: hash, checkpoint, draft
+        PRD outputs: errors[] (level, rule, path, message key, GR/EN message, severity)
+      tags:
+      - PolicyDraft
+      x-requirement:
+      - REQ-PFC-224
+      - REQ-PFC-225
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-04
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Pure'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - POL
+      x-permission: pfc.PolicyDraft.validate
+      x-error-codes: []
+      x-source:
+      - PRD-02 §9.1 l.1470
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyDraftValidateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyDraftValidateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/change-sets:
+    post:
+      operationId: pfc.ChangeSet.create
+      summary: Authoring
+      description: |-
+        Authoring
+
+        PRD inputs: product, base, edits
+        PRD outputs: change set state, validation
+      tags:
+      - ChangeSet
+      x-requirement:
+      - REQ-PFC-182..REQ-PFC-188
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key required'
+      x-exposure:
+      - ui
+      x-permission: pfc.ChangeSet.create
+      x-error-codes:
+      - code: PFC-ERR-CONFLICT
+        status: 409
+      - code: PFC-ERR-FORBIDDEN
+        status: 403
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSetCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeSetCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/change-sets/edit:
+    post:
+      operationId: pfc.ChangeSet.edit
+      summary: Authoring
+      description: |-
+        Authoring
+
+        PRD inputs: product, base, edits
+        PRD outputs: change set state, validation
+      tags:
+      - ChangeSet
+      x-requirement:
+      - REQ-PFC-182..REQ-PFC-188
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key required'
+      x-exposure:
+      - ui
+      x-permission: pfc.ChangeSet.edit
+      x-error-codes:
+      - code: PFC-ERR-CONFLICT
+        status: 409
+      - code: PFC-ERR-FORBIDDEN
+        status: 403
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSetEditRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeSetEditResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/change-sets/revert:
+    post:
+      operationId: pfc.ChangeSet.revert
+      summary: Authoring
+      description: |-
+        Authoring
+
+        PRD inputs: product, base, edits
+        PRD outputs: change set state, validation
+      tags:
+      - ChangeSet
+      x-requirement:
+      - REQ-PFC-182..REQ-PFC-188
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key required'
+      x-exposure:
+      - ui
+      x-permission: pfc.ChangeSet.revert
+      x-error-codes:
+      - code: PFC-ERR-CONFLICT
+        status: 409
+      - code: PFC-ERR-FORBIDDEN
+        status: 403
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSetRevertRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeSetRevertResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/change-sets/rebase:
+    post:
+      operationId: pfc.ChangeSet.rebase
+      summary: Authoring
+      description: |-
+        Authoring
+
+        PRD inputs: product, base, edits
+        PRD outputs: change set state, validation
+      tags:
+      - ChangeSet
+      x-requirement:
+      - REQ-PFC-182..REQ-PFC-188
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key required'
+      x-exposure:
+      - ui
+      x-permission: pfc.ChangeSet.rebase
+      x-error-codes:
+      - code: PFC-ERR-CONFLICT
+        status: 409
+      - code: PFC-ERR-FORBIDDEN
+        status: 403
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSetRebaseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeSetRebaseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/change-sets/abandon:
+    post:
+      operationId: pfc.ChangeSet.abandon
+      summary: Authoring
+      description: |-
+        Authoring
+
+        PRD inputs: product, base, edits
+        PRD outputs: change set state, validation
+      tags:
+      - ChangeSet
+      x-requirement:
+      - REQ-PFC-182..REQ-PFC-188
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key required'
+      x-exposure:
+      - ui
+      x-permission: pfc.ChangeSet.abandon
+      x-error-codes:
+      - code: PFC-ERR-CONFLICT
+        status: 409
+      - code: PFC-ERR-FORBIDDEN
+        status: 403
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSetAbandonRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeSetAbandonResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/submit:
+    post:
+      operationId: pfc.ProductVersion.submit
+      summary: Submit for approval
+      description: |-
+        Submit for approval
+
+        PRD inputs: change set id
+        PRD outputs: version status, check results
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-186
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run runs checks only'
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.submit
+      x-error-codes:
+      - code: PFC-ERR-CHECKS-FAILED
+        status: 422
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1472
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductVersionSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/sign-off:
+    post:
+      operationId: pfc.ProductVersion.signOff
+      summary: Approve or return
+      description: |-
+        Approve or return
+
+        PRD inputs: version, role, decision, comment, conditions
+        PRD outputs: approval state
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-204
+      - REQ-PFC-206
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.signOff
+      x-authority-types:
+      - PFC.ProductApproval
+      x-authority-source:
+      - PRD-02 l.613
+      x-error-codes:
+      - code: PFC-ERR-MAKER-IS-CHECKER
+        status: 403
+      - code: PFC-ERR-AUTHORITY
+        status: 403
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1473
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductVersionSignOffRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionSignOffResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/schedule:
+    post:
+      operationId: pfc.ProductVersion.schedule
+      summary: Release
+      description: |-
+        Release
+
+        PRD inputs: version, environment, activation time, reason
+        PRD outputs: schedule
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-211..REQ-PFC-213
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.schedule
+      x-error-codes:
+      - code: PFC-ERR-SOD
+        status: 403
+      - code: PFC-ERR-NO-RATING
+        status: 422
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1474
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductVersionScheduleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionScheduleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/cancel-schedule:
+    post:
+      operationId: pfc.ProductVersion.cancelSchedule
+      summary: Release
+      description: |-
+        Release
+
+        PRD inputs: version, environment, activation time, reason
+        PRD outputs: schedule
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-211..REQ-PFC-213
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.cancelSchedule
+      x-error-codes:
+      - code: PFC-ERR-SOD
+        status: 403
+      - code: PFC-ERR-NO-RATING
+        status: 422
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1474
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductVersionCancelScheduleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionCancelScheduleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/fall-back:
+    post:
+      operationId: pfc.ProductVersion.fallBack
+      summary: Release
+      description: |-
+        Release
+
+        PRD inputs: version, environment, activation time, reason
+        PRD outputs: schedule
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-211..REQ-PFC-213
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.fallBack
+      x-error-codes:
+      - code: PFC-ERR-SOD
+        status: 403
+      - code: PFC-ERR-NO-RATING
+        status: 422
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1474
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductVersionFallBackRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionFallBackResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/diff:
+    get:
+      operationId: pfc.ProductVersion.diff
+      summary: Business-language diff
+      description: |-
+        Business-language diff
+
+        PRD inputs: from, to, language
+        PRD outputs: grouped entries with classes
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-200
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.diff
+      x-error-codes: []
+      x-source:
+      - PRD-02 §9.1 l.1475
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: from
+        in: query
+        required: false
+        description: 'PRD: "from"'
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        description: 'PRD: "to"'
+        schema:
+          type: string
+      - name: language
+        in: query
+        required: false
+        description: 'PRD: "language"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionDiffResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/impact-analysises/run:
+    post:
+      operationId: pfc.ImpactAnalysis.run
+      summary: Impact report
+      description: |-
+        Impact report
+
+        PRD inputs: version
+        PRD outputs: run id; async result
+      tags:
+      - ImpactAnalysis
+      x-requirement:
+      - REQ-PFC-207..REQ-PFC-209
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: pfc.ImpactAnalysis.run
+      x-error-codes:
+      - code: PFC-ERR-DATA-UNAVAILABLE
+        status: 503
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1476
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImpactAnalysisRunRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactAnalysisRunResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/pfc/v1/pogs/{id}:
+    patch:
+      operationId: pfc.Pog.update
+      summary: POG maintenance
+      description: |-
+        POG maintenance
+
+        PRD inputs: record data
+        PRD outputs: record
+      tags:
+      - Pog
+      x-requirement:
+      - REQ-PFC-148..REQ-PFC-158
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-03
+      x-status: minimal
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: pfc.Pog.update
+      x-error-codes:
+      - code: PFC-ERR-FORBIDDEN
+        status: 403
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1477
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Pog
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PogUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PogUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/pogs/record-review:
+    post:
+      operationId: pfc.Pog.recordReview
+      summary: POG maintenance
+      description: |-
+        POG maintenance
+
+        PRD inputs: record data
+        PRD outputs: record
+      tags:
+      - Pog
+      x-requirement:
+      - REQ-PFC-148..REQ-PFC-158
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-03
+      x-status: minimal
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: pfc.Pog.recordReview
+      x-error-codes:
+      - code: PFC-ERR-FORBIDDEN
+        status: 403
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1477
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PogRecordReviewRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PogRecordReviewResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/pogs/record-test:
+    post:
+      operationId: pfc.Pog.recordTest
+      summary: POG maintenance
+      description: |-
+        POG maintenance
+
+        PRD inputs: record data
+        PRD outputs: record
+      tags:
+      - Pog
+      x-requirement:
+      - REQ-PFC-148..REQ-PFC-158
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-03
+      x-status: minimal
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: pfc.Pog.recordTest
+      x-error-codes:
+      - code: PFC-ERR-FORBIDDEN
+        status: 403
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1477
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PogRecordTestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PogRecordTestResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-imports/import:
+    post:
+      operationId: pfc.ProductImport.import
+      summary: Migration import
+      description: |-
+        Migration import
+
+        PRD inputs: legacy definition, mapping
+        PRD outputs: change set or dry-run lint report
+      tags:
+      - ProductImport
+      x-requirement:
+      - REQ-PFC-240
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: pfc.ProductImport.import
+      x-error-codes:
+      - code: PFC-ERR-IMPORT-INVALID
+        status: 422
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1478
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductImportImportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductImportImportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/legacy-xrefs/get:
+    get:
+      operationId: pfc.LegacyXref.get
+      summary: Code cross-reference
+      description: |-
+        Code cross-reference
+
+        PRD inputs: legacy scheme and code
+        PRD outputs: core codes
+      tags:
+      - LegacyXref
+      x-requirement:
+      - REQ-PFC-241
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: pfc.LegacyXref.get
+      x-error-codes: []
+      x-source:
+      - PRD-02 §9.1 l.1479
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: legacySchemeAndCode
+        in: query
+        required: false
+        description: 'PRD: "legacy scheme and code"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyXrefGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/reference-tables/get:
+    get:
+      operationId: pfc.ReferenceTable.get
+      summary: Product reference table
+      description: |-
+        Product reference table
+
+        PRD inputs: code, version or date
+        PRD outputs: rows
+      tags:
+      - ReferenceTable
+      x-requirement:
+      - REQ-PFC-063
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: pfc.ReferenceTable.get
+      x-error-codes: []
+      x-source:
+      - PRD-02 §9.1 l.1480
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: code
+        in: query
+        required: false
+        description: 'PRD: "code"'
+        schema:
+          type: string
+      - name: versionOrDate
+        in: query
+        required: false
+        description: 'PRD: "version or date"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceTableGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+  schemas:
+    ProductVersionResolveRequest:
+      type: object
+      description: 'pfc.ProductVersion.resolve request. PRD inputs: "jurisdiction, legalEntity, product, channel, transactionType
+        (NewBusiness, Renewal), date, optional knownAt, optional predecessorHash (renewal)"'
+      properties:
+        jurisdiction:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "jurisdiction"'
+        legalEntity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legalEntity"'
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+        transactionType:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "transactionType (NewBusiness, Renewal)"'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "date"'
+        knownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "optional knownAt" (optional)'
+        predecessorHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "optional predecessorHash (renewal)" (optional)'
+    ProductVersionResolveResponse:
+      type: object
+      description: 'pfc.ProductVersion.resolve result. PRD outputs: "version, artefactHash, resolutionManifest, resolutionHash"'
+      properties:
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "artefactHash"'
+        resolutionManifest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "resolutionManifest"'
+        resolutionHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "resolutionHash"'
+    ArtifactGetResponse:
+      type: object
+      description: 'pfc.Artifact.get result. PRD outputs: "canonical JSON artefact"'
+      properties:
+        canonicalJsonArtefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "canonical JSON artefact"'
+    CatalogueGetResponse:
+      type: object
+      description: 'pfc.Catalogue.get result. PRD outputs: "items with terms, finals"'
+      properties:
+        itemsTerms:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "items with terms"'
+        finals:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "finals"'
+    CatalogueGetItemResponse:
+      type: object
+      description: 'pfc.Catalogue.getItem result. PRD outputs: "items with terms, finals"'
+      properties:
+        itemsTerms:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "items with terms"'
+        finals:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "finals"'
+    ChargeTypeListItem:
+      type: object
+      description: 'pfc.ChargeType.list result. PRD outputs: "charge types"'
+      properties:
+        chargeTypes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "charge types"'
+    ChargeTypeListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ChargeTypeListItem'
+      description: Page of pfc.ChargeType.list results (cursor pagination, contract §3.5.5)
+    RegulatoryMappingGetResponse:
+      type: object
+      description: 'pfc.RegulatoryMapping.get result. PRD outputs: "codes with list versions"'
+      properties:
+        codesListVersions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "codes with list versions"'
+    QuestionSetGetResponse:
+      type: object
+      description: 'pfc.QuestionSet.get result. PRD outputs: "questions with visible/required flags, knock-out and referral
+        flags"'
+      properties:
+        questionsVisibleRequiredFlags:
+          type: boolean
+          description: 'PRD: "questions with visible/required flags"'
+        knockOutAndReferralFlags:
+          type: boolean
+          description: 'PRD: "knock-out and referral flags"'
+    QuestionSetEvaluateRequest:
+      type: object
+      description: 'pfc.QuestionSet.evaluate request. PRD inputs: "hash, set, answers"'
+      properties:
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+        set:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "set"'
+        answers:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "answers"'
+    QuestionSetEvaluateResponse:
+      type: object
+      description: 'pfc.QuestionSet.evaluate result. PRD outputs: "questions with visible/required flags, knock-out and referral
+        flags"'
+      properties:
+        questionsVisibleRequiredFlags:
+          type: boolean
+          description: 'PRD: "questions with visible/required flags"'
+        knockOutAndReferralFlags:
+          type: boolean
+          description: 'PRD: "knock-out and referral flags"'
+    PogGetResponse:
+      type: object
+      description: 'pfc.Pog.get result. PRD outputs: "target market, negative, strategy, testing summary, review status"'
+      properties:
+        targetMarket:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target market"'
+        negative:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "negative"'
+        strategy:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "strategy"'
+        testingSummary:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "testing summary"'
+        reviewStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "review status"'
+    RenewalConversionConvertRequest:
+      type: object
+      description: 'pfc.RenewalConversion.convert request. PRD inputs: "sourceHash or `LEGACY:<code>`, targetHash, term selections,
+        renewal date"'
+      properties:
+        sourcehashOrLegacyCode:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "sourceHash or `LEGACY:<code>"'
+        targetHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "targetHash"'
+        termSelections:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term selections"'
+        renewalDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "renewal date"'
+    RenewalConversionConvertResponse:
+      type: object
+      description: 'pfc.RenewalConversion.convert result. PRD outputs: "converted selections, grandfathered items, referrals,
+        non-renew decision"'
+      properties:
+        convertedSelections:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "converted selections"'
+        grandfatheredItems:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grandfathered items"'
+        referrals:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "referrals"'
+        nonRenewDecision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "non-renew decision"'
+    AvailabilityCheckRequest:
+      type: object
+      description: 'pfc.Availability.check request. PRD inputs: "hash, item, context (region, channel, transaction type, producer,
+        element data, date)"'
+      properties:
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+        item:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "item"'
+        context:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "context (region, channel, transaction type, producer, element data, date)"'
+    AvailabilityCheckResponse:
+      type: object
+      description: 'pfc.Availability.check result. PRD outputs: "available, reason, winning rule id"'
+      properties:
+        available:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "available"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        winningRuleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "winning rule id"'
+    ProductDescribeRequest:
+      type: object
+      description: 'pfc.Product.describe request. PRD inputs: "product or hash, channel, transactionType, language, date"'
+      properties:
+        productOrHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "product or hash"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+        transactionType:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "transactionType"'
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+          description: 'PRD: "language"'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "date"'
+    ProductDescribeResponse:
+      type: object
+      description: 'pfc.Product.describe result. PRD outputs: "ordered steps, fields, rules, offerings, coverages, payment
+        plans"'
+      properties:
+        orderedSteps:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "ordered steps"'
+        fields:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "fields"'
+        rules:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rules"'
+        offerings:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "offerings"'
+        coverages:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "coverages"'
+        paymentPlans:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "payment plans"'
+    PolicyDraftValidateRequest:
+      type: object
+      description: 'pfc.PolicyDraft.validate request. PRD inputs: "hash, checkpoint, draft"'
+      properties:
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+        checkpoint:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checkpoint"'
+        draft:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "draft"'
+    PolicyDraftValidateResponse:
+      type: object
+      description: 'pfc.PolicyDraft.validate result. PRD outputs: "errors[] (level, rule, path, message key, GR/EN message,
+        severity)"'
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "errors[] (level, rule, path, message key, GR/EN message, severity)"'
+    ChangeSetCreateRequest:
+      type: object
+      description: 'pfc.ChangeSet.create request. PRD inputs: "product, base, edits"'
+      properties:
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        base:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "base"'
+        edits:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "edits"'
+    ChangeSetCreateResponse:
+      type: object
+      description: 'pfc.ChangeSet.create result. PRD outputs: "change set state, validation"'
+      properties:
+        changeSetState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set state"'
+        validation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation"'
+    ChangeSetEditRequest:
+      type: object
+      description: 'pfc.ChangeSet.edit request. PRD inputs: "product, base, edits"'
+      properties:
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        base:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "base"'
+        edits:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "edits"'
+    ChangeSetEditResponse:
+      type: object
+      description: 'pfc.ChangeSet.edit result. PRD outputs: "change set state, validation"'
+      properties:
+        changeSetState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set state"'
+        validation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation"'
+    ChangeSetRevertRequest:
+      type: object
+      description: 'pfc.ChangeSet.revert request. PRD inputs: "product, base, edits"'
+      properties:
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        base:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "base"'
+        edits:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "edits"'
+    ChangeSetRevertResponse:
+      type: object
+      description: 'pfc.ChangeSet.revert result. PRD outputs: "change set state, validation"'
+      properties:
+        changeSetState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set state"'
+        validation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation"'
+    ChangeSetRebaseRequest:
+      type: object
+      description: 'pfc.ChangeSet.rebase request. PRD inputs: "product, base, edits"'
+      properties:
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        base:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "base"'
+        edits:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "edits"'
+    ChangeSetRebaseResponse:
+      type: object
+      description: 'pfc.ChangeSet.rebase result. PRD outputs: "change set state, validation"'
+      properties:
+        changeSetState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set state"'
+        validation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation"'
+    ChangeSetAbandonRequest:
+      type: object
+      description: 'pfc.ChangeSet.abandon request. PRD inputs: "product, base, edits"'
+      properties:
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        base:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "base"'
+        edits:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "edits"'
+    ChangeSetAbandonResponse:
+      type: object
+      description: 'pfc.ChangeSet.abandon result. PRD outputs: "change set state, validation"'
+      properties:
+        changeSetState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set state"'
+        validation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation"'
+    ProductVersionSubmitRequest:
+      type: object
+      description: 'pfc.ProductVersion.submit request. PRD inputs: "change set id"'
+      properties:
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "change set id"'
+    ProductVersionSubmitResponse:
+      type: object
+      description: 'pfc.ProductVersion.submit result. PRD outputs: "version status, check results"'
+      properties:
+        versionStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version status"'
+        checkResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "check results"'
+    ProductVersionSignOffRequest:
+      type: object
+      description: 'pfc.ProductVersion.signOff request. PRD inputs: "version, role, decision, comment, conditions"'
+      properties:
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        role:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "role"'
+        decision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision"'
+        comment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "comment"'
+        conditions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "conditions"'
+    ProductVersionSignOffResponse:
+      type: object
+      description: 'pfc.ProductVersion.signOff result. PRD outputs: "approval state"'
+      properties:
+        approvalState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval state"'
+    ProductVersionScheduleRequest:
+      type: object
+      description: 'pfc.ProductVersion.schedule request. PRD inputs: "version, environment, activation time, reason"'
+      properties:
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        environment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "environment"'
+        activationTime:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activation time"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ProductVersionScheduleResponse:
+      type: object
+      description: 'pfc.ProductVersion.schedule result. PRD outputs: "schedule"'
+      properties:
+        schedule:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "schedule"'
+    ProductVersionCancelScheduleRequest:
+      type: object
+      description: 'pfc.ProductVersion.cancelSchedule request. PRD inputs: "version, environment, activation time, reason"'
+      properties:
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        environment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "environment"'
+        activationTime:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activation time"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ProductVersionCancelScheduleResponse:
+      type: object
+      description: 'pfc.ProductVersion.cancelSchedule result. PRD outputs: "schedule"'
+      properties:
+        schedule:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "schedule"'
+    ProductVersionFallBackRequest:
+      type: object
+      description: 'pfc.ProductVersion.fallBack request. PRD inputs: "version, environment, activation time, reason"'
+      properties:
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        environment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "environment"'
+        activationTime:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activation time"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ProductVersionFallBackResponse:
+      type: object
+      description: 'pfc.ProductVersion.fallBack result. PRD outputs: "schedule"'
+      properties:
+        schedule:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "schedule"'
+    ProductVersionDiffResponse:
+      type: object
+      description: 'pfc.ProductVersion.diff result. PRD outputs: "grouped entries with classes"'
+      properties:
+        groupedEntriesClasses:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grouped entries with classes"'
+    ImpactAnalysisRunRequest:
+      type: object
+      description: 'pfc.ImpactAnalysis.run request. PRD inputs: "version"'
+      properties:
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+    ImpactAnalysisRunResponse:
+      type: object
+      description: 'pfc.ImpactAnalysis.run result. PRD outputs: "run id; async result"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        asyncResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "async result"'
+    PogUpdateRequest:
+      type: object
+      description: 'pfc.Pog.update request. PRD inputs: "record data"'
+      x-status: minimal
+    PogUpdateResponse:
+      type: object
+      description: 'pfc.Pog.update result. PRD outputs: "record"'
+      properties:
+        record:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "record"'
+    PogRecordReviewRequest:
+      type: object
+      description: 'pfc.Pog.recordReview request. PRD inputs: "record data"'
+      x-status: minimal
+    PogRecordReviewResponse:
+      type: object
+      description: 'pfc.Pog.recordReview result. PRD outputs: "record"'
+      properties:
+        record:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "record"'
+    PogRecordTestRequest:
+      type: object
+      description: 'pfc.Pog.recordTest request. PRD inputs: "record data"'
+      x-status: minimal
+    PogRecordTestResponse:
+      type: object
+      description: 'pfc.Pog.recordTest result. PRD outputs: "record"'
+      properties:
+        record:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "record"'
+    ProductImportImportRequest:
+      type: object
+      description: 'pfc.ProductImport.import request. PRD inputs: "legacy definition, mapping"'
+      properties:
+        legacyDefinition:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy definition"'
+        mapping:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "mapping"'
+    ProductImportImportResponse:
+      type: object
+      description: 'pfc.ProductImport.import result. PRD outputs: "change set or dry-run lint report"'
+      properties:
+        changeSetOrDryRunLint:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set or dry-run lint report"'
+    LegacyXrefGetResponse:
+      type: object
+      description: 'pfc.LegacyXref.get result. PRD outputs: "core codes"'
+      properties:
+        coreCodes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "core codes"'
+    ReferenceTableGetResponse:
+      type: object
+      description: 'pfc.ReferenceTable.get result. PRD outputs: "rows"'
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rows"'

@@ -1,0 +1,4715 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: CLM — Claims management API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by CLM (PRD-07 §9.1)
+  description: 'Contract of the operations CLM exposes (PRD-07 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: CLM
+  x-prd: PRD-07
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: Fnol
+- name: Claim
+- name: Exposure
+- name: Coverage
+- name: TransactionSet
+- name: Payment
+- name: Redress
+- name: Financials
+- name: StatutoryOffer
+- name: Certificate
+- name: ClaimTracking
+- name: CatEvent
+- name: Service
+- name: VendorInvoice
+- name: Fraud
+- name: Conversation
+- name: Import
+- name: Dsar
+paths:
+  /api/clm/v1/fnol/submit:
+    post:
+      operationId: clm.Fnol.submit
+      summary: FNOL for all channels
+      description: |-
+        FNOL for all channels
+
+        PRD inputs: FNOL payload
+        PRD outputs: claim, exposures, checklist, assignment
+      tags:
+      - Fnol
+      x-requirement:
+      - REQ-CLM-001
+      x-anchor:
+      - REQ-CLM-001
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/claims
+      - MCP tool claim_report_submit
+      x-permission: clm.Fnol.submit
+      x-error-codes:
+      - code: CLM-ERR-FNOL-001
+        note: missing field
+        status: 422
+      - code: CLM-ERR-FNOL-CONSENT
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1466
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FnolSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FnolSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/fnol/save-draft:
+    post:
+      operationId: clm.Fnol.saveDraft
+      summary: FNOL for all channels
+      description: |-
+        FNOL for all channels
+
+        PRD inputs: FNOL payload
+        PRD outputs: claim, exposures, checklist, assignment
+      tags:
+      - Fnol
+      x-requirement:
+      - REQ-CLM-001
+      x-anchor:
+      - REQ-CLM-001
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - MCP tool claim_report_draft
+      x-permission: clm.Fnol.saveDraft
+      x-error-codes:
+      - code: CLM-ERR-FNOL-001
+        note: missing field
+        status: 422
+      - code: CLM-ERR-FNOL-CONSENT
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1466
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FnolSaveDraftRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FnolSaveDraftResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/fnol/{id}:
+    get:
+      operationId: clm.Fnol.get
+      summary: FNOL for all channels
+      description: |-
+        FNOL for all channels
+
+        PRD inputs: FNOL payload
+        PRD outputs: claim, exposures, checklist, assignment
+      tags:
+      - Fnol
+      x-requirement:
+      - REQ-CLM-001
+      x-anchor:
+      - REQ-CLM-001
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Fnol.get
+      x-error-codes:
+      - code: CLM-ERR-FNOL-001
+        note: missing field
+        status: 422
+      - code: CLM-ERR-FNOL-CONSENT
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1466
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Fnol
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FnolGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/fnol/validate:
+    post:
+      operationId: clm.Fnol.validate
+      summary: FNOL for all channels
+      description: |-
+        FNOL for all channels
+
+        PRD inputs: FNOL payload
+        PRD outputs: claim, exposures, checklist, assignment
+      tags:
+      - Fnol
+      x-requirement:
+      - REQ-CLM-001
+      x-anchor:
+      - REQ-CLM-001
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - MCP tool claim_report_draft
+      x-permission: clm.Fnol.validate
+      x-error-codes:
+      - code: CLM-ERR-FNOL-001
+        note: missing field
+        status: 422
+      - code: CLM-ERR-FNOL-CONSENT
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1466
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FnolValidateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FnolValidateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/claims/{id}:
+    get:
+      operationId: clm.Claim.get
+      summary: Claim lifecycle
+      description: |-
+        Claim lifecycle
+
+        PRD inputs: ids, changes, reason
+        PRD outputs: claim
+      tags:
+      - Claim
+      x-requirement:
+      - REQ-CLM-061
+      - REQ-CLM-071..REQ-CLM-074
+      - REQ-CLM-042
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: Yes (close, reopen); PRD idempotency: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - RI
+      x-permission: clm.Claim.get
+      x-error-codes:
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: CLM-ERR-CLOSE-GUARD
+        status: 422
+      x-source:
+      - PRD-07 §9.1 l.1467
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Claim (PRD input: "ids")'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    patch:
+      operationId: clm.Claim.update
+      summary: Claim lifecycle
+      description: |-
+        Claim lifecycle
+
+        PRD inputs: ids, changes, reason
+        PRD outputs: claim
+      tags:
+      - Claim
+      x-requirement:
+      - REQ-CLM-061
+      - REQ-CLM-071..REQ-CLM-074
+      - REQ-CLM-042
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: Yes (close, reopen); PRD idempotency: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Claim.update
+      x-authority-types:
+      - CLM.REOPEN
+      x-authority-source:
+      - PRD-07 l.504
+      x-error-codes:
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: CLM-ERR-CLOSE-GUARD
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1467
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Claim
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/claims/close:
+    post:
+      operationId: clm.Claim.close
+      summary: Claim lifecycle
+      description: |-
+        Claim lifecycle
+
+        PRD inputs: ids, changes, reason
+        PRD outputs: claim
+      tags:
+      - Claim
+      x-requirement:
+      - REQ-CLM-061
+      - REQ-CLM-071..REQ-CLM-074
+      - REQ-CLM-042
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes (close, reopen); PRD idempotency: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Claim.close
+      x-authority-types:
+      - CLM.REOPEN
+      x-authority-source:
+      - PRD-07 l.504
+      x-error-codes:
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: CLM-ERR-CLOSE-GUARD
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1467
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimCloseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimCloseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/claims/reopen:
+    post:
+      operationId: clm.Claim.reopen
+      summary: Claim lifecycle
+      description: |-
+        Claim lifecycle
+
+        PRD inputs: ids, changes, reason
+        PRD outputs: claim
+      tags:
+      - Claim
+      x-requirement:
+      - REQ-CLM-061
+      - REQ-CLM-071..REQ-CLM-074
+      - REQ-CLM-042
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes (close, reopen); PRD idempotency: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Claim.reopen
+      x-authority-types:
+      - CLM.REOPEN
+      x-authority-source:
+      - PRD-07 l.504
+      x-error-codes:
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: CLM-ERR-CLOSE-GUARD
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1467
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimReopenRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimReopenResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/claims/merge:
+    post:
+      operationId: clm.Claim.merge
+      summary: Claim lifecycle
+      description: |-
+        Claim lifecycle
+
+        PRD inputs: ids, changes, reason
+        PRD outputs: claim
+      tags:
+      - Claim
+      x-requirement:
+      - REQ-CLM-061
+      - REQ-CLM-071..REQ-CLM-074
+      - REQ-CLM-042
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: Yes (close, reopen); PRD idempotency: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Claim.merge
+      x-authority-types:
+      - CLM.REOPEN
+      x-authority-source:
+      - PRD-07 l.504
+      x-error-codes:
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: CLM-ERR-CLOSE-GUARD
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1467
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimMergeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimMergeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/claims/search:
+    get:
+      operationId: clm.Claim.search
+      summary: Claim search (R-07)
+      description: |-
+        Claim search (R-07)
+
+        PRD inputs: criteria
+        PRD outputs: page of claims
+      tags:
+      - Claim
+      x-requirement:
+      - REQ-CLM-011
+      x-anchor:
+      - REQ-CLM-011
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CMP
+      - WRK
+      x-permission: clm.Claim.search
+      x-error-codes:
+      - code: CLM-ERR-SEARCH-CRITERIA
+        status: 422
+      x-source:
+      - PRD-07 §9.1 l.1468
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: criteria
+        in: query
+        required: false
+        description: 'PRD: "criteria"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimSearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/exposures:
+    post:
+      operationId: clm.Exposure.create
+      summary: Exposures
+      description: |-
+        Exposures
+
+        PRD inputs: exposure data
+        PRD outputs: exposure
+      tags:
+      - Exposure
+      x-requirement:
+      - REQ-CLM-062
+      - REQ-CLM-063
+      - REQ-CLM-072
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Exposure.create
+      x-error-codes:
+      - code: CLM-ERR-EXPOSURE-DUPLICATE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1469
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExposureCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/exposures/{id}:
+    patch:
+      operationId: clm.Exposure.update
+      summary: Exposures
+      description: |-
+        Exposures
+
+        PRD inputs: exposure data
+        PRD outputs: exposure
+      tags:
+      - Exposure
+      x-requirement:
+      - REQ-CLM-062
+      - REQ-CLM-063
+      - REQ-CLM-072
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Exposure.update
+      x-error-codes:
+      - code: CLM-ERR-EXPOSURE-DUPLICATE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1469
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Exposure
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExposureUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/exposures/close:
+    post:
+      operationId: clm.Exposure.close
+      summary: Exposures
+      description: |-
+        Exposures
+
+        PRD inputs: exposure data
+        PRD outputs: exposure
+      tags:
+      - Exposure
+      x-requirement:
+      - REQ-CLM-062
+      - REQ-CLM-063
+      - REQ-CLM-072
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Exposure.close
+      x-error-codes:
+      - code: CLM-ERR-EXPOSURE-DUPLICATE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1469
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExposureCloseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureCloseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/exposures/reopen:
+    post:
+      operationId: clm.Exposure.reopen
+      summary: Exposures
+      description: |-
+        Exposures
+
+        PRD inputs: exposure data
+        PRD outputs: exposure
+      tags:
+      - Exposure
+      x-requirement:
+      - REQ-CLM-062
+      - REQ-CLM-063
+      - REQ-CLM-072
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Exposure.reopen
+      x-error-codes:
+      - code: CLM-ERR-EXPOSURE-DUPLICATE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1469
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExposureReopenRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureReopenResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/coverage/decide:
+    post:
+      operationId: clm.Coverage.decide
+      summary: Coverage decision and re-verification
+      description: |-
+        Coverage decision and re-verification
+
+        PRD inputs: decision, reasons; adopt or keep
+        PRD outputs: decision record
+      tags:
+      - Coverage
+      x-requirement:
+      - REQ-CLM-002
+      - REQ-CLM-051
+      - REQ-CLM-058
+      x-anchor:
+      - REQ-CLM-002
+      x-anchor-mapped:
+      - REQ-CLM-002
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Coverage.decide
+      x-authority-types:
+      - CLM.COVERAGE_DECISION
+      x-authority-source:
+      - PRD-07 l.476
+      x-error-codes:
+      - code: CLM-ERR-AUTHORITY
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1470
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoverageDecideRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoverageDecideResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/coverage/reverify:
+    post:
+      operationId: clm.Coverage.reverify
+      summary: Coverage decision and re-verification
+      description: |-
+        Coverage decision and re-verification
+
+        PRD inputs: decision, reasons; adopt or keep
+        PRD outputs: decision record
+      tags:
+      - Coverage
+      x-requirement:
+      - REQ-CLM-002
+      - REQ-CLM-051
+      - REQ-CLM-058
+      x-anchor:
+      - REQ-CLM-002
+      x-anchor-mapped:
+      - REQ-CLM-002
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Coverage.reverify
+      x-authority-types:
+      - CLM.COVERAGE_DECISION
+      x-authority-source:
+      - PRD-07 l.476
+      x-error-codes:
+      - code: CLM-ERR-AUTHORITY
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1470
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoverageReverifyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoverageReverifyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/transaction-sets/build:
+    post:
+      operationId: clm.TransactionSet.build
+      summary: Financial sets
+      description: |-
+        Financial sets
+
+        PRD inputs: transactions
+        PRD outputs: set with preview, checks, approval request
+      tags:
+      - TransactionSet
+      x-requirement:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      - REQ-CLM-107..REQ-CLM-113
+      x-anchor:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      x-anchor-mapped:
+      - REQ-CLM-004
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-02
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.TransactionSet.build
+      x-error-codes:
+      - code: CLM-ERR-RESERVE-REASON
+        status: 422
+      - code: CLM-ERR-NOT-PAYABLE
+        status: 422
+      - code: CLM-ERR-DUPLICATE-PAYMENT
+        status: 409
+      - code: CLM-ERR-SET-STALE
+        status: 409
+      - code: CLM-ERR-SOD
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionSetBuildRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSetBuildResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/transaction-sets/submit:
+    post:
+      operationId: clm.TransactionSet.submit
+      summary: Financial sets
+      description: |-
+        Financial sets
+
+        PRD inputs: transactions
+        PRD outputs: set with preview, checks, approval request
+      tags:
+      - TransactionSet
+      x-requirement:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      - REQ-CLM-107..REQ-CLM-113
+      x-anchor:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      x-anchor-mapped:
+      - REQ-CLM-004
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-02
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.TransactionSet.submit
+      x-error-codes:
+      - code: CLM-ERR-RESERVE-REASON
+        status: 422
+      - code: CLM-ERR-NOT-PAYABLE
+        status: 422
+      - code: CLM-ERR-DUPLICATE-PAYMENT
+        status: 409
+      - code: CLM-ERR-SET-STALE
+        status: 409
+      - code: CLM-ERR-SOD
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionSetSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSetSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/transaction-sets/approve:
+    post:
+      operationId: clm.TransactionSet.approve
+      summary: Financial sets
+      description: |-
+        Financial sets
+
+        PRD inputs: transactions
+        PRD outputs: set with preview, checks, approval request
+      tags:
+      - TransactionSet
+      x-requirement:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      - REQ-CLM-107..REQ-CLM-113
+      x-anchor:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      x-anchor-mapped:
+      - REQ-CLM-004
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-02
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - WRK
+      x-permission: clm.TransactionSet.approve
+      x-error-codes:
+      - code: CLM-ERR-RESERVE-REASON
+        status: 422
+      - code: CLM-ERR-NOT-PAYABLE
+        status: 422
+      - code: CLM-ERR-DUPLICATE-PAYMENT
+        status: 409
+      - code: CLM-ERR-SET-STALE
+        status: 409
+      - code: CLM-ERR-SOD
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionSetApproveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSetApproveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/transaction-sets/reject:
+    post:
+      operationId: clm.TransactionSet.reject
+      summary: Financial sets
+      description: |-
+        Financial sets
+
+        PRD inputs: transactions
+        PRD outputs: set with preview, checks, approval request
+      tags:
+      - TransactionSet
+      x-requirement:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      - REQ-CLM-107..REQ-CLM-113
+      x-anchor:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      x-anchor-mapped:
+      - REQ-CLM-004
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-02
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.TransactionSet.reject
+      x-error-codes:
+      - code: CLM-ERR-RESERVE-REASON
+        status: 422
+      - code: CLM-ERR-NOT-PAYABLE
+        status: 422
+      - code: CLM-ERR-DUPLICATE-PAYMENT
+        status: 409
+      - code: CLM-ERR-SET-STALE
+        status: 409
+      - code: CLM-ERR-SOD
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionSetRejectRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSetRejectResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/transaction-sets/return:
+    post:
+      operationId: clm.TransactionSet.return
+      summary: Financial sets
+      description: |-
+        Financial sets
+
+        PRD inputs: transactions
+        PRD outputs: set with preview, checks, approval request
+      tags:
+      - TransactionSet
+      x-requirement:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      - REQ-CLM-107..REQ-CLM-113
+      x-anchor:
+      - REQ-CLM-003
+      - REQ-CLM-004
+      x-anchor-mapped:
+      - REQ-CLM-004
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-02
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.TransactionSet.return
+      x-error-codes:
+      - code: CLM-ERR-RESERVE-REASON
+        status: 422
+      - code: CLM-ERR-NOT-PAYABLE
+        status: 422
+      - code: CLM-ERR-DUPLICATE-PAYMENT
+        status: 409
+      - code: CLM-ERR-SET-STALE
+        status: 409
+      - code: CLM-ERR-SOD
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionSetReturnRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSetReturnResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/payments/void:
+    post:
+      operationId: clm.Payment.void
+      summary: Payment corrections (stop executed by bil.Disbursement.stop under BIL's authority type)
+      description: |-
+        Payment corrections (stop executed by `bil.Disbursement.stop` under BIL's authority type)
+
+        PRD inputs: payment id, reason
+        PRD outputs: updated payment
+      tags:
+      - Payment
+      x-requirement:
+      - REQ-CLM-004
+      - REQ-CLM-125..REQ-CLM-127
+      - REQ-CLM-136
+      x-anchor:
+      - REQ-CLM-004
+      x-anchor-mapped:
+      - REQ-CLM-004
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Payment.void
+      x-error-codes:
+      - code: CLM-ERR-NOT-STOPPABLE
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1472
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentVoidRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentVoidResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/payments/stop:
+    post:
+      operationId: clm.Payment.stop
+      summary: Payment corrections (stop executed by bil.Disbursement.stop under BIL's authority type)
+      description: |-
+        Payment corrections (stop executed by `bil.Disbursement.stop` under BIL's authority type)
+
+        PRD inputs: payment id, reason
+        PRD outputs: updated payment
+      tags:
+      - Payment
+      x-requirement:
+      - REQ-CLM-004
+      - REQ-CLM-125..REQ-CLM-127
+      - REQ-CLM-136
+      x-anchor:
+      - REQ-CLM-004
+      x-anchor-mapped:
+      - REQ-CLM-004
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Payment.stop
+      x-error-codes:
+      - code: CLM-ERR-NOT-STOPPABLE
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1472
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentStopRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStopResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/payments/reissue:
+    post:
+      operationId: clm.Payment.reissue
+      summary: Payment corrections (stop executed by bil.Disbursement.stop under BIL's authority type)
+      description: |-
+        Payment corrections (stop executed by `bil.Disbursement.stop` under BIL's authority type)
+
+        PRD inputs: payment id, reason
+        PRD outputs: updated payment
+      tags:
+      - Payment
+      x-requirement:
+      - REQ-CLM-004
+      - REQ-CLM-125..REQ-CLM-127
+      - REQ-CLM-136
+      x-anchor:
+      - REQ-CLM-004
+      x-anchor-mapped:
+      - REQ-CLM-004
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Payment.reissue
+      x-error-codes:
+      - code: CLM-ERR-NOT-STOPPABLE
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1472
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentReissueRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentReissueResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/redresses/request:
+    post:
+      operationId: clm.Redress.request
+      summary: Claim-related complaint redress from CMP paid as ex-gratia
+      description: |-
+        Claim-related complaint redress from CMP paid as ex-gratia
+
+        PRD inputs: complaint id, claim id, payee, amount, reason
+        PRD outputs: set id, status
+      tags:
+      - Redress
+      x-requirement:
+      - REQ-CLM-265
+      x-wave: unscheduled
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CMP
+      x-permission: clm.Redress.request
+      x-authority-types:
+      - CLM.EXGRATIA
+      x-authority-source:
+      - PRD-07 l.593
+      x-error-codes:
+      - code: CLM-ERR-NOT-PAYABLE
+        status: 422
+      - code: CLM-ERR-AUTHORITY
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1473
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedressRequestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedressRequestResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/financials/get:
+    get:
+      operationId: clm.Financials.get
+      summary: Balances as of record time
+      description: |-
+        Balances as of record time
+
+        PRD inputs: claim, asOf
+        PRD outputs: balances by line
+      tags:
+      - Financials
+      x-requirement:
+      - REQ-CLM-101
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-02
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - RI
+      x-permission: clm.Financials.get
+      x-error-codes: []
+      x-source:
+      - PRD-07 §9.1 l.1475
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/AsOf
+      - name: claim
+        in: query
+        required: false
+        description: 'PRD: "claim"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinancialsGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/financials/daily-totals:
+    get:
+      operationId: clm.Financials.dailyTotals
+      summary: Daily claim financial totals for FIN reconciliation (XMR-F-120)
+      description: |-
+        Daily claim financial totals for FIN reconciliation (XMR-F-120)
+
+        PRD inputs: legal entity, accounting date
+        PRD outputs: totals by currency and cost type with transaction ids
+      tags:
+      - Financials
+      x-requirement:
+      - REQ-CLM-005
+      - REQ-CLM-106
+      x-anchor:
+      - REQ-CLM-005
+      x-anchor-mapped:
+      - REQ-CLM-005
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-02
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: clm.Financials.dailyTotals
+      x-error-codes: []
+      x-source:
+      - PRD-07 §9.1 l.1476
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: legalEntity
+        in: query
+        required: false
+        description: 'PRD: "legal entity"'
+        schema:
+          type: string
+      - name: accountingDate
+        in: query
+        required: false
+        description: 'PRD: "accounting date"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinancialsDailyTotalsResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/statutory-offers/issue:
+    post:
+      operationId: clm.StatutoryOffer.issue
+      summary: Reasoned offer or reply; acceptance; repair-in-kind agreement
+      description: |-
+        Reasoned offer or reply; acceptance; repair-in-kind agreement
+
+        PRD inputs: exposure, content
+        PRD outputs: offer record, document request; agreement → clock start
+      tags:
+      - StatutoryOffer
+      x-requirement:
+      - REQ-CLM-007
+      - REQ-CLM-166
+      - REQ-CLM-167
+      - REQ-CLM-263
+      x-anchor:
+      - REQ-CLM-007
+      x-anchor-mapped:
+      - REQ-CLM-007
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.StatutoryOffer.issue
+      x-error-codes:
+      - code: CLM-ERR-OFFER-CONTENT
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1479
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatutoryOfferIssueRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatutoryOfferIssueResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/statutory-offers/record-acceptance:
+    post:
+      operationId: clm.StatutoryOffer.recordAcceptance
+      summary: Reasoned offer or reply; acceptance; repair-in-kind agreement
+      description: |-
+        Reasoned offer or reply; acceptance; repair-in-kind agreement
+
+        PRD inputs: exposure, content
+        PRD outputs: offer record, document request; agreement → clock start
+      tags:
+      - StatutoryOffer
+      x-requirement:
+      - REQ-CLM-007
+      - REQ-CLM-166
+      - REQ-CLM-167
+      - REQ-CLM-263
+      x-anchor:
+      - REQ-CLM-007
+      x-anchor-mapped:
+      - REQ-CLM-007
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: clm.StatutoryOffer.recordAcceptance
+      x-error-codes:
+      - code: CLM-ERR-OFFER-CONTENT
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1479
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatutoryOfferRecordAcceptanceRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatutoryOfferRecordAcceptanceResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/statutory-offers/record-repair-agreement:
+    post:
+      operationId: clm.StatutoryOffer.recordRepairAgreement
+      summary: Reasoned offer or reply; acceptance; repair-in-kind agreement
+      description: |-
+        Reasoned offer or reply; acceptance; repair-in-kind agreement
+
+        PRD inputs: exposure, content
+        PRD outputs: offer record, document request; agreement → clock start
+      tags:
+      - StatutoryOffer
+      x-requirement:
+      - REQ-CLM-007
+      - REQ-CLM-166
+      - REQ-CLM-167
+      - REQ-CLM-263
+      x-anchor:
+      - REQ-CLM-007
+      x-anchor-mapped:
+      - REQ-CLM-007
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.StatutoryOffer.recordRepairAgreement
+      x-error-codes:
+      - code: CLM-ERR-OFFER-CONTENT
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1479
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatutoryOfferRecordRepairAgreementRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatutoryOfferRecordRepairAgreementResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/certificates/request:
+    post:
+      operationId: clm.Certificate.request
+      summary: Claims-history certificate
+      description: |-
+        Claims-history certificate
+
+        PRD inputs: requester, policies, period
+        PRD outputs: certificate
+      tags:
+      - Certificate
+      x-requirement:
+      - REQ-CLM-008
+      - REQ-CLM-170..REQ-CLM-173
+      x-anchor:
+      - REQ-CLM-008
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: clm.Certificate.request
+      x-error-codes:
+      - code: CLM-ERR-CERT-REQUESTER
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1480
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificateRequestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateRequestResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/certificates/assemble:
+    post:
+      operationId: clm.Certificate.assemble
+      summary: Claims-history certificate
+      description: |-
+        Claims-history certificate
+
+        PRD inputs: requester, policies, period
+        PRD outputs: certificate
+      tags:
+      - Certificate
+      x-requirement:
+      - REQ-CLM-008
+      - REQ-CLM-170..REQ-CLM-173
+      x-anchor:
+      - REQ-CLM-008
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Certificate.assemble
+      x-error-codes:
+      - code: CLM-ERR-CERT-REQUESTER
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1480
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificateAssembleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateAssembleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/certificates/issue:
+    post:
+      operationId: clm.Certificate.issue
+      summary: Claims-history certificate
+      description: |-
+        Claims-history certificate
+
+        PRD inputs: requester, policies, period
+        PRD outputs: certificate
+      tags:
+      - Certificate
+      x-requirement:
+      - REQ-CLM-008
+      - REQ-CLM-170..REQ-CLM-173
+      x-anchor:
+      - REQ-CLM-008
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Certificate.issue
+      x-error-codes:
+      - code: CLM-ERR-CERT-REQUESTER
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1480
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificateIssueRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateIssueResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/claim-trackings/{id}:
+    get:
+      operationId: clm.ClaimTracking.get
+      summary: Status for channels, PTY, POL, WRK
+      description: |-
+        Status for channels, PTY, POL, WRK
+
+        PRD inputs: claim, party or policy
+        PRD outputs: tracking view
+      tags:
+      - ClaimTracking
+      x-requirement:
+      - REQ-CLM-009
+      x-anchor:
+      - REQ-CLM-009
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - DOC
+      x-partner-routes:
+      - CHN facade GET /api/chn/v1/claims/{no}/tracking
+      - MCP tool claim_status
+      x-permission: clm.ClaimTracking.get
+      x-error-codes: []
+      x-source:
+      - PRD-07 §9.1 l.1481
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the ClaimTracking
+        schema:
+          type: string
+      - name: claim
+        in: query
+        required: false
+        description: 'PRD: "claim"'
+        schema:
+          type: string
+      - name: partyOrPolicy
+        in: query
+        required: false
+        description: 'PRD: "party or policy"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimTrackingGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/claim-trackings:
+    get:
+      operationId: clm.ClaimTracking.list
+      summary: Status for channels, PTY, POL, WRK
+      description: |-
+        Status for channels, PTY, POL, WRK
+
+        PRD inputs: claim, party or policy
+        PRD outputs: tracking view
+      tags:
+      - ClaimTracking
+      x-requirement:
+      - REQ-CLM-009
+      x-anchor:
+      - REQ-CLM-009
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - PTY
+      x-permission: clm.ClaimTracking.list
+      x-error-codes: []
+      x-source:
+      - PRD-07 §9.1 l.1481
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: claim
+        in: query
+        required: false
+        description: 'PRD: "claim"'
+        schema:
+          type: string
+      - name: partyOrPolicy
+        in: query
+        required: false
+        description: 'PRD: "party or policy"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimTrackingListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/cat-events/aggregate:
+    get:
+      operationId: clm.CatEvent.aggregate
+      summary: Event aggregates for RI and DAT
+      description: |-
+        Event aggregates for RI and DAT
+
+        PRD inputs: cat code, asOf
+        PRD outputs: totals by line
+      tags:
+      - CatEvent
+      x-requirement:
+      - REQ-CLM-215
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - RI
+      x-permission: clm.CatEvent.aggregate
+      x-error-codes: []
+      x-source:
+      - PRD-07 §9.1 l.1483
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/AsOf
+      - name: catCode
+        in: query
+        required: false
+        description: 'PRD: "cat code"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatEventAggregateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/services/request:
+    post:
+      operationId: clm.Service.request
+      summary: Vendor services and invoices (partner API through CHN)
+      description: |-
+        Vendor services and invoices (partner API through CHN)
+
+        PRD inputs: service data; invoice
+        PRD outputs: status
+      tags:
+      - Service
+      x-requirement:
+      - REQ-CLM-188..REQ-CLM-200
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - CHN facade /api/chn/v1/vendor/services`, `/vendor/invoices
+      x-permission: clm.Service.request
+      x-error-codes:
+      - code: CLM-ERR-INVOICE-DUPLICATE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1484
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceRequestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceRequestResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/services/{id}:
+    patch:
+      operationId: clm.Service.update
+      summary: Vendor services and invoices (partner API through CHN)
+      description: |-
+        Vendor services and invoices (partner API through CHN)
+
+        PRD inputs: service data; invoice
+        PRD outputs: status
+      tags:
+      - Service
+      x-requirement:
+      - REQ-CLM-188..REQ-CLM-200
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      - partner
+      x-permission: clm.Service.update
+      x-error-codes:
+      - code: CLM-ERR-INVOICE-DUPLICATE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1484
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Service
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/services/cancel:
+    post:
+      operationId: clm.Service.cancel
+      summary: Vendor services and invoices (partner API through CHN)
+      description: |-
+        Vendor services and invoices (partner API through CHN)
+
+        PRD inputs: service data; invoice
+        PRD outputs: status
+      tags:
+      - Service
+      x-requirement:
+      - REQ-CLM-188..REQ-CLM-200
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      - partner
+      x-permission: clm.Service.cancel
+      x-error-codes:
+      - code: CLM-ERR-INVOICE-DUPLICATE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1484
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceCancelRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceCancelResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/vendor-invoices/submit:
+    post:
+      operationId: clm.VendorInvoice.submit
+      summary: Vendor services and invoices (partner API through CHN)
+      description: |-
+        Vendor services and invoices (partner API through CHN)
+
+        PRD inputs: service data; invoice
+        PRD outputs: status
+      tags:
+      - VendorInvoice
+      x-requirement:
+      - REQ-CLM-188..REQ-CLM-200
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - CHN facade /api/chn/v1/vendor/services`, `/vendor/invoices
+      x-permission: clm.VendorInvoice.submit
+      x-error-codes:
+      - code: CLM-ERR-INVOICE-DUPLICATE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1484
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInvoiceSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VendorInvoiceSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/vendor-invoices/decide:
+    post:
+      operationId: clm.VendorInvoice.decide
+      summary: Vendor services and invoices (partner API through CHN)
+      description: |-
+        Vendor services and invoices (partner API through CHN)
+
+        PRD inputs: service data; invoice
+        PRD outputs: status
+      tags:
+      - VendorInvoice
+      x-requirement:
+      - REQ-CLM-188..REQ-CLM-200
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      - partner
+      x-permission: clm.VendorInvoice.decide
+      x-error-codes:
+      - code: CLM-ERR-INVOICE-DUPLICATE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1484
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInvoiceDecideRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VendorInvoiceDecideResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/fraud/score:
+    post:
+      operationId: clm.Fraud.score
+      summary: Fraud scoring and SIU
+      description: |-
+        Fraud scoring and SIU
+
+        PRD inputs: claim
+        PRD outputs: indicators, band; case data
+      tags:
+      - Fraud
+      x-requirement:
+      - REQ-CLM-201..REQ-CLM-209
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: clm.Fraud.score
+      x-error-codes:
+      - code: CLM-ERR-SIU-ACCESS
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1485
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FraudScoreRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudScoreResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/conversations/send:
+    post:
+      operationId: clm.Conversation.send
+      summary: Claim messaging
+      description: |-
+        Claim messaging
+
+        PRD inputs: party, text, channel
+        PRD outputs: message status
+      tags:
+      - Conversation
+      x-requirement:
+      - REQ-CLM-181..REQ-CLM-184
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: clm.Conversation.send
+      x-error-codes:
+      - code: CLM-ERR-CONTACT-PROHIBITED
+        status: 422
+      - code: CLM-ERR-NO-CONSENT
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1487
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationSendRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationSendResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/conversations/schedule:
+    post:
+      operationId: clm.Conversation.schedule
+      summary: Claim messaging
+      description: |-
+        Claim messaging
+
+        PRD inputs: party, text, channel
+        PRD outputs: message status
+      tags:
+      - Conversation
+      x-requirement:
+      - REQ-CLM-181..REQ-CLM-184
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Conversation.schedule
+      x-error-codes:
+      - code: CLM-ERR-CONTACT-PROHIBITED
+        status: 422
+      - code: CLM-ERR-NO-CONSENT
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1487
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationScheduleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationScheduleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/conversations:
+    get:
+      operationId: clm.Conversation.list
+      summary: Claim messaging
+      description: |-
+        Claim messaging
+
+        PRD inputs: party, text, channel
+        PRD outputs: message status
+      tags:
+      - Conversation
+      x-requirement:
+      - REQ-CLM-181..REQ-CLM-184
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Conversation.list
+      x-error-codes:
+      - code: CLM-ERR-CONTACT-PROHIBITED
+        status: 422
+      - code: CLM-ERR-NO-CONSENT
+        status: 422
+      x-source:
+      - PRD-07 §9.1 l.1487
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/import/claim:
+    post:
+      operationId: clm.Import.claim
+      summary: Migration with the same validation as live (R-77); currency changeover for later markets; reversal of …
+      description: |-
+        Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
+
+        PRD inputs: legacy claim
+        PRD outputs: claim; plan → conversion result; batch or source key → reversal result
+      tags:
+      - Import
+      x-requirement:
+      - REQ-CLM-010
+      - REQ-CLM-237
+      - REQ-CLM-266
+      x-anchor:
+      - REQ-CLM-010
+      x-wave: W9
+      x-work-packages:
+      - W9-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: clm.Import.claim
+      x-error-codes:
+      - code: CLM-ERR-IMPORT-VALIDATION
+        status: 422
+      - code: CLM-ERR-REVERSE-LIVE-ACTIVITY
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1488
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportClaimRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportClaimResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/import/financial-history:
+    post:
+      operationId: clm.Import.financialHistory
+      summary: Migration with the same validation as live (R-77); currency changeover for later markets; reversal of …
+      description: |-
+        Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
+
+        PRD inputs: legacy claim
+        PRD outputs: claim; plan → conversion result; batch or source key → reversal result
+      tags:
+      - Import
+      x-requirement:
+      - REQ-CLM-010
+      - REQ-CLM-237
+      - REQ-CLM-266
+      x-anchor:
+      - REQ-CLM-010
+      x-wave: W9
+      x-work-packages:
+      - W9-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: clm.Import.financialHistory
+      x-error-codes:
+      - code: CLM-ERR-IMPORT-VALIDATION
+        status: 422
+      - code: CLM-ERR-REVERSE-LIVE-ACTIVITY
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1488
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportFinancialHistoryRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportFinancialHistoryResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/import/convert-currency:
+    post:
+      operationId: clm.Import.convertCurrency
+      summary: Migration with the same validation as live (R-77); currency changeover for later markets; reversal of …
+      description: |-
+        Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
+
+        PRD inputs: legacy claim
+        PRD outputs: claim; plan → conversion result; batch or source key → reversal result
+      tags:
+      - Import
+      x-requirement:
+      - REQ-CLM-010
+      - REQ-CLM-237
+      - REQ-CLM-266
+      x-anchor:
+      - REQ-CLM-010
+      x-wave: W9
+      x-work-packages:
+      - W9-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: clm.Import.convertCurrency
+      x-error-codes:
+      - code: CLM-ERR-IMPORT-VALIDATION
+        status: 422
+      - code: CLM-ERR-REVERSE-LIVE-ACTIVITY
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1488
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportConvertCurrencyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportConvertCurrencyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/import/reverse:
+    post:
+      operationId: clm.Import.reverse
+      summary: Migration with the same validation as live (R-77); currency changeover for later markets; reversal of …
+      description: |-
+        Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
+
+        PRD inputs: legacy claim
+        PRD outputs: claim; plan → conversion result; batch or source key → reversal result
+      tags:
+      - Import
+      x-requirement:
+      - REQ-CLM-010
+      - REQ-CLM-237
+      - REQ-CLM-266
+      x-anchor:
+      - REQ-CLM-010
+      x-wave: W9
+      x-work-packages:
+      - W9-CLM-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: clm.Import.reverse
+      x-error-codes:
+      - code: CLM-ERR-IMPORT-VALIDATION
+        status: 422
+      - code: CLM-ERR-REVERSE-LIVE-ACTIVITY
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1488
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportReverseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportReverseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/dsar/export:
+    post:
+      operationId: clm.Dsar.export
+      summary: DSAR access export for CMP fan-out (REQ-CMP-005)
+      description: |-
+        DSAR access export for CMP fan-out (`REQ-CMP-005`)
+
+        PRD inputs: party
+        PRD outputs: claim data package
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-CLM-233
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: clm.Dsar.export
+      x-error-codes:
+      - code: CLM-ERR-HELD
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1489
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/dsar/rectify:
+    post:
+      operationId: clm.Dsar.rectify
+      summary: DSAR rectification of claim data of a party
+      description: |-
+        DSAR rectification of claim data of a party
+
+        PRD inputs: party, corrections
+        PRD outputs: result
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-CLM-233
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: clm.Dsar.rectify
+      x-error-codes:
+      - code: CLM-ERR-HELD
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1490
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarRectifyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarRectifyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/dsar/restrict:
+    post:
+      operationId: clm.Dsar.restrict
+      summary: DSAR restriction of processing for a party's claim data
+      description: |-
+        DSAR restriction of processing for a party's claim data
+
+        PRD inputs: party, scope
+        PRD outputs: result
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-CLM-233
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: clm.Dsar.restrict
+      x-error-codes:
+      - code: CLM-ERR-HELD
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1491
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarRestrictRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarRestrictResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/dsar/purge:
+    post:
+      operationId: clm.Dsar.purge
+      summary: Erasure or anonymisation of a party's claim data where retention allows (legal holds and open recoveries …
+      description: |-
+        Erasure or anonymisation of a party's claim data where retention allows (legal holds and open recoveries respected)
+
+        PRD inputs: party or scope
+        PRD outputs: result
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-CLM-232
+      - REQ-CLM-233
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: clm.Dsar.purge
+      x-error-codes:
+      - code: CLM-ERR-HELD
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1492
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarPurgeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarPurgeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+x-operation-families:
+- family: clm.Recovery.*
+  summary: Recovery cases
+  inputs: case data, receipts
+  outputs: case
+  x-requirement:
+  - REQ-CLM-143..REQ-CLM-151
+  x-wave: W7
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1477
+- family: clm.FriendlySettlement.*
+  summary: FS evaluation, submission, statements, disputes, net settlement approval and hand-over to BIL (`FS_CLEARING`)
+  inputs: claim
+  outputs: eligibility; statement → reconciliation; net → BIL request
+  x-requirement:
+  - REQ-CLM-155..REQ-CLM-160
+  - REQ-CLM-264
+  x-wave: W7
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1478
+- family: clm.CatEvent.*
+  summary: Cat events
+  inputs: event data
+  outputs: event; re-tag preview
+  x-requirement:
+  - REQ-CLM-006
+  - REQ-CLM-210..REQ-CLM-215
+  x-wave: W7
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1482
+- family: clm.Siu.*
+  summary: Fraud scoring and SIU
+  inputs: claim
+  outputs: indicators, band; case data
+  x-requirement:
+  - REQ-CLM-201..REQ-CLM-209
+  x-wave: W7
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1485
+- family: clm.Litigation.*
+  summary: Matters
+  inputs: matter data
+  outputs: matter
+  x-requirement:
+  - REQ-CLM-218..REQ-CLM-223
+  x-wave: W7
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1486
+x-excluded:
+- name: payee-account operations
+  requirement:
+  - REQ-CLM-123
+  - REQ-CLM-131
+  reason: 'PRD-07 §9.1: removed (R-38, R-82); callers use bil.PayeeAccount.*'
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+  schemas:
+    FnolSubmitRequest:
+      type: object
+      description: 'clm.Fnol.submit request. PRD inputs: "FNOL payload"'
+      properties:
+        fnolPayload:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "FNOL payload"'
+    FnolSubmitResponse:
+      type: object
+      description: 'clm.Fnol.submit result. PRD outputs: "claim, exposures, checklist, assignment"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+        exposures:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposures"'
+        checklist:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checklist"'
+        assignment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "assignment"'
+    FnolSaveDraftRequest:
+      type: object
+      description: 'clm.Fnol.saveDraft request. PRD inputs: "FNOL payload"'
+      properties:
+        fnolPayload:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "FNOL payload"'
+    FnolSaveDraftResponse:
+      type: object
+      description: 'clm.Fnol.saveDraft result. PRD outputs: "claim, exposures, checklist, assignment"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+        exposures:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposures"'
+        checklist:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checklist"'
+        assignment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "assignment"'
+    FnolGetResponse:
+      type: object
+      description: 'clm.Fnol.get result. PRD outputs: "claim, exposures, checklist, assignment"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+        exposures:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposures"'
+        checklist:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checklist"'
+        assignment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "assignment"'
+    FnolValidateRequest:
+      type: object
+      description: 'clm.Fnol.validate request. PRD inputs: "FNOL payload"'
+      properties:
+        fnolPayload:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "FNOL payload"'
+    FnolValidateResponse:
+      type: object
+      description: 'clm.Fnol.validate result. PRD outputs: "claim, exposures, checklist, assignment"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+        exposures:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposures"'
+        checklist:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checklist"'
+        assignment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "assignment"'
+    ClaimGetResponse:
+      type: object
+      description: 'clm.Claim.get result. PRD outputs: "claim"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+    ClaimUpdateRequest:
+      type: object
+      description: 'clm.Claim.update request. PRD inputs: "ids, changes, reason"'
+      properties:
+        ids:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "ids"'
+        changes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "changes"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ClaimUpdateResponse:
+      type: object
+      description: 'clm.Claim.update result. PRD outputs: "claim"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+    ClaimCloseRequest:
+      type: object
+      description: 'clm.Claim.close request. PRD inputs: "ids, changes, reason"'
+      properties:
+        ids:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "ids"'
+        changes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "changes"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ClaimCloseResponse:
+      type: object
+      description: 'clm.Claim.close result. PRD outputs: "claim"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+    ClaimReopenRequest:
+      type: object
+      description: 'clm.Claim.reopen request. PRD inputs: "ids, changes, reason"'
+      properties:
+        ids:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "ids"'
+        changes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "changes"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ClaimReopenResponse:
+      type: object
+      description: 'clm.Claim.reopen result. PRD outputs: "claim"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+    ClaimMergeRequest:
+      type: object
+      description: 'clm.Claim.merge request. PRD inputs: "ids, changes, reason"'
+      properties:
+        ids:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "ids"'
+        changes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "changes"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ClaimMergeResponse:
+      type: object
+      description: 'clm.Claim.merge result. PRD outputs: "claim"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+    ClaimSearchItem:
+      type: object
+      description: 'clm.Claim.search result. PRD outputs: "page of claims"'
+      properties:
+        pageClaims:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "page of claims"'
+    ClaimSearchPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ClaimSearchItem'
+      description: Page of clm.Claim.search results (cursor pagination, contract §3.5.5)
+    ExposureCreateRequest:
+      type: object
+      description: 'clm.Exposure.create request. PRD inputs: "exposure data"'
+      properties:
+        exposureData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure data"'
+    ExposureCreateResponse:
+      type: object
+      description: 'clm.Exposure.create result. PRD outputs: "exposure"'
+      properties:
+        exposure:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure"'
+    ExposureUpdateRequest:
+      type: object
+      description: 'clm.Exposure.update request. PRD inputs: "exposure data"'
+      properties:
+        exposureData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure data"'
+    ExposureUpdateResponse:
+      type: object
+      description: 'clm.Exposure.update result. PRD outputs: "exposure"'
+      properties:
+        exposure:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure"'
+    ExposureCloseRequest:
+      type: object
+      description: 'clm.Exposure.close request. PRD inputs: "exposure data"'
+      properties:
+        exposureData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure data"'
+    ExposureCloseResponse:
+      type: object
+      description: 'clm.Exposure.close result. PRD outputs: "exposure"'
+      properties:
+        exposure:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure"'
+    ExposureReopenRequest:
+      type: object
+      description: 'clm.Exposure.reopen request. PRD inputs: "exposure data"'
+      properties:
+        exposureData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure data"'
+    ExposureReopenResponse:
+      type: object
+      description: 'clm.Exposure.reopen result. PRD outputs: "exposure"'
+      properties:
+        exposure:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure"'
+    CoverageDecideRequest:
+      type: object
+      description: 'clm.Coverage.decide request. PRD inputs: "decision, reasons; adopt or keep"'
+      properties:
+        decision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision"'
+        reasons:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reasons"'
+        adoptOrKeep:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "adopt or keep"'
+    CoverageDecideResponse:
+      type: object
+      description: 'clm.Coverage.decide result. PRD outputs: "decision record"'
+      properties:
+        decisionRecord:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision record"'
+    CoverageReverifyRequest:
+      type: object
+      description: 'clm.Coverage.reverify request. PRD inputs: "decision, reasons; adopt or keep"'
+      properties:
+        decision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision"'
+        reasons:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reasons"'
+        adoptOrKeep:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "adopt or keep"'
+    CoverageReverifyResponse:
+      type: object
+      description: 'clm.Coverage.reverify result. PRD outputs: "decision record"'
+      properties:
+        decisionRecord:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision record"'
+    TransactionSetBuildRequest:
+      type: object
+      description: 'clm.TransactionSet.build request. PRD inputs: "transactions"'
+      properties:
+        transactions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "transactions"'
+    TransactionSetBuildResponse:
+      type: object
+      description: 'clm.TransactionSet.build result. PRD outputs: "set with preview, checks, approval request"'
+      properties:
+        setPreview:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "set with preview"'
+        checks:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checks"'
+        approvalRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval request"'
+    TransactionSetSubmitRequest:
+      type: object
+      description: 'clm.TransactionSet.submit request. PRD inputs: "transactions"'
+      properties:
+        transactions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "transactions"'
+    TransactionSetSubmitResponse:
+      type: object
+      description: 'clm.TransactionSet.submit result. PRD outputs: "set with preview, checks, approval request"'
+      properties:
+        setPreview:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "set with preview"'
+        checks:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checks"'
+        approvalRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval request"'
+    TransactionSetApproveRequest:
+      type: object
+      description: 'clm.TransactionSet.approve request. PRD inputs: "transactions"'
+      properties:
+        transactions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "transactions"'
+    TransactionSetApproveResponse:
+      type: object
+      description: 'clm.TransactionSet.approve result. PRD outputs: "set with preview, checks, approval request"'
+      properties:
+        setPreview:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "set with preview"'
+        checks:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checks"'
+        approvalRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval request"'
+    TransactionSetRejectRequest:
+      type: object
+      description: 'clm.TransactionSet.reject request. PRD inputs: "transactions"'
+      properties:
+        transactions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "transactions"'
+    TransactionSetRejectResponse:
+      type: object
+      description: 'clm.TransactionSet.reject result. PRD outputs: "set with preview, checks, approval request"'
+      properties:
+        setPreview:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "set with preview"'
+        checks:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checks"'
+        approvalRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval request"'
+    TransactionSetReturnRequest:
+      type: object
+      description: 'clm.TransactionSet.return request. PRD inputs: "transactions"'
+      properties:
+        transactions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "transactions"'
+    TransactionSetReturnResponse:
+      type: object
+      description: 'clm.TransactionSet.return result. PRD outputs: "set with preview, checks, approval request"'
+      properties:
+        setPreview:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "set with preview"'
+        checks:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "checks"'
+        approvalRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval request"'
+    PaymentVoidRequest:
+      type: object
+      description: 'clm.Payment.void request. PRD inputs: "payment id, reason"'
+      properties:
+        paymentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "payment id"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    PaymentVoidResponse:
+      type: object
+      description: 'clm.Payment.void result. PRD outputs: "updated payment"'
+      properties:
+        updatedPayment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "updated payment"'
+    PaymentStopRequest:
+      type: object
+      description: 'clm.Payment.stop request. PRD inputs: "payment id, reason"'
+      properties:
+        paymentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "payment id"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    PaymentStopResponse:
+      type: object
+      description: 'clm.Payment.stop result. PRD outputs: "updated payment"'
+      properties:
+        updatedPayment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "updated payment"'
+    PaymentReissueRequest:
+      type: object
+      description: 'clm.Payment.reissue request. PRD inputs: "payment id, reason"'
+      properties:
+        paymentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "payment id"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    PaymentReissueResponse:
+      type: object
+      description: 'clm.Payment.reissue result. PRD outputs: "updated payment"'
+      properties:
+        updatedPayment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "updated payment"'
+    RedressRequestRequest:
+      type: object
+      description: 'clm.Redress.request request. PRD inputs: "complaint id, claim id, payee, amount, reason"'
+      properties:
+        complaintId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "complaint id"'
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "claim id"'
+        payee:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "payee"'
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: 'PRD: "amount"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RedressRequestResponse:
+      type: object
+      description: 'clm.Redress.request result. PRD outputs: "set id, status"'
+      properties:
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "set id"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    FinancialsGetResponse:
+      type: object
+      description: 'clm.Financials.get result. PRD outputs: "balances by line"'
+      properties:
+        balancesByLine:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "balances by line"'
+    FinancialsDailyTotalsResponse:
+      type: object
+      description: 'clm.Financials.dailyTotals result. PRD outputs: "totals by currency and cost type with transaction ids"'
+      properties:
+        totalsByCurrencyAndCostType:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "totals by currency and cost type with transaction ids"'
+    StatutoryOfferIssueRequest:
+      type: object
+      description: 'clm.StatutoryOffer.issue request. PRD inputs: "exposure, content"'
+      properties:
+        exposure:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure"'
+        content:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "content"'
+    StatutoryOfferIssueResponse:
+      type: object
+      description: 'clm.StatutoryOffer.issue result. PRD outputs: "offer record, document request; agreement → clock start"'
+      properties:
+        offerRecord:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "offer record"'
+        documentRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document request"'
+        agreementClockStart:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "agreement → clock start"'
+    StatutoryOfferRecordAcceptanceRequest:
+      type: object
+      description: 'clm.StatutoryOffer.recordAcceptance request. PRD inputs: "exposure, content"'
+      properties:
+        exposure:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure"'
+        content:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "content"'
+    StatutoryOfferRecordAcceptanceResponse:
+      type: object
+      description: 'clm.StatutoryOffer.recordAcceptance result. PRD outputs: "offer record, document request; agreement →
+        clock start"'
+      properties:
+        offerRecord:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "offer record"'
+        documentRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document request"'
+        agreementClockStart:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "agreement → clock start"'
+    StatutoryOfferRecordRepairAgreementRequest:
+      type: object
+      description: 'clm.StatutoryOffer.recordRepairAgreement request. PRD inputs: "exposure, content"'
+      properties:
+        exposure:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "exposure"'
+        content:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "content"'
+    StatutoryOfferRecordRepairAgreementResponse:
+      type: object
+      description: 'clm.StatutoryOffer.recordRepairAgreement result. PRD outputs: "offer record, document request; agreement
+        → clock start"'
+      properties:
+        offerRecord:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "offer record"'
+        documentRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document request"'
+        agreementClockStart:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "agreement → clock start"'
+    CertificateRequestRequest:
+      type: object
+      description: 'clm.Certificate.request request. PRD inputs: "requester, policies, period"'
+      properties:
+        requester:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "requester"'
+        policies:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policies"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+    CertificateRequestResponse:
+      type: object
+      description: 'clm.Certificate.request result. PRD outputs: "certificate"'
+      properties:
+        certificate:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "certificate"'
+    CertificateAssembleRequest:
+      type: object
+      description: 'clm.Certificate.assemble request. PRD inputs: "requester, policies, period"'
+      properties:
+        requester:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "requester"'
+        policies:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policies"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+    CertificateAssembleResponse:
+      type: object
+      description: 'clm.Certificate.assemble result. PRD outputs: "certificate"'
+      properties:
+        certificate:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "certificate"'
+    CertificateIssueRequest:
+      type: object
+      description: 'clm.Certificate.issue request. PRD inputs: "requester, policies, period"'
+      properties:
+        requester:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "requester"'
+        policies:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policies"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+    CertificateIssueResponse:
+      type: object
+      description: 'clm.Certificate.issue result. PRD outputs: "certificate"'
+      properties:
+        certificate:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "certificate"'
+    ClaimTrackingGetResponse:
+      type: object
+      description: 'clm.ClaimTracking.get result. PRD outputs: "tracking view"'
+      properties:
+        trackingView:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "tracking view"'
+    ClaimTrackingListItem:
+      type: object
+      description: 'clm.ClaimTracking.list result. PRD outputs: "tracking view"'
+      properties:
+        trackingView:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "tracking view"'
+    ClaimTrackingListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ClaimTrackingListItem'
+      description: Page of clm.ClaimTracking.list results (cursor pagination, contract §3.5.5)
+    CatEventAggregateResponse:
+      type: object
+      description: 'clm.CatEvent.aggregate result. PRD outputs: "totals by line"'
+      properties:
+        totalsByLine:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "totals by line"'
+    ServiceRequestRequest:
+      type: object
+      description: 'clm.Service.request request. PRD inputs: "service data; invoice"'
+      properties:
+        serviceData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "service data"'
+        invoice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "invoice"'
+    ServiceRequestResponse:
+      type: object
+      description: 'clm.Service.request result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    ServiceUpdateRequest:
+      type: object
+      description: 'clm.Service.update request. PRD inputs: "service data; invoice"'
+      properties:
+        serviceData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "service data"'
+        invoice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "invoice"'
+    ServiceUpdateResponse:
+      type: object
+      description: 'clm.Service.update result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    ServiceCancelRequest:
+      type: object
+      description: 'clm.Service.cancel request. PRD inputs: "service data; invoice"'
+      properties:
+        serviceData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "service data"'
+        invoice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "invoice"'
+    ServiceCancelResponse:
+      type: object
+      description: 'clm.Service.cancel result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    VendorInvoiceSubmitRequest:
+      type: object
+      description: 'clm.VendorInvoice.submit request. PRD inputs: "service data; invoice"'
+      properties:
+        serviceData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "service data"'
+        invoice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "invoice"'
+    VendorInvoiceSubmitResponse:
+      type: object
+      description: 'clm.VendorInvoice.submit result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    VendorInvoiceDecideRequest:
+      type: object
+      description: 'clm.VendorInvoice.decide request. PRD inputs: "service data; invoice"'
+      properties:
+        serviceData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "service data"'
+        invoice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "invoice"'
+    VendorInvoiceDecideResponse:
+      type: object
+      description: 'clm.VendorInvoice.decide result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    FraudScoreRequest:
+      type: object
+      description: 'clm.Fraud.score request. PRD inputs: "claim"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+    FraudScoreResponse:
+      type: object
+      description: 'clm.Fraud.score result. PRD outputs: "indicators, band; case data"'
+      properties:
+        indicators:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "indicators"'
+        band:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "band"'
+        caseData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "case data"'
+    ConversationSendRequest:
+      type: object
+      description: 'clm.Conversation.send request. PRD inputs: "party, text, channel"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        text:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "text"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+    ConversationSendResponse:
+      type: object
+      description: 'clm.Conversation.send result. PRD outputs: "message status"'
+      properties:
+        messageStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "message status"'
+    ConversationScheduleRequest:
+      type: object
+      description: 'clm.Conversation.schedule request. PRD inputs: "party, text, channel"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        text:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "text"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+    ConversationScheduleResponse:
+      type: object
+      description: 'clm.Conversation.schedule result. PRD outputs: "message status"'
+      properties:
+        messageStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "message status"'
+    ConversationListItem:
+      type: object
+      description: 'clm.Conversation.list result. PRD outputs: "message status"'
+      properties:
+        messageStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "message status"'
+    ConversationListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ConversationListItem'
+      description: Page of clm.Conversation.list results (cursor pagination, contract §3.5.5)
+    ImportClaimRequest:
+      type: object
+      description: 'clm.Import.claim request. PRD inputs: "legacy claim"'
+      properties:
+        legacyClaim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy claim"'
+    ImportClaimResponse:
+      type: object
+      description: 'clm.Import.claim result. PRD outputs: "claim; plan → conversion result; batch or source key → reversal
+        result"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+        planConversionResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "plan → conversion result"'
+        batchOrSourceKeyReversalResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch or source key → reversal result"'
+    ImportFinancialHistoryRequest:
+      type: object
+      description: 'clm.Import.financialHistory request. PRD inputs: "legacy claim"'
+      properties:
+        legacyClaim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy claim"'
+    ImportFinancialHistoryResponse:
+      type: object
+      description: 'clm.Import.financialHistory result. PRD outputs: "claim; plan → conversion result; batch or source key
+        → reversal result"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+        planConversionResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "plan → conversion result"'
+        batchOrSourceKeyReversalResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch or source key → reversal result"'
+    ImportConvertCurrencyRequest:
+      type: object
+      description: 'clm.Import.convertCurrency request. PRD inputs: "legacy claim"'
+      properties:
+        legacyClaim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy claim"'
+    ImportConvertCurrencyResponse:
+      type: object
+      description: 'clm.Import.convertCurrency result. PRD outputs: "claim; plan → conversion result; batch or source key
+        → reversal result"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+        planConversionResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "plan → conversion result"'
+        batchOrSourceKeyReversalResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch or source key → reversal result"'
+    ImportReverseRequest:
+      type: object
+      description: 'clm.Import.reverse request. PRD inputs: "legacy claim"'
+      properties:
+        legacyClaim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy claim"'
+    ImportReverseResponse:
+      type: object
+      description: 'clm.Import.reverse result. PRD outputs: "claim; plan → conversion result; batch or source key → reversal
+        result"'
+      properties:
+        claim:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim"'
+        planConversionResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "plan → conversion result"'
+        batchOrSourceKeyReversalResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch or source key → reversal result"'
+    DsarExportRequest:
+      type: object
+      description: 'clm.Dsar.export request. PRD inputs: "party"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+    DsarExportResponse:
+      type: object
+      description: 'clm.Dsar.export result. PRD outputs: "claim data package"'
+      properties:
+        claimDataPackage:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim data package"'
+    DsarRectifyRequest:
+      type: object
+      description: 'clm.Dsar.rectify request. PRD inputs: "party, corrections"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        corrections:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "corrections"'
+    DsarRectifyResponse:
+      type: object
+      description: 'clm.Dsar.rectify result. PRD outputs: "result"'
+      properties:
+        result:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result"'
+    DsarRestrictRequest:
+      type: object
+      description: 'clm.Dsar.restrict request. PRD inputs: "party, scope"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    DsarRestrictResponse:
+      type: object
+      description: 'clm.Dsar.restrict result. PRD outputs: "result"'
+      properties:
+        result:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result"'
+    DsarPurgeRequest:
+      type: object
+      description: 'clm.Dsar.purge request. PRD inputs: "party or scope"'
+      properties:
+        partyOrScope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party or scope"'
+    DsarPurgeResponse:
+      type: object
+      description: 'clm.Dsar.purge result. PRD outputs: "result"'
+      properties:
+        result:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result"'

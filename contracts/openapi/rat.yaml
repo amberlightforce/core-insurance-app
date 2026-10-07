@@ -1,0 +1,4282 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: RAT — Rating and pricing engine API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by RAT (PRD-03 §9.1)
+  description: 'Contract of the operations RAT exposes (PRD-03 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: RAT
+  x-prd: PRD-03
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: Rate
+- name: Worksheet
+- name: Proration
+- name: DayCount
+- name: PricingModification
+- name: Breakdown
+- name: ChangeExplanation
+- name: PriceReview
+- name: RatingArtifact
+- name: RatingChangeSet
+- name: RateTable
+- name: GoldenSuite
+- name: Comparison
+- name: ShadowRun
+- name: ImpactAnalysis
+- name: BonusMalus
+- name: Statement
+- name: LegacyRating
+- name: Dsar
+paths:
+  /api/rat/v1/rates/rate:
+    post:
+      operationId: rat.Rate.rate
+      summary: Synchronous rating
+      description: |-
+        Synchronous rating
+
+        PRD inputs: envelope (`REQ-RAT-030`), segments, policy inputs, history, modifications refs, prior rates (renewal), explain flag
+        PRD outputs: rates per element × charge type × segment, taxes, signals, warnings, defaults used, automated-decision flag, bindable, worksheet id and hash
+      tags:
+      - Rate
+      x-requirement:
+      - REQ-RAT-001
+      - REQ-RAT-006
+      - REQ-RAT-009
+      - REQ-RAT-030..REQ-RAT-053
+      x-anchor:
+      - REQ-RAT-001
+      - REQ-RAT-006
+      - REQ-RAT-009
+      x-anchor-mapped:
+      - REQ-RAT-006
+      - REQ-RAT-009
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      - W3-RAT-03
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: optional
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Optional Idempotency-Key; dry-run by mode DRY_RUN'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      - POL
+      - UW
+      x-permission: rat.Rate.rate
+      x-error-codes:
+      - code: RAT-ERR-ENVELOPE
+        status: 422
+      - code: RAT-ERR-INPUT
+        status: 422
+      - code: RAT-ERR-INPUT-UNDECLARED
+        status: 422
+      - code: RAT-ERR-PROHIBITED-INPUT
+        status: 422
+      - code: RAT-ERR-UNKNOWN-ARTEFACT
+        status: 422
+      - code: RAT-ERR-INCOMPATIBLE-ARTEFACT
+        status: 422
+      - code: RAT-ERR-DOMAIN
+        status: 422
+      - code: RAT-ERR-HIT-POLICY
+        status: 422
+      - code: RAT-ERR-TAX
+        status: 422
+      - code: RAT-ERR-ALLOCATION
+        status: 422
+      - code: RAT-ERR-CURRENCY
+        status: 422
+      - code: RAT-ERR-SCHEME
+        status: 422
+      - code: RAT-ERR-FORBIDDEN-MODE
+        status: 403
+      x-source:
+      - PRD-03 §9.1 l.1209
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKeyOptional
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RateRateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateRateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rates/rate-batch:
+    post:
+      operationId: rat.Rate.rateBatch
+      summary: Batch rating
+      description: |-
+        Batch rating
+
+        PRD inputs: items with item keys, priority class, origin
+        PRD outputs: batch id, status, paged results
+      tags:
+      - Rate
+      x-requirement:
+      - REQ-RAT-002
+      - REQ-RAT-054..REQ-RAT-056
+      x-anchor:
+      - REQ-RAT-002
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key; restartable by item key'
+      x-exposure:
+      - ui
+      x-consumers:
+      - MIG
+      - MKT
+      - POL
+      x-permission: rat.Rate.rateBatch
+      x-error-codes:
+      - code: RAT-ERR-BATCH-LIMIT
+        status: 422
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1210
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RateRateBatchRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateRateBatchResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rates/get-batch:
+    get:
+      operationId: rat.Rate.getBatch
+      summary: Batch rating
+      description: |-
+        Batch rating
+
+        PRD inputs: items with item keys, priority class, origin
+        PRD outputs: batch id, status, paged results
+      tags:
+      - Rate
+      x-requirement:
+      - REQ-RAT-002
+      - REQ-RAT-054..REQ-RAT-056
+      x-anchor:
+      - REQ-RAT-002
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key; restartable by item key'
+      x-exposure:
+      - ui
+      x-permission: rat.Rate.getBatch
+      x-error-codes:
+      - code: RAT-ERR-BATCH-LIMIT
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1210
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateGetBatchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rates/get-batch-results:
+    get:
+      operationId: rat.Rate.getBatchResults
+      summary: Batch rating
+      description: |-
+        Batch rating
+
+        PRD inputs: items with item keys, priority class, origin
+        PRD outputs: batch id, status, paged results
+      tags:
+      - Rate
+      x-requirement:
+      - REQ-RAT-002
+      - REQ-RAT-054..REQ-RAT-056
+      x-anchor:
+      - REQ-RAT-002
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key; restartable by item key'
+      x-exposure:
+      - ui
+      x-permission: rat.Rate.getBatchResults
+      x-error-codes:
+      - code: RAT-ERR-BATCH-LIMIT
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1210
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateGetBatchResultsPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rates/cancel-batch:
+    post:
+      operationId: rat.Rate.cancelBatch
+      summary: Batch rating
+      description: |-
+        Batch rating
+
+        PRD inputs: items with item keys, priority class, origin
+        PRD outputs: batch id, status, paged results
+      tags:
+      - Rate
+      x-requirement:
+      - REQ-RAT-002
+      - REQ-RAT-054..REQ-RAT-056
+      x-anchor:
+      - REQ-RAT-002
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key; restartable by item key'
+      x-exposure:
+      - ui
+      x-permission: rat.Rate.cancelBatch
+      x-error-codes:
+      - code: RAT-ERR-BATCH-LIMIT
+        status: 422
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1210
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RateCancelBatchRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateCancelBatchResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/worksheets/{id}:
+    get:
+      operationId: rat.Worksheet.get
+      summary: Worksheet access
+      description: |-
+        Worksheet access
+
+        PRD inputs: worksheet id, language, format
+        PRD outputs: worksheet, explanation, match result, document
+      tags:
+      - Worksheet
+      x-requirement:
+      - REQ-RAT-003
+      - REQ-RAT-233
+      - REQ-RAT-243
+      x-anchor:
+      - REQ-RAT-003
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      - W3-RAT-02
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      - POL
+      x-permission: rat.Worksheet.get
+      x-error-codes:
+      - code: RAT-ERR-WORKSHEET-NOT-FOUND
+        status: 404
+      - code: RAT-ERR-RETENTION-EXPIRED
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1211
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Worksheet (PRD input: "worksheet id")'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorksheetGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/worksheets/explain:
+    get:
+      operationId: rat.Worksheet.explain
+      summary: Worksheet access
+      description: |-
+        Worksheet access
+
+        PRD inputs: worksheet id, language, format
+        PRD outputs: worksheet, explanation, match result, document
+      tags:
+      - Worksheet
+      x-requirement:
+      - REQ-RAT-003
+      - REQ-RAT-233
+      - REQ-RAT-243
+      x-anchor:
+      - REQ-RAT-003
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      - W3-RAT-02
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - MIG
+      - PFC
+      - POL
+      - UW
+      x-partner-routes:
+      - MCP tool explain_price
+      x-permission: rat.Worksheet.explain
+      x-error-codes:
+      - code: RAT-ERR-WORKSHEET-NOT-FOUND
+        status: 404
+      - code: RAT-ERR-RETENTION-EXPIRED
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1211
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorksheetExplainResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/worksheets/reperform:
+    post:
+      operationId: rat.Worksheet.reperform
+      summary: Worksheet access
+      description: |-
+        Worksheet access
+
+        PRD inputs: worksheet id, language, format
+        PRD outputs: worksheet, explanation, match result, document
+      tags:
+      - Worksheet
+      x-requirement:
+      - REQ-RAT-003
+      - REQ-RAT-233
+      - REQ-RAT-243
+      x-anchor:
+      - REQ-RAT-003
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      - W3-RAT-02
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: rat.Worksheet.reperform
+      x-error-codes:
+      - code: RAT-ERR-WORKSHEET-NOT-FOUND
+        status: 404
+      - code: RAT-ERR-RETENTION-EXPIRED
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1211
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorksheetReperformRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorksheetReperformResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/worksheets/export:
+    post:
+      operationId: rat.Worksheet.export
+      summary: Worksheet access
+      description: |-
+        Worksheet access
+
+        PRD inputs: worksheet id, language, format
+        PRD outputs: worksheet, explanation, match result, document
+      tags:
+      - Worksheet
+      x-requirement:
+      - REQ-RAT-003
+      - REQ-RAT-233
+      - REQ-RAT-243
+      x-anchor:
+      - REQ-RAT-003
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      - W3-RAT-02
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: rat.Worksheet.export
+      x-error-codes:
+      - code: RAT-ERR-WORKSHEET-NOT-FOUND
+        status: 404
+      - code: RAT-ERR-RETENTION-EXPIRED
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1211
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorksheetExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorksheetExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/worksheets/attach:
+    post:
+      operationId: rat.Worksheet.attach
+      summary: Link worksheets to a bound transaction
+      description: |-
+        Link worksheets to a bound transaction
+
+        PRD inputs: worksheet ids, transaction ref, policy ref
+        PRD outputs: attachment result
+      tags:
+      - Worksheet
+      x-requirement:
+      - REQ-RAT-229
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-02
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: rat.Worksheet.attach
+      x-error-codes:
+      - code: RAT-ERR-WORKSHEET-NOT-FOUND
+        status: 404
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1212
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorksheetAttachRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorksheetAttachResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/proration/prorate:
+    post:
+      operationId: rat.Proration.prorate
+      summary: Proration and day count
+      description: |-
+        Proration and day count
+
+        PRD inputs: annual rates, periods, term, convention, configuration hash, order of operations, explain
+        PRD outputs: amounts, fractions, residuals, explanation
+      tags:
+      - Proration
+      x-requirement:
+      - REQ-RAT-004
+      - REQ-RAT-155..REQ-RAT-166
+      x-anchor:
+      - REQ-RAT-004
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-03
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Pure'
+      x-exposure:
+      - ui
+      x-permission: rat.Proration.prorate
+      x-error-codes:
+      - code: RAT-ERR-CONVENTION
+        status: 422
+      - code: RAT-ERR-PERIOD
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1213
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProrationProrateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProrationProrateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/day-count/year-fraction:
+    post:
+      operationId: rat.DayCount.yearFraction
+      summary: Proration and day count
+      description: |-
+        Proration and day count
+
+        PRD inputs: annual rates, periods, term, convention, configuration hash, order of operations, explain
+        PRD outputs: amounts, fractions, residuals, explanation
+      tags:
+      - DayCount
+      x-requirement:
+      - REQ-RAT-004
+      - REQ-RAT-155..REQ-RAT-166
+      x-anchor:
+      - REQ-RAT-004
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-03
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Pure'
+      x-exposure:
+      - ui
+      x-permission: rat.DayCount.yearFraction
+      x-error-codes:
+      - code: RAT-ERR-CONVENTION
+        status: 422
+      - code: RAT-ERR-PERIOD
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1213
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DayCountYearFractionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DayCountYearFractionResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/pricing-modifications/propose:
+    post:
+      operationId: rat.PricingModification.propose
+      summary: Deviations
+      description: |-
+        Deviations
+
+        PRD inputs: job, quote version, scope, type, value, reason, justification
+        PRD outputs: modification with status, authority result, dry-run price
+      tags:
+      - PricingModification
+      x-requirement:
+      - REQ-RAT-005
+      - REQ-RAT-124..REQ-RAT-130
+      x-anchor:
+      - REQ-RAT-005
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-03
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: rat.PricingModification.propose
+      x-authority-types:
+      - RAT.PricingDeviation
+      x-authority-source:
+      - PRD-03 l.1529
+      - PRD-03 l.375
+      - PRD-03 l.503
+      x-error-codes:
+      - code: RAT-ERR-REASON-REQUIRED
+        status: 422
+      - code: RAT-ERR-AUTHORITY-DENIED
+        status: 403
+      - code: RAT-ERR-FLOOR
+        status: 422
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1214
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PricingModificationProposeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingModificationProposeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/pricing-modifications/withdraw:
+    post:
+      operationId: rat.PricingModification.withdraw
+      summary: Deviations
+      description: |-
+        Deviations
+
+        PRD inputs: job, quote version, scope, type, value, reason, justification
+        PRD outputs: modification with status, authority result, dry-run price
+      tags:
+      - PricingModification
+      x-requirement:
+      - REQ-RAT-005
+      - REQ-RAT-124..REQ-RAT-130
+      x-anchor:
+      - REQ-RAT-005
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-03
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run'
+      x-exposure:
+      - ui
+      x-permission: rat.PricingModification.withdraw
+      x-authority-types:
+      - RAT.PricingDeviation
+      x-authority-source:
+      - PRD-03 l.1529
+      - PRD-03 l.375
+      - PRD-03 l.503
+      x-error-codes:
+      - code: RAT-ERR-REASON-REQUIRED
+        status: 422
+      - code: RAT-ERR-AUTHORITY-DENIED
+        status: 403
+      - code: RAT-ERR-FLOOR
+        status: 422
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1214
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PricingModificationWithdrawRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingModificationWithdrawResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/pricing-modifications/{id}:
+    get:
+      operationId: rat.PricingModification.get
+      summary: Deviations
+      description: |-
+        Deviations
+
+        PRD inputs: job, quote version, scope, type, value, reason, justification
+        PRD outputs: modification with status, authority result, dry-run price
+      tags:
+      - PricingModification
+      x-requirement:
+      - REQ-RAT-005
+      - REQ-RAT-124..REQ-RAT-130
+      x-anchor:
+      - REQ-RAT-005
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-03
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run'
+      x-exposure:
+      - ui
+      x-permission: rat.PricingModification.get
+      x-error-codes:
+      - code: RAT-ERR-REASON-REQUIRED
+        status: 422
+      - code: RAT-ERR-AUTHORITY-DENIED
+        status: 403
+      - code: RAT-ERR-FLOOR
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1214
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the PricingModification
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingModificationGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/pricing-modifications:
+    get:
+      operationId: rat.PricingModification.list
+      summary: Deviations
+      description: |-
+        Deviations
+
+        PRD inputs: job, quote version, scope, type, value, reason, justification
+        PRD outputs: modification with status, authority result, dry-run price
+      tags:
+      - PricingModification
+      x-requirement:
+      - REQ-RAT-005
+      - REQ-RAT-124..REQ-RAT-130
+      x-anchor:
+      - REQ-RAT-005
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-03
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run'
+      x-exposure:
+      - ui
+      x-permission: rat.PricingModification.list
+      x-error-codes:
+      - code: RAT-ERR-REASON-REQUIRED
+        status: 422
+      - code: RAT-ERR-AUTHORITY-DENIED
+        status: 403
+      - code: RAT-ERR-FLOOR
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1214
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingModificationListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/breakdowns/{id}:
+    get:
+      operationId: rat.Breakdown.get
+      summary: Customer breakdown
+      description: |-
+        Customer breakdown
+
+        PRD inputs: worksheet id, audience (customer, intermediary), language
+        PRD outputs: grouped lines, factor categories, totals
+      tags:
+      - Breakdown
+      x-requirement:
+      - REQ-RAT-008
+      - REQ-RAT-235
+      x-anchor:
+      - REQ-RAT-008
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-02
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - DOC
+      x-partner-routes:
+      - MCP tool explain_price
+      x-permission: rat.Breakdown.get
+      x-error-codes:
+      - code: RAT-ERR-FORBIDDEN
+        status: 403
+      x-source:
+      - PRD-03 §9.1 l.1215
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Breakdown (PRD input: "worksheet id")'
+        schema:
+          type: string
+      - name: audience
+        in: query
+        required: false
+        description: 'PRD: "audience (customer, intermediary)"'
+        schema:
+          type: string
+      - name: language
+        in: query
+        required: false
+        description: 'PRD: "language"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreakdownGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/change-explanations/get:
+    get:
+      operationId: rat.ChangeExplanation.get
+      summary: Explain change
+      description: |-
+        Explain change
+
+        PRD inputs: worksheet before, worksheet after, language
+        PRD outputs: effects summing to the change
+      tags:
+      - ChangeExplanation
+      x-requirement:
+      - REQ-RAT-236
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-02
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: rat.ChangeExplanation.get
+      x-error-codes: []
+      x-source:
+      - PRD-03 §9.1 l.1216
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: worksheetBefore
+        in: query
+        required: false
+        description: 'PRD: "worksheet before"'
+        schema:
+          type: string
+      - name: worksheetAfter
+        in: query
+        required: false
+        description: 'PRD: "worksheet after"'
+        schema:
+          type: string
+      - name: language
+        in: query
+        required: false
+        description: 'PRD: "language"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeExplanationGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/price-reviews/request:
+    post:
+      operationId: rat.PriceReview.request
+      summary: Human review
+      description: |-
+        Human review
+
+        PRD inputs: worksheet, requester; decision, reasoning
+        PRD outputs: review case, activity ref
+      tags:
+      - PriceReview
+      x-requirement:
+      - REQ-RAT-240..REQ-RAT-242
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-02
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: rat.PriceReview.request
+      x-authority-types:
+      - RAT.PriceReviewDecision
+      x-authority-source:
+      - PRD-03 l.1533
+      x-error-codes:
+      - code: RAT-ERR-FORBIDDEN
+        note: AI identities
+        status: 403
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1217
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceReviewRequestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceReviewRequestResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/price-reviews/decide:
+    post:
+      operationId: rat.PriceReview.decide
+      summary: Human review
+      description: |-
+        Human review
+
+        PRD inputs: worksheet, requester; decision, reasoning
+        PRD outputs: review case, activity ref
+      tags:
+      - PriceReview
+      x-requirement:
+      - REQ-RAT-240..REQ-RAT-242
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-02
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: rat.PriceReview.decide
+      x-authority-types:
+      - RAT.PriceReviewDecision
+      x-authority-source:
+      - PRD-03 l.1533
+      x-error-codes:
+      - code: RAT-ERR-FORBIDDEN
+        note: AI identities
+        status: 403
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1217
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceReviewDecideRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceReviewDecideResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts/resolve:
+    post:
+      operationId: rat.RatingArtifact.resolve
+      summary: Active artefact for slot and date
+      description: |-
+        Active artefact for slot and date
+
+        PRD inputs: slot, transaction type, basis date, knownAt
+        PRD outputs: artefact hash, activation record
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-064
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      x-permission: rat.RatingArtifact.resolve
+      x-error-codes:
+      - code: RAT-ERR-NO-ACTIVE-ARTEFACT
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1218
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/KnownAt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingArtifactResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts/{id}:
+    get:
+      operationId: rat.RatingArtifact.get
+      summary: Artefact metadata
+      description: |-
+        Artefact metadata
+
+        PRD inputs: hash or slot
+        PRD outputs: manifest, status, compatibility records
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-060
+      - REQ-RAT-061
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingArtifact.get
+      x-error-codes: []
+      x-source:
+      - PRD-03 §9.1 l.1219
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the RatingArtifact (PRD input: "hash or slot")'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts:
+    get:
+      operationId: rat.RatingArtifact.list
+      summary: Artefact metadata
+      description: |-
+        Artefact metadata
+
+        PRD inputs: hash or slot
+        PRD outputs: manifest, status, compatibility records
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-060
+      - REQ-RAT-061
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingArtifact.list
+      x-error-codes: []
+      x-source:
+      - PRD-03 §9.1 l.1219
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts/compatibility:
+    get:
+      operationId: rat.RatingArtifact.compatibility
+      summary: Artefact metadata
+      description: |-
+        Artefact metadata
+
+        PRD inputs: hash or slot
+        PRD outputs: manifest, status, compatibility records
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-060
+      - REQ-RAT-061
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-01
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingArtifact.compatibility
+      x-error-codes: []
+      x-source:
+      - PRD-03 §9.1 l.1219
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactCompatibilityResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-change-sets:
+    post:
+      operationId: rat.RatingChangeSet.create
+      summary: Authoring
+      description: |-
+        Authoring
+
+        PRD inputs: file or rows, mapping, change set
+        PRD outputs: table version, validation report, diff
+      tags:
+      - RatingChangeSet
+      x-requirement:
+      - REQ-RAT-167..REQ-RAT-184
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates only'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingChangeSet.create
+      x-error-codes:
+      - code: RAT-ERR-IMPORT-INVALID
+        status: 422
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1220
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingChangeSetCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingChangeSetCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rate-tables/import:
+    post:
+      operationId: rat.RateTable.import
+      summary: Authoring
+      description: |-
+        Authoring
+
+        PRD inputs: file or rows, mapping, change set
+        PRD outputs: table version, validation report, diff
+      tags:
+      - RateTable
+      x-requirement:
+      - REQ-RAT-167..REQ-RAT-184
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates only'
+      x-exposure:
+      - ui
+      x-permission: rat.RateTable.import
+      x-error-codes:
+      - code: RAT-ERR-IMPORT-INVALID
+        status: 422
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1220
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RateTableImportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateTableImportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rate-tables/validate:
+    post:
+      operationId: rat.RateTable.validate
+      summary: Authoring
+      description: |-
+        Authoring
+
+        PRD inputs: file or rows, mapping, change set
+        PRD outputs: table version, validation report, diff
+      tags:
+      - RateTable
+      x-requirement:
+      - REQ-RAT-167..REQ-RAT-184
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates only'
+      x-exposure:
+      - ui
+      x-permission: rat.RateTable.validate
+      x-error-codes:
+      - code: RAT-ERR-IMPORT-INVALID
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1220
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RateTableValidateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateTableValidateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rate-tables/diff:
+    get:
+      operationId: rat.RateTable.diff
+      summary: Authoring
+      description: |-
+        Authoring
+
+        PRD inputs: file or rows, mapping, change set
+        PRD outputs: table version, validation report, diff
+      tags:
+      - RateTable
+      x-requirement:
+      - REQ-RAT-167..REQ-RAT-184
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates only'
+      x-exposure:
+      - ui
+      x-permission: rat.RateTable.diff
+      x-error-codes:
+      - code: RAT-ERR-IMPORT-INVALID
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1220
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateTableDiffResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts/build:
+    post:
+      operationId: rat.RatingArtifact.build
+      summary: Lifecycle
+      description: |-
+        Lifecycle
+
+        PRD inputs: change set; artefact; slot dates; reason
+        PRD outputs: artefact status, governance bundle id
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-213..REQ-RAT-226
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingArtifact.build
+      x-authority-types:
+      - RAT.EmergencyRateChange
+      - RAT.RateActivation
+      - RAT.RateArtifactApproval
+      x-authority-source:
+      - PRD-03 l.1530
+      - PRD-03 l.1531
+      - PRD-03 l.1532
+      - PRD-03 l.632
+      x-error-codes:
+      - code: RAT-ERR-EVIDENCE-INCOMPLETE
+        status: 422
+      - code: RAT-ERR-NO-COMPATIBLE-SLOT
+        status: 422
+      - code: RAT-ERR-SOD-VIOLATION
+        status: 403
+      - code: PLT-ERR-SELF-APPROVAL
+        status: 403
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1221
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingArtifactBuildRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactBuildResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts/submit:
+    post:
+      operationId: rat.RatingArtifact.submit
+      summary: Lifecycle
+      description: |-
+        Lifecycle
+
+        PRD inputs: change set; artefact; slot dates; reason
+        PRD outputs: artefact status, governance bundle id
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-213..REQ-RAT-226
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingArtifact.submit
+      x-authority-types:
+      - RAT.EmergencyRateChange
+      - RAT.RateActivation
+      - RAT.RateArtifactApproval
+      x-authority-source:
+      - PRD-03 l.1530
+      - PRD-03 l.1531
+      - PRD-03 l.1532
+      - PRD-03 l.632
+      x-error-codes:
+      - code: RAT-ERR-EVIDENCE-INCOMPLETE
+        status: 422
+      - code: RAT-ERR-NO-COMPATIBLE-SLOT
+        status: 422
+      - code: RAT-ERR-SOD-VIOLATION
+        status: 403
+      - code: PLT-ERR-SELF-APPROVAL
+        status: 403
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1221
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingArtifactSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts/return:
+    post:
+      operationId: rat.RatingArtifact.return
+      summary: Lifecycle
+      description: |-
+        Lifecycle
+
+        PRD inputs: change set; artefact; slot dates; reason
+        PRD outputs: artefact status, governance bundle id
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-213..REQ-RAT-226
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingArtifact.return
+      x-authority-types:
+      - RAT.EmergencyRateChange
+      - RAT.RateActivation
+      - RAT.RateArtifactApproval
+      x-authority-source:
+      - PRD-03 l.1530
+      - PRD-03 l.1531
+      - PRD-03 l.1532
+      - PRD-03 l.632
+      x-error-codes:
+      - code: RAT-ERR-EVIDENCE-INCOMPLETE
+        status: 422
+      - code: RAT-ERR-NO-COMPATIBLE-SLOT
+        status: 422
+      - code: RAT-ERR-SOD-VIOLATION
+        status: 403
+      - code: PLT-ERR-SELF-APPROVAL
+        status: 403
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1221
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingArtifactReturnRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactReturnResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts/schedule:
+    post:
+      operationId: rat.RatingArtifact.schedule
+      summary: Lifecycle
+      description: |-
+        Lifecycle
+
+        PRD inputs: change set; artefact; slot dates; reason
+        PRD outputs: artefact status, governance bundle id
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-213..REQ-RAT-226
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingArtifact.schedule
+      x-authority-types:
+      - RAT.EmergencyRateChange
+      - RAT.RateActivation
+      - RAT.RateArtifactApproval
+      x-authority-source:
+      - PRD-03 l.1530
+      - PRD-03 l.1531
+      - PRD-03 l.1532
+      - PRD-03 l.632
+      x-error-codes:
+      - code: RAT-ERR-EVIDENCE-INCOMPLETE
+        status: 422
+      - code: RAT-ERR-NO-COMPATIBLE-SLOT
+        status: 422
+      - code: RAT-ERR-SOD-VIOLATION
+        status: 403
+      - code: PLT-ERR-SELF-APPROVAL
+        status: 403
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1221
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingArtifactScheduleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactScheduleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts/cancel-schedule:
+    post:
+      operationId: rat.RatingArtifact.cancelSchedule
+      summary: Lifecycle
+      description: |-
+        Lifecycle
+
+        PRD inputs: change set; artefact; slot dates; reason
+        PRD outputs: artefact status, governance bundle id
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-213..REQ-RAT-226
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingArtifact.cancelSchedule
+      x-authority-types:
+      - RAT.EmergencyRateChange
+      - RAT.RateActivation
+      - RAT.RateArtifactApproval
+      x-authority-source:
+      - PRD-03 l.1530
+      - PRD-03 l.1531
+      - PRD-03 l.1532
+      - PRD-03 l.632
+      x-error-codes:
+      - code: RAT-ERR-EVIDENCE-INCOMPLETE
+        status: 422
+      - code: RAT-ERR-NO-COMPATIBLE-SLOT
+        status: 422
+      - code: RAT-ERR-SOD-VIOLATION
+        status: 403
+      - code: PLT-ERR-SELF-APPROVAL
+        status: 403
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1221
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingArtifactCancelScheduleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactCancelScheduleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/rating-artifacts/rollback:
+    post:
+      operationId: rat.RatingArtifact.rollback
+      summary: Lifecycle
+      description: |-
+        Lifecycle
+
+        PRD inputs: change set; artefact; slot dates; reason
+        PRD outputs: artefact status, governance bundle id
+      tags:
+      - RatingArtifact
+      x-requirement:
+      - REQ-RAT-213..REQ-RAT-226
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-exposure:
+      - ui
+      x-permission: rat.RatingArtifact.rollback
+      x-authority-types:
+      - RAT.EmergencyRateChange
+      - RAT.RateActivation
+      - RAT.RateArtifactApproval
+      x-authority-source:
+      - PRD-03 l.1530
+      - PRD-03 l.1531
+      - PRD-03 l.1532
+      - PRD-03 l.632
+      x-error-codes:
+      - code: RAT-ERR-EVIDENCE-INCOMPLETE
+        status: 422
+      - code: RAT-ERR-NO-COMPATIBLE-SLOT
+        status: 422
+      - code: RAT-ERR-SOD-VIOLATION
+        status: 403
+      - code: PLT-ERR-SELF-APPROVAL
+        status: 403
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1221
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingArtifactRollbackRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingArtifactRollbackResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/golden-suites/run:
+    post:
+      operationId: rat.GoldenSuite.run
+      summary: Testing
+      description: |-
+        Testing
+
+        PRD inputs: slot, artefact, suites
+        PRD outputs: run id, results
+      tags:
+      - GoldenSuite
+      x-requirement:
+      - REQ-RAT-185..REQ-RAT-196
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      x-permission: rat.GoldenSuite.run
+      x-error-codes:
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1222
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoldenSuiteRunRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoldenSuiteRunResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/golden-suites/request-rebaseline:
+    post:
+      operationId: rat.GoldenSuite.requestRebaseline
+      summary: Testing
+      description: |-
+        Testing
+
+        PRD inputs: slot, artefact, suites
+        PRD outputs: run id, results
+      tags:
+      - GoldenSuite
+      x-requirement:
+      - REQ-RAT-185..REQ-RAT-196
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-04
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: rat.GoldenSuite.requestRebaseline
+      x-error-codes:
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1222
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoldenSuiteRequestRebaselineRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoldenSuiteRequestRebaselineResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/comparisons/compare-versions:
+    post:
+      operationId: rat.Comparison.compareVersions
+      summary: CompareVersions
+      description: |-
+        CompareVersions
+
+        PRD inputs: artefact hashes, input set
+        PRD outputs: comparison id; async results
+      tags:
+      - Comparison
+      x-requirement:
+      - REQ-RAT-007
+      - REQ-RAT-197..REQ-RAT-199
+      x-anchor:
+      - REQ-RAT-007
+      x-wave: W8
+      x-work-packages:
+      - W8-RAT-01
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      x-permission: rat.Comparison.compareVersions
+      x-error-codes:
+      - code: RAT-ERR-INPUT-SET
+        status: 422
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1223
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComparisonCompareVersionsRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComparisonCompareVersionsResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/shadow-runs/start:
+    post:
+      operationId: rat.ShadowRun.start
+      summary: ShadowRun
+      description: |-
+        ShadowRun
+
+        PRD inputs: candidate, slot, sample, filters, window
+        PRD outputs: run id, status, report
+      tags:
+      - ShadowRun
+      x-requirement:
+      - REQ-RAT-007
+      - REQ-RAT-200..REQ-RAT-203
+      x-anchor:
+      - REQ-RAT-007
+      x-wave: W8
+      x-work-packages:
+      - W8-RAT-01
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-consumers:
+      - MKT
+      x-permission: rat.ShadowRun.start
+      x-error-codes:
+      - code: RAT-ERR-SHADOWRUN-CONFLICT
+        status: 409
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1224
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShadowRunStartRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShadowRunStartResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/shadow-runs/stop:
+    post:
+      operationId: rat.ShadowRun.stop
+      summary: ShadowRun
+      description: |-
+        ShadowRun
+
+        PRD inputs: candidate, slot, sample, filters, window
+        PRD outputs: run id, status, report
+      tags:
+      - ShadowRun
+      x-requirement:
+      - REQ-RAT-007
+      - REQ-RAT-200..REQ-RAT-203
+      x-anchor:
+      - REQ-RAT-007
+      x-wave: W8
+      x-work-packages:
+      - W8-RAT-01
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: rat.ShadowRun.stop
+      x-error-codes:
+      - code: RAT-ERR-SHADOWRUN-CONFLICT
+        status: 409
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1224
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShadowRunStopRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShadowRunStopResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/shadow-runs/{id}:
+    get:
+      operationId: rat.ShadowRun.get
+      summary: ShadowRun
+      description: |-
+        ShadowRun
+
+        PRD inputs: candidate, slot, sample, filters, window
+        PRD outputs: run id, status, report
+      tags:
+      - ShadowRun
+      x-requirement:
+      - REQ-RAT-007
+      - REQ-RAT-200..REQ-RAT-203
+      x-anchor:
+      - REQ-RAT-007
+      x-wave: W8
+      x-work-packages:
+      - W8-RAT-01
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: rat.ShadowRun.get
+      x-error-codes:
+      - code: RAT-ERR-SHADOWRUN-CONFLICT
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1224
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the ShadowRun
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShadowRunGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/impact-analysises/run:
+    post:
+      operationId: rat.ImpactAnalysis.run
+      summary: Impact analysis
+      description: |-
+        Impact analysis
+
+        PRD inputs: candidate, baseline, population, window, slices
+        PRD outputs: run id, progress, metrics
+      tags:
+      - ImpactAnalysis
+      x-requirement:
+      - REQ-RAT-007
+      - REQ-RAT-204..REQ-RAT-212
+      x-anchor:
+      - REQ-RAT-007
+      x-wave: W8
+      x-work-packages:
+      - W8-RAT-01
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-consumers:
+      - MKT
+      - PFC
+      x-permission: rat.ImpactAnalysis.run
+      x-error-codes:
+      - code: RAT-ERR-DATA-UNAVAILABLE
+        status: 503
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1225
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImpactAnalysisRunRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactAnalysisRunResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/rat/v1/impact-analysises/{id}:
+    get:
+      operationId: rat.ImpactAnalysis.get
+      summary: Impact analysis
+      description: |-
+        Impact analysis
+
+        PRD inputs: candidate, baseline, population, window, slices
+        PRD outputs: run id, progress, metrics
+      tags:
+      - ImpactAnalysis
+      x-requirement:
+      - REQ-RAT-007
+      - REQ-RAT-204..REQ-RAT-212
+      x-anchor:
+      - REQ-RAT-007
+      x-wave: W8
+      x-work-packages:
+      - W8-RAT-01
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: rat.ImpactAnalysis.get
+      x-error-codes:
+      - code: RAT-ERR-DATA-UNAVAILABLE
+        status: 503
+      x-source:
+      - PRD-03 §9.1 l.1225
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the ImpactAnalysis
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactAnalysisGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/rat/v1/impact-analysises/resume:
+    post:
+      operationId: rat.ImpactAnalysis.resume
+      summary: Impact analysis
+      description: |-
+        Impact analysis
+
+        PRD inputs: candidate, baseline, population, window, slices
+        PRD outputs: run id, progress, metrics
+      tags:
+      - ImpactAnalysis
+      x-requirement:
+      - REQ-RAT-007
+      - REQ-RAT-204..REQ-RAT-212
+      x-anchor:
+      - REQ-RAT-007
+      x-wave: W8
+      x-work-packages:
+      - W8-RAT-01
+      x-status: full
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-exposure:
+      - ui
+      x-permission: rat.ImpactAnalysis.resume
+      x-error-codes:
+      - code: RAT-ERR-DATA-UNAVAILABLE
+        status: 503
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1225
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImpactAnalysisResumeRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactAnalysisResumeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/rat/v1/bonus-malus/transition:
+    post:
+      operationId: rat.BonusMalus.transition
+      summary: Next class
+      description: |-
+        Next class
+
+        PRD inputs: scale ref, class, claim count, protection, period
+        PRD outputs: next class, scale version
+      tags:
+      - BonusMalus
+      x-requirement:
+      - REQ-RAT-138
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-03
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Pure'
+      x-exposure:
+      - ui
+      x-permission: rat.BonusMalus.transition
+      x-error-codes:
+      - code: RAT-ERR-SCALE
+        status: 422
+      x-source:
+      - PRD-03 §9.1 l.1226
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BonusMalusTransitionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonusMalusTransitionResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/statements/get:
+    get:
+      operationId: rat.Statement.get
+      summary: Published statements
+      description: |-
+        Published statements
+
+        PRD inputs: type, product, market, language
+        PRD outputs: current statement and document ref
+      tags:
+      - Statement
+      x-requirement:
+      - REQ-RAT-238
+      - REQ-RAT-245
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-02
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: rat.Statement.get
+      x-error-codes: []
+      x-source:
+      - PRD-03 §9.1 l.1227
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: type
+        in: query
+        required: false
+        description: 'PRD: "type"'
+        schema:
+          type: string
+      - name: product
+        in: query
+        required: false
+        description: 'PRD: "product"'
+        schema:
+          type: string
+      - name: market
+        in: query
+        required: false
+        description: 'PRD: "market"'
+        schema:
+          type: string
+      - name: language
+        in: query
+        required: false
+        description: 'PRD: "language"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatementGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/legacy-ratings/import:
+    post:
+      operationId: rat.LegacyRating.import
+      summary: Migration
+      description: |-
+        Migration
+
+        PRD inputs: legacy breakdowns
+        PRD outputs: records or dry-run report
+      tags:
+      - LegacyRating
+      x-requirement:
+      - REQ-RAT-271
+      x-wave: unscheduled
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Idempotency-Key; dry-run'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: rat.LegacyRating.import
+      x-error-codes:
+      - code: RAT-ERR-IMPORT-INVALID
+        status: 422
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1228
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegacyRatingImportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyRatingImportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/rat/v1/dsar/export:
+    post:
+      operationId: rat.Dsar.export
+      summary: DSAR fan-out target
+      description: |-
+        DSAR fan-out target
+
+        PRD inputs: party's policy and quote refs
+        PRD outputs: worksheet package
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-RAT-231
+      x-wave: W3
+      x-work-packages:
+      - W3-RAT-02
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Idempotency-Key'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: rat.Dsar.export
+      x-error-codes:
+      - code: RAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-03 §9.1 l.1229
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+  schemas:
+    RateRateRequest:
+      type: object
+      description: 'rat.Rate.rate request. PRD inputs: "envelope (`REQ-RAT-030`), segments, policy inputs, history, modifications
+        refs, prior rates (renewal), explain flag"'
+      properties:
+        envelope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "envelope (`REQ-RAT-030`)"'
+        segments:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "segments"'
+        policyInputs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policy inputs"'
+        history:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "history"'
+        modificationsRefs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "modifications refs"'
+        priorRates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "prior rates (renewal)"'
+        explainFlag:
+          type: boolean
+          description: 'PRD: "explain flag"'
+    RateRateResponse:
+      type: object
+      description: 'rat.Rate.rate result. PRD outputs: "rates per element × charge type × segment, taxes, signals, warnings,
+        defaults used, automated-decision flag, bindable, worksheet id and hash"'
+      properties:
+        ratesPerElementChargeTypeSegment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rates per element × charge type × segment"'
+        taxes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "taxes"'
+        signals:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "signals"'
+        warnings:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "warnings"'
+        defaultsUsed:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "defaults used"'
+        automatedDecisionFlag:
+          type: boolean
+          description: 'PRD: "automated-decision flag"'
+        bindable:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "bindable"'
+        worksheetIdAndHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "worksheet id and hash"'
+    RateRateBatchRequest:
+      type: object
+      description: 'rat.Rate.rateBatch request. PRD inputs: "items with item keys, priority class, origin"'
+      properties:
+        itemsItemKeys:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "items with item keys"'
+        priorityClass:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "priority class"'
+        origin:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "origin"'
+    RateRateBatchResponse:
+      type: object
+      description: 'rat.Rate.rateBatch result. PRD outputs: "batch id, status, paged results"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        pagedResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "paged results"'
+    RateGetBatchItem:
+      type: object
+      description: 'rat.Rate.getBatch result. PRD outputs: "batch id, status, paged results"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        pagedResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "paged results"'
+    RateGetBatchPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RateGetBatchItem'
+      description: Page of rat.Rate.getBatch results (cursor pagination, contract §3.5.5)
+    RateGetBatchResultsItem:
+      type: object
+      description: 'rat.Rate.getBatchResults result. PRD outputs: "batch id, status, paged results"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        pagedResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "paged results"'
+    RateGetBatchResultsPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RateGetBatchResultsItem'
+      description: Page of rat.Rate.getBatchResults results (cursor pagination, contract §3.5.5)
+    RateCancelBatchRequest:
+      type: object
+      description: 'rat.Rate.cancelBatch request. PRD inputs: "items with item keys, priority class, origin"'
+      properties:
+        itemsItemKeys:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "items with item keys"'
+        priorityClass:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "priority class"'
+        origin:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "origin"'
+    RateCancelBatchResponse:
+      type: object
+      description: 'rat.Rate.cancelBatch result. PRD outputs: "batch id, status, paged results"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        pagedResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "paged results"'
+    WorksheetGetResponse:
+      type: object
+      description: 'rat.Worksheet.get result. PRD outputs: "worksheet, explanation, match result, document"'
+      properties:
+        worksheet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "worksheet"'
+        explanation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "explanation"'
+        matchResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "match result"'
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document"'
+    WorksheetExplainResponse:
+      type: object
+      description: 'rat.Worksheet.explain result. PRD outputs: "worksheet, explanation, match result, document"'
+      properties:
+        worksheet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "worksheet"'
+        explanation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "explanation"'
+        matchResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "match result"'
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document"'
+    WorksheetReperformRequest:
+      type: object
+      description: 'rat.Worksheet.reperform request. PRD inputs: "worksheet id, language, format"'
+      properties:
+        worksheetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "worksheet id"'
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+          description: 'PRD: "language"'
+        format:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "format"'
+    WorksheetReperformResponse:
+      type: object
+      description: 'rat.Worksheet.reperform result. PRD outputs: "worksheet, explanation, match result, document"'
+      properties:
+        worksheet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "worksheet"'
+        explanation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "explanation"'
+        matchResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "match result"'
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document"'
+    WorksheetExportRequest:
+      type: object
+      description: 'rat.Worksheet.export request. PRD inputs: "worksheet id, language, format"'
+      properties:
+        worksheetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "worksheet id"'
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+          description: 'PRD: "language"'
+        format:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "format"'
+    WorksheetExportResponse:
+      type: object
+      description: 'rat.Worksheet.export result. PRD outputs: "worksheet, explanation, match result, document"'
+      properties:
+        worksheet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "worksheet"'
+        explanation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "explanation"'
+        matchResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "match result"'
+        document:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "document"'
+    WorksheetAttachRequest:
+      type: object
+      description: 'rat.Worksheet.attach request. PRD inputs: "worksheet ids, transaction ref, policy ref"'
+      properties:
+        worksheetIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "worksheet ids"'
+        transactionRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "transaction ref"'
+        policyRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policy ref"'
+    WorksheetAttachResponse:
+      type: object
+      description: 'rat.Worksheet.attach result. PRD outputs: "attachment result"'
+      properties:
+        attachmentResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "attachment result"'
+    ProrationProrateRequest:
+      type: object
+      description: 'rat.Proration.prorate request. PRD inputs: "annual rates, periods, term, convention, configuration hash,
+        order of operations, explain"'
+      properties:
+        annualRates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "annual rates"'
+        periods:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "periods"'
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        convention:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "convention"'
+        configurationHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "configuration hash"'
+        orderOperations:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "order of operations"'
+        explain:
+          type: boolean
+          description: 'PRD: "explain"'
+    ProrationProrateResponse:
+      type: object
+      description: 'rat.Proration.prorate result. PRD outputs: "amounts, fractions, residuals, explanation"'
+      properties:
+        amounts:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Money
+          description: 'PRD: "amounts"'
+        fractions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "fractions"'
+        residuals:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "residuals"'
+        explanation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "explanation"'
+    DayCountYearFractionRequest:
+      type: object
+      description: 'rat.DayCount.yearFraction request. PRD inputs: "annual rates, periods, term, convention, configuration
+        hash, order of operations, explain"'
+      properties:
+        annualRates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "annual rates"'
+        periods:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "periods"'
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        convention:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "convention"'
+        configurationHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "configuration hash"'
+        orderOperations:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "order of operations"'
+        explain:
+          type: boolean
+          description: 'PRD: "explain"'
+    DayCountYearFractionResponse:
+      type: object
+      description: 'rat.DayCount.yearFraction result. PRD outputs: "amounts, fractions, residuals, explanation"'
+      properties:
+        amounts:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Money
+          description: 'PRD: "amounts"'
+        fractions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "fractions"'
+        residuals:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "residuals"'
+        explanation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "explanation"'
+    PricingModificationProposeRequest:
+      type: object
+      description: 'rat.PricingModification.propose request. PRD inputs: "job, quote version, scope, type, value, reason,
+        justification"'
+      properties:
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job"'
+        quoteVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "quote version"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+        type:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "type"'
+        value:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "value"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        justification:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "justification"'
+    PricingModificationProposeResponse:
+      type: object
+      description: 'rat.PricingModification.propose result. PRD outputs: "modification with status, authority result, dry-run
+        price"'
+      properties:
+        modificationStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "modification with status"'
+        authorityResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "authority result"'
+        dryRunPrice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "dry-run price"'
+    PricingModificationWithdrawRequest:
+      type: object
+      description: 'rat.PricingModification.withdraw request. PRD inputs: "job, quote version, scope, type, value, reason,
+        justification"'
+      properties:
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job"'
+        quoteVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "quote version"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+        type:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "type"'
+        value:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "value"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        justification:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "justification"'
+    PricingModificationWithdrawResponse:
+      type: object
+      description: 'rat.PricingModification.withdraw result. PRD outputs: "modification with status, authority result, dry-run
+        price"'
+      properties:
+        modificationStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "modification with status"'
+        authorityResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "authority result"'
+        dryRunPrice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "dry-run price"'
+    PricingModificationGetResponse:
+      type: object
+      description: 'rat.PricingModification.get result. PRD outputs: "modification with status, authority result, dry-run
+        price"'
+      properties:
+        modificationStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "modification with status"'
+        authorityResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "authority result"'
+        dryRunPrice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "dry-run price"'
+    PricingModificationListItem:
+      type: object
+      description: 'rat.PricingModification.list result. PRD outputs: "modification with status, authority result, dry-run
+        price"'
+      properties:
+        modificationStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "modification with status"'
+        authorityResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "authority result"'
+        dryRunPrice:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "dry-run price"'
+    PricingModificationListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PricingModificationListItem'
+      description: Page of rat.PricingModification.list results (cursor pagination, contract §3.5.5)
+    BreakdownGetResponse:
+      type: object
+      description: 'rat.Breakdown.get result. PRD outputs: "grouped lines, factor categories, totals"'
+      properties:
+        groupedLines:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grouped lines"'
+        factorCategories:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "factor categories"'
+        totals:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "totals"'
+    ChangeExplanationGetResponse:
+      type: object
+      description: 'rat.ChangeExplanation.get result. PRD outputs: "effects summing to the change"'
+      properties:
+        effectsSummingChange:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "effects summing to the change"'
+    PriceReviewRequestRequest:
+      type: object
+      description: 'rat.PriceReview.request request. PRD inputs: "worksheet, requester; decision, reasoning"'
+      properties:
+        worksheet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "worksheet"'
+        requester:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "requester"'
+        decision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision"'
+        reasoning:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reasoning"'
+    PriceReviewRequestResponse:
+      type: object
+      description: 'rat.PriceReview.request result. PRD outputs: "review case, activity ref"'
+      properties:
+        reviewCase:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "review case"'
+        activityRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activity ref"'
+    PriceReviewDecideRequest:
+      type: object
+      description: 'rat.PriceReview.decide request. PRD inputs: "worksheet, requester; decision, reasoning"'
+      properties:
+        worksheet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "worksheet"'
+        requester:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "requester"'
+        decision:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision"'
+        reasoning:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reasoning"'
+    PriceReviewDecideResponse:
+      type: object
+      description: 'rat.PriceReview.decide result. PRD outputs: "review case, activity ref"'
+      properties:
+        reviewCase:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "review case"'
+        activityRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activity ref"'
+    RatingArtifactResolveRequest:
+      type: object
+      description: 'rat.RatingArtifact.resolve request. PRD inputs: "slot, transaction type, basis date, knownAt"'
+      properties:
+        slot:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot"'
+        transactionType:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "transaction type"'
+        basisDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "basis date"'
+        knownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "knownAt"'
+    RatingArtifactResolveResponse:
+      type: object
+      description: 'rat.RatingArtifact.resolve result. PRD outputs: "artefact hash, activation record"'
+      properties:
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "artefact hash"'
+        activationRecord:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "activation record"'
+    RatingArtifactGetResponse:
+      type: object
+      description: 'rat.RatingArtifact.get result. PRD outputs: "manifest, status, compatibility records"'
+      properties:
+        manifest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "manifest"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        compatibilityRecords:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compatibility records"'
+    RatingArtifactListItem:
+      type: object
+      description: 'rat.RatingArtifact.list result. PRD outputs: "manifest, status, compatibility records"'
+      properties:
+        manifest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "manifest"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        compatibilityRecords:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compatibility records"'
+    RatingArtifactListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RatingArtifactListItem'
+      description: Page of rat.RatingArtifact.list results (cursor pagination, contract §3.5.5)
+    RatingArtifactCompatibilityResponse:
+      type: object
+      description: 'rat.RatingArtifact.compatibility result. PRD outputs: "manifest, status, compatibility records"'
+      properties:
+        manifest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "manifest"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        compatibilityRecords:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compatibility records"'
+    RatingChangeSetCreateRequest:
+      type: object
+      description: 'rat.RatingChangeSet.create request. PRD inputs: "file or rows, mapping, change set"'
+      properties:
+        fileOrRows:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file or rows"'
+        mapping:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "mapping"'
+        changeSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set"'
+    RatingChangeSetCreateResponse:
+      type: object
+      description: 'rat.RatingChangeSet.create result. PRD outputs: "table version, validation report, diff"'
+      properties:
+        tableVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "table version"'
+        validationReport:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation report"'
+        diff:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "diff"'
+    RateTableImportRequest:
+      type: object
+      description: 'rat.RateTable.import request. PRD inputs: "file or rows, mapping, change set"'
+      properties:
+        fileOrRows:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file or rows"'
+        mapping:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "mapping"'
+        changeSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set"'
+    RateTableImportResponse:
+      type: object
+      description: 'rat.RateTable.import result. PRD outputs: "table version, validation report, diff"'
+      properties:
+        tableVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "table version"'
+        validationReport:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation report"'
+        diff:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "diff"'
+    RateTableValidateRequest:
+      type: object
+      description: 'rat.RateTable.validate request. PRD inputs: "file or rows, mapping, change set"'
+      properties:
+        fileOrRows:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file or rows"'
+        mapping:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "mapping"'
+        changeSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set"'
+    RateTableValidateResponse:
+      type: object
+      description: 'rat.RateTable.validate result. PRD outputs: "table version, validation report, diff"'
+      properties:
+        tableVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "table version"'
+        validationReport:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation report"'
+        diff:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "diff"'
+    RateTableDiffResponse:
+      type: object
+      description: 'rat.RateTable.diff result. PRD outputs: "table version, validation report, diff"'
+      properties:
+        tableVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "table version"'
+        validationReport:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation report"'
+        diff:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "diff"'
+    RatingArtifactBuildRequest:
+      type: object
+      description: 'rat.RatingArtifact.build request. PRD inputs: "change set; artefact; slot dates; reason"'
+      properties:
+        changeSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set"'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact"'
+        slotDates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot dates"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RatingArtifactBuildResponse:
+      type: object
+      description: 'rat.RatingArtifact.build result. PRD outputs: "artefact status, governance bundle id"'
+      properties:
+        artefactStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact status"'
+        governanceBundleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "governance bundle id"'
+    RatingArtifactSubmitRequest:
+      type: object
+      description: 'rat.RatingArtifact.submit request. PRD inputs: "change set; artefact; slot dates; reason"'
+      properties:
+        changeSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set"'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact"'
+        slotDates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot dates"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RatingArtifactSubmitResponse:
+      type: object
+      description: 'rat.RatingArtifact.submit result. PRD outputs: "artefact status, governance bundle id"'
+      properties:
+        artefactStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact status"'
+        governanceBundleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "governance bundle id"'
+    RatingArtifactReturnRequest:
+      type: object
+      description: 'rat.RatingArtifact.return request. PRD inputs: "change set; artefact; slot dates; reason"'
+      properties:
+        changeSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set"'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact"'
+        slotDates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot dates"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RatingArtifactReturnResponse:
+      type: object
+      description: 'rat.RatingArtifact.return result. PRD outputs: "artefact status, governance bundle id"'
+      properties:
+        artefactStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact status"'
+        governanceBundleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "governance bundle id"'
+    RatingArtifactScheduleRequest:
+      type: object
+      description: 'rat.RatingArtifact.schedule request. PRD inputs: "change set; artefact; slot dates; reason"'
+      properties:
+        changeSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set"'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact"'
+        slotDates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot dates"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RatingArtifactScheduleResponse:
+      type: object
+      description: 'rat.RatingArtifact.schedule result. PRD outputs: "artefact status, governance bundle id"'
+      properties:
+        artefactStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact status"'
+        governanceBundleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "governance bundle id"'
+    RatingArtifactCancelScheduleRequest:
+      type: object
+      description: 'rat.RatingArtifact.cancelSchedule request. PRD inputs: "change set; artefact; slot dates; reason"'
+      properties:
+        changeSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set"'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact"'
+        slotDates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot dates"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RatingArtifactCancelScheduleResponse:
+      type: object
+      description: 'rat.RatingArtifact.cancelSchedule result. PRD outputs: "artefact status, governance bundle id"'
+      properties:
+        artefactStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact status"'
+        governanceBundleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "governance bundle id"'
+    RatingArtifactRollbackRequest:
+      type: object
+      description: 'rat.RatingArtifact.rollback request. PRD inputs: "change set; artefact; slot dates; reason"'
+      properties:
+        changeSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change set"'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact"'
+        slotDates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot dates"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RatingArtifactRollbackResponse:
+      type: object
+      description: 'rat.RatingArtifact.rollback result. PRD outputs: "artefact status, governance bundle id"'
+      properties:
+        artefactStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact status"'
+        governanceBundleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "governance bundle id"'
+    GoldenSuiteRunRequest:
+      type: object
+      description: 'rat.GoldenSuite.run request. PRD inputs: "slot, artefact, suites"'
+      properties:
+        slot:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot"'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact"'
+        suites:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "suites"'
+    GoldenSuiteRunResponse:
+      type: object
+      description: 'rat.GoldenSuite.run result. PRD outputs: "run id, results"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        results:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "results"'
+    GoldenSuiteRequestRebaselineRequest:
+      type: object
+      description: 'rat.GoldenSuite.requestRebaseline request. PRD inputs: "slot, artefact, suites"'
+      properties:
+        slot:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot"'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "artefact"'
+        suites:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "suites"'
+    GoldenSuiteRequestRebaselineResponse:
+      type: object
+      description: 'rat.GoldenSuite.requestRebaseline result. PRD outputs: "run id, results"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        results:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "results"'
+    ComparisonCompareVersionsRequest:
+      type: object
+      description: 'rat.Comparison.compareVersions request. PRD inputs: "artefact hashes, input set"'
+      properties:
+        artefactHashes:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "artefact hashes"'
+        inputSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "input set"'
+    ComparisonCompareVersionsResponse:
+      type: object
+      description: 'rat.Comparison.compareVersions result. PRD outputs: "comparison id; async results"'
+      properties:
+        comparisonId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "comparison id"'
+        asyncResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "async results"'
+    ShadowRunStartRequest:
+      type: object
+      description: 'rat.ShadowRun.start request. PRD inputs: "candidate, slot, sample, filters, window"'
+      properties:
+        candidate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "candidate"'
+        slot:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot"'
+        sample:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sample"'
+        filters:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "filters"'
+        window:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "window"'
+    ShadowRunStartResponse:
+      type: object
+      description: 'rat.ShadowRun.start result. PRD outputs: "run id, status, report"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        report:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "report"'
+    ShadowRunStopRequest:
+      type: object
+      description: 'rat.ShadowRun.stop request. PRD inputs: "candidate, slot, sample, filters, window"'
+      properties:
+        candidate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "candidate"'
+        slot:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slot"'
+        sample:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sample"'
+        filters:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "filters"'
+        window:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "window"'
+    ShadowRunStopResponse:
+      type: object
+      description: 'rat.ShadowRun.stop result. PRD outputs: "run id, status, report"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        report:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "report"'
+    ShadowRunGetResponse:
+      type: object
+      description: 'rat.ShadowRun.get result. PRD outputs: "run id, status, report"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        report:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "report"'
+    ImpactAnalysisRunRequest:
+      type: object
+      description: 'rat.ImpactAnalysis.run request. PRD inputs: "candidate, baseline, population, window, slices"'
+      properties:
+        candidate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "candidate"'
+        baseline:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "baseline"'
+        population:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "population"'
+        window:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "window"'
+        slices:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slices"'
+    ImpactAnalysisRunResponse:
+      type: object
+      description: 'rat.ImpactAnalysis.run result. PRD outputs: "run id, progress, metrics"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        progress:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "progress"'
+        metrics:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "metrics"'
+    ImpactAnalysisGetResponse:
+      type: object
+      description: 'rat.ImpactAnalysis.get result. PRD outputs: "run id, progress, metrics"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        progress:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "progress"'
+        metrics:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "metrics"'
+    ImpactAnalysisResumeRequest:
+      type: object
+      description: 'rat.ImpactAnalysis.resume request. PRD inputs: "candidate, baseline, population, window, slices"'
+      properties:
+        candidate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "candidate"'
+        baseline:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "baseline"'
+        population:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "population"'
+        window:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "window"'
+        slices:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "slices"'
+    ImpactAnalysisResumeResponse:
+      type: object
+      description: 'rat.ImpactAnalysis.resume result. PRD outputs: "run id, progress, metrics"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        progress:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "progress"'
+        metrics:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "metrics"'
+    BonusMalusTransitionRequest:
+      type: object
+      description: 'rat.BonusMalus.transition request. PRD inputs: "scale ref, class, claim count, protection, period"'
+      properties:
+        scaleRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scale ref"'
+        class:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "class"'
+        claimCount:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "claim count"'
+        protection:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "protection"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+    BonusMalusTransitionResponse:
+      type: object
+      description: 'rat.BonusMalus.transition result. PRD outputs: "next class, scale version"'
+      properties:
+        nextClass:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "next class"'
+        scaleVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scale version"'
+    StatementGetResponse:
+      type: object
+      description: 'rat.Statement.get result. PRD outputs: "current statement and document ref"'
+      properties:
+        currentStatementAndDocumentRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "current statement and document ref"'
+    LegacyRatingImportRequest:
+      type: object
+      description: 'rat.LegacyRating.import request. PRD inputs: "legacy breakdowns"'
+      properties:
+        legacyBreakdowns:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy breakdowns"'
+    LegacyRatingImportResponse:
+      type: object
+      description: 'rat.LegacyRating.import result. PRD outputs: "records or dry-run report"'
+      properties:
+        recordsOrDryRunReport:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "records or dry-run report"'
+    DsarExportRequest:
+      type: object
+      description: 'rat.Dsar.export request. PRD inputs: "party''s policy and quote refs"'
+      properties:
+        partySPolicyAndQuoteRefs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party''s policy and quote refs"'
+    DsarExportResponse:
+      type: object
+      description: 'rat.Dsar.export result. PRD outputs: "worksheet package"'
+      properties:
+        worksheetPackage:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "worksheet package"'

@@ -1,0 +1,1803 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: MIG — Data migration and coexistence API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by MIG (PRD-16 §9.1)
+  description: 'Contract of the operations MIG exposes (PRD-16 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: MIG
+  x-prd: PRD-16
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: Xref
+- name: Routing
+- name: Enquiry
+- name: Batch
+- name: Archive
+- name: ImportContract
+paths:
+  /api/mig/v1/xrefs/register:
+    post:
+      operationId: mig.Xref.register
+      summary: Called by module import APIs to record legacy → core links
+      description: |-
+        Called by module import APIs to record legacy → core links
+
+        PRD inputs: source, object type, legacy key, core ids, batch
+        PRD outputs: xref id
+      tags:
+      - Xref
+      x-requirement:
+      - REQ-MIG-002
+      x-anchor:
+      - REQ-MIG-002
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: No; PRD idempotency: Natural key'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: mig.Xref.register
+      x-error-codes:
+      - code: MIG-ERR-XREF-CONFLICT
+        status: 409
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1280
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/XrefRegisterRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XrefRegisterResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/xrefs/resolve:
+    post:
+      operationId: mig.Xref.resolve
+      summary: Legacy key ↔ core ids
+      description: |-
+        Legacy key ↔ core ids
+
+        PRD inputs: key and direction
+        PRD outputs: ids, history
+      tags:
+      - Xref
+      x-requirement:
+      - REQ-MIG-002
+      x-anchor:
+      - REQ-MIG-002
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Query'
+      x-exposure:
+      - ui
+      x-permission: mig.Xref.resolve
+      x-error-codes:
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-16 §9.1 l.1281
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/XrefResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XrefResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/xrefs:
+    get:
+      operationId: mig.Xref.list
+      summary: Page through links per object type or batch
+      description: |-
+        Page through links per object type or batch
+
+        PRD inputs: filters, cursor
+        PRD outputs: page
+      tags:
+      - Xref
+      x-requirement:
+      - REQ-MIG-002
+      x-anchor:
+      - REQ-MIG-002
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Query'
+      x-exposure:
+      - ui
+      x-permission: mig.Xref.list
+      x-error-codes: []
+      x-source:
+      - PRD-16 §9.1 l.1282
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XrefListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/routing/resolve:
+    post:
+      operationId: mig.Routing.resolve
+      summary: Master system for an object at a date
+      description: |-
+        Master system for an object at a date
+
+        PRD inputs: object type, key, asOf
+        PRD outputs: master state, term split, deep link
+      tags:
+      - Routing
+      x-requirement:
+      - REQ-MIG-004
+      - REQ-MIG-149
+      x-anchor:
+      - REQ-MIG-004
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-03
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - CLM
+      - CMP
+      - DOC
+      x-permission: mig.Routing.resolve
+      x-error-codes:
+      - code: MIG-ERR-AMBIGUOUS-KEY
+        status: 422
+      x-source:
+      - PRD-16 §9.1 l.1283
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/AsOf
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/routing/override:
+    post:
+      operationId: mig.Routing.override
+      summary: Authorised override of a route
+      description: |-
+        Authorised override of a route
+
+        PRD inputs: object, target state, reason, until
+        PRD outputs: route, approval ref
+      tags:
+      - Routing
+      x-requirement:
+      - REQ-MIG-148
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-03
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: Yes (impacted modules); PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Routing.override
+      x-error-codes:
+      - code: MIG-ERR-APPROVAL-REQUIRED
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1284
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingOverrideRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingOverrideResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/enquiries/get:
+    get:
+      operationId: mig.Enquiry.get
+      summary: Unified cross-system summary
+      description: |-
+        Unified cross-system summary
+
+        PRD inputs: party, policy or claim key
+        PRD outputs: summary with master marks, freshness
+      tags:
+      - Enquiry
+      x-requirement:
+      - REQ-MIG-152
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-03
+      x-status: full
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Query'
+      x-exposure:
+      - ui
+      x-permission: mig.Enquiry.get
+      x-error-codes:
+      - code: MIG-ERR-LEGACY-UNAVAILABLE
+        note: degraded result
+        status: 503
+      x-source:
+      - PRD-16 §9.1 l.1285
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: party
+        in: query
+        required: false
+        description: 'PRD: "party"'
+        schema:
+          type: string
+      - name: policyOrClaimKey
+        in: query
+        required: false
+        description: 'PRD: "policy or claim key"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnquiryGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/mig/v1/batches/start:
+    post:
+      operationId: mig.Batch.start
+      summary: Pipeline control
+      description: |-
+        Pipeline control
+
+        PRD inputs: batch id
+        PRD outputs: status, outcomes
+      tags:
+      - Batch
+      x-requirement:
+      - REQ-MIG-066..REQ-MIG-078
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `reverse` supports dry-run; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Batch.start
+      x-error-codes:
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      - code: MIG-ERR-DEPENDENCY
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1287
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchStartRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchStartResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/batches/pause:
+    post:
+      operationId: mig.Batch.pause
+      summary: Pipeline control
+      description: |-
+        Pipeline control
+
+        PRD inputs: batch id
+        PRD outputs: status, outcomes
+      tags:
+      - Batch
+      x-requirement:
+      - REQ-MIG-066..REQ-MIG-078
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `reverse` supports dry-run; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Batch.pause
+      x-error-codes:
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      - code: MIG-ERR-DEPENDENCY
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1287
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchPauseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchPauseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/batches/resume:
+    post:
+      operationId: mig.Batch.resume
+      summary: Pipeline control
+      description: |-
+        Pipeline control
+
+        PRD inputs: batch id
+        PRD outputs: status, outcomes
+      tags:
+      - Batch
+      x-requirement:
+      - REQ-MIG-066..REQ-MIG-078
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `reverse` supports dry-run; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Batch.resume
+      x-error-codes:
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      - code: MIG-ERR-DEPENDENCY
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1287
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchResumeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResumeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/batches/reverse:
+    post:
+      operationId: mig.Batch.reverse
+      summary: Pipeline control
+      description: |-
+        Pipeline control
+
+        PRD inputs: batch id
+        PRD outputs: status, outcomes
+      tags:
+      - Batch
+      x-requirement:
+      - REQ-MIG-005
+      - REQ-MIG-066..REQ-MIG-078
+      x-anchor:
+      - REQ-MIG-005
+      x-anchor-mapped:
+      - REQ-MIG-005
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      - W9-MIG-04
+      x-status: full
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: `reverse` supports dry-run; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Batch.reverse
+      x-error-codes:
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      - code: MIG-ERR-DEPENDENCY
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1287
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchReverseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchReverseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/batches/redrive:
+    post:
+      operationId: mig.Batch.redrive
+      summary: Pipeline control
+      description: |-
+        Pipeline control
+
+        PRD inputs: batch id
+        PRD outputs: status, outcomes
+      tags:
+      - Batch
+      x-requirement:
+      - REQ-MIG-066..REQ-MIG-078
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `reverse` supports dry-run; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Batch.redrive
+      x-error-codes:
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      - code: MIG-ERR-DEPENDENCY
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1287
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchRedriveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchRedriveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/batches/{id}:
+    get:
+      operationId: mig.Batch.get
+      summary: Pipeline control
+      description: |-
+        Pipeline control
+
+        PRD inputs: batch id
+        PRD outputs: status, outcomes
+      tags:
+      - Batch
+      x-requirement:
+      - REQ-MIG-066..REQ-MIG-078
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `reverse` supports dry-run; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Batch.get
+      x-error-codes:
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      - code: MIG-ERR-DEPENDENCY
+        status: 422
+      x-source:
+      - PRD-16 §9.1 l.1287
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Batch (PRD input: "batch id")'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/batches/outcomes:
+    get:
+      operationId: mig.Batch.outcomes
+      summary: Pipeline control
+      description: |-
+        Pipeline control
+
+        PRD inputs: batch id
+        PRD outputs: status, outcomes
+      tags:
+      - Batch
+      x-requirement:
+      - REQ-MIG-066..REQ-MIG-078
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `reverse` supports dry-run; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Batch.outcomes
+      x-error-codes:
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      - code: MIG-ERR-DEPENDENCY
+        status: 422
+      x-source:
+      - PRD-16 §9.1 l.1287
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchOutcomesResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/archives/search:
+    get:
+      operationId: mig.Archive.search
+      summary: Archive access
+      description: |-
+        Archive access
+
+        PRD inputs: keys
+        PRD outputs: records (masked)
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-MIG-196
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Query'
+      x-exposure:
+      - ui
+      x-permission: mig.Archive.search
+      x-error-codes:
+      - code: MIG-ERR-PERMISSION
+        status: 403
+      x-source:
+      - PRD-16 §9.1 l.1297
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: keys
+        in: query
+        required: false
+        description: 'PRD: "keys"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveSearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/archives/{id}:
+    get:
+      operationId: mig.Archive.get
+      summary: Archive access
+      description: |-
+        Archive access
+
+        PRD inputs: keys
+        PRD outputs: records (masked)
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-MIG-196
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Query'
+      x-exposure:
+      - ui
+      x-permission: mig.Archive.get
+      x-error-codes:
+      - code: MIG-ERR-PERMISSION
+        status: 403
+      x-source:
+      - PRD-16 §9.1 l.1297
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Archive
+        schema:
+          type: string
+      - name: keys
+        in: query
+        required: false
+        description: 'PRD: "keys"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/archives/subject-export:
+    post:
+      operationId: mig.Archive.subjectExport
+      summary: DSAR operations for CMP
+      description: |-
+        DSAR operations for CMP
+
+        PRD inputs: DSAR id, task id, subject ids, scope
+        PRD outputs: per-item outcomes
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-MIG-006
+      x-anchor:
+      - REQ-MIG-006
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `erase` supports dry-run (scope evaluation); PRD idempotency: Task id'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: mig.Archive.subjectExport
+      x-error-codes:
+      - code: MIG-ERR-LEGAL-HOLD
+        note: outcome restricted
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1298
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveSubjectExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveSubjectExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/archives/rectification-note:
+    post:
+      operationId: mig.Archive.rectificationNote
+      summary: DSAR operations for CMP
+      description: |-
+        DSAR operations for CMP
+
+        PRD inputs: DSAR id, task id, subject ids, scope
+        PRD outputs: per-item outcomes
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-MIG-006
+      x-anchor:
+      - REQ-MIG-006
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `erase` supports dry-run (scope evaluation); PRD idempotency: Task id'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: mig.Archive.rectificationNote
+      x-error-codes:
+      - code: MIG-ERR-LEGAL-HOLD
+        note: outcome restricted
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1298
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveRectificationNoteRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveRectificationNoteResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/archives/restrict:
+    post:
+      operationId: mig.Archive.restrict
+      summary: DSAR operations for CMP
+      description: |-
+        DSAR operations for CMP
+
+        PRD inputs: DSAR id, task id, subject ids, scope
+        PRD outputs: per-item outcomes
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-MIG-006
+      x-anchor:
+      - REQ-MIG-006
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `erase` supports dry-run (scope evaluation); PRD idempotency: Task id'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: mig.Archive.restrict
+      x-error-codes:
+      - code: MIG-ERR-LEGAL-HOLD
+        note: outcome restricted
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1298
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveRestrictRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveRestrictResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/archives/erase:
+    post:
+      operationId: mig.Archive.erase
+      summary: DSAR operations for CMP
+      description: |-
+        DSAR operations for CMP
+
+        PRD inputs: DSAR id, task id, subject ids, scope
+        PRD outputs: per-item outcomes
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-MIG-006
+      x-anchor:
+      - REQ-MIG-006
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: `erase` supports dry-run (scope evaluation); PRD idempotency: Task id'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: mig.Archive.erase
+      x-error-codes:
+      - code: MIG-ERR-LEGAL-HOLD
+        note: outcome restricted
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1298
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveEraseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveEraseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/import-contracts/conformance:
+    post:
+      operationId: mig.ImportContract.conformance
+      summary: Run harness against a module
+      description: |-
+        Run harness against a module
+
+        PRD inputs: module, operation
+        PRD outputs: pass/fail per contract element
+      tags:
+      - ImportContract
+      x-requirement:
+      - REQ-MIG-001
+      x-anchor:
+      - REQ-MIG-001
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: n/a; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.ImportContract.conformance
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1299
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportContractConformanceRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportContractConformanceResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+x-operation-families:
+- family: mig.Wave.*
+  summary: Plan and run waves and cohorts
+  inputs: definitions
+  outputs: ids, status
+  x-requirement:
+  - REQ-MIG-031..REQ-MIG-033
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1286
+- family: mig.Cohort.*
+  summary: Plan and run waves and cohorts
+  inputs: definitions
+  outputs: ids, status
+  x-requirement:
+  - REQ-MIG-031..REQ-MIG-033
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1286
+- family: mig.DqIssue.*
+  summary: DQ workflow
+  inputs: issue, remedy, waiver
+  outputs: status
+  x-requirement:
+  - REQ-MIG-047..REQ-MIG-050
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1288
+- family: mig.Waiver.*
+  summary: DQ workflow
+  inputs: issue, remedy, waiver
+  outputs: status
+  x-requirement:
+  - REQ-MIG-047..REQ-MIG-050
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1288
+- family: mig.MappingSpec.*
+  summary: Author, test, approve, activate
+  inputs: spec version
+  outputs: status, test results
+  x-requirement:
+  - REQ-MIG-054..REQ-MIG-062
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1289
+- family: mig.RenewalConversion.*
+  summary: 'Cases: list, decide, reconvert'
+  inputs: case, decision
+  outputs: case
+  x-requirement:
+  - REQ-MIG-003
+  - REQ-MIG-091..REQ-MIG-108
+  x-anchor-mapped:
+  - REQ-MIG-003
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1290
+- family: mig.Match.*
+  summary: Match review decisions
+  inputs: group, decision, survivors
+  outputs: result, PTY request ref
+  x-requirement:
+  - REQ-MIG-081..REQ-MIG-085
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1291
+- family: mig.Reconciliation.*
+  summary: Run, list, sign, approve
+  inputs: scope
+  outputs: report
+  x-requirement:
+  - REQ-MIG-005
+  - REQ-MIG-171..REQ-MIG-177
+  x-anchor-mapped:
+  - REQ-MIG-005
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1292
+- family: mig.MisdirectedPayment.*
+  summary: Match and transfer
+  inputs: item
+  outputs: status
+  x-requirement:
+  - REQ-MIG-157
+  - REQ-MIG-158
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1293
+- family: mig.Cutover.*
+  summary: Runbook execution
+  inputs: run, task
+  outputs: status
+  x-requirement:
+  - REQ-MIG-186..REQ-MIG-190
+  x-wave: W9
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1294
+- family: mig.ReversalRegister.*
+  summary: Register, test and list owners' reversal operations for `origin=MIGRATION` objects
+  inputs: owner, import operation, reversal operation, scope
+  outputs: entry, conformance result
+  x-requirement:
+  - REQ-MIG-211
+  x-wave: unscheduled
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1295
+- family: mig.ScenarioDecision.*
+  summary: Record planning basis, due date and board confirmation
+  inputs: legal entity, scenario, decision evidence
+  outputs: decision
+  x-requirement:
+  - REQ-MIG-212
+  x-wave: unscheduled
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1296
+- family: mig.Changeover.*
+  summary: Currency changeover plans
+  inputs: plan
+  outputs: status
+  x-requirement:
+  - REQ-MIG-126
+  x-wave: unscheduled
+  x-status: unexpanded
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-16 §9.1 l.1300
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+  schemas:
+    XrefRegisterRequest:
+      type: object
+      description: 'mig.Xref.register request. PRD inputs: "source, object type, legacy key, core ids, batch"'
+      properties:
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source"'
+        objectType:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "object type"'
+        legacyKey:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy key"'
+        coreIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "core ids"'
+        batch:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch"'
+    XrefRegisterResponse:
+      type: object
+      description: 'mig.Xref.register result. PRD outputs: "xref id"'
+      properties:
+        xrefId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "xref id"'
+    XrefResolveRequest:
+      type: object
+      description: 'mig.Xref.resolve request. PRD inputs: "key and direction"'
+      properties:
+        keyAndDirection:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "key and direction"'
+    XrefResolveResponse:
+      type: object
+      description: 'mig.Xref.resolve result. PRD outputs: "ids, history"'
+      properties:
+        ids:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "ids"'
+        history:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "history"'
+    XrefListItem:
+      type: object
+      description: 'mig.Xref.list result. PRD outputs: "page"'
+      properties:
+        page:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "page"'
+    XrefListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/XrefListItem'
+      description: Page of mig.Xref.list results (cursor pagination, contract §3.5.5)
+    RoutingResolveRequest:
+      type: object
+      description: 'mig.Routing.resolve request. PRD inputs: "object type, key, asOf"'
+      properties:
+        objectType:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "object type"'
+        key:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "key"'
+        asOf:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "asOf"'
+    RoutingResolveResponse:
+      type: object
+      description: 'mig.Routing.resolve result. PRD outputs: "master state, term split, deep link"'
+      properties:
+        masterState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "master state"'
+        termSplit:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term split"'
+        deepLink:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "deep link"'
+    RoutingOverrideRequest:
+      type: object
+      description: 'mig.Routing.override request. PRD inputs: "object, target state, reason, until"'
+      properties:
+        object:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "object"'
+        targetState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target state"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        until:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "until"'
+    RoutingOverrideResponse:
+      type: object
+      description: 'mig.Routing.override result. PRD outputs: "route, approval ref"'
+      properties:
+        route:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "route"'
+        approvalRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval ref"'
+    EnquiryGetResponse:
+      type: object
+      description: 'mig.Enquiry.get result. PRD outputs: "summary with master marks, freshness"'
+      properties:
+        summaryMasterMarks:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "summary with master marks"'
+        freshness:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "freshness"'
+    BatchStartRequest:
+      type: object
+      description: 'mig.Batch.start request. PRD inputs: "batch id"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+    BatchStartResponse:
+      type: object
+      description: 'mig.Batch.start result. PRD outputs: "status, outcomes"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        outcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcomes"'
+    BatchPauseRequest:
+      type: object
+      description: 'mig.Batch.pause request. PRD inputs: "batch id"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+    BatchPauseResponse:
+      type: object
+      description: 'mig.Batch.pause result. PRD outputs: "status, outcomes"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        outcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcomes"'
+    BatchResumeRequest:
+      type: object
+      description: 'mig.Batch.resume request. PRD inputs: "batch id"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+    BatchResumeResponse:
+      type: object
+      description: 'mig.Batch.resume result. PRD outputs: "status, outcomes"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        outcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcomes"'
+    BatchReverseRequest:
+      type: object
+      description: 'mig.Batch.reverse request. PRD inputs: "batch id"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+    BatchReverseResponse:
+      type: object
+      description: 'mig.Batch.reverse result. PRD outputs: "status, outcomes"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        outcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcomes"'
+    BatchRedriveRequest:
+      type: object
+      description: 'mig.Batch.redrive request. PRD inputs: "batch id"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+    BatchRedriveResponse:
+      type: object
+      description: 'mig.Batch.redrive result. PRD outputs: "status, outcomes"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        outcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcomes"'
+    BatchGetResponse:
+      type: object
+      description: 'mig.Batch.get result. PRD outputs: "status, outcomes"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        outcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcomes"'
+    BatchOutcomesResponse:
+      type: object
+      description: 'mig.Batch.outcomes result. PRD outputs: "status, outcomes"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        outcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcomes"'
+    ArchiveSearchItem:
+      type: object
+      description: 'mig.Archive.search result. PRD outputs: "records (masked)"'
+      properties:
+        records:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "records (masked)"'
+    ArchiveSearchPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ArchiveSearchItem'
+      description: Page of mig.Archive.search results (cursor pagination, contract §3.5.5)
+    ArchiveGetResponse:
+      type: object
+      description: 'mig.Archive.get result. PRD outputs: "records (masked)"'
+      properties:
+        records:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "records (masked)"'
+    ArchiveSubjectExportRequest:
+      type: object
+      description: 'mig.Archive.subjectExport request. PRD inputs: "DSAR id, task id, subject ids, scope"'
+      properties:
+        dsarId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "DSAR id"'
+        taskId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "task id"'
+        subjectIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "subject ids"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    ArchiveSubjectExportResponse:
+      type: object
+      description: 'mig.Archive.subjectExport result. PRD outputs: "per-item outcomes"'
+      properties:
+        perItemOutcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-item outcomes"'
+    ArchiveRectificationNoteRequest:
+      type: object
+      description: 'mig.Archive.rectificationNote request. PRD inputs: "DSAR id, task id, subject ids, scope"'
+      properties:
+        dsarId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "DSAR id"'
+        taskId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "task id"'
+        subjectIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "subject ids"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    ArchiveRectificationNoteResponse:
+      type: object
+      description: 'mig.Archive.rectificationNote result. PRD outputs: "per-item outcomes"'
+      properties:
+        perItemOutcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-item outcomes"'
+    ArchiveRestrictRequest:
+      type: object
+      description: 'mig.Archive.restrict request. PRD inputs: "DSAR id, task id, subject ids, scope"'
+      properties:
+        dsarId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "DSAR id"'
+        taskId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "task id"'
+        subjectIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "subject ids"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    ArchiveRestrictResponse:
+      type: object
+      description: 'mig.Archive.restrict result. PRD outputs: "per-item outcomes"'
+      properties:
+        perItemOutcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-item outcomes"'
+    ArchiveEraseRequest:
+      type: object
+      description: 'mig.Archive.erase request. PRD inputs: "DSAR id, task id, subject ids, scope"'
+      properties:
+        dsarId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "DSAR id"'
+        taskId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "task id"'
+        subjectIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "subject ids"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    ArchiveEraseResponse:
+      type: object
+      description: 'mig.Archive.erase result. PRD outputs: "per-item outcomes"'
+      properties:
+        perItemOutcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-item outcomes"'
+    ImportContractConformanceRequest:
+      type: object
+      description: 'mig.ImportContract.conformance request. PRD inputs: "module, operation"'
+      properties:
+        module:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "module"'
+        operation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "operation"'
+    ImportContractConformanceResponse:
+      type: object
+      description: 'mig.ImportContract.conformance result. PRD outputs: "pass/fail per contract element"'
+      properties:
+        passFailPerContractElement:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pass/fail per contract element"'
