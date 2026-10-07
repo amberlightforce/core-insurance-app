@@ -22,7 +22,7 @@ internal static class BuiltInArtefacts
     public static ArtefactDefinition Definition(string productCode, string productVersion, IReadOnlyDictionary<string, string> tableHashes) => new(
         "rat.artefact/1",
         AlgorithmCode,
-        "1.0.0-illustrative",
+        "1.0.0",
         productCode,
         productVersion,
         EngineVersion.Current,
