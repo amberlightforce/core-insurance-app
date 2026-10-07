@@ -1,0 +1,331 @@
+<title>Core Insurance Build Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: summary band → wave strip → filter bar → one row per PRD, expanding to work packages → requirements.
+   Palette and type follow the project's Aegean tokens so the tracker reads like part of the product. */
+:root{
+  --canvas:#F6F7F9; --sheet:#FFFFFF; --sunken:#F3F5F8;
+  --fg:#161A21; --fg2:#4A5262; --fg3:#5F6878;
+  --line:#E4E7EC; --line2:#D7DBE2; --focus:#3F63F0; --link:#2E4FD6;
+  --brand:#2E4FD6; --brand-bg:#EEF3FF;
+  --s-none-fg:#3D4452; --s-none-bg:#EEF0F3; --s-none:#B9C0CB;
+  --s-build-fg:#075E8E; --s-build-bg:#EBF8FF; --s-build:#0475B0;
+  --s-rev-fg:#93236A; --s-rev-bg:#FDF2FA; --s-rev:#B32D82;
+  --s-fail-fg:#AE1C1C; --s-fail-bg:#FFF1F1; --s-fail:#D12424;
+  --s-ok-fg:#126341; --s-ok-bg:#ECFAF2; --s-ok:#1A8A57;
+  --s-def-fg:#7A4A06; --s-def-bg:#FDF6E7; --s-def:#A86A0C;
+  --s-block-fg:#8A4A0B; --s-block-bg:#FFF8EB; --s-block:#B66607;
+  --track:#E9ECF1;
+  --sans:"Inter","Noto Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --r:6px; --r-lg:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --canvas:#0E1116; --sheet:#161A21; --sunken:#12151B;
+  --fg:#EEF0F3; --fg2:#B9C0CB; --fg3:#98A1B0;
+  --line:#2A303B; --line2:#3D4452; --focus:#8FA9FF; --link:#8FA9FF;
+  --brand:#8FA9FF; --brand-bg:#1C2340;
+  --s-none-fg:#B9C0CB; --s-none-bg:#232833; --s-none:#4A5262;
+  --s-build-fg:#8FD3FA; --s-build-bg:#0E2A3A; --s-build:#38A8E6;
+  --s-rev-fg:#F5A9DA; --s-rev-bg:#3A1630; --s-rev:#D9529F;
+  --s-fail-fg:#FF9C9C; --s-fail-bg:#3A1717; --s-fail:#F05050;
+  --s-ok-fg:#86E0B2; --s-ok-bg:#0F3022; --s-ok:#2FB57A;
+  --s-def-fg:#F2C77A; --s-def-bg:#33270E; --s-def:#D29A2E;
+  --s-block-fg:#FDC583; --s-block-bg:#33230C; --s-block:#E08A1E;
+  --track:#232833; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --canvas:#0E1116; --sheet:#161A21; --sunken:#12151B;
+  --fg:#EEF0F3; --fg2:#B9C0CB; --fg3:#98A1B0;
+  --line:#2A303B; --line2:#3D4452; --focus:#8FA9FF; --link:#8FA9FF;
+  --brand:#8FA9FF; --brand-bg:#1C2340;
+  --s-none-fg:#B9C0CB; --s-none-bg:#232833; --s-none:#4A5262;
+  --s-build-fg:#8FD3FA; --s-build-bg:#0E2A3A; --s-build:#38A8E6;
+  --s-rev-fg:#F5A9DA; --s-rev-bg:#3A1630; --s-rev:#D9529F;
+  --s-fail-fg:#FF9C9C; --s-fail-bg:#3A1717; --s-fail:#F05050;
+  --s-ok-fg:#86E0B2; --s-ok-bg:#0F3022; --s-ok:#2FB57A;
+  --s-def-fg:#F2C77A; --s-def-bg:#33270E; --s-def:#D29A2E;
+  --s-block-fg:#FDC583; --s-block-bg:#33230C; --s-block:#E08A1E;
+  --track:#232833; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--canvas);color:var(--fg);font:14px/1.5 var(--sans);font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 48px;display:grid;gap:20px}
+@media (max-width:520px){.wrap{padding-inline:16px}}
+h1{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.mono{font-family:var(--mono);font-size:12px}
+.muted{color:var(--fg3)}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--fg3)}
+
+/* summary */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--fg3)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--s-none)}
+.dot.on{background:var(--s-ok);box-shadow:0 0 0 3px var(--s-ok-bg)}
+.summary{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;display:grid;gap:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi .v{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.kpi .l{font-size:12px;color:var(--fg3)}
+.bar{height:8px;background:var(--track);border-radius:999px;overflow:hidden;display:flex}
+.bar span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:2px 9px;border-radius:999px;border:1px solid transparent;white-space:nowrap;line-height:1.5}
+.pill i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.st-none{color:var(--s-none-fg);background:var(--s-none-bg)} .st-none i{background:var(--s-none)}
+.st-build{color:var(--s-build-fg);background:var(--s-build-bg)} .st-build i{background:var(--s-build)}
+.st-rev{color:var(--s-rev-fg);background:var(--s-rev-bg)} .st-rev i{background:var(--s-rev)}
+.st-fail{color:var(--s-fail-fg);background:var(--s-fail-bg)} .st-fail i{background:var(--s-fail)}
+.st-ok{color:var(--s-ok-fg);background:var(--s-ok-bg)} .st-ok i{background:var(--s-ok)}
+.st-def{color:var(--s-def-fg);background:var(--s-def-bg)} .st-def i{background:var(--s-def)}
+.st-block{color:var(--s-block-fg);background:var(--s-block-bg)} .st-block i{background:var(--s-block)}
+button.pill{cursor:pointer;font:inherit;font-size:12px;font-weight:500}
+button.pill[aria-pressed="true"]{border-color:currentColor}
+
+/* waves */
+.waves{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}
+@media (max-width:760px){.waves{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.wave{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);padding:10px;display:grid;gap:6px;cursor:pointer;text-align:left;font:inherit;color:inherit;min-width:0}
+.wave:hover{border-color:var(--line2)}
+.wave[aria-pressed="true"]{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.wave .n{font-weight:700;font-size:13px;display:flex;justify-content:space-between;gap:4px}
+.wave .t{font-size:11px;color:var(--fg3);line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.6em}
+.wave .bar{height:5px}
+.wave.active{border-color:var(--s-build)}
+
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.search{flex:1 1 220px;min-width:0;height:34px;border:1px solid var(--line2);border-radius:var(--r);background:var(--sheet);color:var(--fg);padding:0 10px;font:inherit}
+.search:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.clear{height:34px;padding:0 12px;border:1px solid var(--line2);border-radius:var(--r);background:var(--sheet);color:var(--fg2);font:inherit;cursor:pointer}
+
+/* PRD rows */
+.prds{display:grid;gap:8px}
+details.prd{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r-lg)}
+details.prd[open]{border-color:var(--line2)}
+summary.row{list-style:none;cursor:pointer;display:grid;grid-template-columns:62px minmax(0,1.4fr) minmax(0,1fr) 90px;gap:14px;align-items:center;padding:12px 14px}
+summary.row::-webkit-details-marker{display:none}
+@media (max-width:760px){summary.row{grid-template-columns:52px minmax(0,1fr) 70px}.row .chips{grid-column:1/-1}}
+.code{font-family:var(--mono);font-weight:500;font-size:12px;background:var(--brand-bg);color:var(--brand);border-radius:var(--r);padding:3px 0;text-align:center}
+.ttl{min-width:0}
+.ttl b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ttl .sub{font-size:12px;color:var(--fg3)}
+.chips{display:flex;flex-wrap:wrap;gap:3px;min-width:0}
+.chip{width:12px;height:12px;border-radius:3px;background:var(--s-none)}
+.chip.st-build{background:var(--s-build)} .chip.st-rev{background:var(--s-rev)} .chip.st-fail{background:var(--s-fail)}
+.chip.st-ok{background:var(--s-ok)} .chip.st-def{background:var(--s-def)} .chip.st-block{background:var(--s-block)}
+.pct{text-align:right;display:grid;gap:4px}
+.pct b{font-size:15px}
+.pct .bar{height:5px}
+
+/* WP table */
+.wps{border-top:1px solid var(--line);padding:6px 10px 12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--fg3);text-align:left;padding:8px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right}
+.wp-title{font-weight:500}
+.wp-sum{font-size:12px;color:var(--fg3);margin-top:2px}
+.blk{font-size:12px;color:var(--s-block-fg);margin-top:4px}
+.reqs{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.req{font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:4px;background:var(--s-none-bg);color:var(--s-none-fg)}
+.req.done{background:var(--s-ok-bg);color:var(--s-ok-fg)}
+.req.hit{outline:2px solid var(--focus)}
+.toggle-reqs{background:none;border:0;color:var(--link);font:inherit;font-size:12px;cursor:pointer;padding:0;margin-top:4px}
+.empty{background:var(--sheet);border:1px dashed var(--line2);border-radius:var(--r-lg);padding:28px;text-align:center;color:var(--fg2)}
+.note{font-size:12px;color:var(--fg3)}
+@media (prefers-reduced-motion:no-preference){.bar span{transition:width .4s ease}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="eyebrow">Greek P&amp;C core insurance · Motor MVP</div>
+      <h1>Build tracker</h1>
+    </div>
+    <div class="live" id="live"><span class="dot" id="liveDot"></span><span id="liveText">Connecting…</span></div>
+  </div>
+
+  <section class="summary" aria-label="Overall progress">
+    <div class="kpis">
+      <div class="kpi"><div class="v" id="kMust">–</div><div class="l">Must requirements done</div></div>
+      <div class="kpi"><div class="v" id="kWp">–</div><div class="l">Work packages merged</div></div>
+      <div class="kpi"><div class="v" id="kWave">–</div><div class="l">Current phase / wave</div></div>
+      <div class="kpi"><div class="v" id="kBlk">–</div><div class="l">Failed or blocked</div></div>
+    </div>
+    <div class="bar" id="overallBar" aria-hidden="true"></div>
+    <div class="legend" id="legend"></div>
+    <div class="note" id="metaNote"></div>
+  </section>
+
+  <section aria-label="Waves">
+    <div class="eyebrow" style="margin-bottom:8px">Waves · click to filter</div>
+    <div class="waves" id="waves"></div>
+  </section>
+
+  <div class="filters">
+    <input class="search" id="q" type="search" placeholder="Search WP, title or requirement ID (e.g. REQ-POL-079)" aria-label="Search">
+    <button class="clear" id="clear" type="button">Clear filters</button>
+  </div>
+
+  <section class="prds" id="prds" aria-label="PRDs">
+    <div class="empty">Loading the backlog… Work packages appear here as soon as the orchestrator publishes them.</div>
+  </section>
+</div>
+
+<script>
+const STATUS = {
+  "not started": {cls:"st-none", label:"Not started"},
+  "building":    {cls:"st-build",label:"Building"},
+  "in review":   {cls:"st-rev",  label:"In review"},
+  "failed":      {cls:"st-fail", label:"Failed"},
+  "blocked":     {cls:"st-block",label:"Blocked"},
+  "merged":      {cls:"st-ok",   label:"Merged"},
+  "deferred":    {cls:"st-def",  label:"Deferred"},
+};
+const ORDER = ["merged","in review","building","failed","blocked","not started","deferred"];
+const WAVES = [
+  ["P1","Foundations"],["W1","Platform & config"],["W2","Masters & shared services"],["W3","Pricing & underwriting"],
+  ["W4","Policy core & quote-to-bind"],["W5","Billing, fiscal, posting"],["W6","Servicing & renewal"],
+  ["W7","Claims & RI"],["W8","Close, reporting, compliance"],["W9","Migration & cut-over"]
+];
+const state = {wps:[], prds:[], meta:null, statusF:new Set(), waveF:null, q:"", open:new Set(), openReqs:new Set()};
+try{ const s=JSON.parse(localStorage.getItem("trk")||"{}"); (s.open||[]).forEach(x=>state.open.add(x)); }catch(e){}
+const save=()=>{ try{localStorage.setItem("trk",JSON.stringify({open:[...state.open]}));}catch(e){} };
+const st = s => STATUS[s] || STATUS["not started"];
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => n.toLocaleString("en-GB");
+
+function reqDone(w){ return (w.reqs||[]).filter(r=>r.s==="done").length; }
+function counts(wps){
+  const c={}; ORDER.forEach(k=>c[k]=0);
+  wps.forEach(w=>{c[w.status in STATUS?w.status:"not started"]++;}); return c;
+}
+function matches(w){
+  if(state.statusF.size && !state.statusF.has(w.status)) return false;
+  if(state.waveF && w.wave!==state.waveF) return false;
+  if(state.q){
+    const q=state.q.toLowerCase();
+    const hay=(w.id+" "+w.title+" "+(w.summary||"")+" "+(w.reqs||[]).map(r=>r.id).join(" ")).toLowerCase();
+    if(!hay.includes(q)) return false;
+  }
+  return true;
+}
+function stackBar(el,c,total){
+  el.innerHTML = total? ORDER.filter(k=>c[k]).map(k=>{
+    const v=getComputedStyle(document.documentElement).getPropertyValue("--"+({"not started":"s-none","building":"s-build","in review":"s-rev","failed":"s-fail","blocked":"s-block","merged":"s-ok","deferred":"s-def"}[k])).trim();
+    return `<span style="width:${(c[k]/total*100).toFixed(2)}%;background:${v}" title="${st(k).label}: ${c[k]}"></span>`;
+  }).join("") : "";
+}
+
+function render(){
+  const all=state.wps;
+  const prdsEl=document.getElementById("prds");
+  if(!all.length){
+    prdsEl.innerHTML='<div class="empty">No work packages yet. The orchestrator publishes the backlog here once it is generated; this page then updates live.</div>';
+  }
+  // KPIs
+  const mustTotal = all.filter(w=>w.status!=="deferred").reduce((a,w)=>a+(w.reqs||[]).length,0);
+  const mustDone = all.reduce((a,w)=>a+reqDone(w),0);
+  const c=counts(all);
+  const active=all.filter(w=>w.status!=="deferred").length;
+  document.getElementById("kMust").textContent = all.length? `${fmt(mustDone)} / ${fmt(mustTotal)}` : "–";
+  document.getElementById("kWp").textContent = all.length? `${c["merged"]} / ${active}` : "–";
+  document.getElementById("kWave").textContent = state.meta?.currentWave || "–";
+  document.getElementById("kBlk").textContent = all.length? String(c["failed"]+c["blocked"]) : "–";
+  stackBar(document.getElementById("overallBar"),c,all.length);
+  const lg=document.getElementById("legend");
+  lg.innerHTML = ORDER.map(k=>`<button type="button" class="pill ${st(k).cls}" data-status="${esc(k)}" aria-pressed="${state.statusF.has(k)}"><i></i>${st(k).label} · ${c[k]}</button>`).join("");
+  const m=state.meta;
+  document.getElementById("metaNote").textContent = m? [m.phase, m.note].filter(Boolean).join(" · ") : "";
+
+  // waves
+  const cur = state.meta?.currentWave;
+  document.getElementById("waves").innerHTML = WAVES.map(([id,name])=>{
+    const ws=all.filter(w=>w.wave===id && w.status!=="deferred");
+    const tot=ws.reduce((a,w)=>a+Math.max((w.reqs||[]).length,1),0);
+    const done=ws.reduce((a,w)=>a+((w.reqs||[]).length? reqDone(w) : (w.status==="merged"?1:0)),0);
+    const p= tot? Math.round(done/tot*100):0;
+    const merged=ws.filter(w=>w.status==="merged").length;
+    return `<button type="button" class="wave ${cur===id?"active":""}" data-wave="${id}" aria-pressed="${state.waveF===id}">
+      <span class="n"><span>${id}</span><span class="muted">${p}%</span></span>
+      <span class="t">${esc(name)}</span>
+      <span class="bar"><span style="width:${p}%;background:var(--s-ok)"></span></span>
+      <span class="t" style="min-height:0">${merged}/${ws.length} WPs</span>
+    </button>`;
+  }).join("");
+
+  if(!all.length) return;
+  // PRD rows
+  const prdOrder = state.prds.length? [...state.prds].sort((a,b)=>(a.order??99)-(b.order??99)) :
+    [...new Set(all.map(w=>w.prd))].map(p=>({prd:p,title:p}));
+  const filtering = state.statusF.size||state.waveF||state.q;
+  const rows = prdOrder.map(p=>{
+    const ws=all.filter(w=>w.prd===p.prd).sort((a,b)=>(a.wave+String(a.seq).padStart(3,"0")).localeCompare(b.wave+String(b.seq).padStart(3,"0")));
+    const vis=ws.filter(matches);
+    if(filtering && !vis.length) return "";
+    const live=ws.filter(w=>w.status!=="deferred");
+    const tot=live.reduce((a,w)=>a+(w.reqs||[]).length,0);
+    const done=live.reduce((a,w)=>a+reqDone(w),0);
+    const wpTot=live.length, wpDone=live.filter(w=>w.status==="merged").length;
+    const p100 = tot? Math.round(done/tot*100) : (wpTot? Math.round(wpDone/wpTot*100):0);
+    const waves=[...new Set(ws.map(w=>w.wave))].join(" ");
+    const isOpen = state.open.has(p.prd) || (filtering && vis.length);
+    const wpRows = vis.map(w=>{
+      const s=st(w.status), n=(w.reqs||[]).length, d=reqDone(w);
+      const showReqs = state.openReqs.has(w.id) || (state.q && (w.reqs||[]).some(r=>r.id.toLowerCase().includes(state.q.toLowerCase())));
+      const reqHtml = n? `<button type="button" class="toggle-reqs" data-reqs="${esc(w.id)}">${showReqs?"Hide":"Show"} ${n} requirements</button>`+
+        (showReqs? `<div class="reqs">${w.reqs.map(r=>`<span class="req ${r.s==="done"?"done":""} ${state.q&&r.id.toLowerCase().includes(state.q.toLowerCase())?"hit":""}" title="${esc(r.title||"")}">${esc(r.id)}</span>`).join("")}</div>`:"") : "";
+      const blk=(w.blockers||[]).length? `<div class="blk">Blocked: ${w.blockers.map(esc).join("; ")}</div>`:"";
+      return `<tr>
+        <td class="mono">${esc(w.id)}</td>
+        <td>${esc(w.wave)}</td>
+        <td><div class="wp-title">${esc(w.title)}</div>${w.summary?`<div class="wp-sum">${esc(w.summary)}</div>`:""}${blk}${reqHtml}</td>
+        <td class="num">${n? `${d}/${n}`:"–"}</td>
+        <td><span class="pill ${s.cls}"><i></i>${s.label}</span>${w.reviewAttempts?`<div class="note">Review ${w.reviewAttempts}/3</div>`:""}</td>
+        <td class="note">${esc(w.owner||"")}</td>
+      </tr>`;
+    }).join("");
+    return `<details class="prd" data-prd="${esc(p.prd)}" ${isOpen?"open":""}>
+      <summary class="row">
+        <span class="code">${esc(p.module||p.prd)}</span>
+        <span class="ttl"><b>${esc(p.prd)} · ${esc(p.title)}</b><span class="sub">${wpTot} WPs · ${tot? fmt(tot)+" Musts":""} · ${esc(waves)}</span></span>
+        <span class="chips" aria-hidden="true">${ws.map(w=>`<span class="chip ${st(w.status).cls}" title="${esc(w.id)}: ${st(w.status).label}"></span>`).join("")}</span>
+        <span class="pct"><b>${p100}%</b><span class="bar"><span style="width:${p100}%;background:var(--s-ok)"></span></span></span>
+      </summary>
+      <div class="wps"><table><thead><tr><th>WP</th><th>Wave</th><th>Scope</th><th style="text-align:right">Done</th><th>Status</th><th>Owner</th></tr></thead><tbody>${wpRows}</tbody></table></div>
+    </details>`;
+  }).join("");
+  prdsEl.innerHTML = rows || '<div class="empty">Nothing matches these filters.</div>';
+}
+
+document.addEventListener("click",e=>{
+  const sb=e.target.closest("[data-status]");
+  if(sb){ const k=sb.dataset.status; state.statusF.has(k)?state.statusF.delete(k):state.statusF.add(k); render(); return; }
+  const wb=e.target.closest("[data-wave]");
+  if(wb){ state.waveF = state.waveF===wb.dataset.wave? null : wb.dataset.wave; render(); return; }
+  const rb=e.target.closest("[data-reqs]");
+  if(rb){ const k=rb.dataset.reqs; state.openReqs.has(k)?state.openReqs.delete(k):state.openReqs.add(k); render(); return; }
+});
+document.addEventListener("toggle",e=>{
+  const d=e.target; if(!d.matches||!d.matches("details.prd")) return;
+  d.open? state.open.add(d.dataset.prd) : state.open.delete(d.dataset.prd); save();
+},true);
+let qt; document.getElementById("q").addEventListener("input",e=>{clearTimeout(qt);qt=setTimeout(()=>{state.q=e.target.value.trim();render();},150);});
+document.getElementById("clear").addEventListener("click",()=>{state.statusF.clear();state.waveF=null;state.q="";document.getElementById("q").value="";render();});
+
+function setLive(ok,text){document.getElementById("liveDot").classList.toggle("on",ok);document.getElementById("liveText").textContent=text;}
+render();
+(async()=>{
+  const db = window.claude ? await window.claude.use("db") : null;
+  if(!db){ setLive(false,"Live data unavailable in this view"); return; }
+  const fail = e => setLive(false,"Live updates paused ("+(e&&e.code||"error")+")");
+  db.collection("wps").onSnapshot(s=>{ state.wps=s.docs.map(d=>({id:d.id,...d.data()})); render(); setLive(true,"Live"+(state.meta?.updatedAt?" · updated "+new Date(state.meta.updatedAt).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"}):"")); }, fail);
+  db.collection("prds").onSnapshot(s=>{ state.prds=s.docs.map(d=>d.data()); render(); }, fail);
+  db.doc("meta/summary").onSnapshot(s=>{ state.meta=s.exists? s.data(): null; render();
+    setLive(true,"Live"+(state.meta?.updatedAt?" · updated "+new Date(state.meta.updatedAt).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"}):"")); }, fail);
+})();
+</script>
