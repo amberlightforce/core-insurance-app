@@ -9,6 +9,9 @@
     percentages are decimal (ARCHITECTURE-DECISIONS §2 rule 2). Violations are build errors.
     (Microsoft.CodeAnalysis.BannedApiAnalyzers was evaluated and rejected: RS0030 does not report keyword types,
     literals or implicit conversions, so `double x = 1.5;` passes it.)
+    COREINS002 (same project) forbids reading the system clock (DateTime.Now/UtcNow/Today, DateTimeOffset.Now/UtcNow):
+    the current time comes only from CoreIns.Platform.Time.IClock (contract §3.9.13, REQ-PLT-332), or from an injected
+    TimeProvider, which the Platform backs with IClock. Only SystemClock suppresses it; CoreIns.ArchitectureTests checks that.
   -->
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\tools\CoreIns.Analyzers\CoreIns.Analyzers.csproj"

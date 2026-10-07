@@ -11,9 +11,10 @@ Greek-first, EU-ready P&C core insurance system (modular monolith, .NET 10 + Rea
 |---|---|
 | `src/CoreIns.Host` | The single deployable. `APP_ROLE` = `api` (REST + OpenAPI + React app + Hangfire dashboard), `worker` (Hangfire server) or `migrate` (schemas + Hangfire storage, then exit) |
 | `src/CoreIns.Modules.<Name>` / `.Contracts` | One project pair per business module; other modules may reference only `.Contracts` |
-| `src/CoreIns.Platform`, `src/CoreIns.SharedKernel` | Platform services (outbox, audit, config) and shared value types |
+| `src/CoreIns.Platform`, `src/CoreIns.SharedKernel` | Platform primitives (time service, unit of work, transactional outbox + dispatcher, hash-chained audit, idempotency, Problem Details, command pipeline, authority and configuration interfaces; schema `plt`) and shared value types (Money, dates, ids, state machines, RFC 8785 canonical JSON) |
 | `src/CoreIns.CountryPacks.GR` / `.CY` | Country packs; core code never references them |
-| `tools/CoreIns.Analyzers` | Roslyn analyser COREINS001: no `double`/`float` in `src/` |
+| `tools/CoreIns.Analyzers` | Roslyn analysers in `src/`: COREINS001 no `double`/`float`; COREINS002 no system clock (use `IClock`) |
+| `tools/CoreIns.OutboxBenchmark` | Outbox produce/dispatch throughput benchmark against PostgreSQL 17 |
 | `tests/` | Architecture, analyser, unit, integration (Testcontainers) and Playwright end-to-end tests |
 | `web/` | React + TypeScript + Vite front end (see [web/README.md](web/README.md)) |
 | `infra/database` | `bootstrap.sql`: roles, privileges, extensions; shared by local, CI and Azure |
@@ -62,6 +63,15 @@ dotnet test --project tests/CoreIns.IntegrationTests      # real PostgreSQL 17 v
 cd web && npm test                                        # Vitest
 cd tests/e2e && npm ci && npx playwright test             # against a running stack (E2E_BASE_URL, default :5000)
 ```
+
+Without Docker, the integration tests run against any PostgreSQL 17 server: set `COREINS_TEST_POSTGRES` to a
+superuser connection string (e.g. `Host=127.0.0.1;Port=5432;Database=postgres;Username=postgres;Password=…`); each test
+class then bootstraps, migrates and finally drops its own database on that server. The outbox benchmark uses the same
+variable (or `--connection`): `dotnet run --project tools/CoreIns.OutboxBenchmark -c Release -- --events 50000`.
+
+Schema changes of a module are EF Core migrations in the module (platform: `src/CoreIns.Platform/Persistence/Migrations`,
+created with `dotnet tool restore` then `dotnet ef migrations add <Name> --project src/CoreIns.Platform --startup-project src/CoreIns.Platform
+--context PlatformDbContext --output-dir Persistence/Migrations`); the migrate job applies them and grants the application role its privileges.
 
 `tests/e2e` depends only on `@playwright/test` (end-to-end tests, ADR §1), `typescript` and `@types/node`.
 `dotnet test` runs on Microsoft.Testing.Platform (opted in by `global.json`). Mutation testing: `dotnet tool restore`

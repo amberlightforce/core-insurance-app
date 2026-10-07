@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The canonical cross-module state models (contract §3.2.4, PRD-18 §9) declared in the modules' *.Contracts projects. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Billing.Contracts\CoreIns.Modules.Billing.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Claims.Contracts\CoreIns.Modules.Claims.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Compliance.Contracts\CoreIns.Modules.Compliance.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Work.Contracts\CoreIns.Modules.Work.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Documents.Contracts\CoreIns.Modules.Documents.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

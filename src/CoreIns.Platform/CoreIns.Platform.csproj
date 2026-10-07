@@ -1,13 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- PRD-14 Platform: outbox, audit, configuration, authority, Hangfire set-up. Filled by F-1b. Schema `plt`. -->
+  <!--
+    PRD-14 Platform primitives (F-1b), schema `plt`: time service, request context, command pipeline (no MediatR),
+    transactional outbox + dispatcher + archive + dead letters + replay, insert-only hash-chained audit, idempotency,
+    RFC 9457 Problem Details, authority check interface, configuration resolve interface, module registration.
+  -->
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.Platform.Tests" />
+    <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
+    <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
+    <InternalsVisibleTo Include="CoreIns.OutboxBenchmark" />
   </ItemGroup>
 
 </Project>

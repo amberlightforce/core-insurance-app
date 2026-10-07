@@ -18,7 +18,7 @@ public sealed class DatabaseBootstrapTests(PostgresFixture database) : IClassFix
         for (var run = 0; run < 2; run++)
         {
             await DatabaseBootstrapper.BootstrapAsync(
-                database.AdminConnectionString, DatabaseBootstrapper.DefaultDatabaseName,
+                database.AdminConnectionString, database.DatabaseName,
                 PostgresFixture.AppPassword, PostgresFixture.MigratorPassword, ct);
         }
 
@@ -39,7 +39,7 @@ public sealed class DatabaseBootstrapTests(PostgresFixture database) : IClassFix
     public async Task Bootstrap_refuses_to_run_without_role_passwords()
     {
         var error = await Should.ThrowAsync<PostgresException>(() => DatabaseBootstrapper.BootstrapAsync(
-            database.AdminConnectionString, DatabaseBootstrapper.DefaultDatabaseName, string.Empty, string.Empty,
+            database.AdminConnectionString, database.DatabaseName, string.Empty, string.Empty,
             TestContext.Current.CancellationToken));
 
         error.MessageText.ShouldContain("coreins.app_password");

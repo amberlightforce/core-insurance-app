@@ -31,6 +31,31 @@ public sealed class HostSmokeTests(PostgresFixture database) : IClassFixture<Pos
     }
 
     [Fact]
+    public async Task Platform_tables_are_migrated_with_least_privilege_for_the_app_role()
+    {
+        await using var dataSource = NpgsqlDataSource.Create(database.AppConnectionString);
+        var ct = TestContext.Current.CancellationToken;
+
+        async Task<bool> Can(string table, string privilege)
+        {
+            await using var command = dataSource.CreateCommand($"SELECT has_table_privilege('app', 'plt.{table}', '{privilege}')");
+            return (bool)(await command.ExecuteScalarAsync(ct))!;
+        }
+
+        (await Can("audit_event", "INSERT")).ShouldBeTrue();
+        (await Can("audit_event", "SELECT")).ShouldBeTrue();
+        (await Can("audit_event", "UPDATE")).ShouldBeFalse();
+        (await Can("audit_event", "DELETE")).ShouldBeFalse();
+        (await Can("audit_event", "TRUNCATE")).ShouldBeFalse();
+        (await Can("outbox_message", "UPDATE")).ShouldBeTrue();
+        (await Can("idempotency_record", "DELETE")).ShouldBeTrue();
+        (await Can("__ef_migrations_history", "SELECT")).ShouldBeFalse();
+
+        await using var history = dataSource.CreateCommand("SELECT count(*) FROM pg_tables WHERE schemaname = 'plt'");
+        ((long)(await history.ExecuteScalarAsync(ct))!).ShouldBe(9);
+    }
+
+    [Fact]
     public async Task Database_has_the_required_extensions_and_module_schemas()
     {
         await using var dataSource = NpgsqlDataSource.Create(database.AppConnectionString);
