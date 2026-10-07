@@ -217,3 +217,5 @@ co-signing access (OI-UW-04, OI-DOC-05) · BoG DORA channel (OI-CMP-09) · SMS s
 | D-FE-19 | Timeline day headers are real headings; no `role="feed"` (a list per day) | Screen-reader heading navigation | Made |
 | D-FE-20 | MentionComposer stays a multi-line textarea, with a listbox popup driven by the keyboard and live-region announcements (ARIA forbids combobox on textarea) | Comments are multi-line | Made |
 | D-FE-21 | The design guide's own label table (Part 1 §2.1.4) is the source for Greek/English status labels; labels not in the contract glossary stay `glossary: pending` for business sign-off | Guide is approved; glossary governs terms | Made |
+| D-ARC-22 | Greek postcode→locality autofill (REQ-PTY-076) is deferred to W2-PTY. F-1e defines an `IPostcodeDirectory` data contract with the PRD vector as a test fixture. No postcode list is invented | Reference data not in the PRDs | Made |
+| D-ARC-23 | Encryption key rotation is replica-safe: a demotion time is persisted, Retire waits for demotion + cache refresh + re-scan, search covers every readable version, and KEK re-wraps verify that the key version changed | Review F-1e M3/M4 | Made |
