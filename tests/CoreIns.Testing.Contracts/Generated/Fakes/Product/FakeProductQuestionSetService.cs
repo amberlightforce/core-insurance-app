@@ -17,5 +17,5 @@ public sealed class FakeProductQuestionSetService : global::CoreIns.Testing.Cont
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.QuestionSetEvaluateResponse> EvaluateAsync(global::CoreIns.Modules.Product.Contracts.Api.QuestionSetEvaluateRequest request, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Product.Contracts.Api.QuestionSetEvaluateResponse>("pfc.QuestionSet.evaluate", [request], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.QuestionSetGetResponse> GetAsync(string id, string? set = null, string? answers = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Product.Contracts.Api.QuestionSetGetResponse>("pfc.QuestionSet.get", [id, set, answers], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.QuestionSetGetResponse> GetAsync(string id, string? set = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Product.Contracts.Api.QuestionSetGetResponse>("pfc.QuestionSet.get", [id, set], cancellationToken);
 }

@@ -388,6 +388,32 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
     }
 
     [Fact]
+    public async Task REQ_POL_149_question_set_knock_outs_and_missing_answers_block_the_quote()
+    {
+        var party = await _slice.CreatePartyAsync();
+        var (jobId, _, _) = await _slice.DraftAsync(party, InTwoDays);
+        _slice.QuestionSets.Setup("pfc.QuestionSet.evaluate", new Modules.Product.Contracts.Api.QuestionSetEvaluateResponse
+        {
+            Questions = [], Referrals = [], MissingRequired = [], Complete = true,
+            KnockOuts = [new Modules.Product.Contracts.Api.QuestionOutcomeHit { Question = "garagedOvernight", Answer = "true" }],
+        });
+        var (knockedOut, problem) = await _slice.QuoteAsync(jobId);
+        knockedOut.StatusCode.ShouldBe(HttpStatusCode.BadRequest, problem?.ToJsonString());
+        problem!.ToJsonString().ShouldContain("KNOCK_OUT");
+
+        _slice.QuestionSets.Setup("pfc.QuestionSet.evaluate", new Modules.Product.Contracts.Api.QuestionSetEvaluateResponse
+        {
+            Questions = [], Referrals = [], KnockOuts = [], MissingRequired = ["annualMileage"], Complete = false,
+        });
+        var (missing, missingBody) = await _slice.QuoteAsync(jobId);
+        missing.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        missingBody!.ToJsonString().ShouldContain("QUESTION_REQUIRED");
+        var evaluate = (Modules.Product.Contracts.Api.QuestionSetEvaluateRequest)_slice.QuestionSets.CallsTo("pfc.QuestionSet.evaluate")[^1].Arguments[0]!;
+        evaluate.Set.ShouldBe("GR_MOTOR_PREQUAL");
+        evaluate.Answers["garagedOvernight"].ShouldBe("true");
+    }
+
+    [Fact]
     public async Task Permissions_are_enforced_per_operation()
     {
         var party = await _slice.CreatePartyAsync();
@@ -403,9 +429,9 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
     }
 
     [Fact]
-    public async Task Before_PFC_RAT_UW_and_MKT_are_wired_the_host_starts_and_POL_answers_503()
+    public async Task Without_the_sandbox_doubles_the_host_starts_and_an_unresolvable_product_answers_503()
     {
-        // The plain Host (no sandbox doubles): S1 modules register their implementations in S2 (D-SLC-01).
+        // The plain Host (no sandbox doubles; RAT and UW are not wired yet, D-SLC-01): it starts, and POL refuses cleanly.
         await using var factory = new ApiHostFactory(database.AppConnectionString);
         using var client = factory.CreateClient();
         var (party, body) = await SendAsync(client, HttpMethod.Post, "/api/pty/v1/parties", Person("Νίκος", "Γεωργίου", null));

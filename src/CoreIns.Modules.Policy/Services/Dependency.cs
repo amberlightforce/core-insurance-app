@@ -20,4 +20,7 @@ internal sealed class Dependency<T>(IServiceProvider services)
     public T Value => services.GetService<T>()
                       ?? throw new DomainException(DomainError.Of(
                           ModuleCode.POL, "DEPENDENCY-UNAVAILABLE", $"{typeof(T).Name} is not registered in this deployment yet."));
+
+    /// <summary>The registered implementation, or null for an optional step.</summary>
+    public T? TryValue => services.GetService<T>();
 }

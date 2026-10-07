@@ -69,7 +69,7 @@ internal sealed class QuoteJobHandler(
         var request = command.Request;
         var now = clock.Now;
         // Fail fast (POL-ERR-DEPENDENCY-UNAVAILABLE) before any work when a module is not wired yet.
-        _ = (questionSetService.Value, draftService.Value, ratingService.Value, roundingService.Value, underwritingService.Value);
+        _ = (questionSetService.Value, ratingService.Value, roundingService.Value, underwritingService.Value);
         var loaded = await JobSupport.LoadAsync(db, JobSupport.LegalEntity(context, legalEntities), request.JobId, request.VersionNo, cancellationToken)
             .ConfigureAwait(false);
         if (loaded is not var (job, version))
@@ -209,30 +209,36 @@ internal sealed class QuoteJobHandler(
         foreach (var (set, index) in tree.QuestionSets.Select((s, i) => (s, i)))
         {
             var outcome = await questionSetService.Value.EvaluateAsync(
-                new QuestionSetEvaluateRequest
-                {
-                    Hash = artefact,
-                    Set = JsonSerializer.SerializeToElement(new { code = set.QuestionSetCode, version = set.QuestionSetVersion }, SharedKernelJson.Options),
-                    Answers = set.Answers,
-                },
+                new QuestionSetEvaluateRequest { Hash = artefact, Set = set.QuestionSetCode, Answers = AnswerTexts(set.Answers) },
                 cancellationToken).ConfigureAwait(false);
-            if (outcome.KnockOutFlags == true)
+            if (outcome.KnockOuts.Count > 0)
             {
                 return Validation("A knock-out answer blocks the quote.", [new FieldError($"riskTree.questionSets[{index}]", "KNOCK_OUT", "pol.knock_out")]);
             }
+
+            if (outcome.MissingRequired.Count > 0)
+            {
+                return Validation(
+                    "Required questions are not answered.",
+                    outcome.MissingRequired.Select(q => new FieldError($"riskTree.questionSets[{index}].answers.{q}", "QUESTION_REQUIRED", "pol.question_required")));
+            }
         }
 
-        var validated = await draftService.Value.ValidateAsync(
-            new PolicyDraftValidateRequest
-            {
-                Hash = artefact,
-                Checkpoint = JsonSerializer.SerializeToElement("QUOTE", SharedKernelJson.Options),
-                Draft = JsonSerializer.SerializeToElement(tree, SharedKernelJson.Options),
-            },
-            cancellationToken).ConfigureAwait(false);
-        if (validated.Errors is { Count: > 0 } errors)
+        // pfc.PolicyDraft.validate (REQ-POL-295) runs where PFC offers it; SL-PFC does not build it yet.
+        if (draftService.TryValue is { } drafts)
         {
-            return Validation("The product rejects the draft.", errors.Select((e, i) => new FieldError($"riskTree[{i}]", "PRODUCT_RULE", "pol.product_rule", e.GetRawText())));
+            var validated = await drafts.ValidateAsync(
+                new PolicyDraftValidateRequest
+                {
+                    Hash = artefact,
+                    Checkpoint = JsonSerializer.SerializeToElement("QUOTE", SharedKernelJson.Options),
+                    Draft = JsonSerializer.SerializeToElement(tree, SharedKernelJson.Options),
+                },
+                cancellationToken).ConfigureAwait(false);
+            if (validated.Errors is { Count: > 0 } errors)
+            {
+                return Validation("The product rejects the draft.", errors.Select((e, i) => new FieldError($"riskTree[{i}]", "PRODUCT_RULE", "pol.product_rule", e.GetRawText())));
+            }
         }
 
         return null;
@@ -332,6 +338,15 @@ internal sealed class QuoteJobHandler(
 
         return (response, lines);
     }
+
+    /// <summary>PFC takes answers as text by question code: strings as they are, other JSON values in their JSON form.</summary>
+    private static Dictionary<string, string> AnswerTexts(JsonElement answers) =>
+        answers.ValueKind != JsonValueKind.Object
+            ? []
+            : answers.EnumerateObject().ToDictionary(
+                p => p.Name,
+                p => p.Value.ValueKind == JsonValueKind.String ? p.Value.GetString()! : p.Value.GetRawText(),
+                StringComparer.Ordinal);
 
     private static UwIssue Issue(RulesEvaluateResponse.IssueItem item) => new()
     {

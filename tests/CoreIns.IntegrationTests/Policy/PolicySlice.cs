@@ -59,7 +59,7 @@ internal sealed class PolicySlice : IAsyncDisposable
             },
             ResolutionHash = ResolutionHash.Parse(ResolutionHashValue),
         });
-        QuestionSets.Setup("pfc.QuestionSet.evaluate", new QuestionSetEvaluateResponse { KnockOutFlags = false, ReferralFlags = false });
+        QuestionSets.Setup("pfc.QuestionSet.evaluate", new QuestionSetEvaluateResponse { Questions = [], KnockOuts = [], Referrals = [], MissingRequired = [], Complete = true });
         Drafts.Setup("pfc.PolicyDraft.validate", new PolicyDraftValidateResponse { Errors = [] });
         Rating.Setup("rat.Rate.rate", call => Rate((RateRateRequest)call.Arguments[0]!));
         AcceptAll();
@@ -143,7 +143,7 @@ internal sealed class PolicySlice : IAsyncDisposable
     public static object[] MotorRisk() =>
     [
         new { op = "SET_VEHICLE", vehicle = new { plate = "ikx-1234", make = "Toyota", model = "Yaris", firstRegistrationYear = 2021, use = "PRIVATE" } },
-        new { op = "SET_ANSWERS", questionSet = new { questionSetCode = "GR_MOTOR_PREQUAL", questionSetVersion = "1", answers = new { garagedOvernight = true } } },
+        new { op = "SET_ANSWERS", questionSet = new { questionSetCode = "GR_MOTOR_PREQUAL", questionSetVersion = "1", answers = new { garagedOvernight = "true" } } },
     ];
 
     public static object[] DriverAndCovers(string vehicleLocator, string driverPartyId) =>
