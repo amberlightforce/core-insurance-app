@@ -34,6 +34,13 @@ public sealed record CommandDescriptor(OperationName Operation, ModuleCode Modul
     /// <summary>When true (default), the command needs an Idempotency-Key in the request context (ADR §2 rule 6).</summary>
     public bool RequiresIdempotencyKey { get; init; } = true;
 
+    /// <summary>
+    /// When false, the idempotency decorator is skipped entirely: no key is required and the result is never stored in
+    /// <c>plt.idempotency_record</c>, even when the caller sends a key. Use it for audited reads whose result is personal
+    /// data (e.g. revealing P2 values): a stored result would keep that data in plaintext (SL-0 review M1).
+    /// </summary>
+    public bool Idempotent { get; init; } = true;
+
     /// <summary>When true (default), every execution is audited (ADR §2 rule 9).</summary>
     public bool Audited { get; init; } = true;
 

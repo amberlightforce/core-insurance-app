@@ -48,5 +48,10 @@ internal sealed class RevealPartyAuditor : ICommandAuditor<RevealParty, PartyGet
             ObjectNumber = ok.Value.Party.PartyNumber.Value,
             BusinessKeys = BusinessKeys.Empty.With("partyId", ok.Value.Party.PartyId.Value.ToString()),
         }
-        : new CommandAuditFacts();
+        : new CommandAuditFacts
+        {
+            // A refused or failed reveal still names what was asked for (id, or the party number).
+            ObjectRef = command.PartyId is { } id ? ObjectRef.For(ModuleCode.PTY, "Party", new PartyId(id)) : null,
+            ObjectNumber = command.PartyId is null ? command.PartyNumber : null,
+        };
 }

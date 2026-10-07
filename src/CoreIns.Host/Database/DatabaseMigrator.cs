@@ -135,7 +135,7 @@ internal sealed partial class DatabaseMigrator(IConfiguration configuration, ILo
         {
             throw new InvalidOperationException(
                 "Greek search objects missing (public.coreins_search_key, collation public.el_gr_ci_ai). Run the database bootstrap "
-                + "(locally: the compose ootstrap service or infra/local/pg-init; on Azure: APP_ROLE=migrate, Migrate__Bootstrap=true).");
+                + "(locally: the compose `bootstrap` service or infra/local/pg-init; on Azure: APP_ROLE=migrate, Migrate__Bootstrap=true).");
         }
     }
 

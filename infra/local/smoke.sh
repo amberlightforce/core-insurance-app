@@ -2,6 +2,7 @@
 # Smoke test of the local stack over HTTP (synthetic data): dev sign-in, create a person, search it three ways,
 # read it masked and revealed. Needs curl and python3 (or python). Usage: infra/local/smoke.sh [api-base-url]
 set -euo pipefail
+export PYTHONIOENCODING=utf-8
 API=${1:-http://127.0.0.1:5000}
 PY=$(command -v python3 || command -v python)
 WORK=$(mktemp -d)
@@ -33,20 +34,16 @@ curl -s -X POST "$API/api/pty/v1/parties" -H "$AUTH" -H 'Content-Type: applicati
 ID=$(json "$WORK/created.json" "d['party']['partyId'] if 'party' in d else d['existingPartyId']")
 echo "party $ID"
 
-# Queries are percent-encoded here (UTF-8), so non-ASCII text never depends on the shell's code page.
+# Every search goes in a POST body: names, identifiers and free text are never in a URL (D-SLC-05). The bodies are
+# written as \u escapes so non-ASCII text never depends on the shell's code page.
 search() {
   echo "--- search $1"
-  curl -s "$API/api/pty/v1/parties/search?$2" -H "$AUTH" -o "$WORK/search.json"
+  curl -s -X POST "$API/api/pty/v1/parties/search" -H "$AUTH" -H 'Content-Type: application/json' -d "$2" -o "$WORK/search.json"
   json "$WORK/search.json" "[(i['partyNumber'], i['displayName'], i['displayNameLatin'], i['matchQuality']) for i in d['items']]"
 }
-search "efthymiou (Latin, lower case)" "name=efthymiou"
-search "ΕΥΘΥΜΙΟΥ angeliki (Greek capitals without accents + Latin)" "name=%CE%95%CE%A5%CE%98%CE%A5%CE%9C%CE%99%CE%9F%CE%A5%20angeliki"
-# Identifiers go in a POST body, never in a URL (D-SLC-05).
-echo "--- search AFM through the blind index (POST body)"
-curl -s -X POST "$API/api/pty/v1/parties/search" -H "$AUTH" -H 'Content-Type: application/json' \
-  -d '{"identifierScheme":"AFM","identifierValue":"123456783"}' -o "$WORK/search.json"
-json "$WORK/search.json" "[(i['partyNumber'], i['displayName'], i['displayNameLatin'], i['matchQuality']) for i in d['items']]"
-
+search "efthymiou (Latin, lower case)" '{"name":"efthymiou"}'
+search "ΕΥΘΥΜΙΟΥ angeliki (Greek capitals without accents + Latin)" '{"name":"\u0395\u03a5\u0398\u03a5\u039c\u0399\u039f\u03a5 angeliki"}'
+search "AFM through the blind index" '{"identifierScheme":"AFM","identifierValue":"123456783"}'
 echo "--- get (P2 masked)"
 curl -s "$API/api/pty/v1/parties/$ID" -H "$AUTH" -o "$WORK/get.json"
 json "$WORK/get.json" "(d['party']['partyNumber'], d['party']['birthDate'], d['party']['identifiers'][0]['value'], d['party']['addresses'][0]['formattedLinesLatin'])"

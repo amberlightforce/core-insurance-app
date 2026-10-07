@@ -82,15 +82,15 @@ internal sealed class PartiesController : ControllerBase
             : Results.Ok(new PartyGetResponse { Party = view });
     }
 
-    /// <summary>pty.Party.search (GET): non-personal filters only, name and party number (D-SLC-05).</summary>
+    /// <summary>pty.Party.search (GET): the party number only; no personal data in URLs (D-SLC-05).</summary>
     [HttpGet("search")]
     [Authorize(Policy = PartyPermissions.Search)]
     public Task<IResult> SearchAsync(
-        [FromQuery] string? name, [FromQuery] string? partyNumber, [FromQuery] int? limit, [FromQuery] string? cursor, [FromServices] PartySearch search,
+        [FromQuery] string? partyNumber, [FromQuery] int? limit, [FromQuery] string? cursor, [FromServices] PartySearch search,
         CancellationToken cancellationToken) =>
-        RunAsync(search, null, name, null, null, partyNumber, limit, cursor, cancellationToken);
+        RunAsync(search, null, null, null, null, partyNumber, limit, cursor, cancellationToken);
 
-    /// <summary>pty.Party.searchByCriteria (POST): identifiers and the single search box travel in the body, never in a URL (D-SLC-05).</summary>
+    /// <summary>pty.Party.searchByCriteria (POST): names, identifiers and the single search box travel in the body, never in a URL (D-SLC-05).</summary>
     [HttpPost("search")]
     [SkipIdempotency]
     [Authorize(Policy = PartyPermissions.Search)]
