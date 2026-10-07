@@ -22,7 +22,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 
 | WP | Status | Owner | Notes |
 |---|---|---|---|
-| SL-0 platform wiring + Party | building | opus | reference vertical |
+| SL-0 platform wiring + Party | **in review** (deep) | opus | built 2927240: integration 82/82, arch 196/196, web 1112; compose + smoke OK. Follow-ups D-SLC-05/06 in progress |
 | SL-FIX-WEB | **merged** | sonnet | 1109/1109 native |
 | SL-MKT, SL-PFC, SL-RAT-UW, SL-POL | not started | | after SL-0 |
 | SL-BIL, SL-FIN, SL-UI | not started | | after S1 |
