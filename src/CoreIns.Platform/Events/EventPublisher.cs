@@ -60,6 +60,9 @@ public sealed class StampOptions
 
     /// <summary>ISO 3166-1 country of the stamp (e.g. GR).</summary>
     public string? Country { get; set; }
+
+    /// <summary>UUID of the stamp's legal entity (rows, encryption keys; D-CON-33). Replaced by the MKT registry in W1-MKT.</summary>
+    public string? LegalEntityId { get; set; }
 }
 
 /// <summary>The scoped outbox stage: envelopes published in the current transaction, written before it commits.</summary>

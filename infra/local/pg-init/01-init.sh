@@ -1,13 +1,14 @@
 #!/bin/bash
 # Runs once, on first start of an empty data directory (docker-entrypoint-initdb.d).
 # Creates the `coreins` database, then applies the shared, idempotent bootstrap (infra/database/bootstrap.sql,
-# mounted at /coreins-db): roles `migrator` and `app`, database privileges and the extension set.
+# mounted at /coreins-db): roles `migrator` and `app`, database privileges and the extension set; then greek-search.sql.
 # The same script runs on Azure through the `bootstrap` job and in the Testcontainers integration tests.
 set -e
 
 : "${APP_DB_PASSWORD:?APP_DB_PASSWORD must be set}"
 : "${MIGRATOR_DB_PASSWORD:?MIGRATOR_DB_PASSWORD must be set}"
 BOOTSTRAP_SQL="${COREINS_BOOTSTRAP_SQL:-/coreins-db/bootstrap.sql}"
+GREEK_SEARCH_SQL="${COREINS_GREEK_SEARCH_SQL:-/coreins-db/greek-search.sql}"
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname postgres <<'SQL'
 SELECT 'CREATE DATABASE coreins ENCODING ''UTF8'' TEMPLATE template0'
@@ -22,3 +23,6 @@ SELECT set_config('coreins.app_password', :'app_password', false),
        set_config('coreins.migrator_password', :'migrator_password', false) \g /dev/null
 \i :bootstrap_sql
 SQL
+
+# Greek search objects (schema public, so the administrator applies them; idempotent).
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname coreins -f "$GREEK_SEARCH_SQL"

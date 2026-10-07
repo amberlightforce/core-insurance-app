@@ -34,6 +34,10 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
 
     public DbSet<AuditChainHeadRow> AuditChainHeads => Set<AuditChainHeadRow>();
 
+    public DbSet<NumberSeriesRow> NumberSeries => Set<NumberSeriesRow>();
+
+    public DbSet<DataKeyRow> DataKeys => Set<DataKeyRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -197,6 +201,41 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
             entity.HasIndex(e => e.RecordedAt).HasDatabaseName("ix_audit_event_recorded_at");
         });
 
+        // Numbering series (REQ-PLT-014, REQ-PLT-209..212): one counter row per legal entity, identifier type and series.
+        modelBuilder.Entity<NumberSeriesRow>(entity =>
+        {
+            entity.ToTable("number_series", table =>
+                table.HasCheckConstraint("ck_number_series_range", "next_value >= 1 AND max_value >= 1 AND next_value <= max_value + 1"));
+            entity.HasKey(e => new { e.LegalEntity, e.IdentifierType, e.SeriesId }).HasName("pk_number_series");
+            entity.Property(e => e.LegalEntity).HasColumnName("legal_entity");
+            entity.Property(e => e.IdentifierType).HasColumnName("identifier_type");
+            entity.Property(e => e.SeriesId).HasColumnName("series_id");
+            entity.Property(e => e.NextValue).HasColumnName("next_value");
+            entity.Property(e => e.MaxValue).HasColumnName("max_value");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+        });
+
+        // Wrapped data-encryption keys of field-level protection (D-ARC-14, D-ARC-23; PostgresDataKeyStore). Only
+        // wrapped keys are stored; the key-encryption keys stay in the key provider (Key Vault in production).
+        modelBuilder.Entity<DataKeyRow>(entity =>
+        {
+            entity.ToTable("data_key", table =>
+            {
+                table.HasCheckConstraint("ck_data_key_purpose", "purpose IN (1, 2)");
+                table.HasCheckConstraint("ck_data_key_status", "status IN (1, 2, 3, 4)");
+                table.HasCheckConstraint("ck_data_key_version", "version >= 1");
+            });
+            entity.HasKey(e => new { e.LegalEntityId, e.Purpose, e.Version }).HasName("pk_data_key");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Purpose).HasColumnName("purpose");
+            entity.Property(e => e.Version).HasColumnName("version");
+            entity.Property(e => e.KeyEncryptionKeyId).HasColumnName("kek_id");
+            entity.Property(e => e.WrappedKey).HasColumnName("wrapped_key");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DemotedAt).HasColumnName("demoted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RetiringAt).HasColumnName("retiring_at").HasColumnType("timestamptz");
+        });
         modelBuilder.Entity<AuditChainHeadRow>(entity =>
         {
             entity.ToTable("audit_chain_head", table =>
@@ -496,4 +535,42 @@ internal sealed class AuditChainHeadRow
     public long LastSequence { get; set; }
 
     public string LastHash { get; set; } = string.Empty;
+}
+
+/// <summary><c>plt.number_series</c>: the next sequence of one series (row-locked on allocation).</summary>
+internal sealed class NumberSeriesRow
+{
+    public string LegalEntity { get; set; } = string.Empty;
+
+    public string IdentifierType { get; set; } = string.Empty;
+
+    public string SeriesId { get; set; } = string.Empty;
+
+    public long NextValue { get; set; }
+
+    public long MaxValue { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
+}
+
+/// <summary><c>plt.data_key</c>: one wrapped data-key version per legal entity and purpose.</summary>
+internal sealed class DataKeyRow
+{
+    public Guid LegalEntityId { get; set; }
+
+    public int Purpose { get; set; }
+
+    public int Version { get; set; }
+
+    public string KeyEncryptionKeyId { get; set; } = string.Empty;
+
+    public byte[] WrappedKey { get; set; } = [];
+
+    public int Status { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? DemotedAt { get; set; }
+
+    public DateTime? RetiringAt { get; set; }
 }

@@ -4,31 +4,49 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.ProducerCode.search result. PRD outputs: "validity, reasons, intermediary data"</summary>
+/// <summary>pty.ProducerCode.search result. Typed by SL-0 from REQ-PTY-207 (subset).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProducerCodeSearchItem
 {
-    /// <summary>PRD: "validity"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("validity")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Validity { get; init; }
+    /// <summary>Contract member 'producerCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("producerCode")]
+    public required string ProducerCode { get; init; }
 
-    /// <summary>PRD: "reasons"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reasons")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reasons { get; init; }
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
 
-    /// <summary>PRD: "intermediary data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("intermediaryData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? IntermediaryData { get; init; }
+    /// <summary>Contract member 'intermediaryId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("intermediaryId")]
+    public required global::CoreIns.SharedKernel.Identifiers.IntermediaryId IntermediaryId { get; init; }
+
+    /// <summary>Contract member 'intermediaryName'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("intermediaryName")]
+    public required string IntermediaryName { get; init; }
+
+    /// <summary>Contract member 'intermediaryType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("intermediaryType")]
+    public required string IntermediaryType { get; init; }
+
+    /// <summary>Contract member 'intermediaryStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("intermediaryStatus")]
+    public required global::CoreIns.Modules.Party.Contracts.Api.IntermediaryStatus IntermediaryStatus { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>ACTIVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACTIVE")]
+        Active,
+
+        /// <summary><c>SUSPENDED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUSPENDED")]
+        Suspended,
+
+        /// <summary><c>TERMINATED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("TERMINATED")]
+        Terminated,
+    }
 }
