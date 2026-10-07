@@ -1,0 +1,54 @@
+{
+  "formField": {
+    "required": "required",
+    "help": "Help: {label}",
+    "charactersRemaining": "{count, plural, one {# character left} other {# characters left}}",
+    "characterCount": "{count}/{max}"
+  },
+  "textField": {
+    "copy": "Copy: {label}",
+    "copied": "Copied",
+    "reveal": "Reveal hidden value: {label}",
+    "masked": "hidden",
+    "aiBadge": "AI suggestion: {label}",
+    "aiInstructions": "Suggested by AI. Check it before accepting. Press Enter to accept or Delete to reject.",
+    "aiSource": "Source: {source}",
+    "aiAccepted": "Suggestion accepted",
+    "aiRejected": "Suggestion rejected",
+    "countryCode": "Country code +30"
+  },
+  "searchField": {
+    "placeholder": "Search…",
+    "clear": "Clear search"
+  },
+  "select": {
+    "placeholder": "Choose…",
+    "loading": "Loading options…"
+  },
+  "switch": {
+    "on": "On",
+    "off": "Off",
+    "saving": "Saving…",
+    "failed": "The change to “{label}” wasn't saved and the setting was restored. Try again."
+  },
+  "identifierField": {
+    "converted": "Converted to Greek characters",
+    "errors": {
+      "afmLength": "The tax number (ΑΦΜ) must have {length} digits. Check the number.",
+      "afmChecksum": "The tax number (ΑΦΜ) isn't valid: the last check digit doesn't match. Check the number.",
+      "ibanCountry": "The IBAN must start with the country code and 2 check digits (for example GR16). Check the number.",
+      "ibanLength": "An IBAN for {country} must have {length} characters. Check the number.",
+      "ibanLengthRange": "The IBAN must have between {min} and {max} characters. Check the number.",
+      "ibanChecksum": "The IBAN isn't valid: the check digits don't match. Check the number.",
+      "plateLetters": "The plate has a letter that Greek plates don't use. Use only {letters}.",
+      "plateFormat": "The plate must have 3 letters and 4 digits (ΑΑΑ-0000). Check the plate.",
+      "vinChars": "A vehicle identification number (VIN) never contains I, O or Q. Check whether it is 1 or 0.",
+      "vinLength": "The vehicle identification number (VIN) must have {length} characters. Check the number.",
+      "vinCheckDigit": "The VIN check digit doesn't match. Check the number; many European vehicles don't use it.",
+      "referenceFormat": "The number isn't in the expected format. Check it against the document."
+    }
+  },
+  "errorSummary": {
+    "title": "Fix {count, plural, one {# error} other {# errors}} to continue"
+  }
+}

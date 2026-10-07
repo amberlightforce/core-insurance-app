@@ -1,0 +1,129 @@
+/*
+ * Segmented control (Part 2 §4.12): sunken track, 1 px border.subtle, radius.md, 2 px padding; equal-width
+ * segments; MI-13 sliding thumb (sheet, elevation.1, radius.sm) moved with a CSS transform.
+ */
+.root {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-label-gap);
+  min-inline-size: 0;
+}
+
+.track {
+  --_height: var(--size-control-md);
+  --_pad: var(--space-0_5);
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  min-block-size: var(--_height);
+  padding: var(--_pad);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sunken);
+}
+
+.track[data-size='sm'] {
+  --_height: var(--size-control-sm);
+}
+
+.track[data-size='lg'] {
+  --_height: var(--size-control-lg);
+}
+
+.thumb {
+  position: absolute;
+  inset-block: var(--_pad);
+  inset-inline-start: var(--_pad);
+  z-index: calc(var(--z-raised) * -1);
+  inline-size: calc((100% - var(--_pad) * 2) / var(--_count));
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-sheet);
+  box-shadow: var(--elevation-1);
+  transform: translateX(calc(100% * var(--_index)));
+  transition: transform var(--motion-duration-feedback-lg) var(--motion-ease-standard);
+}
+
+:dir(rtl) .thumb {
+  transform: translateX(calc(-100% * var(--_index)));
+}
+
+.track:has([data-pressed]) .thumb {
+  scale: 0.98;
+}
+
+.segmentField {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.segment {
+  display: inline-flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0;
+  padding: var(--space-0) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+  cursor: pointer;
+  transition: color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+  -webkit-tap-highlight-color: transparent;
+}
+
+:global([data-density='comfortable']) .segment {
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+}
+
+.segment[data-hovered] {
+  color: var(--color-text-primary);
+}
+
+.segment[data-selected] {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.segment[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.segment[data-disabled],
+.segment[data-soft-disabled] {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.readOnly {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-label-gap);
+  color: var(--color-text-primary);
+}
+
+.readOnlyLabel {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+  letter-spacing: var(--type-label-tracking);
+}
+
+@media (forced-colors: active) {
+  .track {
+    border-color: CanvasText;
+  }
+
+  .thumb {
+    border: var(--border-width-thick) solid Highlight;
+  }
+
+  .segment[data-disabled],
+  .segment[data-soft-disabled] {
+    color: GrayText;
+  }
+}

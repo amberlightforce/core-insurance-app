@@ -88,6 +88,7 @@
   --color-control-disabled-checked: #b9c0cb;
   --color-control-disabled-glyph: #ffffff;
   --color-switch-track-off: #b9c0cb;
+  --color-switch-track-off-hover: #98a1b0;
   --color-skeleton: #eef0f3;
   --color-kbd-on-inverse: rgba(255, 255, 255, 0.14);
 
@@ -132,6 +133,7 @@
   --color-control-disabled-checked: #3d4452;
   --color-control-disabled-glyph: #98a1b0;
   --color-switch-track-off: #3d4452;
+  --color-switch-track-off-hover: #4a5262;
   --color-skeleton: #1f242d;
   --color-kbd-on-inverse: rgba(0, 0, 0, 0.08);
   --color-ambient-1: rgba(46, 79, 214, 0.22);
@@ -153,6 +155,7 @@
     --color-control-disabled-checked: #3d4452;
     --color-control-disabled-glyph: #98a1b0;
     --color-switch-track-off: #3d4452;
+    --color-switch-track-off-hover: #4a5262;
     --color-skeleton: #1f242d;
     --color-kbd-on-inverse: rgba(0, 0, 0, 0.08);
     --color-ambient-1: rgba(46, 79, 214, 0.22);

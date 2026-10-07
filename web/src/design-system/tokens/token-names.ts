@@ -117,6 +117,7 @@ export const tokenNames = [
   'color-surface-sheet',
   'color-surface-sunken',
   'color-switch-track-off',
+  'color-switch-track-off-hover',
   'color-text-adverse',
   'color-text-disabled',
   'color-text-inverse',

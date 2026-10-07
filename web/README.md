@@ -35,3 +35,28 @@ Versions are pinned exactly (`.npmrc` sets `save-exact`) and updated weekly by D
 | `openapi-typescript`                                                                                               | Generates the API client types from OpenAPI (ADR §1 API client)                                       |
 | `@types/node`, `@types/react`, `@types/react-dom`                                                                  | Type definitions                                                                                      |
 | `@cyclonedx/cyclonedx-npm`                                                                                         | SBOM on every build (ADR §2 rule 11)                                                                  |
+
+### Added by F-1d (Aegean design system, app shell, i18n, formatters)
+
+Approved in `orchestration/DECISIONS.md` D-FE-01. Versions are exact.
+
+| Package | Version | Reason |
+| --- | --- | --- |
+| `react-aria-components` | 1.21.1 | React Aria's component layer (same release train as `react-aria` 3.52.1): the single primitive library for every design-system control |
+| `@tanstack/react-table` | 8.21.3 | Data table sorting, column pinning, grouping and resizing, which React Aria's Table lacks; v8 is the version the design guide specifies |
+| `@tanstack/react-virtual` | 3.14.13 | Virtualised queues and tables (100k rows at 60 fps) |
+| `lucide-react` | 1.52.0 | Icon set named by the guide's status map and module icons (ISC) |
+| `storybook`, `@storybook/react-vite`, `@storybook/addon-a11y` (dev) | 10.6.1 | Component workbench; axe runs on every story; light/dark, el/en and density toolbars |
+| `@testing-library/user-event` (dev) | 14.6.7 | Realistic keyboard and pointer interaction in component tests |
+| `axe-core` (dev) | 4.14.0 | Accessibility assertions in Vitest (`src/test/axe.ts`) |
+
+Fonts are not npm dependencies: Inter, Noto Sans and JetBrains Mono WOFF2 subsets (SIL OFL 1.1, from the
+Fontsource 5.3.0 builds) are vendored in `src/design-system/fonts/` with their licence files, so nothing is
+fetched from a font CDN at runtime (GDPR).
+
+| Script | What it does |
+| --- | --- |
+| `npm run lint:css` | Stylelint: no raw colours or off-token spacing, radius, z-index, motion or type values |
+| `npm run lint:i18n` | Fails when a translation key used in code is missing in Greek or English, or a message is not valid ICU |
+| `npm run tokens:gen` | Regenerates `src/design-system/tokens/token-names.ts` after a token change |
+| `npm run storybook` / `build-storybook` | Component workbench on port 6006 / static build to `storybook-static/` |

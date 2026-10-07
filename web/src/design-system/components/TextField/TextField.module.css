@@ -1,0 +1,335 @@
+/*
+ * Text input (Part 2 §4.2). MI-01 hover (border, 100 ms), MI-03 focus (1 px border.focus + 3 px halo on any
+ * focus), MI-10 copy confirm, MI-14 field error. The halo is a pseudo-element whose opacity animates.
+ */
+.root {
+  display: block;
+  min-inline-size: 0;
+}
+
+.control {
+  --_border: var(--color-border-control);
+  --_halo: var(--color-state-focus-halo);
+  --_fill: var(--color-surface-sheet);
+  --_height: var(--size-control-md);
+
+  position: relative;
+  display: flex;
+  gap: var(--space-1_5);
+  align-items: center;
+  min-block-size: var(--_height);
+  padding: var(--space-0) var(--space-inset-control-x);
+  border: var(--border-width-hairline) solid var(--_border);
+  border-radius: var(--radius-md);
+  background-color: var(--_fill);
+  color: var(--color-text-primary);
+  transition:
+    border-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+/* Focus halo (0 0 0 3px), shown on any focus, not only :focus-visible. */
+.control::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--border-width-hairline) * -1);
+  border-radius: inherit;
+  box-shadow: 0 0 0 calc(var(--space-0_5) + var(--space-px)) var(--_halo);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.control[data-size='sm'] {
+  --_height: var(--size-control-sm);
+}
+
+.control[data-size='lg'] {
+  --_height: var(--size-control-lg);
+}
+
+@media (hover: hover) {
+  .control:hover {
+    --_border: var(--color-border-control-hover);
+  }
+}
+
+.control:focus-within {
+  --_border: var(--color-border-focus);
+}
+
+.control:focus-within::after {
+  opacity: 1;
+}
+
+.input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  align-self: stretch;
+  padding: var(--space-1) var(--space-0);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-text-placeholder);
+  opacity: 1;
+}
+
+:global([data-density='comfortable']) .input {
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+/* Touch: 16 px text stops iOS zoom. */
+@media (pointer: coarse) {
+  .input {
+    font: var(--type-body-lg);
+    letter-spacing: var(--type-body-lg-tracking);
+  }
+}
+
+/* Textarea: 3 → 12 rows, vertical resize only. */
+.control[data-multiline] {
+  align-items: flex-start;
+  padding-block: var(--space-0);
+}
+
+.control[data-multiline] .input {
+  min-block-size: calc(3lh + var(--space-1_5) * 2);
+  max-block-size: calc(12lh + var(--space-1_5) * 2);
+  padding-block: var(--space-1_5);
+  resize: vertical;
+  field-sizing: content;
+}
+
+.control[data-multiline] .statusIcon,
+.control[data-multiline] .spinner,
+.control[data-multiline] .aiBadge,
+.control[data-multiline] .iconButton {
+  margin-block-start: var(--space-1_5);
+}
+
+.control[data-mono] .input {
+  font: var(--type-mono);
+  letter-spacing: var(--type-mono-tracking);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.leadingIcon {
+  flex: none;
+  color: var(--color-text-tertiary);
+}
+
+.adornment {
+  flex: none;
+  color: var(--color-text-secondary);
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.statusIcon {
+  flex: none;
+  color: var(--color-status-danger-fg);
+  animation: icon-in var(--motion-duration-feedback-lg) var(--motion-ease-enter) both;
+}
+
+.spinner {
+  display: inline-grid;
+  flex: none;
+  color: var(--color-text-secondary);
+}
+
+.count {
+  flex: none;
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+  letter-spacing: var(--type-caption-tracking);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Error: 2 px danger (1 px border + 1 px inset shadow, so nothing shifts) and a danger halo. */
+.control[data-invalid] {
+  --_border: var(--color-status-danger-solid);
+  --_halo: var(--color-danger-halo);
+
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-status-danger-solid);
+}
+
+/* Warning (soft): border and message, never blocks. */
+.control[data-warning] {
+  --_border: var(--color-status-warning-solid);
+}
+
+.control[data-loading] .input {
+  cursor: progress;
+}
+
+/* Disabled: disabled fill, subtle border; with a reason it stays focusable (aria-disabled). */
+.control[data-disabled] {
+  --_border: var(--color-border-subtle);
+  --_fill: var(--color-interactive-disabled-bg);
+
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.control[data-disabled] .input {
+  cursor: not-allowed;
+}
+
+.control[data-disabled]:focus-within {
+  --_border: var(--color-border-focus);
+}
+
+/* Read-only: value as text, no border or fill; padding kept so columns align. */
+.control[data-readonly] {
+  --_border: transparent;
+  --_fill: transparent;
+}
+
+.control[data-readonly]:focus-within {
+  --_border: var(--color-border-focus);
+}
+
+/* AI-suggested: 1 px iris gradient border, value in ai.fg italic until accepted. */
+.control[data-ai] {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--_fill), var(--_fill)) padding-box,
+    var(--gradient-iris) border-box;
+}
+
+.control[data-ai] .input {
+  color: var(--color-status-ai-fg);
+  font-style: italic;
+}
+
+.control[data-ai]:focus-within {
+  background:
+    linear-gradient(var(--_fill), var(--_fill)) padding-box,
+    var(--gradient-iris) border-box;
+}
+
+.iconButton,
+.aiBadge {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: var(--size-control-sm);
+  block-size: var(--size-control-sm);
+  margin-inline-end: calc(var(--space-1) * -1);
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    color var(--motion-duration-feedback-sm) var(--motion-ease-feedback),
+    opacity var(--motion-duration-feedback-sm) var(--motion-ease-feedback);
+}
+
+.iconButton[data-hovered],
+.aiBadge[data-hovered] {
+  background-color: var(--color-interactive-ghost-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.iconButton[data-pressed] {
+  background-color: var(--color-interactive-ghost-bg-pressed);
+}
+
+.iconButton[data-focus-visible],
+.aiBadge[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.aiBadge {
+  background-color: var(--color-status-ai-bg);
+  color: var(--color-status-ai-fg);
+}
+
+/* Copy appears on hover or focus (hover is never required: focus reveals it too). */
+.copyButton {
+  opacity: 0;
+}
+
+.control:hover .copyButton,
+.control:focus-within .copyButton,
+.copyButton[data-copied] {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .copyButton {
+    opacity: 1;
+  }
+}
+
+/* MI-10: copy → check morph (scale 0.6 → 1, rotate −15° → 0). */
+.copyButton[data-copied] {
+  color: var(--color-status-success-fg);
+}
+
+.copyButton[data-copied] .copyIcon {
+  animation: copied var(--motion-duration-feedback-lg) var(--motion-ease-enter) both;
+}
+
+@keyframes copied {
+  from {
+    transform: scale(0.6) rotate(-15deg);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes icon-in {
+  from {
+    transform: scale(0.8);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .control {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
+  .control:focus-within {
+    outline: var(--focus-ring-width) solid Highlight;
+  }
+
+  .control[data-invalid] {
+    border-color: Mark;
+    box-shadow: inset 0 0 0 var(--border-width-hairline) Mark;
+  }
+
+  .control[data-disabled] {
+    border-color: GrayText;
+    color: GrayText;
+  }
+
+  .control[data-ai] {
+    border-color: Highlight;
+    background: Canvas;
+  }
+
+  .statusIcon {
+    color: CanvasText;
+  }
+}

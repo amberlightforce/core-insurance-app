@@ -1,0 +1,75 @@
+/* Error summary (danger banner, Part 2 §4.22 / §4.2): opaque, never glass; focusable on submit failure. */
+.summary {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width-hairline) solid var(--color-status-danger-border);
+  border-inline-start: var(--border-width-accent) solid var(--color-status-danger-solid);
+  border-radius: var(--radius-md);
+  background-color: var(--color-status-danger-bg);
+  color: var(--color-text-primary);
+  animation: summary-in var(--motion-duration-transition-sm) var(--motion-ease-enter) both;
+}
+
+.summary:focus {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.icon {
+  flex: none;
+  color: var(--color-status-danger-fg);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-1_5);
+  min-inline-size: 0;
+}
+
+.title {
+  color: var(--color-status-danger-fg);
+  font: var(--type-heading-4);
+  letter-spacing: var(--type-heading-4-tracking);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-1);
+  padding-inline-start: var(--space-4);
+  list-style: disc;
+  font: var(--type-body-compact);
+  letter-spacing: var(--type-body-compact-tracking);
+}
+
+.link {
+  color: var(--color-text-link);
+}
+
+.link:hover {
+  color: var(--color-text-link-hover);
+}
+
+@keyframes summary-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--space-1) * -1));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .summary {
+    border-color: CanvasText;
+  }
+
+  .icon,
+  .title {
+    color: CanvasText;
+  }
+}
