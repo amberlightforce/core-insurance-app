@@ -15,8 +15,9 @@ public interface IBillingInvoiceService
     /// <remarks>
     /// <para>Operation bil.Invoice.get (query; HTTP GET /api/bil/v1/invoices/{id}).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-067, REQ-BIL-086, REQ-BIL-087, REQ-BIL-088, REQ-BIL-098 (SL-BIL). Wave W5.</para>
     /// <para>Exposure: ui; consumers: DOC.</para>
+    /// <para>Errors: BIL-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     /// <param name="id">Identifier of the Invoice (PRD input: "ids")</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.InvoiceGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);
@@ -25,10 +26,13 @@ public interface IBillingInvoiceService
     /// <remarks>
     /// <para>Operation bil.Invoice.list (query; HTTP GET /api/bil/v1/invoices).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-086, REQ-BIL-087 (SL-BIL). Wave W5.</para>
     /// <para>Exposure: ui; consumers: DOC.</para>
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.InvoiceListPage> ListAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="billingAccountId">Invoices of this billing account</param>
+    /// <param name="policyId">Invoices of this policy</param>
+    /// <param name="policyTermId">Invoices of this policy term</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.InvoiceListPage> ListAsync(string? cursor = null, int? limit = null, global::CoreIns.SharedKernel.Identifiers.BillingAccountId? billingAccountId = null, global::CoreIns.SharedKernel.Identifiers.PolicyId? policyId = null, global::CoreIns.SharedKernel.Identifiers.PolicyTermId? policyTermId = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

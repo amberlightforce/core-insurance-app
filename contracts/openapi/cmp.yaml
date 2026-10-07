@@ -59,7 +59,7 @@ paths:
       - W5-CMP-01
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-CMP-001, REQ-CMP-030..033
+      x-typed: REQ-CMP-001, REQ-CMP-030..033, REQ-CMP-038, REQ-CMP-046 (SL-BIL stub channel)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -71,6 +71,10 @@ paths:
       - CLM
       x-permission: cmp.FiscalDocument.request
       x-error-codes:
+      - code: CMP-ERR-VALIDATION
+        status: 422
+      - code: CMP-ERR-TRANSPORT-UNAVAILABLE
+        status: 503
       - code: CMP-ERR-FISCAL-TOTAL
         status: 422
       - code: CMP-ERR-SOURCE-UNKNOWN
@@ -134,6 +138,7 @@ paths:
       - W5-CMP-01
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-CMP-054 (SL-BIL)
       x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
@@ -6360,14 +6365,105 @@ components:
       description: 'Typed from REQ-CMP-001, REQ-CMP-030..033. PRD outputs: "fiscal document id, status"'
     FiscalDocumentGetResponse:
       type: object
-      description: 'cmp.FiscalDocument.get result. PRD outputs: "document, identifiers"'
+      description: 'Typed from REQ-CMP-054. PRD outputs: "document, identifiers"'
       properties:
         document:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "document"'
+          $ref: '#/components/schemas/FiscalDocumentView'
         identifiers:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "identifiers"'
+          $ref: '#/components/schemas/FiscalDocumentIdentifiers'
+      required:
+      - document
+      - identifiers
+    FiscalDocumentView:
+      type: object
+      description: A fiscal document requested by a source module (REQ-CMP-030, REQ-CMP-031)
+      properties:
+        fiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - PENDING
+          - REGISTERED
+          - REJECTED
+        sourceType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        sourceId:
+          $ref: ../events/common.schema.json#/$defs/Text
+        role:
+          type: string
+          enum:
+          - ISSUE
+          - CREDIT
+          - CANCELLATION
+        revision:
+          $ref: ../events/common.schema.json#/$defs/NonNegativeInt
+        documentType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Fiscal document type. A placeholder while the myDATA document types are open (OQ-012); never an AADE code
+        documentTypeIsPlaceholder:
+          type: boolean
+        issueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        counterpartyPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+        lines:
+          type: array
+          items:
+            type: object
+            properties:
+              fiscalCategoryKey:
+                $ref: ../events/common.schema.json#/$defs/Code
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+              chargeId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+            required:
+            - fiscalCategoryKey
+            - amount
+        rejectionCodes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - fiscalDocumentId
+      - status
+      - sourceType
+      - sourceId
+      - role
+      - revision
+      - documentType
+      - documentTypeIsPlaceholder
+      - issueDate
+      - counterpartyPartyId
+      - total
+      - lines
+    FiscalDocumentIdentifiers:
+      type: object
+      description: Identifiers CMP assigned and the channel returned (REQ-CMP-038, REQ-CMP-046)
+      properties:
+        series:
+          $ref: ../events/common.schema.json#/$defs/Text
+        number:
+          $ref: ../events/common.schema.json#/$defs/Text
+        mark:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Registration id from the channel (AADE MARK); synthetic when the channel is the stub
+        uid:
+          $ref: ../events/common.schema.json#/$defs/Text
+        qrPayloadRef:
+          $ref: ../events/common.schema.json#/$defs/Text
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Channel that registered the document; MYDATA-STUB is the slice stub (no external call)
+        stub:
+          type: boolean
+          description: True when the identifiers are synthetic (stub channel); never valid fiscal evidence
+      required:
+      - channel
+      - stub
     FiscalDocumentListBySourceItem:
       type: object
       description: 'cmp.FiscalDocument.listBySource result. PRD outputs: "documents"'

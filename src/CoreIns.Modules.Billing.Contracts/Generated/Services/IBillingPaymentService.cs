@@ -15,10 +15,10 @@ public interface IBillingPaymentService
     /// <remarks>
     /// <para>Operation bil.Payment.take (command; HTTP POST /api/bil/v1/payments/take).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-004, REQ-BIL-126, REQ-BIL-127, REQ-BIL-129, REQ-BIL-130, REQ-BIL-135 (SL-BIL, bank transfer and cashier receipts). Wave W5.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: BIL-ERR-METHOD-UNAVAILABLE (503), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: BIL-ERR-VALIDATION (422), BIL-ERR-NOT-FOUND (404), BIL-ERR-CURRENCY (422), BIL-ERR-METHOD-NOT-ALLOWED (422), BIL-ERR-METHOD-UNAVAILABLE (503), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.PaymentTakeResponse> TakeAsync(global::CoreIns.Modules.Billing.Contracts.Api.PaymentTakeRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

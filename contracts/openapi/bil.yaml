@@ -136,6 +136,7 @@ paths:
       - W5-BIL-01
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-001, REQ-BIL-030, REQ-BIL-031 (SL-BIL)
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -154,6 +155,8 @@ paths:
       - MCP tool billing_status
       x-permission: bil.BillingAccount.get
       x-error-codes:
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
       - code: BIL-ERR-BALANCE-NOT-ZERO
         status: 422
       - code: BIL-ERR-PAYER-ROLE
@@ -1118,6 +1121,7 @@ paths:
       - W5-BIL-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-067, REQ-BIL-086, REQ-BIL-087, REQ-BIL-088, REQ-BIL-098 (SL-BIL)
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1128,7 +1132,9 @@ paths:
       x-consumers:
       - DOC
       x-permission: bil.Invoice.get
-      x-error-codes: []
+      x-error-codes:
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-06 §9.1 l.1787
       parameters:
@@ -1175,6 +1181,7 @@ paths:
       - W5-BIL-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-086, REQ-BIL-087 (SL-BIL)
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -1193,6 +1200,24 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: billingAccountId
+        in: query
+        required: false
+        description: Invoices of this billing account
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: policyId
+        in: query
+        required: false
+        description: Invoices of this policy
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: policyTermId
+        in: query
+        required: false
+        description: Invoices of this policy term
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -2127,6 +2152,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-004, REQ-BIL-126, REQ-BIL-127, REQ-BIL-129, REQ-BIL-130, REQ-BIL-135 (SL-BIL, bank transfer and cashier receipts)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -2141,6 +2167,14 @@ paths:
       - MCP tool payment_link_create
       x-permission: bil.Payment.take
       x-error-codes:
+      - code: BIL-ERR-VALIDATION
+        status: 422
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-CURRENCY
+        status: 422
+      - code: BIL-ERR-METHOD-NOT-ALLOWED
+        status: 422
       - code: BIL-ERR-METHOD-UNAVAILABLE
         status: 503
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
@@ -2205,6 +2239,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-004, REQ-BIL-126 (SL-BIL)
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2215,7 +2250,9 @@ paths:
       x-consumers:
       - DOC
       x-permission: bil.Receipt.get
-      x-error-codes: []
+      x-error-codes:
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-06 §9.1 l.1794
       parameters:
@@ -2343,6 +2380,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-130, REQ-BIL-136 (SL-BIL, whole open amount per invoice)
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
@@ -2352,6 +2390,16 @@ paths:
       - ui
       x-permission: bil.Allocation.allocate
       x-error-codes:
+      - code: BIL-ERR-VALIDATION
+        status: 422
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-AMOUNT-MISMATCH
+        status: 422
+      - code: BIL-ERR-CURRENCY
+        status: 422
+      - code: BIL-ERR-STALE
+        status: 409
       - code: BIL-ERR-OVER-ALLOCATION
         status: 422
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
@@ -5998,14 +6046,113 @@ components:
           description: 'PRD: "balances by state"'
     BillingAccountGetResponse:
       type: object
-      description: 'bil.BillingAccount.get result. PRD outputs: "account, balances by state"'
+      description: 'Typed from REQ-BIL-001, REQ-BIL-030. PRD outputs: "account, balances by state". Balances are sums of
+        the account sub-ledger lines per money state (REQ-BIL-001 acceptance).'
       properties:
         account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
+          $ref: '#/components/schemas/BillingAccountView'
         balancesByState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances by state"'
+          $ref: '#/components/schemas/BillingAccountBalances'
+      required:
+      - account
+      - balancesByState
+    BillingAccountView:
+      type: object
+      description: A billing account with its policy terms and plan instances (REQ-BIL-001, REQ-BIL-030, REQ-BIL-052)
+      properties:
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: Billing account number from PLT numbering (scheme BILLING_ACCOUNT, REQ-BIL-030)
+        payerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PTY party of the payer (P1 reference, no personal data)
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - SUSPENDED
+          - CLOSING
+          - CLOSED
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingTermView'
+      required:
+      - billingAccountId
+      - accountNumber
+      - payerPartyId
+      - currency
+      - status
+      - createdAt
+      - terms
+    BillingTermView:
+      type: object
+      description: A policy term attached to the account with its plan instance (REQ-BIL-052)
+      properties:
+        policyTermId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        termNumber:
+          $ref: ../events/common.schema.json#/$defs/NonNegativeInt
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        planCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Payment plan code (SL-BIL serves ANNUAL only, D-SLC-10c)
+        billMode:
+          type: string
+          enum:
+          - DIRECT_BILL
+          - AGENCY_BILL
+        termPeriod:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+      required:
+      - policyTermId
+      - policyId
+      - policyNumber
+      - termNumber
+      - productCode
+      - planCode
+      - billMode
+      - termPeriod
+    BillingAccountBalances:
+      type: object
+      description: Balances by money state, derived from the sub-ledger lines of the account (REQ-BIL-001, REQ-BIL-285)
+      properties:
+        writtenUnbilled:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: LA-01 written unbilled receivable
+        billed:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: LA-02 billed receivable still open
+        overdue:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Open amount of Overdue invoices
+        collected:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Cash received on the account (LA-10 debits)
+        unapplied:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: LA-11 suspense / unapplied cash of the account
+        credit:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: LA-12 refunds payable / customer credit
+      required:
+      - writtenUnbilled
+      - billed
+      - overdue
+      - collected
+      - unapplied
+      - credit
     BillingAccountSearchItem:
       type: object
       description: 'bil.BillingAccount.search result. PRD outputs: "account, balances by state"'
@@ -6384,36 +6531,230 @@ components:
       description: 'Typed from REQ-BIL-055. PRD outputs: "status, amount, reference/QR/link"'
     InvoiceGetResponse:
       type: object
-      description: 'bil.Invoice.get result. PRD outputs: "invoice with items, allocations, fiscal and delivery status"'
+      description: 'Typed from REQ-BIL-067, REQ-BIL-086..088, REQ-BIL-098. PRD outputs: "invoice with items, allocations,
+        fiscal and delivery status". An invoice is a non-fiscal payment demand («ειδοποίηση πληρωμής», never «τιμολόγιο», D3).'
       properties:
+        invoice:
+          $ref: '#/components/schemas/InvoiceView'
         invoiceItems:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "invoice with items"'
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItemView'
         allocations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "allocations"'
+          type: array
+          items:
+            $ref: '#/components/schemas/AllocationView'
         fiscalStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "fiscal and delivery status"'
+          $ref: '#/components/schemas/InvoiceFiscalStatus'
         deliveryStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "fiscal and delivery status"'
+          type: string
+          enum:
+          - NOT_REQUESTED
+          description: DOC rendering and delivery are not wired in SL-BIL (REQ-BIL-089 open)
+      required:
+      - invoice
+      - invoiceItems
+      - allocations
+      - fiscalStatus
+      - deliveryStatus
+    InvoiceView:
+      type: object
+      description: Invoice header (REQ-BIL-086, REQ-BIL-087)
+      properties:
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        invoiceNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: Number from the non-fiscal gapless PLT series INVOICE (REQ-BIL-086)
+        kind:
+          type: string
+          enum:
+          - INVOICE
+          - CREDIT_NOTE
+        state:
+          type: string
+          enum:
+          - PLANNED
+          - BILLED
+          - DUE
+          - PAID
+          - PARTIALLY_PAID
+          - OVERDUE
+          - WRITTEN_OFF
+          - REVERSED
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyTermId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Source POL transaction of the invoiced charges
+        issueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        method:
+          $ref: ../events/common.schema.json#/$defs/Code
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+        paid:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Sum of allocations
+        open:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: total − paid
+        totalsByCategory:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/CategoryTotal
+      required:
+      - invoiceId
+      - invoiceNumber
+      - kind
+      - state
+      - billingAccountId
+      - policyId
+      - policyTermId
+      - transactionId
+      - issueDate
+      - dueDate
+      - method
+      - total
+      - paid
+      - open
+      - totalsByCategory
+    InvoiceItemView:
+      type: object
+      description: Invoice item traced to its POL charge (REQ-BIL-067)
+      properties:
+        invoiceItemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        chargeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        elementLocator:
+          $ref: ../events/common.schema.json#/$defs/Text
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+        fiscalCategoryKey:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: PFC fiscal-category key of the charge type (REQ-PFC-121)
+        validPeriod:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        open:
+          $ref: ../events/common.schema.json#/$defs/Money
+        state:
+          type: string
+          enum:
+          - PLANNED
+          - BILLED
+          - OPEN
+          - SETTLED
+          - CANCELLED
+          - WRITTEN_OFF
+      required:
+      - invoiceItemId
+      - chargeId
+      - transactionId
+      - elementLocator
+      - coverageCode
+      - chargeType
+      - chargeCategory
+      - validPeriod
+      - amount
+      - open
+      - state
+    AllocationView:
+      type: object
+      description: One allocation row of a receipt to an invoice item (REQ-BIL-130)
+      properties:
+        allocationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        invoiceItemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        ruleId:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Matching or allocation rule that produced the row (e.g. REFERENCED_INVOICE, UNIQUE_OPEN_AMOUNT, MANUAL)
+        source:
+          type: string
+          enum:
+          - RULE
+          - MANUAL
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - allocationId
+      - receiptId
+      - invoiceId
+      - invoiceItemId
+      - amount
+      - ruleId
+      - source
+      - recordedAt
+    InvoiceFiscalStatus:
+      type: object
+      description: The fiscal document CMP issued for the invoiced transaction (REQ-BIL-086, REQ-BIL-096, REQ-BIL-098). CMP
+        is the sole fiscal issuer (D3); BIL stores its references for display.
+      properties:
+        status:
+          type: string
+          enum:
+          - NOT_REQUESTED
+          - PENDING
+          - REGISTERED
+          - REJECTED
+          - REQUEST_FAILED
+        fiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        triggerPoint:
+          type: string
+          enum:
+          - TRANSACTION
+          - INVOICE
+        series:
+          $ref: ../events/common.schema.json#/$defs/Text
+        number:
+          $ref: ../events/common.schema.json#/$defs/Text
+        mark:
+          $ref: ../events/common.schema.json#/$defs/Text
+        uid:
+          $ref: ../events/common.schema.json#/$defs/Text
+        documentType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Placeholder until the myDATA document types are settled (OQ-012); never an AADE code
+        rejectionCodes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - status
     InvoiceListItem:
       type: object
-      description: 'bil.Invoice.list result. PRD outputs: "invoice with items, allocations, fiscal and delivery status"'
+      description: 'Typed from REQ-BIL-086, REQ-BIL-087. PRD outputs: "invoice with items, allocations, fiscal and delivery
+        status" (the list carries the header and fiscal status; items and allocations come from bil.Invoice.get)'
       properties:
-        invoiceItems:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "invoice with items"'
-        allocations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "allocations"'
+        invoice:
+          $ref: '#/components/schemas/InvoiceView'
         fiscalStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "fiscal and delivery status"'
-        deliveryStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "fiscal and delivery status"'
+          $ref: '#/components/schemas/InvoiceFiscalStatus'
+      required:
+      - invoice
+      - fiscalStatus
     InvoiceListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -6733,40 +7074,132 @@ components:
           description: 'PRD: "mandate"'
     PaymentTakeRequest:
       type: object
-      description: 'bil.Payment.take request. PRD inputs: "account, amount, method"'
+      description: 'Typed from REQ-BIL-004, REQ-BIL-126, REQ-BIL-127. PRD inputs: "account, amount, method". SL-BIL records
+        money already received by bank transfer or at a cashier; card and link payments need the acquirer (OI-BIL-07).'
       properties:
-        account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amount"'
+          description: Amount received, in the account currency, rounded to minor units
         method:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "method"'
+          type: string
+          enum:
+          - BANK_TRANSFER
+          - CASHIER
+        valueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Value date of the money; defaults to today's business date
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Invoice the payer referenced (matching rule REFERENCED_INVOICE, REQ-BIL-127)
+        bankReference:
+          type: string
+          minLength: 1
+          maxLength: 140
+          description: Bank transaction reference (no personal data)
+        autoAllocate:
+          type: boolean
+          default: true
+          description: Match and allocate deterministically at once (REQ-BIL-127, REQ-BIL-129)
+      required:
+      - billingAccountId
+      - amount
+      - method
     PaymentTakeResponse:
       type: object
-      description: 'bil.Payment.take result. PRD outputs: "receipt or link, allocation preview"'
-      properties:
-        receiptOrLink:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or link"'
-        allocationPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "allocation preview"'
-    ReceiptGetResponse:
-      type: object
-      description: 'bil.Receipt.get result. PRD outputs: "receipt, allocations, reversals"'
+      description: 'Typed from REQ-BIL-004, REQ-BIL-129, REQ-BIL-135. PRD outputs: "receipt or link, allocation preview".
+        An amount that does not equal the matched invoice''s open amount is never allocated: it stays as unapplied cash in
+        suspense with a reason (REQ-BIL-135).'
       properties:
         receipt:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt"'
+          $ref: '#/components/schemas/ReceiptView'
         allocations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "allocations"'
+          type: array
+          items:
+            $ref: '#/components/schemas/AllocationView'
+        allocationOutcome:
+          type: string
+          enum:
+          - ALLOCATED
+          - SUSPENSE
+          - NOT_REQUESTED
+      required:
+      - receipt
+      - allocations
+      - allocationOutcome
+    ReceiptView:
+      type: object
+      description: A receipt (incoming payment, REQ-BIL-126)
+      properties:
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        receiptNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          type: string
+          enum:
+          - RECEIVED
+          - ALLOCATED
+          - PARTIALLY_ALLOCATED
+          - SUSPENSE
+          - REVERSED
+          - REFUNDED
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+        method:
+          $ref: ../events/common.schema.json#/$defs/Code
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        allocated:
+          $ref: ../events/common.schema.json#/$defs/Money
+        unallocated:
+          $ref: ../events/common.schema.json#/$defs/Money
+        valueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        accountingDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        suspenseReason:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Why the receipt is unapplied (REQ-BIL-135), e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH, CONCURRENT_ALLOCATION
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - receiptId
+      - receiptNumber
+      - billingAccountId
+      - state
+      - channel
+      - method
+      - amount
+      - allocated
+      - unallocated
+      - valueDate
+      - accountingDate
+      - recordedAt
+    ReceiptGetResponse:
+      type: object
+      description: 'Typed from REQ-BIL-004, REQ-BIL-126. PRD outputs: "receipt, allocations, reversals"'
+      properties:
+        receipt:
+          $ref: '#/components/schemas/ReceiptView'
+        allocations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AllocationView'
         reversals:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reversals"'
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Reversals (none in SL-BIL)
+      required:
+      - receipt
+      - allocations
+      - reversals
     ReceiptListItem:
       type: object
       description: 'bil.Receipt.list result. PRD outputs: "receipt, allocations, reversals"'
@@ -6792,31 +7225,40 @@ components:
       description: Page of bil.Receipt.list results (cursor pagination, contract §3.5.5)
     AllocationAllocateRequest:
       type: object
-      description: 'bil.Allocation.allocate request. PRD inputs: "receipt or suspense, lines"'
+      description: 'Typed from REQ-BIL-130, REQ-BIL-136. PRD inputs: "receipt or suspense, lines". SL-BIL allocates a
+        receipt''s unapplied cash to whole invoices: each line must equal the invoice''s open amount.'
       properties:
-        receipt:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or suspense" (optional)'
-        suspense:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or suspense" (optional)'
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         lines:
           type: array
+          minItems: 1
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
-      oneOf:
-      - required:
-        - receipt
-      - required:
-        - suspense
+            type: object
+            properties:
+              invoiceId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+            required:
+            - invoiceId
+            - amount
+      required:
+      - receiptId
+      - lines
     AllocationAllocateResponse:
       type: object
-      description: 'bil.Allocation.allocate result. PRD outputs: "allocations"'
+      description: 'Typed from REQ-BIL-130. PRD outputs: "allocations"'
       properties:
         allocations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "allocations"'
+          type: array
+          items:
+            $ref: '#/components/schemas/AllocationView'
+        receipt:
+          $ref: '#/components/schemas/ReceiptView'
+      required:
+      - allocations
+      - receipt
     AllocationUnallocateRequest:
       type: object
       description: 'bil.Allocation.unallocate request. PRD inputs: "receipt or suspense, lines"'

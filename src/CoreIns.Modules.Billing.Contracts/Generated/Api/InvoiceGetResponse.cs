@@ -4,39 +4,37 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Invoice.get result. PRD outputs: "invoice with items, allocations, fiscal and delivery status"</summary>
+/// <summary>Typed from REQ-BIL-067, REQ-BIL-086..088, REQ-BIL-098. PRD outputs: "invoice with items, allocations, fiscal and delivery status". An invoice is a non-fiscal payment demand («ειδοποίηση πληρωμής», never «τιμολόγιο», D3).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record InvoiceGetResponse
 {
-    /// <summary>PRD: "invoice with items"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'invoice'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("invoice")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.InvoiceView Invoice { get; init; }
+
+    /// <summary>Contract member 'invoiceItems'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("invoiceItems")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? InvoiceItems { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.InvoiceItemView> InvoiceItems { get; init; }
 
-    /// <summary>PRD: "allocations"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'allocations'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("allocations")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Allocations { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.AllocationView> Allocations { get; init; }
 
-    /// <summary>PRD: "fiscal and delivery status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'fiscalStatus'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("fiscalStatus")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FiscalStatus { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.InvoiceFiscalStatus FiscalStatus { get; init; }
 
-    /// <summary>PRD: "fiscal and delivery status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>DOC rendering and delivery are not wired in SL-BIL (REQ-BIL-089 open)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("deliveryStatus")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DeliveryStatus { get; init; }
+    public required DeliveryStatusValue DeliveryStatus { get; init; }
+
+    /// <summary>DOC rendering and delivery are not wired in SL-BIL (REQ-BIL-089 open)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DeliveryStatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DeliveryStatusValue
+    {
+        /// <summary><c>NOT_REQUESTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NOT_REQUESTED")]
+        NotRequested,
+    }
 }

@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.BillingAccount.get result. PRD outputs: "account, balances by state"</summary>
+/// <summary>Typed from REQ-BIL-001, REQ-BIL-030. PRD outputs: "account, balances by state". Balances are sums of the account sub-ledger lines per money state (REQ-BIL-001 acceptance).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BillingAccountGetResponse
 {
-    /// <summary>PRD: "account"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'account'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("account")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Account { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.BillingAccountView Account { get; init; }
 
-    /// <summary>PRD: "balances by state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'balancesByState'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("balancesByState")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? BalancesByState { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.BillingAccountBalances BalancesByState { get; init; }
 }

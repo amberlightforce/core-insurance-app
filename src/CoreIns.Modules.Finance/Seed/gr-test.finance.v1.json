@@ -1,0 +1,71 @@
+{
+  "seed": "gr-test.finance.v1",
+  "note": "SL-FIN reference data for the synthetic legal entity GR-TEST. IMMUTABLE once applied by migration 'FinanceSlice': a change is a new versioned file and a new rule-set version. Account codes are the illustrative codes of the PRD-09 §7.1.4 reference chart or technical placeholders; they are NOT the Greek statutory (ΕΛΠ) chart (OI-FIN-11 open).",
+  "legalEntity": "GR-TEST",
+  "bookProfile": {
+    "functionalCurrency": "EUR",
+    "statutoryBook": "IFRS17",
+    "activeBooks": [ "IFRS17" ],
+    "source": "PRD-09 BR-FIN-001, A-2 (EUR functional). SOLVENCY_II is active per BR-FIN-001 but has no rule set in the slice (W5-FIN-01)."
+  },
+  "chart": {
+    "book": "IFRS17",
+    "accounts": [
+      { "code": "GL-1110", "el": "Καταθέσεις όψεως", "en": "Cash at bank", "type": "ASSET", "normalBalance": "DEBIT", "origin": "PRD09_ILLUSTRATIVE", "source": "PRD-09 §7.1.4" },
+      { "code": "GL-1210", "el": "Απαιτήσεις από ασφαλισμένους", "en": "Premium receivable – policyholders", "type": "ASSET", "normalBalance": "DEBIT", "origin": "PRD09_ILLUSTRATIVE", "source": "PRD-09 §7.1.4 (billed receivable, mirrors BIL LA-02)" },
+      { "code": "GL-1215", "el": "Εγγεγραμμένα ασφάλιστρα προς τιμολόγηση (τεχνικός κωδικός)", "en": "Premium receivable – written, not yet billed (technical placeholder)", "type": "ASSET", "normalBalance": "DEBIT", "origin": "TECHNICAL_PLACEHOLDER", "source": "Not in PRD-09 §7.1.4; mirrors BIL LA-01 (PRD-06 §7.1.4)" },
+      { "code": "GL-2110", "el": "ΥΕΚ εκτός συνιστώσας ζημίας", "en": "LRC – excluding loss component", "type": "LIABILITY", "normalBalance": "CREDIT", "origin": "PRD09_ILLUSTRATIVE", "systemOnly": true, "source": "PRD-09 §7.1.4; written premium in the IFRS17 book per §4.11" },
+      { "code": "GL-2410", "el": "Φόρος ασφαλίστρων πληρωτέος", "en": "IPT payable", "type": "LIABILITY", "normalBalance": "CREDIT", "origin": "PRD09_ILLUSTRATIVE", "source": "PRD-09 §7.1.4 (mirrors BIL LA-06)" },
+      { "code": "GL-2411", "el": "Φόρος ασφαλίστρων εγγεγραμμένος μη απαιτητός (τεχνικός κωδικός)", "en": "IPT written, not yet due (technical placeholder)", "type": "LIABILITY", "normalBalance": "CREDIT", "origin": "TECHNICAL_PLACEHOLDER", "source": "Not in PRD-09 §7.1.4; mirrors BIL LA-27 (liability point DUE, REQ-FIN-178)" },
+      { "code": "GL-2420", "el": "Εισφορές πληρωτέες", "en": "Levy payable", "type": "LIABILITY", "normalBalance": "CREDIT", "origin": "PRD09_ILLUSTRATIVE", "source": "PRD-09 §7.1.4 (mirrors BIL LA-07)" },
+      { "code": "GL-2425", "el": "Χαρτόσημο εισφοράς πληρωτέο", "en": "Stamp duty on levy payable", "type": "LIABILITY", "normalBalance": "CREDIT", "origin": "PRD09_ILLUSTRATIVE", "source": "PRD-09 §7.1.4 (Greece pack extension)" },
+      { "code": "GL-2540", "el": "Ενδιάμεσος λογαριασμός μη κατανεμημένων εισπράξεων (τεχνικός κωδικός)", "en": "Unallocated receipts clearing (technical placeholder)", "type": "CLEARING", "normalBalance": "CREDIT", "origin": "TECHNICAL_PLACEHOLDER", "source": "Not in PRD-09 §7.1.4; mirrors BIL LA-11 suspense, which BIL owns (PRD-09 §1.4)" },
+      { "code": "GL-6150", "el": "Έξοδο εισφορών (μερίδιο ασφαλιστή)", "en": "Levy expense (insurer share)", "type": "EXPENSE", "normalBalance": "DEBIT", "origin": "PRD09_ILLUSTRATIVE", "source": "PRD-09 §7.1.4 (mirrors BIL LA-08)" }
+    ]
+  },
+  "derivations": {
+    "book": "IFRS17",
+    "validFrom": "2026-01-01",
+    "note": "PFC GL keys proposed by SL-PFC (D-SLC-10b), confirmed by SL-FIN: each resolves to one account of the IFRS17 chart.",
+    "rows": [
+      { "glKey": "PREM-MOTOR-MTPL", "account": "GL-2110" },
+      { "glKey": "PREM-MOTOR-OD", "account": "GL-2110" },
+      { "glKey": "PREM-MOTOR-WINDSCREEN", "account": "GL-2110" },
+      { "glKey": "TAX-IPT", "account": "GL-2410" },
+      { "glKey": "TAX-STAMP", "account": "GL-2425" },
+      { "glKey": "LEVY-AUXF-PH", "account": "GL-2420" },
+      { "glKey": "LEVY-AUXF-INS", "account": "GL-2420" }
+    ]
+  },
+  "catalogue": [
+    { "event": "bil.BillingEntryPosted", "major": 1, "relevance": "POSTING", "amountFields": "lines[].amount", "note": "Sole posting source for BIL facts (REQ-FIN-036, D-SLC-12)" },
+    { "event": "pol.PolicyBound", "major": 1, "relevance": "CONTEXT", "amountFields": "", "note": "Policy business key, product and artefact hash for line dimensions and GL-key derivation" },
+    { "event": "pol.ChargeDeltaEmitted", "major": 1, "relevance": "CONTEXT", "amountFields": "netAmount", "note": "Context and reconciliation only (REQ-FIN-036)" },
+    { "event": "bil.InvoiceIssued", "major": 1, "relevance": "CONTEXT", "amountFields": "totalsByCategory[].amount", "note": "Context and reconciliation only (REQ-FIN-036)" },
+    { "event": "bil.PaymentReceived", "major": 1, "relevance": "CONTEXT", "amountFields": "amount", "note": "Context and reconciliation only (REQ-FIN-030 acceptance)" },
+    { "event": "bil.CashAllocated", "major": 1, "relevance": "CONTEXT", "amountFields": "allocations[].amount", "note": "Context and reconciliation only (REQ-FIN-036)" }
+  ],
+  "ruleSet": {
+    "book": "IFRS17",
+    "version": 1,
+    "effectiveFrom": "2026-01-01",
+    "rules": [
+      { "code": "WR-WRITTEN-UNBILLED", "sourceEvent": "bil.BillingEntryPosted", "entryType": "WRITTEN", "sourceAccount": "LA-01", "account": "GL-1215", "el": "Εγγραφή: απαίτηση προς τιμολόγηση", "en": "Written: receivable not yet billed" },
+      { "code": "WR-PREMIUM", "sourceEvent": "bil.BillingEntryPosted", "entryType": "WRITTEN", "sourceAccount": "LA-04", "chargeCategory": "PREMIUM", "deriveFrom": "GL_KEY", "el": "Εγγραφή: εγγεγραμμένο ασφάλιστρο ανά κάλυψη", "en": "Written: premium per coverage (account from the charge type GL key)" },
+      { "code": "WR-SURCHARGE", "sourceEvent": "bil.BillingEntryPosted", "entryType": "WRITTEN", "sourceAccount": "LA-04", "chargeCategory": "SURCHARGE", "deriveFrom": "GL_KEY", "el": "Εγγραφή: επασφάλιστρο ανά κάλυψη", "en": "Written: surcharge (account from the charge type GL key)" },
+      { "code": "WR-FEE", "sourceEvent": "bil.BillingEntryPosted", "entryType": "WRITTEN", "sourceAccount": "LA-05", "chargeCategory": "FEE", "deriveFrom": "GL_KEY", "el": "Εγγραφή: δικαίωμα συμβολαίου", "en": "Written: fee (account from the charge type GL key; no fee GL key is derived yet, so a fee line is an intake exception)" },
+      { "code": "WR-TAX-NOT-DUE", "sourceEvent": "bil.BillingEntryPosted", "entryType": "WRITTEN", "sourceAccount": "LA-27", "chargeCategory": "TAX", "account": "GL-2411", "el": "Εγγραφή: φόρος εγγεγραμμένος μη απαιτητός", "en": "Written: IPT written, not yet due (liability point DUE)" },
+      { "code": "WR-TAX-PAYABLE", "sourceEvent": "bil.BillingEntryPosted", "entryType": "WRITTEN", "sourceAccount": "LA-06", "chargeCategory": "TAX", "deriveFrom": "GL_KEY", "el": "Εγγραφή: φόρος πληρωτέος", "en": "Written: tax payable (liability point WRITTEN)" },
+      { "code": "WR-LEVY-PAYABLE", "sourceEvent": "bil.BillingEntryPosted", "entryType": "WRITTEN", "sourceAccount": "LA-07", "chargeCategory": "LEVY", "deriveFrom": "GL_KEY", "el": "Εγγραφή: εισφορά πληρωτέα", "en": "Written: levy payable" },
+      { "code": "WR-LEVY-EXPENSE", "sourceEvent": "bil.BillingEntryPosted", "entryType": "WRITTEN", "sourceAccount": "LA-08", "chargeCategory": "LEVY", "account": "GL-6150", "el": "Εγγραφή: έξοδο εισφοράς ασφαλιστή", "en": "Written: insurer levy expense" },
+      { "code": "BL-BILLED", "sourceEvent": "bil.BillingEntryPosted", "entryType": "BILLED", "sourceAccount": "LA-02", "account": "GL-1210", "el": "Τιμολόγηση: απαίτηση", "en": "Billed: receivable" },
+      { "code": "BL-UNBILLED", "sourceEvent": "bil.BillingEntryPosted", "entryType": "BILLED", "sourceAccount": "LA-01", "account": "GL-1215", "el": "Τιμολόγηση: εκκαθάριση απαίτησης προς τιμολόγηση", "en": "Billed: release of the not-yet-billed receivable" },
+      { "code": "ID-NOT-DUE", "sourceEvent": "bil.BillingEntryPosted", "entryType": "IPT_DUE", "sourceAccount": "LA-27", "account": "GL-2411", "el": "Απαιτητότητα φόρου: μη απαιτητός", "en": "IPT due: release of IPT not yet due" },
+      { "code": "ID-PAYABLE", "sourceEvent": "bil.BillingEntryPosted", "entryType": "IPT_DUE", "sourceAccount": "LA-06", "deriveFrom": "GL_KEY", "el": "Απαιτητότητα φόρου: πληρωτέος", "en": "IPT due: tax payable (account from the charge type GL key)" },
+      { "code": "RC-CASH", "sourceEvent": "bil.BillingEntryPosted", "entryType": "RECEIVED", "sourceAccount": "LA-10", "account": "GL-1110", "el": "Είσπραξη: καταθέσεις", "en": "Received: cash at bank" },
+      { "code": "RC-UNALLOCATED", "sourceEvent": "bil.BillingEntryPosted", "entryType": "RECEIVED", "sourceAccount": "LA-11", "account": "GL-2540", "el": "Είσπραξη: μη κατανεμημένη", "en": "Received: unallocated receipt" },
+      { "code": "AL-UNALLOCATED", "sourceEvent": "bil.BillingEntryPosted", "entryType": "ALLOCATED", "sourceAccount": "LA-11", "account": "GL-2540", "el": "Κατανομή: εκκαθάριση μη κατανεμημένης", "en": "Allocated: release of the unallocated receipt" },
+      { "code": "AL-RECEIVABLE", "sourceEvent": "bil.BillingEntryPosted", "entryType": "ALLOCATED", "sourceAccount": "LA-02", "account": "GL-1210", "el": "Κατανομή: εξόφληση απαίτησης", "en": "Allocated: receivable settled" }
+    ]
+  }
+}
