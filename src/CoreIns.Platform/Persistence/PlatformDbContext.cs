@@ -210,7 +210,7 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
         table.HasCheckConstraint(
             $"ck_{name}_set",
             "(set_id IS NULL AND set_size IS NULL AND set_index IS NULL) OR "
-            + "(set_id IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
+            + "(set_id IS NOT NULL AND set_size IS NOT NULL AND set_index IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
         table.HasCheckConstraint($"ck_{name}_origin", "origin IN ('LIVE', 'MIGRATION', 'REPLAY')");
         table.HasCheckConstraint($"ck_{name}_classification", "data_classification IN ('P0', 'P1', 'P2', 'P3')");
         table.HasCheckConstraint($"ck_{name}_actor_kind", "actor_kind IN ('USER', 'SERVICE', 'AI_AGENT')");

@@ -140,7 +140,7 @@ namespace CoreIns.Platform.Persistence.Migrations
                     table.CheckConstraint("ck_event_archive_payload", "jsonb_typeof(payload) = 'object' AND octet_length(payload::text) <= 262144");
                     table.CheckConstraint("ck_event_archive_schema_version", "schema_version ~ '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$'");
                     table.CheckConstraint("ck_event_archive_sequence", "aggregate_sequence >= 1");
-                    table.CheckConstraint("ck_event_archive_set", "(set_id IS NULL AND set_size IS NULL AND set_index IS NULL) OR (set_id IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
+                    table.CheckConstraint("ck_event_archive_set", "(set_id IS NULL AND set_size IS NULL AND set_index IS NULL) OR (set_id IS NOT NULL AND set_size IS NOT NULL AND set_index IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
                 });
 
             migrationBuilder.CreateTable(
@@ -247,7 +247,7 @@ namespace CoreIns.Platform.Persistence.Migrations
                     table.CheckConstraint("ck_outbox_message_payload", "jsonb_typeof(payload) = 'object' AND octet_length(payload::text) <= 262144");
                     table.CheckConstraint("ck_outbox_message_schema_version", "schema_version ~ '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$'");
                     table.CheckConstraint("ck_outbox_message_sequence", "aggregate_sequence >= 1");
-                    table.CheckConstraint("ck_outbox_message_set", "(set_id IS NULL AND set_size IS NULL AND set_index IS NULL) OR (set_id IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
+                    table.CheckConstraint("ck_outbox_message_set", "(set_id IS NULL AND set_size IS NULL AND set_index IS NULL) OR (set_id IS NOT NULL AND set_size IS NOT NULL AND set_index IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
                     table.CheckConstraint("ck_outbox_message_status", "status IN ('Pending', 'Dispatched')");
                 });
 

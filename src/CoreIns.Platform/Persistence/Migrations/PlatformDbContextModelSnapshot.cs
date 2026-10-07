@@ -476,7 +476,7 @@ namespace CoreIns.Platform.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_event_archive_sequence", "aggregate_sequence >= 1");
 
-                            t.HasCheckConstraint("ck_event_archive_set", "(set_id IS NULL AND set_size IS NULL AND set_index IS NULL) OR (set_id IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
+                            t.HasCheckConstraint("ck_event_archive_set", "(set_id IS NULL AND set_size IS NULL AND set_index IS NULL) OR (set_id IS NOT NULL AND set_size IS NOT NULL AND set_index IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
                         });
                 });
 
@@ -733,7 +733,7 @@ namespace CoreIns.Platform.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_outbox_message_sequence", "aggregate_sequence >= 1");
 
-                            t.HasCheckConstraint("ck_outbox_message_set", "(set_id IS NULL AND set_size IS NULL AND set_index IS NULL) OR (set_id IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
+                            t.HasCheckConstraint("ck_outbox_message_set", "(set_id IS NULL AND set_size IS NULL AND set_index IS NULL) OR (set_id IS NOT NULL AND set_size IS NOT NULL AND set_index IS NOT NULL AND set_size >= 1 AND set_index >= 1 AND set_index <= set_size)");
 
                             t.HasCheckConstraint("ck_outbox_message_status", "status IN ('Pending', 'Dispatched')");
                         });

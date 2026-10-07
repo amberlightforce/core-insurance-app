@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Unit and property tests of CoreIns.Platform that need no database (envelope guard, authority, configuration resolve, Problem Details, clock, audit hashing). -->
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FsCheck.Xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Platform\CoreIns.Platform.csproj" />
+  </ItemGroup>
+
+</Project>

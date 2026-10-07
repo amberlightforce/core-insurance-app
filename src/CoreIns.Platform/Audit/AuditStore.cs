@@ -125,8 +125,15 @@ internal static class AuditStore
             batch.Parameters.Add(new NpgsqlParameter<DateOnly>("d", chainDate));
             batch.Parameters.Add(new NpgsqlParameter<string>("genesis", Genesis(chainDate)));
             await using var reader = await batch.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-            await reader.NextResultAsync(cancellationToken).ConfigureAwait(false);
-            await reader.ReadAsync(cancellationToken).ConfigureAwait(false);
+            while (reader.FieldCount == 0 && await reader.NextResultAsync(cancellationToken).ConfigureAwait(false))
+            {
+                // Skip the INSERT's empty result; the SELECT ... FOR UPDATE row follows.
+            }
+
+            if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            {
+                throw new InvalidOperationException("The audit chain head could not be locked.");
+            }
             sequence = reader.GetInt64(0);
             previous = reader.GetString(1).Trim();
         }
