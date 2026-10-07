@@ -1,0 +1,642 @@
+[
+  {
+    "eventId": "019235ff-90c5-770c-86cd-5c7192d4358a",
+    "eventType": "ImpactAnalysisCompleted",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "0192cbe4-f18f-7e6e-847f-8453a8b78037",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "01920cb9-d288-7f41-845f-e922c5664673",
+      "runId": "0192459b-ff26-77f1-8043-330c42e655e2"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "019204a5-ecec-7e00-8370-08abf57d035e",
+      "candidateHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "baselineHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "population": {
+        "note": "sample"
+      },
+      "metricsSummary": {
+        "note": "sample"
+      }
+    }
+  },
+  {
+    "eventId": "019270bf-9aa0-7923-85db-22e06f1de146",
+    "eventType": "ImpactAnalysisCompleted",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "019280ec-7d43-72d1-8edf-f7cc40a09561",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "0192f274-16a0-79f9-8b1b-517e0765d58c",
+      "runId": "01923bbc-a79e-7087-800e-1de90a66982f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "019211eb-6cfe-7271-8137-1ac88f202f94",
+      "candidateHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "baselineHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "population": {
+        "note": "sample"
+      },
+      "metricsSummary": {
+        "note": "sample"
+      }
+    }
+  },
+  {
+    "eventId": "019250fa-2084-717e-8470-06357f45c53d",
+    "eventType": "PricingModificationDecided",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "Job",
+    "aggregateId": "019226e2-550e-7a1a-8225-e8c6ba605c39",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "jobId": "019283b2-d8fc-78ba-8cff-0e5eb9e23df7",
+      "modificationId": "01926f22-f5e1-72a0-8394-463a2c538945"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "modificationId": "01922bf2-61fb-750f-8b75-306e2d821c54",
+      "jobId": "01922e61-a246-7ee5-8445-94b54c96dd9c",
+      "quoteVersion": 1,
+      "value": "12.50",
+      "status": "APPROVED",
+      "decidedBy": "01922fca-7cd6-7f94-8fd7-baef4c6b8766"
+    }
+  },
+  {
+    "eventId": "019274f7-e75c-793c-8c47-bd73ec67734f",
+    "eventType": "PricingModificationDecided",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "Job",
+    "aggregateId": "01929802-3d93-7b88-8270-80c57fa7abc4",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "jobId": "019231b0-f9cc-7b48-8453-119efb403efc",
+      "modificationId": "0192a9a5-53c2-7a09-84fa-a4b600b5ff9a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "modificationId": "0192b730-b8c2-73fb-8fdd-c8f6bbbadd84",
+      "jobId": "019232bd-2376-79fb-8089-a737380572e3",
+      "quoteVersion": 1,
+      "value": "12.50",
+      "status": "APPROVED",
+      "decidedBy": null
+    }
+  },
+  {
+    "eventId": "0192ebc4-ac6d-7aaa-83f7-e6db5aa9e5ff",
+    "eventType": "RateVersionActivated",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "0192da1e-efb3-7032-8c6b-5d5a45287be3",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "0192408c-cf98-7b15-826c-4b3f902b6d93"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "slot": "SAMPLE_CODE",
+      "transactionType": "SAMPLE_CODE",
+      "effectiveFrom": "2026-10-07T09:00:00Z",
+      "predecessorHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    }
+  },
+  {
+    "eventId": "019221b6-5a7d-74df-8780-f405c122c20a",
+    "eventType": "RateVersionActivated",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "01922373-6814-77c9-8851-284932656a6f",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "01925b36-0d26-7f6e-815a-f99953dd0574"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "slot": "SAMPLE_CODE",
+      "transactionType": "SAMPLE_CODE",
+      "effectiveFrom": "2026-10-07T09:00:00Z",
+      "predecessorHash": null
+    }
+  },
+  {
+    "eventId": "019294f8-eee3-73a7-80aa-a362b57bca9d",
+    "eventType": "RateVersionScheduled",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "01925900-d31f-79ce-8bdb-1d217f85eb2b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "0192c4ef-a8a0-7577-8352-da8a5f05a02a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "slot": "SAMPLE_CODE",
+      "transactionType": "SAMPLE_CODE",
+      "effectiveFrom": "2026-10-07T09:00:00Z",
+      "channelScope": [
+        "SAMPLE_CODE"
+      ],
+      "action": "SCHEDULED",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192bb8c-2f30-7d24-86db-28a80ea08631",
+    "eventType": "RateVersionScheduled",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "01927945-a52b-7e9b-8fce-b8f1da28edfa",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "01921643-e72d-7bcd-8c04-a6759eab0eec"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "slot": "SAMPLE_CODE",
+      "transactionType": "SAMPLE_CODE",
+      "effectiveFrom": "2026-10-07T09:00:00Z",
+      "channelScope": [
+        "SAMPLE_CODE"
+      ],
+      "action": "SCHEDULED",
+      "reason": null
+    }
+  },
+  {
+    "eventId": "0192b7fd-e34d-7f30-8f39-2804da8e64fd",
+    "eventType": "RateVersionWithdrawn",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "0192cbc5-10c5-7fe3-8746-d23e37377a52",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "01920bc4-d246-7d19-8025-7b7b91680924"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "withdrawnHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "reactivatedHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "slots": [
+        "SAMPLE_CODE"
+      ],
+      "reason": "SAMPLE_CODE",
+      "affectedQuoteCount": 1,
+      "affectedTransactionCount": 1
+    }
+  },
+  {
+    "eventId": "01925acc-bc3e-7ac5-8a42-41eb055134f9",
+    "eventType": "RateVersionWithdrawn",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "019283a1-f31d-7355-8221-144950f24ad4",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "0192d46e-a403-70e4-8d71-c1c4d696b184"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "withdrawnHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "reactivatedHash": null,
+      "slots": [
+        "SAMPLE_CODE"
+      ],
+      "reason": "SAMPLE_CODE",
+      "affectedQuoteCount": 1,
+      "affectedTransactionCount": 1
+    }
+  },
+  {
+    "eventId": "0192f40a-d1bd-7d13-8b5d-e496f91f0197",
+    "eventType": "RatingArtifactPublished",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "0192151a-cf23-7e01-8171-1121bdb5c6b7",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "0192d8e9-7d31-7c92-8e75-612e14aed1ab"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "label": "Sample text",
+      "slots": [
+        "SAMPLE_CODE"
+      ],
+      "compatibleProductVersions": [
+        {
+          "productCode": "SAMPLE_CODE",
+          "version": "1.0",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        }
+      ],
+      "inputSchemaVersion": "1",
+      "approvalRefs": [
+        "0192b42d-8a6d-7bfe-80c2-393c55164a16"
+      ],
+      "state": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01927b96-2b7b-724a-88ba-30f16df477a1",
+    "eventType": "RatingArtifactPublished",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "0192e6d8-43d6-7883-80ca-d1d3bad53e2a",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "019230fc-f5d8-7aff-887c-fa68e9b9235d"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "label": "Sample text",
+      "slots": [
+        "SAMPLE_CODE"
+      ],
+      "compatibleProductVersions": [
+        {
+          "productCode": "SAMPLE_CODE",
+          "version": "1.0",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        }
+      ],
+      "inputSchemaVersion": "1",
+      "approvalRefs": [
+        "0192d03c-6f9c-70be-8a29-acc20d8fd820"
+      ],
+      "state": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192324a-a62d-7904-8e97-8d409cf2fc7d",
+    "eventType": "RatingCalculated",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "Job",
+    "aggregateId": "019244c6-9ff3-78d2-804a-a403ac3d3a92",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "worksheetId": "0192b7c5-7ceb-70ab-81e3-35671489e4c8"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "ratingKey": "Sample text",
+      "quoteId": "0192e20c-6349-7925-862b-6a65687ed0f2",
+      "jobId": "019211e3-c523-7264-8a86-eccac6edcd97",
+      "transactionId": "019210e5-66a5-7d14-80c2-a3feebdea37a",
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "slot": "SAMPLE_CODE",
+      "mode": "FULL",
+      "channel": "SAMPLE_CODE",
+      "producerCode": "SAMPLE_CODE",
+      "ratingCellKey": "Sample text",
+      "levelCodes": [
+        "SAMPLE_CODE"
+      ],
+      "coveragePremiumTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "taxTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "signalCodes": [
+        "SAMPLE_CODE"
+      ],
+      "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "bindable": true
+    }
+  },
+  {
+    "eventId": "0192bc8e-0ef7-731d-85d2-4407b73ef021",
+    "eventType": "RatingCalculated",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "Job",
+    "aggregateId": "0192e292-a9d7-7756-8912-f08adc845752",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "worksheetId": "019209d0-190f-7b80-8adb-8f77f3140ef9"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "ratingKey": "Sample text",
+      "quoteId": null,
+      "jobId": null,
+      "transactionId": null,
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "slot": "SAMPLE_CODE",
+      "mode": "FULL",
+      "channel": "SAMPLE_CODE",
+      "producerCode": null,
+      "ratingCellKey": "Sample text",
+      "levelCodes": [
+        "SAMPLE_CODE"
+      ],
+      "coveragePremiumTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "taxTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "signalCodes": [
+        "SAMPLE_CODE"
+      ],
+      "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "bindable": true
+    }
+  },
+  {
+    "eventId": "0192f67c-16ec-7f1f-811f-812e18d8ccf9",
+    "eventType": "ShadowRunCompleted",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "0192e1b5-91d9-7fcd-830b-77ae81fa410a",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "019296e0-dfbd-789c-8690-57948b55b07f",
+      "runId": "019238ea-d8a2-77c3-8518-fc9ae8c5fa25"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "0192f18e-9163-7568-8890-c826f9a5c806",
+      "candidateHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "productionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "window": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "itemCount": 1,
+      "distributionSummary": {
+        "note": "sample"
+      },
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "eventId": "01927f4e-a404-7969-898a-7d238c54a40c",
+    "eventType": "ShadowRunCompleted",
+    "schemaVersion": "1.0",
+    "producer": "RAT",
+    "aggregateType": "RatingSlot",
+    "aggregateId": "0192ae82-d843-7220-859c-3feb686235d6",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "ratingSlotId": "01926cb2-963f-7fd2-86ed-55935835b544",
+      "runId": "01926e57-b1af-78e1-895f-66f53f18e114"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "0192ad27-8baa-717b-82b9-4dca9f407cdf",
+      "candidateHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "productionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "window": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "itemCount": 1,
+      "distributionSummary": {
+        "note": "sample"
+      },
+      "status": "COMPLETED"
+    }
+  }
+]

@@ -1,0 +1,2052 @@
+[
+  {
+    "eventId": "0192a11f-279f-7989-85e4-2a2379e1258c",
+    "eventType": "CancellationRescinded",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01927490-e800-7d5e-82b8-bae782b5c7c5",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192b406-8f4d-7461-83f7-537984cac927",
+      "jobId": "019268b0-9b18-7172-8234-49931729f069",
+      "policyTermId": "01927a2d-f4eb-7a6c-8326-ebe1ceebdb95"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192b267-9245-79e3-8dfb-337365edea5f",
+      "termId": "01924915-bbc5-7e72-88fa-317226648cc1",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "019286d3-50d2-71da-8c2e-dfc936fb6e6b",
+    "eventType": "CancellationRescinded",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01920987-2442-74ff-886e-14c4cb0e5549",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192c1e4-f518-7ad9-849d-b19a1b0f4b91",
+      "jobId": "0192cdd5-5290-7c4f-89a5-9de321a31f6e",
+      "policyTermId": "01926eaf-a208-7246-8011-56d5a0d599b1"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01921d26-f38d-7753-89d2-a10b87a7c867",
+      "termId": "0192aa5e-e0eb-7401-8263-64019c769b6c",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01929a38-de27-7552-8df5-7733fd7ea43f",
+    "eventType": "CancellationScheduled",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01923f3c-475b-7e34-8cd1-3780d4f39ea7",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192cfc7-f172-7e29-82cb-e5721ea5d4c8",
+      "jobId": "0192fac7-1be9-7ff1-8eb7-72ca6bc15293",
+      "policyTermId": "0192cf71-4715-75cc-8f54-8bc514441268"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01920b5d-33db-78c0-81c9-5cf70523cb63",
+      "termId": "01923db5-9340-7bee-8353-6be6ef0f2315",
+      "source": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07",
+      "refundMethod": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192bd78-a41a-7baa-88a6-534c6072508e",
+    "eventType": "CancellationScheduled",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192bfd1-9eb0-7442-8b94-5828ee35acdd",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01920ca4-783a-79d3-8c65-3b615e3d8ec2",
+      "jobId": "0192b437-6b82-7133-87b3-c6731f178e2f",
+      "policyTermId": "0192485d-ae5d-73a8-8ad7-838ee41ce49e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01924c64-3d34-784b-8c1f-cbfc39a996cc",
+      "termId": "01925de7-e0cd-795f-843c-0851e5c61ce6",
+      "source": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07",
+      "refundMethod": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192c4a5-fbdb-7dfe-8f85-3d11023e6965",
+    "eventType": "ChargeDeltaEmitted",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "019288c2-09a1-78bf-895f-fc94cd6aefdf",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01922601-6a00-7418-803c-598dd7c6504b",
+      "chargeId": "01923c86-3ace-701a-8547-191b1849b3ec",
+      "policyTermId": "0192a836-b6e7-7068-8eca-ee343359e160",
+      "transactionId": "01920c2e-b613-72f5-89f7-8d285db55f65"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "chargeId": "01927aae-6cf9-7dbc-8d87-73122c64a2aa",
+      "termId": "0192e0c3-7aea-761a-8a74-2fb72cfdadaa",
+      "elementLocator": "Sample text",
+      "coverageCode": "SAMPLE_CODE",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "deltaKind": "SAMPLE_CODE",
+      "netAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "validPeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "bookingDate": "2026-10-07",
+      "transactionId": "0192c7f5-8d06-70b3-8e0a-1f345153e609",
+      "correlationKey": "Sample text",
+      "taxTreatmentRef": "Sample text"
+    },
+    "set_id": "01925a23-1611-75b1-8a5a-4eede0a6ae14",
+    "set_size": 1,
+    "index": 1
+  },
+  {
+    "eventId": "01928522-bfbe-76ae-8e3c-88b0a53ddc2e",
+    "eventType": "ChargeDeltaEmitted",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192a3bf-8b74-7c10-8f2f-f69bb6dba1f3",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01925909-d48e-7e08-866e-e86900f67534",
+      "chargeId": "01929c01-0150-7111-822c-71741ff720d6",
+      "policyTermId": "0192c09a-a16d-7684-8136-f06395e71dd8",
+      "transactionId": "0192e884-6e66-7512-83bb-edf198e2e6c8"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "chargeId": "0192d184-251b-752c-8e32-8a46378f86df",
+      "termId": "019212fd-cf78-7dbc-8ea7-8f1c90d955df",
+      "elementLocator": "Sample text",
+      "coverageCode": "SAMPLE_CODE",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "deltaKind": "SAMPLE_CODE",
+      "netAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "validPeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "bookingDate": "2026-10-07",
+      "transactionId": "0192c833-c82a-76c3-8b50-031cd1a6e7fa",
+      "correlationKey": "Sample text",
+      "taxTreatmentRef": null
+    },
+    "set_id": "01924953-bf0a-7bda-8c69-3d75a8587a78",
+    "set_size": 1,
+    "index": 1
+  },
+  {
+    "eventId": "01922d6c-c9de-7e0e-812c-d1b8dcbce99c",
+    "eventType": "JobNotTaken",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192adb6-081f-732f-8b30-8ae18eb248bd",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01927e1a-a448-756b-8611-db2a5ff90653",
+      "jobId": "01928e91-268b-78ec-8227-fa00e359c14d"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192022e-f71a-7a4c-8fc5-071dd22c6b8e",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01924533-958b-79a2-81e9-5d3c231e66ba",
+    "eventType": "JobNotTaken",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192ade1-7ca9-7429-8bda-2bab6dfb7d5b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192ee53-5643-7ea8-8db5-3046954aab75",
+      "jobId": "0192f998-f3cc-7ad4-84e0-b26e191580fb"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192ca41-d82f-7d9d-8d3d-cbcb445f06ae",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "019228f5-3eef-7f60-8ff8-2da822711f28",
+    "eventType": "JobPreempted",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01920834-c5d9-7d03-833f-32eb9b04a9ce",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01922156-82c8-7f33-8420-723190935bea",
+      "jobId": "019270cc-f20d-7832-852c-6e9488affb57",
+      "preemptingTransactionId": "01922f4b-5cfd-75b5-825f-cd86f642cc88"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192b02c-8646-7f83-8f72-63a94b2e8196",
+      "preemptingTransactionId": "0192779d-0068-7765-86ee-66308b175c54"
+    }
+  },
+  {
+    "eventId": "019203d1-0026-7b0c-83a8-3adb4d7ea8ed",
+    "eventType": "JobPreempted",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192abd7-6bb2-7c51-89d0-bffb61254213",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "019295b0-8c20-7584-8075-77a480677f64",
+      "jobId": "019271e5-a9cb-723a-8686-fb689023884c",
+      "preemptingTransactionId": "0192e81c-7171-7307-8c3c-244144bf55bc"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01926030-1de7-732e-85a3-11346cb8fc5d",
+      "preemptingTransactionId": "0192368e-56a2-7159-8770-661fa4a3a139"
+    }
+  },
+  {
+    "eventId": "019243af-5aba-7bc2-82e4-5ded93d470fa",
+    "eventType": "JobWithdrawn",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01928b38-b277-7e6d-8fd0-012fede457ce",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01925516-213f-7c85-8d29-dcfb54182bbf",
+      "jobId": "01926ef6-9711-754f-8c81-8d72c3078b7e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01922a20-a52f-74e6-8e68-b93090d47515",
+      "jobType": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192af65-c87a-73d2-89a8-3690a8156ff2",
+    "eventType": "JobWithdrawn",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01923d87-0bce-7f5b-8a01-e8524738a641",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01928589-64c8-7d9b-86ea-cb9fa3d0883c",
+      "jobId": "01927543-30ec-7f81-8777-862518df3c5a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01927f1a-424d-7670-8b91-cb8df3f9daa1",
+      "jobType": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192e633-3ec3-763b-8dda-f0618d7e1d4c",
+    "eventType": "OutOfSequenceConflictRaised",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01921a16-36d3-7911-8d86-d9ea6bd19c58",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192c7be-fb38-7670-8a68-a88ec9667d23",
+      "jobId": "01922f84-9cc1-7b0b-8065-a3579be80e46"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01929b3c-6a50-7d2f-85ab-d8fd14d13ea4",
+      "conflictCount": 1,
+      "rule": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01922207-cbdb-7069-80e2-18ff00c900f6",
+    "eventType": "OutOfSequenceConflictRaised",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01927fa5-1d4c-7332-8b53-816d1a64981e",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "019201c6-c46d-7ab4-8d56-3a413b4d687c",
+      "jobId": "0192e40b-2977-7f03-8b8f-54f1da3106b9"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01920304-9b13-715e-8331-1eb86eeb8682",
+      "conflictCount": 1,
+      "rule": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "019294ee-a14c-7fb7-8f44-f5c60581b2db",
+    "eventType": "PolicyBound",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192f0b8-9bb2-7550-8308-9621cec48657",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192aeaf-17e0-71cc-849a-446c024ad047",
+      "policyTermId": "0192b5fa-8e78-7aea-8c68-b6bc35971709",
+      "transactionId": "0192fc13-5ce0-7cb7-8623-a31d2aa10678",
+      "jobId": "0192e173-8f60-7206-8690-614415688afe",
+      "quoteId": "0192c619-ea56-7455-81fe-5998cb8666d0"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "policyId": "0192a508-19cc-7ffb-8ed4-714d84c7b962",
+      "policyNumber": "SAMPLE-000001",
+      "termId": "01927fff-a197-7758-8c54-8e5a33b1bfa0",
+      "termNumber": 1,
+      "transactionId": "01929c09-3046-781d-84b2-f8496684cc8a",
+      "effectivePeriod": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "producerOfRecord": "SAMPLE_CODE",
+      "accountId": "0192d573-c0e0-7edc-8284-4ab838d422fc",
+      "payerPartyId": "01928528-a7d3-7c95-8382-927961e952f3",
+      "paymentPlanRef": "Sample text",
+      "ifrs17Tags": {
+        "note": "sample"
+      },
+      "motor": true
+    }
+  },
+  {
+    "eventId": "01923135-599d-77cd-8b2f-ac55bcee9a33",
+    "eventType": "PolicyBound",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "019297d0-ab68-70b7-8c32-da7fe34bc4ee",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "019203ee-c78a-7c09-8bf4-7752dab55ad9",
+      "policyTermId": "01927518-744f-7062-843b-239b8c9accff",
+      "transactionId": "0192fafa-1095-7275-8527-94755cc8ce3d",
+      "jobId": "0192487e-b32d-7c93-874a-14740b885f76",
+      "quoteId": "01927252-638f-70b8-831c-e40a40b1d407"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "policyId": "019204a5-6026-7141-8c0c-c3311eb47097",
+      "policyNumber": "SAMPLE-000001",
+      "termId": "0192cca3-9a39-7e5a-85f1-9b4b381f10ae",
+      "termNumber": 1,
+      "transactionId": "01920a5c-f8d6-7b0b-8f39-0e5c42eda503",
+      "effectivePeriod": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "producerOfRecord": "SAMPLE_CODE",
+      "accountId": "01927f85-8704-7236-89a1-5d3f5b5adeb5",
+      "payerPartyId": "01928b09-74a4-70d0-80a9-3a5c00b6f2ef",
+      "paymentPlanRef": "Sample text",
+      "ifrs17Tags": {
+        "note": "sample"
+      },
+      "motor": true
+    }
+  },
+  {
+    "eventId": "0192aa25-fce8-7b69-8e5f-c366c3078209",
+    "eventType": "PolicyCancelled",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192186e-b194-7c12-8998-ac73f964bc9a",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192ca25-7222-7d7e-88b1-03035c28a920",
+      "transactionId": "01925f97-bc97-7821-85a7-7996b2d8f276",
+      "policyTermId": "01923f02-6631-7f5c-87de-588207a1fc8b"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "transactionId": "0192ad1a-0ba7-78a6-8e04-33ab4facbc18",
+      "termId": "0192aafa-eb1d-7c6d-8988-9b4381b5d195",
+      "source": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07",
+      "refundMethod": "SAMPLE_CODE",
+      "rewritePolicyId": "01922e5d-07b3-745f-806f-1a6506e5ed98",
+      "terminationClockInstanceId": "01920223-78e1-724d-8af0-3b9fdcd85f86",
+      "thirdPartyCoverEnd": "2026-10-07T09:00:00Z",
+      "thirdPartyCoverClockInstanceId": "01927c56-4a19-798f-828d-7c26c4da20c7"
+    }
+  },
+  {
+    "eventId": "0192822b-2318-7bf6-8812-365afa2b5762",
+    "eventType": "PolicyCancelled",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01927b7d-af4c-7073-81e8-bf30a07781f0",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192460b-be05-7a87-8824-38ea5c6faef7",
+      "transactionId": "0192d4d9-e2ce-76a2-891a-2304c2676818",
+      "policyTermId": "01921c44-938e-7d08-84ae-01821b0c6d78"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "transactionId": "0192f7e0-7800-7af7-8005-a75bb992e6cd",
+      "termId": "01921da5-d21f-774f-8f46-0345006b0a47",
+      "source": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07",
+      "refundMethod": "SAMPLE_CODE",
+      "rewritePolicyId": null,
+      "terminationClockInstanceId": null,
+      "thirdPartyCoverEnd": null,
+      "thirdPartyCoverClockInstanceId": null
+    }
+  },
+  {
+    "eventId": "0192ddb6-1681-7ffe-8ea1-94f8d0e1bf4e",
+    "eventType": "PolicyChanged",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "019255e6-794b-7361-8da6-2b8f530e8bdb",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01929833-9219-7738-8f00-a0a10943f960",
+      "transactionId": "01925544-844f-7788-8b02-8792117cfcaf"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "transactionId": "01921b89-44c3-7fe9-880c-eb2f73fc6b06",
+      "kind": "CHANGE",
+      "effectiveDate": "2026-10-07",
+      "changedElements": [
+        {
+          "locator": "Sample text",
+          "elementType": "SAMPLE_CODE"
+        }
+      ],
+      "vehicleCoverFacts": {
+        "added": [
+          "Sample text"
+        ],
+        "removed": [
+          "Sample text"
+        ],
+        "suspended": [
+          "Sample text"
+        ],
+        "reactivated": [
+          "Sample text"
+        ]
+      },
+      "priorTerm": true
+    }
+  },
+  {
+    "eventId": "0192c114-a11f-7b2a-805e-3afa60f8ecdb",
+    "eventType": "PolicyChanged",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "019233a1-e932-7acd-88ba-737aab8ad8e1",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "019271a8-21a3-7ea7-8a60-e7e8f8af226b",
+      "transactionId": "0192c6d4-22d6-7fc7-845c-b08f404b22f9"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "transactionId": "019253b3-0b4f-75e0-8b33-4b4277ddfa8b",
+      "kind": "CHANGE",
+      "effectiveDate": "2026-10-07",
+      "changedElements": [
+        {
+          "locator": "Sample text",
+          "elementType": "SAMPLE_CODE"
+        }
+      ],
+      "vehicleCoverFacts": {
+        "added": [
+          "Sample text"
+        ],
+        "removed": [
+          "Sample text"
+        ],
+        "suspended": [
+          "Sample text"
+        ],
+        "reactivated": [
+          "Sample text"
+        ]
+      },
+      "priorTerm": true
+    }
+  },
+  {
+    "eventId": "01922bfa-53c4-70d9-8e70-236a2da38f91",
+    "eventType": "PolicyIssued",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01927348-8933-70e9-83cd-0c8a04580bc2",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192a266-7088-78f2-88cd-a82e29af4889",
+      "policyTermId": "01929435-e29b-7903-8521-aae993b80a3c",
+      "transactionId": "0192ce0e-f282-7d18-8657-96929ff24d95"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "019234b4-c079-7b6f-84df-52fa5a04c244",
+      "transactionId": "01924791-1f72-7371-8b3e-bc634782061c",
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "documentIds": [
+        "0192d00e-6b08-796a-88be-cd2816b1dd1c"
+      ]
+    }
+  },
+  {
+    "eventId": "019270d0-3471-72cd-894c-497bff4a9294",
+    "eventType": "PolicyIssued",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01924852-c41a-72f3-819c-4e04e7e2c93c",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01925277-4d74-7c4e-828f-5190e3944a6c",
+      "policyTermId": "01926cd1-e3d9-7913-8530-79f4bf667355",
+      "transactionId": "0192152c-0796-7e67-8bf4-c77e691a4f1c"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "01925ca8-c80d-73e5-8197-1bcc99388782",
+      "transactionId": "01927cc1-1953-7f9a-805c-fe0c039aa239",
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "documentIds": [
+        "0192290e-3b99-74db-8d70-ee95dfa79693"
+      ]
+    }
+  },
+  {
+    "eventId": "01920672-709b-73a2-88fb-a5073bd7caaa",
+    "eventType": "PolicyLapsed",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01920a6c-cf36-7fba-85ee-0bb67b6f1761",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192083b-82da-7595-87c2-611119261862",
+      "policyTermId": "01927d9b-d7ec-71ae-82ba-b3fff9e0c46e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "019297e0-a55d-72cc-8bb7-c52cc685f165",
+      "lapseDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "01925dbe-1833-74bd-8264-8a02edff0581",
+    "eventType": "PolicyLapsed",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192af91-c0b4-7c85-8467-5b5031ebd9e2",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192743c-7b62-7046-8df2-ad185cff0f1c",
+      "policyTermId": "019278f6-c7cb-75c7-81e7-3d433c947a8c"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "01927a3d-0d94-73f6-85d1-03fbcc50926d",
+      "lapseDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "0192d659-c130-77b8-8406-0c7fc69075cb",
+    "eventType": "PolicyMoved",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192ca65-463f-7295-8779-e53dc2fd9676",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01923341-0cf8-73cc-8533-e468e760088f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "oldAccountId": "019213fb-e051-70f0-8e58-4e90ed2b527b",
+      "newAccountId": "0192c522-9114-7085-83f3-14fb4471f51d",
+      "repointMap": [
+        {
+          "reference": {
+            "module": "POL",
+            "type": "Policy",
+            "id": "01927c88-96fb-7943-8faf-e82c759a1de9"
+          },
+          "from": "sample",
+          "to": "sample"
+        }
+      ]
+    }
+  },
+  {
+    "eventId": "0192f9b7-6ba2-7fbe-89ce-87e2eaf96f87",
+    "eventType": "PolicyMoved",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192cc59-6167-7aa8-84d8-914de970ae6c",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01927fdb-27c2-74f5-834a-0a53ba3b7e7b"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "oldAccountId": "01922d15-3504-7552-87a6-a63256d136ee",
+      "newAccountId": "01927a34-3dfb-734b-8f18-ce88e60fc1a0",
+      "repointMap": [
+        {
+          "reference": {
+            "module": "POL",
+            "type": "Policy",
+            "id": "01922587-4b17-72a0-82b7-92022546b54b"
+          },
+          "from": "sample",
+          "to": "sample"
+        }
+      ]
+    }
+  },
+  {
+    "eventId": "01920197-3f16-726a-87d7-56d0abfc2502",
+    "eventType": "PolicyNonRenewed",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01925cbc-c58e-7bfb-85b4-bd1f10521a1b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01927d13-0269-7eeb-87ea-90e7f5916028",
+      "policyTermId": "0192498c-0e4b-7b47-8bff-b57cdff38466"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "019251f0-9269-7ff0-8688-5d27e85e1f56",
+      "source": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE",
+      "noticeDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "01923155-a3a9-7d54-8eec-1bbccb55860c",
+    "eventType": "PolicyNonRenewed",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01929849-a25a-7c99-8ac0-fbec66611168",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01926e20-8dad-7d46-82a3-af80fee65e8c",
+      "policyTermId": "01921234-051d-77c9-8f00-202c5da5285c"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "0192ee7b-f21b-7dee-8c9e-454d777abe7d",
+      "source": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE",
+      "noticeDate": null
+    }
+  },
+  {
+    "eventId": "01920596-7a8f-788b-8c5c-2796177b51a0",
+    "eventType": "PolicyReinstated",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01925bc4-daf6-7f8b-828e-1364211b7592",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01928544-1235-7d78-8b56-983a9676d095",
+      "transactionId": "01925b89-612e-7809-8d49-a87a6dca0876",
+      "policyTermId": "01922359-7e75-705a-8c1e-500d9052415d"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "transactionId": "019296c1-5ccd-7a13-87a8-66c2277992e4",
+      "termId": "01922f91-9bef-7b1c-8f7f-407369e4eb2b",
+      "gap": {
+        "kind": "NONE",
+        "period": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        }
+      },
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192a56f-bb09-7ce8-8ede-1ce8fdb2c9f5",
+    "eventType": "PolicyReinstated",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192f38f-c33f-7b3c-8040-d0d51cac2e31",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192d1c9-30a7-7a8d-8ed3-7f8dc24ad47e",
+      "transactionId": "01923cdc-b230-77bd-82ff-4645643e25ef",
+      "policyTermId": "0192e1e4-4902-7403-8200-e10b8e73f091"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "transactionId": "0192f6b0-1c5a-754b-8d93-0f2414c32d36",
+      "termId": "0192e17e-e337-725e-82c4-77936469fcf3",
+      "gap": {
+        "kind": "NONE",
+        "period": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        }
+      },
+      "reason": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192b934-c2be-7644-87e6-3d8ddc557a67",
+    "eventType": "PolicyRewritten",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01925db5-30e8-7236-8610-93691eaa127e",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192d7e2-5e98-7b78-8e1b-464af3c240a5",
+      "oldTermId": "0192daa0-5dc5-7726-8e0b-adfebb47369d",
+      "newTermId": "01927760-c65a-7819-8dd3-fff10359483e"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "oldTermId": "0192d766-41af-7344-86a6-ba9e38d168ed",
+      "newTermId": "0192d2a4-ad90-79b6-87a7-967503510360",
+      "rewriteType": "SAMPLE_CODE",
+      "newPolicyId": "01921b6a-6543-75e7-880a-34375683920d",
+      "newPolicyNumber": "SAMPLE-000001"
+    }
+  },
+  {
+    "eventId": "0192861c-b176-7f93-8b61-4e8d68f20910",
+    "eventType": "PolicyRewritten",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192c4e2-f840-713b-8958-e7431bb87775",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192ed1f-d0b0-77b0-8594-8151e12394a1",
+      "oldTermId": "019298e9-77b9-7e77-8929-0f9a1a6d3417",
+      "newTermId": "019229dd-dfc6-7542-8a3d-8a2f087c6a06"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "oldTermId": "01927653-9875-7860-8d1e-d2223b87dfd3",
+      "newTermId": "0192f124-d5af-70b3-8e16-2be6ce3dc0a1",
+      "rewriteType": "SAMPLE_CODE",
+      "newPolicyId": null,
+      "newPolicyNumber": null
+    }
+  },
+  {
+    "eventId": "019279b6-25f6-7c90-8a5b-b6840a4337f8",
+    "eventType": "PolicyVoided",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01929aa1-188e-730d-82a9-a8688c82f97d",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192b569-d713-7c87-8d11-ca7f6fbc49cc",
+      "transactionId": "0192844f-eae7-7412-8af1-c2ae3cf40eab",
+      "policyTermId": "01921084-01a8-7f56-8722-d3779f2a7d2f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "transactionId": "0192ece5-b586-7d61-8f86-527b8f9a6d95",
+      "termId": "019224c6-c3f3-7e03-84f8-9a5808a5f8d5",
+      "statutoryReason": "OBJECTION",
+      "costOfCoverRule": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192e453-fffe-7dfe-8797-7ef896139eda",
+    "eventType": "PolicyVoided",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01927fa6-b8c8-7250-858c-242067645c79",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01921f6f-dd14-7dc7-8696-7e695f38a727",
+      "transactionId": "0192867f-4579-7370-8456-ad2315d247f2",
+      "policyTermId": "0192dc0f-25de-75d4-87e9-6936ff5aafff"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "transactionId": "019294cc-6543-7da7-813a-f0e4d4214f5d",
+      "termId": "01927d35-3255-7d60-889a-e9b87e41c7f2",
+      "statutoryReason": "OBJECTION",
+      "costOfCoverRule": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01922fa8-ff5a-7c2d-8513-4df2178a973a",
+    "eventType": "ProofOfCoverIssued",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192acae-fa32-70d4-82e1-03f729ecd80d",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "019242e5-1c50-7c8c-8da4-2e4615f2c1aa",
+      "policyTermId": "0192fc0b-e4db-742b-8c22-ba07884c8fc5",
+      "documentId": "0192626e-eb6e-7860-87fb-e8dd91c8ec51"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "019286d1-515f-7cc6-8486-958ac2fd38f6",
+      "documentId": "0192f94a-8ef3-75e8-80a2-803aa35b5ea4",
+      "validUntil": "2026-10-07T09:00:00Z"
+    }
+  },
+  {
+    "eventId": "0192c9df-356f-7188-8db3-302b2963fc04",
+    "eventType": "ProofOfCoverIssued",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192c499-f75d-7159-88f7-f059ce495ee4",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01929fa4-fc74-71ae-8b71-0809b8b37278",
+      "policyTermId": "0192056d-c8bc-7de9-871c-3d21e6eb6a28",
+      "documentId": "01922d13-98d9-73f2-8ea5-d2b1023937be"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "termId": "01928073-d9cc-7ab2-847a-046ccf3f7021",
+      "documentId": "01927a83-3623-7c34-8057-67fd9b53e76a",
+      "validUntil": "2026-10-07T09:00:00Z"
+    }
+  },
+  {
+    "eventId": "0192cf9d-8c42-711b-8c39-38c707aa7221",
+    "eventType": "QuoteExpired",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192013b-7a3f-7439-8bb9-bae4f5923ba1",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01928302-e875-7524-8e48-06b6c755a60f",
+      "jobId": "0192f98f-2038-7dc2-83da-ee062b05634d"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "019240cf-7256-7ed3-8828-8f857e2210d1",
+      "quoteVersion": 1
+    }
+  },
+  {
+    "eventId": "0192bfdb-7e41-7df0-8531-a154ad968a21",
+    "eventType": "QuoteExpired",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "019284e9-8697-7639-8444-75c3a9cc01eb",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01927592-2b91-7cd5-8383-e8df38bd32a8",
+      "jobId": "019258c5-0004-78cf-8ba8-2e7ce2a568c2"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01923653-f268-7292-8f1d-d2b8720eceef",
+      "quoteVersion": 1
+    }
+  },
+  {
+    "eventId": "0192ee34-be32-75ef-8ddc-530bcbef0a3a",
+    "eventType": "QuoteIssued",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01925dd9-31ad-754c-8d2f-0dde27d0b8b7",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192789e-ef80-7b10-8751-a6d1c6cb9dbb",
+      "jobId": "0192d16c-5d60-7542-8abc-235a015df5f3",
+      "quoteId": "01922f17-2cdf-7c2e-8ee1-6babfa75c725"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192cb66-6fdd-7057-888b-07741a6d94c9",
+      "jobType": "SAMPLE_CODE",
+      "quoteVersion": 1,
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "premiumSummary": {
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxes": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "validUntil": "2026-10-07",
+      "referred": true
+    }
+  },
+  {
+    "eventId": "0192833a-00d5-74e4-88ae-6d5e30b5cb51",
+    "eventType": "QuoteIssued",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01920c0f-a2de-7942-82cb-ee4d18f83daf",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "019246a8-77f4-7169-865c-6863139b152e",
+      "jobId": "0192447e-32a1-74e0-87e4-853037856599",
+      "quoteId": "019247aa-823a-7f9c-8b31-0165528237da"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "01927768-2188-7a21-8d70-0c9bcdbca08b",
+      "jobType": "SAMPLE_CODE",
+      "quoteVersion": 1,
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "premiumSummary": {
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxes": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "validUntil": "2026-10-07",
+      "referred": true
+    }
+  },
+  {
+    "eventId": "01922499-110b-7a1e-8aad-7a520ab8035f",
+    "eventType": "RenewalBound",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192b574-5223-7127-89e7-882839c9839b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192f5ca-19c1-71ad-85fa-f183f8796059",
+      "newTermId": "0192af83-99d3-758b-81c7-024d8d7fe79b",
+      "transactionId": "0192bd81-2b0a-736d-8798-686069699cd7"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "newTermId": "01926e2b-b3c1-7cfc-89a9-4bfa6abe1bbd",
+      "newTermNumber": 1,
+      "transactionId": "0192679a-5085-7902-8c3c-77c65f4a1e1c",
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "producerOfRecord": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192a36e-9aff-722f-8f94-5bd951cc2703",
+    "eventType": "RenewalBound",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192abd3-9799-747d-8da5-580c52ea061b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192ebc0-7d3c-7348-8e5b-eb462319229c",
+      "newTermId": "01927751-8539-7b33-8c44-0eeb07659ea6",
+      "transactionId": "0192c92a-57f4-7b89-8325-3e6b8aa7d782"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "newTermId": "01929d66-a7aa-78d2-80e9-78659a8967c3",
+      "newTermNumber": 1,
+      "transactionId": "0192a967-7b89-74cd-89f7-40efd0de4da2",
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "producerOfRecord": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192c295-fa47-7676-8ec2-d19bc24afde5",
+    "eventType": "RenewalCreated",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192d9d9-029c-7de3-84c6-c3d8706254d7",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192f53d-d57b-74d9-87b2-15f5a274cd29",
+      "jobId": "01920bc5-85ba-7886-8c9c-8dbd52709c33",
+      "expiringTermId": "0192af61-b653-781a-8ca0-22837f3955ed"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "019225fb-7737-7582-854e-27a5826bee24",
+      "expiringTermId": "0192a8b0-def0-75e6-80d3-9dec38eef97a",
+      "renewalProductCode": "SAMPLE_CODE",
+      "renewalProductVersion": "1.0",
+      "conversionOutcomeSummary": {
+        "note": "sample"
+      }
+    }
+  },
+  {
+    "eventId": "019203bb-9e72-7acd-84ab-aa3a8b9a16f8",
+    "eventType": "RenewalCreated",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01928e44-21ca-7401-8e16-bd1165f1b09d",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01928cce-d0e9-7281-8cd5-dea2285ba0bd",
+      "jobId": "01922379-c435-7fe3-892e-35d1a4186945",
+      "expiringTermId": "0192c217-329e-77e6-8d01-628c6fe1e684"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192fd78-a35f-7c0b-82fd-8236c22e86b8",
+      "expiringTermId": "01921c9c-9b11-758d-87e1-48c2ae051de3",
+      "renewalProductCode": "SAMPLE_CODE",
+      "renewalProductVersion": "1.0",
+      "conversionOutcomeSummary": {
+        "note": "sample"
+      }
+    }
+  },
+  {
+    "eventId": "01920fcd-79a4-74e1-8a48-c41572f6bd4d",
+    "eventType": "RenewalOffered",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192e919-fa79-79d5-85d8-dbd9d02be1d1",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192211e-dc4f-71cc-8563-0def035c09f5",
+      "jobId": "019279c3-f98a-7f8b-8ce7-a02c90ec0626"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192d4f4-9dee-72b6-824c-e15389743845",
+      "offerVersion": 1,
+      "premiumSummary": {
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxes": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "acceptanceMode": "SAMPLE_CODE",
+      "deadline": "2026-10-07T09:00:00Z"
+    }
+  },
+  {
+    "eventId": "019265fa-828e-7906-827e-61be77a9db8b",
+    "eventType": "RenewalOffered",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01925251-8acf-740b-8d22-54617c19f2a6",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192d604-b241-7b0a-874e-603be20ebd2d",
+      "jobId": "0192ef55-d0ec-7903-8455-812586022fdf"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "jobId": "0192ed80-c8de-7a59-8683-e9ee709bc1b9",
+      "offerVersion": 1,
+      "premiumSummary": {
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxes": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "acceptanceMode": "SAMPLE_CODE",
+      "deadline": "2026-10-07T09:00:00Z"
+    }
+  },
+  {
+    "eventId": "01924944-13a3-7b78-8643-bf9480de2302",
+    "eventType": "RenewalRunCompleted",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01927eb8-6c65-747b-85e0-1d8a198f0c12",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "runId": "0192d1d0-5fef-7eaa-857c-d6ef8a0692b6"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "0192c24f-8e8e-7962-8218-7b662cf4f02f",
+      "counts": {
+        "total": 1
+      }
+    }
+  },
+  {
+    "eventId": "0192505b-053e-7203-8a93-68f0b4d46b72",
+    "eventType": "RenewalRunCompleted",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "LegalEntity",
+    "aggregateId": "01921d1f-665b-7878-8aac-1466db457beb",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "runId": "01921324-f81a-73dc-808f-d0897f31854a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "runId": "0192b284-aea2-7432-8293-b9081191ce5f",
+      "counts": {
+        "total": 1
+      }
+    }
+  },
+  {
+    "eventId": "019222ee-6e88-7259-8707-c9b9ab07f5c1",
+    "eventType": "SubmissionCreated",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01929424-0216-76f0-8ab2-4c45a150b4ae",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192ecdb-b0fe-7202-88e0-ffd944927e18",
+      "jobId": "0192564e-3d97-75e0-8b63-04b007fcf1c5"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "jobId": "01926001-d97e-765f-867d-5b35acd6c541",
+      "accountId": "0192e1ab-fafb-7cb0-8380-9bbcbba7bc41",
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "channel": "SAMPLE_CODE",
+      "producerCode": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "019230fa-51aa-7b2a-85cd-5f8b054ff0be",
+    "eventType": "SubmissionCreated",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192528c-e72e-7155-8ef9-9df3e6017031",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192c4d4-0ca6-782f-85a4-6c78200ab6de",
+      "jobId": "019247ca-ab34-7927-8b23-25a589fffc24"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "jobId": "0192a9be-f577-7f46-8fc4-42e38e0e1a86",
+      "accountId": "0192be60-b066-787a-83bc-8e41a7c09f0c",
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "channel": "SAMPLE_CODE",
+      "producerCode": null
+    }
+  },
+  {
+    "eventId": "0192baac-3c8e-7d9d-8af4-5eb6cae40669",
+    "eventType": "TransactionReapplied",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01924f10-69c2-73b1-8555-852d6f86bdd0",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192f750-fdd6-73c0-8852-d224dbb275e5",
+      "originalTransactionId": "01929688-a50e-7d79-83f9-655550e4bb95",
+      "newTransactionId": "0192470e-3b0b-73ac-866a-c14c870953a3"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "originalTransactionId": "0192a66f-6580-7d3b-8196-75683c5a6e1a",
+      "newTransactionId": "0192a9b6-09ba-7316-8762-92154de16a6b",
+      "correlationKey": "Sample text"
+    },
+    "set_id": "0192f40e-6a23-70e0-8958-0030f4905fa8",
+    "set_size": 1,
+    "index": 1
+  },
+  {
+    "eventId": "01929a46-df11-7486-84ac-4dd8929912ea",
+    "eventType": "TransactionReapplied",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "0192ac65-e205-7d8b-8ceb-9411668b5585",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "019276ab-683c-7cdd-843a-ff94e58031c7",
+      "originalTransactionId": "01922a8e-530e-7972-8db8-32768b1c4408",
+      "newTransactionId": "01921025-4368-7131-8d06-b026851bebb3"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "originalTransactionId": "019228d8-0e10-7999-8b9e-1514b94cdfb2",
+      "newTransactionId": "01927b5c-9ddd-7c24-8bc2-0dbe022bf2b8",
+      "correlationKey": "Sample text"
+    },
+    "set_id": "0192f574-acdd-70ef-83c5-c2e8ac1c8f14",
+    "set_size": 1,
+    "index": 1
+  },
+  {
+    "eventId": "01920140-0016-733d-86b4-1cce9d9ed85f",
+    "eventType": "TransactionReversed",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01921333-1832-7457-860f-08e268c0933d",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "0192ecdd-feb3-7142-8148-e848ba6500e8",
+      "originalTransactionId": "01923f80-07c6-7a65-810d-badab378060c",
+      "reversalTransactionId": "0192bf83-57dc-79d1-8380-70813c01b42f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "originalTransactionId": "01929b16-a521-7b9b-8169-f8dde63996d4",
+      "reversalTransactionId": "019299e7-7760-74fc-8cd3-cf98233c3880",
+      "correlationKey": "Sample text",
+      "affectedSegmentIds": [
+        "01929926-dfbb-71ac-82fc-d525e33ee387"
+      ],
+      "voidedByCancellation": true
+    },
+    "set_id": "0192bd4c-eaf5-7c5e-8406-aa4f97568dd8",
+    "set_size": 1,
+    "index": 1
+  },
+  {
+    "eventId": "0192ecf5-2445-7399-8104-8fb6c0924719",
+    "eventType": "TransactionReversed",
+    "schemaVersion": "1.0",
+    "producer": "POL",
+    "aggregateType": "Policy",
+    "aggregateId": "01925c23-7c10-7559-8290-705e98c5c387",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "policyId": "01925733-5305-7b64-819e-79896614184b",
+      "originalTransactionId": "0192949f-bf4a-7e5b-8608-b0f11527d396",
+      "reversalTransactionId": "0192c226-2d08-71ab-89ae-02e27c41416f"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "originalTransactionId": "01921562-c39c-7765-8166-dabbd7c2c575",
+      "reversalTransactionId": "0192235f-f426-7930-8b98-2cb81dd188de",
+      "correlationKey": "Sample text",
+      "affectedSegmentIds": [
+        "01921349-5de7-78d0-8912-ad232f2181e7"
+      ],
+      "voidedByCancellation": true
+    },
+    "set_id": "01921d4c-7d55-7631-81b5-06b9cede17d4",
+    "set_size": 1,
+    "index": 1
+  }
+]

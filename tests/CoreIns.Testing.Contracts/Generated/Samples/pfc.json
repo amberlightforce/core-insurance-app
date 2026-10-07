@@ -1,0 +1,340 @@
+{
+  "responses": {
+    "pfc.Artifact.get": {
+      "canonicalJsonArtefact": "unspecified"
+    },
+    "pfc.Availability.check": {
+      "available": true,
+      "reason": "unspecified",
+      "winningRuleId": "019227bd-2490-749b-82d4-263538257ef8"
+    },
+    "pfc.Catalogue.get": {
+      "itemsTerms": "unspecified",
+      "finals": "unspecified"
+    },
+    "pfc.Catalogue.getItem": {
+      "itemsTerms": "unspecified",
+      "finals": "unspecified"
+    },
+    "pfc.ChargeType.list": {
+      "items": [
+        {
+          "chargeTypes": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "pfc.Pog.get": {
+      "targetMarket": "unspecified",
+      "negative": "unspecified",
+      "strategy": "unspecified",
+      "testingSummary": "unspecified",
+      "reviewStatus": "unspecified"
+    },
+    "pfc.PolicyDraft.validate": {
+      "errors": [
+        "unspecified"
+      ]
+    },
+    "pfc.Product.describe": {
+      "orderedSteps": "unspecified",
+      "fields": "unspecified",
+      "rules": "unspecified",
+      "offerings": "unspecified",
+      "coverages": "unspecified",
+      "paymentPlans": "unspecified"
+    },
+    "pfc.ProductImport.import": {
+      "changeSetOrDryRunLint": "unspecified"
+    },
+    "pfc.ProductVersion.resolve": {
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "resolutionManifest": {
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "uwRuleSetVersions": {
+          "sample": "SAMPLE_CODE"
+        },
+        "formPatternEditions": [
+          "SAMPLE_CODE"
+        ],
+        "referenceTableVersions": [
+          "SAMPLE_CODE"
+        ],
+        "paymentPlanVersions": [
+          "SAMPLE_CODE"
+        ]
+      },
+      "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "pfc.QuestionSet.evaluate": {
+      "questionsVisibleRequiredFlags": true,
+      "knockOutFlags": true,
+      "referralFlags": true
+    },
+    "pfc.QuestionSet.get": {
+      "questionsVisibleRequiredFlags": true,
+      "knockOutFlags": true,
+      "referralFlags": true
+    },
+    "pfc.RegulatoryMapping.get": {
+      "codesListVersions": "unspecified"
+    },
+    "pfc.RenewalConversion.convert": {
+      "convertedSelections": "unspecified",
+      "grandfatheredItems": "unspecified",
+      "referrals": "unspecified",
+      "nonRenewDecision": "unspecified"
+    }
+  },
+  "schemas": {
+    "ArtifactGetResponse": {
+      "canonicalJsonArtefact": "unspecified"
+    },
+    "AvailabilityCheckRequest": {
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "item": "unspecified",
+      "context": "unspecified"
+    },
+    "AvailabilityCheckResponse": {
+      "available": true,
+      "reason": "unspecified",
+      "winningRuleId": "01922648-4684-7225-8bbd-ecd575e76a04"
+    },
+    "CatalogueGetItemResponse": {
+      "itemsTerms": "unspecified",
+      "finals": "unspecified"
+    },
+    "CatalogueGetResponse": {
+      "itemsTerms": "unspecified",
+      "finals": "unspecified"
+    },
+    "ChangeSetAbandonRequest": {
+      "product": "unspecified",
+      "base": "unspecified",
+      "edits": "unspecified"
+    },
+    "ChangeSetAbandonResponse": {
+      "changeSetState": "unspecified",
+      "validation": "unspecified"
+    },
+    "ChangeSetCreateRequest": {
+      "product": "unspecified",
+      "base": "unspecified",
+      "edits": "unspecified"
+    },
+    "ChangeSetCreateResponse": {
+      "changeSetState": "unspecified",
+      "validation": "unspecified"
+    },
+    "ChangeSetEditRequest": {
+      "product": "unspecified",
+      "base": "unspecified",
+      "edits": "unspecified"
+    },
+    "ChangeSetEditResponse": {
+      "changeSetState": "unspecified",
+      "validation": "unspecified"
+    },
+    "ChangeSetRebaseRequest": {
+      "product": "unspecified",
+      "base": "unspecified",
+      "edits": "unspecified"
+    },
+    "ChangeSetRebaseResponse": {
+      "changeSetState": "unspecified",
+      "validation": "unspecified"
+    },
+    "ChangeSetRevertRequest": {
+      "product": "unspecified",
+      "base": "unspecified",
+      "edits": "unspecified"
+    },
+    "ChangeSetRevertResponse": {
+      "changeSetState": "unspecified",
+      "validation": "unspecified"
+    },
+    "ChargeTypeListItem": {
+      "chargeTypes": "unspecified"
+    },
+    "ChargeTypeListPage": {
+      "items": [
+        {
+          "chargeTypes": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ImpactAnalysisRunRequest": {
+      "version": "unspecified"
+    },
+    "ImpactAnalysisRunResponse": {
+      "runId": "01929130-f570-74a2-8615-45bc5e15c3b5",
+      "asyncResult": "unspecified"
+    },
+    "LegacyXrefGetResponse": {
+      "coreCodes": "unspecified"
+    },
+    "PogGetResponse": {
+      "targetMarket": "unspecified",
+      "negative": "unspecified",
+      "strategy": "unspecified",
+      "testingSummary": "unspecified",
+      "reviewStatus": "unspecified"
+    },
+    "PogRecordReviewResponse": {
+      "record": "unspecified"
+    },
+    "PogRecordTestResponse": {
+      "record": "unspecified"
+    },
+    "PogUpdateResponse": {
+      "record": "unspecified"
+    },
+    "PolicyDraftValidateRequest": {
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "checkpoint": "unspecified",
+      "draft": "unspecified"
+    },
+    "PolicyDraftValidateResponse": {
+      "errors": [
+        "unspecified"
+      ]
+    },
+    "ProductDescribeRequest": {
+      "product": "unspecified",
+      "channel": "unspecified",
+      "transactionType": "unspecified",
+      "language": "el"
+    },
+    "ProductDescribeResponse": {
+      "orderedSteps": "unspecified",
+      "fields": "unspecified",
+      "rules": "unspecified",
+      "offerings": "unspecified",
+      "coverages": "unspecified",
+      "paymentPlans": "unspecified"
+    },
+    "ProductImportImportRequest": {
+      "legacyDefinition": "unspecified",
+      "mapping": "unspecified"
+    },
+    "ProductImportImportResponse": {
+      "changeSetOrDryRunLint": "unspecified"
+    },
+    "ProductVersionCancelScheduleRequest": {
+      "version": "unspecified",
+      "environment": "unspecified",
+      "activationTime": "unspecified",
+      "reason": "unspecified"
+    },
+    "ProductVersionCancelScheduleResponse": {
+      "schedule": "unspecified"
+    },
+    "ProductVersionDiffResponse": {
+      "groupedEntriesClasses": "unspecified"
+    },
+    "ProductVersionFallBackRequest": {
+      "version": "unspecified",
+      "environment": "unspecified",
+      "activationTime": "unspecified",
+      "reason": "unspecified"
+    },
+    "ProductVersionFallBackResponse": {
+      "schedule": "unspecified"
+    },
+    "ProductVersionResolveRequest": {
+      "jurisdiction": "GR",
+      "legalEntity": "SAMPLE_CODE",
+      "product": "SAMPLE_CODE",
+      "channel": "SAMPLE_CODE",
+      "transactionType": "NewBusiness",
+      "predecessorHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ProductVersionResolveResponse": {
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "resolutionManifest": {
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "uwRuleSetVersions": {
+          "sample": "SAMPLE_CODE"
+        },
+        "formPatternEditions": [
+          "SAMPLE_CODE"
+        ],
+        "referenceTableVersions": [
+          "SAMPLE_CODE"
+        ],
+        "paymentPlanVersions": [
+          "SAMPLE_CODE"
+        ]
+      },
+      "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ProductVersionScheduleRequest": {
+      "version": "unspecified",
+      "environment": "unspecified",
+      "activationTime": "unspecified",
+      "reason": "unspecified"
+    },
+    "ProductVersionScheduleResponse": {
+      "schedule": "unspecified"
+    },
+    "ProductVersionSignOffRequest": {
+      "version": "unspecified",
+      "role": "unspecified",
+      "decision": "unspecified",
+      "comment": "unspecified",
+      "conditions": "unspecified"
+    },
+    "ProductVersionSignOffResponse": {
+      "approvalState": "unspecified"
+    },
+    "ProductVersionSubmitRequest": {
+      "changeSetId": "019227ae-a64e-7f7a-8456-f5ec0783a5a2"
+    },
+    "ProductVersionSubmitResponse": {
+      "versionStatus": "unspecified",
+      "checkResults": "unspecified"
+    },
+    "QuestionSetEvaluateRequest": {
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "set": "unspecified",
+      "answers": "unspecified"
+    },
+    "QuestionSetEvaluateResponse": {
+      "questionsVisibleRequiredFlags": true,
+      "knockOutFlags": true,
+      "referralFlags": true
+    },
+    "QuestionSetGetResponse": {
+      "questionsVisibleRequiredFlags": true,
+      "knockOutFlags": true,
+      "referralFlags": true
+    },
+    "ReferenceTableGetResponse": {
+      "rows": [
+        "unspecified"
+      ]
+    },
+    "RegulatoryMappingGetResponse": {
+      "codesListVersions": "unspecified"
+    },
+    "RenewalConversionConvertRequest": {
+      "sourceHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "targetHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "termSelections": "unspecified",
+      "renewalDate": "2026-10-07"
+    },
+    "RenewalConversionConvertResponse": {
+      "convertedSelections": "unspecified",
+      "grandfatheredItems": "unspecified",
+      "referrals": "unspecified",
+      "nonRenewDecision": "unspecified"
+    }
+  }
+}

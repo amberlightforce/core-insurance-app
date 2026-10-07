@@ -1,0 +1,1203 @@
+{
+  "responses": {
+    "bil.AccountCurrent.dispute": {
+      "dispute": "unspecified",
+      "heldItems": "unspecified"
+    },
+    "bil.AccountCurrent.get": {
+      "statement": "unspecified",
+      "items": [
+        "unspecified"
+      ]
+    },
+    "bil.BillingAccount.attachTerm": {
+      "planInstance": "unspecified",
+      "preview": "unspecified"
+    },
+    "bil.BillingAccount.get": {
+      "account": "unspecified",
+      "balancesByState": "unspecified"
+    },
+    "bil.BillingAccount.moveTerm": {
+      "planInstance": "unspecified",
+      "preview": "unspecified"
+    },
+    "bil.BillingPreview.compute": {
+      "fullSchedule": "unspecified",
+      "firstDue": "unspecified",
+      "credits": "unspecified",
+      "refund": "unspecified"
+    },
+    "bil.Commission.dispute": {
+      "dispute": "unspecified",
+      "adjustmentLineWhenAccepted": "unspecified"
+    },
+    "bil.Commission.statements": {
+      "items": [
+        {
+          "statementsLines": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "bil.Delinquency.get": {
+      "process": "unspecified"
+    },
+    "bil.Disbursement.get": {
+      "disbursement": "unspecified"
+    },
+    "bil.Disbursement.list": {
+      "items": [
+        {
+          "disbursement": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "bil.Disbursement.request": {
+      "disbursementId": "01921317-c3c0-783f-8112-1fe12c3961f4",
+      "status": "Requested",
+      "sourceType": "sample",
+      "sourceId": "sample",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "method": "SAMPLE_CODE",
+      "requestedValueDate": "2026-10-07",
+      "maskedPayeeAccount": "sample"
+    },
+    "bil.Disbursement.stop": {
+      "disbursement": {
+        "disbursementId": "0192f509-2f32-7d35-8002-f5719f81dcd6",
+        "status": "Requested",
+        "sourceType": "sample",
+        "sourceId": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "method": "SAMPLE_CODE",
+        "requestedValueDate": "2026-10-07",
+        "maskedPayeeAccount": "sample"
+      },
+      "stoppable": true,
+      "reversalEntries": [
+        "unspecified"
+      ],
+      "sourcePayableRestored": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "bil.Disbursement.void": {
+      "disbursement": {
+        "disbursementId": "01929558-63f6-7c26-8f3f-be6c99cb55fc",
+        "status": "Requested",
+        "sourceType": "sample",
+        "sourceId": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "method": "SAMPLE_CODE",
+        "requestedValueDate": "2026-10-07",
+        "maskedPayeeAccount": "sample"
+      },
+      "reversalEntries": [
+        "unspecified"
+      ],
+      "sourcePayableRestored": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "bil.DownPayment.initiate": {
+      "status": "NOT_REQUIRED",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paymentReference": "sample",
+      "qrPayload": "sample",
+      "paymentLink": "https://contracts.invalid/sample"
+    },
+    "bil.DownPayment.status": {
+      "status": "NOT_REQUIRED",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "bil.Dsar.erase": {
+      "perObjectOutcome": "unspecified"
+    },
+    "bil.Dsar.export": {
+      "export": "unspecified",
+      "outcome": "unspecified"
+    },
+    "bil.Dsar.restrict": {
+      "restrictionOutcomePerObjectReason": "unspecified"
+    },
+    "bil.Import.convertCurrency": {
+      "conversionReport": "unspecified",
+      "residuals": "unspecified"
+    },
+    "bil.Import.reverse": {
+      "reversalReportPerObject": "unspecified"
+    },
+    "bil.IntermediaryCollection.report": {
+      "perLineOutcome": "unspecified"
+    },
+    "bil.Invoice.get": {
+      "invoiceItems": "unspecified",
+      "allocations": "unspecified",
+      "fiscalStatus": "unspecified",
+      "deliveryStatus": "unspecified"
+    },
+    "bil.Invoice.list": {
+      "items": [
+        {
+          "invoiceItems": "unspecified",
+          "allocations": "unspecified",
+          "fiscalStatus": "unspecified",
+          "deliveryStatus": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "bil.Ledger.balance": {
+      "entries": [
+        "unspecified"
+      ],
+      "balances": "unspecified"
+    },
+    "bil.Ledger.query": {
+      "items": [
+        {
+          "entries": [
+            "unspecified"
+          ],
+          "balances": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "bil.Mandate.create": {
+      "mandate": "2026-10-07"
+    },
+    "bil.Mandate.sign": {
+      "mandate": "2026-10-07"
+    },
+    "bil.PayeeAccount.create": {
+      "payeeAccountId": "0192f68e-85ea-78d6-8deb-435e099d4138",
+      "verificationStatus": "unspecified",
+      "coolingOffUntil": "unspecified"
+    },
+    "bil.PayeeAccount.get": {
+      "accountsPeriods": "unspecified",
+      "verification": "unspecified",
+      "coolingOff": "unspecified"
+    },
+    "bil.PayeeAccount.verify": {
+      "match": "unspecified",
+      "closeMatch": "unspecified",
+      "noMatch": "unspecified",
+      "notAvailable": "unspecified",
+      "checkedAt": "2026-10-07T09:00:00Z"
+    },
+    "bil.Payment.take": {
+      "receiptOrLink": "unspecified",
+      "allocationPreview": "unspecified"
+    },
+    "bil.PaymentPlan.change": {
+      "planInstance": "unspecified",
+      "schedule": "unspecified"
+    },
+    "bil.PaymentPlan.list": {
+      "plans": [
+        {
+          "planCode": "SAMPLE_CODE",
+          "planVersion": "SAMPLE_CODE"
+        }
+      ],
+      "exclusions": [
+        {
+          "planCode": "SAMPLE_CODE",
+          "reason": "SAMPLE_CODE"
+        }
+      ]
+    },
+    "bil.PaymentPlan.select": {
+      "planInstanceId": "0192f290-07f5-767d-804a-0d2fb3d26d06",
+      "planCode": "SAMPLE_CODE",
+      "planVersion": "SAMPLE_CODE",
+      "downPayment": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "schedule": [
+        {
+          "dueDate": "2026-10-07",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
+    },
+    "bil.Receipt.get": {
+      "receipt": "unspecified",
+      "allocations": "unspecified",
+      "reversals": "unspecified"
+    },
+    "bil.Receivable.register": {
+      "receivableId": "0192116f-7bd7-7332-858b-c8592b07491f",
+      "paymentReference": "unspecified"
+    },
+    "bil.Reconciliation.fin": {
+      "controlTotalsPerAccountAndEvent": "unspecified",
+      "entryIdsOnRequest": "unspecified"
+    },
+    "bil.Refund.decide": {
+      "refund": "unspecified",
+      "disbursementIdOnApproval": "unspecified"
+    },
+    "bil.Refund.get": {
+      "refund": "unspecified"
+    },
+    "bil.Refund.list": {
+      "items": [
+        {
+          "refund": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "bil.TaxLevy.detail": {
+      "totals": "unspecified",
+      "detail": "unspecified"
+    },
+    "bil.TaxLevy.periods": {
+      "totals": "unspecified",
+      "detail": "unspecified"
+    }
+  },
+  "schemas": {
+    "AccountCurrentDisputeRequest": {
+      "statementId": "01929e1a-0a38-7487-88ef-9efbe0f55c94",
+      "itemIds": [
+        "0192b7ee-7887-7d82-8540-8ad201a6e6e2"
+      ],
+      "reason": "unspecified"
+    },
+    "AccountCurrentDisputeResponse": {
+      "dispute": "unspecified",
+      "heldItems": "unspecified"
+    },
+    "AccountCurrentGetResponse": {
+      "statement": "unspecified",
+      "items": [
+        "unspecified"
+      ]
+    },
+    "AccountCurrentListItem": {
+      "statement": "unspecified",
+      "items": [
+        "unspecified"
+      ]
+    },
+    "AccountCurrentListPage": {
+      "items": [
+        {
+          "statement": "unspecified",
+          "items": [
+            "unspecified"
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "AllocationAllocateRequest": {
+      "receipt": "unspecified",
+      "lines": [
+        "unspecified"
+      ]
+    },
+    "AllocationAllocateResponse": {
+      "allocations": "unspecified"
+    },
+    "AllocationReallocateRequest": {
+      "receipt": "unspecified",
+      "lines": [
+        "unspecified"
+      ]
+    },
+    "AllocationReallocateResponse": {
+      "allocations": "unspecified"
+    },
+    "AllocationUnallocateRequest": {
+      "receipt": "unspecified",
+      "lines": [
+        "unspecified"
+      ]
+    },
+    "AllocationUnallocateResponse": {
+      "allocations": "unspecified"
+    },
+    "BillingAccountAttachTermRequest": {
+      "termRef": "unspecified",
+      "targetAccount": "unspecified",
+      "billedItemsChoice": "unspecified"
+    },
+    "BillingAccountAttachTermResponse": {
+      "planInstance": "unspecified",
+      "preview": "unspecified"
+    },
+    "BillingAccountChangePayerRequest": {
+      "newPayer": "unspecified",
+      "effectiveDate": "2026-10-07",
+      "reason": "unspecified"
+    },
+    "BillingAccountChangePayerResponse": {
+      "account": "unspecified",
+      "approvalRef": "unspecified"
+    },
+    "BillingAccountCloseRequest": {
+      "payer": "unspecified",
+      "currency": "EUR",
+      "preferences": "unspecified",
+      "criteria": "unspecified"
+    },
+    "BillingAccountCloseResponse": {
+      "account": "unspecified",
+      "balancesByState": "unspecified"
+    },
+    "BillingAccountCreateRequest": {
+      "payer": "unspecified",
+      "currency": "EUR",
+      "preferences": "unspecified",
+      "criteria": "unspecified"
+    },
+    "BillingAccountCreateResponse": {
+      "account": "unspecified",
+      "balancesByState": "unspecified"
+    },
+    "BillingAccountGetResponse": {
+      "account": "unspecified",
+      "balancesByState": "unspecified"
+    },
+    "BillingAccountMoveTermRequest": {
+      "termRef": "unspecified",
+      "targetAccount": "unspecified",
+      "billedItemsChoice": "unspecified"
+    },
+    "BillingAccountMoveTermResponse": {
+      "planInstance": "unspecified",
+      "preview": "unspecified"
+    },
+    "BillingAccountReopenRequest": {
+      "payer": "unspecified",
+      "currency": "EUR",
+      "preferences": "unspecified",
+      "criteria": "unspecified"
+    },
+    "BillingAccountReopenResponse": {
+      "account": "unspecified",
+      "balancesByState": "unspecified"
+    },
+    "BillingAccountSearchItem": {
+      "account": "unspecified",
+      "balancesByState": "unspecified"
+    },
+    "BillingAccountSearchPage": {
+      "items": [
+        {
+          "account": "unspecified",
+          "balancesByState": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "BillingAccountUpdateRequest": {
+      "payer": "unspecified",
+      "currency": "EUR",
+      "preferences": "unspecified",
+      "criteria": "unspecified"
+    },
+    "BillingAccountUpdateResponse": {
+      "account": "unspecified",
+      "balancesByState": "unspecified"
+    },
+    "BillingPreviewComputeRequest": {
+      "quoteJobTerm": "unspecified",
+      "hypotheticalPlan": "unspecified"
+    },
+    "BillingPreviewComputeResponse": {
+      "fullSchedule": "unspecified",
+      "firstDue": "unspecified",
+      "credits": "unspecified",
+      "refund": "unspecified"
+    },
+    "CommissionCalculationsItem": {
+      "lines": [
+        "unspecified"
+      ],
+      "statements": "unspecified",
+      "run": "unspecified"
+    },
+    "CommissionCalculationsPage": {
+      "items": [
+        {
+          "lines": [
+            "unspecified"
+          ],
+          "statements": "unspecified",
+          "run": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "CommissionDisputeRequest": {
+      "statementId": "01923cec-c87b-75eb-8a24-6766a3e2fca0",
+      "lineIds": [
+        "01922d12-9671-7f02-89fb-136f7782c50e"
+      ],
+      "reason": "unspecified"
+    },
+    "CommissionDisputeResponse": {
+      "dispute": "unspecified",
+      "adjustmentLineWhenAccepted": "unspecified"
+    },
+    "CommissionRunPaymentsRequest": {
+      "intermediary": "unspecified",
+      "period": "unspecified"
+    },
+    "CommissionRunPaymentsResponse": {
+      "lines": [
+        "unspecified"
+      ],
+      "statements": "unspecified",
+      "run": "unspecified"
+    },
+    "CommissionSimulateRequest": {
+      "draftVersion": "unspecified",
+      "period": "unspecified"
+    },
+    "CommissionSimulateResponse": {
+      "totals": "unspecified"
+    },
+    "CommissionStatementsItem": {
+      "statementsLines": "unspecified"
+    },
+    "CommissionStatementsPage": {
+      "items": [
+        {
+          "statementsLines": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DelinquencyArrangeRequest": {
+      "process": "unspecified",
+      "data": "unspecified"
+    },
+    "DelinquencyArrangeResponse": {
+      "process": "unspecified"
+    },
+    "DelinquencyGetResponse": {
+      "process": "unspecified"
+    },
+    "DelinquencyListItem": {
+      "process": "unspecified"
+    },
+    "DelinquencyListPage": {
+      "items": [
+        {
+          "process": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DelinquencyRecordContactRequest": {
+      "process": "unspecified",
+      "data": "unspecified"
+    },
+    "DelinquencyRecordContactResponse": {
+      "process": "unspecified"
+    },
+    "DelinquencyReleaseHoldRequest": {
+      "process": "unspecified",
+      "data": "unspecified"
+    },
+    "DelinquencyReleaseHoldResponse": {
+      "process": "unspecified"
+    },
+    "DisbursementBatchApproveReleaseRequest": {
+      "bankAccount": "unspecified",
+      "valueDate": "2026-10-07"
+    },
+    "DisbursementBatchApproveReleaseResponse": {
+      "batch": "unspecified",
+      "fileRef": "unspecified"
+    },
+    "DisbursementBatchPrepareRequest": {
+      "bankAccount": "unspecified",
+      "valueDate": "2026-10-07"
+    },
+    "DisbursementBatchPrepareResponse": {
+      "batch": "unspecified",
+      "fileRef": "unspecified"
+    },
+    "DisbursementBatchReleaseRequest": {
+      "bankAccount": "unspecified",
+      "valueDate": "2026-10-07"
+    },
+    "DisbursementBatchReleaseResponse": {
+      "batch": "unspecified",
+      "fileRef": "unspecified"
+    },
+    "DisbursementGetResponse": {
+      "disbursement": "unspecified"
+    },
+    "DisbursementListItem": {
+      "disbursement": "unspecified"
+    },
+    "DisbursementListPage": {
+      "items": [
+        {
+          "disbursement": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DisbursementRequestRequest": {
+      "sourceType": "sample",
+      "sourceId": "sample",
+      "payeePartyId": "0192cdfb-6a9f-7ff5-8518-16377b9655e7",
+      "coPayees": [
+        "019266f1-cae3-7637-805e-f64fc2baa1a8"
+      ],
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "method": "SAMPLE_CODE",
+      "payeeAccountId": "01926ee9-b2af-71f6-8bbd-7f09ae163d80",
+      "cardToken": "sample",
+      "offsetInstruction": {
+        "note": "sample"
+      },
+      "requestedValueDate": "2026-10-07",
+      "approvalEvidenceRef": "sample",
+      "purposeText": "sample",
+      "statementReference": "sample",
+      "returnReference": "sample"
+    },
+    "DisbursementRequestResponse": {
+      "disbursementId": "0192b5f1-23f6-72a8-8d48-40cb663b2461",
+      "status": "Requested",
+      "sourceType": "sample",
+      "sourceId": "sample",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "method": "SAMPLE_CODE",
+      "requestedValueDate": "2026-10-07",
+      "maskedPayeeAccount": "sample"
+    },
+    "DisbursementStopRequest": {
+      "disbursementId": "0192f765-e9a1-753a-83d6-fbc4acf42d3d",
+      "reason": "SAMPLE_CODE"
+    },
+    "DisbursementStopResponse": {
+      "disbursement": {
+        "disbursementId": "01926b50-b345-733b-8b0f-fbbca0d3ea88",
+        "status": "Requested",
+        "sourceType": "sample",
+        "sourceId": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "method": "SAMPLE_CODE",
+        "requestedValueDate": "2026-10-07",
+        "maskedPayeeAccount": "sample"
+      },
+      "stoppable": true,
+      "reversalEntries": [
+        "unspecified"
+      ],
+      "sourcePayableRestored": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "DisbursementVoidRequest": {
+      "disbursementId": "0192dee4-fb40-733e-8379-023a0f2daa29",
+      "reason": "SAMPLE_CODE"
+    },
+    "DisbursementVoidResponse": {
+      "disbursement": {
+        "disbursementId": "0192f053-d740-777e-8370-3508852021ec",
+        "status": "Requested",
+        "sourceType": "sample",
+        "sourceId": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "method": "SAMPLE_CODE",
+        "requestedValueDate": "2026-10-07",
+        "maskedPayeeAccount": "sample"
+      },
+      "reversalEntries": [
+        "unspecified"
+      ],
+      "sourcePayableRestored": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "DownPaymentInitiateRequest": {
+      "jobId": "019219ec-daf7-75fd-8169-973dc8af7bad",
+      "method": "SAMPLE_CODE"
+    },
+    "DownPaymentInitiateResponse": {
+      "status": "NOT_REQUIRED",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paymentReference": "sample",
+      "qrPayload": "sample",
+      "paymentLink": "https://contracts.invalid/sample"
+    },
+    "DownPaymentStatusResponse": {
+      "status": "NOT_REQUIRED",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "DsarEraseRequest": {
+      "partyId": "0192ec5a-1fdf-755f-82e9-133c39988e83",
+      "dsarId": "0192c508-7c67-785f-82c5-ad30759f0db1"
+    },
+    "DsarEraseResponse": {
+      "perObjectOutcome": "unspecified"
+    },
+    "DsarExportRequest": {
+      "partyId": "01924b63-4fd4-723f-85d5-b7c1c91cfff2"
+    },
+    "DsarExportResponse": {
+      "export": "unspecified",
+      "outcome": "unspecified"
+    },
+    "DsarRestrictRequest": {
+      "partyId": "01920b63-602a-717d-85b6-cb0f48cf7bd1",
+      "dsarId": "01926b14-da55-78cb-8d63-d06c74b08a1f",
+      "scope": "unspecified"
+    },
+    "DsarRestrictResponse": {
+      "restrictionOutcomePerObjectReason": "unspecified"
+    },
+    "ImportConvertCurrencyRequest": {
+      "planId": "0192d346-ba78-752d-830e-777ae4046aeb"
+    },
+    "ImportConvertCurrencyResponse": {
+      "conversionReport": "unspecified",
+      "residuals": "unspecified"
+    },
+    "ImportReverseRequest": {
+      "batchId": "01925ded-f26d-7751-8d1d-3fce885f2700"
+    },
+    "ImportReverseResponse": {
+      "reversalReportPerObject": "unspecified"
+    },
+    "IntermediaryCollectionReportFileRequest": {
+      "producerCode": "unspecified",
+      "items": [
+        "unspecified"
+      ],
+      "receiptData": "unspecified"
+    },
+    "IntermediaryCollectionReportFileResponse": {
+      "perLineOutcome": "unspecified"
+    },
+    "IntermediaryCollectionReportRequest": {
+      "producerCode": "unspecified",
+      "items": [
+        "unspecified"
+      ],
+      "receiptData": "unspecified"
+    },
+    "IntermediaryCollectionReportResponse": {
+      "perLineOutcome": "unspecified"
+    },
+    "InvoiceDisputeRequest": {
+      "ids": [
+        "01922cd4-6f62-7272-8f85-d2cab0bc1d2a"
+      ],
+      "filters": "unspecified"
+    },
+    "InvoiceDisputeResponse": {
+      "invoiceItems": "unspecified",
+      "allocations": "unspecified",
+      "fiscalStatus": "unspecified",
+      "deliveryStatus": "unspecified"
+    },
+    "InvoiceGetResponse": {
+      "invoiceItems": "unspecified",
+      "allocations": "unspecified",
+      "fiscalStatus": "unspecified",
+      "deliveryStatus": "unspecified"
+    },
+    "InvoiceListItem": {
+      "invoiceItems": "unspecified",
+      "allocations": "unspecified",
+      "fiscalStatus": "unspecified",
+      "deliveryStatus": "unspecified"
+    },
+    "InvoiceListPage": {
+      "items": [
+        {
+          "invoiceItems": "unspecified",
+          "allocations": "unspecified",
+          "fiscalStatus": "unspecified",
+          "deliveryStatus": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "InvoiceSendCopyRequest": {
+      "ids": [
+        "01920c11-9623-7f72-85fd-4cb18ddecadd"
+      ],
+      "filters": "unspecified"
+    },
+    "InvoiceSendCopyResponse": {
+      "invoiceItems": "unspecified",
+      "allocations": "unspecified",
+      "fiscalStatus": "unspecified",
+      "deliveryStatus": "unspecified"
+    },
+    "LedgerBalanceResponse": {
+      "entries": [
+        "unspecified"
+      ],
+      "balances": "unspecified"
+    },
+    "LedgerQueryItem": {
+      "entries": [
+        "unspecified"
+      ],
+      "balances": "unspecified"
+    },
+    "LedgerQueryPage": {
+      "items": [
+        {
+          "entries": [
+            "unspecified"
+          ],
+          "balances": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "MandateAmendRequest": {
+      "account": "unspecified",
+      "instrument": "unspecified",
+      "signatureEvidence": "unspecified"
+    },
+    "MandateAmendResponse": {
+      "mandate": "2026-10-07"
+    },
+    "MandateCancelRequest": {
+      "account": "unspecified",
+      "instrument": "unspecified",
+      "signatureEvidence": "unspecified"
+    },
+    "MandateCancelResponse": {
+      "mandate": "2026-10-07"
+    },
+    "MandateCreateRequest": {
+      "account": "unspecified",
+      "instrument": "unspecified",
+      "signatureEvidence": "unspecified"
+    },
+    "MandateCreateResponse": {
+      "mandate": "2026-10-07"
+    },
+    "MandateGetResponse": {
+      "mandate": "2026-10-07"
+    },
+    "MandateSignRequest": {
+      "account": "unspecified",
+      "instrument": "unspecified",
+      "signatureEvidence": "unspecified"
+    },
+    "MandateSignResponse": {
+      "mandate": "2026-10-07"
+    },
+    "PayeeAccountCreateRequest": {
+      "partyId": "01928a36-8080-7ad1-860d-c0cc8094beb2",
+      "purpose": "unspecified",
+      "iban": "unspecified",
+      "holderName": "unspecified",
+      "source": "unspecified",
+      "evidenceRef": "unspecified"
+    },
+    "PayeeAccountCreateResponse": {
+      "payeeAccountId": "0192b074-eafb-79cf-8c4a-8318d7c968c0",
+      "verificationStatus": "unspecified",
+      "coolingOffUntil": "unspecified"
+    },
+    "PayeeAccountGetResponse": {
+      "accountsPeriods": "unspecified",
+      "verification": "unspecified",
+      "coolingOff": "unspecified"
+    },
+    "PayeeAccountListItem": {
+      "accountsPeriods": "unspecified",
+      "verification": "unspecified",
+      "coolingOff": "unspecified"
+    },
+    "PayeeAccountListPage": {
+      "items": [
+        {
+          "accountsPeriods": "unspecified",
+          "verification": "unspecified",
+          "coolingOff": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PayeeAccountVerifyRequest": {
+      "payeeAccountId": "01927af7-5ad6-753a-8f7f-056d03b656b8"
+    },
+    "PayeeAccountVerifyResponse": {
+      "match": "unspecified",
+      "closeMatch": "unspecified",
+      "noMatch": "unspecified",
+      "notAvailable": "unspecified",
+      "checkedAt": "2026-10-07T09:00:00Z"
+    },
+    "PaymentInstrumentAddRequest": {
+      "iban": "unspecified",
+      "holder": "unspecified",
+      "orCardToken": "unspecified"
+    },
+    "PaymentInstrumentAddResponse": {
+      "instrument": "unspecified",
+      "vopResult": "unspecified"
+    },
+    "PaymentInstrumentListItem": {
+      "instrument": "unspecified",
+      "vopResult": "unspecified"
+    },
+    "PaymentInstrumentListPage": {
+      "items": [
+        {
+          "instrument": "unspecified",
+          "vopResult": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PaymentInstrumentRemoveRequest": {
+      "iban": "unspecified",
+      "holder": "unspecified",
+      "orCardToken": "unspecified"
+    },
+    "PaymentInstrumentRemoveResponse": {
+      "instrument": "unspecified",
+      "vopResult": "unspecified"
+    },
+    "PaymentPlanChangeRequest": {
+      "term": "unspecified",
+      "plan": "unspecified",
+      "method": "unspecified",
+      "dueDay": "unspecified"
+    },
+    "PaymentPlanChangeResponse": {
+      "planInstance": "unspecified",
+      "schedule": "unspecified"
+    },
+    "PaymentPlanListResponse": {
+      "plans": [
+        {
+          "planCode": "SAMPLE_CODE",
+          "planVersion": "SAMPLE_CODE"
+        }
+      ],
+      "exclusions": [
+        {
+          "planCode": "SAMPLE_CODE",
+          "reason": "SAMPLE_CODE"
+        }
+      ]
+    },
+    "PaymentPlanSelectRequest": {
+      "termId": "01929a01-6f71-71df-8ba3-42e0445d5631",
+      "planCode": "SAMPLE_CODE",
+      "method": "SAMPLE_CODE",
+      "dueDay": 1
+    },
+    "PaymentPlanSelectResponse": {
+      "planInstanceId": "01927111-0fd5-7aa5-8d37-c341e5c637ab",
+      "planCode": "SAMPLE_CODE",
+      "planVersion": "SAMPLE_CODE",
+      "downPayment": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "schedule": [
+        {
+          "dueDate": "2026-10-07",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
+    },
+    "PaymentTakeRequest": {
+      "account": "unspecified",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "method": "unspecified"
+    },
+    "PaymentTakeResponse": {
+      "receiptOrLink": "unspecified",
+      "allocationPreview": "unspecified"
+    },
+    "ReceiptGetResponse": {
+      "receipt": "unspecified",
+      "allocations": "unspecified",
+      "reversals": "unspecified"
+    },
+    "ReceiptListItem": {
+      "receipt": "unspecified",
+      "allocations": "unspecified",
+      "reversals": "unspecified"
+    },
+    "ReceiptListPage": {
+      "items": [
+        {
+          "receipt": "unspecified",
+          "allocations": "unspecified",
+          "reversals": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ReceivableRegisterRequest": {
+      "source": "unspecified",
+      "counterparty": "unspecified",
+      "references": "unspecified",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "currency": "EUR",
+      "dueDate": "2026-10-07"
+    },
+    "ReceivableRegisterResponse": {
+      "receivableId": "01929abb-78af-787b-859e-3ef69bf78df6",
+      "paymentReference": "unspecified"
+    },
+    "ReconciliationBankRequest": {
+      "account": "unspecified",
+      "date": "2026-10-07"
+    },
+    "ReconciliationBankResponse": {
+      "status": "unspecified",
+      "breaks": "unspecified"
+    },
+    "ReconciliationFinRequest": {
+      "legalEntity": "unspecified",
+      "accountingDate": "2026-10-07",
+      "subLedgerAccount": "unspecified",
+      "eventType": "unspecified"
+    },
+    "ReconciliationFinResponse": {
+      "controlTotalsPerAccountAndEvent": "unspecified",
+      "entryIdsOnRequest": "unspecified"
+    },
+    "ReconciliationInvariantsRequest": {
+      "account": "unspecified",
+      "date": "2026-10-07"
+    },
+    "ReconciliationInvariantsResponse": {
+      "status": "unspecified",
+      "breaks": "unspecified"
+    },
+    "RefundDecideRequest": {
+      "refundId": "01924500-cd90-7e3c-8b8e-58769b018b76",
+      "decision": "unspecified",
+      "comment": "unspecified"
+    },
+    "RefundDecideResponse": {
+      "refund": "unspecified",
+      "disbursementIdOnApproval": "unspecified"
+    },
+    "RefundGetResponse": {
+      "refund": "unspecified"
+    },
+    "RefundListItem": {
+      "refund": "unspecified"
+    },
+    "RefundListPage": {
+      "items": [
+        {
+          "refund": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "RefundProposeRequest": {
+      "account": "unspecified",
+      "credits": "unspecified",
+      "decision": "unspecified"
+    },
+    "RefundProposeResponse": {
+      "refund": "unspecified"
+    },
+    "RefundResubmitRequest": {
+      "account": "unspecified",
+      "credits": "unspecified",
+      "decision": "unspecified"
+    },
+    "RefundResubmitResponse": {
+      "refund": "unspecified"
+    },
+    "SuspenseListItem": {
+      "items": [
+        "unspecified"
+      ],
+      "suggestions": "unspecified"
+    },
+    "SuspenseListPage": {
+      "items": [
+        {
+          "items": [
+            "unspecified"
+          ],
+          "suggestions": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "SuspenseRefundToSenderRequest": {
+      "filters": "unspecified",
+      "item": "unspecified"
+    },
+    "SuspenseRefundToSenderResponse": {
+      "items": [
+        "unspecified"
+      ],
+      "suggestions": "unspecified"
+    },
+    "SuspenseSuggestRequest": {
+      "filters": "unspecified",
+      "item": "unspecified"
+    },
+    "SuspenseSuggestResponse": {
+      "items": [
+        "unspecified"
+      ],
+      "suggestions": "unspecified"
+    },
+    "SuspenseTransferRequest": {
+      "filters": "unspecified",
+      "item": "unspecified"
+    },
+    "SuspenseTransferResponse": {
+      "items": [
+        "unspecified"
+      ],
+      "suggestions": "unspecified"
+    },
+    "TaxLevyDetailResponse": {
+      "totals": "unspecified",
+      "detail": "unspecified"
+    },
+    "TaxLevyPeriodsResponse": {
+      "totals": "unspecified",
+      "detail": "unspecified"
+    },
+    "TaxLevyRequestLevyPaymentRequest": {
+      "type": "unspecified",
+      "period": "unspecified"
+    },
+    "TaxLevyRequestLevyPaymentResponse": {
+      "totals": "unspecified",
+      "detail": "unspecified"
+    },
+    "TransferMoneyRequest": {
+      "source": "unspecified",
+      "target": "unspecified",
+      "amounts": [
+        {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      ]
+    },
+    "TransferMoneyResponse": {
+      "entriesPreview": "unspecified"
+    },
+    "WriteOffDecideRequest": {
+      "items": [
+        "unspecified"
+      ],
+      "reason": "unspecified"
+    },
+    "WriteOffDecideResponse": {
+      "writeOff": "unspecified",
+      "postingPreview": "unspecified"
+    },
+    "WriteOffPostRequest": {
+      "items": [
+        "unspecified"
+      ],
+      "reason": "unspecified"
+    },
+    "WriteOffPostResponse": {
+      "writeOff": "unspecified",
+      "postingPreview": "unspecified"
+    },
+    "WriteOffProposeRequest": {
+      "items": [
+        "unspecified"
+      ],
+      "reason": "unspecified"
+    },
+    "WriteOffProposeResponse": {
+      "writeOff": "unspecified",
+      "postingPreview": "unspecified"
+    }
+  }
+}

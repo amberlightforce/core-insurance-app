@@ -1,0 +1,478 @@
+{
+  "responses": {
+    "doc.Archive.get": {
+      "archiveId": "0192b06a-88f0-733e-874f-11be6c81db10",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "doc.Archive.store": {
+      "archiveId": "01920dd5-dbd3-71dc-8714-ee63724eb406",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "doc.Clause.get": {
+      "objects": "unspecified"
+    },
+    "doc.Delivery.evidenceFor": {
+      "statuses": "unspecified",
+      "completeness": "unspecified"
+    },
+    "doc.Delivery.status": {
+      "statuses": "unspecified",
+      "completeness": "unspecified"
+    },
+    "doc.Document.get": {
+      "items": [
+        {
+          "documentsStatuses": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "doc.Document.import": {
+      "archiveIds": [
+        "0192b266-b1d5-7442-81ad-f847201262d0"
+      ],
+      "documentIds": [
+        "0192a869-5c23-7123-8ea9-4f51cd879fa2"
+      ]
+    },
+    "doc.Document.listForObject": {
+      "items": [
+        {
+          "documentsStatuses": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "doc.Document.preview": {
+      "rendition": "unspecified"
+    },
+    "doc.Document.request": {
+      "documentId": "01924637-e43f-71dd-8793-219538569988",
+      "documentNumber": "SAMPLE-000001",
+      "status": "SAMPLE_CODE",
+      "links": [
+        "https://contracts.invalid/sample"
+      ],
+      "templateVersions": [
+        "SAMPLE_CODE"
+      ],
+      "channels": [
+        "SAMPLE_CODE"
+      ],
+      "preview": "sample"
+    },
+    "doc.Document.requestBatch": {
+      "batchId": "01927c69-0e14-7124-84a6-565f7adfd6d6"
+    },
+    "doc.FormPattern.validateReferences": {
+      "perRefResults": "unspecified"
+    },
+    "doc.Ipid.get": {
+      "archiveId": "0192f4fd-4af6-76d0-85fa-5ba5e2f68f92",
+      "documentId": "019257b1-731a-73ae-8008-f81b5fac2212",
+      "link": "https://contracts.invalid/sample"
+    },
+    "doc.ProofOfCover.issue": {
+      "documentId": "01928dbc-0b0a-731a-8f03-0227092cb899",
+      "documentNumber": "SAMPLE-000001"
+    },
+    "doc.Signature.createEnvelope": {
+      "envelope": "unspecified"
+    },
+    "doc.Signature.get": {
+      "envelope": "unspecified"
+    },
+    "doc.Subject.erase": {
+      "perItemOutcomes": "unspecified"
+    },
+    "doc.Subject.export": {
+      "perItemOutcomes": "unspecified"
+    },
+    "doc.Subject.restrict": {
+      "perItemOutcomes": "unspecified"
+    }
+  },
+  "schemas": {
+    "ArchiveAddRenditionRequest": {
+      "binaryStream": "unspecified",
+      "declaredHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "metadata": "unspecified"
+    },
+    "ArchiveAddRenditionResponse": {
+      "archiveId": "01921627-8b32-7143-8ace-d1d5626f5265",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ArchiveGetResponse": {
+      "archiveId": "0192b141-a9c5-7ee3-89a6-2c265c50af67",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ArchiveListForObjectItem": {
+      "archiveId": "01927d72-52b7-75e8-8f71-30a78da98158",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ArchiveListForObjectPage": {
+      "items": [
+        {
+          "archiveId": "01923aa3-76bb-7623-806e-3f7bc0defe44",
+          "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ArchiveSetRetentionClassRequest": {
+      "binaryStream": "unspecified",
+      "declaredHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "metadata": "unspecified"
+    },
+    "ArchiveSetRetentionClassResponse": {
+      "archiveId": "0192166a-5644-7157-8b7f-21dda5b0befe",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ArchiveStoreRequest": {
+      "binaryStream": "unspecified",
+      "declaredHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "metadata": "unspecified"
+    },
+    "ArchiveStoreResponse": {
+      "archiveId": "01927fbc-59ed-747f-8e5f-54292ca2e8b1",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ArchiveVerifyRequest": {
+      "binaryStream": "unspecified",
+      "declaredHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "metadata": "unspecified"
+    },
+    "ArchiveVerifyResponse": {
+      "archiveId": "01928e59-5049-7188-8466-e0300a253146",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "BindingResolveRequest": {
+      "productVersion": "unspecified",
+      "form": "unspecified",
+      "language": "el",
+      "channel": "unspecified"
+    },
+    "BindingResolveResponse": {
+      "templateVersion": "unspecified"
+    },
+    "ClauseGetResponse": {
+      "objects": "unspecified"
+    },
+    "DeliveryEvidenceForResponse": {
+      "statuses": "unspecified",
+      "completeness": "unspecified"
+    },
+    "DeliveryStatusResponse": {
+      "statuses": "unspecified",
+      "completeness": "unspecified"
+    },
+    "DocumentDeleteDraftRequest": {
+      "documentId": "0192dfcb-d99c-725e-8730-bf1fff52d546",
+      "reason": "unspecified"
+    },
+    "DocumentDeleteDraftResponse": {
+      "status": "unspecified"
+    },
+    "DocumentGetItem": {
+      "documentsStatuses": "unspecified"
+    },
+    "DocumentGetPage": {
+      "items": [
+        {
+          "documentsStatuses": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DocumentHideRequest": {
+      "documentId": "0192eb60-ed11-764d-8d0b-f8082d78137e",
+      "reason": "unspecified"
+    },
+    "DocumentHideResponse": {
+      "status": "unspecified"
+    },
+    "DocumentImportRequest": {
+      "binary": "unspecified",
+      "metadata": "unspecified",
+      "legacyRefs": "unspecified"
+    },
+    "DocumentImportResponse": {
+      "archiveIds": [
+        "01922e3f-83c0-7f21-8767-8246a7f8d9e0"
+      ],
+      "documentIds": [
+        "01928cee-dd88-769b-8339-86b1d3b5c10c"
+      ]
+    },
+    "DocumentListForObjectItem": {
+      "documentsStatuses": "unspecified"
+    },
+    "DocumentListForObjectPage": {
+      "items": [
+        {
+          "documentsStatuses": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DocumentPreviewResponse": {
+      "rendition": "unspecified"
+    },
+    "DocumentRenderAsOfRequest": {
+      "subject": "unspecified",
+      "type": "unspecified",
+      "wordingMode": "unspecified"
+    },
+    "DocumentRenderAsOfResponse": {
+      "documentId": "01925bd6-ba15-75fc-8d17-9cc919d31e85"
+    },
+    "DocumentReprintRequest": {
+      "documentId": "0192f558-e1eb-7039-8d18-990bbdb6176e",
+      "reason": "unspecified"
+    },
+    "DocumentReprintResponse": {
+      "link": "unspecified"
+    },
+    "DocumentRequestBatchRequest": {
+      "items": [
+        "unspecified"
+      ],
+      "batchKey": "unspecified",
+      "window": "unspecified"
+    },
+    "DocumentRequestBatchResponse": {
+      "batchId": "0192d093-b9ae-7fd3-8624-6bb913ac1c6f"
+    },
+    "DocumentRequestRequest": {
+      "documentType": "SAMPLE_CODE",
+      "subject": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "0192fbf5-5c23-7493-83df-fd524a7adad6"
+      },
+      "recipients": [
+        {
+          "note": "sample"
+        }
+      ],
+      "languageOverride": "el",
+      "payloadSupplement": {
+        "note": "sample"
+      },
+      "deliveryInstruction": {
+        "mode": "RESOLVE",
+        "channel": "SAMPLE_CODE"
+      },
+      "sync": true
+    },
+    "DocumentRequestResponse": {
+      "documentId": "019211c6-54f2-7a6e-881d-842fab203b93",
+      "documentNumber": "SAMPLE-000001",
+      "status": "SAMPLE_CODE",
+      "links": [
+        "https://contracts.invalid/sample"
+      ],
+      "templateVersions": [
+        "SAMPLE_CODE"
+      ],
+      "channels": [
+        "SAMPLE_CODE"
+      ],
+      "preview": "sample"
+    },
+    "DocumentResendRequest": {
+      "documentId": "019230de-1513-7e94-82a1-f682006caabb",
+      "recipient": "unspecified",
+      "channel": "unspecified",
+      "reason": "unspecified"
+    },
+    "DocumentResendResponse": {
+      "deliveryId": "01929bc4-f5e4-739f-878c-b204a376a83f"
+    },
+    "DocumentSupersedeRequest": {
+      "documentId": "01924cd1-5c04-7eaf-8068-d7c63059362b",
+      "replacement": "unspecified",
+      "reason": "unspecified"
+    },
+    "DocumentSupersedeResponse": {
+      "status": "unspecified"
+    },
+    "DocumentTypeListItem": {
+      "types": "unspecified"
+    },
+    "DocumentTypeListPage": {
+      "items": [
+        {
+          "types": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "DocumentUnhideRequest": {
+      "documentId": "01923405-8c93-73d0-80f9-c41f1d0e8e23",
+      "reason": "unspecified"
+    },
+    "DocumentUnhideResponse": {
+      "status": "unspecified"
+    },
+    "DocumentWithdrawRequest": {
+      "documentId": "01927396-332a-70b6-8cfb-54ec489419b5",
+      "replacement": "unspecified",
+      "reason": "unspecified"
+    },
+    "DocumentWithdrawResponse": {
+      "status": "unspecified"
+    },
+    "EvidencePackExportRequest": {
+      "packId": "01925f46-ce3c-7d5b-8276-b07016710155",
+      "filters": "unspecified"
+    },
+    "EvidencePackExportResponse": {
+      "sealedArchive": "unspecified"
+    },
+    "EvidencePackGetResponse": {
+      "sealedArchive": "unspecified"
+    },
+    "FormPatternValidateReferencesRequest": {
+      "productVersion": "unspecified",
+      "refs": "unspecified"
+    },
+    "FormPatternValidateReferencesResponse": {
+      "perRefResults": "unspecified"
+    },
+    "FormsAddManualRequest": {
+      "jobId": "01928800-59f9-7532-8a1c-fcc89026c2c2",
+      "version": "unspecified",
+      "pattern": "unspecified",
+      "reason": "unspecified"
+    },
+    "FormsAddManualResponse": {
+      "formSet": "unspecified"
+    },
+    "FormsGetResponse": {
+      "formSet": "unspecified"
+    },
+    "FormsInferRequest": {
+      "jobId": "0192a107-1c84-7b09-8433-58b52e652ca0",
+      "version": "unspecified"
+    },
+    "FormsInferResponse": {
+      "formSet": "unspecified"
+    },
+    "FormsRemoveManualRequest": {
+      "jobId": "01921e1c-2ac7-7482-8f00-8e19fe291729",
+      "version": "unspecified",
+      "pattern": "unspecified",
+      "reason": "unspecified"
+    },
+    "FormsRemoveManualResponse": {
+      "formSet": "unspecified"
+    },
+    "IpidGetResponse": {
+      "archiveId": "0192db39-8165-73d1-8963-4e890f3f03fc",
+      "documentId": "01928a64-9ea1-79bb-8e51-e5b7b43616d5",
+      "link": "https://contracts.invalid/sample"
+    },
+    "ProofOfCoverIssueRequest": {
+      "transactionId": "01923bb0-009c-7779-8698-719cd9b8ac60"
+    },
+    "ProofOfCoverIssueResponse": {
+      "documentId": "0192281d-488c-7973-877a-f43010141b1b",
+      "documentNumber": "SAMPLE-000001"
+    },
+    "SignatureCreateEnvelopeRequest": {
+      "documents": [
+        "unspecified"
+      ],
+      "signatories": [
+        "unspecified"
+      ],
+      "level": "unspecified",
+      "deadline": "unspecified"
+    },
+    "SignatureCreateEnvelopeResponse": {
+      "envelope": "unspecified"
+    },
+    "SignatureGetResponse": {
+      "envelope": "unspecified"
+    },
+    "SignatureRemindRequest": {
+      "documents": [
+        "unspecified"
+      ],
+      "signatories": [
+        "unspecified"
+      ],
+      "level": "unspecified",
+      "deadline": "unspecified"
+    },
+    "SignatureRemindResponse": {
+      "envelope": "unspecified"
+    },
+    "SignatureSendRequest": {
+      "documents": [
+        "unspecified"
+      ],
+      "signatories": [
+        "unspecified"
+      ],
+      "level": "unspecified",
+      "deadline": "unspecified"
+    },
+    "SignatureSendResponse": {
+      "envelope": "unspecified"
+    },
+    "SignatureVoidRequest": {
+      "documents": [
+        "unspecified"
+      ],
+      "signatories": [
+        "unspecified"
+      ],
+      "level": "unspecified",
+      "deadline": "unspecified"
+    },
+    "SignatureVoidResponse": {
+      "envelope": "unspecified"
+    },
+    "SubjectEraseRequest": {
+      "partyId": "01923393-d4d7-779e-83cf-384a35719eca",
+      "scope": "unspecified"
+    },
+    "SubjectEraseResponse": {
+      "perItemOutcomes": "unspecified"
+    },
+    "SubjectExportRequest": {
+      "partyId": "0192ab4f-b7fa-75cf-8d02-ab254863cee0",
+      "scope": "unspecified"
+    },
+    "SubjectExportResponse": {
+      "perItemOutcomes": "unspecified"
+    },
+    "SubjectRestrictRequest": {
+      "partyId": "0192f09d-03fa-744e-864d-fd15c4d9403e",
+      "scope": "unspecified"
+    },
+    "SubjectRestrictResponse": {
+      "perItemOutcomes": "unspecified"
+    },
+    "TemplateListItem": {
+      "objects": "unspecified"
+    },
+    "TemplateListPage": {
+      "items": [
+        {
+          "objects": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    }
+  }
+}

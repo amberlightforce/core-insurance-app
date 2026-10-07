@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    F-1c part 3 (D-PRG-07): generates the C# contract types from the published contracts (contracts/events,
+    contracts/openapi) into each owner module's *.Contracts project under Generated/: event payload records,
+    in-process module interfaces with their request/response DTOs, error-code constants, the sandbox doubles in
+    tests/CoreIns.Testing.Contracts and the schema samples the contract tests and fakes use.
+      regenerate:  dotnet run (project tools/CoreIns.ContractGen)
+      CI check:    dotnet run (same project) with the argument "check" prefixed by two dashes; fails when Generated/ is
+                   stale or two runs differ (determinism). "verbose" lists unmapped ids and contract observations.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+</Project>

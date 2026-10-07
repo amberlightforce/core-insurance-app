@@ -37,11 +37,22 @@ jobs:
       - name: Build (warnings are errors)
         run: dotnet build CoreIns.sln --configuration Release --no-restore
 
+      - name: Generated contract code is current and deterministic (tools/CoreIns.ContractGen)
+        run: dotnet run --project tools/CoreIns.ContractGen --configuration Release --no-build -- --check
+
+      - name: Contract schemas and generated samples are valid
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet -r contracts/openapi/requirements.txt
+          python3 contracts/events/validate.py --require-jsonschema --instance tests/CoreIns.Contracts.Tests/Generated/Samples/events/*.json
+          python3 tools/CoreIns.ContractGen/validate_samples.py
+
       - name: Unit, analyser and architecture tests
         run: |
           set -euo pipefail
           for project in tests/*/*.csproj; do
-            case "$project" in *IntegrationTests*) continue ;; esac
+            # CoreIns.Testing.Contracts is a test-support library (sandbox doubles), not a test project.
+            case "$project" in *IntegrationTests*|*/CoreIns.Testing.*) continue ;; esac
             dotnet test --project "$project" --configuration Release --no-build
           done
 

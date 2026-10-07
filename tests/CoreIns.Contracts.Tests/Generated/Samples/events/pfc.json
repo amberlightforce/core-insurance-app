@@ -1,0 +1,686 @@
+[
+  {
+    "eventId": "01927a5b-406a-7894-8bc2-a20cab61133b",
+    "eventType": "ProductReferenceTablePublished",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "ProductReferenceTable",
+    "aggregateId": "01927b09-2e52-722b-86d9-169ecc77d143",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "tableCode": "0192a68b-c9ce-7d85-8cd2-007522123ec7"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "tableCode": "SAMPLE_CODE",
+      "version": "1",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "effectivePeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      }
+    }
+  },
+  {
+    "eventId": "01929ce0-2027-7456-8046-4aa4608634ef",
+    "eventType": "ProductReferenceTablePublished",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "ProductReferenceTable",
+    "aggregateId": "01922452-58c0-7f09-89f3-d7458dd2b4f7",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "tableCode": "01927ad4-14b7-705e-89f4-f6f0aaa20e0a"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "tableCode": "SAMPLE_CODE",
+      "version": "1",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "effectivePeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      }
+    }
+  },
+  {
+    "eventId": "019252b5-cbae-7c83-8bae-9001231ab6d7",
+    "eventType": "ProductRegulatoryAlertRaised",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "0192a65c-fa34-70fc-8be3-c7f16a5b1ca0",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "01929480-f859-74c2-857c-2f68dc204aa3"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "versions": [
+        "1.0"
+      ],
+      "keyOrCodeList": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07",
+      "violationCount": 1
+    }
+  },
+  {
+    "eventId": "01922098-f476-7a6a-87f4-64083e2df774",
+    "eventType": "ProductRegulatoryAlertRaised",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "0192f713-670d-7753-85d3-a3fb8b78038e",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "01921179-e953-7b47-85f7-6146660179cb"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "versions": [
+        "1.0"
+      ],
+      "keyOrCodeList": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07",
+      "violationCount": 1
+    }
+  },
+  {
+    "eventId": "0192da0d-2318-76a2-8725-0611c58ac676",
+    "eventType": "ProductVersionApproved",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "01924995-d547-7e56-8b4f-a9150568bbb8",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "0192b3bd-58ca-7561-8ff5-b4ef52a857f1",
+      "evidencePackId": "01927e07-b087-745a-8c7a-ea6d89a34b44"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "approvals": [
+        {
+          "role": "SAMPLE_CODE",
+          "decidedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "evidencePackId": "01921e9c-85fb-7a6f-8c39-17b3351770a4",
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "0192041e-a706-76a6-865f-75094aea775f",
+    "eventType": "ProductVersionApproved",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "01921481-47a3-72c1-869b-59c819b72c7b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "01929f99-d6c0-7add-897d-23d4a5329286",
+      "evidencePackId": "01926ae2-8965-7219-8dd5-5e7cbb0b9993"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P1",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "approvals": [
+        {
+          "role": "SAMPLE_CODE",
+          "decidedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "evidencePackId": "01922e62-1b01-7ff9-819d-5264c78acdc0",
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "0192aa37-0c31-7f8c-829e-b11dd8b0888e",
+    "eventType": "ProductVersionPublished",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "0192349f-13fb-7604-8920-4d53d5eb2f76",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "01928b5e-8eb5-7418-84e6-6ca945abfe57"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "newBusinessWindow": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "renewalWindow": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "jurisdiction": "GR",
+      "legalEntity": "SAMPLE_CODE",
+      "channels": [
+        "SAMPLE_CODE"
+      ],
+      "ipidChanged": true,
+      "changedAreas": [
+        "SAMPLE_CODE"
+      ],
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "0192545c-e0cd-7921-8f5d-97fd4e939c11",
+    "eventType": "ProductVersionPublished",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "01921ff9-430a-7c25-8155-a2bc394d358d",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "01926d2d-615b-7728-877e-031f37d50631"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "newBusinessWindow": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "renewalWindow": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "jurisdiction": "GR",
+      "legalEntity": "SAMPLE_CODE",
+      "channels": [
+        "SAMPLE_CODE"
+      ],
+      "ipidChanged": true,
+      "changedAreas": [
+        "SAMPLE_CODE"
+      ],
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "0192fbb7-5a73-71a9-80d9-3ddd40af3a6a",
+    "eventType": "ProductVersionRetired",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "0192a28b-c7ea-7ad0-8b06-1f0b0c47876b",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "01925095-fbd2-7885-8f71-167b122a4c76"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "retirementDate": "2026-10-07",
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "0192d7d5-62ad-73c1-818d-a2faf0c9549e",
+    "eventType": "ProductVersionRetired",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "0192d724-8772-756a-8d27-da1745f849ed",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "019269f2-694c-7159-827b-00b0e45abead"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "retirementDate": "2026-10-07",
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "0192f7f0-c3d9-7f17-8e98-4b7fc92a84df",
+    "eventType": "ProductVersionReturned",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "0192efdf-046e-7650-8d6a-2fb8f46e6ca0",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "019288ae-0b71-7048-8600-7f7f95e8b491"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "returnedByRole": "SAMPLE_CODE",
+      "reasonCategory": "SAMPLE_CODE",
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "01924182-e181-7503-8515-c3c871600ea0",
+    "eventType": "ProductVersionReturned",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "01928c8b-9b63-7adc-8ca9-924723694c97",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "0192545c-bed5-7e8d-8de8-784e8b8d0393"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "returnedByRole": "SAMPLE_CODE",
+      "reasonCategory": "SAMPLE_CODE",
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "01925c1e-9842-7c27-8a45-c9a7eaba3e96",
+    "eventType": "ProductVersionScheduled",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "01929b71-9d55-79b0-8123-45418bb054e3",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "01922380-f245-7fb9-86dc-8fe0489d71bc"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "environment": "SAMPLE_CODE",
+      "activationTime": "2026-10-07T09:00:00Z",
+      "newBusinessWindow": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "renewalWindow": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "reason": "SAMPLE_CODE",
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "01920f30-919c-7934-866e-61bae3946e11",
+    "eventType": "ProductVersionScheduled",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "0192c217-a568-76bc-8a77-25c43c23b0d1",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "019293b0-dee6-779b-834e-3d5d6cba79c4"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "environment": "SAMPLE_CODE",
+      "activationTime": null,
+      "newBusinessWindow": null,
+      "renewalWindow": null,
+      "reason": null,
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "019253fe-ea79-7e4a-8b89-290349946e1f",
+    "eventType": "ProductVersionSubmitted",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "01924471-d74d-7eca-89ef-cf5898de4219",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "019289a9-29a9-7831-884e-ef9708304f4f",
+      "changeSetId": "01924d12-3f69-7770-80c1-e1ec4e7193d8"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "candidateArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "changeClasses": [
+        "SAMPLE_CODE"
+      ],
+      "significantAdaptation": true,
+      "requiredSignOffRoles": [
+        "SAMPLE_CODE"
+      ],
+      "changeSetId": "01920291-2a26-7a39-8503-1b606e969fb1",
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  },
+  {
+    "eventId": "01928a52-951d-7bc7-8674-df966c4a8fd8",
+    "eventType": "ProductVersionSubmitted",
+    "schemaVersion": "1.0",
+    "producer": "PFC",
+    "aggregateType": "Product",
+    "aggregateId": "0192321f-905d-7c9f-87bb-159fdd96dfcd",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "productId": "0192b083-2ca3-796f-8bae-7cc2108f3af0",
+      "changeSetId": "0192c164-2588-7786-8060-e9ee7bafc514"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "productCode": "SAMPLE_CODE",
+      "version": "1.0",
+      "candidateArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "changeClasses": [
+        "SAMPLE_CODE"
+      ],
+      "significantAdaptation": true,
+      "requiredSignOffRoles": [
+        "SAMPLE_CODE"
+      ],
+      "changeSetId": "0192310b-fdd6-780b-8f0b-a197728e02ae",
+      "ratingSlotDeclaration": {
+        "algorithmCode": "SAMPLE_CODE",
+        "inputSchemaVersion": "1",
+        "bindingMode": "PINNED",
+        "compatibleArtefactRange": "Sample text",
+        "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    }
+  }
+]

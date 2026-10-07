@@ -1,0 +1,623 @@
+{
+  "responses": {
+    "clm.CatEvent.aggregate": {
+      "totalsByLine": "unspecified"
+    },
+    "clm.Certificate.request": {
+      "certificate": "unspecified"
+    },
+    "clm.Claim.get": {
+      "claim": "unspecified"
+    },
+    "clm.Claim.search": {
+      "items": [
+        {
+          "pageClaims": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "clm.ClaimTracking.get": {
+      "trackingView": "unspecified"
+    },
+    "clm.ClaimTracking.list": {
+      "items": [
+        {
+          "trackingView": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "clm.Conversation.send": {
+      "messageStatus": "unspecified"
+    },
+    "clm.Dsar.export": {
+      "claimDataPackage": "unspecified"
+    },
+    "clm.Dsar.purge": {
+      "result": "unspecified"
+    },
+    "clm.Dsar.rectify": {
+      "result": "unspecified"
+    },
+    "clm.Dsar.restrict": {
+      "result": "unspecified"
+    },
+    "clm.Financials.dailyTotals": {
+      "totalsByCurrencyAndCostType": "unspecified"
+    },
+    "clm.Financials.get": {
+      "balancesByLine": "unspecified"
+    },
+    "clm.Fnol.saveDraft": {
+      "claim": "unspecified",
+      "exposures": "unspecified",
+      "checklist": "unspecified",
+      "assignment": "unspecified"
+    },
+    "clm.Fnol.submit": {
+      "claimId": "0192f99f-55f6-7e78-85c2-d6c99b61b809",
+      "claimNumber": "SAMPLE-000001",
+      "exposures": [
+        {
+          "exposureId": "01924ece-05d6-7ab2-819f-a478e11e337d",
+          "exposureType": "SAMPLE_CODE"
+        }
+      ],
+      "coverageIndications": [
+        "unspecified"
+      ],
+      "handlingSegment": "SAMPLE_CODE",
+      "assignment": {
+        "assigneeType": "USER",
+        "assigneeId": "sample"
+      },
+      "requiredDocuments": [
+        "SAMPLE_CODE"
+      ]
+    },
+    "clm.Fnol.validate": {
+      "claim": "unspecified",
+      "exposures": "unspecified",
+      "checklist": "unspecified",
+      "assignment": "unspecified"
+    },
+    "clm.Fraud.score": {
+      "indicators": "unspecified",
+      "band": "unspecified",
+      "caseData": "unspecified"
+    },
+    "clm.Import.claim": {
+      "claim": "unspecified"
+    },
+    "clm.Import.convertCurrency": {
+      "conversionResult": "unspecified"
+    },
+    "clm.Import.financialHistory": {
+      "claim": "unspecified"
+    },
+    "clm.Import.reverse": {
+      "reversalResult": "unspecified"
+    },
+    "clm.Redress.request": {
+      "setId": "019235c5-90ff-790a-8fbf-ddefb92198db",
+      "status": "unspecified"
+    },
+    "clm.Service.request": {
+      "status": "unspecified"
+    },
+    "clm.StatutoryOffer.recordAcceptance": {
+      "offerRecord": "unspecified",
+      "documentRequest": "unspecified",
+      "agreementClockStart": "unspecified"
+    },
+    "clm.TransactionSet.approve": {
+      "setId": "0192b409-f39a-7220-8a5e-af3ff2a9ddf3",
+      "status": "SAMPLE_CODE",
+      "disbursementIds": [
+        "01928161-3b64-755d-8b45-44934cd53480"
+      ]
+    },
+    "clm.VendorInvoice.submit": {
+      "status": "unspecified"
+    }
+  },
+  "schemas": {
+    "CatEventAggregateResponse": {
+      "totalsByLine": "unspecified"
+    },
+    "CertificateAssembleRequest": {
+      "requester": "unspecified",
+      "policies": "unspecified",
+      "period": "unspecified"
+    },
+    "CertificateAssembleResponse": {
+      "certificate": "unspecified"
+    },
+    "CertificateIssueRequest": {
+      "requester": "unspecified",
+      "policies": "unspecified",
+      "period": "unspecified"
+    },
+    "CertificateIssueResponse": {
+      "certificate": "unspecified"
+    },
+    "CertificateRequestRequest": {
+      "requester": "unspecified",
+      "policies": "unspecified",
+      "period": "unspecified"
+    },
+    "CertificateRequestResponse": {
+      "certificate": "unspecified"
+    },
+    "ClaimCloseRequest": {
+      "ids": [
+        "019268ae-4dce-74df-8653-17ece4fb4f45"
+      ],
+      "changes": "unspecified",
+      "reason": "unspecified"
+    },
+    "ClaimCloseResponse": {
+      "claim": "unspecified"
+    },
+    "ClaimGetResponse": {
+      "claim": "unspecified"
+    },
+    "ClaimMergeRequest": {
+      "ids": [
+        "01924b75-4e94-7952-812f-ee16a92b476a"
+      ],
+      "changes": "unspecified",
+      "reason": "unspecified"
+    },
+    "ClaimMergeResponse": {
+      "claim": "unspecified"
+    },
+    "ClaimReopenRequest": {
+      "ids": [
+        "01921567-2abe-7e2f-85c6-8d481858ced2"
+      ],
+      "changes": "unspecified",
+      "reason": "unspecified"
+    },
+    "ClaimReopenResponse": {
+      "claim": "unspecified"
+    },
+    "ClaimSearchItem": {
+      "pageClaims": "unspecified"
+    },
+    "ClaimSearchPage": {
+      "items": [
+        {
+          "pageClaims": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ClaimTrackingGetResponse": {
+      "trackingView": "unspecified"
+    },
+    "ClaimTrackingListItem": {
+      "trackingView": "unspecified"
+    },
+    "ClaimTrackingListPage": {
+      "items": [
+        {
+          "trackingView": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ClaimUpdateRequest": {
+      "ids": [
+        "01926048-e678-70f4-8b0a-0e62e2350c0f"
+      ],
+      "changes": "unspecified",
+      "reason": "unspecified"
+    },
+    "ClaimUpdateResponse": {
+      "claim": "unspecified"
+    },
+    "ConversationListItem": {
+      "messageStatus": "unspecified"
+    },
+    "ConversationListPage": {
+      "items": [
+        {
+          "messageStatus": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ConversationScheduleRequest": {
+      "party": "unspecified",
+      "text": "unspecified",
+      "channel": "unspecified"
+    },
+    "ConversationScheduleResponse": {
+      "messageStatus": "unspecified"
+    },
+    "ConversationSendRequest": {
+      "party": "unspecified",
+      "text": "unspecified",
+      "channel": "unspecified"
+    },
+    "ConversationSendResponse": {
+      "messageStatus": "unspecified"
+    },
+    "CoverageDecideRequest": {
+      "decision": "unspecified",
+      "reasons": "unspecified",
+      "adopt": "unspecified"
+    },
+    "CoverageDecideResponse": {
+      "decisionRecord": "unspecified"
+    },
+    "CoverageReverifyRequest": {
+      "decision": "unspecified",
+      "reasons": "unspecified",
+      "adopt": "unspecified"
+    },
+    "CoverageReverifyResponse": {
+      "decisionRecord": "unspecified"
+    },
+    "DsarExportRequest": {
+      "party": "unspecified"
+    },
+    "DsarExportResponse": {
+      "claimDataPackage": "unspecified"
+    },
+    "DsarPurgeRequest": {
+      "party": "unspecified"
+    },
+    "DsarPurgeResponse": {
+      "result": "unspecified"
+    },
+    "DsarRectifyRequest": {
+      "party": "unspecified",
+      "corrections": "unspecified"
+    },
+    "DsarRectifyResponse": {
+      "result": "unspecified"
+    },
+    "DsarRestrictRequest": {
+      "party": "unspecified",
+      "scope": "unspecified"
+    },
+    "DsarRestrictResponse": {
+      "result": "unspecified"
+    },
+    "ExposureCloseRequest": {
+      "exposureData": "unspecified"
+    },
+    "ExposureCloseResponse": {
+      "exposure": "unspecified"
+    },
+    "ExposureCreateRequest": {
+      "exposureData": "unspecified"
+    },
+    "ExposureCreateResponse": {
+      "exposure": "unspecified"
+    },
+    "ExposureReopenRequest": {
+      "exposureData": "unspecified"
+    },
+    "ExposureReopenResponse": {
+      "exposure": "unspecified"
+    },
+    "ExposureUpdateRequest": {
+      "exposureData": "unspecified"
+    },
+    "ExposureUpdateResponse": {
+      "exposure": "unspecified"
+    },
+    "FinancialsDailyTotalsResponse": {
+      "totalsByCurrencyAndCostType": "unspecified"
+    },
+    "FinancialsGetResponse": {
+      "balancesByLine": "unspecified"
+    },
+    "FnolGetResponse": {
+      "claim": "unspecified",
+      "exposures": "unspecified",
+      "checklist": "unspecified",
+      "assignment": "unspecified"
+    },
+    "FnolSaveDraftRequest": {
+      "fnolPayload": "unspecified"
+    },
+    "FnolSaveDraftResponse": {
+      "claim": "unspecified",
+      "exposures": "unspecified",
+      "checklist": "unspecified",
+      "assignment": "unspecified"
+    },
+    "FnolSubmitRequest": {
+      "lineOfBusiness": "SAMPLE_CODE",
+      "policyId": "0192a551-d0c1-7fea-8fa7-92f18ef85762",
+      "lossAt": "2026-10-07T09:00:00Z",
+      "lossData": {
+        "note": "sample"
+      },
+      "reporter": {
+        "partyId": "01924f3e-904f-73d9-82b4-be8f45670bb7",
+        "adHoc": {
+          "note": "sample"
+        }
+      },
+      "involvedParties": [
+        {
+          "note": "sample"
+        }
+      ],
+      "incidents": [
+        {
+          "note": "sample"
+        }
+      ],
+      "attachmentRefs": [
+        "0192cf74-c299-72fb-8fa8-9287f9218611"
+      ],
+      "channel": "SAMPLE_CODE",
+      "channelMetadata": {
+        "note": "sample"
+      }
+    },
+    "FnolSubmitResponse": {
+      "claimId": "0192a90d-a9c4-7dfc-89f6-0c3a50a153e8",
+      "claimNumber": "SAMPLE-000001",
+      "exposures": [
+        {
+          "exposureId": "0192fe30-b2d4-7f48-8157-7bceebf50668",
+          "exposureType": "SAMPLE_CODE"
+        }
+      ],
+      "coverageIndications": [
+        "unspecified"
+      ],
+      "handlingSegment": "SAMPLE_CODE",
+      "assignment": {
+        "assigneeType": "USER",
+        "assigneeId": "sample"
+      },
+      "requiredDocuments": [
+        "SAMPLE_CODE"
+      ]
+    },
+    "FnolValidateRequest": {
+      "fnolPayload": "unspecified"
+    },
+    "FnolValidateResponse": {
+      "claim": "unspecified",
+      "exposures": "unspecified",
+      "checklist": "unspecified",
+      "assignment": "unspecified"
+    },
+    "FraudScoreRequest": {
+      "claim": "unspecified"
+    },
+    "FraudScoreResponse": {
+      "indicators": "unspecified",
+      "band": "unspecified",
+      "caseData": "unspecified"
+    },
+    "ImportClaimRequest": {
+      "legacyClaim": "unspecified"
+    },
+    "ImportClaimResponse": {
+      "claim": "unspecified"
+    },
+    "ImportConvertCurrencyRequest": {
+      "plan": "unspecified"
+    },
+    "ImportConvertCurrencyResponse": {
+      "conversionResult": "unspecified"
+    },
+    "ImportFinancialHistoryRequest": {
+      "legacyClaim": "unspecified"
+    },
+    "ImportFinancialHistoryResponse": {
+      "claim": "unspecified"
+    },
+    "ImportReverseRequest": {
+      "batchId": "019294eb-7254-7ce3-8a3e-1a69781811e2"
+    },
+    "ImportReverseResponse": {
+      "reversalResult": "unspecified"
+    },
+    "PaymentReissueRequest": {
+      "paymentId": "01924969-2990-7552-8fb3-8a6ca684f396",
+      "reason": "SAMPLE_CODE",
+      "payeeAccountId": "0192da95-e428-7410-8028-6ea1b2276b8c"
+    },
+    "PaymentReissueResponse": {
+      "originalPaymentId": "0192c66e-07e5-7de4-8588-c64a9689d854",
+      "newPaymentId": "01928d78-9714-7f0b-8f21-3b61d2cfb06d",
+      "setId": "01923a28-0a7b-7c52-825e-feb7949abfe1"
+    },
+    "PaymentStopRequest": {
+      "paymentId": "01920321-4faf-7c88-8361-9c795da793ca",
+      "reason": "SAMPLE_CODE"
+    },
+    "PaymentStopResponse": {
+      "paymentId": "01920382-13a2-7be4-8d9b-5dcbbadd7aae",
+      "status": "SAMPLE_CODE",
+      "disbursementId": "0192672d-4d94-79fa-86ee-ecd1505ac25c"
+    },
+    "PaymentVoidRequest": {
+      "paymentId": "0192b851-c9a8-79fe-8fdc-321b3013ec92",
+      "reason": "SAMPLE_CODE"
+    },
+    "PaymentVoidResponse": {
+      "paymentId": "0192a671-f4c5-7055-8dda-53e1afb100eb",
+      "status": "SAMPLE_CODE",
+      "reversalTransactionId": "0192555c-7bb8-7c24-8cfa-39d6bc938828"
+    },
+    "RedressRequestRequest": {
+      "complaintId": "019200a3-4d39-793f-8cc5-dac608571440",
+      "claimId": "01929508-3da9-7577-8937-9077c7fd5aea",
+      "payee": "unspecified",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "reason": "unspecified"
+    },
+    "RedressRequestResponse": {
+      "setId": "0192b0c8-51da-715a-8481-e45bae967b36",
+      "status": "unspecified"
+    },
+    "ServiceCancelRequest": {
+      "serviceData": "unspecified",
+      "invoice": "unspecified"
+    },
+    "ServiceCancelResponse": {
+      "status": "unspecified"
+    },
+    "ServiceRequestRequest": {
+      "serviceData": "unspecified",
+      "invoice": "unspecified"
+    },
+    "ServiceRequestResponse": {
+      "status": "unspecified"
+    },
+    "ServiceUpdateRequest": {
+      "serviceData": "unspecified",
+      "invoice": "unspecified"
+    },
+    "ServiceUpdateResponse": {
+      "status": "unspecified"
+    },
+    "StatutoryOfferIssueRequest": {
+      "exposure": "unspecified",
+      "content": "unspecified"
+    },
+    "StatutoryOfferIssueResponse": {
+      "offerRecord": "unspecified",
+      "documentRequest": "unspecified",
+      "agreementClockStart": "unspecified"
+    },
+    "StatutoryOfferRecordAcceptanceRequest": {
+      "exposure": "unspecified",
+      "content": "unspecified"
+    },
+    "StatutoryOfferRecordAcceptanceResponse": {
+      "offerRecord": "unspecified",
+      "documentRequest": "unspecified",
+      "agreementClockStart": "unspecified"
+    },
+    "StatutoryOfferRecordRepairAgreementRequest": {
+      "exposure": "unspecified",
+      "content": "unspecified"
+    },
+    "StatutoryOfferRecordRepairAgreementResponse": {
+      "offerRecord": "unspecified",
+      "documentRequest": "unspecified",
+      "agreementClockStart": "unspecified"
+    },
+    "TransactionSetApproveRequest": {
+      "setId": "0192e43d-45b7-7993-8481-64872f898bd2",
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "comment": "sample"
+    },
+    "TransactionSetApproveResponse": {
+      "setId": "019218f4-8fdf-7769-8547-1bbcbe5f0db0",
+      "status": "SAMPLE_CODE",
+      "disbursementIds": [
+        "01921e77-2db5-7278-8925-801ea06e8adf"
+      ]
+    },
+    "TransactionSetBuildRequest": {
+      "claimId": "0192e391-73c6-70d9-8858-9e9e1010e075",
+      "transactions": [
+        {
+          "kind": "RESERVE",
+          "exposureId": "0192ca99-f7ad-724c-8040-45f1c8702690",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "payeePartyId": "0192ed9e-f497-71b7-853d-e0ecf615bacd",
+          "payeeAccountId": "019286b6-1878-7643-8a52-2cbb34ed529a",
+          "reason": "SAMPLE_CODE"
+        }
+      ]
+    },
+    "TransactionSetBuildResponse": {
+      "setId": "0192e6aa-5a62-7e02-8767-2909853badd4",
+      "status": "SAMPLE_CODE",
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "preview": [
+        {
+          "exposureId": "01928076-838f-79cd-8309-858b67b2222e",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "before": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "after": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "checks": [
+        "unspecified"
+      ]
+    },
+    "TransactionSetRejectRequest": {
+      "setId": "0192cc23-d706-75c7-80bb-8cfb10d57560",
+      "reason": "SAMPLE_CODE",
+      "comment": "sample"
+    },
+    "TransactionSetRejectResponse": {
+      "setId": "01928045-3732-7289-81e2-01079d93e74c",
+      "status": "SAMPLE_CODE",
+      "copySetId": "01922afb-7d31-70c5-8b73-1548a4c70a50"
+    },
+    "TransactionSetReturnRequest": {
+      "transactions": "unspecified"
+    },
+    "TransactionSetReturnResponse": {
+      "setPreview": "unspecified",
+      "checks": "unspecified",
+      "approvalRequest": "unspecified"
+    },
+    "TransactionSetSubmitRequest": {
+      "setId": "0192f377-9020-7573-815e-04d241cf9d52"
+    },
+    "TransactionSetSubmitResponse": {
+      "setId": "0192b6df-b812-71c4-823d-edc311098e7b",
+      "status": "SAMPLE_CODE",
+      "approvalRequestId": "019212f2-8da5-70d3-8354-bf0c9f1d9596",
+      "authorityChecks": [
+        {
+          "checkId": "0192aa32-db49-7430-833a-8fe4aa2a2be4",
+          "decision": "ALLOW"
+        }
+      ]
+    },
+    "VendorInvoiceDecideRequest": {
+      "serviceData": "unspecified",
+      "invoice": "unspecified"
+    },
+    "VendorInvoiceDecideResponse": {
+      "status": "unspecified"
+    },
+    "VendorInvoiceSubmitRequest": {
+      "serviceData": "unspecified",
+      "invoice": "unspecified"
+    },
+    "VendorInvoiceSubmitResponse": {
+      "status": "unspecified"
+    }
+  }
+}

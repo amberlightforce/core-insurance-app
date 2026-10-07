@@ -1,0 +1,416 @@
+{
+  "responses": {
+    "mkt.Capability.get": {
+      "state": "unspecified",
+      "source": "unspecified"
+    },
+    "mkt.Configuration.currentHash": {
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "activatedAt": "2026-10-07T09:00:00Z"
+    },
+    "mkt.Configuration.resolve": {
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "values": [
+        {
+          "key": "SAMPLE_CODE",
+          "value": "unspecified",
+          "sourceLayer": "SAMPLE_CODE",
+          "valueVersionId": "01923dd9-3e48-79f6-8cca-6e5b8fa8c4ce",
+          "validity": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "final": true,
+          "mergeTrace": [
+            "unspecified"
+          ]
+        }
+      ]
+    },
+    "mkt.CrossBorder.check": {
+      "authorised": true,
+      "reason": "unspecified",
+      "domesticFosFoe": "unspecified"
+    },
+    "mkt.Currency.convertFixed": {
+      "converted": "unspecified",
+      "rule": "unspecified"
+    },
+    "mkt.Currency.rule": {
+      "rule": "unspecified"
+    },
+    "mkt.L10n.bundle": {
+      "bundle": "unspecified",
+      "formattedString": "unspecified"
+    },
+    "mkt.L10n.format": {
+      "bundle": "unspecified",
+      "formattedString": "unspecified"
+    },
+    "mkt.RegimeCode.get": {
+      "codes": "unspecified",
+      "validity": "unspecified"
+    },
+    "mkt.RegimeCode.list": {
+      "items": [
+        {
+          "codes": "unspecified",
+          "validity": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "mkt.RegimeCode.validate": {
+      "codes": "unspecified",
+      "validity": "unspecified"
+    },
+    "mkt.RiskLocation.resolve": {
+      "jurisdiction": "unspecified",
+      "ruleApplied": "unspecified"
+    },
+    "mkt.Rounding.apply": {
+      "amountAfterRounding": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ruleId": "0192a18a-6ba6-7418-8c03-601a9ca75854",
+      "residual": "unspecified"
+    },
+    "mkt.Spi.bind": {
+      "implementationHandle": "unspecified",
+      "packVersion": "unspecified",
+      "bindingId": "01921a3e-8771-74cb-8db4-a2177456a3c2"
+    },
+    "mkt.Spi.catalogue": {
+      "sPIs": "unspecified",
+      "status": "unspecified"
+    },
+    "mkt.StatutoryClockSet.get": {
+      "values": "unspecified"
+    },
+    "mkt.StatutoryClockSet.list": {
+      "values": "unspecified"
+    }
+  },
+  "schemas": {
+    "CapabilityGetResponse": {
+      "state": "unspecified",
+      "source": "unspecified"
+    },
+    "ChangeoverConfigurationResponse": {
+      "keys": "unspecified",
+      "values": "unspecified",
+      "activationState": "unspecified"
+    },
+    "ConfigChangeRequestApproveResponse": {
+      "request": "unspecified"
+    },
+    "ConfigChangeRequestCreateResponse": {
+      "request": "unspecified"
+    },
+    "ConfigChangeRequestImportRequest": {
+      "file": "unspecified"
+    },
+    "ConfigChangeRequestImportResponse": {
+      "validationReport": "unspecified"
+    },
+    "ConfigChangeRequestPreviewRequest": {
+      "requestId": "01924921-d69e-7f10-8c82-355ae00ff80d"
+    },
+    "ConfigChangeRequestPreviewResponse": {
+      "previewRun": "unspecified"
+    },
+    "ConfigChangeRequestRebaseResponse": {
+      "request": "unspecified"
+    },
+    "ConfigChangeRequestRejectResponse": {
+      "request": "unspecified"
+    },
+    "ConfigChangeRequestScheduleResponse": {
+      "request": "unspecified"
+    },
+    "ConfigChangeRequestSubmitResponse": {
+      "request": "unspecified"
+    },
+    "ConfigChangeRequestUpdateResponse": {
+      "request": "unspecified"
+    },
+    "ConfigChangeRequestWithdrawResponse": {
+      "request": "unspecified"
+    },
+    "ConfigurationCompareResponse": {
+      "changes": "unspecified"
+    },
+    "ConfigurationCurrentHashResponse": {
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "activatedAt": "2026-10-07T09:00:00Z"
+    },
+    "ConfigurationExplainResponse": {
+      "layerContributions": "unspecified",
+      "mergeSteps": "unspecified",
+      "cr": "unspecified",
+      "approvers": "unspecified"
+    },
+    "ConfigurationExportRequest": {
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "context": "unspecified"
+    },
+    "ConfigurationExportResponse": {
+      "signedCanonicalJson": "unspecified"
+    },
+    "ConfigurationResolveRequest": {
+      "legalEntity": "SAMPLE_CODE",
+      "jurisdiction": "GR",
+      "subdivision": "SAMPLE_CODE",
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "channel": "SAMPLE_CODE",
+      "timeBasisDates": {
+        "sample": "2026-10-07"
+      },
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "keys": [
+        "SAMPLE_CODE"
+      ]
+    },
+    "ConfigurationResolveResponse": {
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "values": [
+        {
+          "key": "SAMPLE_CODE",
+          "value": "unspecified",
+          "sourceLayer": "SAMPLE_CODE",
+          "valueVersionId": "01929d7a-873f-7aeb-8430-d4f627236ca0",
+          "validity": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "final": true,
+          "mergeTrace": [
+            "unspecified"
+          ]
+        }
+      ]
+    },
+    "CrossBorderBasisResponse": {
+      "authorised": true,
+      "reason": "unspecified",
+      "domesticFosFoe": "unspecified"
+    },
+    "CrossBorderCheckRequest": {
+      "entity": "unspecified",
+      "hostState": "unspecified",
+      "class": "unspecified"
+    },
+    "CrossBorderCheckResponse": {
+      "authorised": true,
+      "reason": "unspecified",
+      "domesticFosFoe": "unspecified"
+    },
+    "CurrencyConvertFixedRequest": {
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "from": "unspecified",
+      "to": "unspecified",
+      "plan": "unspecified"
+    },
+    "CurrencyConvertFixedResponse": {
+      "converted": "unspecified",
+      "rule": "unspecified"
+    },
+    "CurrencyRuleResponse": {
+      "rule": "unspecified"
+    },
+    "L10nBundleResponse": {
+      "bundle": "unspecified",
+      "formattedString": "unspecified"
+    },
+    "L10nCaseMapResponse": {
+      "mappedText": "unspecified",
+      "ruleVersion": "unspecified"
+    },
+    "L10nFormatResponse": {
+      "bundle": "unspecified",
+      "formattedString": "unspecified"
+    },
+    "L10nSearchKeysResponse": {
+      "normalisedKeys": "unspecified"
+    },
+    "L10nUiLanguageResolveRequest": {
+      "userId": "01925635-8b4e-7298-86bc-ac18bb7b2eb0",
+      "browserLanguages": "unspecified",
+      "legalEntity": "unspecified"
+    },
+    "L10nUiLanguageResolveResponse": {
+      "language": "el",
+      "source": "unspecified",
+      "allowedLanguages": "unspecified"
+    },
+    "PackCertifyResponse": {
+      "packVersionActivation": "unspecified"
+    },
+    "PackDeprecateResponse": {
+      "packVersionActivation": "unspecified"
+    },
+    "PackGetResponse": {
+      "packVersionActivation": "unspecified"
+    },
+    "PackListItem": {
+      "packVersionActivation": "unspecified"
+    },
+    "PackListPage": {
+      "items": [
+        {
+          "packVersionActivation": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PackPublishResponse": {
+      "packVersionActivation": "unspecified"
+    },
+    "PackRollbackResponse": {
+      "packVersionActivation": "unspecified"
+    },
+    "PackScheduleActivationResponse": {
+      "packVersionActivation": "unspecified"
+    },
+    "RegimeCodeCrosswalkResponse": {
+      "codes": "unspecified",
+      "validity": "unspecified"
+    },
+    "RegimeCodeGetResponse": {
+      "codes": "unspecified",
+      "validity": "unspecified"
+    },
+    "RegimeCodeListItem": {
+      "codes": "unspecified",
+      "validity": "unspecified"
+    },
+    "RegimeCodeListPage": {
+      "items": [
+        {
+          "codes": "unspecified",
+          "validity": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "RegimeCodeValidateRequest": {
+      "regime": "unspecified",
+      "versionDate": "2026-10-07",
+      "code": "unspecified"
+    },
+    "RegimeCodeValidateResponse": {
+      "codes": "unspecified",
+      "validity": "unspecified"
+    },
+    "RiskLocationResolveRequest": {
+      "riskType": "unspecified",
+      "attributes": "unspecified",
+      "policyholder": "unspecified"
+    },
+    "RiskLocationResolveResponse": {
+      "jurisdiction": "unspecified",
+      "ruleApplied": "unspecified"
+    },
+    "RoundingApplyRequest": {
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "currency": "EUR",
+      "purpose": "unspecified",
+      "context": "unspecified"
+    },
+    "RoundingApplyResponse": {
+      "amountAfterRounding": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ruleId": "0192ea34-547c-784e-8413-5a81424293df",
+      "residual": "unspecified"
+    },
+    "SpiBindRequest": {
+      "entity": "unspecified",
+      "spi": "unspecified",
+      "axisValue": "unspecified",
+      "qualifier": "unspecified",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "SpiBindResponse": {
+      "implementationHandle": "unspecified",
+      "packVersion": "unspecified",
+      "bindingId": "0192bd33-2d50-7dd9-82a1-3348f40c1866"
+    },
+    "SpiCatalogueResponse": {
+      "sPIs": "unspecified",
+      "status": "unspecified"
+    },
+    "SpiSuspendRequest": {
+      "entity": "unspecified",
+      "spi": "unspecified",
+      "reason": "unspecified",
+      "expiry": "unspecified"
+    },
+    "SpiSuspendResponse": {
+      "binding": "unspecified"
+    },
+    "StatutoryClockSetGetResponse": {
+      "values": "unspecified"
+    },
+    "StatutoryClockSetListResponse": {
+      "values": "unspecified"
+    },
+    "TerminologyApproveRequest": {
+      "term": "unspecified",
+      "renderings": "unspecified",
+      "decision": "unspecified"
+    },
+    "TerminologyApproveResponse": {
+      "entries": [
+        "unspecified"
+      ]
+    },
+    "TerminologyListItem": {
+      "entries": [
+        "unspecified"
+      ]
+    },
+    "TerminologyListPage": {
+      "items": [
+        {
+          "entries": [
+            "unspecified"
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "TerminologyProposeRequest": {
+      "term": "unspecified",
+      "renderings": "unspecified",
+      "decision": "unspecified"
+    },
+    "TerminologyProposeResponse": {
+      "entries": [
+        "unspecified"
+      ]
+    },
+    "TranslationGateRequest": {
+      "releaseCandidate": "2026-10-07"
+    },
+    "TranslationGateResponse": {
+      "result": "unspecified",
+      "failures": "unspecified",
+      "bundleVersions": "unspecified",
+      "evidenceRef": "unspecified"
+    }
+  }
+}

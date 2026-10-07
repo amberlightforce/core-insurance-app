@@ -1,0 +1,690 @@
+{
+  "responses": {
+    "pol.Cancellation.create": {
+      "jobId": "01927f17-c665-7a64-8e5b-43a52cc8a8d8",
+      "refundPreview": "unspecified"
+    },
+    "pol.Charges.reconcile": {
+      "differences": "unspecified"
+    },
+    "pol.Dsar.export": {
+      "exportPackage": "unspecified"
+    },
+    "pol.Dsar.restrict": {
+      "restrictionStatus": "unspecified",
+      "retentionConflicts": "unspecified"
+    },
+    "pol.Earning.compute": {
+      "key": "value"
+    },
+    "pol.EffectiveDate.limits": {
+      "earliest": "unspecified",
+      "latest": "unspecified",
+      "overrideAvailable": "unspecified"
+    },
+    "pol.Import.convertCurrency": {
+      "conversionReport": "unspecified"
+    },
+    "pol.Import.policy": {
+      "key": "value"
+    },
+    "pol.Import.reverse": {
+      "perObjectOutcome": "unspecified"
+    },
+    "pol.Import.term": {
+      "key": "value"
+    },
+    "pol.Job.bind": {
+      "transactionId": "01928e57-fa2c-7132-809a-4f7421445777",
+      "termId": "0192074e-4191-7c1c-8b5b-c93abf6cadc6",
+      "policyId": "01923f2f-1575-785a-8302-103abb4151d4",
+      "chargeDeltas": [
+        {
+          "chargeId": "0192e1e0-af93-7b04-8d2c-a6d05a868dc5",
+          "elementId": "sample",
+          "chargeType": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "gateResults": [
+        {
+          "gate": "SAMPLE_CODE",
+          "passed": true,
+          "severity": "BLOCK",
+          "reason": "SAMPLE_CODE",
+          "evidenceRef": "sample"
+        }
+      ],
+      "coverNoteDocumentId": "0192220c-4ba0-78ef-8622-ae7c9b837fd2"
+    },
+    "pol.Job.list": {
+      "items": [
+        {
+          "jobs": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "pol.Job.newVersion": {
+      "newVersion": "unspecified",
+      "comparison": "unspecified"
+    },
+    "pol.Job.quote": {
+      "jobId": "0192ee18-f32e-7fb2-8038-7e58b1b4288f",
+      "versionNo": 1,
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "issues": [
+        {
+          "issueId": "01928e4f-9c2b-7663-89c9-220406b813e9",
+          "issueType": "SAMPLE_CODE",
+          "severity": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "issueKey": "sample",
+          "lane": "SAMPLE_CODE",
+          "explanationKeys": [
+            "sample"
+          ],
+          "approvalStatus": "SAMPLE_CODE"
+        }
+      ],
+      "validUntil": "2026-10-07T09:00:00Z"
+    },
+    "pol.Job.updateDraft": {
+      "draftState": "unspecified",
+      "validation": "unspecified",
+      "premiumPreview": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "pol.Job.withdraw": {
+      "job": "unspecified"
+    },
+    "pol.Policy.get": {
+      "policy": "unspecified",
+      "term": "unspecified",
+      "segment": "unspecified",
+      "riskTree": "unspecified"
+    },
+    "pol.Policy.getMany": {
+      "policies": "unspecified"
+    },
+    "pol.Policy.search": {
+      "items": [
+        {
+          "results": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "pol.PolicyChange.create": {
+      "jobId": "019209cb-848b-720b-8865-01efe733c130"
+    },
+    "pol.Renewal.accept": {
+      "job": "unspecified"
+    },
+    "pol.Renewal.create": {
+      "job": "unspecified"
+    },
+    "pol.Renewal.decline": {
+      "job": "unspecified"
+    },
+    "pol.Renewal.nonRenew": {
+      "job": "unspecified"
+    },
+    "pol.Renewal.offer": {
+      "job": "unspecified"
+    },
+    "pol.Rewrite.create": {
+      "jobId": "01920cf2-e925-799b-8d70-b5067560ba05"
+    },
+    "pol.Segment.changes": {
+      "items": [
+        {
+          "segmentVersions": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "pol.Snapshot.get": {
+      "snapshotRef": "unspecified",
+      "content": "unspecified"
+    },
+    "pol.Submission.create": {
+      "jobId": "01925eb9-f3a5-7802-86d7-10cffca2a528",
+      "describeModel": {
+        "note": "sample"
+      },
+      "versionNo": 1,
+      "manifest": {
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "uwRuleSetVersions": {
+          "sample": "SAMPLE_CODE"
+        },
+        "formPatternEditions": [
+          "SAMPLE_CODE"
+        ],
+        "referenceTableVersions": [
+          "SAMPLE_CODE"
+        ],
+        "paymentPlanVersions": [
+          "SAMPLE_CODE"
+        ]
+      }
+    },
+    "pol.Suspension.create": {
+      "jobId": "019293df-99db-71e2-8309-44e58c85da15"
+    },
+    "pol.Term.get": {
+      "policy": "unspecified",
+      "term": "unspecified",
+      "segment": "unspecified",
+      "riskTree": "unspecified"
+    },
+    "pol.Term.timeline": {
+      "policy": "unspecified",
+      "term": "unspecified",
+      "segment": "unspecified",
+      "riskTree": "unspecified"
+    },
+    "pol.Withdrawal.submit": {
+      "voidJob": "unspecified",
+      "refundPreview": "unspecified"
+    }
+  },
+  "schemas": {
+    "CancellationCreateRequest": {
+      "policyId": "0192fba2-435e-7bcd-83d6-d8fece88cf96",
+      "source": "unspecified",
+      "reason": "unspecified",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "evidenceRefs": "unspecified",
+      "requestRef": "unspecified"
+    },
+    "CancellationCreateResponse": {
+      "jobId": "01926c88-a3d8-7df0-8e1b-93af74f92a07",
+      "refundPreview": "unspecified"
+    },
+    "CancellationRescindRequest": {
+      "policyId": "0192e2f9-e615-7650-8b65-27a7026015b6",
+      "source": "unspecified",
+      "reason": "unspecified",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "evidenceRefs": "unspecified",
+      "requestRef": "unspecified"
+    },
+    "CancellationRescindResponse": {
+      "jobId": "0192e7d3-fee3-7cd3-8edb-96767b16feb3",
+      "refundPreview": "unspecified"
+    },
+    "CancellationScheduleRequest": {
+      "policyId": "0192d2e7-374d-7df6-80ec-0d8f64987cbc",
+      "source": "unspecified",
+      "reason": "unspecified",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "evidenceRefs": "unspecified",
+      "requestRef": "unspecified"
+    },
+    "CancellationScheduleResponse": {
+      "jobId": "0192ffd1-d0ee-7157-833f-9b4c33f98c28",
+      "refundPreview": "unspecified"
+    },
+    "ChargesReconcileRequest": {
+      "termId": "01928174-f0ea-7bd5-83e2-ea5a5bbf8d4d",
+      "counterpartTotals": "unspecified"
+    },
+    "ChargesReconcileResponse": {
+      "differences": "unspecified"
+    },
+    "DsarExportRequest": {
+      "partyId": "019244f7-1501-7ad3-8923-bed5f1ad555e",
+      "dsarTaskId": "0192091e-3df7-7743-8f24-4f643a7db36c"
+    },
+    "DsarExportResponse": {
+      "exportPackage": "unspecified"
+    },
+    "DsarRestrictRequest": {
+      "partyId": "01921dba-1966-7b89-8a0f-30d7b54e35e4",
+      "dsarTaskId": "01928c39-1e93-7293-8516-92fe0efb7644",
+      "restrict": "unspecified",
+      "lift": "unspecified"
+    },
+    "DsarRestrictResponse": {
+      "restrictionStatus": "unspecified",
+      "retentionConflicts": "unspecified"
+    },
+    "EarningComputeRequest": {
+      "termId": "019221c7-717e-77d5-80bd-794a05a87fbc"
+    },
+    "EffectiveDateLimitsResponse": {
+      "earliest": "unspecified",
+      "latest": "unspecified",
+      "overrideAvailable": "unspecified"
+    },
+    "ImportConvertCurrencyRequest": {
+      "planId": "019228a4-5863-7822-8662-9a324d95f112"
+    },
+    "ImportConvertCurrencyResponse": {
+      "conversionReport": "unspecified"
+    },
+    "ImportPolicyRequest": {
+      "legacyPayload": "unspecified",
+      "sourceKey": "unspecified"
+    },
+    "ImportReverseRequest": {
+      "importBatchId": "01921d48-b78e-7513-80b5-a82b96c4ba36"
+    },
+    "ImportReverseResponse": {
+      "perObjectOutcome": "unspecified"
+    },
+    "ImportTermRequest": {
+      "legacyPayload": "unspecified",
+      "sourceKey": "unspecified"
+    },
+    "JobBindRequest": {
+      "jobId": "0192804b-5203-754a-85fb-80fe27f3e7d6",
+      "versionNo": 1,
+      "paymentPlanOption": "SAMPLE_CODE",
+      "holdIssuance": true,
+      "confirmation": true,
+      "disclosureEvidence": {
+        "presentationReceiptId": "019253aa-be61-708e-848c-2b3ca7708d26"
+      }
+    },
+    "JobBindResponse": {
+      "transactionId": "0192014d-8687-7a18-8d48-bcba712e749c",
+      "termId": "0192948b-fc43-715e-8cc1-a7fa7dae3422",
+      "policyId": "019201c2-064a-7326-8c91-766c518f25bc",
+      "chargeDeltas": [
+        {
+          "chargeId": "019253ac-6516-7147-8b5e-eee1e3a8f92a",
+          "elementId": "sample",
+          "chargeType": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "gateResults": [
+        {
+          "gate": "SAMPLE_CODE",
+          "passed": true,
+          "severity": "BLOCK",
+          "reason": "SAMPLE_CODE",
+          "evidenceRef": "sample"
+        }
+      ],
+      "coverNoteDocumentId": "019235d0-54a6-7bd1-81f6-8bae220d26fc"
+    },
+    "JobCompareVersionsRequest": {
+      "jobId": "0192cfc3-55aa-7596-8e6e-900eb178e0cd",
+      "sourceVersion": "unspecified"
+    },
+    "JobCompareVersionsResponse": {
+      "newVersion": "unspecified",
+      "comparison": "unspecified"
+    },
+    "JobCopyVersionRequest": {
+      "jobId": "01921a5e-035d-777e-8ad7-ee557415f6c2",
+      "sourceVersion": "unspecified"
+    },
+    "JobCopyVersionResponse": {
+      "newVersion": "unspecified",
+      "comparison": "unspecified"
+    },
+    "JobGetResponse": {
+      "jobs": "unspecified"
+    },
+    "JobLeaseRequest": {
+      "jobId": "0192dff7-6a1d-7167-8b3d-8dadc2065e45"
+    },
+    "JobLeaseResponse": {
+      "lease": "unspecified"
+    },
+    "JobListItem": {
+      "jobs": "unspecified"
+    },
+    "JobListPage": {
+      "items": [
+        {
+          "jobs": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "JobNewVersionRequest": {
+      "jobId": "01927e89-de19-78af-829b-d03afdb7a108",
+      "sourceVersion": "unspecified"
+    },
+    "JobNewVersionResponse": {
+      "newVersion": "unspecified",
+      "comparison": "unspecified"
+    },
+    "JobNotTakenRequest": {
+      "jobId": "01922c16-5f6e-70bb-8816-534700251d32",
+      "reasonCode": "unspecified",
+      "text": "unspecified"
+    },
+    "JobNotTakenResponse": {
+      "job": "unspecified"
+    },
+    "JobQuoteRequest": {
+      "jobId": "019236b4-28a7-7c18-839c-29b9f8b91d06",
+      "versionNo": 1
+    },
+    "JobQuoteResponse": {
+      "jobId": "0192bf55-e541-7371-8bbc-191d9ec17695",
+      "versionNo": 1,
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "issues": [
+        {
+          "issueId": "019261dc-f27a-7567-883a-aa4ca1bb7ebc",
+          "issueType": "SAMPLE_CODE",
+          "severity": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "issueKey": "sample",
+          "lane": "SAMPLE_CODE",
+          "explanationKeys": [
+            "sample"
+          ],
+          "approvalStatus": "SAMPLE_CODE"
+        }
+      ],
+      "validUntil": "2026-10-07T09:00:00Z"
+    },
+    "JobRebaseRequest": {
+      "jobId": "0192abca-0d82-779f-8107-831002687be9"
+    },
+    "JobRebaseResponse": {
+      "rebasedDraft": "unspecified",
+      "conflicts": "unspecified"
+    },
+    "JobReleaseLeaseRequest": {
+      "jobId": "0192c763-4dc0-780b-8384-f3f6763896c9"
+    },
+    "JobReleaseLeaseResponse": {
+      "lease": "unspecified"
+    },
+    "JobRequoteRequest": {
+      "jobId": "0192223e-c5a9-79f2-8683-5f2f82630172",
+      "versionNo": "unspecified"
+    },
+    "JobRequoteResponse": {
+      "quoteVersion": "unspecified",
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "issues": [
+        "unspecified"
+      ],
+      "validity": "unspecified"
+    },
+    "JobResolveConflictsRequest": {
+      "jobId": "0192d724-9ab6-7b2a-8572-904f084809fa",
+      "resolutions": [
+        "unspecified"
+      ]
+    },
+    "JobResolveConflictsResponse": {
+      "conflictsState": "unspecified"
+    },
+    "JobUpdateDraftRequest": {
+      "jobId": "0192b621-737b-7ce5-8530-31159adf00d5",
+      "versionNo": "unspecified",
+      "instructions": [
+        "unspecified"
+      ],
+      "expectedDraftVersion": "unspecified"
+    },
+    "JobUpdateDraftResponse": {
+      "draftState": "unspecified",
+      "validation": "unspecified",
+      "premiumPreview": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "JobWithdrawRequest": {
+      "jobId": "01929a5b-a2d1-7ea0-89e3-ec64a8048463",
+      "reasonCode": "unspecified",
+      "text": "unspecified"
+    },
+    "JobWithdrawResponse": {
+      "job": "unspecified"
+    },
+    "PolicyChangeCreateRequest": {
+      "policyId": "019278f6-5773-7001-8558-06137c29d5d9",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "description": "unspecified"
+    },
+    "PolicyChangeCreateResponse": {
+      "jobId": "01925fa1-bff2-7c90-8b2f-76c0efe0d122"
+    },
+    "PolicyGetManyResponse": {
+      "policies": "unspecified"
+    },
+    "PolicyGetResponse": {
+      "policy": "unspecified",
+      "term": "unspecified",
+      "segment": "unspecified",
+      "riskTree": "unspecified"
+    },
+    "PolicyMoveExecuteRequest": {
+      "policyIds": [
+        "0192bb29-2a86-7e69-8164-af0bad7200f2"
+      ],
+      "targetAccountId": "0192338c-b212-7ab8-83ad-6cfed339bcbe",
+      "requestRef": "unspecified"
+    },
+    "PolicyMoveExecuteResponse": {
+      "rePointMap": "unspecified"
+    },
+    "PolicySearchItem": {
+      "results": "unspecified"
+    },
+    "PolicySearchPage": {
+      "items": [
+        {
+          "results": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ReactivationCreateRequest": {
+      "termId": "019295fd-9b8d-74f6-8a76-66f446a50ed6",
+      "elementLocator": "unspecified",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "reason": "unspecified",
+      "evidence": "unspecified"
+    },
+    "ReactivationCreateResponse": {
+      "jobId": "019255a1-84bd-75b1-830c-30e6d97abc88"
+    },
+    "ReinstatementCreateRequest": {
+      "termId": "01928d8b-6b50-7d82-8790-561145eeb1c7",
+      "type": "unspecified",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "reason": "unspecified"
+    },
+    "ReinstatementCreateResponse": {
+      "jobId": "019269a1-40e9-719c-8a96-eb9e276522d7"
+    },
+    "RenewalAcceptRequest": {
+      "termId": "0192f41b-ea25-7e6c-889b-108d38fea640",
+      "offer": "unspecified",
+      "acceptanceEvidence": "unspecified",
+      "reason": "unspecified"
+    },
+    "RenewalAcceptResponse": {
+      "job": "unspecified"
+    },
+    "RenewalCreateRequest": {
+      "termId": "0192d0dd-9d1a-7d8d-8470-fcac93946a81",
+      "offer": "unspecified",
+      "acceptanceEvidence": "unspecified",
+      "reason": "unspecified"
+    },
+    "RenewalCreateResponse": {
+      "job": "unspecified"
+    },
+    "RenewalDeclineRequest": {
+      "termId": "01928633-672b-7900-8b5d-c3c2d1c8f133",
+      "offer": "unspecified",
+      "acceptanceEvidence": "unspecified",
+      "reason": "unspecified"
+    },
+    "RenewalDeclineResponse": {
+      "job": "unspecified"
+    },
+    "RenewalNonRenewRequest": {
+      "termId": "0192a9a9-e9e5-7f16-860f-84d19857d0b2",
+      "offer": "unspecified",
+      "acceptanceEvidence": "unspecified",
+      "reason": "unspecified"
+    },
+    "RenewalNonRenewResponse": {
+      "job": "unspecified"
+    },
+    "RenewalOfferRequest": {
+      "termId": "019270c9-213f-74eb-8b5f-4c2f2848f4a4",
+      "offer": "unspecified",
+      "acceptanceEvidence": "unspecified",
+      "reason": "unspecified"
+    },
+    "RenewalOfferResponse": {
+      "job": "unspecified"
+    },
+    "RenewalRunPauseRequest": {
+      "entity": "unspecified",
+      "product": "unspecified",
+      "window": "unspecified"
+    },
+    "RenewalRunPauseResponse": {
+      "run": "unspecified"
+    },
+    "RenewalRunRetryItemRequest": {
+      "entity": "unspecified",
+      "product": "unspecified",
+      "window": "unspecified"
+    },
+    "RenewalRunRetryItemResponse": {
+      "run": "unspecified"
+    },
+    "RenewalRunStartRequest": {
+      "entity": "unspecified",
+      "product": "unspecified",
+      "window": "unspecified"
+    },
+    "RenewalRunStartResponse": {
+      "run": "unspecified"
+    },
+    "RewriteCreateRequest": {
+      "termId": "01929019-0f3b-7532-8af5-3f590c828f63",
+      "rewriteType": "unspecified",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "targetAccountId": "01927ad5-20ef-7826-8463-21e207bfc2f3"
+    },
+    "RewriteCreateResponse": {
+      "jobId": "01924c22-e36a-72c4-8a86-47fcecce39c0"
+    },
+    "SegmentChangesItem": {
+      "segmentVersions": "unspecified"
+    },
+    "SegmentChangesPage": {
+      "items": [
+        {
+          "segmentVersions": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "SnapshotGetResponse": {
+      "snapshotRef": "unspecified",
+      "content": "unspecified"
+    },
+    "StatusModelGetResponse": {
+      "table": "unspecified"
+    },
+    "SubmissionCreateRequest": {
+      "accountId": "0192e866-20dd-78e2-85c0-3a2fc619e6a6",
+      "product": "SAMPLE_CODE",
+      "producerCode": "SAMPLE_CODE",
+      "channel": "SAMPLE_CODE",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "quoteType": "QUICK"
+    },
+    "SubmissionCreateResponse": {
+      "jobId": "0192d160-66a6-729b-8750-932871737f3e",
+      "describeModel": {
+        "note": "sample"
+      },
+      "versionNo": 1,
+      "manifest": {
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "uwRuleSetVersions": {
+          "sample": "SAMPLE_CODE"
+        },
+        "formPatternEditions": [
+          "SAMPLE_CODE"
+        ],
+        "referenceTableVersions": [
+          "SAMPLE_CODE"
+        ],
+        "paymentPlanVersions": [
+          "SAMPLE_CODE"
+        ]
+      }
+    },
+    "SuspensionCreateRequest": {
+      "termId": "0192dc57-077d-7d29-811c-dc2e5035cc78",
+      "elementLocator": "unspecified",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "reason": "unspecified",
+      "evidence": "unspecified"
+    },
+    "SuspensionCreateResponse": {
+      "jobId": "0192a305-e7ef-7f41-8648-cdee81c8d446"
+    },
+    "TermGetResponse": {
+      "policy": "unspecified",
+      "term": "unspecified",
+      "segment": "unspecified",
+      "riskTree": "unspecified"
+    },
+    "TermTimelineResponse": {
+      "policy": "unspecified",
+      "term": "unspecified",
+      "segment": "unspecified",
+      "riskTree": "unspecified"
+    },
+    "WithdrawalSubmitRequest": {
+      "policyId": "01929782-2e1e-77a9-8f49-be3c564432c5",
+      "right": "unspecified",
+      "receivedAt": "2026-10-07T09:00:00Z",
+      "channelRef": "unspecified"
+    },
+    "WithdrawalSubmitResponse": {
+      "voidJob": "unspecified",
+      "refundPreview": "unspecified"
+    }
+  }
+}

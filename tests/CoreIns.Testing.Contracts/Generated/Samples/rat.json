@@ -1,0 +1,657 @@
+{
+  "responses": {
+    "rat.Breakdown.get": {
+      "groupedLines": "unspecified",
+      "factorCategories": "unspecified",
+      "totals": "unspecified"
+    },
+    "rat.ChangeExplanation.get": {
+      "effectsSummingChange": "unspecified"
+    },
+    "rat.Comparison.compareVersions": {
+      "comparisonId": "01923c09-50af-73e8-830b-cc42b00ff6b9",
+      "asyncResults": "unspecified"
+    },
+    "rat.Dsar.export": {
+      "worksheetPackage": "unspecified"
+    },
+    "rat.GoldenSuite.run": {
+      "runId": "01920244-53e0-7a40-87f9-c70558cf18dc",
+      "results": "unspecified"
+    },
+    "rat.ImpactAnalysis.run": {
+      "runId": "01925b05-e29f-7309-8dd4-42e0b5fbe9fc",
+      "progress": "unspecified",
+      "metrics": "unspecified"
+    },
+    "rat.LegacyRating.import": {
+      "recordsOrDryRunReport": "unspecified"
+    },
+    "rat.PriceReview.request": {
+      "reviewCase": "unspecified",
+      "activityRef": "unspecified"
+    },
+    "rat.PricingModification.propose": {
+      "modificationStatus": "unspecified",
+      "authorityResult": "unspecified",
+      "dryRunPrice": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "rat.Rate.rate": {
+      "rates": [
+        {
+          "segmentId": "sample",
+          "elementId": "sample",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "coverageCode": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "currency": "EUR",
+          "ratingStep": "sample",
+          "handling": "FLAT"
+        }
+      ],
+      "taxes": [
+        "unspecified"
+      ],
+      "signals": [
+        "unspecified"
+      ],
+      "warnings": [
+        {
+          "code": "sample"
+        }
+      ],
+      "defaultsUsed": [
+        "unspecified"
+      ],
+      "automatedDecision": true,
+      "bindable": true,
+      "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "worksheetHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "rat.Rate.rateBatch": {
+      "batchId": "01920d67-193a-7e66-8de7-5d6c26af84bd",
+      "status": "unspecified",
+      "pagedResults": "unspecified"
+    },
+    "rat.RatingArtifact.resolve": {
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "activationRecord": "unspecified"
+    },
+    "rat.ShadowRun.start": {
+      "runId": "019208a9-808e-7bdf-85b1-0a064d7de505",
+      "status": "unspecified",
+      "report": "unspecified"
+    },
+    "rat.Worksheet.attach": {
+      "attachmentResult": "unspecified"
+    },
+    "rat.Worksheet.explain": {
+      "worksheet": "unspecified",
+      "explanation": "unspecified",
+      "matchResult": "unspecified",
+      "document": "unspecified"
+    },
+    "rat.Worksheet.get": {
+      "worksheet": "unspecified",
+      "explanation": "unspecified",
+      "matchResult": "unspecified",
+      "document": "unspecified"
+    }
+  },
+  "schemas": {
+    "BonusMalusTransitionRequest": {
+      "scaleRef": "unspecified",
+      "class": "unspecified",
+      "claimCount": "unspecified",
+      "protection": "unspecified",
+      "period": "unspecified"
+    },
+    "BonusMalusTransitionResponse": {
+      "nextClass": "unspecified",
+      "scaleVersion": "unspecified"
+    },
+    "BreakdownGetResponse": {
+      "groupedLines": "unspecified",
+      "factorCategories": "unspecified",
+      "totals": "unspecified"
+    },
+    "ChangeExplanationGetResponse": {
+      "effectsSummingChange": "unspecified"
+    },
+    "ComparisonCompareVersionsRequest": {
+      "artefactHashes": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "inputSet": "unspecified"
+    },
+    "ComparisonCompareVersionsResponse": {
+      "comparisonId": "019226fe-0bf6-7046-8236-ab13ce54ee5a",
+      "asyncResults": "unspecified"
+    },
+    "DayCountYearFractionRequest": {
+      "annualRates": "unspecified",
+      "periods": "unspecified",
+      "term": "unspecified",
+      "convention": "unspecified",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "orderOperations": "unspecified",
+      "explain": true
+    },
+    "DayCountYearFractionResponse": {
+      "amounts": [
+        {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      ],
+      "fractions": "unspecified",
+      "residuals": "unspecified",
+      "explanation": "unspecified"
+    },
+    "DsarExportRequest": {
+      "partySPolicy": "unspecified",
+      "quoteRefs": "unspecified"
+    },
+    "DsarExportResponse": {
+      "worksheetPackage": "unspecified"
+    },
+    "GoldenSuiteRequestRebaselineRequest": {
+      "slot": "unspecified",
+      "artefact": "unspecified",
+      "suites": "unspecified"
+    },
+    "GoldenSuiteRequestRebaselineResponse": {
+      "runId": "0192bd22-4ed7-7ca8-8221-565081cd9e1f",
+      "results": "unspecified"
+    },
+    "GoldenSuiteRunRequest": {
+      "slot": "unspecified",
+      "artefact": "unspecified",
+      "suites": "unspecified"
+    },
+    "GoldenSuiteRunResponse": {
+      "runId": "0192cf6a-8958-7a41-8b53-5aacec7ef6c9",
+      "results": "unspecified"
+    },
+    "ImpactAnalysisGetResponse": {
+      "runId": "01925a37-3692-7e4c-8304-06f1d5d1555b",
+      "progress": "unspecified",
+      "metrics": "unspecified"
+    },
+    "ImpactAnalysisResumeRequest": {
+      "candidate": "2026-10-07",
+      "baseline": "unspecified",
+      "population": "unspecified",
+      "window": "unspecified",
+      "slices": "unspecified"
+    },
+    "ImpactAnalysisResumeResponse": {
+      "runId": "01922d1f-032a-7779-85f1-01413cb3e0fc",
+      "progress": "unspecified",
+      "metrics": "unspecified"
+    },
+    "ImpactAnalysisRunRequest": {
+      "candidate": "2026-10-07",
+      "baseline": "unspecified",
+      "population": "unspecified",
+      "window": "unspecified",
+      "slices": "unspecified"
+    },
+    "ImpactAnalysisRunResponse": {
+      "runId": "0192f177-c3be-70cd-8a21-3a0c8ae81fb9",
+      "progress": "unspecified",
+      "metrics": "unspecified"
+    },
+    "LegacyRatingImportRequest": {
+      "legacyBreakdowns": "unspecified"
+    },
+    "LegacyRatingImportResponse": {
+      "recordsOrDryRunReport": "unspecified"
+    },
+    "PriceReviewDecideRequest": {
+      "worksheet": "unspecified",
+      "requester": "unspecified",
+      "decision": "unspecified",
+      "reasoning": "unspecified"
+    },
+    "PriceReviewDecideResponse": {
+      "reviewCase": "unspecified",
+      "activityRef": "unspecified"
+    },
+    "PriceReviewRequestRequest": {
+      "worksheet": "unspecified",
+      "requester": "unspecified",
+      "decision": "unspecified",
+      "reasoning": "unspecified"
+    },
+    "PriceReviewRequestResponse": {
+      "reviewCase": "unspecified",
+      "activityRef": "unspecified"
+    },
+    "PricingModificationGetResponse": {
+      "modificationStatus": "unspecified",
+      "authorityResult": "unspecified",
+      "dryRunPrice": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "PricingModificationListItem": {
+      "modificationStatus": "unspecified",
+      "authorityResult": "unspecified",
+      "dryRunPrice": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "PricingModificationListPage": {
+      "items": [
+        {
+          "modificationStatus": "unspecified",
+          "authorityResult": "unspecified",
+          "dryRunPrice": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PricingModificationProposeRequest": {
+      "job": "unspecified",
+      "quoteVersion": "unspecified",
+      "scope": "unspecified",
+      "type": "unspecified",
+      "value": "unspecified",
+      "reason": "unspecified",
+      "justification": "unspecified"
+    },
+    "PricingModificationProposeResponse": {
+      "modificationStatus": "unspecified",
+      "authorityResult": "unspecified",
+      "dryRunPrice": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "PricingModificationWithdrawRequest": {
+      "job": "unspecified",
+      "quoteVersion": "unspecified",
+      "scope": "unspecified",
+      "type": "unspecified",
+      "value": "unspecified",
+      "reason": "unspecified",
+      "justification": "unspecified"
+    },
+    "PricingModificationWithdrawResponse": {
+      "modificationStatus": "unspecified",
+      "authorityResult": "unspecified",
+      "dryRunPrice": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "ProrationProrateRequest": {
+      "annualRates": "unspecified",
+      "periods": "unspecified",
+      "term": "unspecified",
+      "convention": "unspecified",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "orderOperations": "unspecified",
+      "explain": true
+    },
+    "ProrationProrateResponse": {
+      "amounts": [
+        {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      ],
+      "fractions": "unspecified",
+      "residuals": "unspecified",
+      "explanation": "unspecified"
+    },
+    "RateCancelBatchRequest": {
+      "itemsItemKeys": "unspecified",
+      "priorityClass": "unspecified",
+      "origin": "unspecified"
+    },
+    "RateCancelBatchResponse": {
+      "batchId": "0192302f-9b87-7ddb-8e7a-7e0779387ad3",
+      "status": "unspecified",
+      "pagedResults": "unspecified"
+    },
+    "RateGetBatchItem": {
+      "batchId": "01929805-b204-7e53-8e98-f32967bfafa8",
+      "status": "unspecified",
+      "pagedResults": "unspecified"
+    },
+    "RateGetBatchPage": {
+      "items": [
+        {
+          "batchId": "019254d5-7cfc-70fd-88a7-7620ba78b281",
+          "status": "unspecified",
+          "pagedResults": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "RateGetBatchResultsItem": {
+      "batchId": "0192c7df-c62a-7b6f-8fd5-ef154e22ce7f",
+      "status": "unspecified",
+      "pagedResults": "unspecified"
+    },
+    "RateGetBatchResultsPage": {
+      "items": [
+        {
+          "batchId": "0192aef6-ddac-75ff-8fe8-fd4ed088aa93",
+          "status": "unspecified",
+          "pagedResults": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "RateRateBatchRequest": {
+      "itemsItemKeys": "unspecified",
+      "priorityClass": "unspecified",
+      "origin": "unspecified"
+    },
+    "RateRateBatchResponse": {
+      "batchId": "0192d493-76af-7c20-86e5-d6ff48b7c3c8",
+      "status": "unspecified",
+      "pagedResults": "unspecified"
+    },
+    "RateRateRequest": {
+      "envelope": {
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "GR",
+        "productCode": "SAMPLE_CODE",
+        "productArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "mode": "FULL",
+        "transactionType": "SAMPLE_CODE",
+        "ratingBasisDate": "2026-10-07",
+        "taxPointDate": "2026-10-07",
+        "currency": "EUR",
+        "channel": "SAMPLE_CODE",
+        "producerCode": "SAMPLE_CODE",
+        "lineage": {
+          "quoteId": "01928c9b-b6b1-7366-8fde-2599cd3874b3",
+          "jobId": "0192df1d-61d2-72b4-8e7e-8550fba11508",
+          "transactionId": "0192233b-dfa8-7dde-8afc-2df3f4482fcd"
+        },
+        "origin": "LIVE"
+      },
+      "segments": [
+        {
+          "segmentId": "sample",
+          "validPeriod": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "riskTree": {
+            "note": "sample"
+          }
+        }
+      ],
+      "policyInputs": {
+        "note": "sample"
+      },
+      "history": {
+        "note": "sample"
+      },
+      "modificationRefs": [
+        "0192e254-5035-7f5d-85da-751d6250ae8a"
+      ],
+      "priorRates": [
+        "unspecified"
+      ],
+      "explain": true
+    },
+    "RateRateResponse": {
+      "rates": [
+        {
+          "segmentId": "sample",
+          "elementId": "sample",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "coverageCode": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "currency": "EUR",
+          "ratingStep": "sample",
+          "handling": "FLAT"
+        }
+      ],
+      "taxes": [
+        "unspecified"
+      ],
+      "signals": [
+        "unspecified"
+      ],
+      "warnings": [
+        {
+          "code": "sample"
+        }
+      ],
+      "defaultsUsed": [
+        "unspecified"
+      ],
+      "automatedDecision": true,
+      "bindable": true,
+      "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "worksheetHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "RateTableDiffResponse": {
+      "tableVersion": "unspecified",
+      "validationReport": "unspecified",
+      "diff": "unspecified"
+    },
+    "RateTableImportRequest": {
+      "file": "unspecified",
+      "mapping": "unspecified",
+      "changeSet": "unspecified"
+    },
+    "RateTableImportResponse": {
+      "tableVersion": "unspecified",
+      "validationReport": "unspecified",
+      "diff": "unspecified"
+    },
+    "RateTableValidateRequest": {
+      "file": "unspecified",
+      "mapping": "unspecified",
+      "changeSet": "unspecified"
+    },
+    "RateTableValidateResponse": {
+      "tableVersion": "unspecified",
+      "validationReport": "unspecified",
+      "diff": "unspecified"
+    },
+    "RatingArtifactBuildRequest": {
+      "changeSet": "unspecified",
+      "artefact": "unspecified",
+      "slotDates": "unspecified",
+      "reason": "unspecified"
+    },
+    "RatingArtifactBuildResponse": {
+      "artefactStatus": "unspecified",
+      "governanceBundleId": "0192ab81-a027-7504-87df-d2d4868eecff"
+    },
+    "RatingArtifactCancelScheduleRequest": {
+      "changeSet": "unspecified",
+      "artefact": "unspecified",
+      "slotDates": "unspecified",
+      "reason": "unspecified"
+    },
+    "RatingArtifactCancelScheduleResponse": {
+      "artefactStatus": "unspecified",
+      "governanceBundleId": "0192c3bb-f9a7-758d-86d7-160112f3247d"
+    },
+    "RatingArtifactCompatibilityResponse": {
+      "manifest": "unspecified",
+      "status": "unspecified",
+      "compatibilityRecords": "unspecified"
+    },
+    "RatingArtifactGetResponse": {
+      "manifest": "unspecified",
+      "status": "unspecified",
+      "compatibilityRecords": "unspecified"
+    },
+    "RatingArtifactListItem": {
+      "manifest": "unspecified",
+      "status": "unspecified",
+      "compatibilityRecords": "unspecified"
+    },
+    "RatingArtifactListPage": {
+      "items": [
+        {
+          "manifest": "unspecified",
+          "status": "unspecified",
+          "compatibilityRecords": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "RatingArtifactResolveRequest": {
+      "slot": "unspecified",
+      "transactionType": "unspecified"
+    },
+    "RatingArtifactResolveResponse": {
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "activationRecord": "unspecified"
+    },
+    "RatingArtifactReturnRequest": {
+      "changeSet": "unspecified",
+      "artefact": "unspecified",
+      "slotDates": "unspecified",
+      "reason": "unspecified"
+    },
+    "RatingArtifactReturnResponse": {
+      "artefactStatus": "unspecified",
+      "governanceBundleId": "01922b70-47b9-7260-8539-7ea156837166"
+    },
+    "RatingArtifactRollbackRequest": {
+      "changeSet": "unspecified",
+      "artefact": "unspecified",
+      "slotDates": "unspecified",
+      "reason": "unspecified"
+    },
+    "RatingArtifactRollbackResponse": {
+      "artefactStatus": "unspecified",
+      "governanceBundleId": "01920748-6366-7f52-87d0-e10fd7db9ed7"
+    },
+    "RatingArtifactScheduleRequest": {
+      "changeSet": "unspecified",
+      "artefact": "unspecified",
+      "slotDates": "unspecified",
+      "reason": "unspecified"
+    },
+    "RatingArtifactScheduleResponse": {
+      "artefactStatus": "unspecified",
+      "governanceBundleId": "01925bfe-399c-7999-8d94-94746fd25ce9"
+    },
+    "RatingArtifactSubmitRequest": {
+      "changeSet": "unspecified",
+      "artefact": "unspecified",
+      "slotDates": "unspecified",
+      "reason": "unspecified"
+    },
+    "RatingArtifactSubmitResponse": {
+      "artefactStatus": "unspecified",
+      "governanceBundleId": "0192aad8-72d4-7fc7-898b-bd6cdd87d92a"
+    },
+    "RatingChangeSetCreateRequest": {
+      "file": "unspecified",
+      "mapping": "unspecified",
+      "changeSet": "unspecified"
+    },
+    "RatingChangeSetCreateResponse": {
+      "tableVersion": "unspecified",
+      "validationReport": "unspecified",
+      "diff": "unspecified"
+    },
+    "ShadowRunGetResponse": {
+      "runId": "019253f6-fe42-75f5-8bd2-35010c9c4a2d",
+      "status": "unspecified",
+      "report": "unspecified"
+    },
+    "ShadowRunStartRequest": {
+      "candidate": "2026-10-07",
+      "slot": "unspecified",
+      "sample": "unspecified",
+      "filters": "unspecified",
+      "window": "unspecified"
+    },
+    "ShadowRunStartResponse": {
+      "runId": "0192eb9b-755e-78d7-8f1c-b9d7d7beabf8",
+      "status": "unspecified",
+      "report": "unspecified"
+    },
+    "ShadowRunStopRequest": {
+      "candidate": "2026-10-07",
+      "slot": "unspecified",
+      "sample": "unspecified",
+      "filters": "unspecified",
+      "window": "unspecified"
+    },
+    "ShadowRunStopResponse": {
+      "runId": "01929c1b-f074-772c-8a8f-34ac03a6b340",
+      "status": "unspecified",
+      "report": "unspecified"
+    },
+    "StatementGetResponse": {
+      "currentStatement": "unspecified",
+      "documentRef": "unspecified"
+    },
+    "WorksheetAttachRequest": {
+      "worksheetIds": [
+        "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      ],
+      "transactionRef": "unspecified",
+      "policyRef": "unspecified"
+    },
+    "WorksheetAttachResponse": {
+      "attachmentResult": "unspecified"
+    },
+    "WorksheetExplainResponse": {
+      "worksheet": "unspecified",
+      "explanation": "unspecified",
+      "matchResult": "unspecified",
+      "document": "unspecified"
+    },
+    "WorksheetExportRequest": {
+      "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "language": "el",
+      "format": "unspecified"
+    },
+    "WorksheetExportResponse": {
+      "worksheet": "unspecified",
+      "explanation": "unspecified",
+      "matchResult": "unspecified",
+      "document": "unspecified"
+    },
+    "WorksheetGetResponse": {
+      "worksheet": "unspecified",
+      "explanation": "unspecified",
+      "matchResult": "unspecified",
+      "document": "unspecified"
+    },
+    "WorksheetReperformRequest": {
+      "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "language": "el",
+      "format": "unspecified"
+    },
+    "WorksheetReperformResponse": {
+      "worksheet": "unspecified",
+      "explanation": "unspecified",
+      "matchResult": "unspecified",
+      "document": "unspecified"
+    }
+  }
+}

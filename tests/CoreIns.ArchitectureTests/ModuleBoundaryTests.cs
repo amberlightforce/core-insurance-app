@@ -116,6 +116,40 @@ public sealed partial class ModuleBoundaryTests
     }
 
     /// <summary>
+    /// F-1c part 3: the contract-level abstractions every module's Contracts project shares (IEventPayload, common event
+    /// value types, PLT contracts) depend on the SharedKernel only, so referencing them never pulls in the platform
+    /// implementation (Npgsql, ASP.NET Core, EF Core) or another module.
+    /// </summary>
+    [Fact]
+    public void Platform_contracts_reference_only_the_shared_kernel()
+    {
+        SolutionModel.ProjectReferences(SolutionModel.PlatformContracts)
+            .Where(reference => reference != SolutionModel.SharedKernel)
+            .ShouldBeEmpty();
+
+        using var assembly = ModuleDefinition.ReadModule(SolutionModel.AssemblyPath(SolutionModel.PlatformContracts));
+        assembly.AssemblyReferences.Select(reference => reference.Name)
+            .Where(name => (name.StartsWith("CoreIns.", StringComparison.Ordinal) && name != SolutionModel.SharedKernel)
+                           || name.StartsWith("Npgsql", StringComparison.Ordinal)
+                           || name.StartsWith("Microsoft.AspNetCore", StringComparison.Ordinal)
+                           || name.StartsWith("Microsoft.EntityFrameworkCore", StringComparison.Ordinal))
+            .ShouldBeEmpty();
+    }
+
+    /// <summary>A module's Contracts project references only the SharedKernel, Platform.Contracts and other modules' Contracts.</summary>
+    [Theory]
+    [MemberData(nameof(Modules))]
+    public void Module_contracts_reference_only_kernel_platform_contracts_and_contracts(string module)
+    {
+        SolutionModel.ProjectReferences(SolutionModel.Contracts(module))
+            .Where(reference => reference != SolutionModel.SharedKernel
+                                && reference != SolutionModel.PlatformContracts
+                                && !(reference.StartsWith(SolutionModel.ModulePrefix, StringComparison.Ordinal)
+                                     && reference.EndsWith(SolutionModel.ContractsSuffix, StringComparison.Ordinal)))
+            .ShouldBeEmpty($"{SolutionModel.Contracts(module)} references more than contracts");
+    }
+
+    /// <summary>
     /// D-ARC-20: the only pack-to-pack reference allowed is CY → GR (the Cyprus stub reuses the Greek ELOT 743 engine).
     /// Any other one must move the shared algorithm to <c>CoreIns.CountryPacks.Common</c> instead.
     /// </summary>

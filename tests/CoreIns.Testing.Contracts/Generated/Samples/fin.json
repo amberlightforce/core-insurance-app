@@ -1,0 +1,861 @@
+{
+  "responses": {
+    "fin.ActuarialInputs.extract": {
+      "extractControlTotals": "unspecified"
+    },
+    "fin.ActuarialResults.get": {
+      "validationFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "fin.ActuarialResults.submit": {
+      "validationFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "fin.ActuarialResults.validate": {
+      "validationFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "fin.Dsar.export": {
+      "references": "unspecified",
+      "restrictionOutcome": "unspecified"
+    },
+    "fin.Dsar.restrict": {
+      "restrictionOutcome": "unspecified",
+      "referencesRestricted": "unspecified"
+    },
+    "fin.Ifrs17Group.assignment": {
+      "groupId": "0192ea65-a349-7a17-8597-510bae004ee1",
+      "groupCode": "unspecified",
+      "portfolio": "unspecified",
+      "cohort": "unspecified",
+      "profitabilityGroup": "unspecified",
+      "model": "unspecified",
+      "recognitionDate": "2026-10-07",
+      "version": "unspecified",
+      "orPending": "unspecified"
+    },
+    "fin.Ifrs17Group.get": {
+      "group": "unspecified",
+      "status": "unspecified",
+      "links": "unspecified"
+    },
+    "fin.Ifrs17Group.riHeldAssignment": {
+      "group": "unspecified",
+      "linksIssuedGroups": "unspecified",
+      "orPending": "unspecified"
+    },
+    "fin.Import.convertCurrency": {
+      "conversionJournals": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "fin.Import.earningBaseline": {
+      "outcomes": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "fin.Import.ifrs17Groups": {
+      "outcomes": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "fin.Import.lic": {
+      "outcomes": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "fin.Import.openingBalances": {
+      "outcomes": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "fin.Import.reverseBatch": {
+      "reversalJournals": "unspecified",
+      "supersededAssignments": "unspecified"
+    },
+    "fin.Period.status": {
+      "legalEntity": "SAMPLE_CODE",
+      "period": "SAMPLE_CODE",
+      "state": "SAMPLE_CODE",
+      "closedForPosting": true
+    },
+    "fin.Reconciliation.exchange": {
+      "comparisonResult": "unspecified",
+      "breakIds": [
+        "01922b61-2f05-7750-87ce-2a5dd37599de"
+      ]
+    }
+  },
+  "schemas": {
+    "ActuarialInputsExtractRequest": {
+      "valuationDate": "2026-10-07"
+    },
+    "ActuarialInputsExtractResponse": {
+      "extractControlTotals": "unspecified"
+    },
+    "ActuarialResultsApproveRequest": {
+      "resultSet": "unspecified"
+    },
+    "ActuarialResultsApproveResponse": {
+      "validationFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "ActuarialResultsGetResponse": {
+      "validationFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "ActuarialResultsRejectRequest": {
+      "resultSet": "unspecified"
+    },
+    "ActuarialResultsRejectResponse": {
+      "validationFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "ActuarialResultsSubmitRequest": {
+      "resultSet": "unspecified"
+    },
+    "ActuarialResultsSubmitResponse": {
+      "validationFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "ActuarialResultsValidateRequest": {
+      "resultSet": "unspecified"
+    },
+    "ActuarialResultsValidateResponse": {
+      "validationFindings": "unspecified",
+      "status": "unspecified"
+    },
+    "BalanceGetResponse": {
+      "balances": "unspecified"
+    },
+    "BalanceTrialBalanceResponse": {
+      "balances": "unspecified"
+    },
+    "CloseAcceptBreakRequest": {
+      "period": "unspecified",
+      "task": "unspecified",
+      "reason": "unspecified"
+    },
+    "CloseAcceptBreakResponse": {
+      "state": "unspecified",
+      "impact": "unspecified",
+      "pack": "unspecified"
+    },
+    "CloseEvidencePackRequest": {
+      "period": "unspecified",
+      "task": "unspecified",
+      "reason": "unspecified"
+    },
+    "CloseEvidencePackResponse": {
+      "state": "unspecified",
+      "impact": "unspecified",
+      "pack": "unspecified"
+    },
+    "CloseLockRequest": {
+      "period": "unspecified",
+      "task": "unspecified",
+      "reason": "unspecified"
+    },
+    "CloseLockResponse": {
+      "state": "unspecified",
+      "impact": "unspecified",
+      "pack": "unspecified"
+    },
+    "CloseReopenRequest": {
+      "period": "unspecified",
+      "task": "unspecified",
+      "reason": "unspecified"
+    },
+    "CloseReopenResponse": {
+      "state": "unspecified",
+      "impact": "unspecified",
+      "pack": "unspecified"
+    },
+    "CloseSignOffRequest": {
+      "period": "unspecified",
+      "task": "unspecified",
+      "reason": "unspecified"
+    },
+    "CloseSignOffResponse": {
+      "state": "unspecified",
+      "impact": "unspecified",
+      "pack": "unspecified"
+    },
+    "CloseSoftCloseRequest": {
+      "period": "unspecified",
+      "task": "unspecified",
+      "reason": "unspecified"
+    },
+    "CloseSoftCloseResponse": {
+      "state": "unspecified",
+      "impact": "unspecified",
+      "pack": "unspecified"
+    },
+    "CloseTasksResponse": {
+      "state": "unspecified",
+      "impact": "unspecified",
+      "pack": "unspecified"
+    },
+    "DsarExportRequest": {
+      "partyId": "01920977-c650-77fb-878a-7ebb21d9e00a"
+    },
+    "DsarExportResponse": {
+      "references": "unspecified",
+      "restrictionOutcome": "unspecified"
+    },
+    "DsarRestrictRequest": {
+      "partyId": "01928cd5-cf5e-780e-8061-9888fa1854be",
+      "dsarId": "01928e55-1ae6-7904-80e3-1c288d5fd7d0"
+    },
+    "DsarRestrictResponse": {
+      "restrictionOutcome": "unspecified",
+      "referencesRestricted": "unspecified"
+    },
+    "EarningResultRequest": {
+      "entity": "unspecified",
+      "as": "unspecified"
+    },
+    "EarningResultResponse": {
+      "run": "unspecified",
+      "results": "unspecified"
+    },
+    "EarningRunRequest": {
+      "entity": "unspecified",
+      "as": "unspecified"
+    },
+    "EarningRunResponse": {
+      "run": "unspecified",
+      "results": "unspecified"
+    },
+    "EarningSimulateRequest": {
+      "entity": "unspecified",
+      "as": "unspecified"
+    },
+    "EarningSimulateResponse": {
+      "run": "unspecified",
+      "results": "unspecified"
+    },
+    "EarningStatusResponse": {
+      "run": "unspecified",
+      "results": "unspecified"
+    },
+    "FiscalReconciliationResultsItem": {
+      "legs": "unspecified",
+      "breaks": "unspecified"
+    },
+    "FiscalReconciliationResultsPage": {
+      "items": [
+        {
+          "legs": "unspecified",
+          "breaks": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "FiscalReconciliationRunRequest": {
+      "date": "2026-10-07"
+    },
+    "FiscalReconciliationRunResponse": {
+      "legs": "unspecified",
+      "breaks": "unspecified"
+    },
+    "FxRevalueRequest": {
+      "entity": "unspecified",
+      "books": "unspecified",
+      "periodEnd": "unspecified"
+    },
+    "FxRevalueResponse": {
+      "run": "unspecified",
+      "journals": "unspecified"
+    },
+    "FxRunsItem": {
+      "run": "unspecified",
+      "journals": "unspecified"
+    },
+    "FxRunsPage": {
+      "items": [
+        {
+          "run": "unspecified",
+          "journals": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "FxTranslateRequest": {
+      "entity": "unspecified",
+      "books": "unspecified",
+      "periodEnd": "unspecified"
+    },
+    "FxTranslateResponse": {
+      "run": "unspecified",
+      "journals": "unspecified"
+    },
+    "GLExtractAcknowledgeRequest": {
+      "target": "unspecified",
+      "range": "unspecified",
+      "ackData": "unspecified"
+    },
+    "GLExtractAcknowledgeResponse": {
+      "extract": "unspecified",
+      "status": "unspecified"
+    },
+    "GLExtractCorrectiveRequest": {
+      "target": "unspecified",
+      "range": "unspecified",
+      "ackData": "unspecified"
+    },
+    "GLExtractCorrectiveResponse": {
+      "extract": "unspecified",
+      "status": "unspecified"
+    },
+    "GLExtractGenerateRequest": {
+      "target": "unspecified",
+      "range": "unspecified",
+      "ackData": "unspecified"
+    },
+    "GLExtractGenerateResponse": {
+      "extract": "unspecified",
+      "status": "unspecified"
+    },
+    "GLExtractListItem": {
+      "extract": "unspecified",
+      "status": "unspecified"
+    },
+    "GLExtractListPage": {
+      "items": [
+        {
+          "extract": "unspecified",
+          "status": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "GLExtractReplayRequest": {
+      "target": "unspecified",
+      "range": "unspecified",
+      "ackData": "unspecified"
+    },
+    "GLExtractReplayResponse": {
+      "extract": "unspecified",
+      "status": "unspecified"
+    },
+    "GroupPackExportRequest": {
+      "entity": "unspecified",
+      "period": "unspecified"
+    },
+    "GroupPackExportResponse": {
+      "files": "unspecified"
+    },
+    "Ifrs17GroupAssignmentResponse": {
+      "groupId": "01926fab-5630-7e4c-8046-142431a67ea0",
+      "groupCode": "unspecified",
+      "portfolio": "unspecified",
+      "cohort": "unspecified",
+      "profitabilityGroup": "unspecified",
+      "model": "unspecified",
+      "recognitionDate": "2026-10-07",
+      "version": "unspecified",
+      "orPending": "unspecified"
+    },
+    "Ifrs17GroupCorrectAssignmentRequest": {
+      "termId": "0192bba3-4257-771b-8e56-7cbd7e7816b2",
+      "targetGroup": "unspecified",
+      "reason": "unspecified",
+      "evidence": "unspecified"
+    },
+    "Ifrs17GroupCorrectAssignmentResponse": {
+      "newAssignmentVersion": "unspecified",
+      "approvalRef": "unspecified"
+    },
+    "Ifrs17GroupGetResponse": {
+      "group": "unspecified",
+      "status": "unspecified",
+      "links": "unspecified"
+    },
+    "Ifrs17GroupListItem": {
+      "group": "unspecified",
+      "status": "unspecified",
+      "links": "unspecified"
+    },
+    "Ifrs17GroupListPage": {
+      "items": [
+        {
+          "group": "unspecified",
+          "status": "unspecified",
+          "links": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "Ifrs17GroupRiHeldAssignmentResponse": {
+      "group": "unspecified",
+      "linksIssuedGroups": "unspecified",
+      "orPending": "unspecified"
+    },
+    "Ifrs17MovementsResponse": {
+      "tables": "unspecified"
+    },
+    "ImportConvertCurrencyRequest": {
+      "planId": "01928842-77f8-7262-8b16-29cadfea31c0"
+    },
+    "ImportConvertCurrencyResponse": {
+      "conversionJournals": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "ImportEarningBaselineResponse": {
+      "outcomes": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "ImportIfrs17GroupsResponse": {
+      "outcomes": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "ImportLicResponse": {
+      "outcomes": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "ImportOpeningBalancesResponse": {
+      "outcomes": "unspecified",
+      "reconciliation": "unspecified"
+    },
+    "ImportReverseBatchRequest": {
+      "batchId": "01920d22-2c7c-7935-8401-d2cb5ed540f9"
+    },
+    "ImportReverseBatchResponse": {
+      "reversalJournals": "unspecified",
+      "supersededAssignments": "unspecified"
+    },
+    "IntakeExceptionListPage": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "IntakeExceptionMarkDuplicateRequest": {
+      "filters": "unspecified",
+      "itemIds": [
+        "0192f8e9-e526-7d35-8bb3-08c44ba2ff25"
+      ]
+    },
+    "IntakeExceptionRejectRequest": {
+      "filters": "unspecified",
+      "itemIds": [
+        "0192341d-1cde-7931-868c-b050664b8519"
+      ]
+    },
+    "IntakeExceptionRerunRequest": {
+      "filters": "unspecified",
+      "itemIds": [
+        "019266ba-fee9-7be4-89d1-387ac75911d5"
+      ]
+    },
+    "JournalGetResponse": {
+      "journalsLines": "unspecified"
+    },
+    "JournalQueryItem": {
+      "journalsLines": "unspecified"
+    },
+    "JournalQueryPage": {
+      "items": [
+        {
+          "journalsLines": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "JournalReverseRequest": {
+      "journalId": "01928173-dba3-7912-81b3-846be47282c4",
+      "reason": "unspecified",
+      "date": "2026-10-07"
+    },
+    "JournalReverseResponse": {
+      "reversalJournal": "unspecified"
+    },
+    "LevyReturnAddAdjustmentRequest": {
+      "levy": "unspecified",
+      "period": "unspecified"
+    },
+    "LevyReturnAddAdjustmentResponse": {
+      "return": "unspecified"
+    },
+    "LevyReturnGenerateFileRequest": {
+      "levy": "unspecified",
+      "period": "unspecified"
+    },
+    "LevyReturnGenerateFileResponse": {
+      "return": "unspecified"
+    },
+    "LevyReturnGetResponse": {
+      "return": "unspecified"
+    },
+    "LevyReturnListItem": {
+      "return": "unspecified"
+    },
+    "LevyReturnListPage": {
+      "items": [
+        {
+          "return": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "LevyReturnRecalculateRequest": {
+      "levy": "unspecified",
+      "period": "unspecified"
+    },
+    "LevyReturnRecalculateResponse": {
+      "return": "unspecified"
+    },
+    "LevyReturnRecordFilingRequest": {
+      "levy": "unspecified",
+      "period": "unspecified"
+    },
+    "LevyReturnRecordFilingResponse": {
+      "return": "unspecified"
+    },
+    "LevyReturnRequestPaymentRequest": {
+      "levy": "unspecified",
+      "period": "unspecified"
+    },
+    "LevyReturnRequestPaymentResponse": {
+      "return": "unspecified"
+    },
+    "LevyReturnTransitionRequest": {
+      "levy": "unspecified",
+      "period": "unspecified"
+    },
+    "LevyReturnTransitionResponse": {
+      "return": "unspecified"
+    },
+    "ManualJournalCreateRequest": {
+      "template": "unspecified",
+      "lines": [
+        "unspecified"
+      ],
+      "evidence": "unspecified"
+    },
+    "ManualJournalCreateResponse": {
+      "manualJournal": "unspecified",
+      "postedIds": [
+        "0192d539-80c4-70cc-8851-7f2da9e328c9"
+      ]
+    },
+    "ManualJournalDecideRequest": {
+      "template": "unspecified",
+      "lines": [
+        "unspecified"
+      ],
+      "evidence": "unspecified"
+    },
+    "ManualJournalDecideResponse": {
+      "manualJournal": "unspecified",
+      "postedIds": [
+        "0192d3c8-98b1-7277-8c86-6f9342076bb3"
+      ]
+    },
+    "ManualJournalGetResponse": {
+      "manualJournal": "unspecified",
+      "postedIds": [
+        "0192c8d4-8791-7ed3-836e-b93f1e0d4ed0"
+      ]
+    },
+    "ManualJournalListItem": {
+      "manualJournal": "unspecified",
+      "postedIds": [
+        "0192b384-22f1-71ee-807c-dd3b35843260"
+      ]
+    },
+    "ManualJournalListPage": {
+      "items": [
+        {
+          "manualJournal": "unspecified",
+          "postedIds": [
+            "01927adb-f807-7538-8c20-fe8e0d15fe92"
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ManualJournalSubmitRequest": {
+      "template": "unspecified",
+      "lines": [
+        "unspecified"
+      ],
+      "evidence": "unspecified"
+    },
+    "ManualJournalSubmitResponse": {
+      "manualJournal": "unspecified",
+      "postedIds": [
+        "0192d760-cddb-723c-8d42-638c482fa7cc"
+      ]
+    },
+    "ManualJournalWithdrawRequest": {
+      "template": "unspecified",
+      "lines": [
+        "unspecified"
+      ],
+      "evidence": "unspecified"
+    },
+    "ManualJournalWithdrawResponse": {
+      "manualJournal": "unspecified",
+      "postedIds": [
+        "01921ac0-09b7-7f1c-8e6b-4a9fdc6c4090"
+      ]
+    },
+    "PeriodListItem": {
+      "state": "unspecified"
+    },
+    "PeriodListPage": {
+      "items": [
+        {
+          "state": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PeriodStatusResponse": {
+      "legalEntity": "SAMPLE_CODE",
+      "period": "SAMPLE_CODE",
+      "state": "SAMPLE_CODE",
+      "closedForPosting": true
+    },
+    "PostingRulesCompileRequest": {
+      "ruleSet": "unspecified",
+      "ruleRows": "unspecified",
+      "sampleEvents": "unspecified"
+    },
+    "PostingRulesCompileResponse": {
+      "compileResults": "unspecified",
+      "goldenResults": "unspecified",
+      "preview": "unspecified"
+    },
+    "PostingRulesDecideRequest": {
+      "ruleSet": "unspecified",
+      "ruleRows": "unspecified",
+      "sampleEvents": "unspecified"
+    },
+    "PostingRulesDecideResponse": {
+      "compileResults": "unspecified",
+      "goldenResults": "unspecified",
+      "preview": "unspecified"
+    },
+    "PostingRulesDraftRequest": {
+      "ruleSet": "unspecified",
+      "ruleRows": "unspecified",
+      "sampleEvents": "unspecified"
+    },
+    "PostingRulesDraftResponse": {
+      "compileResults": "unspecified",
+      "goldenResults": "unspecified",
+      "preview": "unspecified"
+    },
+    "PostingRulesListItem": {
+      "compileResults": "unspecified",
+      "goldenResults": "unspecified",
+      "preview": "unspecified"
+    },
+    "PostingRulesListPage": {
+      "items": [
+        {
+          "compileResults": "unspecified",
+          "goldenResults": "unspecified",
+          "preview": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PostingRulesPreviewImpactRequest": {
+      "ruleSet": "unspecified",
+      "ruleRows": "unspecified",
+      "sampleEvents": "unspecified"
+    },
+    "PostingRulesPreviewImpactResponse": {
+      "compileResults": "unspecified",
+      "goldenResults": "unspecified",
+      "preview": "unspecified"
+    },
+    "PostingRulesSubmitRequest": {
+      "ruleSet": "unspecified",
+      "ruleRows": "unspecified",
+      "sampleEvents": "unspecified"
+    },
+    "PostingRulesSubmitResponse": {
+      "compileResults": "unspecified",
+      "goldenResults": "unspecified",
+      "preview": "unspecified"
+    },
+    "PostingRulesTestRequest": {
+      "ruleSet": "unspecified",
+      "ruleRows": "unspecified",
+      "sampleEvents": "unspecified"
+    },
+    "PostingRulesTestResponse": {
+      "compileResults": "unspecified",
+      "goldenResults": "unspecified",
+      "preview": "unspecified"
+    },
+    "ReconciliationBreaksItem": {
+      "items": [
+        "unspecified"
+      ],
+      "matches": "unspecified"
+    },
+    "ReconciliationBreaksPage": {
+      "items": [
+        {
+          "items": [
+            "unspecified"
+          ],
+          "matches": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ReconciliationDetailResponse": {
+      "items": [
+        "unspecified"
+      ],
+      "matches": "unspecified"
+    },
+    "ReconciliationExchangeRequest": {
+      "source": "unspecified",
+      "date": "2026-10-07",
+      "totals": "unspecified"
+    },
+    "ReconciliationExchangeResponse": {
+      "comparisonResult": "unspecified",
+      "breakIds": [
+        "01928a71-a660-76ee-8fe3-e6b760982997"
+      ]
+    },
+    "ReconciliationMatchRequest": {
+      "key": "unspecified",
+      "date": "2026-10-07",
+      "items": [
+        "unspecified"
+      ]
+    },
+    "ReconciliationMatchResponse": {
+      "items": [
+        "unspecified"
+      ],
+      "matches": "unspecified"
+    },
+    "ReconciliationRunRequest": {
+      "key": "unspecified",
+      "date": "2026-10-07",
+      "items": [
+        "unspecified"
+      ]
+    },
+    "ReconciliationRunResponse": {
+      "items": [
+        "unspecified"
+      ],
+      "matches": "unspecified"
+    },
+    "TaxReturnAddAdjustmentRequest": {
+      "tax": "unspecified",
+      "period": "unspecified",
+      "data": "unspecified"
+    },
+    "TaxReturnAddAdjustmentResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "paymentStatus": "unspecified"
+    },
+    "TaxReturnGenerateFileRequest": {
+      "tax": "unspecified",
+      "period": "unspecified",
+      "data": "unspecified"
+    },
+    "TaxReturnGenerateFileResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "paymentStatus": "unspecified"
+    },
+    "TaxReturnGetResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "paymentStatus": "unspecified"
+    },
+    "TaxReturnListItem": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "paymentStatus": "unspecified"
+    },
+    "TaxReturnListPage": {
+      "items": [
+        {
+          "return": "unspecified",
+          "file": "unspecified",
+          "paymentStatus": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "TaxReturnRecalculateRequest": {
+      "tax": "unspecified",
+      "period": "unspecified",
+      "data": "unspecified"
+    },
+    "TaxReturnRecalculateResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "paymentStatus": "unspecified"
+    },
+    "TaxReturnRecordFilingRequest": {
+      "tax": "unspecified",
+      "period": "unspecified",
+      "data": "unspecified"
+    },
+    "TaxReturnRecordFilingResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "paymentStatus": "unspecified"
+    },
+    "TaxReturnRequestPaymentRequest": {
+      "tax": "unspecified",
+      "period": "unspecified",
+      "data": "unspecified"
+    },
+    "TaxReturnRequestPaymentResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "paymentStatus": "unspecified"
+    },
+    "TaxReturnTransitionRequest": {
+      "tax": "unspecified",
+      "period": "unspecified",
+      "data": "unspecified"
+    },
+    "TaxReturnTransitionResponse": {
+      "return": "unspecified",
+      "file": "unspecified",
+      "paymentStatus": "unspecified"
+    },
+    "WrittenPremiumQueryItem": {
+      "totals": "unspecified",
+      "explainedDifferencesDat": "unspecified"
+    },
+    "WrittenPremiumQueryPage": {
+      "items": [
+        {
+          "totals": "unspecified",
+          "explainedDifferencesDat": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    }
+  }
+}

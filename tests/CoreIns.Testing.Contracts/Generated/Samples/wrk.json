@@ -1,0 +1,578 @@
+{
+  "responses": {
+    "wrk.Activity.blockingStatus": {
+      "openGateBlockingActivities": "unspecified"
+    },
+    "wrk.Activity.complete": {
+      "activity": "unspecified"
+    },
+    "wrk.Activity.create": {
+      "activityId": "01928382-1255-78cd-8e0d-6f0ab9171637",
+      "number": "SAMPLE-000001",
+      "targetAt": "2026-10-07T09:00:00Z",
+      "escalationAt": "2026-10-07T09:00:00Z",
+      "assignment": {
+        "assigneeType": "USER",
+        "assigneeId": "sample"
+      }
+    },
+    "wrk.Activity.list": {
+      "items": [
+        {
+          "activity": "unspecified",
+          "page": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "wrk.Activity.update": {
+      "activity": "unspecified"
+    },
+    "wrk.Assignment.simulate": {
+      "target": "unspecified",
+      "rulePath": "unspecified",
+      "rejectedCandidates": "unspecified"
+    },
+    "wrk.CommandRegistry.register": {
+      "groupedResults": "unspecified"
+    },
+    "wrk.DataSubject.erase": {
+      "package": "unspecified",
+      "resultConflicts": "unspecified"
+    },
+    "wrk.DataSubject.export": {
+      "package": "unspecified",
+      "resultConflicts": "unspecified"
+    },
+    "wrk.DataSubject.restrict": {
+      "package": "unspecified",
+      "resultConflicts": "unspecified"
+    },
+    "wrk.Import.activities": {
+      "key": "value"
+    },
+    "wrk.Import.groups": {
+      "key": "value"
+    },
+    "wrk.Import.inboundMetadata": {
+      "key": "value"
+    },
+    "wrk.Import.notes": {
+      "key": "value"
+    },
+    "wrk.Import.participants": {
+      "key": "value"
+    },
+    "wrk.InboundDocument.export": {
+      "document": "unspecified"
+    },
+    "wrk.InboundDocument.get": {
+      "document": "unspecified"
+    },
+    "wrk.InboundDocument.link": {
+      "document": "unspecified"
+    },
+    "wrk.InboundDocument.list": {
+      "items": [
+        {
+          "document": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "wrk.InboundDocument.redact": {
+      "document": "unspecified"
+    },
+    "wrk.InboundDocument.reject": {
+      "document": "unspecified"
+    },
+    "wrk.InboundDocument.relink": {
+      "document": "unspecified"
+    },
+    "wrk.InboundDocument.reprocess": {
+      "document": "unspecified"
+    },
+    "wrk.InboundDocument.split": {
+      "document": "unspecified"
+    },
+    "wrk.InboundDocument.submit": {
+      "envelopeId": "019290ab-35f7-7ed9-8f15-8d9c9e1bf1a9",
+      "documentIds": [
+        "0192d711-d3ed-7e33-8305-1dac939fa6f1"
+      ],
+      "inboundNumbers": "unspecified"
+    },
+    "wrk.InboundDocument.verify": {
+      "document": "unspecified"
+    },
+    "wrk.Note.create": {
+      "note": "unspecified"
+    },
+    "wrk.Note.delete": {
+      "note": "unspecified"
+    },
+    "wrk.Note.edit": {
+      "note": "unspecified"
+    },
+    "wrk.Note.export": {
+      "note": "unspecified"
+    },
+    "wrk.Note.get": {
+      "note": "unspecified"
+    },
+    "wrk.Note.history": {
+      "items": [
+        {
+          "note": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "wrk.Note.list": {
+      "items": [
+        {
+          "note": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "wrk.Note.search": {
+      "items": [
+        {
+          "note": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "wrk.Palette.query": {
+      "items": [
+        {
+          "groupedResults": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "wrk.Participant.assignByRules": {
+      "key": "value"
+    },
+    "wrk.Participant.change": {
+      "key": "value"
+    },
+    "wrk.Participant.list": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "wrk.Participant.objectsFor": {
+      "key": "value"
+    },
+    "wrk.Request.close": {
+      "request": "unspecified"
+    },
+    "wrk.Request.get": {
+      "request": "unspecified"
+    },
+    "wrk.Request.list": {
+      "items": [
+        {
+          "request": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "wrk.Request.reply": {
+      "request": "unspecified"
+    },
+    "wrk.Request.requestInfo": {
+      "request": "unspecified"
+    },
+    "wrk.Request.submit": {
+      "request": "unspecified"
+    },
+    "wrk.Request.toComplaint": {
+      "request": "unspecified"
+    },
+    "wrk.Request.withdraw": {
+      "request": "unspecified"
+    },
+    "wrk.Search.global": {
+      "groupedResults": "unspecified"
+    }
+  },
+  "schemas": {
+    "ActivityAssignRequest": {
+      "id": "0192a336-b99f-7ded-8b71-5bbf91f7dc1e",
+      "target": "unspecified",
+      "reason": "unspecified"
+    },
+    "ActivityAssignResponse": {
+      "assignment": "unspecified"
+    },
+    "ActivityBlockingStatusResponse": {
+      "openGateBlockingActivities": "unspecified"
+    },
+    "ActivityBulkReassignRequest": {
+      "selection": "unspecified",
+      "target": "unspecified",
+      "includeParticipants": "unspecified",
+      "reason": "unspecified"
+    },
+    "ActivityBulkReassignResponse": {
+      "jobId": "0192f394-0ec2-7fb0-8901-53bb9d37aca2",
+      "previewWhenDryRun": "unspecified"
+    },
+    "ActivityCancelRequest": {
+      "id": "01922998-10c6-79cc-8dda-2f844cd5490d",
+      "outcome": "unspecified",
+      "note": "unspecified",
+      "reason": "unspecified"
+    },
+    "ActivityCancelResponse": {
+      "activity": "unspecified"
+    },
+    "ActivityCompleteRequest": {
+      "id": "0192ad07-ee3a-7709-8e69-9e74f3591562",
+      "outcome": "unspecified",
+      "note": "unspecified",
+      "reason": "unspecified"
+    },
+    "ActivityCompleteResponse": {
+      "activity": "unspecified"
+    },
+    "ActivityCreateRequest": {
+      "patternCode": "SAMPLE_CODE",
+      "primaryObject": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "0192ebb6-92b5-7e3e-8d3f-55f28302efdd"
+      },
+      "secondaryObjects": [
+        {
+          "module": "POL",
+          "type": "Policy",
+          "id": "01925b2d-dfd2-7805-830c-548b3dd334fa"
+        }
+      ],
+      "overrides": {
+        "note": "sample"
+      },
+      "raisingModule": "PTY",
+      "causeRef": "sample",
+      "suggestedAssignee": "sample",
+      "amountBand": "SAMPLE_CODE"
+    },
+    "ActivityCreateResponse": {
+      "activityId": "0192e502-9208-7d74-84ca-ded03052a0e6",
+      "number": "SAMPLE-000001",
+      "targetAt": "2026-10-07T09:00:00Z",
+      "escalationAt": "2026-10-07T09:00:00Z",
+      "assignment": {
+        "assigneeType": "USER",
+        "assigneeId": "sample"
+      }
+    },
+    "ActivityGetItem": {
+      "activity": "unspecified",
+      "page": "unspecified"
+    },
+    "ActivityGetPage": {
+      "items": [
+        {
+          "activity": "unspecified",
+          "page": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ActivityListItem": {
+      "activity": "unspecified",
+      "page": "unspecified"
+    },
+    "ActivityListPage": {
+      "items": [
+        {
+          "activity": "unspecified",
+          "page": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ActivitySkipRequest": {
+      "id": "019205b0-d7f6-78db-89c4-1c577b8b770d",
+      "outcome": "unspecified",
+      "note": "unspecified",
+      "reason": "unspecified"
+    },
+    "ActivitySkipResponse": {
+      "activity": "unspecified"
+    },
+    "ActivityUpdateRequest": {
+      "id": "01923ee3-d1dd-7bac-8b9c-d948d3eaaac2",
+      "fields": "unspecified",
+      "reason": "unspecified",
+      "recordVersion": "unspecified"
+    },
+    "ActivityUpdateResponse": {
+      "activity": "unspecified"
+    },
+    "AssignmentSimulateRequest": {
+      "draftActivity": "unspecified"
+    },
+    "AssignmentSimulateResponse": {
+      "target": "unspecified",
+      "rulePath": "unspecified",
+      "rejectedCandidates": "unspecified"
+    },
+    "CommandRegistryRegisterRequest": {
+      "query": "unspecified",
+      "context": "unspecified"
+    },
+    "CommandRegistryRegisterResponse": {
+      "groupedResults": "unspecified"
+    },
+    "DataSubjectEraseRequest": {
+      "partyId": "0192e0b3-0030-7415-8142-fa9096283f7d",
+      "scope": "unspecified",
+      "dsarId": "0192ea2c-266a-7d90-8da0-f29f4b9153ca"
+    },
+    "DataSubjectEraseResponse": {
+      "package": "unspecified",
+      "resultConflicts": "unspecified"
+    },
+    "DataSubjectExportRequest": {
+      "partyId": "0192abaf-08f1-75a4-88ae-bdaa03be85b3",
+      "scope": "unspecified",
+      "dsarId": "0192491e-a367-70bf-814c-50121427f039"
+    },
+    "DataSubjectExportResponse": {
+      "package": "unspecified",
+      "resultConflicts": "unspecified"
+    },
+    "DataSubjectRestrictRequest": {
+      "partyId": "019285d5-334b-75bf-8416-dd3ccee5d0d6",
+      "scope": "unspecified",
+      "dsarId": "0192da7b-00ac-7f13-8099-28dfec05562c"
+    },
+    "DataSubjectRestrictResponse": {
+      "package": "unspecified",
+      "resultConflicts": "unspecified"
+    },
+    "DesktopGetResponse": {
+      "widgets": "unspecified",
+      "counters": "unspecified"
+    },
+    "ExportCreateRequest": {
+      "listQuery": "unspecified",
+      "format": "unspecified"
+    },
+    "ExportCreateResponse": {
+      "fileRef": "unspecified"
+    },
+    "ImportActivitiesRequest": {
+      "batch": "unspecified"
+    },
+    "ImportGroupsRequest": {
+      "batch": "unspecified"
+    },
+    "ImportInboundMetadataRequest": {
+      "batch": "unspecified"
+    },
+    "ImportNotesRequest": {
+      "batch": "unspecified"
+    },
+    "ImportParticipantsRequest": {
+      "batch": "unspecified"
+    },
+    "InboundDocumentExportResponse": {
+      "document": "unspecified"
+    },
+    "InboundDocumentGetResponse": {
+      "document": "unspecified"
+    },
+    "InboundDocumentLinkResponse": {
+      "document": "unspecified"
+    },
+    "InboundDocumentListItem": {
+      "document": "unspecified"
+    },
+    "InboundDocumentListPage": {
+      "items": [
+        {
+          "document": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "InboundDocumentRedactResponse": {
+      "document": "unspecified"
+    },
+    "InboundDocumentRejectResponse": {
+      "document": "unspecified"
+    },
+    "InboundDocumentRelinkResponse": {
+      "document": "unspecified"
+    },
+    "InboundDocumentReprocessResponse": {
+      "document": "unspecified"
+    },
+    "InboundDocumentSplitResponse": {
+      "document": "unspecified"
+    },
+    "InboundDocumentSubmitRequest": {
+      "envelopeMetadata": "unspecified",
+      "files": "unspecified",
+      "channel": "unspecified",
+      "sender": "unspecified",
+      "suggestedClass": "unspecified",
+      "link": "unspecified"
+    },
+    "InboundDocumentSubmitResponse": {
+      "envelopeId": "0192b1f1-7767-72e8-8725-cb7ca9f43c7c",
+      "documentIds": [
+        "01925c6b-f4f7-7492-85a3-ad05276081be"
+      ],
+      "inboundNumbers": "unspecified"
+    },
+    "InboundDocumentVerifyResponse": {
+      "document": "unspecified"
+    },
+    "NoteCreateResponse": {
+      "note": "unspecified"
+    },
+    "NoteDeleteResponse": {
+      "note": "unspecified"
+    },
+    "NoteEditResponse": {
+      "note": "unspecified"
+    },
+    "NoteExportResponse": {
+      "note": "unspecified"
+    },
+    "NoteGetResponse": {
+      "note": "unspecified"
+    },
+    "NoteHistoryItem": {
+      "note": "unspecified"
+    },
+    "NoteHistoryPage": {
+      "items": [
+        {
+          "note": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "NoteListItem": {
+      "note": "unspecified"
+    },
+    "NoteListPage": {
+      "items": [
+        {
+          "note": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "NoteSearchItem": {
+      "note": "unspecified"
+    },
+    "NoteSearchPage": {
+      "items": [
+        {
+          "note": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PaletteQueryItem": {
+      "groupedResults": "unspecified"
+    },
+    "PaletteQueryPage": {
+      "items": [
+        {
+          "groupedResults": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ParticipantListPage": {
+      "items": [
+        {
+          "key": "value"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "QueueGetNextRequest": {
+      "queueId": "01920025-ac6e-7537-815f-dedcb95eedad"
+    },
+    "QueueGetNextResponse": {
+      "assignedActivity": "unspecified"
+    },
+    "RecentItemListResponse": {
+      "groupedResults": "unspecified"
+    },
+    "RequestCloseResponse": {
+      "request": "unspecified"
+    },
+    "RequestGetResponse": {
+      "request": "unspecified"
+    },
+    "RequestListItem": {
+      "request": "unspecified"
+    },
+    "RequestListPage": {
+      "items": [
+        {
+          "request": "unspecified"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "RequestReplyResponse": {
+      "request": "unspecified"
+    },
+    "RequestRequestInfoResponse": {
+      "request": "unspecified"
+    },
+    "RequestSubmitResponse": {
+      "request": "unspecified"
+    },
+    "RequestToComplaintResponse": {
+      "request": "unspecified"
+    },
+    "RequestWithdrawResponse": {
+      "request": "unspecified"
+    },
+    "SearchGlobalRequest": {
+      "query": "unspecified",
+      "context": "unspecified"
+    },
+    "SearchGlobalResponse": {
+      "groupedResults": "unspecified"
+    },
+    "TeamSummaryResponse": {
+      "counts": "unspecified"
+    }
+  }
+}
