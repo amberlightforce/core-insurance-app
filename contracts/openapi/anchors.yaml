@@ -1,0 +1,625 @@
+# Contract anchors (00-system-contract §3.6.3 / digest §G.2) and how the OpenAPI covers them.
+# validate.py checks that every anchor is in the x-requirement of at least one operation or family,
+# or carries a notApi reason. 'mappedTo' records anchors attached to operations by the builder
+# (the PRD row cites a detailed REQ instead of the anchor).
+anchors:
+  REQ-PTY-001:
+    text: Party master record and party query/search API (Greek/Latin, accent-insensitive).
+  REQ-PTY-002:
+    text: Party role assignment and role query.
+  REQ-PTY-003:
+    text: Identifier validation via `IdValidator` and verification status.
+    mappedTo:
+    - pty.Identifier.verify
+    - pty.Party.validate
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-PTY-004:
+    text: Account entity and account API (create, get, holder, members).
+  REQ-PTY-005:
+    text: Consent and communication-preference query API (purpose, channel, language, durable-medium consent).
+  REQ-PTY-006:
+    text: Sanctions screening API (sync screen of party/payee; Clear / PotentialHit / Blocked; payment block).
+  REQ-PTY-007:
+    text: Party merge/unmerge with re-pointing events.
+  REQ-PTY-008:
+    text: Intermediary and producer-code registry API (validate code, licence status, authorities at a date).
+  REQ-PTY-009:
+    text: Producer of record per policy term API (get/change, effective-dated, bulk transfer).
+  REQ-PTY-010:
+    text: Commission agreement resolution API (version and rates for product, channel, transaction type at a date).
+  REQ-PTY-011:
+    text: Vulnerable-customer and trusted-contact query.
+  REQ-PTY-012:
+    text: Address and contact-point model with native and Latin forms (`AddressFormatter`, `NameTransliterator`).
+    mappedTo:
+    - pty.Party.create
+    - pty.Party.update
+    - pty.Location.add
+    - pty.Location.update
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-PTY-013:
+    text: Party import API for migration (dry-run, idempotent, same validation).
+  REQ-PFC-001:
+    text: Product version resolution API (jurisdiction, product, channel, effective date → Locked version + artefact hash).
+  REQ-PFC-002:
+    text: Compiled immutable product artefact with content hash.
+  REQ-PFC-003:
+    text: Coverage/term/option/exclusion/condition catalogue query incl. statutory-minimum finals.
+  REQ-PFC-004:
+    text: Charge-type catalogue (category, proration, earning pattern, tax class, GL key, RI-cedable).
+  REQ-PFC-005:
+    text: Coverage-grain regulatory mapping (CD-08).
+  REQ-PFC-006:
+    text: Question-set definitions and evaluation of answers' visibility rules.
+  REQ-PFC-007:
+    text: POG record query (target market).
+  REQ-PFC-008:
+    text: Renewal conversion rules between versions.
+  REQ-PFC-009:
+    text: Product lifecycle events (`ProductVersion*`).
+    notApi: event contract only (ProductVersion* events in contracts/events/pfc)
+  REQ-PFC-010:
+    text: References to UW rule sets, form patterns, payment plans, refund method, day-count, OOS conflict rule.
+    mappedTo:
+    - pfc.Artifact.get
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-PFC-011:
+    text: Offerings and availability rules (jurisdiction, channel, date, producer).
+  REQ-RAT-001:
+    text: '`rat.Rate.rate` sync rating keyed by product artefact hash + rating artefact hash + configuration hash + normalised
+      input → rates per element × charge type per segment + worksheet ref (R-21).'
+  REQ-RAT-002:
+    text: '`rat.Rate.rateBatch`.'
+  REQ-RAT-003:
+    text: '`rat.Worksheet.explain` and worksheet retrieval/retention.'
+  REQ-RAT-004:
+    text: Proration and day-count service shared with POL.
+  REQ-RAT-005:
+    text: Pricing modifications (deviations) within authority.
+  REQ-RAT-006:
+    text: Referral signals emitted to UW.
+    mappedTo:
+    - rat.Rate.rate
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-RAT-007:
+    text: CompareVersions, ShadowRun, impact analysis.
+  REQ-RAT-008:
+    text: Customer premium breakdown data.
+  REQ-RAT-009:
+    text: Taxes/levies after premium via `TaxCalculator` as separate charge types.
+    mappedTo:
+    - rat.Rate.rate
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-UW-001:
+    text: '`uw.Rules.evaluate` at a checkpoint (pre-quote, pre-bind, pre-issue, renewal) returning issues.'
+  REQ-UW-002:
+    text: 'UW issue lifecycle and blocking-status query (bind gate: no open blocking issues).'
+  REQ-UW-003:
+    text: Approval validity and invalidation.
+    mappedTo:
+    - uw.Issue.decide
+    - uw.Approval.history
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-UW-004:
+    text: Referral creation and routing on WRK queues.
+  REQ-UW-005:
+    text: Decline record and refusal-document request.
+  REQ-UW-006:
+    text: Contingency API.
+  REQ-UW-007:
+    text: Policy-hold check API.
+  REQ-UW-008:
+    text: Accumulation check at bind.
+  REQ-UW-009:
+    text: External report and inspection ordering.
+  REQ-UW-010:
+    text: UW authority types registered with PLT and authority-at-decision UX.
+    mappedTo:
+    - uw.Issue.decide
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-POL-001:
+    text: Job command API for every job type, with dry-run and idempotency.
+  REQ-POL-002:
+    text: Policy query as of `validAt`/`knownAt` (segment snapshot).
+  REQ-POL-003:
+    text: Bind gate orchestration (UW issues, down payment, sanctions, mandatory disclosures, consents, holds).
+  REQ-POL-004:
+    text: Policy and term status model and transition table.
+    mappedTo:
+    - pol.StatusModel.get
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-POL-005:
+    text: '`ChargeDeltaEmitted` per element × charge type, net on out-of-sequence.'
+    notApi: event contract only (ChargeDeltaEmitted in contracts/events/pol)
+  REQ-POL-006:
+    text: Out-of-sequence reverse-and-reapply with conflict handling.
+    mappedTo:
+    - pol.Job.rebase
+    - pol.Job.resolveConflicts
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-POL-007:
+    text: Policy snapshot reference for claims (segment valid at loss date, record time).
+  REQ-POL-008:
+    text: Effective-date permissions (backdating/future-dating limits).
+    mappedTo:
+    - pol.EffectiveDate.limits
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-POL-009:
+    text: Renewal engine (window, conversion, offer, non-renewal, lapse).
+  REQ-POL-010:
+    text: Risk-unit data (vehicles, drivers, buildings, locations, interested parties).
+    mappedTo:
+    - pol.Job.updateDraft
+    - pol.Policy.get
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-POL-011:
+    text: Quote lifecycle (versions, copy, withdraw, decline, not-taken, expiry).
+  REQ-POL-012:
+    text: Cancellation request intake from BIL (non-payment) and other sources.
+  REQ-POL-013:
+    text: Policy import API for migration.
+  REQ-POL-014:
+    text: Policy search.
+  REQ-BIL-001:
+    text: Billing account API.
+  REQ-BIL-002:
+    text: Charge-delta intake and scheduling.
+    notApi: event-driven intake of ChargeDeltaEmitted (contracts/events); PRD-06 §9.1 names no operation
+  REQ-BIL-003:
+    text: Payment plans and down-payment bind-gate status.
+  REQ-BIL-004:
+    text: Payment intake and allocation.
+    mappedTo:
+    - bil.Payment.take
+    - bil.Receipt.*
+    - bil.Allocation.*
+    - bil.Suspense.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-BIL-005:
+    text: Payment reversals.
+    notApi: PRD-06 §9.1 names no operation for payment reversals (bank returns / staff screens); open question
+  REQ-BIL-006:
+    text: Delinquency and `CancellationForNonPaymentRequested`.
+    mappedTo:
+    - bil.Delinquency.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-BIL-007:
+    text: Refunds with approval, payee verification and sanctions check.
+    mappedTo:
+    - bil.Refund.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-BIL-008:
+    text: Commission calculation from PTY agreements.
+    mappedTo:
+    - bil.Commission.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-BIL-009:
+    text: Disbursement service shared with CLM (CD-13).
+  REQ-BIL-010:
+    text: Agency bill and account current.
+    mappedTo:
+    - bil.IntermediaryCollection.*
+    - bil.AccountCurrent.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-BIL-011:
+    text: Billing sub-ledger business events to FIN and daily reconciliation (CD-15).
+    mappedTo:
+    - bil.Ledger.*
+    - bil.Reconciliation.fin
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-BIL-012:
+    text: Billing import API for migration (opening balances, mandates).
+  REQ-CLM-001:
+    text: FNOL API for all channels.
+  REQ-CLM-002:
+    text: Coverage verification on POL snapshot and re-verification.
+    mappedTo:
+    - clm.Coverage.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CLM-003:
+    text: Claim financial transactions and transaction-set approval.
+  REQ-CLM-004:
+    text: Claim payment request to `REQ-BIL-009` with sanctions via `REQ-PTY-006`.
+    mappedTo:
+    - clm.TransactionSet.*
+    - clm.Payment.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CLM-005:
+    text: Claim financial events feed to RI and FIN.
+    notApi: 'event contract (claim financial events in contracts/events/clm); secondary: clm.Financials.dailyTotals for FIN
+      reconciliation'
+  REQ-CLM-006:
+    text: Catastrophe event coding.
+  REQ-CLM-007:
+    text: Statutory offer clock via `REQ-CMP-003`.
+    mappedTo:
+    - clm.StatutoryOffer.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CLM-008:
+    text: Claims-history certificate.
+  REQ-CLM-009:
+    text: Claim status and tracking query for channels.
+  REQ-CLM-010:
+    text: Claim import API for migration.
+  REQ-CLM-011:
+    text: Claim search API (claim number, party, plate, policy, loss date; permission-filtered) (R-07).
+  REQ-RI-001:
+    text: Programme and contract registry API.
+  REQ-RI-002:
+    text: Proportional cession on charge deltas.
+    mappedTo:
+    - ri.Cession.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-RI-003:
+    text: Non-proportional recovery on claim financial events.
+    mappedTo:
+    - ri.Recovery.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-RI-004:
+    text: Cession and recovery business events to FIN.
+    notApi: 'event contract (cession and recovery business events in contracts/events/ri); secondary: ri.Reconciliation.fin'
+  REQ-RI-005:
+    text: Accumulation data API (consumed by UW, DAT).
+  REQ-RI-006:
+    text: Bordereaux and statements of account.
+  REQ-RI-007:
+    text: RI import API for migration (cession history).
+  REQ-FIN-001:
+    text: Business-event intake and posting engine per book.
+    mappedTo:
+    - fin.PostingRules.*
+    - fin.IntakeException.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-FIN-002:
+    text: Immutable journals with reversal-only correction.
+  REQ-FIN-003:
+    text: Earning run from policy segments.
+    mappedTo:
+    - fin.Earning.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-FIN-004:
+    text: Chart of accounts and mappings.
+    mappedTo:
+    - fin.Chart.*
+    - fin.Mapping.*
+    - fin.Dimension.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-FIN-005:
+    text: Tax and levy accounting and returns.
+    mappedTo:
+    - fin.TaxReturn.*
+    - fin.LevyReturn.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-FIN-006:
+    text: FX revaluation and three-currency reporting (USD group).
+    mappedTo:
+    - fin.Fx.*
+    - fin.GroupPack.export
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-FIN-007:
+    text: Period close orchestration.
+    mappedTo:
+    - fin.Close.*
+    - fin.Period.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-FIN-008:
+    text: GL extract.
+    mappedTo:
+    - fin.GLExtract.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-FIN-009:
+    text: Actuarial results intake API (from DAT).
+  REQ-FIN-010:
+    text: Opening-balance import for migration.
+  REQ-FIN-011:
+    text: IFRS 17 portfolio/cohort/group assignment at initial recognition, on `PolicyBound` (event-driven, no sync call at
+      bind), with query API (R-37); system of record also for RI-held on `RIContractActivated` (R-52).
+  REQ-DOC-001:
+    text: Document request API (render, archive, deliver).
+  REQ-DOC-002:
+    text: Template and clause library with per-language approval.
+  REQ-DOC-003:
+    text: Form patterns and binding matrix.
+  REQ-DOC-004:
+    text: Immutable archive API (store, hash, retention, legal hold), also for inbound documents.
+  REQ-DOC-005:
+    text: Delivery orchestration with statutory proof.
+    mappedTo:
+    - doc.Delivery.*
+    - doc.Document.resend
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DOC-006:
+    text: E-signature.
+  REQ-DOC-007:
+    text: Provisional proof of cover and pre-contractual documents (IPID).
+    mappedTo:
+    - doc.ProofOfCover.issue
+    - doc.Ipid.get
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DOC-008:
+    text: Document list query and Documents tab component for any object.
+  REQ-CMP-001:
+    text: Fiscal-document channel (submit, MARK, rejection handling) via `FiscalDocumentChannel` (also claim-payment sources,
+      R-43).
+    mappedTo:
+    - cmp.FiscalDocument.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CMP-002:
+    text: Motor bureau / Information Centre adapter via `BureauAdapter`.
+    mappedTo:
+    - cmp.Bureau.*
+    - cmp.BureauManualFile.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CMP-003:
+    text: Statutory clock register and clock API (start, pause, stop, query).
+  REQ-CMP-004:
+    text: Complaints management.
+    mappedTo:
+    - cmp.Complaint.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CMP-005:
+    text: DSAR orchestration (fan-out to every module's export/erasure/restriction API).
+    mappedTo:
+    - cmp.Dsar.create
+    - cmp.Dsar.verifyIdentity
+    - cmp.Dsar.startFanOut
+    - cmp.Dsar.retryTask
+    - cmp.Dsar.decideItem
+    - cmp.Dsar.approve
+    - cmp.Dsar.extend
+    - cmp.Dsar.refuse
+    - cmp.Dsar.get
+    - cmp.Dsar.query
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CMP-006:
+    text: Obligations register and traceability.
+    mappedTo:
+    - cmp.Obligation.*
+    - cmp.Control.*
+    - cmp.Evidence.submit
+    - cmp.Traceability.export
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CMP-007:
+    text: AI system register.
+    mappedTo:
+    - cmp.AiSystem.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CMP-008:
+    text: Regulatory report submission tracker.
+    mappedTo:
+    - cmp.Submission.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CMP-009:
+    text: Migration import and external hand-over (fiscal series continuity, bureau hand-over, open clock instances) (R-72).
+  REQ-CHN-001:
+    text: External API gateway contract (ACORD-aligned, idempotency, dry-run, webhooks, throttling, sandbox).
+  REQ-CHN-002:
+    text: Transaction-permission matrix (channel × role × transaction → self-service / quote-only / refer).
+  REQ-CHN-003:
+    text: MCP AI agent facade with governance logging.
+  REQ-CHN-004:
+    text: Customer portal and mobile.
+    mappedTo:
+    - chn.Journey.*
+    - chn.Quote.*
+    - chn.Purchase.confirm
+    - chn.Change.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CHN-005:
+    text: Broker and agent portal.
+    mappedTo:
+    - chn.Journey.*
+    - chn.Quote.*
+    - chn.Purchase.confirm
+    - chn.Change.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CHN-006:
+    text: Bank embedded journeys and bancassurance APIs.
+    notApi: bancassurance is out of P1 (D-PRG-10); no §9.1 operation
+  REQ-CHN-007:
+    text: EU online withdrawal function.
+  REQ-CHN-008:
+    text: Customer and intermediary identity journeys (on PLT identity).
+    mappedTo:
+    - plt.ExternalUser.*
+    - chn.Language.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-CHN-009:
+    text: Notification and webhook subscriptions.
+  REQ-WRK-001:
+    text: Activity API (create from pattern, link to any object, assign, complete).
+  REQ-WRK-002:
+    text: Activity pattern catalogue.
+  REQ-WRK-003:
+    text: Groups, queues and assignment rules.
+  REQ-WRK-004:
+    text: Notes API.
+  REQ-WRK-005:
+    text: Inbound document intake, classification, extraction, linking, verification.
+  REQ-WRK-006:
+    text: Global search, recent items, command-palette back-end.
+  REQ-WRK-007:
+    text: Staff notifications.
+  REQ-WRK-008:
+    text: Back-office requests from intermediaries and customers.
+  REQ-WRK-009:
+    text: SLA policies and escalation.
+    mappedTo:
+    - wrk.SlaPolicy.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-WRK-010:
+    text: 'Participants (user-to-object assignments: underwriter, CSR, handler).'
+  REQ-PLT-001:
+    text: Staff identity and access (custom-built identity service), RBAC + ABAC (+ SoD rules as data, §3.9.4).
+    mappedTo:
+    - plt.User.*
+    - plt.RoleAssignment.*
+    - plt.Policy.evaluate
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-PLT-002:
+    text: Business audit trail API (append-only, before/after, correlation id).
+  REQ-PLT-003:
+    text: Authority framework and `authority.check`.
+  REQ-PLT-004:
+    text: Maker-checker (four-eyes) service.
+  REQ-PLT-005:
+    text: Event infrastructure (outbox, topics, schema registry, idempotent consumers, replay, DLQ).
+    mappedTo:
+    - plt.Outbox.publish
+    - plt.Consumer.replay
+    - plt.DeadLetter.*
+    - plt.Schema.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-PLT-006:
+    text: Integration hub / adapter host.
+  REQ-PLT-007:
+    text: Workflow engine and rules runtime (decision tables).
+  REQ-PLT-008:
+    text: Configuration service runtime and feature flags.
+    mappedTo:
+    - plt.FeatureFlag.*
+    - plt.RuntimeProperty.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-PLT-009:
+    text: 'Reference data: calendars, holidays, currencies, FX rates.'
+    mappedTo:
+    - plt.Calendar.*
+    - plt.Fx.*
+    - plt.Currency.get
+    - plt.Holiday.addException
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-PLT-010:
+    text: 'AI control plane: EU model gateway, hierarchical toggles, kill switch, AI interaction record.'
+  REQ-PLT-011:
+    text: Retention engine, legal hold, deletion, pseudonymisation.
+  REQ-PLT-012:
+    text: DORA incident management and register of information.
+  REQ-PLT-013:
+    text: Observability and SLOs.
+    notApi: 'observability and SLOs: platform capability, no API'
+  REQ-PLT-014:
+    text: Numbering service (`NumberingScheme`).
+  REQ-PLT-015:
+    text: Customer, intermediary and bank-staff identity infrastructure (custom-built, external realm).
+    mappedTo:
+    - plt.ExternalUser.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DAT-001:
+    text: Event ingestion and data contracts.
+    mappedTo:
+    - dat.DataContract.*
+    - dat.Ingestion.replay
+    - dat.Quarantine.release
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DAT-002:
+    text: Bitemporal analytical models.
+    mappedTo:
+    - dat.Query.asOf
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DAT-003:
+    text: Regulatory marts (SII, BoG, A.1004, IPT, EAEE, Fairfax USD).
+    mappedTo:
+    - dat.Mart.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DAT-004:
+    text: Actuarial return path to `REQ-FIN-009`.
+    mappedTo:
+    - dat.Actuarial.*
+    - dat.ActuarialResultSet.submit
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DAT-005:
+    text: Model registry, monitoring, drift and bias monitoring.
+    mappedTo:
+    - dat.Model.*
+    - dat.Monitor.metrics
+    - dat.BiasTest.run
+    - dat.Coverage.status
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DAT-006:
+    text: Feature store.
+    mappedTo:
+    - dat.FeatureStore.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DAT-007:
+    text: Data quality, reconciliation and lineage.
+    mappedTo:
+    - dat.Lineage.trace
+    - dat.Quarantine.release
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DAT-008:
+    text: Catastrophe accumulation analytics.
+    mappedTo:
+    - dat.Accumulation.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-DAT-009:
+    text: Lakehouse data-subject operations (export, erasure/pseudonymisation propagation, restriction) for `REQ-CMP-005`
+      (R-62); `dat.Erasure.execute` sync response completes the DSAR task (R-97).
+    mappedTo:
+    - dat.Subject.export
+    - dat.Erasure.execute
+    - dat.Restriction.apply
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-MIG-001:
+    text: Import-API contract every module provides (dry-run, idempotent, same validation, `origin=MIGRATION`); optional `convertCurrency(planId)`
+      (R-08; not for Greek MVP, R-77).
+  REQ-MIG-002:
+    text: Legacy-to-core ID cross-reference.
+  REQ-MIG-003:
+    text: Renewal conversion pipeline.
+    mappedTo:
+    - mig.RenewalConversion.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-MIG-004:
+    text: Coexistence routing and cross-system enquiry (`mig.Routing.resolve` via `REQ-MIG-149`, R-96).
+  REQ-MIG-005:
+    text: Reconciliation and sign-off.
+    mappedTo:
+    - mig.Reconciliation.*
+    - mig.Batch.reverse
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-MIG-006:
+    text: Legacy-archive and staging data-subject operations for `REQ-CMP-005` (R-62).
+  REQ-MKT-001:
+    text: Configuration model and resolve API (six layers, final keys, effective dating, configuration hash).
+  REQ-MKT-002:
+    text: SPI catalogue and SPI binding per entity and date.
+  REQ-MKT-003:
+    text: Pack registry and lifecycle.
+    mappedTo:
+    - mkt.Pack.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-MKT-004:
+    text: Capability switches per market and entity.
+    mappedTo:
+    - mkt.Capability.get
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-MKT-005:
+    text: i18n/l10n (four independent settings, translation store; R-101 language switch and completeness gate).
+    mappedTo:
+    - mkt.L10n.*
+    - mkt.L10nUiLanguage.*
+    - mkt.Translation.*
+    - mkt.Terminology.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-MKT-006:
+    text: Currency rules and rounding.
+    mappedTo:
+    - mkt.Rounding.apply
+    - mkt.Currency.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-MKT-007:
+    text: Regime code lists.
+    mappedTo:
+    - mkt.RegimeCode.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-MKT-008:
+    text: Golden suite and Cyprus stub pack in CI; architecture tests.
+    notApi: golden suite, Cyprus stub pack and architecture tests run in CI; no API
+  REQ-MKT-009:
+    text: '`StatutoryClockSet` values supplied by packs (definitions in `REQ-CMP-003`).'
+    mappedTo:
+    - mkt.StatutoryClockSet.*
+    basis: 'mapped by the F-1c(apis) builder: the owner''s §9.1 rows cite detailed requirements, not the anchor'
+  REQ-MKT-010:
+    text: Migration-baseline configuration state (R-72).
+    notApi: 'migration-baseline configuration state: PRD-17 §9.1 names no operation; open question'

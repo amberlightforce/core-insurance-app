@@ -1,0 +1,5593 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: PTY — Party, customer and distribution API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by PTY (PRD-01 §9.1)
+  description: 'Contract of the operations PTY exposes (PRD-01 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: PTY
+  x-prd: PRD-01
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: Party
+- name: Identifier
+- name: PartyRole
+- name: Relationship
+- name: Account
+- name: Location
+- name: LifeEvent
+- name: Consent
+- name: CommunicationPreference
+- name: Vulnerability
+- name: Screening
+- name: ProducerCode
+- name: Intermediary
+- name: ProducerOfRecord
+- name: CommissionAgreement
+- name: Dsar
+- name: Import
+paths:
+  /api/pty/v1/parties/search:
+    get:
+      operationId: pty.Party.search
+      summary: Search parties
+      description: |-
+        Search parties
+
+        PRD inputs: criteria, validAt, cursor
+        PRD outputs: ranked results
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-001
+      - REQ-PTY-068
+      x-anchor:
+      - REQ-PTY-001
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - CLM
+      - CMP
+      - PLT
+      - POL
+      - UW
+      - WRK
+      x-permission: pty.Party.search
+      x-error-codes:
+      - code: PTY-ERR-QUERY-TOO-SHORT
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1636
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: criteria
+        in: query
+        required: false
+        description: 'PRD: "criteria"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartySearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/parties/{id}:
+    get:
+      operationId: pty.Party.get
+      summary: Get party with view profile
+      description: |-
+        Get party with view profile
+
+        PRD inputs: party_id or number, validAt, knownAt, profile
+        PRD outputs: party
+        PRD error notes: redirect for Merged
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-001
+      - REQ-PTY-036
+      x-anchor:
+      - REQ-PTY-001
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - CLM
+      - CMP
+      - DOC
+      - FIN
+      - PLT
+      - POL
+      - RI
+      - UW
+      x-permission: pty.Party.get
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-01 §9.1 l.1637
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Party (PRD input: "party_id or number")'
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: partyNumber
+        in: query
+        required: false
+        description: 'PRD: "party_id or number" (optional)'
+        schema:
+          type: string
+      - name: profile
+        in: query
+        required: false
+        description: 'PRD: "profile"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    patch:
+      operationId: pty.Party.update
+      summary: Create or update party
+      description: |-
+        Create or update party
+
+        PRD inputs: party data, reason
+        PRD outputs: party, duplicate suggestions, missing data
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-001
+      - REQ-PTY-012
+      - REQ-PTY-038
+      x-anchor:
+      - REQ-PTY-001
+      - REQ-PTY-012
+      x-anchor-mapped:
+      - REQ-PTY-012
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: validate-only'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - MIG
+      x-permission: pty.Party.update
+      x-error-codes:
+      - code: PTY-ERR-ID-CHECKDIGIT
+        status: 422
+      - code: PTY-ERR-STALE
+        status: 409
+      - code: PTY-ERR-DUPLICATE-IDENTIFIER
+        status: 409
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1638
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Party
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartyUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/parties:
+    post:
+      operationId: pty.Party.create
+      summary: Create or update party
+      description: |-
+        Create or update party
+
+        PRD inputs: party data, reason
+        PRD outputs: party, duplicate suggestions, missing data
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-001
+      - REQ-PTY-012
+      - REQ-PTY-038
+      x-anchor:
+      - REQ-PTY-001
+      - REQ-PTY-012
+      x-anchor-mapped:
+      - REQ-PTY-012
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: validate-only'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - CLM
+      - POL
+      x-permission: pty.Party.create
+      x-error-codes:
+      - code: PTY-ERR-ID-CHECKDIGIT
+        status: 422
+      - code: PTY-ERR-STALE
+        status: 409
+      - code: PTY-ERR-DUPLICATE-IDENTIFIER
+        status: 409
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1638
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartyCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/parties/validate:
+    post:
+      operationId: pty.Party.validate
+      summary: Validate data and return duplicates without saving
+      description: |-
+        Validate data and return duplicates without saving
+
+        PRD inputs: party data
+        PRD outputs: issues, candidates
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-003
+      - REQ-PTY-131
+      x-anchor:
+      - REQ-PTY-003
+      x-anchor-mapped:
+      - REQ-PTY-003
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      - W2-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: inherent'
+      x-exposure:
+      - ui
+      x-permission: pty.Party.validate
+      x-error-codes: []
+      x-source:
+      - PRD-01 §9.1 l.1639
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartyValidateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyValidateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/parties/merge:
+    post:
+      operationId: pty.Party.merge
+      summary: Merge or unmerge
+      description: |-
+        Merge or unmerge
+
+        PRD inputs: candidates, survivorship decisions
+        PRD outputs: merge record, approval request
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-007
+      x-anchor:
+      - REQ-PTY-007
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - MIG
+      x-permission: pty.Party.merge
+      x-error-codes:
+      - code: PTY-ERR-MERGE-CROSS-ENTITY
+        status: 422
+      - code: PTY-ERR-WINDOW-CLOSED
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1640
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartyMergeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyMergeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/parties/unmerge:
+    post:
+      operationId: pty.Party.unmerge
+      summary: Unmerge within the window (stated separately for MIG and steward callers; same operation as the unmerge half
+        …
+      description: |-
+        Unmerge within the window (stated separately for MIG and steward callers; same operation as the unmerge half of `pty.Party.merge / unmerge`)
+
+        PRD inputs: merge_id, assignment of post-merge changes
+        PRD outputs: restored parties, approval request
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-007
+      - REQ-PTY-138
+      x-anchor:
+      - REQ-PTY-007
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - MIG
+      x-permission: pty.Party.unmerge
+      x-error-codes:
+      - code: PTY-ERR-MERGE-CROSS-ENTITY
+        status: 422
+      - code: PTY-ERR-WINDOW-CLOSED
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1640
+      - PRD-01 §9.1 l.1661
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartyUnmergeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyUnmergeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/identifiers/verify:
+    post:
+      operationId: pty.Identifier.verify
+      summary: Registry or VIES verification
+      description: |-
+        Registry or VIES verification
+
+        PRD inputs: party_id, scheme
+        PRD outputs: status, suggestions
+      tags:
+      - Identifier
+      x-requirement:
+      - REQ-PTY-003
+      - REQ-PTY-054
+      x-anchor:
+      - REQ-PTY-003
+      x-anchor-mapped:
+      - REQ-PTY-003
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Identifier.verify
+      x-error-codes:
+      - code: PTY-ERR-REGISTRY-UNAVAILABLE
+        retryable: true
+        status: 503
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1641
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentifierVerifyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentifierVerifyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/pty/v1/party-roles/assign:
+    post:
+      operationId: pty.PartyRole.assign
+      summary: Roles
+      description: |-
+        Roles
+
+        PRD inputs: party, role, context, period
+        PRD outputs: role
+      tags:
+      - PartyRole
+      x-requirement:
+      - REQ-PTY-002
+      x-anchor:
+      - REQ-PTY-002
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - POL
+      x-permission: pty.PartyRole.assign
+      x-error-codes:
+      - code: PTY-ERR-ROLE-DATA-MISSING
+        note: structured
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1642
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartyRoleAssignRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyRoleAssignResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/party-roles/end:
+    post:
+      operationId: pty.PartyRole.end
+      summary: Roles
+      description: |-
+        Roles
+
+        PRD inputs: party, role, context, period
+        PRD outputs: role
+      tags:
+      - PartyRole
+      x-requirement:
+      - REQ-PTY-002
+      x-anchor:
+      - REQ-PTY-002
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.PartyRole.end
+      x-error-codes:
+      - code: PTY-ERR-ROLE-DATA-MISSING
+        note: structured
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1642
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartyRoleEndRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyRoleEndResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/party-roles/query:
+    get:
+      operationId: pty.PartyRole.query
+      summary: Roles
+      description: |-
+        Roles
+
+        PRD inputs: party, role, context, period
+        PRD outputs: role
+      tags:
+      - PartyRole
+      x-requirement:
+      - REQ-PTY-002
+      x-anchor:
+      - REQ-PTY-002
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - POL
+      - RI
+      x-permission: pty.PartyRole.query
+      x-error-codes:
+      - code: PTY-ERR-ROLE-DATA-MISSING
+        note: structured
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1642
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyRoleQueryPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/relationships/add:
+    post:
+      operationId: pty.Relationship.add
+      summary: Relationships
+      description: |-
+        Relationships
+
+        PRD inputs: parties, type, period
+        PRD outputs: —
+      tags:
+      - Relationship
+      x-requirement:
+      - REQ-PTY-104
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Relationship.add
+      x-error-codes:
+      - code: PTY-ERR-OVERLAP
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1643
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipAddRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipAddResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/relationships/end:
+    post:
+      operationId: pty.Relationship.end
+      summary: Relationships
+      description: |-
+        Relationships
+
+        PRD inputs: parties, type, period
+        PRD outputs: —
+      tags:
+      - Relationship
+      x-requirement:
+      - REQ-PTY-104
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Relationship.end
+      x-error-codes:
+      - code: PTY-ERR-OVERLAP
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1643
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipEndRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipEndResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/relationships/query:
+    get:
+      operationId: pty.Relationship.query
+      summary: Relationships
+      description: |-
+        Relationships
+
+        PRD inputs: parties, type, period
+        PRD outputs: —
+      tags:
+      - Relationship
+      x-requirement:
+      - REQ-PTY-104
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Relationship.query
+      x-error-codes:
+      - code: PTY-ERR-OVERLAP
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1643
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipQueryPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts:
+    post:
+      operationId: pty.Account.create
+      summary: Accounts
+      description: |-
+        Accounts
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-004
+      x-anchor:
+      - REQ-PTY-004
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: create: validate-only'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - POL
+      - UW
+      x-permission: pty.Account.create
+      x-error-codes:
+      - code: PTY-ERR-ACCOUNT-HAS-JOBS
+        status: 422
+      - code: PTY-ERR-MEMBER-IN-USE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1644
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts/{id}:
+    get:
+      operationId: pty.Account.get
+      summary: Accounts
+      description: |-
+        Accounts
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-004
+      x-anchor:
+      - REQ-PTY-004
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create: validate-only'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - PLT
+      - POL
+      - UW
+      x-permission: pty.Account.get
+      x-error-codes:
+      - code: PTY-ERR-ACCOUNT-HAS-JOBS
+        status: 422
+      - code: PTY-ERR-MEMBER-IN-USE
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1644
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Account
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts/search:
+    get:
+      operationId: pty.Account.search
+      summary: Accounts
+      description: |-
+        Accounts
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-004
+      x-anchor:
+      - REQ-PTY-004
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create: validate-only'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - UW
+      x-permission: pty.Account.search
+      x-error-codes:
+      - code: PTY-ERR-ACCOUNT-HAS-JOBS
+        status: 422
+      - code: PTY-ERR-MEMBER-IN-USE
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1644
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountSearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts/set-holder:
+    post:
+      operationId: pty.Account.setHolder
+      summary: Accounts
+      description: |-
+        Accounts
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-004
+      x-anchor:
+      - REQ-PTY-004
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create: validate-only'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: pty.Account.setHolder
+      x-error-codes:
+      - code: PTY-ERR-ACCOUNT-HAS-JOBS
+        status: 422
+      - code: PTY-ERR-MEMBER-IN-USE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1644
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountSetHolderRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountSetHolderResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts/add-member:
+    post:
+      operationId: pty.Account.addMember
+      summary: Accounts
+      description: |-
+        Accounts
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-004
+      x-anchor:
+      - REQ-PTY-004
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create: validate-only'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: pty.Account.addMember
+      x-error-codes:
+      - code: PTY-ERR-ACCOUNT-HAS-JOBS
+        status: 422
+      - code: PTY-ERR-MEMBER-IN-USE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1644
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountAddMemberRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountAddMemberResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts/remove-member:
+    post:
+      operationId: pty.Account.removeMember
+      summary: Accounts
+      description: |-
+        Accounts
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-004
+      x-anchor:
+      - REQ-PTY-004
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create: validate-only'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: pty.Account.removeMember
+      x-error-codes:
+      - code: PTY-ERR-ACCOUNT-HAS-JOBS
+        status: 422
+      - code: PTY-ERR-MEMBER-IN-USE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1644
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRemoveMemberRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountRemoveMemberResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts/withdraw:
+    post:
+      operationId: pty.Account.withdraw
+      summary: Accounts
+      description: |-
+        Accounts
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-004
+      x-anchor:
+      - REQ-PTY-004
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: create: validate-only'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: pty.Account.withdraw
+      x-error-codes:
+      - code: PTY-ERR-ACCOUNT-HAS-JOBS
+        status: 422
+      - code: PTY-ERR-MEMBER-IN-USE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1644
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountWithdrawRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountWithdrawResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts/merge:
+    post:
+      operationId: pty.Account.merge
+      summary: Account restructuring
+      description: |-
+        Account restructuring
+
+        PRD inputs: source, target, policies
+        PRD outputs: request
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-123
+      - REQ-PTY-124
+      - REQ-PTY-126
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - UW
+      x-permission: pty.Account.merge
+      x-error-codes:
+      - code: PTY-ERR-OPEN-JOB
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1645
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountMergeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountMergeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts/request-policy-move:
+    post:
+      operationId: pty.Account.requestPolicyMove
+      summary: Account restructuring
+      description: |-
+        Account restructuring
+
+        PRD inputs: source, target, policies
+        PRD outputs: request
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-123
+      - REQ-PTY-124
+      - REQ-PTY-126
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - UW
+      x-permission: pty.Account.requestPolicyMove
+      x-error-codes:
+      - code: PTY-ERR-OPEN-JOB
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1645
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequestPolicyMoveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountRequestPolicyMoveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/accounts/split:
+    post:
+      operationId: pty.Account.split
+      summary: Account restructuring
+      description: |-
+        Account restructuring
+
+        PRD inputs: source, target, policies
+        PRD outputs: request
+      tags:
+      - Account
+      x-requirement:
+      - REQ-PTY-123
+      - REQ-PTY-124
+      - REQ-PTY-126
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - UW
+      x-permission: pty.Account.split
+      x-error-codes:
+      - code: PTY-ERR-OPEN-JOB
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1645
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountSplitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountSplitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/locations/add:
+    post:
+      operationId: pty.Location.add
+      summary: Account locations
+      description: |-
+        Account locations
+
+        PRD inputs: location
+        PRD outputs: location
+      tags:
+      - Location
+      x-requirement:
+      - REQ-PTY-012
+      - REQ-PTY-085
+      x-anchor:
+      - REQ-PTY-012
+      x-anchor-mapped:
+      - REQ-PTY-012
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Location.add
+      x-error-codes:
+      - code: PTY-ERR-LOCATION-IN-USE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1646
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationAddRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationAddResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/locations/{id}:
+    patch:
+      operationId: pty.Location.update
+      summary: Account locations
+      description: |-
+        Account locations
+
+        PRD inputs: location
+        PRD outputs: location
+      tags:
+      - Location
+      x-requirement:
+      - REQ-PTY-012
+      - REQ-PTY-085
+      x-anchor:
+      - REQ-PTY-012
+      x-anchor-mapped:
+      - REQ-PTY-012
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Location.update
+      x-error-codes:
+      - code: PTY-ERR-LOCATION-IN-USE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1646
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Location
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/locations/remove:
+    post:
+      operationId: pty.Location.remove
+      summary: Account locations
+      description: |-
+        Account locations
+
+        PRD inputs: location
+        PRD outputs: location
+      tags:
+      - Location
+      x-requirement:
+      - REQ-PTY-085
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Location.remove
+      x-error-codes:
+      - code: PTY-ERR-LOCATION-IN-USE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1646
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationRemoveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationRemoveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/life-events/start:
+    post:
+      operationId: pty.LifeEvent.start
+      summary: Life events
+      description: |-
+        Life events
+
+        PRD inputs: type, party, data
+        PRD outputs: life event, created activities
+      tags:
+      - LifeEvent
+      x-requirement:
+      - REQ-PTY-113
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes (effects preview)'
+      x-exposure:
+      - ui
+      x-permission: pty.LifeEvent.start
+      x-error-codes:
+      - code: PTY-ERR-EVIDENCE-REQUIRED
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1647
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LifeEventStartRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifeEventStartResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/life-events/complete:
+    post:
+      operationId: pty.LifeEvent.complete
+      summary: Life events
+      description: |-
+        Life events
+
+        PRD inputs: type, party, data
+        PRD outputs: life event, created activities
+      tags:
+      - LifeEvent
+      x-requirement:
+      - REQ-PTY-113
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes (effects preview)'
+      x-exposure:
+      - ui
+      x-permission: pty.LifeEvent.complete
+      x-error-codes:
+      - code: PTY-ERR-EVIDENCE-REQUIRED
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1647
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LifeEventCompleteRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifeEventCompleteResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/life-events/reverse:
+    post:
+      operationId: pty.LifeEvent.reverse
+      summary: Life events
+      description: |-
+        Life events
+
+        PRD inputs: type, party, data
+        PRD outputs: life event, created activities
+      tags:
+      - LifeEvent
+      x-requirement:
+      - REQ-PTY-113
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes (effects preview)'
+      x-exposure:
+      - ui
+      x-permission: pty.LifeEvent.reverse
+      x-error-codes:
+      - code: PTY-ERR-EVIDENCE-REQUIRED
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1647
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LifeEventReverseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifeEventReverseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/consents/query:
+    get:
+      operationId: pty.Consent.query
+      summary: Consents
+      description: |-
+        Consents
+
+        PRD inputs: party, purpose, channel
+        PRD outputs: state
+      tags:
+      - Consent
+      x-requirement:
+      - REQ-PTY-005
+      - REQ-PTY-150
+      x-anchor:
+      - REQ-PTY-005
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - CLM
+      - DOC
+      - POL
+      - UW
+      x-permission: pty.Consent.query
+      x-error-codes:
+      - code: PTY-ERR-PROOF-REQUIRED
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1648
+      x-superseded-names:
+      - pty.Preferences.query (XRF-004a)
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentQueryPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/consents/record:
+    post:
+      operationId: pty.Consent.record
+      summary: Record a consent or its withdrawal with proof (called by CHN portals; same operation as in pty.Consent.query
+        …
+      description: |-
+        Record a consent or its withdrawal with proof (called by CHN portals; same operation as in `pty.Consent.query / record / withdraw`)
+
+        PRD inputs: party, purpose, channel, kind, source, wording version, proof ref
+        PRD outputs: consent state
+      tags:
+      - Consent
+      x-requirement:
+      - REQ-PTY-005
+      - REQ-PTY-150
+      - REQ-PTY-152
+      x-anchor:
+      - REQ-PTY-005
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pty.Consent.record
+      x-error-codes:
+      - code: PTY-ERR-PROOF-REQUIRED
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1648
+      - PRD-01 §9.1 l.1662
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentRecordRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRecordResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/consents/withdraw:
+    post:
+      operationId: pty.Consent.withdraw
+      summary: Consents
+      description: |-
+        Consents
+
+        PRD inputs: party, purpose, channel
+        PRD outputs: state
+      tags:
+      - Consent
+      x-requirement:
+      - REQ-PTY-005
+      - REQ-PTY-150
+      x-anchor:
+      - REQ-PTY-005
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pty.Consent.withdraw
+      x-error-codes:
+      - code: PTY-ERR-PROOF-REQUIRED
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1648
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentWithdrawRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentWithdrawResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/communication-preferences/resolve:
+    post:
+      operationId: pty.CommunicationPreference.resolve
+      summary: Preferences
+      description: |-
+        Preferences
+
+        PRD inputs: party, purpose, date
+        PRD outputs: channel, language, medium, proof
+      tags:
+      - CommunicationPreference
+      x-requirement:
+      - REQ-PTY-005
+      x-anchor:
+      - REQ-PTY-005
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - CLM
+      - DOC
+      - POL
+      x-permission: pty.CommunicationPreference.resolve
+      x-error-codes:
+      - code: PTY-ERR-NO-EMAIL
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1649
+      x-prd-param-names:
+        validAt: date
+      x-superseded-names:
+      - pty.Preferences.query (XRF-004a)
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunicationPreferenceResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationPreferenceResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/communication-preferences/set:
+    post:
+      operationId: pty.CommunicationPreference.set
+      summary: Preferences
+      description: |-
+        Preferences
+
+        PRD inputs: party, purpose, date
+        PRD outputs: channel, language, medium, proof
+      tags:
+      - CommunicationPreference
+      x-requirement:
+      - REQ-PTY-005
+      x-anchor:
+      - REQ-PTY-005
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pty.CommunicationPreference.set
+      x-error-codes:
+      - code: PTY-ERR-NO-EMAIL
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1649
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunicationPreferenceSetRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationPreferenceSetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/vulnerabilities/query:
+    get:
+      operationId: pty.Vulnerability.query
+      summary: Vulnerability
+      description: |-
+        Vulnerability
+
+        PRD inputs: party
+        PRD outputs: flag, rule codes, trusted contacts
+      tags:
+      - Vulnerability
+      x-requirement:
+      - REQ-PTY-011
+      x-anchor:
+      - REQ-PTY-011
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - CLM
+      - DOC
+      - POL
+      x-permission: pty.Vulnerability.query
+      x-error-codes: []
+      x-source:
+      - PRD-01 §9.1 l.1650
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VulnerabilityQueryPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/vulnerabilities/record:
+    post:
+      operationId: pty.Vulnerability.record
+      summary: Vulnerability
+      description: |-
+        Vulnerability
+
+        PRD inputs: party
+        PRD outputs: flag, rule codes, trusted contacts
+      tags:
+      - Vulnerability
+      x-requirement:
+      - REQ-PTY-011
+      x-anchor:
+      - REQ-PTY-011
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Vulnerability.record
+      x-error-codes:
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1650
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VulnerabilityRecordRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VulnerabilityRecordResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/vulnerabilities/remove:
+    post:
+      operationId: pty.Vulnerability.remove
+      summary: Vulnerability
+      description: |-
+        Vulnerability
+
+        PRD inputs: party
+        PRD outputs: flag, rule codes, trusted contacts
+      tags:
+      - Vulnerability
+      x-requirement:
+      - REQ-PTY-011
+      x-anchor:
+      - REQ-PTY-011
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Vulnerability.remove
+      x-error-codes:
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1650
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VulnerabilityRemoveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VulnerabilityRemoveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/screening/screen:
+    post:
+      operationId: pty.Screening.screen
+      summary: Synchronous screen
+      description: |-
+        Synchronous screen
+
+        PRD inputs: party_id or ad-hoc payee, caller ref
+        PRD outputs: Clear / PotentialHit / Blocked, case, block
+      tags:
+      - Screening
+      x-requirement:
+      - REQ-PTY-006
+      x-anchor:
+      - REQ-PTY-006
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-PTY-006, REQ-PTY-174
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CLM
+      - MIG
+      - POL
+      - RI
+      - UW
+      x-permission: pty.Screening.screen
+      x-error-codes:
+      - code: PTY-ERR-SCREEN-INPUT
+        note: non-retryable
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1651
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScreeningScreenRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreeningScreenResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/screening/bulk:
+    post:
+      operationId: pty.Screening.bulk
+      summary: Bulk and case management
+      description: |-
+        Bulk and case management
+
+        PRD inputs: list
+        PRD outputs: job id; decision → case
+      tags:
+      - Screening
+      x-requirement:
+      - REQ-PTY-185
+      - REQ-PTY-177
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - MIG
+      x-permission: pty.Screening.bulk
+      x-error-codes:
+      - code: PTY-ERR-SELF-APPROVAL
+        status: 403
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1652
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScreeningBulkRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreeningBulkResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/screening/case-decide:
+    post:
+      operationId: pty.Screening.caseDecide
+      summary: Bulk and case management
+      description: |-
+        Bulk and case management
+
+        PRD inputs: list
+        PRD outputs: job id; decision → case
+      tags:
+      - Screening
+      x-requirement:
+      - REQ-PTY-185
+      - REQ-PTY-177
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Screening.caseDecide
+      x-error-codes:
+      - code: PTY-ERR-SELF-APPROVAL
+        status: 403
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1652
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScreeningCaseDecideRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreeningCaseDecideResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/screening/case-get:
+    get:
+      operationId: pty.Screening.caseGet
+      summary: Bulk and case management
+      description: |-
+        Bulk and case management
+
+        PRD inputs: list
+        PRD outputs: job id; decision → case
+      tags:
+      - Screening
+      x-requirement:
+      - REQ-PTY-185
+      - REQ-PTY-177
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Screening.caseGet
+      x-error-codes:
+      - code: PTY-ERR-SELF-APPROVAL
+        status: 403
+      x-source:
+      - PRD-01 §9.1 l.1652
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreeningCaseGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/producer-codes/validate:
+    post:
+      operationId: pty.ProducerCode.validate
+      summary: Producer validation and search
+      description: |-
+        Producer validation and search
+
+        PRD inputs: code, product, transaction type, date, acting person
+        PRD outputs: validity, reasons, intermediary data
+      tags:
+      - ProducerCode
+      x-requirement:
+      - REQ-PTY-008
+      x-anchor:
+      - REQ-PTY-008
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-PTY-008
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: inherent'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - DOC
+      - PFC
+      - PLT
+      - POL
+      - UW
+      x-permission: pty.ProducerCode.validate
+      x-error-codes: []
+      x-source:
+      - PRD-01 §9.1 l.1653
+      x-prd-param-names:
+        validAt: date
+      x-superseded-names:
+      - pty.Intermediary.validate (XRF-004b)
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProducerCodeValidateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProducerCodeValidateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/producer-codes/search:
+    get:
+      operationId: pty.ProducerCode.search
+      summary: Producer validation and search
+      description: |-
+        Producer validation and search
+
+        PRD inputs: code, product, transaction type, date, acting person
+        PRD outputs: validity, reasons, intermediary data
+      tags:
+      - ProducerCode
+      x-requirement:
+      - REQ-PTY-008
+      x-anchor:
+      - REQ-PTY-008
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: inherent'
+      x-exposure:
+      - ui
+      x-permission: pty.ProducerCode.search
+      x-error-codes: []
+      x-source:
+      - PRD-01 §9.1 l.1653
+      x-prd-param-names:
+        validAt: date
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: code
+        in: query
+        required: false
+        description: 'PRD: "code"'
+        schema:
+          type: string
+      - name: product
+        in: query
+        required: false
+        description: 'PRD: "product"'
+        schema:
+          type: string
+      - name: transactionType
+        in: query
+        required: false
+        description: 'PRD: "transaction type"'
+        schema:
+          type: string
+      - name: actingPerson
+        in: query
+        required: false
+        description: 'PRD: "acting person"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProducerCodeSearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/intermediaries:
+    post:
+      operationId: pty.Intermediary.create
+      summary: Intermediaries
+      description: |-
+        Intermediaries
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Intermediary
+      x-requirement:
+      - REQ-PTY-187..REQ-PTY-202
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: terminate: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.Intermediary.create
+      x-error-codes:
+      - code: PTY-ERR-ACTIVATION-INCOMPLETE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntermediaryCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntermediaryCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/intermediaries/{id}:
+    patch:
+      operationId: pty.Intermediary.update
+      summary: Intermediaries
+      description: |-
+        Intermediaries
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Intermediary
+      x-requirement:
+      - REQ-PTY-187..REQ-PTY-202
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: terminate: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.Intermediary.update
+      x-error-codes:
+      - code: PTY-ERR-ACTIVATION-INCOMPLETE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Intermediary
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntermediaryUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntermediaryUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/intermediaries/suspend:
+    post:
+      operationId: pty.Intermediary.suspend
+      summary: Intermediaries
+      description: |-
+        Intermediaries
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Intermediary
+      x-requirement:
+      - REQ-PTY-187..REQ-PTY-202
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: terminate: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.Intermediary.suspend
+      x-error-codes:
+      - code: PTY-ERR-ACTIVATION-INCOMPLETE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntermediarySuspendRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntermediarySuspendResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/intermediaries/terminate:
+    post:
+      operationId: pty.Intermediary.terminate
+      summary: Intermediaries
+      description: |-
+        Intermediaries
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Intermediary
+      x-requirement:
+      - REQ-PTY-187..REQ-PTY-202
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: terminate: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.Intermediary.terminate
+      x-error-codes:
+      - code: PTY-ERR-ACTIVATION-INCOMPLETE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntermediaryTerminateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntermediaryTerminateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/intermediaries/import-register:
+    post:
+      operationId: pty.Intermediary.importRegister
+      summary: Intermediaries
+      description: |-
+        Intermediaries
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - Intermediary
+      x-requirement:
+      - REQ-PTY-187..REQ-PTY-202
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: terminate: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.Intermediary.importRegister
+      x-error-codes:
+      - code: PTY-ERR-ACTIVATION-INCOMPLETE
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntermediaryImportRegisterRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntermediaryImportRegisterResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/producer-of-records/{id}:
+    get:
+      operationId: pty.ProducerOfRecord.get
+      summary: Producer of record
+      description: |-
+        Producer of record
+
+        PRD inputs: term, date / change
+        PRD outputs: PoR
+        PRD error notes: validation reasons
+      tags:
+      - ProducerOfRecord
+      x-requirement:
+      - REQ-PTY-009
+      x-anchor:
+      - REQ-PTY-009
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - DOC
+      - PLT
+      - POL
+      x-permission: pty.ProducerOfRecord.get
+      x-error-codes:
+      - code: PTY-ERR-MANDATE-MISSING
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1656
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the ProducerOfRecord
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProducerOfRecordGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/producer-of-records/change:
+    post:
+      operationId: pty.ProducerOfRecord.change
+      summary: Producer of record
+      description: |-
+        Producer of record
+
+        PRD inputs: term, date / change
+        PRD outputs: PoR
+        PRD error notes: validation reasons
+      tags:
+      - ProducerOfRecord
+      x-requirement:
+      - REQ-PTY-009
+      x-anchor:
+      - REQ-PTY-009
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.ProducerOfRecord.change
+      x-error-codes:
+      - code: PTY-ERR-MANDATE-MISSING
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1656
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProducerOfRecordChangeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProducerOfRecordChangeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/producer-of-records/bulk-transfer:
+    post:
+      operationId: pty.ProducerOfRecord.bulkTransfer
+      summary: Producer of record
+      description: |-
+        Producer of record
+
+        PRD inputs: term, date / change
+        PRD outputs: PoR
+        PRD error notes: validation reasons
+      tags:
+      - ProducerOfRecord
+      x-requirement:
+      - REQ-PTY-009
+      x-anchor:
+      - REQ-PTY-009
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pty.ProducerOfRecord.bulkTransfer
+      x-error-codes:
+      - code: PTY-ERR-MANDATE-MISSING
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1656
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProducerOfRecordBulkTransferRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProducerOfRecordBulkTransferResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/producer-of-records/cancel:
+    post:
+      operationId: pty.ProducerOfRecord.cancel
+      summary: Producer of record
+      description: |-
+        Producer of record
+
+        PRD inputs: term, date / change
+        PRD outputs: PoR
+        PRD error notes: validation reasons
+      tags:
+      - ProducerOfRecord
+      x-requirement:
+      - REQ-PTY-009
+      x-anchor:
+      - REQ-PTY-009
+      x-wave: W2
+      x-work-packages:
+      - W2-PTY-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.ProducerOfRecord.cancel
+      x-error-codes:
+      - code: PTY-ERR-MANDATE-MISSING
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1656
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProducerOfRecordCancelRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProducerOfRecordCancelResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/commission-agreements/resolve:
+    post:
+      operationId: pty.CommissionAgreement.resolve
+      summary: Agreements
+      description: |-
+        Agreements
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - CommissionAgreement
+      x-requirement:
+      - REQ-PTY-010
+      x-anchor:
+      - REQ-PTY-010
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: approve: yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      x-permission: pty.CommissionAgreement.resolve
+      x-error-codes:
+      - code: PTY-ERR-RATE-ABOVE-MAX
+        status: 422
+      - code: PTY-ERR-BACKDATE
+        status: 422
+      - code: PTY-ERR-SPLIT-SUM
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1657
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommissionAgreementResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommissionAgreementResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/commission-agreements/{id}:
+    get:
+      operationId: pty.CommissionAgreement.get
+      summary: Agreements
+      description: |-
+        Agreements
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - CommissionAgreement
+      x-requirement:
+      - REQ-PTY-010
+      x-anchor:
+      - REQ-PTY-010
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: approve: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.CommissionAgreement.get
+      x-error-codes:
+      - code: PTY-ERR-RATE-ABOVE-MAX
+        status: 422
+      - code: PTY-ERR-BACKDATE
+        status: 422
+      - code: PTY-ERR-SPLIT-SUM
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1657
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the CommissionAgreement
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommissionAgreementGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/commission-agreements/create-version:
+    post:
+      operationId: pty.CommissionAgreement.createVersion
+      summary: Agreements
+      description: |-
+        Agreements
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - CommissionAgreement
+      x-requirement:
+      - REQ-PTY-010
+      x-anchor:
+      - REQ-PTY-010
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: approve: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.CommissionAgreement.createVersion
+      x-error-codes:
+      - code: PTY-ERR-RATE-ABOVE-MAX
+        status: 422
+      - code: PTY-ERR-BACKDATE
+        status: 422
+      - code: PTY-ERR-SPLIT-SUM
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1657
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommissionAgreementCreateVersionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommissionAgreementCreateVersionResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/commission-agreements/submit:
+    post:
+      operationId: pty.CommissionAgreement.submit
+      summary: Agreements
+      description: |-
+        Agreements
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - CommissionAgreement
+      x-requirement:
+      - REQ-PTY-010
+      x-anchor:
+      - REQ-PTY-010
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: approve: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.CommissionAgreement.submit
+      x-error-codes:
+      - code: PTY-ERR-RATE-ABOVE-MAX
+        status: 422
+      - code: PTY-ERR-BACKDATE
+        status: 422
+      - code: PTY-ERR-SPLIT-SUM
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1657
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommissionAgreementSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommissionAgreementSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/commission-agreements/approve:
+    post:
+      operationId: pty.CommissionAgreement.approve
+      summary: Agreements
+      description: |-
+        Agreements
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - CommissionAgreement
+      x-requirement:
+      - REQ-PTY-010
+      x-anchor:
+      - REQ-PTY-010
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: approve: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.CommissionAgreement.approve
+      x-error-codes:
+      - code: PTY-ERR-RATE-ABOVE-MAX
+        status: 422
+      - code: PTY-ERR-BACKDATE
+        status: 422
+      - code: PTY-ERR-SPLIT-SUM
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1657
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommissionAgreementApproveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommissionAgreementApproveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/commission-agreements/compare:
+    get:
+      operationId: pty.CommissionAgreement.compare
+      summary: Agreements
+      description: |-
+        Agreements
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - CommissionAgreement
+      x-requirement:
+      - REQ-PTY-010
+      x-anchor:
+      - REQ-PTY-010
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: approve: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.CommissionAgreement.compare
+      x-error-codes:
+      - code: PTY-ERR-RATE-ABOVE-MAX
+        status: 422
+      - code: PTY-ERR-BACKDATE
+        status: 422
+      - code: PTY-ERR-SPLIT-SUM
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1657
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommissionAgreementCompareResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/commission-agreements/simulate:
+    post:
+      operationId: pty.CommissionAgreement.simulate
+      summary: Agreements
+      description: |-
+        Agreements
+
+        PRD inputs: as named
+        PRD outputs: —
+      tags:
+      - CommissionAgreement
+      x-requirement:
+      - REQ-PTY-010
+      x-anchor:
+      - REQ-PTY-010
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: approve: yes'
+      x-exposure:
+      - ui
+      x-permission: pty.CommissionAgreement.simulate
+      x-error-codes:
+      - code: PTY-ERR-RATE-ABOVE-MAX
+        status: 422
+      - code: PTY-ERR-BACKDATE
+        status: 422
+      - code: PTY-ERR-SPLIT-SUM
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1657
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommissionAgreementSimulateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommissionAgreementSimulateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/dsar/export:
+    post:
+      operationId: pty.Dsar.export
+      summary: DSAR support for CMP
+      description: |-
+        DSAR support for CMP
+
+        PRD inputs: party, request id
+        PRD outputs: file ref, outcome
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-PTY-161..REQ-PTY-165
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: evaluateErasure: yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: pty.Dsar.export
+      x-error-codes:
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1660
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/dsar/evaluate-erasure:
+    post:
+      operationId: pty.Dsar.evaluateErasure
+      summary: Evaluate an erasure request against retention (called by CMP fan-out, REQ-CMP-005)
+      description: |-
+        Evaluate an erasure request against retention (called by CMP fan-out, `REQ-CMP-005`)
+
+        PRD inputs: party, request id
+        PRD outputs: erased / restricted with retention conflict and obligation reference
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-PTY-161..REQ-PTY-165
+      - REQ-PTY-164
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: evaluateErasure: yes; PRD dry-run: yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: pty.Dsar.evaluateErasure
+      x-error-codes:
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1660
+      - PRD-01 §9.1 l.1663
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarEvaluateErasureRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarEvaluateErasureResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/dsar/restrict:
+    post:
+      operationId: pty.Dsar.restrict
+      summary: Restrict processing of a party (called by CMP fan-out, REQ-CMP-005)
+      description: |-
+        Restrict processing of a party (called by CMP fan-out, `REQ-CMP-005`)
+
+        PRD inputs: party, request id
+        PRD outputs: status Restricted
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-PTY-161..REQ-PTY-165
+      - REQ-PTY-165
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: evaluateErasure: yes; PRD dry-run: —'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: pty.Dsar.restrict
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1660
+      - PRD-01 §9.1 l.1664
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarRestrictRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarRestrictResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/dsar/lift-restriction:
+    post:
+      operationId: pty.Dsar.liftRestriction
+      summary: DSAR support for CMP
+      description: |-
+        DSAR support for CMP
+
+        PRD inputs: party, request id
+        PRD outputs: file ref, outcome
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-PTY-161..REQ-PTY-165
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: evaluateErasure: yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: pty.Dsar.liftRestriction
+      x-error-codes:
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1660
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarLiftRestrictionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarLiftRestrictionResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/import/reverse:
+    post:
+      operationId: pty.Import.reverse
+      summary: Named reversal of origin=MIGRATION objects for MIG rollback (listed under REQ-MIG-005)
+      description: |-
+        Named reversal of `origin=MIGRATION` objects for MIG rollback (listed under `REQ-MIG-005`)
+
+        PRD inputs: import batch id or object ids, dryRun
+        PRD outputs: per-object outcome (reversed, blocked with reason)
+      tags:
+      - Import
+      x-requirement:
+      - REQ-PTY-282
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: pty.Import.reverse
+      x-error-codes:
+      - code: PTY-ERR-LIVE-DEPENDANT
+        status: 422
+      - code: PTY-ERR-NOT-MIGRATED
+        status: 404
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1666
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportReverseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportReverseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+x-operation-families:
+- family: pty.Appointment.*
+  summary: Appointments and codes
+  inputs: as named
+  outputs: —
+  x-requirement:
+  - REQ-PTY-204..REQ-PTY-206
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-01 §9.1 l.1655
+- family: pty.ProducerCode.*
+  summary: Appointments and codes
+  inputs: as named
+  outputs: —
+  x-requirement:
+  - REQ-PTY-204..REQ-PTY-206
+  x-wave: W2
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-01 §9.1 l.1655
+- family: pty.AgencyUser.*
+  summary: Delegated administration
+  inputs: user, role, grants
+  outputs: —
+  x-requirement:
+  - REQ-PTY-243..REQ-PTY-252
+  x-wave: W6
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-01 §9.1 l.1658
+- family: pty.Bancassurance.*
+  summary: Partnerships
+  inputs: partnership data, branch file
+  outputs: —
+  x-requirement:
+  - REQ-PTY-253..REQ-PTY-258
+  x-wave: unscheduled
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-01 §9.1 l.1659
+- family: pty.Import.*
+  summary: Migration import
+  inputs: batch
+  outputs: per-record outcomes
+  x-requirement:
+  - REQ-PTY-013
+  x-wave: W9
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-01 §9.1 l.1665
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+  schemas:
+    PartySearchItem:
+      type: object
+      description: 'pty.Party.search result. PRD outputs: "ranked results"'
+      properties:
+        rankedResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "ranked results"'
+    PartySearchPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PartySearchItem'
+      description: Page of pty.Party.search results (cursor pagination, contract §3.5.5)
+    PartyGetResponse:
+      type: object
+      description: 'pty.Party.get result. PRD outputs: "party"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+    PartyCreateRequest:
+      type: object
+      description: 'pty.Party.create request. PRD inputs: "party data, reason"'
+      properties:
+        partyData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party data"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    PartyCreateResponse:
+      type: object
+      description: 'pty.Party.create result. PRD outputs: "party, duplicate suggestions, missing data"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        duplicateSuggestions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "duplicate suggestions"'
+        missingData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "missing data"'
+    PartyUpdateRequest:
+      type: object
+      description: 'pty.Party.update request. PRD inputs: "party data, reason"'
+      properties:
+        partyData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party data"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    PartyUpdateResponse:
+      type: object
+      description: 'pty.Party.update result. PRD outputs: "party, duplicate suggestions, missing data"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        duplicateSuggestions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "duplicate suggestions"'
+        missingData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "missing data"'
+    PartyValidateRequest:
+      type: object
+      description: 'pty.Party.validate request. PRD inputs: "party data"'
+      properties:
+        partyData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party data"'
+    PartyValidateResponse:
+      type: object
+      description: 'pty.Party.validate result. PRD outputs: "issues, candidates"'
+      properties:
+        issues:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "issues"'
+        candidates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "candidates"'
+    PartyMergeRequest:
+      type: object
+      description: 'pty.Party.merge request. PRD inputs: "candidates, survivorship decisions"'
+      properties:
+        candidates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "candidates"'
+        survivorshipDecisions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "survivorship decisions"'
+    PartyMergeResponse:
+      type: object
+      description: 'pty.Party.merge result. PRD outputs: "merge record, approval request"'
+      properties:
+        mergeRecord:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "merge record"'
+        approvalRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval request"'
+    PartyUnmergeRequest:
+      type: object
+      description: 'pty.Party.unmerge request. PRD inputs: "merge_id, assignment of post-merge changes"'
+      properties:
+        mergeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "merge_id"'
+        assignmentPostMergeChanges:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "assignment of post-merge changes"'
+    PartyUnmergeResponse:
+      type: object
+      description: 'pty.Party.unmerge result. PRD outputs: "restored parties, approval request"'
+      properties:
+        restoredParties:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "restored parties"'
+        approvalRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval request"'
+    IdentifierVerifyRequest:
+      type: object
+      description: 'pty.Identifier.verify request. PRD inputs: "party_id, scheme"'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "party_id"'
+        scheme:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scheme"'
+    IdentifierVerifyResponse:
+      type: object
+      description: 'pty.Identifier.verify result. PRD outputs: "status, suggestions"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        suggestions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "suggestions"'
+    PartyRoleAssignRequest:
+      type: object
+      description: 'pty.PartyRole.assign request. PRD inputs: "party, role, context, period"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        role:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "role"'
+        context:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "context"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+    PartyRoleAssignResponse:
+      type: object
+      description: 'pty.PartyRole.assign result. PRD outputs: "role"'
+      properties:
+        role:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "role"'
+    PartyRoleEndRequest:
+      type: object
+      description: 'pty.PartyRole.end request. PRD inputs: "party, role, context, period"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        role:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "role"'
+        context:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "context"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+    PartyRoleEndResponse:
+      type: object
+      description: 'pty.PartyRole.end result. PRD outputs: "role"'
+      properties:
+        role:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "role"'
+    PartyRoleQueryItem:
+      type: object
+      description: 'pty.PartyRole.query result. PRD outputs: "role"'
+      properties:
+        role:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "role"'
+    PartyRoleQueryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PartyRoleQueryItem'
+      description: Page of pty.PartyRole.query results (cursor pagination, contract §3.5.5)
+    RelationshipAddRequest:
+      type: object
+      description: 'pty.Relationship.add request. PRD inputs: "parties, type, period"'
+      properties:
+        parties:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "parties"'
+        type:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "type"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+    RelationshipAddResponse:
+      type: object
+      description: 'pty.Relationship.add result. PRD outputs: "—"'
+      x-status: minimal
+    RelationshipEndRequest:
+      type: object
+      description: 'pty.Relationship.end request. PRD inputs: "parties, type, period"'
+      properties:
+        parties:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "parties"'
+        type:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "type"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+    RelationshipEndResponse:
+      type: object
+      description: 'pty.Relationship.end result. PRD outputs: "—"'
+      x-status: minimal
+    RelationshipQueryItem:
+      type: object
+      description: 'pty.Relationship.query result. PRD outputs: "—"'
+      x-status: minimal
+    RelationshipQueryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RelationshipQueryItem'
+      description: Page of pty.Relationship.query results (cursor pagination, contract §3.5.5)
+    AccountCreateRequest:
+      type: object
+      description: 'pty.Account.create request. PRD inputs: "as named"'
+      x-status: minimal
+    AccountCreateResponse:
+      type: object
+      description: 'pty.Account.create result. PRD outputs: "—"'
+      x-status: minimal
+    AccountGetResponse:
+      type: object
+      description: 'pty.Account.get result. PRD outputs: "—"'
+      x-status: minimal
+    AccountSearchItem:
+      type: object
+      description: 'pty.Account.search result. PRD outputs: "—"'
+      x-status: minimal
+    AccountSearchPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/AccountSearchItem'
+      description: Page of pty.Account.search results (cursor pagination, contract §3.5.5)
+    AccountSetHolderRequest:
+      type: object
+      description: 'pty.Account.setHolder request. PRD inputs: "as named"'
+      x-status: minimal
+    AccountSetHolderResponse:
+      type: object
+      description: 'pty.Account.setHolder result. PRD outputs: "—"'
+      x-status: minimal
+    AccountAddMemberRequest:
+      type: object
+      description: 'pty.Account.addMember request. PRD inputs: "as named"'
+      x-status: minimal
+    AccountAddMemberResponse:
+      type: object
+      description: 'pty.Account.addMember result. PRD outputs: "—"'
+      x-status: minimal
+    AccountRemoveMemberRequest:
+      type: object
+      description: 'pty.Account.removeMember request. PRD inputs: "as named"'
+      x-status: minimal
+    AccountRemoveMemberResponse:
+      type: object
+      description: 'pty.Account.removeMember result. PRD outputs: "—"'
+      x-status: minimal
+    AccountWithdrawRequest:
+      type: object
+      description: 'pty.Account.withdraw request. PRD inputs: "as named"'
+      x-status: minimal
+    AccountWithdrawResponse:
+      type: object
+      description: 'pty.Account.withdraw result. PRD outputs: "—"'
+      x-status: minimal
+    AccountMergeRequest:
+      type: object
+      description: 'pty.Account.merge request. PRD inputs: "source, target, policies"'
+      properties:
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source"'
+        target:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target"'
+        policies:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policies"'
+    AccountMergeResponse:
+      type: object
+      description: 'pty.Account.merge result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    AccountRequestPolicyMoveRequest:
+      type: object
+      description: 'pty.Account.requestPolicyMove request. PRD inputs: "source, target, policies"'
+      properties:
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source"'
+        target:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target"'
+        policies:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policies"'
+    AccountRequestPolicyMoveResponse:
+      type: object
+      description: 'pty.Account.requestPolicyMove result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    AccountSplitRequest:
+      type: object
+      description: 'pty.Account.split request. PRD inputs: "source, target, policies"'
+      properties:
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source"'
+        target:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "target"'
+        policies:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policies"'
+    AccountSplitResponse:
+      type: object
+      description: 'pty.Account.split result. PRD outputs: "request"'
+      properties:
+        request:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "request"'
+    LocationAddRequest:
+      type: object
+      description: 'pty.Location.add request. PRD inputs: "location"'
+      properties:
+        location:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "location"'
+    LocationAddResponse:
+      type: object
+      description: 'pty.Location.add result. PRD outputs: "location"'
+      properties:
+        location:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "location"'
+    LocationUpdateRequest:
+      type: object
+      description: 'pty.Location.update request. PRD inputs: "location"'
+      properties:
+        location:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "location"'
+    LocationUpdateResponse:
+      type: object
+      description: 'pty.Location.update result. PRD outputs: "location"'
+      properties:
+        location:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "location"'
+    LocationRemoveRequest:
+      type: object
+      description: 'pty.Location.remove request. PRD inputs: "location"'
+      properties:
+        location:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "location"'
+    LocationRemoveResponse:
+      type: object
+      description: 'pty.Location.remove result. PRD outputs: "location"'
+      properties:
+        location:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "location"'
+    LifeEventStartRequest:
+      type: object
+      description: 'pty.LifeEvent.start request. PRD inputs: "type, party, data"'
+      properties:
+        type:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "type"'
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        data:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "data"'
+    LifeEventStartResponse:
+      type: object
+      description: 'pty.LifeEvent.start result. PRD outputs: "life event, created activities"'
+      properties:
+        lifeEvent:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "life event"'
+        createdActivities:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "created activities"'
+    LifeEventCompleteRequest:
+      type: object
+      description: 'pty.LifeEvent.complete request. PRD inputs: "type, party, data"'
+      properties:
+        type:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "type"'
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        data:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "data"'
+    LifeEventCompleteResponse:
+      type: object
+      description: 'pty.LifeEvent.complete result. PRD outputs: "life event, created activities"'
+      properties:
+        lifeEvent:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "life event"'
+        createdActivities:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "created activities"'
+    LifeEventReverseRequest:
+      type: object
+      description: 'pty.LifeEvent.reverse request. PRD inputs: "type, party, data"'
+      properties:
+        type:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "type"'
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        data:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "data"'
+    LifeEventReverseResponse:
+      type: object
+      description: 'pty.LifeEvent.reverse result. PRD outputs: "life event, created activities"'
+      properties:
+        lifeEvent:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "life event"'
+        createdActivities:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "created activities"'
+    ConsentQueryItem:
+      type: object
+      description: 'pty.Consent.query result. PRD outputs: "state"'
+      properties:
+        state:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "state"'
+    ConsentQueryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ConsentQueryItem'
+      description: Page of pty.Consent.query results (cursor pagination, contract §3.5.5)
+    ConsentRecordRequest:
+      type: object
+      description: 'pty.Consent.record request. PRD inputs: "party, purpose, channel, kind, source, wording version, proof
+        ref"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        purpose:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "purpose"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+        kind:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "kind"'
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source"'
+        wordingVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "wording version"'
+        proofRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "proof ref"'
+    ConsentRecordResponse:
+      type: object
+      description: 'pty.Consent.record result. PRD outputs: "consent state"'
+      properties:
+        consentState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "consent state"'
+    ConsentWithdrawRequest:
+      type: object
+      description: 'pty.Consent.withdraw request. PRD inputs: "party, purpose, channel"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        purpose:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "purpose"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+    ConsentWithdrawResponse:
+      type: object
+      description: 'pty.Consent.withdraw result. PRD outputs: "state"'
+      properties:
+        state:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "state"'
+    CommunicationPreferenceResolveRequest:
+      type: object
+      description: 'pty.CommunicationPreference.resolve request. PRD inputs: "party, purpose, date"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        purpose:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "purpose"'
+    CommunicationPreferenceResolveResponse:
+      type: object
+      description: 'pty.CommunicationPreference.resolve result. PRD outputs: "channel, language, medium, proof"'
+      properties:
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+          description: 'PRD: "language"'
+        medium:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "medium"'
+        proof:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "proof"'
+    CommunicationPreferenceSetRequest:
+      type: object
+      description: 'pty.CommunicationPreference.set request. PRD inputs: "party, purpose, date"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        purpose:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "purpose"'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "date"'
+    CommunicationPreferenceSetResponse:
+      type: object
+      description: 'pty.CommunicationPreference.set result. PRD outputs: "channel, language, medium, proof"'
+      properties:
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+          description: 'PRD: "language"'
+        medium:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "medium"'
+        proof:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "proof"'
+    VulnerabilityQueryItem:
+      type: object
+      description: 'pty.Vulnerability.query result. PRD outputs: "flag, rule codes, trusted contacts"'
+      properties:
+        flag:
+          type: boolean
+          description: 'PRD: "flag"'
+        ruleCodes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rule codes"'
+        trustedContacts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "trusted contacts"'
+    VulnerabilityQueryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/VulnerabilityQueryItem'
+      description: Page of pty.Vulnerability.query results (cursor pagination, contract §3.5.5)
+    VulnerabilityRecordRequest:
+      type: object
+      description: 'pty.Vulnerability.record request. PRD inputs: "party"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+    VulnerabilityRecordResponse:
+      type: object
+      description: 'pty.Vulnerability.record result. PRD outputs: "flag, rule codes, trusted contacts"'
+      properties:
+        flag:
+          type: boolean
+          description: 'PRD: "flag"'
+        ruleCodes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rule codes"'
+        trustedContacts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "trusted contacts"'
+    VulnerabilityRemoveRequest:
+      type: object
+      description: 'pty.Vulnerability.remove request. PRD inputs: "party"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+    VulnerabilityRemoveResponse:
+      type: object
+      description: 'pty.Vulnerability.remove result. PRD outputs: "flag, rule codes, trusted contacts"'
+      properties:
+        flag:
+          type: boolean
+          description: 'PRD: "flag"'
+        ruleCodes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rule codes"'
+        trustedContacts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "trusted contacts"'
+    ScreeningScreenRequest:
+      type: object
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        adHocPayee:
+          type: object
+          properties:
+            name:
+              type: string
+            birthDate:
+              $ref: ../events/common.schema.json#/$defs/LocalDate
+            nationality:
+              $ref: ../events/common.schema.json#/$defs/CountryCode
+            country:
+              $ref: ../events/common.schema.json#/$defs/CountryCode
+            identifiers:
+              type: array
+              items:
+                type: object
+                properties:
+                  scheme:
+                    $ref: ../events/common.schema.json#/$defs/Code
+                  value:
+                    type: string
+                required:
+                - scheme
+                - value
+          required:
+          - name
+        callerRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: Calling object (refund, disbursement, bind, claim payment)
+      required:
+      - callerRef
+      oneOf:
+      - required:
+        - partyId
+      - required:
+        - adHocPayee
+      description: 'Typed from REQ-PTY-006, REQ-PTY-174. PRD inputs: "party_id or ad-hoc payee, caller ref"'
+    ScreeningScreenResponse:
+      type: object
+      properties:
+        result:
+          type: string
+          enum:
+          - Clear
+          - PotentialHit
+          - Blocked
+          description: REQ-PTY-006
+        caseNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: When not Clear
+        listVersions:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        paymentBlock:
+          type: boolean
+          description: Payment block
+      required:
+      - result
+      - listVersions
+      - paymentBlock
+      description: 'Typed from REQ-PTY-006, REQ-PTY-174. PRD outputs: "Clear / PotentialHit / Blocked, case, block"'
+    ScreeningBulkRequest:
+      type: object
+      description: 'pty.Screening.bulk request. PRD inputs: "list"'
+      properties:
+        list:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "list"'
+    ScreeningBulkResponse:
+      type: object
+      description: 'pty.Screening.bulk result. PRD outputs: "job id; decision → case"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "job id"'
+        decisionCase:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision → case"'
+    ScreeningCaseDecideRequest:
+      type: object
+      description: 'pty.Screening.caseDecide request. PRD inputs: "list"'
+      properties:
+        list:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "list"'
+    ScreeningCaseDecideResponse:
+      type: object
+      description: 'pty.Screening.caseDecide result. PRD outputs: "job id; decision → case"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "job id"'
+        decisionCase:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision → case"'
+    ScreeningCaseGetResponse:
+      type: object
+      description: 'pty.Screening.caseGet result. PRD outputs: "job id; decision → case"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "job id"'
+        decisionCase:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "decision → case"'
+    ProducerCodeValidateRequest:
+      type: object
+      properties:
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        transactionType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        actingPersonId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Acting person (PRD-01 §9.1)
+      required:
+      - producerCode
+      - product
+      - transactionType
+      description: 'Typed from REQ-PTY-008. PRD inputs: "code, product, transaction type, date, acting person"'
+    ProducerCodeValidateResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+          description: Validity
+        reasons:
+          type: array
+          items:
+            allOf:
+            - $ref: ../events/common.schema.json#/$defs/Code
+            examples:
+            - REGISTER_INACTIVE
+            - NOT_APPOINTED
+            - CPD_NON_COMPLIANT
+            - TRAINING_MISSING
+        intermediaryType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        registerNumber:
+          type: string
+        registerStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+        licenceStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+        licenceExpiry:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        appointedForProduct:
+          type: boolean
+          description: Appointment for the product
+        authorities:
+          type: object
+          properties:
+            collectPremium:
+              type: boolean
+              description: Collect premium
+            issueCoverNotes:
+              type: boolean
+              description: Issue cover notes
+            bindWithinAuthority:
+              type: boolean
+              description: Bind within authority
+            limits:
+              $ref: ../events/common.schema.json#/$defs/OpenObject
+        intermediaryData:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Data that must appear on applications and policies
+      required:
+      - valid
+      - reasons
+      description: 'Typed from REQ-PTY-008. PRD outputs: "validity, reasons, intermediary data"'
+    ProducerCodeSearchItem:
+      type: object
+      description: 'pty.ProducerCode.search result. PRD outputs: "validity, reasons, intermediary data"'
+      properties:
+        validity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validity"'
+        reasons:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reasons"'
+        intermediaryData:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "intermediary data"'
+    ProducerCodeSearchPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ProducerCodeSearchItem'
+      description: Page of pty.ProducerCode.search results (cursor pagination, contract §3.5.5)
+    IntermediaryCreateRequest:
+      type: object
+      description: 'pty.Intermediary.create request. PRD inputs: "as named"'
+      x-status: minimal
+    IntermediaryCreateResponse:
+      type: object
+      description: 'pty.Intermediary.create result. PRD outputs: "—"'
+      x-status: minimal
+    IntermediaryUpdateRequest:
+      type: object
+      description: 'pty.Intermediary.update request. PRD inputs: "as named"'
+      x-status: minimal
+    IntermediaryUpdateResponse:
+      type: object
+      description: 'pty.Intermediary.update result. PRD outputs: "—"'
+      x-status: minimal
+    IntermediarySuspendRequest:
+      type: object
+      description: 'pty.Intermediary.suspend request. PRD inputs: "as named"'
+      x-status: minimal
+    IntermediarySuspendResponse:
+      type: object
+      description: 'pty.Intermediary.suspend result. PRD outputs: "—"'
+      x-status: minimal
+    IntermediaryTerminateRequest:
+      type: object
+      description: 'pty.Intermediary.terminate request. PRD inputs: "as named"'
+      x-status: minimal
+    IntermediaryTerminateResponse:
+      type: object
+      description: 'pty.Intermediary.terminate result. PRD outputs: "—"'
+      x-status: minimal
+    IntermediaryImportRegisterRequest:
+      type: object
+      description: 'pty.Intermediary.importRegister request. PRD inputs: "as named"'
+      x-status: minimal
+    IntermediaryImportRegisterResponse:
+      type: object
+      description: 'pty.Intermediary.importRegister result. PRD outputs: "—"'
+      x-status: minimal
+    ProducerOfRecordGetResponse:
+      type: object
+      description: 'pty.ProducerOfRecord.get result. PRD outputs: "PoR"'
+      properties:
+        poR:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "PoR"'
+    ProducerOfRecordChangeRequest:
+      type: object
+      description: 'pty.ProducerOfRecord.change request. PRD inputs: "term, date / change"'
+      properties:
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "date"'
+        change:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change"'
+    ProducerOfRecordChangeResponse:
+      type: object
+      description: 'pty.ProducerOfRecord.change result. PRD outputs: "PoR"'
+      properties:
+        poR:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "PoR"'
+    ProducerOfRecordBulkTransferRequest:
+      type: object
+      description: 'pty.ProducerOfRecord.bulkTransfer request. PRD inputs: "term, date / change"'
+      properties:
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "date"'
+        change:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change"'
+    ProducerOfRecordBulkTransferResponse:
+      type: object
+      description: 'pty.ProducerOfRecord.bulkTransfer result. PRD outputs: "PoR"'
+      properties:
+        poR:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "PoR"'
+    ProducerOfRecordCancelRequest:
+      type: object
+      description: 'pty.ProducerOfRecord.cancel request. PRD inputs: "term, date / change"'
+      properties:
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "date"'
+        change:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "change"'
+    ProducerOfRecordCancelResponse:
+      type: object
+      description: 'pty.ProducerOfRecord.cancel result. PRD outputs: "PoR"'
+      properties:
+        poR:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "PoR"'
+    CommissionAgreementResolveRequest:
+      type: object
+      description: 'pty.CommissionAgreement.resolve request. PRD inputs: "as named"'
+      x-status: minimal
+    CommissionAgreementResolveResponse:
+      type: object
+      description: 'pty.CommissionAgreement.resolve result. PRD outputs: "—"'
+      x-status: minimal
+    CommissionAgreementGetResponse:
+      type: object
+      description: 'pty.CommissionAgreement.get result. PRD outputs: "—"'
+      x-status: minimal
+    CommissionAgreementCreateVersionRequest:
+      type: object
+      description: 'pty.CommissionAgreement.createVersion request. PRD inputs: "as named"'
+      x-status: minimal
+    CommissionAgreementCreateVersionResponse:
+      type: object
+      description: 'pty.CommissionAgreement.createVersion result. PRD outputs: "—"'
+      x-status: minimal
+    CommissionAgreementSubmitRequest:
+      type: object
+      description: 'pty.CommissionAgreement.submit request. PRD inputs: "as named"'
+      x-status: minimal
+    CommissionAgreementSubmitResponse:
+      type: object
+      description: 'pty.CommissionAgreement.submit result. PRD outputs: "—"'
+      x-status: minimal
+    CommissionAgreementApproveRequest:
+      type: object
+      description: 'pty.CommissionAgreement.approve request. PRD inputs: "as named"'
+      x-status: minimal
+    CommissionAgreementApproveResponse:
+      type: object
+      description: 'pty.CommissionAgreement.approve result. PRD outputs: "—"'
+      x-status: minimal
+    CommissionAgreementCompareResponse:
+      type: object
+      description: 'pty.CommissionAgreement.compare result. PRD outputs: "—"'
+      x-status: minimal
+    CommissionAgreementSimulateRequest:
+      type: object
+      description: 'pty.CommissionAgreement.simulate request. PRD inputs: "as named"'
+      x-status: minimal
+    CommissionAgreementSimulateResponse:
+      type: object
+      description: 'pty.CommissionAgreement.simulate result. PRD outputs: "—"'
+      x-status: minimal
+    DsarExportRequest:
+      type: object
+      description: 'pty.Dsar.export request. PRD inputs: "party, request id"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "request id"'
+    DsarExportResponse:
+      type: object
+      description: 'pty.Dsar.export result. PRD outputs: "file ref, outcome"'
+      properties:
+        fileRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file ref"'
+        outcome:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcome"'
+    DsarEvaluateErasureRequest:
+      type: object
+      description: 'pty.Dsar.evaluateErasure request. PRD inputs: "party, request id"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "request id"'
+    DsarEvaluateErasureResponse:
+      type: object
+      description: 'pty.Dsar.evaluateErasure result. PRD outputs: "erased / restricted with retention conflict and obligation
+        reference"'
+      properties:
+        erased:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "erased"'
+        restrictedRetentionConflictAndObligation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "restricted with retention conflict and obligation reference"'
+    DsarRestrictRequest:
+      type: object
+      description: 'pty.Dsar.restrict request. PRD inputs: "party, request id"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "request id"'
+    DsarRestrictResponse:
+      type: object
+      description: 'pty.Dsar.restrict result. PRD outputs: "status Restricted"'
+      properties:
+        statusRestricted:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status Restricted"'
+    DsarLiftRestrictionRequest:
+      type: object
+      description: 'pty.Dsar.liftRestriction request. PRD inputs: "party, request id"'
+      properties:
+        party:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "party"'
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "request id"'
+    DsarLiftRestrictionResponse:
+      type: object
+      description: 'pty.Dsar.liftRestriction result. PRD outputs: "file ref, outcome"'
+      properties:
+        fileRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "file ref"'
+        outcome:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcome"'
+    ImportReverseRequest:
+      type: object
+      description: 'pty.Import.reverse request. PRD inputs: "import batch id or object ids, dryRun"'
+      properties:
+        importBatchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "import batch id or object ids" (optional)'
+        objectIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "import batch id or object ids" (optional)'
+      oneOf:
+      - required:
+        - importBatchId
+      - required:
+        - objectIds
+    ImportReverseResponse:
+      type: object
+      description: 'pty.Import.reverse result. PRD outputs: "per-object outcome (reversed, blocked with reason)"'
+      properties:
+        perObjectOutcome:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-object outcome (reversed, blocked with reason)"'

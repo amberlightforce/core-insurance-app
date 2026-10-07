@@ -1,0 +1,4710 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: POL — Policy administration and transactions API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by POL (PRD-05 §9.1)
+  description: 'Contract of the operations POL exposes (PRD-05 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: POL
+  x-prd: PRD-05
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: Submission
+- name: Job
+- name: PolicyChange
+- name: Cancellation
+- name: Withdrawal
+- name: Reinstatement
+- name: Rewrite
+- name: Suspension
+- name: Reactivation
+- name: Renewal
+- name: RenewalRun
+- name: PolicyMove
+- name: Policy
+- name: Term
+- name: Snapshot
+- name: Earning
+- name: Charges
+- name: Segment
+- name: StatusModel
+- name: EffectiveDate
+- name: Import
+- name: Dsar
+paths:
+  /api/pol/v1/submissions:
+    post:
+      operationId: pol.Submission.create
+      summary: Start a submission
+      description: |-
+        Start a submission
+
+        PRD inputs: accountId, product, producerCode, channel, effectiveAt, quoteType
+        PRD outputs: jobId, describe model, version, manifest
+      tags:
+      - Submission
+      x-requirement:
+      - REQ-POL-001
+      - REQ-POL-145
+      x-anchor:
+      - REQ-POL-001
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-POL-001, REQ-POL-145
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/quotes
+      - MCP tool quote_motor_dry_run
+      - MCP tool quote_motor_save
+      x-permission: pol.Submission.create
+      x-error-codes:
+      - code: POL-ERR-PRODUCT-UNAVAILABLE
+        status: 503
+      - code: POL-ERR-PRODUCER-INVALID
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1774
+      x-superseded-names:
+      - pol.Quote.create (F-1c brief wording; quote creation is pol.Submission.create + pol.Job.quote)
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/pol/v1/jobs/update-draft:
+    post:
+      operationId: pol.Job.updateDraft
+      summary: Apply intent edits to a draft
+      description: |-
+        Apply intent edits to a draft
+
+        PRD inputs: jobId, versionNo, instructions[], expectedDraftVersion
+        PRD outputs: draft state, validation, premium preview
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-001
+      - REQ-POL-010
+      - REQ-POL-163
+      x-anchor:
+      - REQ-POL-001
+      - REQ-POL-010
+      x-anchor-mapped:
+      - REQ-POL-010
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR (pricing)'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/quotes
+      x-permission: pol.Job.updateDraft
+      x-error-codes:
+      - code: POL-ERR-LOCKED
+        status: 409
+      - code: POL-ERR-VALIDATION
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1775
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobUpdateDraftRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobUpdateDraftResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/quote:
+    post:
+      operationId: pol.Job.quote
+      summary: Price and evaluate UW
+      description: |-
+        Price and evaluate UW
+
+        PRD inputs: jobId, versionNo
+        PRD outputs: quote version, premium, issues, validity
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-011
+      x-anchor:
+      - REQ-POL-011
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-POL-011, REQ-POL-157
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/quotes
+      - MCP tool quote_motor_dry_run
+      x-permission: pol.Job.quote
+      x-error-codes:
+      - code: POL-ERR-QUICK-QUOTE-NOT-BINDABLE
+        note: bind only
+        status: 422
+      - code: POL-ERR-RATING
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1776
+      x-superseded-names:
+      - pol.Quote.create (F-1c brief wording; quote creation is pol.Submission.create + pol.Job.quote)
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobQuoteRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobQuoteResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/requote:
+    post:
+      operationId: pol.Job.requote
+      summary: Price and evaluate UW
+      description: |-
+        Price and evaluate UW
+
+        PRD inputs: jobId, versionNo
+        PRD outputs: quote version, premium, issues, validity
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-011
+      x-anchor:
+      - REQ-POL-011
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-permission: pol.Job.requote
+      x-error-codes:
+      - code: POL-ERR-QUICK-QUOTE-NOT-BINDABLE
+        note: bind only
+        status: 422
+      - code: POL-ERR-RATING
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1776
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobRequoteRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobRequoteResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/new-version:
+    post:
+      operationId: pol.Job.newVersion
+      summary: Versions
+      description: |-
+        Versions
+
+        PRD inputs: jobId, sourceVersion
+        PRD outputs: new version; comparison
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-150
+      - REQ-POL-151
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key / query'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/quotes/{id}/versions`, `GET …/compare
+      x-permission: pol.Job.newVersion
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1777
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobNewVersionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobNewVersionResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/copy-version:
+    post:
+      operationId: pol.Job.copyVersion
+      summary: Versions
+      description: |-
+        Versions
+
+        PRD inputs: jobId, sourceVersion
+        PRD outputs: new version; comparison
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-150
+      - REQ-POL-151
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key / query'
+      x-exposure:
+      - ui
+      x-permission: pol.Job.copyVersion
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1777
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCopyVersionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobCopyVersionResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/compare-versions:
+    post:
+      operationId: pol.Job.compareVersions
+      summary: Versions
+      description: |-
+        Versions
+
+        PRD inputs: jobId, sourceVersion
+        PRD outputs: new version; comparison
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-150
+      - REQ-POL-151
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key / query'
+      x-exposure:
+      - ui
+      x-permission: pol.Job.compareVersions
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1777
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCompareVersionsRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobCompareVersionsResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/bind:
+    post:
+      operationId: pol.Job.bind
+      summary: Bind with gates (any job type; canonical name, R-87)
+      description: |-
+        Bind with gates (any job type; canonical name, R-87)
+
+        PRD inputs: jobId, versionNo, paymentPlanOption, holdIssuance, confirmation, disclosureEvidence (CHN presentation receipt, optional)
+        PRD outputs: transaction, term, deltas, gate results, cover note ref
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-001
+      - REQ-POL-003
+      x-anchor:
+      - REQ-POL-001
+      - REQ-POL-003
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      - W4-POL-05
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-POL-001, REQ-POL-003, REQ-POL-170
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/policies/{no}/changes` (`dryRun`)
+      - CHN facade POST /api/chn/v1/quotes/{id}/bind
+      - MCP tool policy_change_submit
+      - MCP tool quote_motor_bind
+      x-permission: pol.Job.bind
+      x-error-codes:
+      - code: POL-ERR-GATE-FAILED
+        status: 422
+      - code: POL-ERR-PREEMPTED
+        status: 409
+      - code: POL-ERR-REBASE-REQUIRED
+        status: 409
+      - code: POL-ERR-QUOTE-STALE
+        status: 409
+      - code: POL-ERR-CONFLICTS-OPEN
+        status: 409
+      - code: POL-ERR-HUMAN-CONFIRMATION-REQUIRED
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1778
+      x-superseded-names:
+      - pol.PolicyChange.bind (XRF-003)
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobBindRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobBindResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/withdraw:
+    post:
+      operationId: pol.Job.withdraw
+      summary: Close job
+      description: |-
+        Close job
+
+        PRD inputs: jobId, reasonCode, text
+        PRD outputs: job
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-073
+      - REQ-POL-155
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pol.Job.withdraw
+      x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1779
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobWithdrawRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobWithdrawResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/not-taken:
+    post:
+      operationId: pol.Job.notTaken
+      summary: Close job
+      description: |-
+        Close job
+
+        PRD inputs: jobId, reasonCode, text
+        PRD outputs: job
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-073
+      - REQ-POL-155
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-exposure:
+      - ui
+      x-permission: pol.Job.notTaken
+      x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1779
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobNotTakenRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobNotTakenResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/rebase:
+    post:
+      operationId: pol.Job.rebase
+      summary: Handle preemption
+      description: |-
+        Handle preemption
+
+        PRD inputs: jobId
+        PRD outputs: rebased draft, conflicts
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-006
+      - REQ-POL-064
+      x-anchor:
+      - REQ-POL-006
+      x-anchor-mapped:
+      - REQ-POL-006
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      - W4-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-permission: pol.Job.rebase
+      x-error-codes:
+      - code: POL-ERR-NOT-PREEMPTED
+        status: 409
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1780
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobRebaseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobRebaseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/resolve-conflicts:
+    post:
+      operationId: pol.Job.resolveConflicts
+      summary: Resolve conflicts
+      description: |-
+        Resolve conflicts
+
+        PRD inputs: jobId, resolutions[]
+        PRD outputs: conflicts state
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-006
+      - REQ-POL-100..REQ-POL-102
+      x-anchor:
+      - REQ-POL-006
+      x-anchor-mapped:
+      - REQ-POL-006
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-exposure:
+      - ui
+      x-permission: pol.Job.resolveConflicts
+      x-authority-types:
+      - POL.ConflictResolution
+      x-authority-source:
+      - PRD-05 l.2123
+      - PRD-05 l.596
+      x-error-codes:
+      - code: POL-ERR-AUTHORITY-REQUIRED
+        status: 403
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1781
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobResolveConflictsRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResolveConflictsResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/lease:
+    post:
+      operationId: pol.Job.lease
+      summary: Edit lease
+      description: |-
+        Edit lease
+
+        PRD inputs: jobId
+        PRD outputs: lease
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-055
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-exposure:
+      - ui
+      x-permission: pol.Job.lease
+      x-error-codes:
+      - code: POL-ERR-LOCKED
+        status: 409
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1782
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobLeaseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobLeaseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/release-lease:
+    post:
+      operationId: pol.Job.releaseLease
+      summary: Edit lease
+      description: |-
+        Edit lease
+
+        PRD inputs: jobId
+        PRD outputs: lease
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-055
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-exposure:
+      - ui
+      x-permission: pol.Job.releaseLease
+      x-error-codes:
+      - code: POL-ERR-LOCKED
+        status: 409
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1782
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobReleaseLeaseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobReleaseLeaseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs:
+    get:
+      operationId: pol.Job.list
+      summary: Job queries
+      description: |-
+        Job queries
+
+        PRD inputs: account, policy, participant, state
+        PRD outputs: jobs
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-331
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      - PTY
+      x-permission: pol.Job.list
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1783
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: account
+        in: query
+        required: false
+        description: 'PRD: "account"'
+        schema:
+          type: string
+      - name: policy
+        in: query
+        required: false
+        description: 'PRD: "policy"'
+        schema:
+          type: string
+      - name: participant
+        in: query
+        required: false
+        description: 'PRD: "participant"'
+        schema:
+          type: string
+      - name: state
+        in: query
+        required: false
+        description: 'PRD: "state"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/jobs/{id}:
+    get:
+      operationId: pol.Job.get
+      summary: Job queries
+      description: |-
+        Job queries
+
+        PRD inputs: account, policy, participant, state
+        PRD outputs: jobs
+      tags:
+      - Job
+      x-requirement:
+      - REQ-POL-331
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: pol.Job.get
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1783
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Job
+        schema:
+          type: string
+      - name: account
+        in: query
+        required: false
+        description: 'PRD: "account"'
+        schema:
+          type: string
+      - name: policy
+        in: query
+        required: false
+        description: 'PRD: "policy"'
+        schema:
+          type: string
+      - name: participant
+        in: query
+        required: false
+        description: 'PRD: "participant"'
+        schema:
+          type: string
+      - name: state
+        in: query
+        required: false
+        description: 'PRD: "state"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/policy-changes:
+    post:
+      operationId: pol.PolicyChange.create
+      summary: Start change
+      description: |-
+        Start change
+
+        PRD inputs: policyId, effectiveAt, description
+        PRD outputs: jobId
+      tags:
+      - PolicyChange
+      x-requirement:
+      - REQ-POL-190
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - BIL
+      - CHN
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/policies/{no}/changes` (`dryRun`)
+      - MCP tool policy_change_preview
+      x-permission: pol.PolicyChange.create
+      x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: POL-ERR-EFFDATE-LIMIT
+        status: 422
+      - code: POL-ERR-AFTER-CANCELLATION
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1784
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyChangeCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyChangeCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/cancellations:
+    post:
+      operationId: pol.Cancellation.create
+      summary: Cancellation
+      description: |-
+        Cancellation
+
+        PRD inputs: policyId, source, reason, effectiveAt, evidenceRefs, requestRef
+        PRD outputs: jobId, refund preview
+      tags:
+      - Cancellation
+      x-requirement:
+      - REQ-POL-012
+      - REQ-POL-205..REQ-POL-211
+      x-anchor:
+      - REQ-POL-012
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-partner-routes:
+      - CHN facade POST /api/chn/v1/policies/{no}/cancellation-requests
+      - MCP tool cancellation_request
+      x-permission: pol.Cancellation.create
+      x-authority-types:
+      - POL.RefundMethodOverride
+      x-authority-source:
+      - PRD-05 l.2126
+      x-error-codes:
+      - code: POL-ERR-JOB-CONFLICT
+        status: 409
+      - code: POL-ERR-EFFDATE-LIMIT
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1785
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancellationCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/cancellations/schedule:
+    post:
+      operationId: pol.Cancellation.schedule
+      summary: Cancellation
+      description: |-
+        Cancellation
+
+        PRD inputs: policyId, source, reason, effectiveAt, evidenceRefs, requestRef
+        PRD outputs: jobId, refund preview
+      tags:
+      - Cancellation
+      x-requirement:
+      - REQ-POL-012
+      - REQ-POL-205..REQ-POL-211
+      x-anchor:
+      - REQ-POL-012
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-permission: pol.Cancellation.schedule
+      x-authority-types:
+      - POL.RefundMethodOverride
+      x-authority-source:
+      - PRD-05 l.2126
+      x-error-codes:
+      - code: POL-ERR-JOB-CONFLICT
+        status: 409
+      - code: POL-ERR-EFFDATE-LIMIT
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1785
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancellationScheduleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationScheduleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/cancellations/rescind:
+    post:
+      operationId: pol.Cancellation.rescind
+      summary: Cancellation
+      description: |-
+        Cancellation
+
+        PRD inputs: policyId, source, reason, effectiveAt, evidenceRefs, requestRef
+        PRD outputs: jobId, refund preview
+      tags:
+      - Cancellation
+      x-requirement:
+      - REQ-POL-012
+      - REQ-POL-205..REQ-POL-211
+      x-anchor:
+      - REQ-POL-012
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-permission: pol.Cancellation.rescind
+      x-authority-types:
+      - POL.RefundMethodOverride
+      x-authority-source:
+      - PRD-05 l.2126
+      x-error-codes:
+      - code: POL-ERR-JOB-CONFLICT
+        status: 409
+      - code: POL-ERR-EFFDATE-LIMIT
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1785
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancellationRescindRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationRescindResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/withdrawals/submit:
+    post:
+      operationId: pol.Withdrawal.submit
+      summary: Statutory withdrawal or objection from CHN or staff
+      description: |-
+        Statutory withdrawal or objection from CHN or staff
+
+        PRD inputs: policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef
+        PRD outputs: void job, refund preview
+      tags:
+      - Withdrawal
+      x-requirement:
+      - REQ-POL-307
+      - REQ-POL-308
+      - REQ-POL-314
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pol.Withdrawal.submit
+      x-error-codes:
+      - code: POL-ERR-RIGHT-EXPIRED
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1786
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawalSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WithdrawalSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/reinstatements:
+    post:
+      operationId: pol.Reinstatement.create
+      summary: Reinstatement
+      description: |-
+        Reinstatement
+
+        PRD inputs: termId, type, effectiveAt, reason
+        PRD outputs: jobId
+      tags:
+      - Reinstatement
+      x-requirement:
+      - REQ-POL-225..REQ-POL-229
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-permission: pol.Reinstatement.create
+      x-authority-types:
+      - POL.Reinstatement
+      x-authority-source:
+      - PRD-05 l.2127
+      - PRD-05 l.761
+      x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1787
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReinstatementCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReinstatementCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/rewrites:
+    post:
+      operationId: pol.Rewrite.create
+      summary: Rewrite
+      description: |-
+        Rewrite
+
+        PRD inputs: termId, rewriteType, effectiveAt, targetAccountId
+        PRD outputs: jobId
+      tags:
+      - Rewrite
+      x-requirement:
+      - REQ-POL-230..REQ-POL-232
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PTY
+      x-permission: pol.Rewrite.create
+      x-authority-types:
+      - POL.Rewrite
+      x-authority-source:
+      - PRD-05 l.2128
+      x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1788
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewriteCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewriteCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/suspensions:
+    post:
+      operationId: pol.Suspension.create
+      summary: Suspend or reactivate vehicle cover
+      description: |-
+        Suspend or reactivate vehicle cover
+
+        PRD inputs: termId, elementLocator, effectiveAt, reason, evidence
+        PRD outputs: jobId
+      tags:
+      - Suspension
+      x-requirement:
+      - REQ-POL-236
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pol.Suspension.create
+      x-error-codes:
+      - code: POL-ERR-AFTER-CANCELLATION
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1789
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuspensionCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuspensionCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/reactivations:
+    post:
+      operationId: pol.Reactivation.create
+      summary: Suspend or reactivate vehicle cover
+      description: |-
+        Suspend or reactivate vehicle cover
+
+        PRD inputs: termId, elementLocator, effectiveAt, reason, evidence
+        PRD outputs: jobId
+      tags:
+      - Reactivation
+      x-requirement:
+      - REQ-POL-236
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-permission: pol.Reactivation.create
+      x-error-codes:
+      - code: POL-ERR-AFTER-CANCELLATION
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1789
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactivationCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReactivationCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/renewals:
+    post:
+      operationId: pol.Renewal.create
+      summary: Renewal
+      description: |-
+        Renewal
+
+        PRD inputs: termId; offer; acceptance evidence; reason
+        PRD outputs: job
+      tags:
+      - Renewal
+      x-requirement:
+      - REQ-POL-009
+      - REQ-POL-245..REQ-POL-258
+      x-anchor:
+      - REQ-POL-009
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pol.Renewal.create
+      x-authority-types:
+      - POL.NonRenewal
+      x-authority-source:
+      - PRD-05 l.2129
+      - PRD-05 l.789
+      x-error-codes:
+      - code: POL-ERR-NOTICE-TOO-LATE
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1790
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenewalCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/renewals/offer:
+    post:
+      operationId: pol.Renewal.offer
+      summary: Renewal
+      description: |-
+        Renewal
+
+        PRD inputs: termId; offer; acceptance evidence; reason
+        PRD outputs: job
+      tags:
+      - Renewal
+      x-requirement:
+      - REQ-POL-009
+      - REQ-POL-245..REQ-POL-258
+      x-anchor:
+      - REQ-POL-009
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pol.Renewal.offer
+      x-authority-types:
+      - POL.NonRenewal
+      x-authority-source:
+      - PRD-05 l.2129
+      - PRD-05 l.789
+      x-error-codes:
+      - code: POL-ERR-NOTICE-TOO-LATE
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1790
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalOfferRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenewalOfferResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/renewals/accept:
+    post:
+      operationId: pol.Renewal.accept
+      summary: Renewal
+      description: |-
+        Renewal
+
+        PRD inputs: termId; offer; acceptance evidence; reason
+        PRD outputs: job
+      tags:
+      - Renewal
+      x-requirement:
+      - REQ-POL-009
+      - REQ-POL-245..REQ-POL-258
+      x-anchor:
+      - REQ-POL-009
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pol.Renewal.accept
+      x-authority-types:
+      - POL.NonRenewal
+      x-authority-source:
+      - PRD-05 l.2129
+      - PRD-05 l.789
+      x-error-codes:
+      - code: POL-ERR-NOTICE-TOO-LATE
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1790
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalAcceptRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenewalAcceptResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/renewals/decline:
+    post:
+      operationId: pol.Renewal.decline
+      summary: Renewal
+      description: |-
+        Renewal
+
+        PRD inputs: termId; offer; acceptance evidence; reason
+        PRD outputs: job
+      tags:
+      - Renewal
+      x-requirement:
+      - REQ-POL-009
+      - REQ-POL-245..REQ-POL-258
+      x-anchor:
+      - REQ-POL-009
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pol.Renewal.decline
+      x-authority-types:
+      - POL.NonRenewal
+      x-authority-source:
+      - PRD-05 l.2129
+      - PRD-05 l.789
+      x-error-codes:
+      - code: POL-ERR-NOTICE-TOO-LATE
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1790
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalDeclineRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenewalDeclineResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/renewals/non-renew:
+    post:
+      operationId: pol.Renewal.nonRenew
+      summary: Renewal
+      description: |-
+        Renewal
+
+        PRD inputs: termId; offer; acceptance evidence; reason
+        PRD outputs: job
+      tags:
+      - Renewal
+      x-requirement:
+      - REQ-POL-009
+      - REQ-POL-245..REQ-POL-258
+      x-anchor:
+      - REQ-POL-009
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pol.Renewal.nonRenew
+      x-authority-types:
+      - POL.NonRenewal
+      x-authority-source:
+      - PRD-05 l.2129
+      - PRD-05 l.789
+      x-error-codes:
+      - code: POL-ERR-NOTICE-TOO-LATE
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1790
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalNonRenewRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenewalNonRenewResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/renewal-runs/start:
+    post:
+      operationId: pol.RenewalRun.start
+      summary: Batch
+      description: |-
+        Batch
+
+        PRD inputs: entity, product, window
+        PRD outputs: run
+      tags:
+      - RenewalRun
+      x-requirement:
+      - REQ-POL-247
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-exposure:
+      - ui
+      x-permission: pol.RenewalRun.start
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1791
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalRunStartRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenewalRunStartResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/renewal-runs/retry-item:
+    post:
+      operationId: pol.RenewalRun.retryItem
+      summary: Batch
+      description: |-
+        Batch
+
+        PRD inputs: entity, product, window
+        PRD outputs: run
+      tags:
+      - RenewalRun
+      x-requirement:
+      - REQ-POL-247
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-exposure:
+      - ui
+      x-permission: pol.RenewalRun.retryItem
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1791
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalRunRetryItemRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenewalRunRetryItemResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/renewal-runs/pause:
+    post:
+      operationId: pol.RenewalRun.pause
+      summary: Batch
+      description: |-
+        Batch
+
+        PRD inputs: entity, product, window
+        PRD outputs: run
+      tags:
+      - RenewalRun
+      x-requirement:
+      - REQ-POL-247
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-exposure:
+      - ui
+      x-permission: pol.RenewalRun.pause
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1791
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalRunPauseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenewalRunPauseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/policy-moves/execute:
+    post:
+      operationId: pol.PolicyMove.execute
+      summary: Move between accounts (PTY-initiated)
+      description: |-
+        Move between accounts (PTY-initiated)
+
+        PRD inputs: policyIds, targetAccountId, requestRef
+        PRD outputs: re-point map
+      tags:
+      - PolicyMove
+      x-requirement:
+      - REQ-POL-233
+      x-wave: W6
+      x-work-packages:
+      - W6-POL-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-permission: pol.PolicyMove.execute
+      x-error-codes:
+      - code: POL-ERR-OPEN-JOB
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1792
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyMoveExecuteRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyMoveExecuteResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/policies/{id}:
+    get:
+      operationId: pol.Policy.get
+      summary: Policy as of validAt/knownAt
+      description: |-
+        Policy as of validAt/knownAt
+
+        PRD inputs: ids, validAt, knownAt
+        PRD outputs: policy, term, segment, risk tree
+      tags:
+      - Policy
+      x-requirement:
+      - REQ-POL-002
+      - REQ-POL-010
+      - REQ-POL-085
+      x-anchor:
+      - REQ-POL-002
+      - REQ-POL-010
+      x-anchor-mapped:
+      - REQ-POL-010
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      - W4-POL-02
+      - W4-POL-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - CLM
+      - CMP
+      - DAT
+      - DOC
+      - FIN
+      - MIG
+      - PTY
+      - RI
+      x-partner-routes:
+      - CHN facade GET /api/chn/v1/policies/{no}?validAt=
+      - MCP tool policy_summary
+      x-permission: pol.Policy.get
+      x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-05 §9.1 l.1793
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Policy (PRD input: "ids")'
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/terms/{id}:
+    get:
+      operationId: pol.Term.get
+      summary: Policy as of validAt/knownAt
+      description: |-
+        Policy as of validAt/knownAt
+
+        PRD inputs: ids, validAt, knownAt
+        PRD outputs: policy, term, segment, risk tree
+      tags:
+      - Term
+      x-requirement:
+      - REQ-POL-002
+      - REQ-POL-085
+      x-anchor:
+      - REQ-POL-002
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      - W4-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PTY
+      x-permission: pol.Term.get
+      x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-05 §9.1 l.1793
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Term (PRD input: "ids")'
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/terms/timeline:
+    get:
+      operationId: pol.Term.timeline
+      summary: Policy as of validAt/knownAt
+      description: |-
+        Policy as of validAt/knownAt
+
+        PRD inputs: ids, validAt, knownAt
+        PRD outputs: policy, term, segment, risk tree
+      tags:
+      - Term
+      x-requirement:
+      - REQ-POL-002
+      - REQ-POL-085
+      x-anchor:
+      - REQ-POL-002
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-01
+      - W4-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-bounded: one term's timeline (REQ-POL-002)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - RI
+      x-permission: pol.Term.timeline
+      x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-05 §9.1 l.1793
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermTimelineResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/snapshots/get:
+    get:
+      operationId: pol.Snapshot.get
+      summary: Claims snapshot
+      description: |-
+        Claims snapshot
+
+        PRD inputs: policyId or snapshotRef, lossAt, knownAt
+        PRD outputs: snapshot ref + content
+      tags:
+      - Snapshot
+      x-requirement:
+      - REQ-POL-007
+      x-anchor:
+      - REQ-POL-007
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - RAT
+      - RI
+      x-permission: pol.Snapshot.get
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1794
+      x-prd-param-names:
+        validAt: lossAt
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: policyId
+        in: query
+        required: false
+        description: 'PRD: "policyId or snapshotRef" (optional)'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: snapshotRef
+        in: query
+        required: false
+        description: 'PRD: "policyId or snapshotRef" (optional)'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SnapshotGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/policies/get-many:
+    get:
+      operationId: pol.Policy.getMany
+      summary: Batch policy query as of validAt/knownAt
+      description: |-
+        Batch policy query as of validAt/knownAt
+
+        PRD inputs: ids (≤ 200), validAt, knownAt
+        PRD outputs: policies
+      tags:
+      - Policy
+      x-requirement:
+      - REQ-POL-351
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-bounded: ids <= 200 per call (REQ-POL-351)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - DOC
+      x-permission: pol.Policy.getMany
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1795
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: ids
+        in: query
+        required: false
+        description: 'PRD: "ids (≤ 200)"'
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyGetManyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/policies/search:
+    get:
+      operationId: pol.Policy.search
+      summary: Policy search
+      description: |-
+        Policy search
+
+        PRD inputs: criteria, cursor
+        PRD outputs: results
+      tags:
+      - Policy
+      x-requirement:
+      - REQ-POL-014
+      x-anchor:
+      - REQ-POL-014
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - CLM
+      - CMP
+      - PFC
+      x-partner-routes:
+      - CHN facade GET /api/chn/v1/book/changes?cursor=
+      x-permission: pol.Policy.search
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1796
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: criteria
+        in: query
+        required: false
+        description: 'PRD: "criteria"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/earning/compute:
+    post:
+      operationId: pol.Earning.compute
+      summary: Earned/unearned
+      description: |-
+        Earned/unearned
+
+        PRD inputs: termId, asOf, knownAt
+        PRD outputs: per element × charge type
+      tags:
+      - Earning
+      x-requirement:
+      - REQ-POL-118
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - BIL
+      - FIN
+      x-permission: pol.Earning.compute
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1797
+      x-prd-param-names:
+        validAt: asOf
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EarningComputeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EarningComputeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/charges/reconcile:
+    post:
+      operationId: pol.Charges.reconcile
+      summary: Charge reconciliation (written charges and written premium)
+      description: |-
+        Charge reconciliation (written charges and written premium)
+
+        PRD inputs: termId or period, counterpart totals
+        PRD outputs: differences
+      tags:
+      - Charges
+      x-requirement:
+      - REQ-POL-122
+      - REQ-POL-355
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - BIL
+      - FIN
+      - RI
+      x-permission: pol.Charges.reconcile
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1798
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChargesReconcileRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargesReconcileResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/segments/changes:
+    get:
+      operationId: pol.Segment.changes
+      summary: Segment feed
+      description: |-
+        Segment feed
+
+        PRD inputs: cursor
+        PRD outputs: segment versions
+      tags:
+      - Segment
+      x-requirement:
+      - REQ-POL-094
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - DAT
+      - FIN
+      - RI
+      x-partner-routes:
+      - CHN facade GET /api/chn/v1/book/changes?cursor=
+      x-permission: pol.Segment.changes
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1799
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SegmentChangesPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/status-model/get:
+    get:
+      operationId: pol.StatusModel.get
+      summary: Transition table
+      description: |-
+        Transition table
+
+        PRD inputs: —
+        PRD outputs: table
+      tags:
+      - StatusModel
+      x-requirement:
+      - REQ-POL-004
+      - REQ-POL-133
+      x-anchor:
+      - REQ-POL-004
+      x-anchor-mapped:
+      - REQ-POL-004
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-03
+      x-status: minimal
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-permission: pol.StatusModel.get
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1800
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModelGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/effective-date/limits:
+    get:
+      operationId: pol.EffectiveDate.limits
+      summary: Allowed range for a job
+      description: |-
+        Allowed range for a job
+
+        PRD inputs: policyId, txnType, role, channel
+        PRD outputs: earliest, latest, override available
+      tags:
+      - EffectiveDate
+      x-requirement:
+      - REQ-POL-008
+      - REQ-POL-136
+      x-anchor:
+      - REQ-POL-008
+      x-anchor-mapped:
+      - REQ-POL-008
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CHN
+      x-permission: pol.EffectiveDate.limits
+      x-error-codes: []
+      x-source:
+      - PRD-05 §9.1 l.1801
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: policyId
+        in: query
+        required: false
+        description: 'PRD: "policyId"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: txnType
+        in: query
+        required: false
+        description: 'PRD: "txnType"'
+        schema:
+          type: string
+      - name: role
+        in: query
+        required: false
+        description: 'PRD: "role"'
+        schema:
+          type: string
+      - name: channel
+        in: query
+        required: false
+        description: 'PRD: "channel"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EffectiveDateLimitsResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/import/policy:
+    post:
+      operationId: pol.Import.policy
+      summary: Migration (same validation as live)
+      description: |-
+        Migration (same validation as live)
+
+        PRD inputs: legacy payload, sourceKey
+        PRD outputs: outcome
+        PRD error notes: validation errors
+      tags:
+      - Import
+      x-requirement:
+      - REQ-POL-013
+      - REQ-POL-340..REQ-POL-343
+      x-anchor:
+      - REQ-POL-013
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-05
+      - W9-POL-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key (sourceKey); DR'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: pol.Import.policy
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1802
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportPolicyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportPolicyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/import/term:
+    post:
+      operationId: pol.Import.term
+      summary: Migration (same validation as live)
+      description: |-
+        Migration (same validation as live)
+
+        PRD inputs: legacy payload, sourceKey
+        PRD outputs: outcome
+        PRD error notes: validation errors
+      tags:
+      - Import
+      x-requirement:
+      - REQ-POL-013
+      - REQ-POL-340..REQ-POL-343
+      x-anchor:
+      - REQ-POL-013
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-05
+      - W9-POL-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key (sourceKey); DR'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: pol.Import.term
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1802
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportTermRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportTermResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/import/reverse:
+    post:
+      operationId: pol.Import.reverse
+      summary: Named reversal of origin=MIGRATION objects (XMR-D-260)
+      description: |-
+        Named reversal of `origin=MIGRATION` objects (XMR-D-260)
+
+        PRD inputs: importBatchId or sourceKeys
+        PRD outputs: per-object outcome (reversed, refused with reason)
+      tags:
+      - Import
+      x-requirement:
+      - REQ-POL-358
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key (batch); DR'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: pol.Import.reverse
+      x-error-codes:
+      - code: POL-ERR-MIGRATION-REVERSAL-BLOCKED
+        status: 409
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1803
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportReverseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportReverseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/import/convert-currency:
+    post:
+      operationId: pol.Import.convertCurrency
+      summary: Later-market currency changeover (Could)
+      description: |-
+        Later-market currency changeover (Could)
+
+        PRD inputs: planId
+        PRD outputs: conversion report
+        PRD error notes: plan errors
+      tags:
+      - Import
+      x-requirement:
+      - REQ-POL-350
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: pol.Import.convertCurrency
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1804
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportConvertCurrencyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportConvertCurrencyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/dsar/export:
+    post:
+      operationId: pol.Dsar.export
+      summary: 'Data-subject access: export of POL-held personal data per party (CMP DSAR fan-out, REQ-CMP-005)'
+      description: |-
+        Data-subject access: export of POL-held personal data per party (CMP DSAR fan-out, `REQ-CMP-005`)
+
+        PRD inputs: partyId, dsarTaskId
+        PRD outputs: export package
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-POL-338
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: pol.Dsar.export
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1805
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/dsar/restrict:
+    post:
+      operationId: pol.Dsar.restrict
+      summary: Data-subject restriction and erasure-conflict recording per party (CMP DSAR fan-out, REQ-CMP-005)
+      description: |-
+        Data-subject restriction and erasure-conflict recording per party (CMP DSAR fan-out, `REQ-CMP-005`)
+
+        PRD inputs: partyId, dsarTaskId, restrict / lift
+        PRD outputs: restriction status, retention conflicts
+      tags:
+      - Dsar
+      x-requirement:
+      - REQ-POL-339
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Key'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: pol.Dsar.restrict
+      x-error-codes:
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-05 §9.1 l.1806
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DsarRestrictRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DsarRestrictResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+  schemas:
+    SubmissionCreateRequest:
+      type: object
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: R-84 channel code (e.g. STAFF, WEB_DIRECT, BROKER_PORTAL, PARTNER_API, AI_AGENT)
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        quoteType:
+          type: string
+          enum:
+          - QUICK
+          - FULL
+          description: Quick or full quote (REQ-POL-011)
+      required:
+      - accountId
+      - product
+      - channel
+      - effectiveAt
+      - quoteType
+      description: 'Typed from REQ-POL-001, REQ-POL-145. PRD inputs: "accountId, product, producerCode, channel, effectiveAt,
+        quoteType"'
+    SubmissionCreateResponse:
+      type: object
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        describeModel:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: pfc.Product.describe model
+        versionNo:
+          type: integer
+          description: Quote version number
+          minimum: 1
+        manifest:
+          type: object
+          properties:
+            artefactHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+            ratingArtefactHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+              description: Floating at resolution, pinned for the term (REQ-PFC-221)
+            uwRuleSetVersions:
+              type: object
+              additionalProperties:
+                $ref: ../events/common.schema.json#/$defs/Code
+              description: Rule-set version per checkpoint
+            formPatternEditions:
+              type: array
+              items:
+                $ref: ../events/common.schema.json#/$defs/Code
+            referenceTableVersions:
+              type: array
+              items:
+                $ref: ../events/common.schema.json#/$defs/Code
+            paymentPlanVersions:
+              type: array
+              items:
+                $ref: ../events/common.schema.json#/$defs/Code
+          required:
+          - artefactHash
+          description: Resolution manifest (REQ-PFC-221)
+      required:
+      - jobId
+      - versionNo
+      - manifest
+      description: 'Typed from REQ-POL-001, REQ-POL-145. PRD outputs: "jobId, describe model, version, manifest"'
+    JobUpdateDraftRequest:
+      type: object
+      description: 'pol.Job.updateDraft request. PRD inputs: "jobId, versionNo, instructions[], expectedDraftVersion"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        versionNo:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "versionNo"'
+        instructions:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "instructions[]"'
+        expectedDraftVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "expectedDraftVersion"'
+    JobUpdateDraftResponse:
+      type: object
+      description: 'pol.Job.updateDraft result. PRD outputs: "draft state, validation, premium preview"'
+      properties:
+        draftState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "draft state"'
+        validation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validation"'
+        premiumPreview:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: 'PRD: "premium preview"'
+    JobQuoteRequest:
+      type: object
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+          description: Quote version
+          minimum: 1
+      required:
+      - jobId
+      - versionNo
+      description: 'Typed from REQ-POL-011, REQ-POL-157. PRD inputs: "jobId, versionNo"'
+    JobQuoteResponse:
+      type: object
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+          description: Quote version
+          minimum: 1
+        premium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        issues:
+          type: array
+          items:
+            type: object
+            properties:
+              issueId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              issueType:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: Issue type code
+              severity:
+                $ref: ../events/common.schema.json#/$defs/Code
+              blockingPoint:
+                $ref: ../events/common.schema.json#/$defs/BlockingPoint
+              issueKey:
+                type: string
+                description: Issue key, e.g. `driver:<driverRef>` (REQ-UW-001)
+              lane:
+                $ref: ../events/common.schema.json#/$defs/Code
+              explanationKeys:
+                type: array
+                items:
+                  type: string
+              approvalStatus:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: Issue state (PRD-04 §7.3)
+            required:
+            - issueId
+            - issueType
+            - blockingPoint
+            - issueKey
+            - approvalStatus
+            description: UW issue as returned by evaluate (REQ-UW-001)
+          description: UW issues by blocking point
+        validUntil:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Quote validity
+      required:
+      - jobId
+      - versionNo
+      - premium
+      - issues
+      description: 'Typed from REQ-POL-011, REQ-POL-157. PRD outputs: "quote version, premium, issues, validity"'
+    JobRequoteRequest:
+      type: object
+      description: 'pol.Job.requote request. PRD inputs: "jobId, versionNo"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        versionNo:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "versionNo"'
+    JobRequoteResponse:
+      type: object
+      description: 'pol.Job.requote result. PRD outputs: "quote version, premium, issues, validity"'
+      properties:
+        quoteVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "quote version"'
+        premium:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: 'PRD: "premium"'
+        issues:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "issues"'
+        validity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "validity"'
+    JobNewVersionRequest:
+      type: object
+      description: 'pol.Job.newVersion request. PRD inputs: "jobId, sourceVersion"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        sourceVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sourceVersion"'
+    JobNewVersionResponse:
+      type: object
+      description: 'pol.Job.newVersion result. PRD outputs: "new version; comparison"'
+      properties:
+        newVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "new version"'
+        comparison:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "comparison"'
+    JobCopyVersionRequest:
+      type: object
+      description: 'pol.Job.copyVersion request. PRD inputs: "jobId, sourceVersion"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        sourceVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sourceVersion"'
+    JobCopyVersionResponse:
+      type: object
+      description: 'pol.Job.copyVersion result. PRD outputs: "new version; comparison"'
+      properties:
+        newVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "new version"'
+        comparison:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "comparison"'
+    JobCompareVersionsRequest:
+      type: object
+      description: 'pol.Job.compareVersions request. PRD inputs: "jobId, sourceVersion"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        sourceVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sourceVersion"'
+    JobCompareVersionsResponse:
+      type: object
+      description: 'pol.Job.compareVersions result. PRD outputs: "new version; comparison"'
+      properties:
+        newVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "new version"'
+        comparison:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "comparison"'
+    JobBindRequest:
+      type: object
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+          description: Quote version
+          minimum: 1
+        paymentPlanOption:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: BIL plan code (bil.PaymentPlan.select)
+        holdIssuance:
+          type: boolean
+          description: Hold issuance
+        confirmation:
+          type: boolean
+          description: Human confirmation (POL-ERR-HUMAN-CONFIRMATION-REQUIRED)
+        disclosureEvidence:
+          type: object
+          properties:
+            presentationReceiptId:
+              $ref: ../events/common.schema.json#/$defs/Uuid
+              description: CHN presentation receipt
+          description: Optional
+      required:
+      - jobId
+      - versionNo
+      description: 'Typed from REQ-POL-001, REQ-POL-003, REQ-POL-170. PRD inputs: "jobId, versionNo, paymentPlanOption, holdIssuance,
+        confirmation, disclosureEvidence (CHN presentation receipt, optional)"'
+    JobBindResponse:
+      type: object
+      properties:
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        chargeDeltas:
+          type: array
+          items:
+            type: object
+            properties:
+              chargeId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              elementId:
+                type: string
+              chargeType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+            required:
+            - chargeType
+            - amount
+        gateResults:
+          type: array
+          items:
+            type: object
+            properties:
+              gate:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: e.g. DOWN_PAYMENT
+              passed:
+                type: boolean
+                description: Gate passed
+              severity:
+                type: string
+                enum:
+                - BLOCK
+                - WARN
+                description: REQ-POL-170
+              reason:
+                $ref: ../events/common.schema.json#/$defs/Code
+              evidenceRef:
+                type: string
+            required:
+            - gate
+            - passed
+            - severity
+        coverNoteDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: doc.ProofOfCover.issue result
+      required:
+      - gateResults
+      description: 'On a failed gate the job stays Quoted, no transaction exists and gateResults explain why (REQ-POL-003)
+        Typed from REQ-POL-001, REQ-POL-003, REQ-POL-170. PRD outputs: "transaction, term, deltas, gate results, cover note
+        ref"'
+    JobWithdrawRequest:
+      type: object
+      description: 'pol.Job.withdraw request. PRD inputs: "jobId, reasonCode, text"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        reasonCode:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reasonCode"'
+        text:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "text"'
+    JobWithdrawResponse:
+      type: object
+      description: 'pol.Job.withdraw result. PRD outputs: "job"'
+      properties:
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job"'
+    JobNotTakenRequest:
+      type: object
+      description: 'pol.Job.notTaken request. PRD inputs: "jobId, reasonCode, text"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        reasonCode:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reasonCode"'
+        text:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "text"'
+    JobNotTakenResponse:
+      type: object
+      description: 'pol.Job.notTaken result. PRD outputs: "job"'
+      properties:
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job"'
+    JobRebaseRequest:
+      type: object
+      description: 'pol.Job.rebase request. PRD inputs: "jobId"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+    JobRebaseResponse:
+      type: object
+      description: 'pol.Job.rebase result. PRD outputs: "rebased draft, conflicts"'
+      properties:
+        rebasedDraft:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rebased draft"'
+        conflicts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "conflicts"'
+    JobResolveConflictsRequest:
+      type: object
+      description: 'pol.Job.resolveConflicts request. PRD inputs: "jobId, resolutions[]"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        resolutions:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "resolutions[]"'
+    JobResolveConflictsResponse:
+      type: object
+      description: 'pol.Job.resolveConflicts result. PRD outputs: "conflicts state"'
+      properties:
+        conflictsState:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "conflicts state"'
+    JobLeaseRequest:
+      type: object
+      description: 'pol.Job.lease request. PRD inputs: "jobId"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+    JobLeaseResponse:
+      type: object
+      description: 'pol.Job.lease result. PRD outputs: "lease"'
+      properties:
+        lease:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "lease"'
+    JobReleaseLeaseRequest:
+      type: object
+      description: 'pol.Job.releaseLease request. PRD inputs: "jobId"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+    JobReleaseLeaseResponse:
+      type: object
+      description: 'pol.Job.releaseLease result. PRD outputs: "lease"'
+      properties:
+        lease:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "lease"'
+    JobListItem:
+      type: object
+      description: 'pol.Job.list result. PRD outputs: "jobs"'
+      properties:
+        jobs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "jobs"'
+    JobListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/JobListItem'
+      description: Page of pol.Job.list results (cursor pagination, contract §3.5.5)
+    JobGetResponse:
+      type: object
+      description: 'pol.Job.get result. PRD outputs: "jobs"'
+      properties:
+        jobs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "jobs"'
+    PolicyChangeCreateRequest:
+      type: object
+      description: 'pol.PolicyChange.create request. PRD inputs: "policyId, effectiveAt, description"'
+      properties:
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "policyId"'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "effectiveAt"'
+        description:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "description"'
+    PolicyChangeCreateResponse:
+      type: object
+      description: 'pol.PolicyChange.create result. PRD outputs: "jobId"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+    CancellationCreateRequest:
+      type: object
+      description: 'pol.Cancellation.create request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef"'
+      properties:
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "policyId"'
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "effectiveAt"'
+        evidenceRefs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidenceRefs"'
+        requestRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "requestRef"'
+    CancellationCreateResponse:
+      type: object
+      description: 'pol.Cancellation.create result. PRD outputs: "jobId, refund preview"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        refundPreview:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "refund preview"'
+    CancellationScheduleRequest:
+      type: object
+      description: 'pol.Cancellation.schedule request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef"'
+      properties:
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "policyId"'
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "effectiveAt"'
+        evidenceRefs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidenceRefs"'
+        requestRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "requestRef"'
+    CancellationScheduleResponse:
+      type: object
+      description: 'pol.Cancellation.schedule result. PRD outputs: "jobId, refund preview"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        refundPreview:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "refund preview"'
+    CancellationRescindRequest:
+      type: object
+      description: 'pol.Cancellation.rescind request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef"'
+      properties:
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "policyId"'
+        source:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "effectiveAt"'
+        evidenceRefs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidenceRefs"'
+        requestRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "requestRef"'
+    CancellationRescindResponse:
+      type: object
+      description: 'pol.Cancellation.rescind result. PRD outputs: "jobId, refund preview"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+        refundPreview:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "refund preview"'
+    WithdrawalSubmitRequest:
+      type: object
+      description: 'pol.Withdrawal.submit request. PRD inputs: "policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef"'
+      properties:
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "policyId"'
+        right:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "right (WITHDRAWAL, OBJECTION)"'
+        receivedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "receivedAt"'
+        channelRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channelRef"'
+    WithdrawalSubmitResponse:
+      type: object
+      description: 'pol.Withdrawal.submit result. PRD outputs: "void job, refund preview"'
+      properties:
+        voidJob:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "void job"'
+        refundPreview:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "refund preview"'
+    ReinstatementCreateRequest:
+      type: object
+      description: 'pol.Reinstatement.create request. PRD inputs: "termId, type, effectiveAt, reason"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+        type:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "type"'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "effectiveAt"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    ReinstatementCreateResponse:
+      type: object
+      description: 'pol.Reinstatement.create result. PRD outputs: "jobId"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+    RewriteCreateRequest:
+      type: object
+      description: 'pol.Rewrite.create request. PRD inputs: "termId, rewriteType, effectiveAt, targetAccountId"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+        rewriteType:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rewriteType"'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "effectiveAt"'
+        targetAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "targetAccountId"'
+    RewriteCreateResponse:
+      type: object
+      description: 'pol.Rewrite.create result. PRD outputs: "jobId"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+    SuspensionCreateRequest:
+      type: object
+      description: 'pol.Suspension.create request. PRD inputs: "termId, elementLocator, effectiveAt, reason, evidence"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+        elementLocator:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "elementLocator"'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "effectiveAt"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        evidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidence"'
+    SuspensionCreateResponse:
+      type: object
+      description: 'pol.Suspension.create result. PRD outputs: "jobId"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+    ReactivationCreateRequest:
+      type: object
+      description: 'pol.Reactivation.create request. PRD inputs: "termId, elementLocator, effectiveAt, reason, evidence"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+        elementLocator:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "elementLocator"'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'PRD: "effectiveAt"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        evidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidence"'
+    ReactivationCreateResponse:
+      type: object
+      description: 'pol.Reactivation.create result. PRD outputs: "jobId"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "jobId"'
+    RenewalCreateRequest:
+      type: object
+      description: 'pol.Renewal.create request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+        offer:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "offer"'
+        acceptanceEvidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "acceptance evidence"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RenewalCreateResponse:
+      type: object
+      description: 'pol.Renewal.create result. PRD outputs: "job"'
+      properties:
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job"'
+    RenewalOfferRequest:
+      type: object
+      description: 'pol.Renewal.offer request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+        offer:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "offer"'
+        acceptanceEvidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "acceptance evidence"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RenewalOfferResponse:
+      type: object
+      description: 'pol.Renewal.offer result. PRD outputs: "job"'
+      properties:
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job"'
+    RenewalAcceptRequest:
+      type: object
+      description: 'pol.Renewal.accept request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+        offer:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "offer"'
+        acceptanceEvidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "acceptance evidence"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RenewalAcceptResponse:
+      type: object
+      description: 'pol.Renewal.accept result. PRD outputs: "job"'
+      properties:
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job"'
+    RenewalDeclineRequest:
+      type: object
+      description: 'pol.Renewal.decline request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+        offer:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "offer"'
+        acceptanceEvidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "acceptance evidence"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RenewalDeclineResponse:
+      type: object
+      description: 'pol.Renewal.decline result. PRD outputs: "job"'
+      properties:
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job"'
+    RenewalNonRenewRequest:
+      type: object
+      description: 'pol.Renewal.nonRenew request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+        offer:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "offer"'
+        acceptanceEvidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "acceptance evidence"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    RenewalNonRenewResponse:
+      type: object
+      description: 'pol.Renewal.nonRenew result. PRD outputs: "job"'
+      properties:
+        job:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "job"'
+    RenewalRunStartRequest:
+      type: object
+      description: 'pol.RenewalRun.start request. PRD inputs: "entity, product, window"'
+      properties:
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        window:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "window"'
+    RenewalRunStartResponse:
+      type: object
+      description: 'pol.RenewalRun.start result. PRD outputs: "run"'
+      properties:
+        run:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "run"'
+    RenewalRunRetryItemRequest:
+      type: object
+      description: 'pol.RenewalRun.retryItem request. PRD inputs: "entity, product, window"'
+      properties:
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        window:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "window"'
+    RenewalRunRetryItemResponse:
+      type: object
+      description: 'pol.RenewalRun.retryItem result. PRD outputs: "run"'
+      properties:
+        run:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "run"'
+    RenewalRunPauseRequest:
+      type: object
+      description: 'pol.RenewalRun.pause request. PRD inputs: "entity, product, window"'
+      properties:
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        product:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product"'
+        window:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "window"'
+    RenewalRunPauseResponse:
+      type: object
+      description: 'pol.RenewalRun.pause result. PRD outputs: "run"'
+      properties:
+        run:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "run"'
+    PolicyMoveExecuteRequest:
+      type: object
+      description: 'pol.PolicyMove.execute request. PRD inputs: "policyIds, targetAccountId, requestRef"'
+      properties:
+        policyIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "policyIds"'
+        targetAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "targetAccountId"'
+        requestRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "requestRef"'
+    PolicyMoveExecuteResponse:
+      type: object
+      description: 'pol.PolicyMove.execute result. PRD outputs: "re-point map"'
+      properties:
+        rePointMap:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "re-point map"'
+    PolicyGetResponse:
+      type: object
+      description: 'pol.Policy.get result. PRD outputs: "policy, term, segment, risk tree"'
+      properties:
+        policy:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policy"'
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        segment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "segment"'
+        riskTree:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "risk tree"'
+    TermGetResponse:
+      type: object
+      description: 'pol.Term.get result. PRD outputs: "policy, term, segment, risk tree"'
+      properties:
+        policy:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policy"'
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        segment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "segment"'
+        riskTree:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "risk tree"'
+    TermTimelineResponse:
+      type: object
+      description: 'pol.Term.timeline result. PRD outputs: "policy, term, segment, risk tree"'
+      properties:
+        policy:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policy"'
+        term:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "term"'
+        segment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "segment"'
+        riskTree:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "risk tree"'
+    SnapshotGetResponse:
+      type: object
+      description: 'pol.Snapshot.get result. PRD outputs: "snapshot ref + content"'
+      properties:
+        snapshotRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "snapshot ref + content"'
+        content:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "snapshot ref + content"'
+    PolicyGetManyResponse:
+      type: object
+      description: 'pol.Policy.getMany result. PRD outputs: "policies"'
+      properties:
+        policies:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "policies"'
+    PolicySearchItem:
+      type: object
+      description: 'pol.Policy.search result. PRD outputs: "results"'
+      properties:
+        results:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "results"'
+    PolicySearchPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PolicySearchItem'
+      description: Page of pol.Policy.search results (cursor pagination, contract §3.5.5)
+    EarningComputeRequest:
+      type: object
+      description: 'pol.Earning.compute request. PRD inputs: "termId, asOf, knownAt"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId"'
+    EarningComputeResponse:
+      type: object
+      description: 'pol.Earning.compute result. PRD outputs: "per element × charge type"'
+      x-status: minimal
+    ChargesReconcileRequest:
+      type: object
+      description: 'pol.Charges.reconcile request. PRD inputs: "termId or period, counterpart totals"'
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "termId or period" (optional)'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "termId or period" (optional)'
+        counterpartTotals:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "counterpart totals"'
+      oneOf:
+      - required:
+        - termId
+      - required:
+        - period
+    ChargesReconcileResponse:
+      type: object
+      description: 'pol.Charges.reconcile result. PRD outputs: "differences"'
+      properties:
+        differences:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "differences"'
+    SegmentChangesItem:
+      type: object
+      description: 'pol.Segment.changes result. PRD outputs: "segment versions"'
+      properties:
+        segmentVersions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "segment versions"'
+    SegmentChangesPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/SegmentChangesItem'
+      description: Page of pol.Segment.changes results (cursor pagination, contract §3.5.5)
+    StatusModelGetResponse:
+      type: object
+      description: 'pol.StatusModel.get result. PRD outputs: "table"'
+      properties:
+        table:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "table"'
+    EffectiveDateLimitsResponse:
+      type: object
+      description: 'pol.EffectiveDate.limits result. PRD outputs: "earliest, latest, override available"'
+      properties:
+        earliest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "earliest"'
+        latest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "latest"'
+        overrideAvailable:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "override available"'
+    ImportPolicyRequest:
+      type: object
+      description: 'pol.Import.policy request. PRD inputs: "legacy payload, sourceKey"'
+      properties:
+        legacyPayload:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy payload"'
+        sourceKey:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sourceKey"'
+    ImportPolicyResponse:
+      type: object
+      description: 'pol.Import.policy result. PRD outputs: "outcome"'
+      x-status: minimal
+    ImportTermRequest:
+      type: object
+      description: 'pol.Import.term request. PRD inputs: "legacy payload, sourceKey"'
+      properties:
+        legacyPayload:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy payload"'
+        sourceKey:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sourceKey"'
+    ImportTermResponse:
+      type: object
+      description: 'pol.Import.term result. PRD outputs: "outcome"'
+      x-status: minimal
+    ImportReverseRequest:
+      type: object
+      description: 'pol.Import.reverse request. PRD inputs: "importBatchId or sourceKeys"'
+      properties:
+        importBatchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "importBatchId or sourceKeys" (optional)'
+        sourceKeys:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "importBatchId or sourceKeys" (optional)'
+      oneOf:
+      - required:
+        - importBatchId
+      - required:
+        - sourceKeys
+    ImportReverseResponse:
+      type: object
+      description: 'pol.Import.reverse result. PRD outputs: "per-object outcome (reversed, refused with reason)"'
+      properties:
+        perObjectOutcome:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-object outcome (reversed, refused with reason)"'
+    ImportConvertCurrencyRequest:
+      type: object
+      description: 'pol.Import.convertCurrency request. PRD inputs: "planId"'
+      properties:
+        planId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "planId"'
+    ImportConvertCurrencyResponse:
+      type: object
+      description: 'pol.Import.convertCurrency result. PRD outputs: "conversion report"'
+      properties:
+        conversionReport:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "conversion report"'
+    DsarExportRequest:
+      type: object
+      description: 'pol.Dsar.export request. PRD inputs: "partyId, dsarTaskId"'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "partyId"'
+        dsarTaskId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "dsarTaskId"'
+    DsarExportResponse:
+      type: object
+      description: 'pol.Dsar.export result. PRD outputs: "export package"'
+      properties:
+        exportPackage:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "export package"'
+    DsarRestrictRequest:
+      type: object
+      description: 'pol.Dsar.restrict request. PRD inputs: "partyId, dsarTaskId, restrict / lift"'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "partyId"'
+        dsarTaskId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "dsarTaskId"'
+        restrict:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "restrict"'
+        lift:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "lift"'
+    DsarRestrictResponse:
+      type: object
+      description: 'pol.Dsar.restrict result. PRD outputs: "restriction status, retention conflicts"'
+      properties:
+        restrictionStatus:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "restriction status"'
+        retentionConflicts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "retention conflicts"'
