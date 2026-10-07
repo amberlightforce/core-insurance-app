@@ -73,8 +73,7 @@ public sealed class BlindIndexAndClassificationTests
         var candidates = await _keys.Indexer.SearchCandidatesAsync(EntityA, AfmIndex, "090 000 045", cancellationToken: ct);
         candidates.ShouldBe([rewritten, stored]); // Active first; rows not yet re-indexed are still found
 
-        _time.Advance(_keys.Ring.Options.RefreshInterval + _keys.Ring.Options.RetirementMargin + TimeSpan.FromSeconds(1));
-        await _keys.Ring.RetireAsync(EntityA, KeyPurpose.BlindIndex, 1, new FixedScan(0), ct);
+        await Retirement.RetireAsync(_keys.Ring, _time, EntityA, KeyPurpose.BlindIndex, 1, ct);
         (await _keys.Indexer.SearchCandidatesAsync(EntityA, AfmIndex, "090000045", cancellationToken: ct)).ShouldBe([rewritten]);
     }
 

@@ -20,7 +20,7 @@ public sealed class KeyVaultProviderTests
     public async Task Each_wrap_records_the_versioned_kid_of_the_current_KEK_version()
     {
         var ct = TestContext.Current.CancellationToken;
-        var provider = new AzureKeyVaultKeyProvider(_vault, _time);
+        var provider = new AzureKeyVaultKeyProvider(FakeKeyVault.VaultUri, _vault, _time);
         var context = new DataKeyContext(Entity, KeyPurpose.FieldEncryption, 1);
 
         var first = await provider.WrapKeyAsync(context, new byte[32], ct);
@@ -44,7 +44,7 @@ public sealed class KeyVaultProviderTests
     public async Task Rewrap_after_a_Key_Vault_rotation_moves_every_data_key_to_the_new_version()
     {
         var ct = TestContext.Current.CancellationToken;
-        var provider = new AzureKeyVaultKeyProvider(_vault, _time);
+        var provider = new AzureKeyVaultKeyProvider(FakeKeyVault.VaultUri, _vault, _time);
         var store = new InMemoryDataKeyStore();
         var ring = new KeyRing(provider, store, _time);
         var encryptor = new FieldEncryptor(ring);
@@ -71,7 +71,7 @@ public sealed class KeyVaultProviderTests
     public async Task Wrapped_keys_are_bound_to_their_purpose_version_and_legal_entity()
     {
         var ct = TestContext.Current.CancellationToken;
-        var provider = new AzureKeyVaultKeyProvider(_vault, _time);
+        var provider = new AzureKeyVaultKeyProvider(FakeKeyVault.VaultUri, _vault, _time);
         var context = new DataKeyContext(Entity, KeyPurpose.FieldEncryption, 1);
         var wrapped = await provider.WrapKeyAsync(context, RandomNumberGenerator.GetBytes(32), ct);
 
@@ -92,20 +92,28 @@ public sealed class KeyVaultProviderTests
     public async Task Warm_up_service_loads_every_catalogued_legal_entity_so_converters_do_no_key_vault_io()
     {
         var ct = TestContext.Current.CancellationToken;
-        var provider = new AzureKeyVaultKeyProvider(_vault, _time);
-        var store = new InMemoryDataKeyStore();
+        var provider = new AzureKeyVaultKeyProvider(FakeKeyVault.VaultUri, _vault, _time);
+        var store = new FlakyStore(new InMemoryDataKeyStore());
         var ring = new KeyRing(provider, store, _time);
 
         await new KeyRingWarmUpService(ring, [new Catalogue([Entity])]).StartAsync(ct);
         var callsAfterWarmUp = _vault.WrappedWith.Count;
         callsAfterWarmUp.ShouldBe(2); // one data key per purpose created and wrapped
+        var readsAfterWarmUp = store.Reads;
 
-        // Synchronous request-thread paths now hit memory only, even once the cached view is stale.
-        _time.Advance(ring.Options.RefreshInterval + TimeSpan.FromMinutes(1));
+        // Within half the write-staleness bound, synchronous request-thread paths hit memory only (no store, no vault).
+        _time.Advance(ring.Options.MaxStaleForWrite / 4);
         var encryptor = new FieldEncryptor(ring);
         var envelope = encryptor.Encrypt(Entity, Field, "x", null);
         encryptor.Decrypt(envelope, Field, null).ShouldBe("x");
         new BlindIndexer(ring).Compute(Entity, "pty.identifier.AFM", "x").ShouldStartWith("v1:");
+        store.Reads.ShouldBe(readsAfterWarmUp);
+        _vault.WrappedWith.Count.ShouldBe(callsAfterWarmUp);
+
+        // Beyond the bound a write re-reads the key store (D-ARC-23, review B1) but still needs no Key Vault call.
+        _time.Advance(ring.Options.MaxStaleForWrite);
+        encryptor.Encrypt(Entity, Field, "x", null);
+        store.Reads.ShouldBeGreaterThan(readsAfterWarmUp);
         _vault.WrappedWith.Count.ShouldBe(callsAfterWarmUp);
     }
 

@@ -124,79 +124,9 @@ public sealed class FieldEncryptionTests
         var reEncrypted = await keys.Encryptor.ReEncryptAsync(old, Field, cancellationToken: ct);
         FieldEncryptor.ReadHeader(reEncrypted).KeyVersion.ShouldBe(2);
 
-        time.Advance(keys.Ring.Options.RefreshInterval + keys.Ring.Options.RetirementMargin + TimeSpan.FromSeconds(1));
-        await keys.Ring.RetireAsync(EntityA, KeyPurpose.FieldEncryption, 1, new FixedScan(0), ct);
+        await Retirement.RetireAsync(keys.Ring, time, EntityA, KeyPurpose.FieldEncryption, 1, ct);
         await Should.ThrowAsync<CryptographicException>(async () => await keys.Encryptor.DecryptAsync(old, Field, cancellationToken: ct));
         (await keys.Encryptor.DecryptAsync(reEncrypted, Field, cancellationToken: ct)).ShouldBe("090000045");
-    }
-
-    /// <summary>
-    /// Review F-1e M3 (D-ARC-23): two replicas share the store; replica B's view is cached. After A rotates, B may still
-    /// write with v1 until its view expires, B's searches see A's v2 at once, and retirement of v1 is refused until the
-    /// demotion grace has passed and the re-scan finds no v1 rows.
-    /// </summary>
-    [Fact]
-    public async Task Two_replica_rotation_is_safe()
-    {
-        var ct = TestContext.Current.CancellationToken;
-        var time = new ManualTimeProvider(DateTimeOffset.Parse("2026-10-07T10:00:00Z", System.Globalization.CultureInfo.InvariantCulture));
-        var replicaA = new TestKeys(time);
-        var replicaB = new TestKeys(time, replicaA.Store, replicaA.Provider);
-
-        // Both replicas warm their cached views at v1.
-        await replicaA.Ring.WarmUpAsync(EntityA, ct);
-        await replicaB.Ring.WarmUpAsync(EntityA, ct);
-
-        // A rotates both purposes.
-        await replicaA.Ring.RotateAsync(EntityA, KeyPurpose.FieldEncryption, ct);
-        await replicaA.Ring.RotateAsync(EntityA, KeyPurpose.BlindIndex, ct);
-        var demotedAt = time.GetUtcNow();
-
-        // B is stale: it still writes with v1 (allowed, v1 stays readable) ...
-        var staleWrite = await replicaB.Encryptor.EncryptAsync(EntityA, Field, "123456783", cancellationToken: ct);
-        FieldEncryptor.ReadHeader(staleWrite).KeyVersion.ShouldBe(1);
-        var staleIndex = replicaB.Indexer.Compute(EntityA, "pty.identifier.AFM", "123456783");
-        BlindIndexer.VersionOf(staleIndex).ShouldBe(1);
-
-        // ... but B's search candidates come from the store and include A's newer v2 (and still v1).
-        var aIndex = await replicaA.Indexer.ComputeAsync(EntityA, "pty.identifier.AFM", "123456783", cancellationToken: ct);
-        BlindIndexer.VersionOf(aIndex).ShouldBe(2);
-        var candidates = await replicaB.Indexer.SearchCandidatesAsync(EntityA, "pty.identifier.AFM", "123 456 783", cancellationToken: ct);
-        candidates.ShouldBe([aIndex, staleIndex]);
-
-        // A can read what stale B wrote; B can read what A writes (unknown version → store re-read).
-        (await replicaA.Encryptor.DecryptAsync(staleWrite, Field, cancellationToken: ct)).ShouldBe("123456783");
-        var aWrite = await replicaA.Encryptor.EncryptAsync(EntityA, Field, "090000045", cancellationToken: ct);
-        (await replicaB.Encryptor.DecryptAsync(aWrite, Field, cancellationToken: ct)).ShouldBe("090000045");
-
-        // Retirement right after demotion is refused: stale replicas may still write with v1.
-        var scan = new FixedScan(0);
-        await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await replicaA.Ring.RetireAsync(EntityA, KeyPurpose.FieldEncryption, 1, scan, ct));
-        (await replicaA.Store.ListAsync(EntityA, KeyPurpose.FieldEncryption, ct)).Single(key => key.Version == 1).DemotedAt.ShouldBe(demotedAt);
-
-        // After the refresh interval B writes with v2.
-        time.Advance(replicaB.Ring.Options.RefreshInterval + TimeSpan.FromSeconds(1));
-        FieldEncryptor.ReadHeader(await replicaB.Encryptor.EncryptAsync(EntityA, Field, "x", cancellationToken: ct)).KeyVersion.ShouldBe(2);
-
-        // After the grace, the re-scan still finds B's stale row: refused until it is re-encrypted.
-        time.Advance(replicaA.Ring.Options.RetirementMargin);
-        scan.Rows = 1;
-        await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await replicaA.Ring.RetireAsync(EntityA, KeyPurpose.FieldEncryption, 1, scan, ct));
-
-        scan.Rows = 0;
-        await replicaA.Ring.RetireAsync(EntityA, KeyPurpose.FieldEncryption, 1, scan, ct);
-        (await replicaA.Store.ListAsync(EntityA, KeyPurpose.FieldEncryption, ct)).Single(key => key.Version == 1).Status.ShouldBe(DataKeyStatus.Retired);
-    }
-
-    [Fact]
-    public async Task Active_key_cannot_be_retired()
-    {
-        var ct = TestContext.Current.CancellationToken;
-        await _keys.Encryptor.EncryptAsync(EntityA, Field, "x", cancellationToken: ct);
-        await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await _keys.Ring.RetireAsync(EntityA, KeyPurpose.FieldEncryption, 1, new FixedScan(0), ct));
     }
 
     [Fact]

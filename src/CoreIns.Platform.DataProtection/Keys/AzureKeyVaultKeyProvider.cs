@@ -86,22 +86,31 @@ public sealed class AzureKeyVaultKeyOperations : IKeyVaultKeyOperations
 /// </summary>
 public sealed class AzureKeyVaultKeyProvider : IKeyProvider
 {
+    private readonly Uri _vaultUri;
     private readonly IKeyVaultKeyOperations _operations;
     private readonly TimeProvider _time;
     private readonly ConcurrentDictionary<LegalEntityId, (string KeyId, DateTimeOffset ResolvedAt)> _current = new();
 
     /// <summary>Provider over the Azure SDK.</summary>
     public AzureKeyVaultKeyProvider(Uri vaultUri, TokenCredential credential, Func<LegalEntityId, string>? keyName = null)
-        : this(new AzureKeyVaultKeyOperations(vaultUri, credential), TimeProvider.System, keyName)
+        : this(vaultUri, new AzureKeyVaultKeyOperations(vaultUri, credential), TimeProvider.System, keyName)
     {
     }
 
     /// <summary>Provider over any <see cref="IKeyVaultKeyOperations"/> (tests use a fake vault).</summary>
+    /// <param name="vaultUri">The vault every key id must belong to (scheme https, same host and port).</param>
+    /// <param name="operations">Key Vault operations.</param>
+    /// <param name="time">Clock.</param>
+    /// <param name="keyName">KEK name per legal entity.</param>
+    /// <param name="currentVersionCacheDuration">Cache of the resolved current KEK version.</param>
     public AzureKeyVaultKeyProvider(
-        IKeyVaultKeyOperations operations, TimeProvider time, Func<LegalEntityId, string>? keyName = null, TimeSpan? currentVersionCacheDuration = null)
+        Uri vaultUri, IKeyVaultKeyOperations operations, TimeProvider time, Func<LegalEntityId, string>? keyName = null,
+        TimeSpan? currentVersionCacheDuration = null)
     {
+        ArgumentNullException.ThrowIfNull(vaultUri);
         ArgumentNullException.ThrowIfNull(operations);
         ArgumentNullException.ThrowIfNull(time);
+        _vaultUri = vaultUri;
         _operations = operations;
         _time = time;
         KeyName = keyName ?? (legalEntity => $"kek-{legalEntity}");
@@ -135,10 +144,13 @@ public sealed class AzureKeyVaultKeyProvider : IKeyProvider
         ArgumentNullException.ThrowIfNull(keyEncryptionKeyId);
         var expectedPath = $"/keys/{KeyName(context.LegalEntity)}/";
         if (!Uri.TryCreate(keyEncryptionKeyId, UriKind.Absolute, out var kid)
+            || kid.Scheme != Uri.UriSchemeHttps
+            || !string.Equals(kid.Host, _vaultUri.Host, StringComparison.OrdinalIgnoreCase)
+            || kid.Port != _vaultUri.Port
             || !kid.AbsolutePath.StartsWith(expectedPath, StringComparison.OrdinalIgnoreCase)
             || kid.AbsolutePath.Length <= expectedPath.Length)
         {
-            throw new CryptographicException("The key-encryption key id is not a versioned key of this legal entity.");
+            throw new CryptographicException("The key-encryption key id is not a versioned key of this legal entity in the configured vault.");
         }
 
         var payload = await _operations.UnwrapKeyAsync(keyEncryptionKeyId, wrappedKey.ToArray(), cancellationToken).ConfigureAwait(false);

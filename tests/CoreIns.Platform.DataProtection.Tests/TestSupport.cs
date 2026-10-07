@@ -40,6 +40,40 @@ internal sealed class TestKeys
     public BlindIndexer Indexer { get; }
 }
 
+/// <summary>Drives the two-step retirement with a manual clock.</summary>
+internal static class Retirement
+{
+    public static TimeSpan Grace(KeyRing ring) => ring.Options.MaxStaleForWrite + ring.Options.RetirementMargin + TimeSpan.FromSeconds(1);
+
+    public static async Task RetireAsync(KeyRing ring, ManualTimeProvider time, LegalEntityId legalEntity, KeyPurpose purpose, int version, CancellationToken ct)
+    {
+        time.Advance(Grace(ring));
+        await ring.BeginRetirementAsync(legalEntity, purpose, version, new FixedScan(0), ct);
+        time.Advance(Grace(ring));
+        await ring.CompleteRetirementAsync(legalEntity, purpose, version, new FixedScan(0), ct);
+    }
+}
+
+/// <summary>A key store that can be switched off (key-store outage).</summary>
+internal sealed class FlakyStore(IDataKeyStore inner) : IDataKeyStore
+{
+    public bool Down { get; set; }
+
+    public int Reads { get; private set; }
+
+    public ValueTask<IReadOnlyList<WrappedDataKey>> ListAsync(LegalEntityId legalEntity, KeyPurpose purpose, CancellationToken cancellationToken = default)
+    {
+        Reads++;
+        return Down ? throw new IOException("key store unavailable") : inner.ListAsync(legalEntity, purpose, cancellationToken);
+    }
+
+    public ValueTask AddAsync(WrappedDataKey key, CancellationToken cancellationToken = default) =>
+        Down ? throw new IOException("key store unavailable") : inner.AddAsync(key, cancellationToken);
+
+    public ValueTask UpdateAsync(WrappedDataKey key, CancellationToken cancellationToken = default) =>
+        Down ? throw new IOException("key store unavailable") : inner.UpdateAsync(key, cancellationToken);
+}
+
 /// <summary>Retirement scan answering a fixed row count.</summary>
 internal sealed class FixedScan(long rows) : IRetirementScan
 {
@@ -56,6 +90,8 @@ internal sealed class FixedScan(long rows) : IRetirementScan
 internal sealed class FakeKeyVault : IKeyVaultKeyOperations
 {
     private const string Vault = "https://fake-vault.vault.azure.net";
+
+    public static Uri VaultUri { get; } = new(Vault + "/");
     private readonly Dictionary<string, int> _latest = new(StringComparer.Ordinal);
     private readonly Dictionary<string, byte[]> _secrets = new(StringComparer.Ordinal);
 

@@ -24,6 +24,12 @@ public enum DataKeyStatus
 
     /// <summary>No data uses it any more; it is kept only for audit and is never unwrapped.</summary>
     Retired = 3,
+
+    /// <summary>
+    /// Retirement in progress: the first re-scan found no rows; still decrypts and still answers searches, never
+    /// written; becomes Retired only after a second re-scan at least the write-staleness bound later (D-ARC-23).
+    /// </summary>
+    Retiring = 4,
 }
 
 /// <summary>
@@ -38,9 +44,10 @@ public enum DataKeyStatus
 /// <param name="Status">Life-cycle state.</param>
 /// <param name="CreatedAt">When the version was created.</param>
 /// <param name="DemotedAt">
-/// When the version stopped being Active (persisted so every replica can tell when its cached view, at most
-/// <see cref="KeyRingOptions.RefreshInterval"/> old, can no longer pick it for new data; D-ARC-23).
+/// When the version stopped being Active (persisted so every replica can tell when its write view, at most
+/// <see cref="KeyRingOptions.MaxStaleForWrite"/> old, can no longer pick it for new data; D-ARC-23).
 /// </param>
+/// <param name="RetiringAt">When the version entered <see cref="DataKeyStatus.Retiring"/> (first clean re-scan).</param>
 public sealed record WrappedDataKey(
     LegalEntityId LegalEntity,
     KeyPurpose Purpose,
@@ -49,7 +56,30 @@ public sealed record WrappedDataKey(
     ReadOnlyMemory<byte> WrappedKey,
     DataKeyStatus Status,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? DemotedAt = null);
+    DateTimeOffset? DemotedAt = null,
+    DateTimeOffset? RetiringAt = null);
+
+/// <summary>
+/// A write (encryption or blind-index computation) was refused because this replica could not obtain a view of the key
+/// ring that is at most <see cref="KeyRingOptions.MaxStaleForWrite"/> old (for example during a key-store outage).
+/// Fail closed: writing with a possibly demoted or retiring version could make the data unreadable (D-ARC-23).
+/// </summary>
+public sealed class KeyRingStaleException : Exception
+{
+    public KeyRingStaleException()
+    {
+    }
+
+    public KeyRingStaleException(string message)
+        : base(message)
+    {
+    }
+
+    public KeyRingStaleException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
+}
 
 /// <summary>
 /// Identity of a data key, bound into its wrapping (authenticated data in the local provider, an authenticated prefix of

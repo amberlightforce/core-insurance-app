@@ -74,6 +74,7 @@ Source: PRD-17 §9.4 (catalogue summary §9.4.0, per-SPI specifications §9.4.1�
 
 - **Interface:** `INameTransliterator` · **Mode:** S · **Binding axis:** SCHEME (script + country) · **Idempotency:** P · **Timeout / fallback:** 20 ms; fail closed · **Core default:** Identity for Latin; error otherwise
 - **Operations:** `transliterate(text, sourceScript, ruleSet?) → {latin, ruleSetId, warnings[]}`; `searchVariants(text) → keys[]` (the only source of transliteration and Greeklish match variants; language folding comes from the MKT language rules, REQ-MKT-340).
+- **`searchVariants` key shape (F-1e, review N4):** keys are search-normalised (accent-free, upper case, single spaces). The first key is the transliteration of the whole text; the following keys are **per name part** (token): each part's own transliteration and its variants, with every single-point alternative guaranteed (at most 32 keys per part). Callers therefore match **token-wise**: a query part matches a stored name when its key equals (or trigram-matches) one of the stored part keys — W2-PTY indexes the part keys, not only the whole-name key (e.g. "Dokos" finds "Χατζηχριστοδούλου Ντόκος").
 - **Errors:** VALIDATION (unsupported script), RULE_MISSING.
 - **Callers:** PTY (`REQ-PTY-012`), DOC.
 - **Source:** PRD-17 §9.4.2 (line 1626); country content there.

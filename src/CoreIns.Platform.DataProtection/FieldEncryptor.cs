@@ -19,8 +19,8 @@ namespace CoreIns.Platform.DataProtection;
 /// [33..n-16] ciphertext
 /// [n-16..n] GCM tag (128 bits)
 /// </code>
-/// <para>Associated data = bytes [0..20] ‖ UTF-8 field context (for example <c>pty.party_identifier.value</c>) ‖ 0x1F ‖
-/// UTF-8 row key (empty when none). A ciphertext therefore cannot be moved to another legal entity, key version or
+/// <para>Associated data = bytes [0..20] ‖ len32 ‖ UTF-8 field context (for example <c>pty.party_identifier.value</c>;
+/// control characters rejected) ‖ len32 ‖ UTF-8 row key (empty when none), lengths big-endian. A ciphertext therefore cannot be moved to another legal entity, key version or
 /// column. Moving it to another <b>row of the same column</b> is detected only when the caller supplies a row key (for
 /// example the row's UUID) on both encrypt and decrypt; the EF Core converters cannot see the row and pass none, so for
 /// them row binding is not provided.</para>
@@ -165,15 +165,28 @@ public sealed class FieldEncryptor(KeyRing keyRing)
         return plaintext;
     }
 
+    /// <summary>
+    /// header ‖ len32(fieldContext) ‖ fieldContext ‖ len32(rowKey) ‖ rowKey (UTF-8, big-endian lengths): the encoding is
+    /// injective, so no (field context, row key) pair can be re-split into another (review N1).
+    /// </summary>
     private static byte[] AssociatedData(ReadOnlySpan<byte> header, string fieldContext, string? rowKey)
     {
+        if (fieldContext.Any(char.IsControl))
+        {
+            throw new ArgumentException("The field context must not contain control characters.", nameof(fieldContext));
+        }
+
         var context = Encoding.UTF8.GetBytes(fieldContext);
         var row = Encoding.UTF8.GetBytes(rowKey ?? string.Empty);
-        var data = new byte[header.Length + context.Length + 1 + row.Length];
-        header.CopyTo(data);
-        context.CopyTo(data.AsSpan(header.Length));
-        data[header.Length + context.Length] = 0x1F;
-        row.CopyTo(data.AsSpan(header.Length + context.Length + 1));
+        var data = new byte[header.Length + 4 + context.Length + 4 + row.Length];
+        var span = data.AsSpan();
+        header.CopyTo(span);
+        span = span[header.Length..];
+        BinaryPrimitives.WriteInt32BigEndian(span, context.Length);
+        context.CopyTo(span[4..]);
+        span = span[(4 + context.Length)..];
+        BinaryPrimitives.WriteInt32BigEndian(span, row.Length);
+        row.CopyTo(span[4..]);
         return data;
     }
 }

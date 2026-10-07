@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,19 +12,18 @@ namespace CoreIns.Platform.DataProtection;
 /// variants ("123 456 789", "gr16 0110 …") index identically; no plain value reaches an index or a log.
 /// </summary>
 /// <remarks>
-/// <para>Index value: <c>v{version}:{base64url(HMAC-SHA256(key_v, indexName ‖ 0x1F ‖ normalised))}</c>. The index
+/// <para>Index value: <c>v{version}:{base64url(HMAC-SHA256(key_v, len32(indexName) ‖ indexName ‖ len32(normalised) ‖ normalised))}</c>. The index
 /// name (for example <c>pty.identifier.AFM</c>) separates domains, so equal values in different columns do not
 /// correlate; per-legal-entity keys mean indexes never correlate across entities.</para>
 /// <para>Rotation without downtime (D-ARC-23): writes use the replica's Active version; searches use
-/// <see cref="SearchCandidatesAsync"/>, whose version set is read from the key store on every call, so it includes
-/// versions newer than a replica's cached Active and rows written by stale replicas with the demoted version
-/// (one value per readable version, <c>WHERE idx = ANY(@candidates)</c>) until the re-index job has moved every row to
-/// the Active version and the old version is retired. Determinism holds per key version.</para>
+/// <see cref="SearchCandidatesAsync"/>: one value per readable version (Active, DecryptOnly, Retiring) from a key-ring
+/// view at most <see cref="KeyRingOptions.SearchCandidateCacheDuration"/> old, so it includes versions newer than this
+/// replica's write key and rows written with a demoted version (<c>WHERE idx = ANY(@candidates)</c>), until the
+/// re-index job has moved every row to the Active version and the old version is retired. Writes follow the key-ring
+/// write-staleness bound (<see cref="KeyRingOptions.MaxStaleForWrite"/>). Determinism holds per key version.</para>
 /// </remarks>
 public sealed class BlindIndexer(KeyRing keyRing)
 {
-    private const byte Separator = 0x1F;
-
     /// <summary>Index value under the Active version, for writes.</summary>
     public async ValueTask<string> ComputeAsync(
         LegalEntityId legalEntity, string indexName, string value, Func<string, string>? normaliser = null, CancellationToken cancellationToken = default)
@@ -64,10 +64,12 @@ public sealed class BlindIndexer(KeyRing keyRing)
         ArgumentException.ThrowIfNullOrWhiteSpace(indexName);
         var name = Encoding.UTF8.GetBytes(indexName);
         var value = Encoding.UTF8.GetBytes(normalised);
-        var message = new byte[name.Length + 1 + value.Length];
-        name.CopyTo(message, 0);
-        message[name.Length] = Separator;
-        value.CopyTo(message, name.Length + 1);
+        // len32(indexName) ‖ indexName ‖ len32(value) ‖ value: injective, so (name, value) pairs cannot be re-split (review N2).
+        var message = new byte[4 + name.Length + 4 + value.Length];
+        BinaryPrimitives.WriteInt32BigEndian(message, name.Length);
+        name.CopyTo(message, 4);
+        BinaryPrimitives.WriteInt32BigEndian(message.AsSpan(4 + name.Length), value.Length);
+        value.CopyTo(message, 8 + name.Length);
 
         var mac = HMACSHA256.HashData(key.Material, message);
         CryptographicOperations.ZeroMemory(value);
