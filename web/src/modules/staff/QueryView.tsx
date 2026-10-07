@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ErrorState, LoadingState } from '../../design-system';
+import { Banner, ErrorState, LoadingState } from '../../design-system';
 import { problemOf } from './problem';
 
 export interface QueryViewProps<T> {
@@ -25,6 +25,13 @@ export function QueryView<T>({ query, notFoundMessage, children }: QueryViewProp
   }
   if (query.isError) {
     const problem = problemOf(query.error);
+    if (problem.status === 403) {
+      return (
+        <Banner variant="warning" title={t('noPermission.title')}>
+          {t('noPermission.body')}
+        </Banner>
+      );
+    }
     const message =
       problem.status === 404 && notFoundMessage
         ? notFoundMessage

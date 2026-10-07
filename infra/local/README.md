@@ -76,5 +76,6 @@ unreadable: run `docker compose down -v` to start over. Outside Development the 
 `tests/e2e/run-e2e01.sh` builds the image (tag `coreins-host:e2e`), starts a separate compose project `coreins-e2e` with its own
 volume and host ports in the 26000 range (`tests/e2e/stack/e2e.env`, API on http://127.0.0.1:26000), runs the API-level E2E-01
 happy path (`tests/e2e/tests/e2e01.spec.ts`: product import, party, submission, quote, ANNUAL bind, invoice with stub MARK,
-exact payment, FIN journals, as-of policy read) and tears everything down with `down -v`. It never touches the `coreins`
+exact payment, FIN journals, as-of policy read), then the same journey through the staff screens in Chromium
+(`tests/e2e/tests/e2e01-ui.spec.ts`; needs `npx playwright install chromium` once) and tears everything down with `down -v`. It never touches the `coreins`
 project. `KEEP_STACK=1` leaves the stack up; `SKIP_BUILD=1` reuses the image. CI runs it in the `e2e01` job.

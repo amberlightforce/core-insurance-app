@@ -322,7 +322,7 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
     enableRowSelection: (row) => !row.getIsGrouped() && !getRowState?.(row.original)?.lockedReason,
     groupedColumnMode: false,
     autoResetExpanded: false,
-    autoResetPageIndex: true,
+    autoResetPageIndex: paged,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onRowSelectionChange,

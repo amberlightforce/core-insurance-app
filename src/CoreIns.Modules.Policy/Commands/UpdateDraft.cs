@@ -77,7 +77,9 @@ internal sealed class UpdateDraftHandler(
             var superseded = JobSupport.Fire(version, QuoteTrigger.Supersede);
             if (edit.IsFailure || superseded.IsFailure)
             {
-                return (edit.IsFailure ? edit.Error : superseded.Error)!;
+                // The job or the version was read while a concurrent edit was moving it (the winner superseded the quote
+                // between our two reads): that is a stale request, not an illegal transition.
+                return JobSupport.Stale();
             }
 
             if (version.VersionNo >= MaxVersions)
@@ -104,6 +106,11 @@ internal sealed class UpdateDraftHandler(
             };
             db.QuoteVersions.Add(target);
             job.CurrentVersionNo = target.VersionNo;
+        }
+        else if (Codes.Parse<JobState>(job.State) == JobState.Draft && Codes.Parse<QuoteState>(version.State) != QuoteState.Draft)
+        {
+            // A Draft job whose version is no longer a draft: a concurrent edit superseded it between our reads.
+            return JobSupport.Stale();
         }
         else if (Codes.Parse<JobState>(job.State) != JobState.Draft || Codes.Parse<QuoteState>(version.State) != QuoteState.Draft)
         {

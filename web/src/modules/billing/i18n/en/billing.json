@@ -66,8 +66,10 @@
       "from": "From",
       "amount": "Amount",
       "open": "Open",
-      "state": "Status"
-    }
+      "state": "Status",
+      "legalStatus": "Legal status"
+    },
+    "provisional": "Provisional"
   },
   "allocations": {
     "title": "Payment allocations",

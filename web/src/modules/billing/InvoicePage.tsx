@@ -3,12 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import type { InvoiceGetResponse } from '../../api/types';
+import { compareMoney } from '../../format/money-input';
 import {
   Banner,
   KeyValueList,
+  StatusPill,
   dateColumn,
   identifierColumn,
   moneyColumn,
+  statusColumn,
   textColumn,
   type DataColumn,
 } from '../../design-system';
@@ -42,6 +45,21 @@ function InvoiceDetails({ data }: { data: InvoiceGetResponse }) {
         size: 160,
       }),
       textColumn<Item>('category', t('lines.columns.category'), (i) => i.chargeCategory),
+      statusColumn<Item>(
+        'legal',
+        t('lines.columns.legalStatus'),
+        (i) => i.legalStatus ?? null,
+        (i) =>
+          i.provisional === true ? (
+            <StatusPill
+              semantic="warning"
+              subLabel={t('lines.provisional')}
+              announceChanges={false}
+            />
+          ) : i.legalStatus ? (
+            <span>{i.legalStatus}</span>
+          ) : null,
+      ),
       dateColumn<Item>('from', t('lines.columns.from'), (i) => i.validPeriod.from),
       moneyColumn<Item>('amount', t('lines.columns.amount'), (i) => i.amount.amount, {
         currency: invoice.total.currency,
@@ -66,7 +84,7 @@ function InvoiceDetails({ data }: { data: InvoiceGetResponse }) {
     ],
     [t, invoice.total.currency],
   );
-  const payable = invoice.kind === 'INVOICE' && Number(invoice.open.amount) > 0;
+  const payable = invoice.kind === 'INVOICE' && compareMoney(invoice.open.amount, '0', 4) > 0;
 
   return (
     <div className={styles.page}>

@@ -1,0 +1,60 @@
+
+> coreins-web@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.3 C:/Users/Karl/Projects/coreinsurance/core-insurance-app/.claude/worktrees/agent-a93e40c91a62b1dc1/web
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ src/design-system/components/DatePicker/DatePicker.test.tsx (39 tests | 1 failed) 21656ms
+   ❯ DatePicker (10)
+     × labels holidays, strikes unavailable dates with a reason and marks weekends 633ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/design-system/components/DatePicker/DatePicker.test.tsx > DatePicker > labels holidays, strikes unavailable dates with a reason and marks weekends
+Error: [2mexpect([22m[31melement[39m[2m).toHaveAttribute([22m[32m[32m"data-today"[32m[39m[2m, [22m[32m[32m"true"[32m[39m[2m) // element.getAttribute("data-today") === "true"[22m
+
+Expected the element to have attribute:
+[32m  data-today="true"[39m
+Received:
+[31m  null[39m
+ ❯ src/design-system/components/DatePicker/DatePicker.test.tsx:249:23
+    247|     expect(getDayOfWeek(new CalendarDate(2026, 10, 10), 'el-GR')).toBe…
+    248|     const todayCell = screen.getByRole('button', { name: /Τετάρτη 7 Οκ…
+    249|     expect(todayCell).toHaveAttribute('data-today', 'true');
+       |                       ^
+    250|   });
+    251|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 79 passed (80)
+      Tests  1 failed | 1194 passed (1195)
+   Start at  00:16:17
+   Duration  139.60s (import 52%, tests 25%, environment 14%, setup 6%, transform 3%)
+
+     Import  502 modules were evaluated 7329 times · 894.08s total, 52% of tracked time
+             ~33.29s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+

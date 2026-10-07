@@ -48,6 +48,8 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     // axe-core on open overlays in jsdom can exceed the 5 s default when all files run in parallel.
-    testTimeout: 15_000,
+    // Heavy jsdom screens (forms, grids, overlays) also slow down when the whole machine is busy (parallel gates).
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
   },
 });

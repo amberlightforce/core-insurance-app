@@ -162,6 +162,12 @@ jobs:
           cache: npm
           cache-dependency-path: tests/e2e/package-lock.json
 
-      # Fresh stack (project coreins-e2e, ports 26000+), API-level test, then down -v. Needs no browser.
-      - name: Run E2E-01
+      - name: Install the Playwright browser (the UI run of E2E-01)
+        working-directory: tests/e2e
+        run: |
+          npm ci --no-audit
+          npx playwright install --with-deps chromium
+
+      # Fresh stack (project coreins-e2e, ports 26000+): the API-level run and the staff-screens run, then down -v.
+      - name: Run E2E-01 (API and UI)
         run: tests/e2e/run-e2e01.sh

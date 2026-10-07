@@ -32,5 +32,9 @@
       "BIL-ERR-METHOD-NOT-ALLOWED": "The payment method is not allowed.",
       "BIL-ERR-DUPLICATE": "The payment has already been recorded."
     }
+  },
+  "noPermission": {
+    "title": "No permission",
+    "body": "Your role does not allow you to see this section."
   }
 }
