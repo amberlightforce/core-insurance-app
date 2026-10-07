@@ -165,8 +165,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "building",
-   "owner": "events + OpenAPI MERGED; C# contract records after F-1b",
+   "status": "in review",
+   "owner": "reviewer (light, Sonnet)",
    "reviewAttempts": 2,
    "blockers": []
   },
