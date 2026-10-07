@@ -24,11 +24,13 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 |---|---|---|---|
 | SL-0 platform wiring + Party | **merged** (5720b79) | opus | review 1 FAIL (M1 plaintext P2 in idempotency store) → fixed 4e849b4, orchestrator-verified; main: build clean, integration 83, arch 196, platform 47, host 18 |
 | SL-FIX-WEB | **merged** | sonnet | 1109/1109 native |
-| SL-POL | building | opus | based on SL-0 branch (started before SL-0 review ends, to save time) |
+| SL-POL | **in review** (deep, opus, 1st round) | opus | built d60d87c: integration 149/149; bitemporal + exclusion constraints; RAT/UW faked; D-SLC-11 alignment at merge |
 | SL-MKT | **merged** (ca3c127) | sonnet | light review PASS; D-REG-06a split removed; full gate green (10 suites) |
 | SL-PFC | **merged** (ae022f0) | sonnet | light review PASS; full gate green (integration 135, arch 196) |
-| SL-RAT-UW | building | sonnet | based on SL-0 branch |
-| SL-BIL, SL-FIN, SL-UI | not started | | after S1 |
+| SL-RAT-UW | **fixing** (review 1 FAIL: M1 IPT legalStatus ignores motor class + fail-open default; 9 minors) | sonnet | money verified by hand (430.00 + IPT 64.51 = 494.51); re-check light per D-USR-09; also D-SLC-11 |
+| SL-BIL | building | opus | started early against contracts/fakes (POL still building) |
+| SL-FIN | building | opus | started early against contracts/fakes |
+| SL-UI | not started | sonnet | next free slot |
 | SL-E2E | not started | | after S2 |
 
 ## Module status (feature waves)
