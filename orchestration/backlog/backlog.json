@@ -168,7 +168,7 @@
     "F-1b"
    ],
    "status": "in review",
-   "owner": "reviewer: API contracts (attempt 2)",
+   "owner": "builder: final minor fixes before merge",
    "reviewAttempts": 2,
    "blockers": []
   },
