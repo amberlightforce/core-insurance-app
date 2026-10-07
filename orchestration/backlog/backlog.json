@@ -127,10 +127,13 @@
    "mustCount": 0,
    "points": null,
    "dependsOn": [],
-   "status": "building",
-   "owner": "builder agent (worktree)",
+   "status": "in review",
+   "owner": "reviewer agent",
    "reviewAttempts": 0,
-   "blockers": []
+   "blockers": [
+    "GitHub push needs 'workflow' token scope (user: gh auth refresh -s workflow)",
+    "Integration tests unrun locally: Docker Desktop broken"
+   ]
   },
   {
    "id": "F-1b",
@@ -184,8 +187,8 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "not started",
-   "owner": null,
+   "status": "building",
+   "owner": "builder: design system (worktree)",
    "reviewAttempts": 0,
    "blockers": []
   },
