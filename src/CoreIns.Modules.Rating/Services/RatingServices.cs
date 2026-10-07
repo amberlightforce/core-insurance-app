@@ -97,9 +97,28 @@ internal sealed class RatingRateService(
                 var baseAmount = new Money(premium.Premium, currency);
                 foreach (var plan in artefact.Definition.TaxPlan.Where(p => p.Coverages is null || p.Coverages.Contains(premium.Coverage)))
                 {
-                    var taxClass = plan.CoverageClasses.GetValueOrDefault(premium.Coverage)
-                        ?? (plan.ClassKey is { } classKey && rates.Values.FirstOrDefault(v => v.Key == classKey) is { } configured
-                            && configured.Value.ValueKind == JsonValueKind.String ? configured.Value.GetString()!.ToLowerInvariant() : plan.DefaultClass);
+                    // The tax class comes from MKT configuration. A missing or malformed class fails closed: there is no default (D-REG-01).
+                    ConfigurationResolveResponse.ValueItem? classValue = null;
+                    string taxClass;
+                    if (plan.CoverageClasses.TryGetValue(premium.Coverage, out var fixedClass))
+                    {
+                        taxClass = fixedClass;
+                    }
+                    else if (plan.ClassKey is { } classKey)
+                    {
+                        classValue = rates.Values.FirstOrDefault(v => v.Key == classKey)
+                            ?? throw Error("TAX", $"MKT configuration returned no tax class ({classKey}); rating fails closed.");
+                        taxClass = (classValue.Value.ValueKind == JsonValueKind.String ? classValue.Value.GetString()!.Trim().ToLowerInvariant() : string.Empty);
+                        if (!plan.Classes.Contains(taxClass, StringComparer.Ordinal))
+                        {
+                            throw Error("TAX", $"{classKey} does not hold a tax class this artefact knows ({string.Join(", ", plan.Classes)}); rating fails closed.");
+                        }
+                    }
+                    else
+                    {
+                        taxClass = plan.DefaultClass;
+                    }
+
                     var key = plan.Classes.Count == 0 ? plan.RateKey : plan.KeyFor(taxClass);
                     var value = rates.Values.FirstOrDefault(v => v.Key == key);
                     if (value is null)
@@ -127,9 +146,14 @@ internal sealed class RatingRateService(
                         RoundingRule = $"{plan.Places}:{plan.Mode}",
                         ConfigurationKey = key,
                         ConfigurationValueVersionId = value.ValueVersionId,
-                        LegalStatus = value.LegalStatus.ToString(),
+                        ChargeCategory = plan.Category,
+                        ClassConfigurationKey = classValue?.Key,
+                        ClassConfigurationValueVersionId = classValue?.ValueVersionId,
+                        ClassLegalStatus = classValue?.LegalStatus.ToString(),
+                        // The weakest legal status of class and rate decides the line (D-REG-01/02).
+                        LegalStatus = Weakest(value.LegalStatus, classValue?.LegalStatus).ToString(),
                         LegalSourceRef = value.LegalSourceRef,
-                        Provisional = value.Provisional,
+                        Provisional = value.Provisional || (classValue?.Provisional ?? false) || !IsSettled(value.LegalStatus) || (classValue is not null && !IsSettled(classValue.LegalStatus)),
                     });
                 }
             }
@@ -158,7 +182,7 @@ internal sealed class RatingRateService(
         var inputHash = CanonicalJson.Hash(new JsonArray(segments.Select(s => (JsonNode)new JsonObject
         {
             ["segmentId"] = s.SegmentId,
-            ["risk"] = s.Risk.ToNormalised(),
+            ["risk"] = s.Risk.ToNormalised(basis),
         }).ToArray())).Value;
         var configurationHash = rates.ConfigurationHash;
         var dataStatus = artefact.Definition.Metadata.DataStatus;
@@ -173,11 +197,13 @@ internal sealed class RatingRateService(
         // 4. Persist (not for DRY_RUN) with the event, in the caller's transaction (REQ-RAT-003).
         if (mode != RateRateRequest.EnvelopeDetail.ModeValue.DryRun)
         {
-            await store.SaveWorksheetAsync(
+            var created = await store.SaveWorksheetAsync(
                 worksheetId.Value, legalEntity.Value, envelope.Jurisdiction, artefact.Hash.Value, configurationHash.ToString(), inputHash, dataStatus,
-                worksheet.ToJsonString(), envelope.Lineage?.QuoteId, envelope.Lineage?.JobId, envelope.Lineage?.TransactionId, mode.ToString().ToUpperInvariant(),
+                worksheet.ToJsonString(), envelope.Lineage?.QuoteId, envelope.Lineage?.JobId, envelope.Lineage?.TransactionId, ModeText(mode),
                 cancellationToken).ConfigureAwait(false);
             context.ConfigurationHash ??= configurationHash; // the configuration this unit of work was priced under
+            if (created)
+            {
             events.Publish(new OutgoingEvent(
                 EventDescriptor.From(RatingCalculatedV1.Descriptor), "RatingRequest", worksheetId.Value,
                 new RatingCalculatedV1
@@ -201,6 +227,7 @@ internal sealed class RatingRateService(
                     Bindable = mode == RateRateRequest.EnvelopeDetail.ModeValue.Full,
                 },
                 BusinessKeys.Empty.With("worksheetId", worksheetId.Value)));
+            }
         }
 
         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
@@ -316,7 +343,7 @@ internal sealed class RatingRateService(
                 ["engineVersion"] = artefact.Definition.EngineVersion,
                 ["inputHash"] = inputHash,
                 ["tableHashes"] = tableHashes,
-                ["mode"] = envelope.Mode.ToString().ToUpperInvariant(),
+                ["mode"] = ModeText(envelope.Mode),
                 ["transactionType"] = envelope.TransactionType,
                 ["ratingBasisDate"] = envelope.RatingBasisDate.ToString(),
                 ["taxPointDate"] = taxPoint.ToString(),
@@ -347,6 +374,10 @@ internal sealed class RatingRateService(
                 ["rounding"] = t.RoundingRule,
                 ["configurationKey"] = t.ConfigurationKey,
                 ["configurationValueVersionId"] = t.ConfigurationValueVersionId?.ToString(),
+                ["chargeCategory"] = t.ChargeCategory,
+                ["classConfigurationKey"] = t.ClassConfigurationKey,
+                ["classConfigurationValueVersionId"] = t.ClassConfigurationValueVersionId?.ToString(),
+                ["classLegalStatus"] = t.ClassLegalStatus,
                 ["legalStatus"] = t.LegalStatus,
                 ["legalSourceRef"] = t.LegalSourceRef,
                 ["provisional"] = t.Provisional,
@@ -359,6 +390,32 @@ internal sealed class RatingRateService(
             },
         };
     }
+
+    private static string ModeText(RateRateRequest.EnvelopeDetail.ModeValue mode) => mode switch
+    {
+        RateRateRequest.EnvelopeDetail.ModeValue.Full => "FULL",
+        RateRateRequest.EnvelopeDetail.ModeValue.Quick => "QUICK",
+        RateRateRequest.EnvelopeDetail.ModeValue.DryRun => "DRY_RUN",
+        RateRateRequest.EnvelopeDetail.ModeValue.Endorsement => "ENDORSEMENT",
+        _ => "RENEWAL",
+    };
+
+    private static bool IsSettled(ConfigurationResolveResponse.ValueItem.LegalStatusValue status) =>
+        status is ConfigurationResolveResponse.ValueItem.LegalStatusValue.Settled or ConfigurationResolveResponse.ValueItem.LegalStatusValue.NotRegulatory;
+
+    private static int Strength(ConfigurationResolveResponse.ValueItem.LegalStatusValue status) => status switch
+    {
+        ConfigurationResolveResponse.ValueItem.LegalStatusValue.NotRegulatory => 0,
+        ConfigurationResolveResponse.ValueItem.LegalStatusValue.Settled => 1,
+        ConfigurationResolveResponse.ValueItem.LegalStatusValue.Verify => 2,
+        ConfigurationResolveResponse.ValueItem.LegalStatusValue.PendingOpinion => 3,
+        ConfigurationResolveResponse.ValueItem.LegalStatusValue.Unverified => 4,
+        _ => 5,
+    };
+
+    private static ConfigurationResolveResponse.ValueItem.LegalStatusValue Weakest(
+        ConfigurationResolveResponse.ValueItem.LegalStatusValue rate, ConfigurationResolveResponse.ValueItem.LegalStatusValue? taxClass) =>
+        taxClass is { } other && Strength(other) > Strength(rate) ? other : rate;
 
     private static DomainException Error(string code, string detail) => new(DomainError.Of(ModuleCode.RAT, code, detail));
 }

@@ -103,8 +103,7 @@ public sealed record RateRateResponse
 
         /// <summary>Contract member 'coverageCode'.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("coverageCode")]
-        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        public string? CoverageCode { get; init; }
+        public required string CoverageCode { get; init; }
 
         /// <summary>Annual rate, scale 4</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("annualRate")]
@@ -150,8 +149,7 @@ public sealed record RateRateResponse
 
         /// <summary>Contract member 'coverageCode'.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("coverageCode")]
-        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        public string? CoverageCode { get; init; }
+        public required string CoverageCode { get; init; }
 
         /// <summary>Contract member 'chargeType'.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("chargeType")]
@@ -205,6 +203,28 @@ public sealed record RateRateResponse
         [global::System.Text.Json.Serialization.JsonPropertyName("legalSourceRef")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public string? LegalSourceRef { get; init; }
+
+        /// <summary>TAX or LEVY, the same as category (D-SLC-11; POL reads this name)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("chargeCategory")]
+        public required string ChargeCategory { get; init; }
+
+        /// <summary>MKT key that decided the tax class (for example tax.ipt.motor_class)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("classConfigurationKey")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? ClassConfigurationKey { get; init; }
+
+        /// <summary>Contract member 'classConfigurationValueVersionId'.</summary>
+        /// <remarks>
+        /// <para>Untyped id: no SharedKernel id type is mapped for 'classConfigurationValueVersionId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+        /// </remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("classConfigurationValueVersionId")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::System.Guid? ClassConfigurationValueVersionId { get; init; }
+
+        /// <summary>Legal status of the class value; the line's legalStatus is the weaker of class and rate</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("classLegalStatus")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? ClassLegalStatus { get; init; }
 
         /// <summary>True when the value is not Settled; such a line is provisional and refused in production (D-REG-02)</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]

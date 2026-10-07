@@ -140,7 +140,7 @@ public sealed class RatingApiTests(PostgresFixture database) : IClassFixture<Pos
 
         second.WorksheetId.ShouldBe(first.WorksheetId);
         (await ScalarAsync<long>($"SELECT count(*) FROM rat.worksheet WHERE worksheet_id = '{first.WorksheetId}'")).ShouldBe(1);
-        (await ScalarAsync<long>($"SELECT count(*) FROM rat.worksheet_index WHERE worksheet_id = '{first.WorksheetId}'")).ShouldBe(2);
+        (await ScalarAsync<long>($"SELECT count(*) FROM rat.worksheet_index WHERE worksheet_id = '{first.WorksheetId}'")).ShouldBe(1); // a retry of the same lineage adds no index row
 
         var other = await RateAsync(RateRequest(RiskTree(value: "31234.57", coverages: ["OWN-DAMAGE"])));
         other.WorksheetId.ShouldNotBe(first.WorksheetId);
@@ -185,7 +185,7 @@ public sealed class RatingApiTests(PostgresFixture database) : IClassFixture<Pos
         var ex = await Should.ThrowAsync<DomainException>(() => service.RateAsync(RateRequest(RiskTree(value: "60000.00")), TestContext.Current.CancellationToken));
 
         ex.Error.Code.Value.ShouldBe("RAT-ERR-TAX");
-        ex.Error.Detail!.ShouldContain("tax.ipt.rate.general");
+        ex.Error.Detail!.ShouldContain("tax.ipt.");
         (await ScalarAsync<long>("SELECT count(*) FROM rat.worksheet")).ShouldBe(before);
     }
 
@@ -200,22 +200,124 @@ public sealed class RatingApiTests(PostgresFixture database) : IClassFixture<Pos
         response.Taxes!.Select(t => t.ConfigurationKey).ShouldNotContain(k => k.Contains("auxfund", StringComparison.Ordinal));
     }
 
-    // D-REG-01/02: legal status and provisional flag travel from MKT onto each tax line and the worksheet.
+    // D-REG-01/02: the line carries the weakest legal status of the class and the rate, and is provisional if either is.
     [Fact]
-    public async Task D_REG_01_the_legal_status_and_provisional_flag_are_carried_onto_the_tax_lines_and_the_worksheet()
+    public async Task D_REG_01_a_settled_rate_with_a_settled_class_gives_a_settled_non_provisional_line()
     {
         var settled = await RateAsync(RateRequest(RiskTree(value: "11111.11")));
-        settled.Taxes!.ShouldAllBe(t => t.LegalStatus == "Settled" && t.Provisional == false && t.ConfigurationKey == "tax.ipt.rate.general");
-        settled.Warnings!.Select(w => w.Code).ShouldNotContain("RAT-WARN-PROVISIONAL-TAX");
 
-        await using var provisional = WithMarket(_baseFactory, MarketFake(iptSettled: false));
-        await using var scope = Scope(provisional.Services);
+        settled.Taxes!.ShouldAllBe(t => t.LegalStatus == "Settled" && t.Provisional == false && t.ConfigurationKey == "tax.ipt.rate.general"
+            && t.ClassConfigurationKey == "tax.ipt.motor_class" && t.ChargeCategory == "TAX" && t.CoverageCode != null);
+        settled.Warnings!.Select(w => w.Code).ShouldNotContain("RAT-WARN-PROVISIONAL-TAX");
+    }
+
+    [Fact]
+    public async Task D_REG_01_a_verify_class_makes_the_line_verify_and_provisional_even_when_the_rate_is_settled()
+    {
+        await using var verify = WithMarket(_baseFactory, MarketFake(classSettled: false));
+        await using var scope = Scope(verify.Services);
+
         var response = await scope.ServiceProvider.GetRequiredService<IRatingRateService>().RateAsync(RateRequest(RiskTree(value: "22222.22")), TestContext.Current.CancellationToken);
 
-        response.Taxes!.ShouldAllBe(t => t.LegalStatus == "PendingOpinion" && t.Provisional == true);
+        response.Taxes!.ShouldAllBe(t => t.LegalStatus == "Verify" && t.Provisional == true && t.ClassLegalStatus == "Verify" && t.ClassConfigurationValueVersionId != null);
         response.Warnings!.Select(w => w.Code).ShouldContain("RAT-WARN-PROVISIONAL-TAX");
         var (_, body) = await SendAsync(_client, HttpMethod.Get, $"/api/rat/v1/worksheets/{response.WorksheetId}");
-        body!["worksheet"]!["taxes"]!.AsArray().ShouldAllBe(t => t!["provisional"]!.GetValue<bool>() && t["legalStatus"]!.GetValue<string>() == "PendingOpinion");
+        body!["worksheet"]!["taxes"]!.AsArray().ShouldAllBe(t => t!["provisional"]!.GetValue<bool>() && t["legalStatus"]!.GetValue<string>() == "Verify"
+            && t["classConfigurationKey"]!.GetValue<string>() == "tax.ipt.motor_class" && t["classConfigurationValueVersionId"] != null);
+    }
+
+    [Fact]
+    public async Task D_REG_01_a_pending_opinion_rate_beats_a_verify_class_as_the_weaker_status()
+    {
+        await using var weak = WithMarket(_baseFactory, MarketFake(iptSettled: false, classSettled: false));
+        await using var scope = Scope(weak.Services);
+
+        var response = await scope.ServiceProvider.GetRequiredService<IRatingRateService>().RateAsync(RateRequest(RiskTree(value: "33333.33")), TestContext.Current.CancellationToken);
+
+        response.Taxes!.ShouldAllBe(t => t.LegalStatus == "PendingOpinion" && t.Provisional == true);
+    }
+
+    [Theory]
+    [InlineData(null)] // class key absent
+    [InlineData("\"luxury\"")] // a class this artefact does not know
+    [InlineData("42")] // not text
+    [InlineData("\"\"")]
+    public async Task D_REG_01_a_missing_or_malformed_tax_class_fails_closed_with_RAT_ERR_TAX_and_no_default(string? classJson)
+    {
+        await using var broken = WithMarket(_baseFactory, MarketFake(classJson: classJson));
+        await using var scope = Scope(broken.Services);
+        var before = await ScalarAsync<long>("SELECT count(*) FROM rat.worksheet");
+
+        var ex = await Should.ThrowAsync<DomainException>(() =>
+            scope.ServiceProvider.GetRequiredService<IRatingRateService>().RateAsync(RateRequest(RiskTree(value: "44444.01")), TestContext.Current.CancellationToken));
+
+        ex.Error.Code.Value.ShouldBe("RAT-ERR-TAX");
+        ex.Error.Detail!.ShouldContain("tax.ipt.motor_class");
+        (await ScalarAsync<long>("SELECT count(*) FROM rat.worksheet")).ShouldBe(before);
+    }
+
+    // m1: a retried rate for the same lineage neither duplicates the index row nor the event.
+    [Fact]
+    public async Task A_retried_rate_for_the_same_quote_publishes_one_event_and_one_index_row()
+    {
+        var quote = Guid.CreateVersion7();
+        var request = RateRequest(RiskTree(value: "55555.55"), quoteId: quote);
+        var first = await RateAsync(request);
+        await RateAsync(request);
+        await RateAsync(request);
+
+        (await ScalarAsync<long>($"SELECT count(*) FROM rat.worksheet_index WHERE quote_id = '{quote}'")).ShouldBe(1);
+        (await ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'RatingCalculated' AND business_keys->>'worksheetId' = '{first.WorksheetId}'")).ShouldBe(1);
+        (await RateAsync(RateRequest(RiskTree(value: "55555.55"), quoteId: Guid.CreateVersion7()))).WorksheetId.ShouldBe(first.WorksheetId);
+    }
+
+    // m2/m3: equal amounts are one input; an amount that cannot be held exactly is refused.
+    [Fact]
+    public async Task Equal_amounts_written_differently_give_the_same_worksheet_id()
+    {
+        var a = await RateAsync(RateRequest(RiskTree(value: "70004")));
+        var b = await RateAsync(RateRequest(RiskTree(value: "70004.00")));
+        var c = await RateAsync(RateRequest(RiskTree(value: "70004.0")));
+
+        b.WorksheetId.ShouldBe(a.WorksheetId);
+        c.WorksheetId.ShouldBe(a.WorksheetId);
+    }
+
+    [Theory]
+    [InlineData("70004.001")]
+    [InlineData("1e3")]
+    [InlineData("0.1234567890123456789012345678901")]
+    [InlineData("-5")]
+    [InlineData("1000000000")]
+    public async Task An_amount_that_does_not_round_trip_exactly_is_an_input_error(string value)
+    {
+        var tree = RiskTree();
+        tree["vehicle"]!["vehicleValue"] = JsonNode.Parse(value);
+
+        (await ErrorCodeAsync(RateRequest(tree))).ShouldBe("RAT-ERR-INPUT");
+    }
+
+    // m4: the input hash follows the derived ages, not the dates, so the same age band is the same input.
+    [Fact]
+    public async Task The_input_hash_uses_the_derived_ages_not_the_birth_date()
+    {
+        var a = await RateAsync(RateRequest(RiskTree(birthDate: "1985-06-15", value: "66666.66")));
+        var b = await RateAsync(RateRequest(RiskTree(birthDate: "1985-09-30", value: "66666.66")));
+        var (_, body) = await SendAsync(_client, HttpMethod.Get, $"/api/rat/v1/worksheets/{a.WorksheetId}");
+
+        b.WorksheetId.ShouldBe(a.WorksheetId);
+        body!["worksheet"]!.ToJsonString().ShouldNotContain("1985");
+    }
+
+    [Fact]
+    public async Task A_dry_run_is_named_DRY_RUN_in_the_worksheet_header()
+    {
+        await using var scope = Scope(_factory.Services);
+        var request = RateRequest(RiskTree(value: "77777.77"), mode: "DRY_RUN");
+        var response = await scope.ServiceProvider.GetRequiredService<IRatingRateService>().RateAsync(request, TestContext.Current.CancellationToken);
+
+        response.Bindable.ShouldBeFalse();
+        (await ScalarAsync<long>($"SELECT count(*) FROM rat.worksheet_index WHERE mode = 'DRYRUN'")).ShouldBe(0);
     }
 
     [Fact]
@@ -233,7 +335,8 @@ public sealed class RatingApiTests(PostgresFixture database) : IClassFixture<Pos
         var response = await scope.ServiceProvider.GetRequiredService<IRatingRateService>().RateAsync(RateRequest(RiskTree(value: "91000.00")), TestContext.Current.CancellationToken);
 
         response.Taxes!.First(t => t.ChargeType == "GR-IPT").Rate.ShouldBe(0.15m);
-        response.Taxes!.First(t => t.ChargeType == "GR-IPT").Provisional.ShouldBe(false);
+        response.Taxes!.First(t => t.ChargeType == "GR-IPT").Provisional.ShouldBe(true); // the real pack marks the motor class Verify
+        response.Taxes!.First(t => t.ChargeType == "GR-IPT").LegalStatus.ShouldBe("Verify");
         response.ConfigurationHash.ShouldNotBeNull();
     }
 

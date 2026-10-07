@@ -162,6 +162,48 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
         body!["reasons"]!.AsArray().Select(r => r!["ruleId"]!.GetValue<string>()).ShouldBe([expectedRule]);
     }
 
+    // m5/m7/m8: no exact age in the trace, a bad amount is a snapshot error, and the response says the rules are illustrative.
+    [Fact]
+    public async Task The_trace_keeps_rule_ids_not_the_exact_age_and_the_response_marks_the_rules_as_illustrative()
+    {
+        var job = Guid.CreateVersion7();
+        var (_, body) = await EvaluateAsync(EvaluateBody(job, RiskTree(birthDate: "1985-06-15")));
+
+        body.Text("dataStatus").ShouldBe("ILLUSTRATIVE_TEST_DATA");
+        body!["warnings"]!.AsArray().Select(w => w!.GetValue<string>()).ShouldContain("UW-WARN-ILLUSTRATIVE-RULES");
+        var trace = await ScalarAsync<string>($"SELECT trace::text FROM uw.evaluation WHERE job_id = '{job}'");
+        trace.ShouldContain("matchedRules");
+        trace.ShouldNotContain("driverAgeIn");
+        trace.ShouldNotContain("1985");
+    }
+
+    [Theory]
+    [InlineData("79228162514264337593543950336")]
+    [InlineData("12.345")]
+    public async Task A_vehicle_value_that_cannot_be_held_exactly_is_UW_ERR_SNAPSHOT_not_a_server_error(string value)
+    {
+        var risk = RiskTree();
+        risk["vehicle"]!["vehicleValue"] = JsonNode.Parse(value);
+
+        var (response, body) = await EvaluateAsync(EvaluateBody(Guid.CreateVersion7(), risk));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, body?.ToJsonString());
+        body.Text("code").ShouldBe("UW-ERR-SNAPSHOT");
+    }
+
+    [Fact]
+    public async Task When_no_effective_date_is_given_the_athens_business_date_is_used()
+    {
+        var job = Guid.CreateVersion7();
+        var (response, body) = await SendAsync(_client, HttpMethod.Post, "/api/uw/v1/rules/evaluate",
+            new { jobRef = job, checkpoint = "PRE_BIND", snapshotRef = "s", productCode = MotorProduct, riskSnapshot = RiskTree() });
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        var athens = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens")));
+        (await ScalarAsync<string>($"SELECT trace->>'effectiveDate' FROM uw.evaluation WHERE job_id = '{job}'"))
+            .ShouldBeOneOf(athens.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture), athens.AddDays(-1).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture));
+    }
+
     [Fact]
     public async Task The_rule_set_boundary_is_the_21st_birthday_on_the_effective_date()
     {

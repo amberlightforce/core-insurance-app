@@ -36,7 +36,7 @@ internal sealed record UwRisk(
                 [DateOnly.ParseExact(driver.GetProperty("dateOfBirth").GetString()!, "yyyy-MM-dd", CultureInfo.InvariantCulture)],
                 driver.TryGetProperty("claimsLast5Years", out var claims) && claims.ValueKind == JsonValueKind.Number ? claims.GetInt32() : 0);
         }
-        catch (Exception ex) when (ex is KeyNotFoundException or InvalidOperationException or FormatException or ArgumentNullException or JsonException or ArgumentOutOfRangeException)
+        catch (Exception ex) when (ex is KeyNotFoundException or InvalidOperationException or FormatException or ArgumentNullException or JsonException or ArgumentOutOfRangeException or OverflowException or ArgumentException)
         {
             throw new DomainException(DomainError.Of(ModuleCode.UW, "SNAPSHOT", $"The risk snapshot is not a valid motor risk: {ex.Message}"));
         }
@@ -49,9 +49,14 @@ internal sealed record UwRisk(
             element = amount;
         }
 
-        return element.ValueKind == JsonValueKind.String
-            ? decimal.Parse(element.GetString()!, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture)
-            : element.GetDecimal();
+        var text = element.ValueKind == JsonValueKind.String ? element.GetString() : element.ValueKind == JsonValueKind.Number ? element.GetRawText() : null;
+        if (text is null || !System.Text.RegularExpressions.Regex.IsMatch(text, @"^[0-9]{1,9}(\.[0-9]{1,2}0*)?$", System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromMilliseconds(50))
+            || !decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value))
+        {
+            throw new FormatException("the vehicle value must be an amount with at most two decimals");
+        }
+
+        return value;
     }
 }
 

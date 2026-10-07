@@ -33,6 +33,16 @@ public sealed record RulesEvaluateResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<ReasonItem>? Reasons { get; init; }
 
+    /// <summary>ILLUSTRATIVE_TEST_DATA when the rule set is made-up test data, not an underwriting guideline (D-SLC-04)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dataStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? DataStatus { get; init; }
+
+    /// <summary>e.g. UW-WARN-ILLUSTRATIVE-RULES</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("warnings")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<string>? Warnings { get; init; }
+
     /// <summary>Contract member 'ruleSetCode'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetCode")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
