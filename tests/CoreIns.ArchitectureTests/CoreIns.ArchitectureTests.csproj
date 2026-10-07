@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CoreIns.Host\CoreIns.Host.csproj" />
+    <!-- Not composed by the Host yet; referenced so its assembly is inspected by the rules. -->
+    <ProjectReference Include="..\..\src\CoreIns.Platform.DataProtection\CoreIns.Platform.DataProtection.csproj" />
   </ItemGroup>
 
 </Project>

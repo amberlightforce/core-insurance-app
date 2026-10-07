@@ -50,6 +50,10 @@
     <PackageVersion Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
     <!-- Microsoft.Identity.Web: Entra ID token validation and app roles (ADR §1 identity). -->
     <PackageVersion Include="Microsoft.Identity.Web" Version="4.16.0" />
+    <!-- Key Vault keys client: per-legal-entity key-encryption keys wrap/unwrap the field-encryption data keys
+         (D-ARC-14, REQ-PTY-060, NFR-PTY-010; CoreIns.Platform.DataProtection). Credentials come from the Host
+         (Azure.Core TokenCredential), so Azure.Identity is not referenced here. -->
+    <PackageVersion Include="Azure.Security.KeyVault.Keys" Version="4.10.2" />
   </ItemGroup>
 
   <!-- Build-time tooling -->

@@ -3,10 +3,14 @@
   <!--
     Cyprus stub country pack, run in CI to prove core code is country-neutral. Implements interfaces from module
     Contracts. Core code never references a country pack; only the Host composes it (checked by CoreIns.ArchitectureTests).
+    Synthetic, CI-only (D-REG-05). It reuses the ELOT 743 engine of the Greece pack under its own rule-set id, as
+    PRD-17 §9.4.2 states (same algorithm, different binding), so it depends on the GR pack (pack dependency, PRD-17 §7).
   -->
 
   <ItemGroup>
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.CountryPacks.GR\CoreIns.CountryPacks.GR.csproj" />
   </ItemGroup>
 
 </Project>
