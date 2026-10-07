@@ -37,6 +37,20 @@ public sealed record EventDescriptor(
 
     /// <summary>Handler routing key: registry name plus major, e.g. <c>pol.PolicyBound.v1</c>.</summary>
     public string RoutingKey => EventRouting.Key(Producer.ToString(), EventType.Value, Major);
+
+    /// <summary>
+    /// The descriptor of a generated contract event (<c>XxxV1.Descriptor</c>, D-CON-34): modules publish the generated
+    /// payload records with <c>EventDescriptor.From(PartyCreatedV1.Descriptor)</c> instead of hand-writing descriptors.
+    /// </summary>
+    public static EventDescriptor From(CoreIns.Platform.Contracts.Events.EventContract contract)
+    {
+        ArgumentNullException.ThrowIfNull(contract);
+        return new EventDescriptor(contract.Producer, EventTypeName.Parse(contract.EventType), contract.SchemaVersion, contract.AggregateTypes, contract.DataClassification)
+        {
+            RequiredBusinessKeys = contract.RequiredBusinessKeys,
+            SetCompleteness = contract.SetCompleteness,
+        };
+    }
 }
 
 /// <summary>Routing keys of event handlers.</summary>

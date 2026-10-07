@@ -164,6 +164,37 @@ public static class ModuleDbContextRegistration
             args: [MigrationOptions<TContext>(connectionString, schema)],
             culture: null)!;
 
+    /// <summary>
+    /// The usual definition of a module database for the migrate job: EF Core migrations of <typeparamref name="TContext"/>
+    /// in <paramref name="schema"/>, then <paramref name="privileges"/> for the application role on every table of the
+    /// model (never on the migrations history), plus the sequences. Default: no DELETE (business rows are end-dated, not deleted).
+    /// </summary>
+    public static ModuleDatabaseDefinition Define<TContext>(ModuleCode module, string schema, string privileges = "SELECT, INSERT, UPDATE")
+        where TContext : DbContext =>
+        new(module, schema, connectionString => CreateForMigration<TContext>(connectionString, schema), appRole => GrantsFor<TContext>(schema, appRole, privileges));
+
+    /// <summary>The grant statements of <see cref="Define{TContext}"/>; table names come from the EF Core model.</summary>
+    public static IReadOnlyList<string> GrantsFor<TContext>(string schema, string appRole, string privileges)
+        where TContext : DbContext
+    {
+        using var context = CreateForMigration<TContext>("Host=localhost;Database=design;Username=design", schema);
+        var tables = context.Model.GetEntityTypes()
+            .Select(entity => Microsoft.EntityFrameworkCore.RelationalEntityTypeExtensions.GetTableName(entity))
+            .OfType<string>()
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .Select(table => $"{schema}.{table}")
+            .ToList();
+        var statements = new List<string> { $"REVOKE ALL ON ALL TABLES IN SCHEMA {schema} FROM {appRole}" };
+        if (tables.Count > 0)
+        {
+            statements.Add($"GRANT {privileges} ON {string.Join(", ", tables)} TO {appRole}");
+        }
+
+        statements.Add($"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {schema} TO {appRole}");
+        return statements;
+    }
+
     /// <summary>Registers the data source used by every scope's <see cref="DbSession"/> (no-op when one is registered).</summary>
     public static IServiceCollection AddPlatformDataSource(this IServiceCollection services, string connectionString)
     {
