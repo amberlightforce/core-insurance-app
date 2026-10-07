@@ -4,22 +4,27 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.QuestionSet.evaluate result. PRD outputs: "questions with visible/required flags, knock-out and referral flags"</summary>
+/// <summary>pfc.QuestionSet.evaluate result: visible/required flag per question, knock-out and referral hits, and the visible required questions still unanswered.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record QuestionSetEvaluateResponse
 {
-    /// <summary>PRD: "questions with visible/required flags"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("questionsVisibleRequiredFlags")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public bool? QuestionsVisibleRequiredFlags { get; init; }
+    /// <summary>Contract member 'questions'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("questions")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.QuestionState> Questions { get; init; }
 
-    /// <summary>PRD: "knock-out and referral flags"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("knockOutFlags")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public bool? KnockOutFlags { get; init; }
+    /// <summary>Contract member 'knockOuts'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("knockOuts")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.QuestionOutcomeHit> KnockOuts { get; init; }
 
-    /// <summary>PRD: "knock-out and referral flags"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("referralFlags")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public bool? ReferralFlags { get; init; }
+    /// <summary>Contract member 'referrals'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("referrals")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.QuestionOutcomeHit> Referrals { get; init; }
+
+    /// <summary>Contract member 'missingRequired'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("missingRequired")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> MissingRequired { get; init; }
+
+    /// <summary>True when no visible required question is unanswered</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("complete")]
+    public required bool Complete { get; init; }
 }

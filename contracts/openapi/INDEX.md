@@ -9,7 +9,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | Module | Operations | Full | Minimal | Commands | Queries | In-process only | Partner-facing | Unexpanded families |
 |---|---|---|---|---|---|---|---|---|
 | [PTY](#pty) | 66 | 46 | 20 | 47 | 19 | 5 | 0 | 5 |
-| [PFC](#pfc) | 31 | 28 | 3 | 15 | 16 | 1 | 1 | 0 |
+| [PFC](#pfc) | 32 | 29 | 3 | 16 | 16 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
 | [POL](#pol) | 51 | 47 | 4 | 37 | 14 | 8 | 10 | 0 |
@@ -25,7 +25,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 20 | 20 | 0 | 12 | 8 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 32 | 16 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1111 | 893 | 218 | 727 | 384 | 127 | 69 | 65 |
+| **Total** | 1112 | 894 | 218 | 728 | 384 | 127 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -140,6 +140,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pfc.ProductVersion.cancelSchedule` | POST `/api/pfc/v1/product-versions/cancel-schedule` | C | yes | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
 | `pfc.ProductVersion.diff` | GET `/api/pfc/v1/product-versions/diff` | Q |  | ui |  | W2 | full | REQ-PFC-200 |
 | `pfc.ProductVersion.fallBack` | POST `/api/pfc/v1/product-versions/fall-back` | C | yes | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
+| `pfc.ProductVersion.import` | POST `/api/pfc/v1/product-versions/import` | C |  | ui |  | W2 | full | REQ-PFC-031, REQ-PFC-032, REQ-PFC-162 |
 | `pfc.ProductVersion.resolve` | POST `/api/pfc/v1/product-versions/resolve` | Q |  | ui | DOC, MIG, MKT, POL, RAT | W2 | full | REQ-PFC-001, REQ-PFC-167, REQ-PFC-221 |
 | `pfc.ProductVersion.schedule` | POST `/api/pfc/v1/product-versions/schedule` | C | yes | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
 | `pfc.ProductVersion.signOff` | POST `/api/pfc/v1/product-versions/sign-off` | C |  | ui |  | W2 | full | REQ-PFC-204, REQ-PFC-206 |
