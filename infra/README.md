@@ -3,6 +3,7 @@
 | Path | Contents |
 |---|---|
 | `database/bootstrap.sql` | The one idempotent database bootstrap for every environment: roles `migrator` and `app`, database privileges, the five extensions |
+| `database/greek-search.sql` | Idempotent Greek search objects (F-1e): `coreins_search_key()` (twin of the GR pack `GreekSearchNormalizer`, parity-tested), ICU collation `el_gr_ci_ai`, text-search configuration `greek_unaccent`. Not yet run by the migrate job (wiring is a follow-up) |
 | `local/` | Docker Compose stack (INFRASTRUCTURE §3.2); `pg-init/` creates `coreins` and runs `database/bootstrap.sql` |
 | `azure/` | Bicep for one stamp (INFRASTRUCTURE §6); deployed by `.github/workflows/deploy.yml` |
 

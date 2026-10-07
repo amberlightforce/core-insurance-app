@@ -97,6 +97,25 @@ public sealed partial class ModuleBoundaryTests
     }
 
     [Fact]
+    public void Platform_data_protection_references_only_the_shared_kernel()
+    {
+        SolutionModel.ProjectReferences(SolutionModel.DataProtection)
+            .Where(reference => reference != SolutionModel.SharedKernel)
+            .ShouldBeEmpty();
+
+        var result = SolutionModel.TypesOf(SolutionModel.DataProtection)
+            .ShouldNot().HaveDependencyOnAny("CoreIns.Modules", "CoreIns.CountryPacks", SolutionModel.Host)
+            .GetResult();
+        result.IsSuccessful.ShouldBeTrue($"{SolutionModel.DataProtection} depends on: {FailingTypes(result)}");
+
+        // CoreIns.Platform itself (outbox, audit, Hangfire) is a namespace prefix of this project, so check assemblies.
+        using var assembly = ModuleDefinition.ReadModule(SolutionModel.AssemblyPath(SolutionModel.DataProtection));
+        assembly.AssemblyReferences.Select(reference => reference.Name)
+            .Where(name => name.StartsWith("CoreIns.", StringComparison.Ordinal) && name != SolutionModel.SharedKernel)
+            .ShouldBeEmpty();
+    }
+
+    [Fact]
     public void Country_packs_reference_no_module_implementation()
     {
         foreach (var pack in SolutionModel.CountryPacks)

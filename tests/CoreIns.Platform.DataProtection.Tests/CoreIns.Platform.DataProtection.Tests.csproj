@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Unit and property-based tests for CoreIns.Platform.DataProtection (F-1e). -->
+
+  <ItemGroup>
+    <PackageReference Include="FsCheck.Xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreIns.Platform.DataProtection\CoreIns.Platform.DataProtection.csproj" />
+  </ItemGroup>
+
+</Project>

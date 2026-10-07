@@ -12,6 +12,7 @@ internal static class SolutionModel
     public const string SharedKernel = "CoreIns.SharedKernel";
     public const string Platform = "CoreIns.Platform";
     public const string Host = "CoreIns.Host";
+    public const string DataProtection = "CoreIns.Platform.DataProtection";
 
     /// <summary>The business modules of INFRASTRUCTURE §2 (Platform is <see cref="Platform"/>).</summary>
     public static IReadOnlyList<string> ModuleNames { get; } =
@@ -31,7 +32,8 @@ internal static class SolutionModel
         ModuleNames.SelectMany(module => new[] { Implementation(module), Contracts(module) });
 
     /// <summary>Core = everything except the Host (composition root) and the country packs.</summary>
-    public static IEnumerable<string> CoreProjects => ModuleProjects.Prepend(Platform).Prepend(SharedKernel);
+    public static IEnumerable<string> CoreProjects =>
+        ModuleProjects.Prepend(DataProtection).Prepend(Platform).Prepend(SharedKernel);
 
     /// <summary>The repository root (the directory containing CoreIns.sln).</summary>
     public static string RepositoryRoot { get; } = FindRepositoryRoot();

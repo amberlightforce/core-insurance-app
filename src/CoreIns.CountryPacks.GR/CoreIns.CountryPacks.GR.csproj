@@ -4,10 +4,12 @@
     Greek country pack: IdValidator (AFM), TaxCalculator, FiscalDocumentChannel (myDATA), BureauAdapter,
     StatutoryClockSet. Implements interfaces from module Contracts. Core code never references a country pack;
     only the Host composes it (checked by CoreIns.ArchitectureTests).
+    F-1e: IdValidator, NameTransliterator (ELOT 743), AddressFormatter and the Greek language rules (REQ-MKT-340).
   -->
 
   <ItemGroup>
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

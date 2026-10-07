@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Platform data protection (contract §3.2.1 rule 7, §3.9.12; D-ARC-14; REQ-PTY-060, NFR-PTY-010, REQ-PTY-168):
+    P0–P3 data classification, field-level envelope encryption (AES-256-GCM) with per-legal-entity key-encryption keys
+    (Azure Key Vault in production, local provider in development and tests), key versioning and rotation without
+    downtime, HMAC-SHA256 blind indexes for equality search, EF Core value converters.
+    Rule: references CoreIns.SharedKernel only (checked by CoreIns.ArchitectureTests).
+  -->
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.Platform.DataProtection.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Azure.Security.KeyVault.Keys" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>
