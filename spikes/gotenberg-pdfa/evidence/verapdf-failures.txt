@@ -1,0 +1,20 @@
+﻿===== veraPDF 1.30.2 --flavour 3b det-run1.raw.pdf
+<validationReport jobEndStatus="normal" profileName="PDF/A-3b validation profile" statement="PDF file is not compliant with Validation Profile requirements." isCompliant="false">
+<rule specification="ISO 19005-3:2012" clause="6.2.4.3" testNumber="2" status="failed" failedChecks="9817">
+<description>DeviceRGB shall only be used if a device independent DefaultRGB colour space has been set when the DeviceRGB colour space is used, or if the file has a PDF/A OutputIntent that contains an RGB destination profile</description>
+<rule specification="ISO 19005-3:2012" clause="6.1.3" testNumber="1" status="failed" failedChecks="1">
+<description>The file trailer dictionary shall contain the ID keyword whose value shall be File Identifiers as defined in ISO 32000-1:2008, 14.4</description>
+<rule specification="ISO 19005-3:2012" clause="6.6.2.1" testNumber="1" status="failed" failedChecks="1">
+<description>The Catalog dictionary of a conforming file shall contain the Metadata key whose value is a metadata stream as defined in ISO 32000-1:2008, 14.3.2. The metadata stream dictionary shall contain entry Type with value /Metadata and entry Subtype with value /XML</description>
+===== veraPDF 1.30.2 --flavour ua1 det-run1.raw.pdf
+<validationReport jobEndStatus="normal" profileName="PDF/UA-1 validation profile" statement="PDF file is not compliant with Validation Profile requirements." isCompliant="false">
+<rule specification="ISO 14289-1:2014" clause="7.1" testNumber="8" status="failed" failedChecks="1" tags="metadata">
+<description>The Catalog dictionary of a conforming file shall contain the Metadata key whose value is a metadata stream as defined in ISO 32000-1:2008, 14.3.2. The metadata stream dictionary shall contain entry Type with value /Metadata and entry Subtype with value /XML</description>
+<rule specification="ISO 14289-1:2014" clause="7.1" testNumber="3" status="failed" failedChecks="340" tags="artifact">
+<description>Content shall be marked as Artifact or tagged as real content</description>
+===== veraPDF 1.30.2 --flavour 3a glyph-pua.pdfa.pdf
+<validationReport jobEndStatus="normal" profileName="PDF/A-3a validation profile" statement="PDF file is not compliant with Validation Profile requirements." isCompliant="false">
+<rule specification="ISO 19005-3:2012" clause="6.2.11.8" testNumber="1" status="failed" failedChecks="2">
+<description>A PDF/A-3 compliant document shall not contain a reference to the .notdef glyph from any of the text showing operators, regardless of text rendering mode, in any content stream</description>
+<rule specification="ISO 19005-3:2012" clause="6.2.11.7.2" testNumber="1" status="failed" failedChecks="2">
+<description>The Font dictionary of all fonts shall define the map of all used character codes to Unicode values, either via a ToUnicode entry, or other mechanisms as defined in ISO 19005-3, 6.2.11.7.2</description>
