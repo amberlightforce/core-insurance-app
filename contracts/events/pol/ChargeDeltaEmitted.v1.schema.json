@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pol/ChargeDeltaEmitted.v1.schema.json",
+  "title": "ChargeDeltaEmitted v1",
+  "description": "Every bound transaction. Set completeness fields set_id, set_size, index are required in the envelope (D4). Delta mode NET is final for P1-P2.",
+  "x-event-type": "ChargeDeltaEmitted",
+  "x-registry-name": "pol.ChargeDeltaEmitted",
+  "x-producer": "POL",
+  "x-topic": "pol.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "policy_id",
+  "x-aggregate-type": [
+    "Policy"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": true,
+  "x-business-keys": [
+    "policyId",
+    "chargeId",
+    "policyTermId",
+    "transactionId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-05 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ChargeDeltaEmitted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "POL"
+    },
+    "aggregateType": {
+      "const": "Policy"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyId",
+        "chargeId",
+        "policyTermId",
+        "transactionId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "required": [
+    "set_id",
+    "set_size",
+    "index"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chargeId",
+        "termId",
+        "elementLocator",
+        "coverageCode",
+        "chargeType",
+        "chargeCategory",
+        "deltaKind",
+        "netAmount",
+        "validPeriod",
+        "bookingDate",
+        "transactionId",
+        "correlationKey"
+      ],
+      "properties": {
+        "chargeId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "termId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "elementLocator": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "coverageCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "chargeType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "chargeCategory": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "deltaKind": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "netAmount": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "description": "Net amount and currency",
+          "x-classification": "P0"
+        },
+        "validPeriod": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        },
+        "bookingDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "transactionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "correlationKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "description": "Business lineage key",
+          "x-classification": "P0"
+        },
+        "taxTreatmentRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Tax treatment reference (D2, TaxCalculator.treatment)",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

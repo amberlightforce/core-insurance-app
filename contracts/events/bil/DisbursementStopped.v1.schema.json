@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/bil/DisbursementStopped.v1.schema.json",
+  "title": "DisbursementStopped v1",
+  "description": "Disbursement enters Stopped. Decided addition (contract D4, D-CON-21).",
+  "x-event-type": "DisbursementStopped",
+  "x-registry-name": "bil.DisbursementStopped",
+  "x-producer": "BIL",
+  "x-topic": "bil.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "disbursement_id",
+  "x-aggregate-type": [
+    "Disbursement"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "disbursementId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-06 §8.1",
+    "contract D4; D-CON-21"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DisbursementStopped"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "BIL"
+    },
+    "aggregateType": {
+      "const": "Disbursement"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "disbursementId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "disbursementId",
+        "sourceType",
+        "sourceId",
+        "reasonCode",
+        "actor"
+      ],
+      "properties": {
+        "disbursementId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "sourceType": {
+          "$ref": "../common.schema.json#/$defs/DisbursementSourceType",
+          "x-classification": "P0"
+        },
+        "sourceId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "reasonCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "actor": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P1",
+          "x-personal-data": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/uw/UWIssueApproved.v1.schema.json",
+  "title": "UWIssueApproved v1",
+  "description": "Issue Approved or ApprovedWithConditions",
+  "x-event-type": "UWIssueApproved",
+  "x-registry-name": "uw.UWIssueApproved",
+  "x-producer": "UW",
+  "x-topic": "uw.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "job_id",
+  "x-aggregate-type": [
+    "Job"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "jobId",
+    "issueId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-04 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "UWIssueApproved"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "UW"
+    },
+    "aggregateType": {
+      "const": "Job"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "jobId",
+        "issueId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jobId",
+        "issueId",
+        "issueType",
+        "blockingPoint",
+        "outcome",
+        "approverUserId",
+        "scope",
+        "conditionKinds",
+        "authorityCheckIds"
+      ],
+      "properties": {
+        "jobId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "issueId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "issueType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "blockingPoint": {
+          "$ref": "../common.schema.json#/$defs/BlockingPoint",
+          "x-classification": "P0"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "APPROVED",
+            "APPROVED_WITH_CONDITIONS"
+          ],
+          "x-classification": "P0"
+        },
+        "approverUserId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "secondApproverUserId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "scope": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "validUntil": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Instant"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "conditionKinds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "authorityCheckIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

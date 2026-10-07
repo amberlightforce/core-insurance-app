@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/fin/JournalPosted.v1.schema.json",
+  "title": "JournalPosted v1",
+  "description": "Journal (or batch of a run) committed. Consumers needing per-claim or per-account order use the source sequence carried in sourceRefs.",
+  "x-event-type": "JournalPosted",
+  "x-registry-name": "fin.JournalPosted",
+  "x-producer": "FIN",
+  "x-topic": "fin.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "legal_entity_id",
+  "x-aggregate-type": [
+    "LegalEntity"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "journalId",
+    "periodId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-09 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "JournalPosted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "FIN"
+    },
+    "aggregateType": {
+      "const": "LegalEntity"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "journalId",
+        "periodId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "journals",
+        "book",
+        "accountingDate",
+        "periodId",
+        "sourceType",
+        "sourceRefs",
+        "totalsPerCurrency"
+      ],
+      "properties": {
+        "journals": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/JournalRef"
+          },
+          "x-classification": "P0"
+        },
+        "book": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "accountingDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "periodId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "sourceType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Text"
+          },
+          "x-classification": "P0"
+        },
+        "totalsPerCurrency": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Money"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

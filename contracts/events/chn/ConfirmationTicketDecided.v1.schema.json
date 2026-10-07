@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/chn/ConfirmationTicketDecided.v1.schema.json",
+  "title": "ConfirmationTicketDecided v1",
+  "description": "Ticket Approved, Rejected or Expired",
+  "x-event-type": "ConfirmationTicketDecided",
+  "x-registry-name": "chn.ConfirmationTicketDecided",
+  "x-producer": "CHN",
+  "x-topic": "chn.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "ticket_id",
+  "x-aggregate-type": [
+    "ConfirmationTicket"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "ticketId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-12 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ConfirmationTicketDecided"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CHN"
+    },
+    "aggregateType": {
+      "const": "ConfirmationTicket"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "ticketId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ticketId",
+        "tool",
+        "channelTransactionType",
+        "decision",
+        "agentClientId"
+      ],
+      "properties": {
+        "ticketId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "tool": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "channelTransactionType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "APPROVED",
+            "REJECTED",
+            "EXPIRED"
+          ],
+          "x-classification": "P0"
+        },
+        "approverUserId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "agentClientId": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

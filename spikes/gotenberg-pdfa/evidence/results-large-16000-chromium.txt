@@ -1,0 +1,10 @@
+# PdfaSpike results  mode=large renderer=ChromeCdpRenderer os=Microsoft Windows NT 10.0.26200.0 dotnet=10.0.11
+chromium=154.0.8037.98
+font NotoSans-Bold.ttf sha256=1df075a380fc7cb898acf64c1f7b3b4dd780de3caa860178bf929de35817a913
+font NotoSans-Regular.ttf sha256=478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823
+
+## Large document (16000 cover rows)
+compose HTML: 82 ms, 2998 KiB
+render: 36.7 s, 28.5 MiB, renderer peak working set 5598 MiB
+post-process: 4.8 s, 28.5 MiB, PostProcessReport { ArtifactRunsWrapped = 3005, StructIdsRenumbered = 9, PayloadSha256 = 080caedb5b0523149e7277a65349decd6be446e2c4a468ddf290b20785c77138 }, .NET process peak working set 361 MiB (before post-process 213 MiB)
+pages=601

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pol/PolicyRewritten.v1.schema.json",
+  "title": "PolicyRewritten v1",
+  "description": "Rewrite bound",
+  "x-event-type": "PolicyRewritten",
+  "x-registry-name": "pol.PolicyRewritten",
+  "x-producer": "POL",
+  "x-topic": "pol.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "policy_id",
+  "x-aggregate-type": [
+    "Policy"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "policyId",
+    "oldTermId",
+    "newTermId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-05 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PolicyRewritten"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "POL"
+    },
+    "aggregateType": {
+      "const": "Policy"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyId",
+        "oldTermId",
+        "newTermId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oldTermId",
+        "newTermId",
+        "rewriteType"
+      ],
+      "properties": {
+        "oldTermId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "newTermId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "rewriteType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "newPolicyId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "newPolicyNumber": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/BusinessNumber"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

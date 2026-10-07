@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/mkt/PackRolledBack.v1.schema.json",
+  "title": "PackRolledBack v1",
+  "description": "A PackActivation of kind ROLLBACK reaches its instant",
+  "x-event-type": "PackRolledBack",
+  "x-registry-name": "mkt.PackRolledBack",
+  "x-producer": "MKT",
+  "x-topic": "mkt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "stamp_id",
+  "x-aggregate-type": [
+    "Stamp"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "stampId",
+    "packId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-17 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PackRolledBack"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "MKT"
+    },
+    "aggregateType": {
+      "const": "Stamp"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "stampId",
+        "packId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packId",
+        "fromVersion",
+        "toVersion",
+        "affectedWindow",
+        "hashesInWindow",
+        "reason"
+      ],
+      "properties": {
+        "packId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "fromVersion": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "toVersion": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "affectedWindow": {
+          "$ref": "../common.schema.json#/$defs/TimeWindow",
+          "x-classification": "P0"
+        },
+        "hashesInWindow": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Sha256"
+          },
+          "x-classification": "P0"
+        },
+        "reason": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

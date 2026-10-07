@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/mkt/ConfigurationActivated.v1.schema.json",
+  "title": "ConfigurationActivated v1",
+  "description": "A change request, capability switch change, group bundle or translation bundle activates in a stamp. Governance fact (R-03); envelope configurationHash is the hash after the change.",
+  "x-event-type": "ConfigurationActivated",
+  "x-registry-name": "mkt.ConfigurationActivated",
+  "x-producer": "MKT",
+  "x-topic": "mkt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "stamp_id",
+  "x-aggregate-type": [
+    "Stamp"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "stampId",
+    "changeRequestId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-17 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ConfigurationActivated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "MKT"
+    },
+    "aggregateType": {
+      "const": "Stamp"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "stampId",
+        "changeRequestId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "previousHash",
+        "newHash",
+        "kind",
+        "changedKeys",
+        "clockValueFlags",
+        "changeRequestId"
+      ],
+      "properties": {
+        "previousHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "newHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "CONFIG",
+            "CAPABILITY",
+            "GROUP_BUNDLE",
+            "TRANSLATION_BUNDLE",
+            "CLOCK"
+          ],
+          "x-classification": "P0"
+        },
+        "changedKeys": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ChangedKey"
+          },
+          "x-classification": "P0"
+        },
+        "retroWindow": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/TimeWindow"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "clockValueFlags": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ClockValueFlag"
+          },
+          "description": "applies_to_running flags for clock values",
+          "x-classification": "P0"
+        },
+        "changeRequestId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

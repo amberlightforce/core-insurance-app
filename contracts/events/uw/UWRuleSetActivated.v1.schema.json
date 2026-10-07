@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/uw/UWRuleSetActivated.v1.schema.json",
+  "title": "UWRuleSetActivated v1",
+  "description": "Rule-set version becomes Active",
+  "x-event-type": "UWRuleSetActivated",
+  "x-registry-name": "uw.UWRuleSetActivated",
+  "x-producer": "UW",
+  "x-topic": "uw.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "rule_set_id",
+  "x-aggregate-type": [
+    "UwRuleSet"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "ruleSetId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-04 §8.2",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "UWRuleSetActivated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "UW"
+    },
+    "aggregateType": {
+      "const": "UwRuleSet"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "ruleSetId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleSetCode",
+        "version",
+        "contentHash",
+        "activationTime",
+        "checkpoint"
+      ],
+      "properties": {
+        "ruleSetCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "contentHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "activationTime": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "checkpoint": {
+          "type": "string",
+          "enum": [
+            "PRE_QUOTE",
+            "PRE_BIND",
+            "PRE_ISSUE",
+            "RENEWAL"
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/wrk/NoteRevised.v1.schema.json",
+  "title": "NoteRevised v1",
+  "description": "Edit / soft delete",
+  "x-event-type": "NoteRevised",
+  "x-registry-name": "wrk.NoteRevised",
+  "x-producer": "WRK",
+  "x-topic": "wrk.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "note_id",
+  "x-aggregate-type": [
+    "Note"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "noteId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-13 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "NoteRevised"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "WRK"
+    },
+    "aggregateType": {
+      "const": "Note"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "noteId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "versionNumber",
+        "actor"
+      ],
+      "properties": {
+        "versionNumber": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "actor": {
+          "$ref": "../common.schema.json#/$defs/Actor",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "reasonCode": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

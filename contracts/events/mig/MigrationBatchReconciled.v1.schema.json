@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/mig/MigrationBatchReconciled.v1.schema.json",
+  "title": "MigrationBatchReconciled v1",
+  "description": "Batch reconciliation signed (REQ-MIG-005)",
+  "x-event-type": "MigrationBatchReconciled",
+  "x-registry-name": "mig.MigrationBatchReconciled",
+  "x-producer": "MIG",
+  "x-topic": "mig.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "batch_id",
+  "x-aggregate-type": [
+    "MigrationBatch"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "batchId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-16 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "MigrationBatchReconciled"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "MIG"
+    },
+    "aggregateType": {
+      "const": "MigrationBatch"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "batchId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "batchId",
+        "wave",
+        "matchStatus",
+        "breakCountsByMeasure",
+        "signatories",
+        "reportRef"
+      ],
+      "properties": {
+        "batchId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "wave": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "matchStatus": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "breakCountsByMeasure": {
+          "$ref": "../common.schema.json#/$defs/Counts",
+          "x-classification": "P0"
+        },
+        "signatories": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "reportRef": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

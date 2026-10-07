@@ -1,0 +1,3858 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: DOC — Documents and communications API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by DOC (PRD-10 §9.1)
+  description: 'Contract of the operations DOC exposes (PRD-10 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: DOC
+  x-prd: PRD-10
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: Document
+- name: DocumentType
+- name: Template
+- name: Clause
+- name: Forms
+- name: FormPattern
+- name: Binding
+- name: ProofOfCover
+- name: Ipid
+- name: Delivery
+- name: EvidencePack
+- name: Signature
+- name: Archive
+- name: Subject
+- name: ProviderEvent
+paths:
+  /api/doc/v1/documents/request:
+    post:
+      operationId: doc.Document.request
+      summary: Request a document
+      description: |-
+        Request a document
+
+        PRD inputs: type, subject ref, recipients or resolve, language override, payload supplement, delivery instruction, sync flag
+        PRD outputs: document id, number, status, links
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-001
+      x-anchor:
+      - REQ-DOC-001
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-DOC-001, REQ-DOC-007
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD idempotency: Key; DR'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - BIL
+      - CHN
+      - CLM
+      - CMP
+      - MIG
+      - PFC
+      - PLT
+      - POL
+      - PTY
+      - RAT
+      - RI
+      x-permission: doc.Document.request
+      x-error-codes:
+      - code: DOC-ERR-TYPE-UNKNOWN
+        status: 422
+      - code: DOC-ERR-PAYLOAD-INVALID
+        status: 422
+      - code: DOC-ERR-LANGUAGE-NOT-APPROVED
+        status: 422
+      - code: DOC-ERR-BINDING-MISSING
+        status: 422
+      - code: DOC-ERR-FORBIDDEN
+        status: 403
+      - code: DOC-ERR-AI-TEXT-UNACCEPTED
+        status: 422
+      - code: DOC-ERR-COEXISTENCE-LEGACY
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1633
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentRequestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentRequestResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/request-batch:
+    post:
+      operationId: doc.Document.requestBatch
+      summary: Batch request
+      description: |-
+        Batch request
+
+        PRD inputs: items[], batch key, window
+        PRD outputs: batch id
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-176
+      x-wave: W6
+      x-work-packages:
+      - W6-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key per item'
+      x-exposure:
+      - ui
+      x-consumers:
+      - POL
+      x-permission: doc.Document.requestBatch
+      x-error-codes:
+      - code: DOC-ERR-BATCH-INVALID
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1634
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentRequestBatchRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentRequestBatchResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/preview:
+    post:
+      operationId: doc.Document.preview
+      summary: Draft rendition without side effects
+      description: |-
+        Draft rendition without side effects
+
+        PRD inputs: as request
+        PRD outputs: rendition (DRAFT)
+        PRD error notes: as request
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-306
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-02
+      x-status: minimal
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: DR only'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - PFC
+      - POL
+      x-permission: doc.Document.preview
+      x-error-codes: []
+      x-source:
+      - PRD-10 §9.1 l.1635
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentPreviewRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentPreviewResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/{id}:
+    get:
+      operationId: doc.Document.get
+      summary: Metadata and lists
+      description: |-
+        Metadata and lists
+
+        PRD inputs: ids / object ref, filters, cursor
+        PRD outputs: documents with statuses
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-008
+      x-anchor:
+      - REQ-DOC-008
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - CLM
+      x-permission: doc.Document.get
+      x-error-codes:
+      - code: DOC-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-10 §9.1 l.1636
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Document (PRD input: "ids")'
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: objectRef
+        in: query
+        required: false
+        description: 'PRD: "object ref"'
+        schema:
+          type: string
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentGetPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/list-for-object:
+    get:
+      operationId: doc.Document.listForObject
+      summary: Metadata and lists
+      description: |-
+        Metadata and lists
+
+        PRD inputs: ids / object ref, filters, cursor
+        PRD outputs: documents with statuses
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-008
+      x-anchor:
+      - REQ-DOC-008
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - CLM
+      - POL
+      x-partner-routes:
+      - CHN facade GET /api/chn/v1/{object}/{id}/documents
+      - MCP tool documents_list` / `document_get
+      x-permission: doc.Document.listForObject
+      x-error-codes:
+      - code: DOC-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-10 §9.1 l.1636
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: ids
+        in: query
+        required: false
+        description: 'PRD: "ids"'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: objectRef
+        in: query
+        required: false
+        description: 'PRD: "object ref"'
+        schema:
+          type: string
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentListForObjectPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/reprint:
+    post:
+      operationId: doc.Document.reprint
+      summary: Reprint copy
+      description: |-
+        Reprint copy
+
+        PRD inputs: document id, reason
+        PRD outputs: link
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-205
+      x-wave: W6
+      x-work-packages:
+      - W6-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.reprint
+      x-error-codes:
+      - code: DOC-ERR-FORBIDDEN
+        status: 403
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1637
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentReprintRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentReprintResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/resend:
+    post:
+      operationId: doc.Document.resend
+      summary: Resend
+      description: |-
+        Resend
+
+        PRD inputs: document id, recipient, channel, reason
+        PRD outputs: delivery id
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-005
+      - REQ-DOC-211
+      x-anchor:
+      - REQ-DOC-005
+      x-anchor-mapped:
+      - REQ-DOC-005
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      - W6-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.resend
+      x-error-codes:
+      - code: DOC-ERR-CHANNEL-NOT-PERMITTED
+        status: 403
+      - code: DOC-ERR-NO-CONSENT
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1638
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentResendRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResendResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/render-as-of:
+    post:
+      operationId: doc.Document.renderAsOf
+      summary: As-of rendering
+      description: |-
+        As-of rendering
+
+        PRD inputs: subject, type, validAt, knownAt, wording mode
+        PRD outputs: document id
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-208
+      x-wave: W6
+      x-work-packages:
+      - W6-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.renderAsOf
+      x-error-codes:
+      - code: DOC-ERR-ASOF-UNSUPPORTED
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1639
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentRenderAsOfRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentRenderAsOfResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/hide:
+    post:
+      operationId: doc.Document.hide
+      summary: List hygiene
+      description: |-
+        List hygiene
+
+        PRD inputs: document id, reason
+        PRD outputs: status
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-278
+      - REQ-DOC-279
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.hide
+      x-error-codes:
+      - code: DOC-ERR-IMMUTABLE
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1640
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentHideRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentHideResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/unhide:
+    post:
+      operationId: doc.Document.unhide
+      summary: List hygiene
+      description: |-
+        List hygiene
+
+        PRD inputs: document id, reason
+        PRD outputs: status
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-278
+      - REQ-DOC-279
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.unhide
+      x-error-codes:
+      - code: DOC-ERR-IMMUTABLE
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1640
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentUnhideRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentUnhideResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/delete-draft:
+    post:
+      operationId: doc.Document.deleteDraft
+      summary: List hygiene
+      description: |-
+        List hygiene
+
+        PRD inputs: document id, reason
+        PRD outputs: status
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-278
+      - REQ-DOC-279
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.deleteDraft
+      x-error-codes:
+      - code: DOC-ERR-IMMUTABLE
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1640
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentDeleteDraftRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentDeleteDraftResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/supersede:
+    post:
+      operationId: doc.Document.supersede
+      summary: Replace or withdraw
+      description: |-
+        Replace or withdraw
+
+        PRD inputs: document id, replacement, reason
+        PRD outputs: status
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-210
+      - REQ-DOC-185
+      x-wave: W6
+      x-work-packages:
+      - W6-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.supersede
+      x-error-codes:
+      - code: DOC-ERR-ALREADY-DELIVERED
+        status: 409
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1641
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentSupersedeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentSupersedeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/withdraw:
+    post:
+      operationId: doc.Document.withdraw
+      summary: Replace or withdraw
+      description: |-
+        Replace or withdraw
+
+        PRD inputs: document id, replacement, reason
+        PRD outputs: status
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-210
+      - REQ-DOC-185
+      x-wave: W6
+      x-work-packages:
+      - W6-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.withdraw
+      x-error-codes:
+      - code: DOC-ERR-ALREADY-DELIVERED
+        status: 409
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1641
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentWithdrawRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentWithdrawResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/document-types:
+    get:
+      operationId: doc.DocumentType.list
+      summary: Catalogue
+      description: |-
+        Catalogue
+
+        PRD inputs: filters
+        PRD outputs: types
+      tags:
+      - DocumentType
+      x-requirement:
+      - REQ-DOC-049
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      x-permission: doc.DocumentType.list
+      x-error-codes: []
+      x-source:
+      - PRD-10 §9.1 l.1642
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTypeListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/templates:
+    get:
+      operationId: doc.Template.list
+      summary: Library lookups for WRK, PFC
+      description: |-
+        Library lookups for WRK, PFC
+
+        PRD inputs: filters
+        PRD outputs: objects
+      tags:
+      - Template
+      x-requirement:
+      - REQ-DOC-002
+      x-anchor:
+      - REQ-DOC-002
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      x-permission: doc.Template.list
+      x-error-codes: []
+      x-source:
+      - PRD-10 §9.1 l.1643
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/clauses/{id}:
+    get:
+      operationId: doc.Clause.get
+      summary: Library lookups for WRK, PFC
+      description: |-
+        Library lookups for WRK, PFC
+
+        PRD inputs: filters
+        PRD outputs: objects
+      tags:
+      - Clause
+      x-requirement:
+      - REQ-DOC-002
+      x-anchor:
+      - REQ-DOC-002
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      x-permission: doc.Clause.get
+      x-error-codes: []
+      x-source:
+      - PRD-10 §9.1 l.1643
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Clause
+        schema:
+          type: string
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClauseGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/forms/infer:
+    post:
+      operationId: doc.Forms.infer
+      summary: Form inference
+      description: |-
+        Form inference
+
+        PRD inputs: job id, version
+        PRD outputs: form set
+      tags:
+      - Forms
+      x-requirement:
+      - REQ-DOC-003
+      - REQ-DOC-102
+      x-anchor:
+      - REQ-DOC-003
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: — (query)'
+      x-exposure:
+      - ui
+      x-permission: doc.Forms.infer
+      x-error-codes:
+      - code: DOC-ERR-CONTEXT-MISSING
+        status: 422
+      x-source:
+      - PRD-10 §9.1 l.1644
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormsInferRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormsInferResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/forms/add-manual:
+    post:
+      operationId: doc.Forms.addManual
+      summary: Manual forms
+      description: |-
+        Manual forms
+
+        PRD inputs: job id, version, pattern, reason
+        PRD outputs: form set
+      tags:
+      - Forms
+      x-requirement:
+      - REQ-DOC-103
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Forms.addManual
+      x-error-codes:
+      - code: DOC-ERR-FORBIDDEN
+        status: 403
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1645
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormsAddManualRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormsAddManualResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/forms/remove-manual:
+    post:
+      operationId: doc.Forms.removeManual
+      summary: Manual forms
+      description: |-
+        Manual forms
+
+        PRD inputs: job id, version, pattern, reason
+        PRD outputs: form set
+      tags:
+      - Forms
+      x-requirement:
+      - REQ-DOC-103
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Forms.removeManual
+      x-error-codes:
+      - code: DOC-ERR-FORBIDDEN
+        status: 403
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1645
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormsRemoveManualRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormsRemoveManualResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/forms/{id}:
+    get:
+      operationId: doc.Forms.get
+      summary: Form set of transaction
+      description: |-
+        Form set of transaction
+
+        PRD inputs: transaction id
+        PRD outputs: form set
+      tags:
+      - Forms
+      x-requirement:
+      - REQ-DOC-114
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      x-permission: doc.Forms.get
+      x-error-codes: []
+      x-source:
+      - PRD-10 §9.1 l.1646
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Forms (PRD input: "transaction id")'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormsGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/form-patterns/validate-references:
+    post:
+      operationId: doc.FormPattern.validateReferences
+      summary: PFC lint
+      description: |-
+        PFC lint
+
+        PRD inputs: product version, refs
+        PRD outputs: per-ref results
+      tags:
+      - FormPattern
+      x-requirement:
+      - REQ-DOC-113
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      x-permission: doc.FormPattern.validateReferences
+      x-error-codes: []
+      x-source:
+      - PRD-10 §9.1 l.1647
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormPatternValidateReferencesRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormPatternValidateReferencesResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/bindings/resolve:
+    post:
+      operationId: doc.Binding.resolve
+      summary: Template versions
+      description: |-
+        Template versions
+
+        PRD inputs: product version, form, language, channel, date
+        PRD outputs: template version
+      tags:
+      - Binding
+      x-requirement:
+      - REQ-DOC-124
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      x-permission: doc.Binding.resolve
+      x-error-codes:
+      - code: DOC-ERR-BINDING-MISSING
+        status: 422
+      - code: DOC-ERR-OVERLAP
+        status: 422
+      x-source:
+      - PRD-10 §9.1 l.1648
+      x-prd-param-names:
+        validAt: date
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BindingResolveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BindingResolveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/proof-of-covers/issue:
+    post:
+      operationId: doc.ProofOfCover.issue
+      summary: Cover note
+      description: |-
+        Cover note
+
+        PRD inputs: transaction id
+        PRD outputs: document id
+      tags:
+      - ProofOfCover
+      x-requirement:
+      - REQ-DOC-007
+      - REQ-DOC-224
+      x-anchor:
+      - REQ-DOC-007
+      x-anchor-mapped:
+      - REQ-DOC-007
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-DOC-007, REQ-DOC-224
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key; no dry-run: the PRD-10 row gives Key only, and the operation renders the cover
+        note of a transaction already bound (cover and money change at pol.Job.bind, which offers dry-run); contract §3.5.3
+        does not require it'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - POL
+      x-partner-routes:
+      - CHN facade GET /api/chn/v1/policies/{no}/cover-note
+      x-permission: doc.ProofOfCover.issue
+      x-error-codes:
+      - code: DOC-ERR-NOT-BOUND
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1649
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProofOfCoverIssueRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProofOfCoverIssueResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/ipids/get:
+    get:
+      operationId: doc.Ipid.get
+      summary: Current IPID
+      description: |-
+        Current IPID
+
+        PRD inputs: product version, offering, language
+        PRD outputs: archive link
+      tags:
+      - Ipid
+      x-requirement:
+      - REQ-DOC-007
+      - REQ-DOC-220
+      x-anchor:
+      - REQ-DOC-007
+      x-anchor-mapped:
+      - REQ-DOC-007
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-DOC-007, REQ-DOC-220
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      - PFC
+      x-partner-routes:
+      - CHN facade GET /api/chn/v1/products/{code}/ipid
+      - MCP tool product_info
+      x-permission: doc.Ipid.get
+      x-error-codes:
+      - code: DOC-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-10 §9.1 l.1650
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: productVersion
+        in: query
+        required: true
+        description: Product version
+        schema:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+      - name: product
+        in: query
+        required: true
+        description: Product code
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: offering
+        in: query
+        required: true
+        description: Offering
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: language
+        in: query
+        required: true
+        description: Language
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpidGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/deliveries/status:
+    get:
+      operationId: doc.Delivery.status
+      summary: Delivery queries
+      description: |-
+        Delivery queries
+
+        PRD inputs: document id / subject, purpose
+        PRD outputs: statuses, completeness
+      tags:
+      - Delivery
+      x-requirement:
+      - REQ-DOC-005
+      - REQ-DOC-249
+      x-anchor:
+      - REQ-DOC-005
+      x-anchor-mapped:
+      - REQ-DOC-005
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - CLM
+      - CMP
+      - POL
+      x-permission: doc.Delivery.status
+      x-error-codes: []
+      x-source:
+      - PRD-10 §9.1 l.1651
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: documentId
+        in: query
+        required: false
+        description: 'PRD: "document id"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: subject
+        in: query
+        required: false
+        description: 'PRD: "subject"'
+        schema:
+          type: string
+      - name: purpose
+        in: query
+        required: false
+        description: 'PRD: "purpose"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryStatusResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/deliveries/evidence-for:
+    get:
+      operationId: doc.Delivery.evidenceFor
+      summary: Delivery queries
+      description: |-
+        Delivery queries
+
+        PRD inputs: document id / subject, purpose
+        PRD outputs: statuses, completeness
+      tags:
+      - Delivery
+      x-requirement:
+      - REQ-DOC-005
+      - REQ-DOC-249
+      x-anchor:
+      - REQ-DOC-005
+      x-anchor-mapped:
+      - REQ-DOC-005
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      - CMP
+      x-permission: doc.Delivery.evidenceFor
+      x-error-codes: []
+      x-source:
+      - PRD-10 §9.1 l.1651
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: documentId
+        in: query
+        required: false
+        description: 'PRD: "document id"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: subject
+        in: query
+        required: false
+        description: 'PRD: "subject"'
+        schema:
+          type: string
+      - name: purpose
+        in: query
+        required: false
+        description: 'PRD: "purpose"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryEvidenceForResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/evidence-packs/{id}:
+    get:
+      operationId: doc.EvidencePack.get
+      summary: Evidence
+      description: |-
+        Evidence
+
+        PRD inputs: pack id / filters
+        PRD outputs: sealed archive
+      tags:
+      - EvidencePack
+      x-requirement:
+      - REQ-DOC-257
+      x-wave: W6
+      x-work-packages:
+      - W6-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key (export)'
+      x-exposure:
+      - ui
+      x-permission: doc.EvidencePack.get
+      x-error-codes:
+      - code: DOC-ERR-FORBIDDEN
+        status: 403
+      x-source:
+      - PRD-10 §9.1 l.1652
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the EvidencePack (PRD input: "pack id")'
+        schema:
+          type: string
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidencePackGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/evidence-packs/export:
+    post:
+      operationId: doc.EvidencePack.export
+      summary: Evidence
+      description: |-
+        Evidence
+
+        PRD inputs: pack id / filters
+        PRD outputs: sealed archive
+      tags:
+      - EvidencePack
+      x-requirement:
+      - REQ-DOC-257
+      x-wave: W6
+      x-work-packages:
+      - W6-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key (export)'
+      x-exposure:
+      - ui
+      x-permission: doc.EvidencePack.export
+      x-error-codes:
+      - code: DOC-ERR-FORBIDDEN
+        status: 403
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1652
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvidencePackExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidencePackExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/signatures/create-envelope:
+    post:
+      operationId: doc.Signature.createEnvelope
+      summary: Envelopes
+      description: |-
+        Envelopes
+
+        PRD inputs: documents, signatories, level, deadline
+        PRD outputs: envelope
+      tags:
+      - Signature
+      x-requirement:
+      - REQ-DOC-006
+      - REQ-DOC-260..REQ-DOC-266
+      x-anchor:
+      - REQ-DOC-006
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-permission: doc.Signature.createEnvelope
+      x-error-codes:
+      - code: DOC-ERR-SIGNATORY-IDENTIFIER-MISSING
+        status: 422
+      - code: DOC-ERR-PROVIDER-UNAVAILABLE
+        status: 503
+      - code: DOC-ERR-HUMAN-SIGNATURE-REQUIRED
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1653
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignatureCreateEnvelopeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignatureCreateEnvelopeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/doc/v1/signatures/send:
+    post:
+      operationId: doc.Signature.send
+      summary: Envelopes
+      description: |-
+        Envelopes
+
+        PRD inputs: documents, signatories, level, deadline
+        PRD outputs: envelope
+      tags:
+      - Signature
+      x-requirement:
+      - REQ-DOC-006
+      - REQ-DOC-260..REQ-DOC-266
+      x-anchor:
+      - REQ-DOC-006
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      - partner
+      x-permission: doc.Signature.send
+      x-error-codes:
+      - code: DOC-ERR-SIGNATORY-IDENTIFIER-MISSING
+        status: 422
+      - code: DOC-ERR-PROVIDER-UNAVAILABLE
+        status: 503
+      - code: DOC-ERR-HUMAN-SIGNATURE-REQUIRED
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1653
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignatureSendRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignatureSendResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/doc/v1/signatures/remind:
+    post:
+      operationId: doc.Signature.remind
+      summary: Envelopes
+      description: |-
+        Envelopes
+
+        PRD inputs: documents, signatories, level, deadline
+        PRD outputs: envelope
+      tags:
+      - Signature
+      x-requirement:
+      - REQ-DOC-006
+      - REQ-DOC-260..REQ-DOC-266
+      x-anchor:
+      - REQ-DOC-006
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      - partner
+      x-permission: doc.Signature.remind
+      x-error-codes:
+      - code: DOC-ERR-SIGNATORY-IDENTIFIER-MISSING
+        status: 422
+      - code: DOC-ERR-PROVIDER-UNAVAILABLE
+        status: 503
+      - code: DOC-ERR-HUMAN-SIGNATURE-REQUIRED
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1653
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignatureRemindRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignatureRemindResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/doc/v1/signatures/void:
+    post:
+      operationId: doc.Signature.void
+      summary: Envelopes
+      description: |-
+        Envelopes
+
+        PRD inputs: documents, signatories, level, deadline
+        PRD outputs: envelope
+      tags:
+      - Signature
+      x-requirement:
+      - REQ-DOC-006
+      - REQ-DOC-260..REQ-DOC-266
+      x-anchor:
+      - REQ-DOC-006
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      - partner
+      x-permission: doc.Signature.void
+      x-error-codes:
+      - code: DOC-ERR-SIGNATORY-IDENTIFIER-MISSING
+        status: 422
+      - code: DOC-ERR-PROVIDER-UNAVAILABLE
+        status: 503
+      - code: DOC-ERR-HUMAN-SIGNATURE-REQUIRED
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1653
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignatureVoidRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignatureVoidResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/doc/v1/signatures/{id}:
+    get:
+      operationId: doc.Signature.get
+      summary: Envelopes
+      description: |-
+        Envelopes
+
+        PRD inputs: documents, signatories, level, deadline
+        PRD outputs: envelope
+      tags:
+      - Signature
+      x-requirement:
+      - REQ-DOC-006
+      - REQ-DOC-260..REQ-DOC-266
+      x-anchor:
+      - REQ-DOC-006
+      x-wave: W4
+      x-work-packages:
+      - W4-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 5
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      - partner
+      x-consumers:
+      - CHN
+      x-permission: doc.Signature.get
+      x-error-codes:
+      - code: DOC-ERR-SIGNATORY-IDENTIFIER-MISSING
+        status: 422
+      - code: DOC-ERR-PROVIDER-UNAVAILABLE
+        status: 503
+      - code: DOC-ERR-HUMAN-SIGNATURE-REQUIRED
+        status: 422
+      x-source:
+      - PRD-10 §9.1 l.1653
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Signature
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignatureGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/doc/v1/archives/store:
+    post:
+      operationId: doc.Archive.store
+      summary: Archive
+      description: |-
+        Archive
+
+        PRD inputs: binary stream + declared hash, metadata
+        PRD outputs: archive id, hash
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-DOC-004
+      - REQ-DOC-187..REQ-DOC-202
+      x-anchor:
+      - REQ-DOC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - FIN
+      - MKT
+      - PFC
+      - PLT
+      - PTY
+      - RAT
+      x-permission: doc.Archive.store
+      x-error-codes:
+      - code: DOC-ERR-HASH-MISMATCH
+        status: 422
+      - code: DOC-ERR-IMMUTABLE
+        status: 422
+      - code: DOC-ERR-SCAN-REQUIRED
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveStoreRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveStoreResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/archives/{id}:
+    get:
+      operationId: doc.Archive.get
+      summary: Archive
+      description: |-
+        Archive
+
+        PRD inputs: binary stream + declared hash, metadata
+        PRD outputs: archive id, hash
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-DOC-004
+      - REQ-DOC-187..REQ-DOC-202
+      x-anchor:
+      - REQ-DOC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-consumers:
+      - FIN
+      - MKT
+      - PFC
+      x-permission: doc.Archive.get
+      x-error-codes:
+      - code: DOC-ERR-HASH-MISMATCH
+        status: 422
+      - code: DOC-ERR-IMMUTABLE
+        status: 422
+      - code: DOC-ERR-SCAN-REQUIRED
+        status: 422
+      x-source:
+      - PRD-10 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Archive (PRD input: "binary stream + declared hash")'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/archives/verify:
+    post:
+      operationId: doc.Archive.verify
+      summary: Archive
+      description: |-
+        Archive
+
+        PRD inputs: binary stream + declared hash, metadata
+        PRD outputs: archive id, hash
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-DOC-004
+      - REQ-DOC-187..REQ-DOC-202
+      x-anchor:
+      - REQ-DOC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Archive.verify
+      x-error-codes:
+      - code: DOC-ERR-HASH-MISMATCH
+        status: 422
+      - code: DOC-ERR-IMMUTABLE
+        status: 422
+      - code: DOC-ERR-SCAN-REQUIRED
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveVerifyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveVerifyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/archives/add-rendition:
+    post:
+      operationId: doc.Archive.addRendition
+      summary: Archive
+      description: |-
+        Archive
+
+        PRD inputs: binary stream + declared hash, metadata
+        PRD outputs: archive id, hash
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-DOC-004
+      - REQ-DOC-187..REQ-DOC-202
+      x-anchor:
+      - REQ-DOC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Archive.addRendition
+      x-error-codes:
+      - code: DOC-ERR-HASH-MISMATCH
+        status: 422
+      - code: DOC-ERR-IMMUTABLE
+        status: 422
+      - code: DOC-ERR-SCAN-REQUIRED
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveAddRenditionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveAddRenditionResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/archives/set-retention-class:
+    post:
+      operationId: doc.Archive.setRetentionClass
+      summary: Archive
+      description: |-
+        Archive
+
+        PRD inputs: binary stream + declared hash, metadata
+        PRD outputs: archive id, hash
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-DOC-004
+      - REQ-DOC-187..REQ-DOC-202
+      x-anchor:
+      - REQ-DOC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Archive.setRetentionClass
+      x-error-codes:
+      - code: DOC-ERR-HASH-MISMATCH
+        status: 422
+      - code: DOC-ERR-IMMUTABLE
+        status: 422
+      - code: DOC-ERR-SCAN-REQUIRED
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveSetRetentionClassRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveSetRetentionClassResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/archives/list-for-object:
+    get:
+      operationId: doc.Archive.listForObject
+      summary: Archive
+      description: |-
+        Archive
+
+        PRD inputs: binary stream + declared hash, metadata
+        PRD outputs: archive id, hash
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-DOC-004
+      - REQ-DOC-187..REQ-DOC-202
+      x-anchor:
+      - REQ-DOC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-exposure:
+      - ui
+      x-permission: doc.Archive.listForObject
+      x-error-codes:
+      - code: DOC-ERR-HASH-MISMATCH
+        status: 422
+      - code: DOC-ERR-IMMUTABLE
+        status: 422
+      - code: DOC-ERR-SCAN-REQUIRED
+        status: 422
+      x-source:
+      - PRD-10 §9.1 l.1654
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveListForObjectPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/subject/export:
+    post:
+      operationId: doc.Subject.export
+      summary: DSAR
+      description: |-
+        DSAR
+
+        PRD inputs: party id, scope
+        PRD outputs: per-item outcomes
+      tags:
+      - Subject
+      x-requirement:
+      - REQ-DOC-313
+      - REQ-DOC-314
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: doc.Subject.export
+      x-error-codes:
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1655
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/subject/restrict:
+    post:
+      operationId: doc.Subject.restrict
+      summary: DSAR
+      description: |-
+        DSAR
+
+        PRD inputs: party id, scope
+        PRD outputs: per-item outcomes
+      tags:
+      - Subject
+      x-requirement:
+      - REQ-DOC-313
+      - REQ-DOC-314
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: doc.Subject.restrict
+      x-error-codes:
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1655
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectRestrictRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectRestrictResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/subject/erase:
+    post:
+      operationId: doc.Subject.erase
+      summary: DSAR
+      description: |-
+        DSAR
+
+        PRD inputs: party id, scope
+        PRD outputs: per-item outcomes
+      tags:
+      - Subject
+      x-requirement:
+      - REQ-DOC-313
+      - REQ-DOC-314
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: Key'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: doc.Subject.erase
+      x-error-codes:
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1655
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectEraseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectEraseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/import:
+    post:
+      operationId: doc.Document.import
+      summary: Migration
+      description: |-
+        Migration
+
+        PRD inputs: binary, metadata, legacy refs
+        PRD outputs: archive and document ids
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-311
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD idempotency: Key; DR'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - MIG
+      x-permission: doc.Document.import
+      x-error-codes:
+      - code: DOC-ERR-IMPORT-INVALID
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-10 §9.1 l.1656
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentImportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentImportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/provider-events/{provider}:
+    post:
+      operationId: doc.ProviderEvent.receive
+      summary: Provider status callbacks (email, SMS, e-signature)
+      description: 'PRD-10 §9.1 lists the path only (`/api/doc/v1/provider-events/{provider}`); the operation name is derived.
+        Inputs: signed provider payloads → 202; 401 on invalid signature; idempotent on the provider event id.'
+      tags:
+      - ProviderEvent
+      x-requirement:
+      - REQ-DOC-228
+      - REQ-DOC-246
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: minimal
+      x-name-derived: true
+      x-operation-kind: command
+      x-idempotency: required
+      x-idempotency-note: 'PRD: idempotent on the provider event id; the Idempotency-Key header carries it'
+      x-dry-run: false
+      x-maturity: pre-release
+      x-exposure:
+      - partner
+      x-permission: doc.ProviderEvent.receive
+      x-error-codes:
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+        note: contract §3.5.3
+      x-source:
+      - PRD-10 §9.1 l.1657
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - name: provider
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Provider code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderEventReceiveRequest'
+      responses:
+        '202':
+          description: Accepted
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+      security:
+      - providerSignature: []
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+    providerSignature:
+      $ref: common.yaml#/components/securitySchemes/providerSignature
+  schemas:
+    DocumentRequestRequest:
+      type: object
+      properties:
+        documentType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: DT-* catalogue, e.g. DT-IPID, DT-PRECONTRACT-INFO
+        subject:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+        recipients:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/OpenObject
+        resolveRecipients:
+          type: boolean
+          description: Resolve recipients from the type
+        languageOverride:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+        payloadSupplement:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+        deliveryInstruction:
+          type: object
+          properties:
+            mode:
+              type: string
+              enum:
+              - RESOLVE
+              - SUPPRESS
+              - EXPLICIT
+              description: REQ-DOC-001
+            channel:
+              $ref: ../events/common.schema.json#/$defs/Code
+          required:
+          - mode
+        sync:
+          type: boolean
+          description: Synchronous rendering
+      required:
+      - documentType
+      - subject
+      - deliveryInstruction
+      oneOf:
+      - required:
+        - recipients
+      - required:
+        - resolveRecipients
+      description: 'Typed from REQ-DOC-001, REQ-DOC-007. PRD inputs: "type, subject ref, recipients or resolve, language override,
+        payload supplement, delivery instruction, sync flag"'
+    DocumentRequestResponse:
+      type: object
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+        links:
+          type: array
+          items:
+            type: string
+            format: uri
+        templateVersions:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Dry-run
+        channels:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Dry-run
+        preview:
+          type: string
+          description: Dry-run preview reference
+      required:
+      - status
+      description: 'Typed from REQ-DOC-001, REQ-DOC-007. PRD outputs: "document id, number, status, links"'
+    DocumentRequestBatchRequest:
+      type: object
+      description: 'doc.Document.requestBatch request. PRD inputs: "items[], batch key, window"'
+      properties:
+        items:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "items[]"'
+        batchKey:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "batch key"'
+        window:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "window"'
+    DocumentRequestBatchResponse:
+      type: object
+      description: 'doc.Document.requestBatch result. PRD outputs: "batch id"'
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id"'
+    DocumentPreviewRequest:
+      type: object
+      description: 'doc.Document.preview request. PRD inputs: "as request"'
+      x-status: minimal
+    DocumentPreviewResponse:
+      type: object
+      description: 'doc.Document.preview result. PRD outputs: "rendition (DRAFT)"'
+      properties:
+        rendition:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rendition (DRAFT)"'
+    DocumentGetItem:
+      type: object
+      description: 'doc.Document.get result. PRD outputs: "documents with statuses"'
+      properties:
+        documentsStatuses:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "documents with statuses"'
+    DocumentGetPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/DocumentGetItem'
+      description: Page of doc.Document.get results (cursor pagination, contract §3.5.5)
+    DocumentListForObjectItem:
+      type: object
+      description: 'doc.Document.listForObject result. PRD outputs: "documents with statuses"'
+      properties:
+        documentsStatuses:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "documents with statuses"'
+    DocumentListForObjectPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/DocumentListForObjectItem'
+      description: Page of doc.Document.listForObject results (cursor pagination, contract §3.5.5)
+    DocumentReprintRequest:
+      type: object
+      description: 'doc.Document.reprint request. PRD inputs: "document id, reason"'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "document id"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    DocumentReprintResponse:
+      type: object
+      description: 'doc.Document.reprint result. PRD outputs: "link"'
+      properties:
+        link:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "link"'
+    DocumentResendRequest:
+      type: object
+      description: 'doc.Document.resend request. PRD inputs: "document id, recipient, channel, reason"'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "document id"'
+        recipient:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "recipient"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    DocumentResendResponse:
+      type: object
+      description: 'doc.Document.resend result. PRD outputs: "delivery id"'
+      properties:
+        deliveryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "delivery id"'
+    DocumentRenderAsOfRequest:
+      type: object
+      description: 'doc.Document.renderAsOf request. PRD inputs: "subject, type, validAt, knownAt, wording mode"'
+      properties:
+        subject:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "subject"'
+        type:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "type"'
+        wordingMode:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "wording mode"'
+    DocumentRenderAsOfResponse:
+      type: object
+      description: 'doc.Document.renderAsOf result. PRD outputs: "document id"'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "document id"'
+    DocumentHideRequest:
+      type: object
+      description: 'doc.Document.hide request. PRD inputs: "document id, reason"'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "document id"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    DocumentHideResponse:
+      type: object
+      description: 'doc.Document.hide result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    DocumentUnhideRequest:
+      type: object
+      description: 'doc.Document.unhide request. PRD inputs: "document id, reason"'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "document id"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    DocumentUnhideResponse:
+      type: object
+      description: 'doc.Document.unhide result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    DocumentDeleteDraftRequest:
+      type: object
+      description: 'doc.Document.deleteDraft request. PRD inputs: "document id, reason"'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "document id"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    DocumentDeleteDraftResponse:
+      type: object
+      description: 'doc.Document.deleteDraft result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    DocumentSupersedeRequest:
+      type: object
+      description: 'doc.Document.supersede request. PRD inputs: "document id, replacement, reason"'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "document id"'
+        replacement:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "replacement"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    DocumentSupersedeResponse:
+      type: object
+      description: 'doc.Document.supersede result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    DocumentWithdrawRequest:
+      type: object
+      description: 'doc.Document.withdraw request. PRD inputs: "document id, replacement, reason"'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "document id"'
+        replacement:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "replacement"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    DocumentWithdrawResponse:
+      type: object
+      description: 'doc.Document.withdraw result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    DocumentTypeListItem:
+      type: object
+      description: 'doc.DocumentType.list result. PRD outputs: "types"'
+      properties:
+        types:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "types"'
+    DocumentTypeListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/DocumentTypeListItem'
+      description: Page of doc.DocumentType.list results (cursor pagination, contract §3.5.5)
+    TemplateListItem:
+      type: object
+      description: 'doc.Template.list result. PRD outputs: "objects"'
+      properties:
+        objects:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "objects"'
+    TemplateListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/TemplateListItem'
+      description: Page of doc.Template.list results (cursor pagination, contract §3.5.5)
+    ClauseGetResponse:
+      type: object
+      description: 'doc.Clause.get result. PRD outputs: "objects"'
+      properties:
+        objects:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "objects"'
+    FormsInferRequest:
+      type: object
+      description: 'doc.Forms.infer request. PRD inputs: "job id, version"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "job id"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+    FormsInferResponse:
+      type: object
+      description: 'doc.Forms.infer result. PRD outputs: "form set"'
+      properties:
+        formSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "form set"'
+    FormsAddManualRequest:
+      type: object
+      description: 'doc.Forms.addManual request. PRD inputs: "job id, version, pattern, reason"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "job id"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        pattern:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pattern"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    FormsAddManualResponse:
+      type: object
+      description: 'doc.Forms.addManual result. PRD outputs: "form set"'
+      properties:
+        formSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "form set"'
+    FormsRemoveManualRequest:
+      type: object
+      description: 'doc.Forms.removeManual request. PRD inputs: "job id, version, pattern, reason"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "job id"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        pattern:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "pattern"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+    FormsRemoveManualResponse:
+      type: object
+      description: 'doc.Forms.removeManual result. PRD outputs: "form set"'
+      properties:
+        formSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "form set"'
+    FormsGetResponse:
+      type: object
+      description: 'doc.Forms.get result. PRD outputs: "form set"'
+      properties:
+        formSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "form set"'
+    FormPatternValidateReferencesRequest:
+      type: object
+      description: 'doc.FormPattern.validateReferences request. PRD inputs: "product version, refs"'
+      properties:
+        productVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product version"'
+        refs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "refs"'
+    FormPatternValidateReferencesResponse:
+      type: object
+      description: 'doc.FormPattern.validateReferences result. PRD outputs: "per-ref results"'
+      properties:
+        perRefResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-ref results"'
+    BindingResolveRequest:
+      type: object
+      description: 'doc.Binding.resolve request. PRD inputs: "product version, form, language, channel, date"'
+      properties:
+        productVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product version"'
+        form:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "form"'
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+          description: 'PRD: "language"'
+        channel:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "channel"'
+    BindingResolveResponse:
+      type: object
+      description: 'doc.Binding.resolve result. PRD outputs: "template version"'
+      properties:
+        templateVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "template version"'
+    ProofOfCoverIssueRequest:
+      type: object
+      properties:
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - transactionId
+      description: 'Typed from REQ-DOC-007, REQ-DOC-224. PRD inputs: "transaction id"'
+    ProofOfCoverIssueResponse:
+      type: object
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: Statutory cover-note number
+      required:
+      - documentId
+      - documentNumber
+      description: 'Typed from REQ-DOC-007, REQ-DOC-224. PRD outputs: "document id"'
+    IpidGetResponse:
+      type: object
+      properties:
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        link:
+          type: string
+          format: uri
+      required:
+      - archiveId
+      - link
+      description: 'Typed from REQ-DOC-007, REQ-DOC-220. PRD outputs: "archive link"'
+    DeliveryStatusResponse:
+      type: object
+      description: 'doc.Delivery.status result. PRD outputs: "statuses, completeness"'
+      properties:
+        statuses:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "statuses"'
+        completeness:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "completeness"'
+    DeliveryEvidenceForResponse:
+      type: object
+      description: 'doc.Delivery.evidenceFor result. PRD outputs: "statuses, completeness"'
+      properties:
+        statuses:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "statuses"'
+        completeness:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "completeness"'
+    EvidencePackGetResponse:
+      type: object
+      description: 'doc.EvidencePack.get result. PRD outputs: "sealed archive"'
+      properties:
+        sealedArchive:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sealed archive"'
+    EvidencePackExportRequest:
+      type: object
+      description: 'doc.EvidencePack.export request. PRD inputs: "pack id / filters"'
+      properties:
+        packId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "pack id"'
+        filters:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "filters"'
+    EvidencePackExportResponse:
+      type: object
+      description: 'doc.EvidencePack.export result. PRD outputs: "sealed archive"'
+      properties:
+        sealedArchive:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sealed archive"'
+    SignatureCreateEnvelopeRequest:
+      type: object
+      description: 'doc.Signature.createEnvelope request. PRD inputs: "documents, signatories, level, deadline"'
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "documents"'
+        signatories:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "signatories"'
+        level:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "level"'
+        deadline:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "deadline"'
+    SignatureCreateEnvelopeResponse:
+      type: object
+      description: 'doc.Signature.createEnvelope result. PRD outputs: "envelope"'
+      properties:
+        envelope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "envelope"'
+    SignatureSendRequest:
+      type: object
+      description: 'doc.Signature.send request. PRD inputs: "documents, signatories, level, deadline"'
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "documents"'
+        signatories:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "signatories"'
+        level:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "level"'
+        deadline:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "deadline"'
+    SignatureSendResponse:
+      type: object
+      description: 'doc.Signature.send result. PRD outputs: "envelope"'
+      properties:
+        envelope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "envelope"'
+    SignatureRemindRequest:
+      type: object
+      description: 'doc.Signature.remind request. PRD inputs: "documents, signatories, level, deadline"'
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "documents"'
+        signatories:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "signatories"'
+        level:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "level"'
+        deadline:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "deadline"'
+    SignatureRemindResponse:
+      type: object
+      description: 'doc.Signature.remind result. PRD outputs: "envelope"'
+      properties:
+        envelope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "envelope"'
+    SignatureVoidRequest:
+      type: object
+      description: 'doc.Signature.void request. PRD inputs: "documents, signatories, level, deadline"'
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "documents"'
+        signatories:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "signatories"'
+        level:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "level"'
+        deadline:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "deadline"'
+    SignatureVoidResponse:
+      type: object
+      description: 'doc.Signature.void result. PRD outputs: "envelope"'
+      properties:
+        envelope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "envelope"'
+    SignatureGetResponse:
+      type: object
+      description: 'doc.Signature.get result. PRD outputs: "envelope"'
+      properties:
+        envelope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "envelope"'
+    ArchiveStoreRequest:
+      type: object
+      description: 'doc.Archive.store request. PRD inputs: "binary stream + declared hash, metadata"'
+      properties:
+        binaryStream:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binary stream + declared hash"'
+        declaredHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "binary stream + declared hash"'
+        metadata:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "metadata"'
+    ArchiveStoreResponse:
+      type: object
+      description: 'doc.Archive.store result. PRD outputs: "archive id, hash"'
+      properties:
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "archive id"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+    ArchiveGetResponse:
+      type: object
+      description: 'doc.Archive.get result. PRD outputs: "archive id, hash"'
+      properties:
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "archive id"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+    ArchiveVerifyRequest:
+      type: object
+      description: 'doc.Archive.verify request. PRD inputs: "binary stream + declared hash, metadata"'
+      properties:
+        binaryStream:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binary stream + declared hash"'
+        declaredHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "binary stream + declared hash"'
+        metadata:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "metadata"'
+    ArchiveVerifyResponse:
+      type: object
+      description: 'doc.Archive.verify result. PRD outputs: "archive id, hash"'
+      properties:
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "archive id"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+    ArchiveAddRenditionRequest:
+      type: object
+      description: 'doc.Archive.addRendition request. PRD inputs: "binary stream + declared hash, metadata"'
+      properties:
+        binaryStream:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binary stream + declared hash"'
+        declaredHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "binary stream + declared hash"'
+        metadata:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "metadata"'
+    ArchiveAddRenditionResponse:
+      type: object
+      description: 'doc.Archive.addRendition result. PRD outputs: "archive id, hash"'
+      properties:
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "archive id"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+    ArchiveSetRetentionClassRequest:
+      type: object
+      description: 'doc.Archive.setRetentionClass request. PRD inputs: "binary stream + declared hash, metadata"'
+      properties:
+        binaryStream:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binary stream + declared hash"'
+        declaredHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "binary stream + declared hash"'
+        metadata:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "metadata"'
+    ArchiveSetRetentionClassResponse:
+      type: object
+      description: 'doc.Archive.setRetentionClass result. PRD outputs: "archive id, hash"'
+      properties:
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "archive id"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+    ArchiveListForObjectItem:
+      type: object
+      description: 'doc.Archive.listForObject result. PRD outputs: "archive id, hash"'
+      properties:
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "archive id"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+    ArchiveListForObjectPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ArchiveListForObjectItem'
+      description: Page of doc.Archive.listForObject results (cursor pagination, contract §3.5.5)
+    SubjectExportRequest:
+      type: object
+      description: 'doc.Subject.export request. PRD inputs: "party id, scope"'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "party id"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    SubjectExportResponse:
+      type: object
+      description: 'doc.Subject.export result. PRD outputs: "per-item outcomes"'
+      properties:
+        perItemOutcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-item outcomes"'
+    SubjectRestrictRequest:
+      type: object
+      description: 'doc.Subject.restrict request. PRD inputs: "party id, scope"'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "party id"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    SubjectRestrictResponse:
+      type: object
+      description: 'doc.Subject.restrict result. PRD outputs: "per-item outcomes"'
+      properties:
+        perItemOutcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-item outcomes"'
+    SubjectEraseRequest:
+      type: object
+      description: 'doc.Subject.erase request. PRD inputs: "party id, scope"'
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "party id"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    SubjectEraseResponse:
+      type: object
+      description: 'doc.Subject.erase result. PRD outputs: "per-item outcomes"'
+      properties:
+        perItemOutcomes:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "per-item outcomes"'
+    DocumentImportRequest:
+      type: object
+      description: 'doc.Document.import request. PRD inputs: "binary, metadata, legacy refs"'
+      properties:
+        binary:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "binary"'
+        metadata:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "metadata"'
+        legacyRefs:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "legacy refs"'
+    DocumentImportResponse:
+      type: object
+      description: 'doc.Document.import result. PRD outputs: "archive and document ids"'
+      properties:
+        archiveIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "archive and document ids"'
+        documentIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "archive and document ids"'
+    ProviderEventReceiveRequest:
+      type: object
+      x-status: minimal
+      description: Signed provider payload (email, SMS, signature providers); shape is provider-specific

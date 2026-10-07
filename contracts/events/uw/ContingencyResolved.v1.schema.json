@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/uw/ContingencyResolved.v1.schema.json",
+  "title": "ContingencyResolved v1",
+  "description": "Contingency Satisfied, Waived or ConsequenceApplied",
+  "x-event-type": "ContingencyResolved",
+  "x-registry-name": "uw.ContingencyResolved",
+  "x-producer": "UW",
+  "x-topic": "uw.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "term_id",
+  "x-aggregate-type": [
+    "PolicyTerm"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "policyTermId",
+    "contingencyId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-04 §8.2",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ContingencyResolved"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "UW"
+    },
+    "aggregateType": {
+      "const": "PolicyTerm"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyTermId",
+        "contingencyId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contingencyId",
+        "outcome"
+      ],
+      "properties": {
+        "contingencyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "SATISFIED",
+            "WAIVED",
+            "CONSEQUENCE_APPLIED"
+          ],
+          "x-classification": "P0"
+        },
+        "consequenceJobId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

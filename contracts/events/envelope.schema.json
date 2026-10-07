@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/envelope.schema.json",
+  "title": "Event envelope",
+  "description": "Standard envelope for every cross-module event (contract §3.4.1, PLAN §4.3, D-ARC-02, D-CON-01, D-CON-09, D-CON-19). Each event schema in contracts/events/<module>/ composes this envelope with allOf, pins eventType, producer, aggregateType and dataClassification, and binds payload to its own payload schema. Fields are camelCase except the set-completeness fields, which keep the contract D4 names set_id, set_size and index.",
+  "type": "object",
+  "required": [
+    "eventId",
+    "eventType",
+    "schemaVersion",
+    "producer",
+    "aggregateType",
+    "aggregateId",
+    "aggregateSequence",
+    "occurredAt",
+    "recordedAt",
+    "legalEntity",
+    "jurisdiction",
+    "configurationHash",
+    "businessKeys",
+    "correlationId",
+    "causationId",
+    "actor",
+    "aiInteractionId",
+    "origin",
+    "dataClassification",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "description": "Unique event id, UUIDv7 (contract §3.4.1). Consumers are idempotent on this id (plt.processed_event).",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "eventType": {
+      "description": "Catalogued event name, PascalCase past tense (e.g. PolicyBound). The registry name is <producer lower-case>.<eventType> (XMR-F-121).",
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]+$"
+    },
+    "schemaVersion": {
+      "description": "Schema version major.minor. Minor versions are additive only; a breaking change is a new major published in parallel.",
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "producer": {
+      "description": "Producing module code (contract §3.6.1). Exactly one producer per event type.",
+      "type": "string",
+      "enum": [
+        "PTY",
+        "PFC",
+        "RAT",
+        "UW",
+        "POL",
+        "BIL",
+        "CLM",
+        "RI",
+        "FIN",
+        "DOC",
+        "CMP",
+        "CHN",
+        "WRK",
+        "PLT",
+        "DAT",
+        "MIG",
+        "MKT"
+      ]
+    },
+    "aggregateType": {
+      "description": "Type of the aggregate whose order consumers depend on (R-100).",
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]+$"
+    },
+    "aggregateId": {
+      "description": "Ordering key: the stable id of the aggregate (contract partition key, D-ARC-02). Usually a UUID; some aggregates use a stable code (stamp, pack, rc_code, GLOBAL).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "aggregateSequence": {
+      "description": "Per-aggregate sequence, starting at 1 and gap-free per (aggregateType, aggregateId). The dispatcher delivers events of one aggregate in this order.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "occurredAt": {
+      "description": "Business time of the fact, RFC 3339 UTC.",
+      "$ref": "#/$defs/UtcInstant"
+    },
+    "recordedAt": {
+      "description": "Time the fact was committed with its outbox row, RFC 3339 UTC.",
+      "$ref": "#/$defs/UtcInstant"
+    },
+    "legalEntity": {
+      "description": "Legal entity code the fact belongs to (stamp per legal entity, D-ARC-01).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "jurisdiction": {
+      "description": "ISO 3166-1 alpha-2 jurisdiction of the fact (contract §3.4.1; required on every event per D-CON-26).",
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "configurationHash": {
+      "description": "SHA-256 (lower-case hex) of the resolved configuration in force when the fact was produced (D-ARC-12). For MKT activation events it is the hash after the change.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "businessKeys": {
+      "description": "Business lineage keys (D5, D-CON-01): named business ids such as quoteId, jobId, policyId, transactionId, chargeId, invoiceId, claimId, journalId. Journey lineage uses these, never correlationId. At least one key (D-CON-28); each event schema requires its own keys (catalog x-business-keys). Party and account ids here are P1 pseudonymous ids.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][A-Za-z0-9]*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "minProperties": 1
+    },
+    "correlationId": {
+      "description": "W3C trace-id (32 lower-case hex, not all zero) for technical tracing only (D-CON-01).",
+      "type": "string",
+      "pattern": "^(?!0{32})[0-9a-f]{32}$"
+    },
+    "causationId": {
+      "description": "eventId of the event, or id of the command, that caused this event; null for an originating user or system action.",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "actor": {
+      "description": "Who caused the fact: user, service or AI agent id (contract §3.4.1; required per D-CON-26). Classified P1.",
+      "type": "object",
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "USER",
+            "SERVICE",
+            "AI_AGENT"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "x-classification": "P1"
+    },
+    "aiInteractionId": {
+      "description": "AiInteractionRecord id when the fact came from an accepted AI suggestion (contract §3.4.1); null otherwise. Always present (D-CON-26).",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "origin": {
+      "description": "LIVE for normal business, MIGRATION for converted business (contract §3.4.1, D-CON-09), REPLAY for events re-emitted by the replay command. MIG's own events are LIVE.",
+      "type": "string",
+      "enum": [
+        "LIVE",
+        "MIGRATION",
+        "REPLAY"
+      ]
+    },
+    "dataClassification": {
+      "description": "Highest personal-data class among the payload fields (P0 not personal, P1 personal, P2 personal-sensitive, P3 special category; contract §3.2.1, R-66). Each event schema pins this value.",
+      "type": "string",
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    "set_id": {
+      "description": "Contract D4 set-completeness: id of the set of events a consumer must process as a whole (e.g. one out-of-sequence aggregate or one transaction's charge deltas). Name kept as in the contract (D-CON-19).",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "set_size": {
+      "description": "Contract D4: number of members in the set.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "index": {
+      "description": "Contract D4: 1-based position of this event in its set; 1 <= index <= set_size. JSON Schema cannot compare two fields, so validate.py and the C# envelope type must reject index > set_size.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "payload": {
+      "description": "Event-specific payload. Its schema is the Payload definition of the event schema for eventType at schemaVersion.",
+      "type": "object"
+    }
+  },
+  "dependentRequired": {
+    "set_id": [
+      "set_size",
+      "index"
+    ],
+    "set_size": [
+      "set_id",
+      "index"
+    ],
+    "index": [
+      "set_id",
+      "set_size"
+    ]
+  },
+  "$defs": {
+    "UtcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?Z$"
+    }
+  }
+}

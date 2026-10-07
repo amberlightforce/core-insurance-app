@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/rat/ShadowRunCompleted.v1.schema.json",
+  "title": "ShadowRunCompleted v1",
+  "description": "ShadowRun ended (completed or stopped)",
+  "x-event-type": "ShadowRunCompleted",
+  "x-registry-name": "rat.ShadowRunCompleted",
+  "x-producer": "RAT",
+  "x-topic": "rat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "rating_slot_id",
+  "x-aggregate-type": [
+    "RatingSlot"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "ratingSlotId",
+    "runId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-03 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ShadowRunCompleted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RAT"
+    },
+    "aggregateType": {
+      "const": "RatingSlot"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "ratingSlotId",
+        "runId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "candidateHash",
+        "productionHash",
+        "window",
+        "itemCount",
+        "distributionSummary",
+        "status"
+      ],
+      "properties": {
+        "runId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "candidateHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "productionHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "window": {
+          "$ref": "../common.schema.json#/$defs/TimeWindow",
+          "x-classification": "P0"
+        },
+        "itemCount": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "distributionSummary": {
+          "$ref": "../common.schema.json#/$defs/OpenObject",
+          "x-classification": "P0"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "COMPLETED",
+            "STOPPED"
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

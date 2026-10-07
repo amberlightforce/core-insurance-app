@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/rat/RatingCalculated.v1.schema.json",
+  "title": "RatingCalculated v1",
+  "description": "Rating in FULL, QUICK, ENDORSEMENT or RENEWAL mode completed. Keyed on job_id, or the request id for anonymous quick quotes. Business lineage keys also go in envelope businessKeys (D5).",
+  "x-event-type": "RatingCalculated",
+  "x-registry-name": "rat.RatingCalculated",
+  "x-producer": "RAT",
+  "x-topic": "rat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "job_id",
+  "x-aggregate-type": [
+    "Job",
+    "RatingRequest"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "worksheetId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-03 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RatingCalculated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RAT"
+    },
+    "aggregateType": {
+      "enum": [
+        "Job",
+        "RatingRequest"
+      ]
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "worksheetId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ratingKey",
+        "productCode",
+        "productVersion",
+        "slot",
+        "mode",
+        "channel",
+        "ratingCellKey",
+        "levelCodes",
+        "coveragePremiumTotal",
+        "taxTotal",
+        "signalCodes",
+        "worksheetId",
+        "bindable"
+      ],
+      "properties": {
+        "ratingKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "quoteId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "jobId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Absent for anonymous quick quotes",
+          "x-classification": "P0"
+        },
+        "transactionId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "productCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "productVersion": {
+          "$ref": "../common.schema.json#/$defs/ProductVersionNumber",
+          "x-classification": "P0"
+        },
+        "slot": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "FULL",
+            "QUICK",
+            "ENDORSEMENT",
+            "RENEWAL"
+          ],
+          "x-classification": "P0"
+        },
+        "channel": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "producerCode": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "ratingCellKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "levelCodes": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "coveragePremiumTotal": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "taxTotal": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "signalCodes": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "worksheetId": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "description": "SHA-256 of the canonical worksheet (D-API-12, PRD-03 data model); same value as rat.Rate.rate worksheetId",
+          "x-classification": "P0"
+        },
+        "bindable": {
+          "type": "boolean",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

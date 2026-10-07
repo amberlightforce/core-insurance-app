@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pty/BookTransferCompleted.v1.schema.json",
+  "title": "BookTransferCompleted v1",
+  "description": "Bulk transfer finished",
+  "x-event-type": "BookTransferCompleted",
+  "x-registry-name": "pty.BookTransferCompleted",
+  "x-producer": "PTY",
+  "x-topic": "pty.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "transfer_id",
+  "x-aggregate-type": [
+    "BookTransfer"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "transferId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-01 §8.2",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "BookTransferCompleted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PTY"
+    },
+    "aggregateType": {
+      "const": "BookTransfer"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "transferId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transferId",
+        "transferredCount",
+        "failureCount",
+        "mode",
+        "sourceProducerCodes",
+        "targetProducerCode"
+      ],
+      "properties": {
+        "transferId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "transferredCount": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "failureCount": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "mode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "sourceProducerCodes": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "targetProducerCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

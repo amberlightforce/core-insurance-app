@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/wrk/ActivitySkipped.v1.schema.json",
+  "title": "ActivitySkipped v1",
+  "description": "Skipped",
+  "x-event-type": "ActivitySkipped",
+  "x-registry-name": "wrk.ActivitySkipped",
+  "x-producer": "WRK",
+  "x-topic": "wrk.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "activity_id",
+  "x-aggregate-type": [
+    "Activity"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "activityId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-13 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ActivitySkipped"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "WRK"
+    },
+    "aggregateType": {
+      "const": "Activity"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "activityId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reasonCode"
+      ],
+      "properties": {
+        "reasonCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/clm/ReverificationRequired.v1.schema.json",
+  "title": "ReverificationRequired v1",
+  "description": "POL superseded the snapshot segment or changed the policy at or before loss date",
+  "x-event-type": "ReverificationRequired",
+  "x-registry-name": "clm.ReverificationRequired",
+  "x-producer": "CLM",
+  "x-topic": "clm.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "claim_id",
+  "x-aggregate-type": [
+    "Claim"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "claimId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-07 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ReverificationRequired"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CLM"
+    },
+    "aggregateType": {
+      "const": "Claim"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "claimId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oldSnapshotRef",
+        "newSnapshotRef",
+        "causeEventId"
+      ],
+      "properties": {
+        "oldSnapshotRef": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "newSnapshotRef": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "causeEventId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

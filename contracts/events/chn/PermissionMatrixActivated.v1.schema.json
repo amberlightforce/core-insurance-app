@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/chn/PermissionMatrixActivated.v1.schema.json",
+  "title": "PermissionMatrixActivated v1",
+  "description": "Matrix version becomes Active",
+  "x-event-type": "PermissionMatrixActivated",
+  "x-registry-name": "chn.PermissionMatrixActivated",
+  "x-producer": "CHN",
+  "x-topic": "chn.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "legal_entity_id",
+  "x-aggregate-type": [
+    "LegalEntity"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "permissionMatrixVersion"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-12 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "PermissionMatrixActivated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CHN"
+    },
+    "aggregateType": {
+      "const": "LegalEntity"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "permissionMatrixVersion"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "effectiveFrom",
+        "approvalRef"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "effectiveFrom": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "approvalRef": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

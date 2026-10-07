@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pty/SanctionsHitRaised.v1.schema.json",
+  "title": "SanctionsHitRaised v1",
+  "description": "Case enters PotentialHit or TrueMatch. Keyed on party_id, or the ad-hoc subject hash.",
+  "x-event-type": "SanctionsHitRaised",
+  "x-registry-name": "pty.SanctionsHitRaised",
+  "x-producer": "PTY",
+  "x-topic": "pty.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "party_id",
+  "x-aggregate-type": [
+    "Party",
+    "ScreeningSubject"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "caseNumber"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-01 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "SanctionsHitRaised"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PTY"
+    },
+    "aggregateType": {
+      "enum": [
+        "Party",
+        "ScreeningSubject"
+      ]
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "caseNumber"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseNumber",
+        "status",
+        "blockFlag",
+        "callerRefs"
+      ],
+      "properties": {
+        "partyId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Absent for ad-hoc screening subjects",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "subjectHash": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Ad-hoc subject hash when no party exists",
+          "x-classification": "P0"
+        },
+        "caseNumber": {
+          "$ref": "../common.schema.json#/$defs/BusinessNumber",
+          "x-classification": "P0"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "POTENTIAL_HIT",
+            "TRUE_MATCH"
+          ],
+          "x-classification": "P0"
+        },
+        "blockFlag": {
+          "type": "boolean",
+          "x-classification": "P0"
+        },
+        "callerRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ObjectRef"
+          },
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

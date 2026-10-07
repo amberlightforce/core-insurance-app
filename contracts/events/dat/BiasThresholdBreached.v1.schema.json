@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/dat/BiasThresholdBreached.v1.schema.json",
+  "title": "BiasThresholdBreached v1",
+  "description": "Bias ratio outside band (REQ-DAT-218). Keyed on model_id, or the rating artefact id.",
+  "x-event-type": "BiasThresholdBreached",
+  "x-registry-name": "dat.BiasThresholdBreached",
+  "x-producer": "DAT",
+  "x-topic": "dat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "model_id",
+  "x-aggregate-type": [
+    "Model",
+    "RatingArtefact"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "breachId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-15 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "BiasThresholdBreached"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DAT"
+    },
+    "aggregateType": {
+      "enum": [
+        "Model",
+        "RatingArtefact"
+      ]
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "breachId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "proxyGroup",
+        "ratio",
+        "confidenceInterval",
+        "band",
+        "sampleSize",
+        "breachId"
+      ],
+      "properties": {
+        "featureId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/AiFeatureId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "ratingArtefactHash": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "proxyGroup": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "ratio": {
+          "$ref": "../common.schema.json#/$defs/Decimal",
+          "x-classification": "P0"
+        },
+        "confidenceInterval": {
+          "$ref": "../common.schema.json#/$defs/ConfidenceInterval",
+          "x-classification": "P0"
+        },
+        "band": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "sampleSize": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "breachId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

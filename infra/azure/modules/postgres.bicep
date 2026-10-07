@@ -66,6 +66,10 @@ var parameters = [
   { name: 'shared_preload_libraries', value: 'pg_stat_statements' }
   { name: 'require_secure_transport', value: 'on' }
   { name: 'timezone', value: 'UTC' }
+  // Statement logging stays off: bootstrap statements carry role credentials (as SCRAM verifiers) and application
+  // statements may carry personal data (infra/README.md).
+  { name: 'log_statement', value: 'none' }
+  { name: 'log_min_duration_statement', value: '-1' }
 ]
 
 // Server parameters must be applied one at a time.

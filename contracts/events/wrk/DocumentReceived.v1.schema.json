@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/wrk/DocumentReceived.v1.schema.json",
+  "title": "DocumentReceived v1",
+  "description": "Inbound file archived or quarantined. Inbound document (registry name wrk.DocumentReceived, XMR-F-121).",
+  "x-event-type": "DocumentReceived",
+  "x-registry-name": "wrk.DocumentReceived",
+  "x-producer": "WRK",
+  "x-topic": "wrk.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "inbound_document_id",
+  "x-aggregate-type": [
+    "InboundDocument"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "inboundDocumentId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-13 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DocumentReceived"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "WRK"
+    },
+    "aggregateType": {
+      "const": "InboundDocument"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "inboundDocumentId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "channel",
+        "mediaType",
+        "sizeBytes",
+        "scanStatus"
+      ],
+      "properties": {
+        "envelopeId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "channel": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "mediaType": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "sizeBytes": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "x-classification": "P0"
+        },
+        "scanStatus": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "archiveRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present when clean",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/ClockPaused.v1.schema.json",
+  "title": "ClockPaused v1",
+  "description": "Instance transitions",
+  "x-event-type": "ClockPaused",
+  "x-registry-name": "cmp.ClockPaused",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "clock_instance_id",
+  "x-aggregate-type": [
+    "ClockInstance"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "clockInstanceId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ClockPaused"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "ClockInstance"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "clockInstanceId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clockCode",
+        "subject"
+      ],
+      "properties": {
+        "clockCode": {
+          "$ref": "../common.schema.json#/$defs/ClockCode",
+          "x-classification": "P0"
+        },
+        "subject": {
+          "$ref": "../common.schema.json#/$defs/ObjectRef",
+          "x-classification": "P0"
+        },
+        "newDeadline": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Instant"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

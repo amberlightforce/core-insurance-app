@@ -16,8 +16,9 @@ Greek-first, EU-ready P&C core insurance system (modular monolith, .NET 10 + Rea
 | `tools/CoreIns.Analyzers` | Roslyn analyser COREINS001: no `double`/`float` in `src/` |
 | `tests/` | Architecture, analyser, unit, integration (Testcontainers) and Playwright end-to-end tests |
 | `web/` | React + TypeScript + Vite front end (see [web/README.md](web/README.md)) |
+| `infra/database` | `bootstrap.sql`: roles, privileges, extensions; shared by local, CI and Azure |
 | `infra/local` | Docker Compose stack for local development |
-| `infra/azure` | Bicep templates for one Azure stamp |
+| `infra/azure` | Bicep templates for one Azure stamp (see [infra/README.md](infra/README.md), including the deltas to the infra spec) |
 
 ## Prerequisites
 
@@ -42,6 +43,9 @@ dotnet run --project src/CoreIns.Host --launch-profile worker    # optional
 # 3. Front end with hot reload (proxies /api to :5000)
 cd web && npm ci && npm run dev                                   # http://localhost:5173
 ```
+
+Auth sign-in (MSAL React, OIDC cookie sign-in for the Hangfire dashboard): W1-PLT identity WP (ruling D-FE-10).
+Until then the API accepts Entra ID bearer tokens only.
 
 Health probes on every container: `/health/live` (process up) and `/health/ready` (PostgreSQL reachable).
 Migrations never run at application start-up; only `APP_ROLE=migrate` changes the schema.

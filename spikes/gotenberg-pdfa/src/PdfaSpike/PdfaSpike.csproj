@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Apache-2.0. Read-only PDF parser: used to inspect embedded fonts (fallback-font detection,
+         REQ-DOC-149), extract text (REQ-DOC-150 round-trip) and read the embedded payload back. -->
+    <PackageReference Include="PdfPig" Version="0.1.11" />
+    <!-- MIT, Microsoft. SignedCms/CmsSigner for the PAdES seal probe (REQ-DOC-167); also has Rfc3161TimestampRequest. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.0" />
+  </ItemGroup>
+
+</Project>

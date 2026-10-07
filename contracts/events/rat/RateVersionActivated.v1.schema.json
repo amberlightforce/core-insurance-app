@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/rat/RateVersionActivated.v1.schema.json",
+  "title": "RateVersionActivated v1",
+  "description": "Activation time reached",
+  "x-event-type": "RateVersionActivated",
+  "x-registry-name": "rat.RateVersionActivated",
+  "x-producer": "RAT",
+  "x-topic": "rat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "rating_slot_id",
+  "x-aggregate-type": [
+    "RatingSlot"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "ratingSlotId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-03 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "RateVersionActivated"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "RAT"
+    },
+    "aggregateType": {
+      "const": "RatingSlot"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "ratingSlotId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artefactHash",
+        "slot",
+        "transactionType",
+        "effectiveFrom"
+      ],
+      "properties": {
+        "artefactHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "slot": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "transactionType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "effectiveFrom": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "predecessorHash": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/dat/DataContractVersionPublished.v1.schema.json",
+  "title": "DataContractVersionPublished v1",
+  "description": "Contract version becomes Active (REQ-DAT-031)",
+  "x-event-type": "DataContractVersionPublished",
+  "x-registry-name": "dat.DataContractVersionPublished",
+  "x-producer": "DAT",
+  "x-topic": "dat.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "contract_id",
+  "x-aggregate-type": [
+    "DataContract"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "contractId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-15 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DataContractVersionPublished"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DAT"
+    },
+    "aggregateType": {
+      "const": "DataContract"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "contractId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractId",
+        "version",
+        "breaking",
+        "producer"
+      ],
+      "properties": {
+        "contractId": {
+          "$ref": "../common.schema.json#/$defs/DataContractId",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "breaking": {
+          "type": "boolean",
+          "x-classification": "P0"
+        },
+        "producer": {
+          "$ref": "../common.schema.json#/$defs/ModuleCode",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

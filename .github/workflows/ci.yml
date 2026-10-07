@@ -23,9 +23,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
 
@@ -53,7 +53,7 @@ jobs:
           dotnet CycloneDX src/CoreIns.Host/CoreIns.Host.csproj --exclude-test-projects
           --output artifacts/sbom --filename dotnet.cdx.json --output-format Json
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sbom-dotnet
           path: artifacts/sbom/dotnet.cdx.json
@@ -66,9 +66,9 @@ jobs:
       run:
         working-directory: web
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -92,16 +92,46 @@ jobs:
       - name: SBOM (CycloneDX, npm)
         run: npm run sbom
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sbom-web
           path: artifacts/sbom/web.cdx.json
+
+  infra:
+    name: Bicep build, lint and Key Vault least-privilege guard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install a pinned Bicep CLI
+        run: az bicep install --version v0.48.1
+
+      - name: Build and lint
+        run: |
+          mkdir -p artifacts
+          az bicep build --file infra/azure/main.bicep --outfile artifacts/main.json
+          az bicep lint --file infra/azure/main.bicep
+
+      - name: Key Vault access is per secret and per workload
+        run: python3 scripts/check-keyvault-rbac.py artifacts/main.json
 
   image:
     name: Container image builds
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Build the single image (not pushed)
         run: docker build --tag coreins:ci .
+
+      - name: Vulnerability scan (Trivy; fails on fixable HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.75.0
+          image-ref: coreins:ci
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          format: table

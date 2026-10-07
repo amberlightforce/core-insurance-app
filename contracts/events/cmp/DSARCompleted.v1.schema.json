@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/DSARCompleted.v1.schema.json",
+  "title": "DSARCompleted v1",
+  "description": "DSAR transitions. PRD-11 names an outcome summary without structure.",
+  "x-event-type": "DSARCompleted",
+  "x-registry-name": "cmp.DSARCompleted",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "dsar_id",
+  "x-aggregate-type": [
+    "Dsar"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "dsarId"
+  ],
+  "x-payload-status": "minimal",
+  "x-payload-note": "PRD-11 names an outcome summary without structure.",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DSARCompleted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "Dsar"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "dsarId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dsarId",
+        "outcomeSummary"
+      ],
+      "properties": {
+        "dsarId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "outcomeSummary": {
+          "$ref": "../common.schema.json#/$defs/OpenObject",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

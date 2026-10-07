@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/clm/StatutoryOfferIssued.v1.schema.json",
+  "title": "StatutoryOfferIssued v1",
+  "description": "reasoned offer or reply delivered (proven delivery; for a reasoned offer CLM starts CLM_MTPL_PAYMENT_DUE at the delivery time, D7). For a reasoned offer CLM starts CLM_MTPL_PAYMENT_DUE at the delivery time (D7).",
+  "x-event-type": "StatutoryOfferIssued",
+  "x-registry-name": "clm.StatutoryOfferIssued",
+  "x-producer": "CLM",
+  "x-topic": "clm.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "claim_id",
+  "x-aggregate-type": [
+    "Claim"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "claimId",
+    "exposureId",
+    "documentId",
+    "deliveryEvidenceId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-07 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "StatutoryOfferIssued"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CLM"
+    },
+    "aggregateType": {
+      "const": "Claim"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "claimId",
+        "exposureId",
+        "documentId",
+        "deliveryEvidenceId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exposureId",
+        "kind",
+        "deliveredAt",
+        "documentId",
+        "deliveryEvidenceId"
+      ],
+      "properties": {
+        "exposureId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "REASONED_OFFER",
+            "REASONED_REPLY"
+          ],
+          "x-classification": "P0"
+        },
+        "deliveredAt": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "documentId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "deliveryEvidenceId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

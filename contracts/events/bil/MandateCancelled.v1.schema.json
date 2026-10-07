@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/bil/MandateCancelled.v1.schema.json",
+  "title": "MandateCancelled v1",
+  "description": "Mandate state change. PRD-06 gives only mandate id, reference and reason; no IBAN is ever carried.",
+  "x-event-type": "MandateCancelled",
+  "x-registry-name": "bil.MandateCancelled",
+  "x-producer": "BIL",
+  "x-topic": "bil.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "billing_account_id",
+  "x-aggregate-type": [
+    "BillingAccount"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "billingAccountId",
+    "mandateId"
+  ],
+  "x-payload-status": "minimal",
+  "x-payload-note": "PRD-06 gives only mandate id, reference and reason; no IBAN is ever carried.",
+  "x-source": [
+    "PRD-06 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "MandateCancelled"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "BIL"
+    },
+    "aggregateType": {
+      "const": "BillingAccount"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "billingAccountId",
+        "mandateId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mandateId",
+        "mandateReference",
+        "reason"
+      ],
+      "properties": {
+        "mandateId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "mandateReference": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "reason": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

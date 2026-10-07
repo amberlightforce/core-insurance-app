@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/doc/DocumentBatchCompleted.v1.schema.json",
+  "title": "DocumentBatchCompleted v1",
+  "description": "Batch run ended",
+  "x-event-type": "DocumentBatchCompleted",
+  "x-registry-name": "doc.DocumentBatchCompleted",
+  "x-producer": "DOC",
+  "x-topic": "doc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "batch_id",
+  "x-aggregate-type": [
+    "DocumentBatch"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "batchId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-10 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DocumentBatchCompleted"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DOC"
+    },
+    "aggregateType": {
+      "const": "DocumentBatch"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "batchId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "batchId",
+        "batchKey",
+        "countsPerStatus"
+      ],
+      "properties": {
+        "batchId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "batchKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "x-classification": "P0"
+        },
+        "countsPerStatus": {
+          "$ref": "../common.schema.json#/$defs/Counts",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/doc/DocumentDelivered.v1.schema.json",
+  "title": "DocumentDelivered v1",
+  "description": "Delivery reaches required proof level",
+  "x-event-type": "DocumentDelivered",
+  "x-registry-name": "doc.DocumentDelivered",
+  "x-producer": "DOC",
+  "x-topic": "doc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "document_id",
+  "x-aggregate-type": [
+    "Document"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "documentId",
+    "deliveryId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-10 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "DocumentDelivered"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "DOC"
+    },
+    "aggregateType": {
+      "const": "Document"
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "documentId",
+        "deliveryId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deliveryId",
+        "recipientRole",
+        "recipientPartyId",
+        "channel",
+        "medium",
+        "proofLevel",
+        "notificationDate"
+      ],
+      "properties": {
+        "deliveryId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "recipientRole": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "recipientPartyId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "channel": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "medium": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "proofLevel": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "notificationDate": {
+          "$ref": "../common.schema.json#/$defs/LocalDate",
+          "x-classification": "P0"
+        },
+        "evidencePackId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Statutory deliveries",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/fin/GLExtractSent.v1.schema.json",
+  "title": "GLExtractSent v1",
+  "description": "Extract delivered",
+  "x-event-type": "GLExtractSent",
+  "x-registry-name": "fin.GLExtractSent",
+  "x-producer": "FIN",
+  "x-topic": "fin.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "legal_entity_id",
+  "x-aggregate-type": [
+    "LegalEntity"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "extractId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-09 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "GLExtractSent"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "FIN"
+    },
+    "aggregateType": {
+      "const": "LegalEntity"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "extractId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "extractId",
+        "target",
+        "book",
+        "range",
+        "totals",
+        "hash"
+      ],
+      "properties": {
+        "extractId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "target": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "book": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "range": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        },
+        "totals": {
+          "$ref": "../common.schema.json#/$defs/MoneyTotals",
+          "x-classification": "P0"
+        },
+        "hash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

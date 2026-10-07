@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/cmp/ClockBreached.v1.schema.json",
+  "title": "ClockBreached v1",
+  "description": "Instance transitions (Breached only for DEADLINE, Elapsed only for WAITING_PERIOD; ClockElapsed per R-78). DEADLINE clocks only.",
+  "x-event-type": "ClockBreached",
+  "x-registry-name": "cmp.ClockBreached",
+  "x-producer": "CMP",
+  "x-topic": "cmp.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "clock_instance_id",
+  "x-aggregate-type": [
+    "ClockInstance"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "clockInstanceId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-11 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ClockBreached"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "CMP"
+    },
+    "aggregateType": {
+      "const": "ClockInstance"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "clockInstanceId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clockCode",
+        "subject",
+        "deadline",
+        "late"
+      ],
+      "properties": {
+        "clockCode": {
+          "$ref": "../common.schema.json#/$defs/ClockCode",
+          "x-classification": "P0"
+        },
+        "subject": {
+          "$ref": "../common.schema.json#/$defs/ObjectRef",
+          "x-classification": "P0"
+        },
+        "deadline": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0"
+        },
+        "late": {
+          "type": "boolean",
+          "x-classification": "P0"
+        },
+        "lateEmission": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "REQ-CMP-262",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

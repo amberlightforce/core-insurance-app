@@ -1,0 +1,40 @@
+# F-1f(a) Gotenberg PDF/A spike - Docker path.
+# NOTE: on the spike host Docker Desktop would not start (stale AF_UNIX socket files under
+# %LOCALAPPDATA%), so the evidence in FINDINGS.md was produced with run-local.ps1 (same Chromium
+# Page.printToPDF call, local Chrome 154 + veraPDF 1.30.2). This file is the ready-to-run Docker
+# equivalent; run it with run-docker.sh once Docker is available.
+#
+#   docker compose up -d gotenberg
+#   docker compose run --rm spike --mode=all
+#   docker compose run --rm spike --mode=gotenberg-native
+#   docker compose run --rm spike --mode=large --rows=16000
+#   docker compose run --rm verapdf --flavour 3a --format text /data/det-run1.pdfa.pdf
+services:
+  gotenberg:
+    # Pin by tag AND digest in production (REQ-DOC-161: engine versions must stay runnable).
+    image: gotenberg/gotenberg:8.37.0
+    command:
+      - gotenberg
+      - --api-timeout=600s
+      - --chromium-auto-start=true
+      - --libreoffice-auto-start=false
+    ports: ["3000:3000"]
+    # Mirrors infra sizing (1 vCPU / 2 GiB) so the 500-page test shows the real limit.
+    cpus: 1.0
+    mem_limit: 2g
+
+  spike:
+    build: .
+    depends_on: [gotenberg]
+    environment:
+      DOTNET_gcServer: "0"
+    entrypoint: ["dotnet", "PdfaSpike.dll", "--renderer=gotenberg", "--gotenberg=http://gotenberg:3000", "--out=/data", "--fonts=/app/fonts"]
+    volumes:
+      - ./out:/data
+
+  verapdf:
+    # veraPDF CLI (GPLv3+/MPLv2+) used only as an external validator - never linked into the product.
+    image: verapdf/cli:v1.30.2
+    profiles: ["tools"]
+    volumes:
+      - ./out:/data

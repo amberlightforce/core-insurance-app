@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pfc/ProductReferenceTablePublished.v1.schema.json",
+  "title": "ProductReferenceTablePublished v1",
+  "description": "Reference table version published",
+  "x-event-type": "ProductReferenceTablePublished",
+  "x-registry-name": "pfc.ProductReferenceTablePublished",
+  "x-producer": "PFC",
+  "x-topic": "pfc.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "table_code",
+  "x-aggregate-type": [
+    "ProductReferenceTable"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "tableCode"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-02 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "ProductReferenceTablePublished"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PFC"
+    },
+    "aggregateType": {
+      "const": "ProductReferenceTable"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "tableCode"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tableCode",
+        "version",
+        "hash",
+        "effectivePeriod"
+      ],
+      "properties": {
+        "tableCode": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "version": {
+          "$ref": "../common.schema.json#/$defs/VersionLabel",
+          "x-classification": "P0"
+        },
+        "hash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0"
+        },
+        "effectivePeriod": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

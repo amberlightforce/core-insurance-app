@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/pol/TransactionReversed.v1.schema.json",
+  "title": "TransactionReversed v1",
+  "description": "Each reversal in an aggregate. Set completeness fields set_id, set_size, index are required in the envelope (D4).",
+  "x-event-type": "TransactionReversed",
+  "x-registry-name": "pol.TransactionReversed",
+  "x-producer": "POL",
+  "x-topic": "pol.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "policy_id",
+  "x-aggregate-type": [
+    "Policy"
+  ],
+  "x-data-classification": "P0",
+  "x-set-completeness": true,
+  "x-business-keys": [
+    "policyId",
+    "originalTransactionId",
+    "reversalTransactionId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-05 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "TransactionReversed"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "POL"
+    },
+    "aggregateType": {
+      "const": "Policy"
+    },
+    "dataClassification": {
+      "const": "P0"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "required": [
+        "policyId",
+        "originalTransactionId",
+        "reversalTransactionId"
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "required": [
+    "set_id",
+    "set_size",
+    "index"
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "originalTransactionId",
+        "reversalTransactionId",
+        "correlationKey",
+        "affectedSegmentIds",
+        "voidedByCancellation"
+      ],
+      "properties": {
+        "originalTransactionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "reversalTransactionId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "correlationKey": {
+          "$ref": "../common.schema.json#/$defs/Text",
+          "description": "Aggregate correlation key (business lineage)",
+          "x-classification": "P0"
+        },
+        "affectedSegmentIds": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P0"
+        },
+        "voidedByCancellation": {
+          "type": "boolean",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}

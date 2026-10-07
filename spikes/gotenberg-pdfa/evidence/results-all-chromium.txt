@@ -1,0 +1,35 @@
+# PdfaSpike results  mode=all renderer=ChromeCdpRenderer os=Microsoft Windows NT 10.0.26200.0 dotnet=10.0.11
+chromium=154.0.8037.98
+font NotoSans-Bold.ttf sha256=1df075a380fc7cb898acf64c1f7b3b4dd780de3caa860178bf929de35817a913
+font NotoSans-Regular.ttf sha256=478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823
+
+## Determinism + PDF/A-3a post-processing
+glyph pre-check (sample schedule incl. polytonic line): OK, all code points covered
+run 1: render 1922 ms, raw 254049 B sha256=e38915602cd82d5fa977f5166c5f119c6f681e807e64df2d27d35d33fd29df9c | post-processed 260969 B sha256=2e69cc4bcc2712cc08f041152656e174e66adf653a460a8379742defe8a4a9fc | PostProcessReport { ArtifactRunsWrapped = 25, StructIdsRenumbered = 9, PayloadSha256 = b261da52758b28f7fa55cedbdfa18315863520536d8d1fad18f9c23d6937f379 }
+embedded file 'payload.json' 17683 B sha256=b261da52758b28f7fa55cedbdfa18315863520536d8d1fad18f9c23d6937f379 equals payload hash: True
+text round-trip (NFC, ToUnicode) contains "ΑΣΦΑΛΙΣΤΗΡΙΟ ΟΧΗΜΑΤΟΣ": True
+text round-trip (NFC, ToUnicode) contains "«ΑΥΤ-2026-0001234»": True
+text round-trip (NFC, ToUnicode) contains "Ἡ ἀσφάλισις ἰσχύει": True
+text round-trip (NFC, ToUnicode) contains "«ζημιάς»": True
+text round-trip (NFC, ToUnicode) contains "Ευρωπαϊκή": True
+text round-trip (NFC, ToUnicode) contains "28.028,78 €": True
+text round-trip (NFC, ToUnicode) contains "Σελίδα 2 από": True
+pages=5 version=1.7 xmp=pdfaid:part=3
+seal (PAdES B-B, incremental update): 278631 B, valid=True; CMS signature valid; ByteRange covers whole file except /Contents: True; signer=CN=Elliniki Asfalistiki AE Test Seal, O=Elliniki Asfalistiki AE, C=GR, OID.2.5.4.97=VATGR-123456789; digest=sha256; signed attrs=[Content Type,Message Digest,1.2.840.113549.1.9.16.2.47]
+pre-seal revision is a byte-exact prefix of the sealed file: True (sha256 of prefix=2e69cc4bcc2712cc08f041152656e174e66adf653a460a8379742defe8a4a9fc)
+run 2: render 1819 ms, raw 254049 B sha256=07aa9de413c1c3af0856f9d5bc2c996b131fac59b860897f99badf6ff4fafcd7 | post-processed 260969 B sha256=2e69cc4bcc2712cc08f041152656e174e66adf653a460a8379742defe8a4a9fc | PostProcessReport { ArtifactRunsWrapped = 25, StructIdsRenumbered = 9, PayloadSha256 = b261da52758b28f7fa55cedbdfa18315863520536d8d1fad18f9c23d6937f379 }
+raw diff run1 vs run2: 1231 differing bytes: Info /CreationDate,/ModDate=2, StructElem /ID + IDTree strings (DOM node ids)=1229
+run 3: render 1743 ms, raw 254049 B sha256=01e253c56b938ea75b4c534135bd26cf38bd34bda3da36a96395e3b500362851 | post-processed 260969 B sha256=2e69cc4bcc2712cc08f041152656e174e66adf653a460a8379742defe8a4a9fc | PostProcessReport { ArtifactRunsWrapped = 25, StructIdsRenumbered = 9, PayloadSha256 = b261da52758b28f7fa55cedbdfa18315863520536d8d1fad18f9c23d6937f379 }
+raw identical across runs: False; post-processed identical across runs: True
+
+## Missing-glyph detection
+[ok-polytonic] pre-check: PASS
+[ok-polytonic] post-check embedded fonts: AAAAAA+NotoSans-Regular glyphs=1510, BAAAAA+NotoSans-Bold glyphs=350
+[cjk] pre-check: DOC-ERR-GLYPH-MISSING U+4FDD '保' (OtherLetter) in "Ονοματεπώνυμο: 保险 (CJK not in"; U+9669 '险' (OtherLetter) in "νοματεπώνυμο: 保险 (CJK not in d"
+[cjk] post-check embedded fonts: AAAAAA+NotoSans-Regular glyphs=1507, BAAAAA+NotoSans-Bold glyphs=350, CAAAAA+MicrosoftYaHei **UNDECLARED FALLBACK** glyphs=2
+[emoji] pre-check: DOC-ERR-GLYPH-MISSING U+1F697 '🚗' (OtherSymbol) in "Σχόλιο πελάτη 🚗 (emoji)"
+[emoji] post-check embedded fonts: AAAAAA+NotoSans-Regular glyphs=1483, BAAAAA+NotoSans-Bold glyphs=350, Type3 **UNDECLARED FALLBACK** glyphs=1
+[coptic] pre-check: DOC-ERR-GLYPH-MISSING U+2C80 'Ⲁ' (UppercaseLetter) in "ἀσφάλιστρον.  Ⲁⲃⲅ Coptic U+2C"; U+2C83 'ⲃ' (LowercaseLetter) in "ἀσφάλιστρον.  Ⲁⲃⲅ Coptic U+2C8"; U+2C85 'ⲅ' (LowercaseLetter) in "σφάλιστρον.  Ⲁⲃⲅ Coptic U+2C80"
+[coptic] post-check embedded fonts: AAAAAA+NotoSans-Regular glyphs=1475, BAAAAA+NotoSans-Bold glyphs=350, CAAAAA+SegoeUISymbol **UNDECLARED FALLBACK** glyphs=3
+[pua] pre-check: DOC-ERR-GLYPH-MISSING U+10FFFD '􏿽' (PrivateUse) in ".  Private use 􏿽 and unassign"; U+1FAFF '🫿' (OtherNotAssigned) in "and unassigned 🫿         "Ελλ"
+[pua] post-check embedded fonts: AAAAAA+NotoSans-Regular glyphs=1491 notdef/unmapped=2, BAAAAA+NotoSans-Bold glyphs=350

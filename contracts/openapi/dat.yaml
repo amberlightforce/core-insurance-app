@@ -1,0 +1,3976 @@
+# GENERATED from the module PRD §9.1 tables by the F-1c(apis) builder; edit by hand from now on.
+# Conventions: contracts/README.md (APIs) and contracts/openapi/common.yaml. Validate: python contracts/openapi/validate.py
+openapi: 3.1.0
+info:
+  title: DAT — Data, analytics and regulatory marts API
+  version: 1.0.0
+  summary: Cross-module and UI/partner operations owned by DAT (PRD-15 §9.1)
+  description: 'Contract of the operations DAT exposes (PRD-15 §9.1, canonical names per R-87). Modules call these in-process
+    through `CoreIns.<Module>.Contracts` interfaces with the same operation names (D-ARC-16); HTTP is for UI, partners and
+    tests. Shared conventions: `common.yaml` and `README.md` (contracts/). Generated from the PRD tables; `x-status: minimal`
+    marks operations whose PRD row gives only names, to be completed by the owning work package without inventing rules.'
+  x-module: DAT
+  x-prd: PRD-15
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+servers:
+- url: /
+  description: Same origin; paths carry /api/<module>/v<major>
+security:
+- entra: []
+tags:
+- name: DataContract
+- name: Ingestion
+- name: Quarantine
+- name: Query
+- name: Population
+- name: Kpi
+- name: Mart
+- name: ScrResults
+- name: Lineage
+- name: Accumulation
+- name: Model
+- name: Coverage
+- name: Monitor
+- name: BiasTest
+- name: FeatureStore
+- name: Actuarial
+- name: ActuarialResultSet
+- name: Subject
+- name: Erasure
+- name: Restriction
+- name: PurposeGrant
+- name: Synthetic
+- name: Analytics
+paths:
+  /api/dat/v1/data-contracts/register:
+    post:
+      operationId: dat.DataContract.register
+      summary: Register a contract version
+      description: |-
+        Register a contract version
+
+        PRD inputs: contract document
+        PRD outputs: version, compatibility result
+      tags:
+      - DataContract
+      x-requirement:
+      - REQ-DAT-001
+      - REQ-DAT-030
+      - REQ-DAT-031
+      x-anchor:
+      - REQ-DAT-001
+      x-anchor-mapped:
+      - REQ-DAT-001
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes / dry-run returns compatibility'
+      x-exposure:
+      - ui
+      x-consumers:
+      - RAT
+      x-permission: dat.DataContract.register
+      x-error-codes:
+      - code: DAT-ERR-001
+        note: breaking change without new major
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1447
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataContractRegisterRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataContractRegisterResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/data-contracts/{id}:
+    get:
+      operationId: dat.DataContract.get
+      summary: Read contracts
+      description: |-
+        Read contracts
+
+        PRD inputs: id, producer
+        PRD outputs: contract versions
+      tags:
+      - DataContract
+      x-requirement:
+      - REQ-DAT-001
+      - REQ-DAT-030
+      x-anchor:
+      - REQ-DAT-001
+      x-anchor-mapped:
+      - REQ-DAT-001
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.DataContract.get
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1448
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the DataContract (PRD input: "id")'
+        schema:
+          type: string
+      - name: producer
+        in: query
+        required: false
+        description: 'PRD: "producer"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataContractGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/data-contracts:
+    get:
+      operationId: dat.DataContract.list
+      summary: Read contracts
+      description: |-
+        Read contracts
+
+        PRD inputs: id, producer
+        PRD outputs: contract versions
+      tags:
+      - DataContract
+      x-requirement:
+      - REQ-DAT-001
+      - REQ-DAT-030
+      x-anchor:
+      - REQ-DAT-001
+      x-anchor-mapped:
+      - REQ-DAT-001
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.DataContract.list
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1448
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: id
+        in: query
+        required: false
+        description: 'PRD: "id"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: producer
+        in: query
+        required: false
+        description: 'PRD: "producer"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataContractListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/ingestion/replay:
+    post:
+      operationId: dat.Ingestion.replay
+      summary: Replay a contract scope
+      description: |-
+        Replay a contract scope
+
+        PRD inputs: contract, from, to
+        PRD outputs: job id, counts
+      tags:
+      - Ingestion
+      x-requirement:
+      - REQ-DAT-001
+      - REQ-DAT-039
+      x-anchor:
+      - REQ-DAT-001
+      x-anchor-mapped:
+      - REQ-DAT-001
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes / dry-run counts'
+      x-exposure:
+      - ui
+      x-permission: dat.Ingestion.replay
+      x-error-codes:
+      - code: DAT-ERR-002
+        note: scope too broad without approval
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1449
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionReplayRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionReplayResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/quarantine/release:
+    post:
+      operationId: dat.Quarantine.release
+      summary: Reprocess quarantined records
+      description: |-
+        Reprocess quarantined records
+
+        PRD inputs: ids or filter
+        PRD outputs: outcome per record
+      tags:
+      - Quarantine
+      x-requirement:
+      - REQ-DAT-001
+      - REQ-DAT-007
+      - REQ-DAT-034
+      x-anchor:
+      - REQ-DAT-001
+      - REQ-DAT-007
+      x-anchor-mapped:
+      - REQ-DAT-001
+      - REQ-DAT-007
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-01
+      - W8-DAT-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Quarantine.release
+      x-error-codes:
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1450
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuarantineReleaseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuarantineReleaseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/queries/as-of:
+    get:
+      operationId: dat.Query.asOf
+      summary: Bitemporal query of a silver view
+      description: |-
+        Bitemporal query of a silver view
+
+        PRD inputs: view, validAt, knownAt, filters
+        PRD outputs: rows, as-of metadata, hash
+      tags:
+      - Query
+      x-requirement:
+      - REQ-DAT-002
+      - REQ-DAT-082
+      x-anchor:
+      - REQ-DAT-002
+      x-anchor-mapped:
+      - REQ-DAT-002
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Query.asOf
+      x-error-codes:
+      - code: DAT-ERR-010
+        note: view not permitted
+        status: 422
+      x-source:
+      - PRD-15 §9.1 l.1451
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: view
+        in: query
+        required: false
+        description: 'PRD: "view"'
+        schema:
+          type: string
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryAsOfResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/populations/sample:
+    post:
+      operationId: dat.Population.sample
+      summary: Point-in-time populations for RAT, PFC, UW
+      description: |-
+        Point-in-time populations for RAT, PFC, UW
+
+        PRD inputs: product/slot, as-of, window, sampling
+        PRD outputs: rows or aggregates, snapshot hash
+      tags:
+      - Population
+      x-requirement:
+      - REQ-DAT-087
+      - REQ-DAT-163
+      - REQ-DAT-167
+      - REQ-DAT-169
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-02
+      - W8-DAT-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - RAT
+      x-permission: dat.Population.sample
+      x-error-codes:
+      - code: DAT-ERR-011
+        note: population too large for sync (async job returned
+        status: 422
+      x-source:
+      - PRD-15 §9.1 l.1452
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PopulationSampleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PopulationSampleResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/populations/aggregate:
+    get:
+      operationId: dat.Population.aggregate
+      summary: Point-in-time populations for RAT, PFC, UW
+      description: |-
+        Point-in-time populations for RAT, PFC, UW
+
+        PRD inputs: product/slot, as-of, window, sampling
+        PRD outputs: rows or aggregates, snapshot hash
+      tags:
+      - Population
+      x-requirement:
+      - REQ-DAT-087
+      - REQ-DAT-163
+      - REQ-DAT-167
+      - REQ-DAT-169
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-02
+      - W8-DAT-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      - RAT
+      x-permission: dat.Population.aggregate
+      x-error-codes:
+      - code: DAT-ERR-011
+        note: population too large for sync (async job returned
+        status: 422
+      x-source:
+      - PRD-15 §9.1 l.1452
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: productSlot
+        in: query
+        required: false
+        description: 'PRD: "product/slot"'
+        schema:
+          type: string
+      - name: as
+        in: query
+        required: false
+        description: 'PRD: "as-of"'
+        schema:
+          type: string
+      - name: window
+        in: query
+        required: false
+        description: 'PRD: "window"'
+        schema:
+          type: string
+      - name: sampling
+        in: query
+        required: false
+        description: 'PRD: "sampling"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PopulationAggregateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/kpis/get:
+    get:
+      operationId: dat.Kpi.get
+      summary: KPI values by definition
+      description: |-
+        KPI values by definition
+
+        PRD inputs: KPI code, filters, period
+        PRD outputs: values, definition version, as-of
+      tags:
+      - Kpi
+      x-requirement:
+      - REQ-DAT-166
+      - REQ-DAT-226
+      - REQ-DAT-231
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - PFC
+      x-permission: dat.Kpi.get
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1453
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: kpiCode
+        in: query
+        required: false
+        description: 'PRD: "KPI code"'
+        schema:
+          type: string
+      - name: filters
+        in: query
+        required: false
+        description: 'PRD: "filters"'
+        schema:
+          type: string
+      - name: period
+        in: query
+        required: false
+        description: 'PRD: "period"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KpiGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/marts/run:
+    post:
+      operationId: dat.Mart.run
+      summary: Start a mart run
+      description: |-
+        Start a mart run
+
+        PRD inputs: mart, entity, period, regime, taxonomy version
+        PRD outputs: run id
+      tags:
+      - Mart
+      x-requirement:
+      - REQ-DAT-003
+      - REQ-DAT-104
+      x-anchor:
+      - REQ-DAT-003
+      x-anchor-mapped:
+      - REQ-DAT-003
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes / dry-run returns scope and unmapped list'
+      x-exposure:
+      - ui
+      x-permission: dat.Mart.run
+      x-error-codes:
+      - code: DAT-ERR-020
+        note: unmapped coverages
+        status: 422
+      - code: DAT-ERR-021
+        note: open blocking break
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1454
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MartRunRequest'
+      responses:
+        '202':
+          description: Accepted; result or job reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MartRunResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/marts/{id}:
+    get:
+      operationId: dat.Mart.get
+      summary: Read run, figures, differences
+      description: |-
+        Read run, figures, differences
+
+        PRD inputs: run id, data point
+        PRD outputs: figures, lineage pointer, diff
+      tags:
+      - Mart
+      x-requirement:
+      - REQ-DAT-003
+      - REQ-DAT-085
+      x-anchor:
+      - REQ-DAT-003
+      x-anchor-mapped:
+      - REQ-DAT-003
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-02
+      - W8-DAT-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Mart.get
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1455
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: 'Identifier of the Mart (PRD input: "run id")'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MartGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/marts/figure:
+    get:
+      operationId: dat.Mart.figure
+      summary: Read run, figures, differences
+      description: |-
+        Read run, figures, differences
+
+        PRD inputs: run id, data point
+        PRD outputs: figures, lineage pointer, diff
+      tags:
+      - Mart
+      x-requirement:
+      - REQ-DAT-003
+      - REQ-DAT-085
+      x-anchor:
+      - REQ-DAT-003
+      x-anchor-mapped:
+      - REQ-DAT-003
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-02
+      - W8-DAT-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Mart.figure
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1455
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MartFigureResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/marts/compare:
+    get:
+      operationId: dat.Mart.compare
+      summary: Read run, figures, differences
+      description: |-
+        Read run, figures, differences
+
+        PRD inputs: run id, data point
+        PRD outputs: figures, lineage pointer, diff
+      tags:
+      - Mart
+      x-requirement:
+      - REQ-DAT-003
+      - REQ-DAT-085
+      x-anchor:
+      - REQ-DAT-003
+      x-anchor-mapped:
+      - REQ-DAT-003
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-02
+      - W8-DAT-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Mart.compare
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1455
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MartCompareResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/marts/adjust:
+    post:
+      operationId: dat.Mart.adjust
+      summary: Propose adjustment
+      description: |-
+        Propose adjustment
+
+        PRD inputs: figure, amount, reason, evidence
+        PRD outputs: approval request
+      tags:
+      - Mart
+      x-requirement:
+      - REQ-DAT-003
+      - REQ-DAT-114
+      x-anchor:
+      - REQ-DAT-003
+      x-anchor-mapped:
+      - REQ-DAT-003
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Mart.adjust
+      x-error-codes:
+      - code: DAT-ERR-022
+        note: run locked
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1456
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MartAdjustRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MartAdjustResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/marts/sign-off:
+    post:
+      operationId: dat.Mart.signOff
+      summary: Sign off
+      description: |-
+        Sign off
+
+        PRD inputs: run id, comment
+        PRD outputs: status
+      tags:
+      - Mart
+      x-requirement:
+      - REQ-DAT-003
+      - REQ-DAT-115
+      x-anchor:
+      - REQ-DAT-003
+      x-anchor-mapped:
+      - REQ-DAT-003
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Mart.signOff
+      x-error-codes:
+      - code: DAT-ERR-023
+        note: signer is preparer
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1457
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MartSignOffRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MartSignOffResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/marts/export:
+    post:
+      operationId: dat.Mart.export
+      summary: Export the data-point package for CMP's in-house renderer
+      description: |-
+        Export the data-point package for CMP's in-house renderer
+
+        PRD inputs: run id
+        PRD outputs: package ref (DOC archive), manifest hash
+      tags:
+      - Mart
+      x-requirement:
+      - REQ-DAT-003
+      - REQ-DAT-116
+      x-anchor:
+      - REQ-DAT-003
+      x-anchor-mapped:
+      - REQ-DAT-003
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Mart.export
+      x-error-codes:
+      - code: DAT-ERR-024
+        note: not signed off
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1458
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MartExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MartExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/scr-results/submit:
+    post:
+      operationId: dat.ScrResults.submit
+      summary: SCR and MCR results intake from the risk function
+      description: |-
+        SCR and MCR results intake from the risk function
+
+        PRD inputs: entity, period, result file, preparer attestation
+        PRD outputs: result set id, completeness findings, status
+      tags:
+      - ScrResults
+      x-requirement:
+      - REQ-DAT-300
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes / dry-run returns completeness findings'
+      x-exposure:
+      - ui
+      x-permission: dat.ScrResults.submit
+      x-error-codes:
+      - code: DAT-ERR-025
+        note: SCR data point missing
+        status: 422
+      - code: DAT-ERR-026
+        note: acceptor is preparer
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1459
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScrResultsSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrResultsSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/scr-results/accept:
+    post:
+      operationId: dat.ScrResults.accept
+      summary: SCR and MCR results intake from the risk function
+      description: |-
+        SCR and MCR results intake from the risk function
+
+        PRD inputs: entity, period, result file, preparer attestation
+        PRD outputs: result set id, completeness findings, status
+      tags:
+      - ScrResults
+      x-requirement:
+      - REQ-DAT-300
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes / dry-run returns completeness findings'
+      x-exposure:
+      - ui
+      x-permission: dat.ScrResults.accept
+      x-error-codes:
+      - code: DAT-ERR-025
+        note: SCR data point missing
+        status: 422
+      - code: DAT-ERR-026
+        note: acceptor is preparer
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1459
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScrResultsAcceptRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrResultsAcceptResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/scr-results/{id}:
+    get:
+      operationId: dat.ScrResults.get
+      summary: SCR and MCR results intake from the risk function
+      description: |-
+        SCR and MCR results intake from the risk function
+
+        PRD inputs: entity, period, result file, preparer attestation
+        PRD outputs: result set id, completeness findings, status
+      tags:
+      - ScrResults
+      x-requirement:
+      - REQ-DAT-300
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Yes / dry-run returns completeness findings'
+      x-exposure:
+      - ui
+      x-permission: dat.ScrResults.get
+      x-error-codes:
+      - code: DAT-ERR-025
+        note: SCR data point missing
+        status: 422
+      - code: DAT-ERR-026
+        note: acceptor is preparer
+        status: 422
+      x-source:
+      - PRD-15 §9.1 l.1459
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the ScrResults
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrResultsGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/lineage/trace:
+    get:
+      operationId: dat.Lineage.trace
+      summary: Lineage of a figure, KPI, column or business key (correlation id accepted as a technical search key)
+      description: |-
+        Lineage of a figure, KPI, column or business key (correlation id accepted as a technical search key)
+
+        PRD inputs: node, direction, knownAt
+        PRD outputs: graph, source records ref
+      tags:
+      - Lineage
+      x-requirement:
+      - REQ-DAT-007
+      - REQ-DAT-248
+      - REQ-DAT-249
+      - REQ-DAT-302
+      x-anchor:
+      - REQ-DAT-007
+      x-anchor-mapped:
+      - REQ-DAT-007
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Lineage.trace
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1460
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: node
+        in: query
+        required: false
+        description: 'PRD: "node"'
+        schema:
+          type: string
+      - name: direction
+        in: query
+        required: false
+        description: 'PRD: "direction"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineageTraceResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/accumulation/snapshot:
+    get:
+      operationId: dat.Accumulation.snapshot
+      summary: Exposure analytics
+      description: |-
+        Exposure analytics
+
+        PRD inputs: peril, scheme, as-at, area
+        PRD outputs: aggregates
+      tags:
+      - Accumulation
+      x-requirement:
+      - REQ-DAT-008
+      - REQ-DAT-180..REQ-DAT-187
+      x-anchor:
+      - REQ-DAT-008
+      x-anchor-mapped:
+      - REQ-DAT-008
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Accumulation.snapshot
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1461
+      x-prd-param-names:
+        validAt: as-at
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccumulationSnapshotResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/accumulation/footprint:
+    get:
+      operationId: dat.Accumulation.footprint
+      summary: Exposure analytics
+      description: |-
+        Exposure analytics
+
+        PRD inputs: peril, scheme, as-at, area
+        PRD outputs: aggregates
+      tags:
+      - Accumulation
+      x-requirement:
+      - REQ-DAT-008
+      - REQ-DAT-180..REQ-DAT-187
+      x-anchor:
+      - REQ-DAT-008
+      x-anchor-mapped:
+      - REQ-DAT-008
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Accumulation.footprint
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1461
+      x-prd-param-names:
+        validAt: as-at
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccumulationFootprintResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/accumulation/trend:
+    get:
+      operationId: dat.Accumulation.trend
+      summary: Exposure analytics
+      description: |-
+        Exposure analytics
+
+        PRD inputs: peril, scheme, as-at, area
+        PRD outputs: aggregates
+      tags:
+      - Accumulation
+      x-requirement:
+      - REQ-DAT-008
+      - REQ-DAT-180..REQ-DAT-187
+      x-anchor:
+      - REQ-DAT-008
+      x-anchor-mapped:
+      - REQ-DAT-008
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Accumulation.trend
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1461
+      x-prd-param-names:
+        validAt: as-at
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccumulationTrendResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/models/register:
+    post:
+      operationId: dat.Model.register
+      summary: Registry
+      description: |-
+        Registry
+
+        PRD inputs: model card, version
+        PRD outputs: status
+      tags:
+      - Model
+      x-requirement:
+      - REQ-DAT-005
+      - REQ-DAT-197..REQ-DAT-207
+      x-anchor:
+      - REQ-DAT-005
+      x-anchor-mapped:
+      - REQ-DAT-005
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - MKT
+      - PFC
+      - RAT
+      x-permission: dat.Model.register
+      x-error-codes:
+      - code: DAT-ERR-030
+        note: validator equals developer
+        status: 422
+      - code: DAT-ERR-031
+        note: card incomplete
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1462
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelRegisterRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRegisterResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/models/{id}:
+    get:
+      operationId: dat.Model.get
+      summary: Registry
+      description: |-
+        Registry
+
+        PRD inputs: model card, version
+        PRD outputs: status
+      tags:
+      - Model
+      x-requirement:
+      - REQ-DAT-005
+      - REQ-DAT-197..REQ-DAT-207
+      x-anchor:
+      - REQ-DAT-005
+      x-anchor-mapped:
+      - REQ-DAT-005
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Model.get
+      x-error-codes:
+      - code: DAT-ERR-030
+        note: validator equals developer
+        status: 422
+      - code: DAT-ERR-031
+        note: card incomplete
+        status: 422
+      x-source:
+      - PRD-15 §9.1 l.1462
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Model
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/models/submit-validation:
+    post:
+      operationId: dat.Model.submitValidation
+      summary: Registry
+      description: |-
+        Registry
+
+        PRD inputs: model card, version
+        PRD outputs: status
+      tags:
+      - Model
+      x-requirement:
+      - REQ-DAT-005
+      - REQ-DAT-197..REQ-DAT-207
+      x-anchor:
+      - REQ-DAT-005
+      x-anchor-mapped:
+      - REQ-DAT-005
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Model.submitValidation
+      x-error-codes:
+      - code: DAT-ERR-030
+        note: validator equals developer
+        status: 422
+      - code: DAT-ERR-031
+        note: card incomplete
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1462
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelSubmitValidationRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelSubmitValidationResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/models/record-validation:
+    post:
+      operationId: dat.Model.recordValidation
+      summary: Registry
+      description: |-
+        Registry
+
+        PRD inputs: model card, version
+        PRD outputs: status
+      tags:
+      - Model
+      x-requirement:
+      - REQ-DAT-005
+      - REQ-DAT-197..REQ-DAT-207
+      x-anchor:
+      - REQ-DAT-005
+      x-anchor-mapped:
+      - REQ-DAT-005
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Model.recordValidation
+      x-error-codes:
+      - code: DAT-ERR-030
+        note: validator equals developer
+        status: 422
+      - code: DAT-ERR-031
+        note: card incomplete
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1462
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelRecordValidationRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRecordValidationResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/models/approve:
+    post:
+      operationId: dat.Model.approve
+      summary: Registry
+      description: |-
+        Registry
+
+        PRD inputs: model card, version
+        PRD outputs: status
+      tags:
+      - Model
+      x-requirement:
+      - REQ-DAT-005
+      - REQ-DAT-197..REQ-DAT-207
+      x-anchor:
+      - REQ-DAT-005
+      x-anchor-mapped:
+      - REQ-DAT-005
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Model.approve
+      x-error-codes:
+      - code: DAT-ERR-030
+        note: validator equals developer
+        status: 422
+      - code: DAT-ERR-031
+        note: card incomplete
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1462
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelApproveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelApproveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/models/retire:
+    post:
+      operationId: dat.Model.retire
+      summary: Registry
+      description: |-
+        Registry
+
+        PRD inputs: model card, version
+        PRD outputs: status
+      tags:
+      - Model
+      x-requirement:
+      - REQ-DAT-005
+      - REQ-DAT-197..REQ-DAT-207
+      x-anchor:
+      - REQ-DAT-005
+      x-anchor-mapped:
+      - REQ-DAT-005
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 6
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Model.retire
+      x-error-codes:
+      - code: DAT-ERR-030
+        note: validator equals developer
+        status: 422
+      - code: DAT-ERR-031
+        note: card incomplete
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1462
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelRetireRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRetireResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/coverage/status:
+    get:
+      operationId: dat.Coverage.status
+      summary: Governed status of an AI feature (called by PLT before enablement)
+      description: |-
+        Governed status of an AI feature (called by PLT before enablement)
+
+        PRD inputs: AI feature id
+        PRD outputs: Governed / Ungoverned + reasons
+      tags:
+      - Coverage
+      x-requirement:
+      - REQ-DAT-005
+      - REQ-DAT-209
+      x-anchor:
+      - REQ-DAT-005
+      x-anchor-mapped:
+      - REQ-DAT-005
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - PLT
+      x-permission: dat.Coverage.status
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1463
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: aiFeatureId
+        in: query
+        required: false
+        description: 'PRD: "AI feature id"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoverageStatusResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/monitor/metrics:
+    post:
+      operationId: dat.Monitor.metrics
+      summary: Submit outcome labels or metrics from owning modules
+      description: |-
+        Submit outcome labels or metrics from owning modules
+
+        PRD inputs: feature, version, metric records
+        PRD outputs: accepted counts
+      tags:
+      - Monitor
+      x-requirement:
+      - REQ-DAT-005
+      - REQ-DAT-210
+      - REQ-DAT-211
+      x-anchor:
+      - REQ-DAT-005
+      x-anchor-mapped:
+      - REQ-DAT-005
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-permission: dat.Monitor.metrics
+      x-error-codes:
+      - code: DAT-ERR-032
+        note: unknown feature
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1464
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitorMetricsRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitorMetricsResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/bias-tests/run:
+    post:
+      operationId: dat.BiasTest.run
+      summary: Run a bias test on a population or artefact
+      description: |-
+        Run a bias test on a population or artefact
+
+        PRD inputs: feature or artefact, population ref
+        PRD outputs: BiasReport id, ratios
+      tags:
+      - BiasTest
+      x-requirement:
+      - REQ-DAT-005
+      - REQ-DAT-216
+      x-anchor:
+      - REQ-DAT-005
+      x-anchor-mapped:
+      - REQ-DAT-005
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-consumers:
+      - RAT
+      x-permission: dat.BiasTest.run
+      x-error-codes:
+      - code: DAT-ERR-033
+        note: sample below minimum
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1465
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiasTestRunRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiasTestRunResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/feature-store/get-online:
+    get:
+      operationId: dat.FeatureStore.getOnline
+      summary: Features
+      description: |-
+        Features
+
+        PRD inputs: entity keys, feature list, as-of
+        PRD outputs: values / data set ref
+      tags:
+      - FeatureStore
+      x-requirement:
+      - REQ-DAT-006
+      - REQ-DAT-191
+      - REQ-DAT-192
+      x-anchor:
+      - REQ-DAT-006
+      x-anchor-mapped:
+      - REQ-DAT-006
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: — / Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.FeatureStore.getOnline
+      x-error-codes:
+      - code: DAT-ERR-040
+        note: purpose not allowed
+        status: 422
+      x-source:
+      - PRD-15 §9.1 l.1466
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: entityKeys
+        in: query
+        required: false
+        description: 'PRD: "entity keys"'
+        schema:
+          type: string
+      - name: featureList
+        in: query
+        required: false
+        description: 'PRD: "feature list"'
+        schema:
+          type: string
+      - name: as
+        in: query
+        required: false
+        description: 'PRD: "as-of"'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureStoreGetOnlineResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/feature-store/build-training-set:
+    post:
+      operationId: dat.FeatureStore.buildTrainingSet
+      summary: Features
+      description: |-
+        Features
+
+        PRD inputs: entity keys, feature list, as-of
+        PRD outputs: values / data set ref
+      tags:
+      - FeatureStore
+      x-requirement:
+      - REQ-DAT-006
+      - REQ-DAT-191
+      - REQ-DAT-192
+      x-anchor:
+      - REQ-DAT-006
+      x-anchor-mapped:
+      - REQ-DAT-006
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-05
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: — / Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.FeatureStore.buildTrainingSet
+      x-error-codes:
+      - code: DAT-ERR-040
+        note: purpose not allowed
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1466
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureStoreBuildTrainingSetRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureStoreBuildTrainingSetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/actuarial/input-set:
+    post:
+      operationId: dat.Actuarial.inputSet
+      summary: Actuarial workflow
+      description: |-
+        Actuarial workflow
+
+        PRD inputs: valuation date, model version, attestation
+        PRD outputs: status, FIN ack
+      tags:
+      - Actuarial
+      x-requirement:
+      - REQ-DAT-004
+      - REQ-DAT-144..REQ-DAT-155
+      x-anchor:
+      - REQ-DAT-004
+      x-anchor-mapped:
+      - REQ-DAT-004
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Yes / dry-run calls FIN validate'
+      x-exposure:
+      - ui
+      x-permission: dat.Actuarial.inputSet
+      x-error-codes:
+      - code: DAT-ERR-050
+        note: inputs unreconciled
+        status: 422
+      - code: DAT-ERR-051
+        note: model not approved
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1467
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActuarialInputSetRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActuarialInputSetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/actuarial/run:
+    post:
+      operationId: dat.Actuarial.run
+      summary: Actuarial workflow
+      description: |-
+        Actuarial workflow
+
+        PRD inputs: valuation date, model version, attestation
+        PRD outputs: status, FIN ack
+      tags:
+      - Actuarial
+      x-requirement:
+      - REQ-DAT-004
+      - REQ-DAT-144..REQ-DAT-155
+      x-anchor:
+      - REQ-DAT-004
+      x-anchor-mapped:
+      - REQ-DAT-004
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes / dry-run calls FIN validate'
+      x-exposure:
+      - ui
+      x-permission: dat.Actuarial.run
+      x-error-codes:
+      - code: DAT-ERR-050
+        note: inputs unreconciled
+        status: 422
+      - code: DAT-ERR-051
+        note: model not approved
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1467
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActuarialRunRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActuarialRunResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/actuarial-result-sets/submit:
+    post:
+      operationId: dat.ActuarialResultSet.submit
+      summary: Actuarial workflow
+      description: |-
+        Actuarial workflow
+
+        PRD inputs: valuation date, model version, attestation
+        PRD outputs: status, FIN ack
+      tags:
+      - ActuarialResultSet
+      x-requirement:
+      - REQ-DAT-004
+      - REQ-DAT-144..REQ-DAT-155
+      x-anchor:
+      - REQ-DAT-004
+      x-anchor-mapped:
+      - REQ-DAT-004
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Yes / dry-run calls FIN validate'
+      x-exposure:
+      - ui
+      x-permission: dat.ActuarialResultSet.submit
+      x-error-codes:
+      - code: DAT-ERR-050
+        note: inputs unreconciled
+        status: 422
+      - code: DAT-ERR-051
+        note: model not approved
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1467
+      x-prd-name:
+      - dat.Actuarial.resultSet.submit
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActuarialResultSetSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActuarialResultSetSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/actuarial/supersede:
+    post:
+      operationId: dat.Actuarial.supersede
+      summary: Actuarial workflow
+      description: |-
+        Actuarial workflow
+
+        PRD inputs: valuation date, model version, attestation
+        PRD outputs: status, FIN ack
+      tags:
+      - Actuarial
+      x-requirement:
+      - REQ-DAT-004
+      - REQ-DAT-144..REQ-DAT-155
+      x-anchor:
+      - REQ-DAT-004
+      x-anchor-mapped:
+      - REQ-DAT-004
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-04
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Yes / dry-run calls FIN validate'
+      x-exposure:
+      - ui
+      x-permission: dat.Actuarial.supersede
+      x-error-codes:
+      - code: DAT-ERR-050
+        note: inputs unreconciled
+        status: 422
+      - code: DAT-ERR-051
+        note: model not approved
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1467
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActuarialSupersedeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActuarialSupersedeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/subject/export:
+    post:
+      operationId: dat.Subject.export
+      summary: DSAR fan-out
+      description: |-
+        DSAR fan-out
+
+        PRD inputs: DSAR ref, subject token, scope
+        PRD outputs: evidence
+      tags:
+      - Subject
+      x-requirement:
+      - REQ-DAT-009
+      - REQ-DAT-270..REQ-DAT-275
+      x-anchor:
+      - REQ-DAT-009
+      x-anchor-mapped:
+      - REQ-DAT-009
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-06
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: dat.Subject.export
+      x-error-codes:
+      - code: DAT-ERR-060
+        note: legal hold (returns restriction
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1468
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectExportRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/erasure/execute:
+    post:
+      operationId: dat.Erasure.execute
+      summary: DSAR fan-out
+      description: |-
+        DSAR fan-out
+
+        PRD inputs: DSAR ref, subject token, scope
+        PRD outputs: evidence
+      tags:
+      - Erasure
+      x-requirement:
+      - REQ-DAT-009
+      - REQ-DAT-270..REQ-DAT-275
+      x-anchor:
+      - REQ-DAT-009
+      x-anchor-mapped:
+      - REQ-DAT-009
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-06
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: dat.Erasure.execute
+      x-error-codes:
+      - code: DAT-ERR-060
+        note: legal hold (returns restriction
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1468
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErasureExecuteRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErasureExecuteResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/restriction/apply:
+    post:
+      operationId: dat.Restriction.apply
+      summary: DSAR fan-out
+      description: |-
+        DSAR fan-out
+
+        PRD inputs: DSAR ref, subject token, scope
+        PRD outputs: evidence
+      tags:
+      - Restriction
+      x-requirement:
+      - REQ-DAT-009
+      - REQ-DAT-270..REQ-DAT-275
+      x-anchor:
+      - REQ-DAT-009
+      x-anchor-mapped:
+      - REQ-DAT-009
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-06
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-in-process: true
+      x-exposure:
+      - internal
+      x-consumers:
+      - CMP
+      x-permission: dat.Restriction.apply
+      x-error-codes:
+      - code: DAT-ERR-060
+        note: legal hold (returns restriction
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1468
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestrictionApplyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestrictionApplyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/purpose-grants/request:
+    post:
+      operationId: dat.PurposeGrant.request
+      summary: Purpose-based access
+      description: |-
+        Purpose-based access
+
+        PRD inputs: purpose, data set, columns, grantee, expiry
+        PRD outputs: grant
+      tags:
+      - PurposeGrant
+      x-requirement:
+      - REQ-DAT-264
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-06
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.PurposeGrant.request
+      x-error-codes:
+      - code: DAT-ERR-061
+        note: purpose not allowed for columns
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1469
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurposeGrantRequestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeGrantRequestResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/purpose-grants/decide:
+    post:
+      operationId: dat.PurposeGrant.decide
+      summary: Purpose-based access
+      description: |-
+        Purpose-based access
+
+        PRD inputs: purpose, data set, columns, grantee, expiry
+        PRD outputs: grant
+      tags:
+      - PurposeGrant
+      x-requirement:
+      - REQ-DAT-264
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-06
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.PurposeGrant.decide
+      x-error-codes:
+      - code: DAT-ERR-061
+        note: purpose not allowed for columns
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1469
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurposeGrantDecideRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeGrantDecideResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/purpose-grants/revoke:
+    post:
+      operationId: dat.PurposeGrant.revoke
+      summary: Purpose-based access
+      description: |-
+        Purpose-based access
+
+        PRD inputs: purpose, data set, columns, grantee, expiry
+        PRD outputs: grant
+      tags:
+      - PurposeGrant
+      x-requirement:
+      - REQ-DAT-264
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-06
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 3
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.PurposeGrant.revoke
+      x-error-codes:
+      - code: DAT-ERR-061
+        note: purpose not allowed for columns
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1469
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurposeGrantRevokeRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurposeGrantRevokeResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/synthetic/generate:
+    post:
+      operationId: dat.Synthetic.generate
+      summary: Synthetic data set
+      description: |-
+        Synthetic data set
+
+        PRD inputs: spec
+        PRD outputs: data set ref, privacy test results
+      tags:
+      - Synthetic
+      x-requirement:
+      - REQ-DAT-280
+      - REQ-DAT-281
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-06
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: dat.Synthetic.generate
+      x-error-codes:
+      - code: DAT-ERR-070
+        note: privacy test failed
+        status: 422
+      - code: DAT-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-15 §9.1 l.1470
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyntheticGenerateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyntheticGenerateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/analytics/ask:
+    post:
+      operationId: dat.Analytics.ask
+      summary: Conversational analytics
+      description: |-
+        Conversational analytics
+
+        PRD inputs: question, context
+        PRD outputs: proposed query, result after user runs it
+      tags:
+      - Analytics
+      x-requirement:
+      - REQ-DAT-234
+      x-wave: unscheduled
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Analytics.ask
+      x-error-codes: []
+      x-source:
+      - PRD-15 §9.1 l.1471
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyticsAskRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsAskResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+components:
+  securitySchemes:
+    entra:
+      $ref: common.yaml#/components/securitySchemes/entra
+  schemas:
+    DataContractRegisterRequest:
+      type: object
+      description: 'dat.DataContract.register request. PRD inputs: "contract document"'
+      properties:
+        contractDocument:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "contract document"'
+    DataContractRegisterResponse:
+      type: object
+      description: 'dat.DataContract.register result. PRD outputs: "version, compatibility result"'
+      properties:
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        compatibilityResult:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "compatibility result"'
+    DataContractGetResponse:
+      type: object
+      description: 'dat.DataContract.get result. PRD outputs: "contract versions"'
+      properties:
+        contractVersions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "contract versions"'
+    DataContractListItem:
+      type: object
+      description: 'dat.DataContract.list result. PRD outputs: "contract versions"'
+      properties:
+        contractVersions:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "contract versions"'
+    DataContractListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/DataContractListItem'
+      description: Page of dat.DataContract.list results (cursor pagination, contract §3.5.5)
+    IngestionReplayRequest:
+      type: object
+      description: 'dat.Ingestion.replay request. PRD inputs: "contract, from, to"'
+      properties:
+        contract:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "contract"'
+        from:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "from"'
+        to:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "to"'
+    IngestionReplayResponse:
+      type: object
+      description: 'dat.Ingestion.replay result. PRD outputs: "job id, counts"'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "job id"'
+        counts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "counts"'
+    QuarantineReleaseRequest:
+      type: object
+      description: 'dat.Quarantine.release request. PRD inputs: "ids or filter"'
+      properties:
+        ids:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "ids or filter" (optional)'
+        filter:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "ids or filter" (optional)'
+      oneOf:
+      - required:
+        - ids
+      - required:
+        - filter
+    QuarantineReleaseResponse:
+      type: object
+      description: 'dat.Quarantine.release result. PRD outputs: "outcome per record"'
+      properties:
+        outcomePerRecord:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "outcome per record"'
+    QueryAsOfResponse:
+      type: object
+      description: 'dat.Query.asOf result. PRD outputs: "rows, as-of metadata, hash"'
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rows"'
+        asMetadata:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "as-of metadata"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "hash"'
+    PopulationSampleRequest:
+      type: object
+      description: 'dat.Population.sample request. PRD inputs: "product/slot, as-of, window, sampling"'
+      properties:
+        productSlot:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "product/slot"'
+        as:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "as-of"'
+        window:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "window"'
+        sampling:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "sampling"'
+    PopulationSampleResponse:
+      type: object
+      description: 'dat.Population.sample result. PRD outputs: "rows or aggregates, snapshot hash"'
+      properties:
+        rowsOrAggregates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rows or aggregates"'
+        snapshotHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "snapshot hash"'
+    PopulationAggregateResponse:
+      type: object
+      description: 'dat.Population.aggregate result. PRD outputs: "rows or aggregates, snapshot hash"'
+      properties:
+        rowsOrAggregates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "rows or aggregates"'
+        snapshotHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "snapshot hash"'
+    KpiGetResponse:
+      type: object
+      description: 'dat.Kpi.get result. PRD outputs: "values, definition version, as-of"'
+      properties:
+        values:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "values"'
+        definitionVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "definition version"'
+        as:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "as-of"'
+    MartRunRequest:
+      type: object
+      description: 'dat.Mart.run request. PRD inputs: "mart, entity, period, regime, taxonomy version"'
+      properties:
+        mart:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "mart"'
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+        regime:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "regime"'
+        taxonomyVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "taxonomy version"'
+    MartRunResponse:
+      type: object
+      description: 'dat.Mart.run result. PRD outputs: "run id"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+    MartGetResponse:
+      type: object
+      description: 'dat.Mart.get result. PRD outputs: "figures, lineage pointer, diff"'
+      properties:
+        figures:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "figures"'
+        lineagePointer:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "lineage pointer"'
+        diff:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "diff"'
+    MartFigureResponse:
+      type: object
+      description: 'dat.Mart.figure result. PRD outputs: "figures, lineage pointer, diff"'
+      properties:
+        figures:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "figures"'
+        lineagePointer:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "lineage pointer"'
+        diff:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "diff"'
+    MartCompareResponse:
+      type: object
+      description: 'dat.Mart.compare result. PRD outputs: "figures, lineage pointer, diff"'
+      properties:
+        figures:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "figures"'
+        lineagePointer:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "lineage pointer"'
+        diff:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "diff"'
+    MartAdjustRequest:
+      type: object
+      description: 'dat.Mart.adjust request. PRD inputs: "figure, amount, reason, evidence"'
+      properties:
+        figure:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "figure"'
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: 'PRD: "amount"'
+        reason:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "reason"'
+        evidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidence"'
+    MartAdjustResponse:
+      type: object
+      description: 'dat.Mart.adjust result. PRD outputs: "approval request"'
+      properties:
+        approvalRequest:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "approval request"'
+    MartSignOffRequest:
+      type: object
+      description: 'dat.Mart.signOff request. PRD inputs: "run id, comment"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+        comment:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "comment"'
+    MartSignOffResponse:
+      type: object
+      description: 'dat.Mart.signOff result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    MartExportRequest:
+      type: object
+      description: 'dat.Mart.export request. PRD inputs: "run id"'
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "run id"'
+    MartExportResponse:
+      type: object
+      description: 'dat.Mart.export result. PRD outputs: "package ref (DOC archive), manifest hash"'
+      properties:
+        packageRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "package ref (DOC archive)"'
+        manifestHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'PRD: "manifest hash"'
+    ScrResultsSubmitRequest:
+      type: object
+      description: 'dat.ScrResults.submit request. PRD inputs: "entity, period, result file, preparer attestation"'
+      properties:
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+        resultFile:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result file"'
+        preparerAttestation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "preparer attestation"'
+    ScrResultsSubmitResponse:
+      type: object
+      description: 'dat.ScrResults.submit result. PRD outputs: "result set id, completeness findings, status"'
+      properties:
+        resultSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "result set id"'
+        completenessFindings:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "completeness findings"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    ScrResultsAcceptRequest:
+      type: object
+      description: 'dat.ScrResults.accept request. PRD inputs: "entity, period, result file, preparer attestation"'
+      properties:
+        entity:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity"'
+        period:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "period"'
+        resultFile:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result file"'
+        preparerAttestation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "preparer attestation"'
+    ScrResultsAcceptResponse:
+      type: object
+      description: 'dat.ScrResults.accept result. PRD outputs: "result set id, completeness findings, status"'
+      properties:
+        resultSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "result set id"'
+        completenessFindings:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "completeness findings"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    ScrResultsGetResponse:
+      type: object
+      description: 'dat.ScrResults.get result. PRD outputs: "result set id, completeness findings, status"'
+      properties:
+        resultSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "result set id"'
+        completenessFindings:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "completeness findings"'
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    LineageTraceResponse:
+      type: object
+      description: 'dat.Lineage.trace result. PRD outputs: "graph, source records ref"'
+      properties:
+        graph:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "graph"'
+        sourceRecordsRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "source records ref"'
+    AccumulationSnapshotResponse:
+      type: object
+      description: 'dat.Accumulation.snapshot result. PRD outputs: "aggregates"'
+      properties:
+        aggregates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "aggregates"'
+    AccumulationFootprintResponse:
+      type: object
+      description: 'dat.Accumulation.footprint result. PRD outputs: "aggregates"'
+      properties:
+        aggregates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "aggregates"'
+    AccumulationTrendResponse:
+      type: object
+      description: 'dat.Accumulation.trend result. PRD outputs: "aggregates"'
+      properties:
+        aggregates:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "aggregates"'
+    ModelRegisterRequest:
+      type: object
+      description: 'dat.Model.register request. PRD inputs: "model card, version"'
+      properties:
+        modelCard:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "model card"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+    ModelRegisterResponse:
+      type: object
+      description: 'dat.Model.register result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    ModelGetResponse:
+      type: object
+      description: 'dat.Model.get result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    ModelSubmitValidationRequest:
+      type: object
+      description: 'dat.Model.submitValidation request. PRD inputs: "model card, version"'
+      properties:
+        modelCard:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "model card"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+    ModelSubmitValidationResponse:
+      type: object
+      description: 'dat.Model.submitValidation result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    ModelRecordValidationRequest:
+      type: object
+      description: 'dat.Model.recordValidation request. PRD inputs: "model card, version"'
+      properties:
+        modelCard:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "model card"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+    ModelRecordValidationResponse:
+      type: object
+      description: 'dat.Model.recordValidation result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    ModelApproveRequest:
+      type: object
+      description: 'dat.Model.approve request. PRD inputs: "model card, version"'
+      properties:
+        modelCard:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "model card"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+    ModelApproveResponse:
+      type: object
+      description: 'dat.Model.approve result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    ModelRetireRequest:
+      type: object
+      description: 'dat.Model.retire request. PRD inputs: "model card, version"'
+      properties:
+        modelCard:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "model card"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+    ModelRetireResponse:
+      type: object
+      description: 'dat.Model.retire result. PRD outputs: "status"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+    CoverageStatusResponse:
+      type: object
+      description: 'dat.Coverage.status result. PRD outputs: "Governed / Ungoverned + reasons"'
+      properties:
+        governed:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "Governed"'
+        ungoverned:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "Ungoverned + reasons"'
+        reasons:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "Ungoverned + reasons"'
+    MonitorMetricsRequest:
+      type: object
+      description: 'dat.Monitor.metrics request. PRD inputs: "feature, version, metric records"'
+      properties:
+        feature:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "feature"'
+        version:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "version"'
+        metricRecords:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "metric records"'
+    MonitorMetricsResponse:
+      type: object
+      description: 'dat.Monitor.metrics result. PRD outputs: "accepted counts"'
+      properties:
+        acceptedCounts:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "accepted counts"'
+    BiasTestRunRequest:
+      type: object
+      description: 'dat.BiasTest.run request. PRD inputs: "feature or artefact, population ref"'
+      properties:
+        feature:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "feature or artefact" (optional)'
+        artefact:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "feature or artefact" (optional)'
+        populationRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "population ref"'
+      oneOf:
+      - required:
+        - feature
+      - required:
+        - artefact
+    BiasTestRunResponse:
+      type: object
+      description: 'dat.BiasTest.run result. PRD outputs: "BiasReport id, ratios"'
+      properties:
+        biasreportId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "BiasReport id"'
+        ratios:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "ratios"'
+    FeatureStoreGetOnlineResponse:
+      type: object
+      description: 'dat.FeatureStore.getOnline result. PRD outputs: "values / data set ref"'
+      properties:
+        values:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "values"'
+        dataSetRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "data set ref"'
+    FeatureStoreBuildTrainingSetRequest:
+      type: object
+      description: 'dat.FeatureStore.buildTrainingSet request. PRD inputs: "entity keys, feature list, as-of"'
+      properties:
+        entityKeys:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "entity keys"'
+        featureList:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "feature list"'
+        as:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "as-of"'
+    FeatureStoreBuildTrainingSetResponse:
+      type: object
+      description: 'dat.FeatureStore.buildTrainingSet result. PRD outputs: "values / data set ref"'
+      properties:
+        values:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "values"'
+        dataSetRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "data set ref"'
+    ActuarialInputSetRequest:
+      type: object
+      description: 'dat.Actuarial.inputSet request. PRD inputs: "valuation date, model version, attestation"'
+      properties:
+        valuationDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "valuation date"'
+        modelVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "model version"'
+        attestation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "attestation"'
+    ActuarialInputSetResponse:
+      type: object
+      description: 'dat.Actuarial.inputSet result. PRD outputs: "status, FIN ack"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        finAck:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "FIN ack"'
+    ActuarialRunRequest:
+      type: object
+      description: 'dat.Actuarial.run request. PRD inputs: "valuation date, model version, attestation"'
+      properties:
+        valuationDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "valuation date"'
+        modelVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "model version"'
+        attestation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "attestation"'
+    ActuarialRunResponse:
+      type: object
+      description: 'dat.Actuarial.run result. PRD outputs: "status, FIN ack"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        finAck:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "FIN ack"'
+    ActuarialResultSetSubmitRequest:
+      type: object
+      description: 'dat.ActuarialResultSet.submit request. PRD inputs: "valuation date, model version, attestation"'
+      properties:
+        valuationDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "valuation date"'
+        modelVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "model version"'
+        attestation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "attestation"'
+    ActuarialResultSetSubmitResponse:
+      type: object
+      description: 'dat.ActuarialResultSet.submit result. PRD outputs: "status, FIN ack"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        finAck:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "FIN ack"'
+    ActuarialSupersedeRequest:
+      type: object
+      description: 'dat.Actuarial.supersede request. PRD inputs: "valuation date, model version, attestation"'
+      properties:
+        valuationDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'PRD: "valuation date"'
+        modelVersion:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "model version"'
+        attestation:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "attestation"'
+    ActuarialSupersedeResponse:
+      type: object
+      description: 'dat.Actuarial.supersede result. PRD outputs: "status, FIN ack"'
+      properties:
+        status:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "status"'
+        finAck:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "FIN ack"'
+    SubjectExportRequest:
+      type: object
+      description: 'dat.Subject.export request. PRD inputs: "DSAR ref, subject token, scope"'
+      properties:
+        dsarRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "DSAR ref"'
+        subjectToken:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "subject token"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    SubjectExportResponse:
+      type: object
+      description: 'dat.Subject.export result. PRD outputs: "evidence"'
+      properties:
+        evidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidence"'
+    ErasureExecuteRequest:
+      type: object
+      description: 'dat.Erasure.execute request. PRD inputs: "DSAR ref, subject token, scope"'
+      properties:
+        dsarRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "DSAR ref"'
+        subjectToken:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "subject token"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    ErasureExecuteResponse:
+      type: object
+      description: 'dat.Erasure.execute result. PRD outputs: "evidence"'
+      properties:
+        evidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidence"'
+    RestrictionApplyRequest:
+      type: object
+      description: 'dat.Restriction.apply request. PRD inputs: "DSAR ref, subject token, scope"'
+      properties:
+        dsarRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "DSAR ref"'
+        subjectToken:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "subject token"'
+        scope:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "scope"'
+    RestrictionApplyResponse:
+      type: object
+      description: 'dat.Restriction.apply result. PRD outputs: "evidence"'
+      properties:
+        evidence:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "evidence"'
+    PurposeGrantRequestRequest:
+      type: object
+      description: 'dat.PurposeGrant.request request. PRD inputs: "purpose, data set, columns, grantee, expiry"'
+      properties:
+        purpose:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "purpose"'
+        dataSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "data set"'
+        columns:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "columns"'
+        grantee:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grantee"'
+        expiry:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "expiry"'
+    PurposeGrantRequestResponse:
+      type: object
+      description: 'dat.PurposeGrant.request result. PRD outputs: "grant"'
+      properties:
+        grant:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grant"'
+    PurposeGrantDecideRequest:
+      type: object
+      description: 'dat.PurposeGrant.decide request. PRD inputs: "purpose, data set, columns, grantee, expiry"'
+      properties:
+        purpose:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "purpose"'
+        dataSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "data set"'
+        columns:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "columns"'
+        grantee:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grantee"'
+        expiry:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "expiry"'
+    PurposeGrantDecideResponse:
+      type: object
+      description: 'dat.PurposeGrant.decide result. PRD outputs: "grant"'
+      properties:
+        grant:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grant"'
+    PurposeGrantRevokeRequest:
+      type: object
+      description: 'dat.PurposeGrant.revoke request. PRD inputs: "purpose, data set, columns, grantee, expiry"'
+      properties:
+        purpose:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "purpose"'
+        dataSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "data set"'
+        columns:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "columns"'
+        grantee:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grantee"'
+        expiry:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "expiry"'
+    PurposeGrantRevokeResponse:
+      type: object
+      description: 'dat.PurposeGrant.revoke result. PRD outputs: "grant"'
+      properties:
+        grant:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "grant"'
+    SyntheticGenerateRequest:
+      type: object
+      description: 'dat.Synthetic.generate request. PRD inputs: "spec"'
+      properties:
+        spec:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "spec"'
+    SyntheticGenerateResponse:
+      type: object
+      description: 'dat.Synthetic.generate result. PRD outputs: "data set ref, privacy test results"'
+      properties:
+        dataSetRef:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "data set ref"'
+        privacyTestResults:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "privacy test results"'
+    AnalyticsAskRequest:
+      type: object
+      description: 'dat.Analytics.ask request. PRD inputs: "question, context"'
+      properties:
+        question:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "question"'
+        context:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "context"'
+    AnalyticsAskResponse:
+      type: object
+      description: 'dat.Analytics.ask result. PRD outputs: "proposed query, result after user runs it"'
+      properties:
+        proposedQuery:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "proposed query"'
+        resultAfterUserRunsIt:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'PRD: "result after user runs it"'

@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.coreinsurance.example/events/plt/AuthorityGrantChanged.v1.schema.json",
+  "title": "AuthorityGrantChanged v1",
+  "description": "Profile, limit, grant or delegation change. Keyed on profile_id, or user_id for user-level grants and delegations.",
+  "x-event-type": "AuthorityGrantChanged",
+  "x-registry-name": "plt.AuthorityGrantChanged",
+  "x-producer": "PLT",
+  "x-topic": "plt.events.v1",
+  "x-schema-version": "1.0",
+  "x-ordering-key": "profile_id",
+  "x-aggregate-type": [
+    "AuthorityProfile",
+    "User"
+  ],
+  "x-data-classification": "P1",
+  "x-set-completeness": false,
+  "x-business-keys": [
+    "authorityProfileId|userId"
+  ],
+  "x-payload-status": "full",
+  "x-source": [
+    "PRD-14 §8.1",
+    "PRD-18 §8.2"
+  ],
+  "allOf": [
+    {
+      "$ref": "../envelope.schema.json"
+    }
+  ],
+  "properties": {
+    "eventType": {
+      "const": "AuthorityGrantChanged"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "producer": {
+      "const": "PLT"
+    },
+    "aggregateType": {
+      "enum": [
+        "AuthorityProfile",
+        "User"
+      ]
+    },
+    "dataClassification": {
+      "const": "P1"
+    },
+    "businessKeys": {
+      "type": "object",
+      "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "required": [
+                "authorityProfileId"
+              ]
+            },
+            {
+              "required": [
+                "userId"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "payload": {
+      "$ref": "#/$defs/Payload"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "Payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "typeCodes",
+        "usersAffected",
+        "validPeriod"
+      ],
+      "properties": {
+        "profileId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0"
+        },
+        "typeCodes": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "x-classification": "P0"
+        },
+        "usersAffected": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Uuid"
+          },
+          "x-classification": "P1",
+          "x-personal-data": true
+        },
+        "validPeriod": {
+          "$ref": "../common.schema.json#/$defs/DatePeriod",
+          "x-classification": "P0"
+        }
+      }
+    }
+  }
+}
