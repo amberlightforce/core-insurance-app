@@ -7,6 +7,12 @@
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "Stamp__LegalEntity": "GR-TEST",
+        "Stamp__Country": "GR",
+        "Stamp__LegalEntityId": "0192f0c4-0000-7000-8000-000000000001",
+        "DataProtection__LocalMasterKey": "Y29yZWlucy1sb2NhbC1kZXYtb25seS1ub3QtYS1rZXk=",
+        "Party__DefaultCallingCode": "30",
+        "DevAuthentication__Enabled": "true",
         "APP_ROLE": "api"
       }
     },
@@ -16,6 +22,11 @@
       "applicationUrl": "http://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "Stamp__LegalEntity": "GR-TEST",
+        "Stamp__Country": "GR",
+        "Stamp__LegalEntityId": "0192f0c4-0000-7000-8000-000000000001",
+        "DataProtection__LocalMasterKey": "Y29yZWlucy1sb2NhbC1kZXYtb25seS1ub3QtYS1rZXk=",
+        "Party__DefaultCallingCode": "30",
         "APP_ROLE": "worker"
       }
     },

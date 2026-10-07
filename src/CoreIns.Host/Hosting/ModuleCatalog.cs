@@ -50,6 +50,13 @@ internal static class ModuleCatalog
     public static IReadOnlyList<CoreIns.Platform.Persistence.ModuleDatabaseDefinition> Databases { get; } =
     [
         .. PlatformModule.Databases,
+        .. PartyModule.Databases,
+    ];
+
+    /// <summary>Module assemblies whose (internal) <c>[ApiController]</c>s the api serves.</summary>
+    public static IReadOnlyList<System.Reflection.Assembly> ApiAssemblies { get; } =
+    [
+        typeof(PartyModule).Assembly,
     ];
 
     /// <summary>Calls every module's registration hook. The platform registers first.</summary>

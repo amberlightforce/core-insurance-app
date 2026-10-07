@@ -1,16 +1,20 @@
 using CoreIns.Platform.Audit;
+using CoreIns.Platform.Authorization;
 using CoreIns.Platform.Authority;
 using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Numbering;
 using CoreIns.Platform.Persistence;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel.Identifiers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace CoreIns.Platform;
 
@@ -78,6 +82,24 @@ public static class PlatformModule
         services.TryAddSingleton<IAuthorityTypeRegistry, AuthorityTypeRegistry>();
         services.TryAddSingleton<IAuthorityService, ConfiguredAuthorityService>();
         services.TryAddSingleton<IConfigurationResolver, InMemoryConfigurationResolver>();
+
+        // Legal entity directory (D-CON-33; MKT registry later), permissions (REQ-PLT-075/079 subset), numbering (REQ-PLT-014).
+        services.TryAddSingleton<ILegalEntityDirectory, StampLegalEntityDirectory>();
+        services.AddOptions<PermissionOptions>().Bind(configuration.GetSection(PermissionOptions.Section));
+        services.TryAddSingleton<IPermissionEvaluator, ConfiguredPermissionEvaluator>();
+        services.TryAddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+        services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+        services.AddOptions<NumberingOptions>().Bind(configuration.GetSection(NumberingOptions.Section))
+            .Validate(o => o.Validate().Count == 0, "Platform:Numbering is invalid (see NumberingOptions.Validate).")
+            .ValidateOnStart();
+        services.TryAddSingleton<INumberFormat, CoreNumberFormat>();
+        services.TryAddSingleton<NumberBlockCache>();
+        services.TryAddScoped<INumberingService, NumberingService>();
+        services.AddErrorDefinitions(
+            ErrorDefinition.For(ModuleCode.PLT, NumberingErrors.RangeExhausted, 422, "Η σειρά αρίθμησης εξαντλήθηκε", "The numbering series is exhausted")
+                .Describe("Δεν απομένουν αριθμοί στη σειρά· ο διαχειριστής πρέπει να ορίσει νέα σειρά.", "No number is left in the series; an administrator must define a new series."),
+            ErrorDefinition.For(ModuleCode.PLT, NumberingErrors.UnknownScheme, 500, "Δεν έχει οριστεί σειρά αρίθμησης", "No numbering series is defined")
+                .Describe("Ο τύπος αναγνωριστικού δεν έχει ορισμό σειράς στις ρυθμίσεις της πλατφόρμας.", "The identifier type has no series definition in the platform settings."));
         return services;
     }
 
@@ -123,6 +145,7 @@ public static class PlatformModule
         $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
         $"GRANT SELECT, INSERT, UPDATE, DELETE ON {Schema}.outbox_message, {Schema}.aggregate_sequence, {Schema}.processed_event, "
             + $"{Schema}.outbox_dead_letter, {Schema}.event_archive, {Schema}.idempotency_record TO {appRole}",
+        $"GRANT SELECT, INSERT, UPDATE ON {Schema}.number_series, {Schema}.data_key TO {appRole}",
         $"GRANT SELECT, INSERT ON {Schema}.audit_event TO {appRole}",
         $"GRANT SELECT ON {Schema}.audit_chain_head TO {appRole}",
         $"REVOKE ALL ON FUNCTION {Schema}.audit_chain_lock(date) FROM PUBLIC",
