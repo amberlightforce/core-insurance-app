@@ -51,6 +51,98 @@ public sealed class AuditTests(PostgresFixture database) : IClassFixture<Postgre
     }
 
     [Fact]
+    public async Task The_application_role_cannot_corrupt_the_chain_head_or_skip_a_link()
+    {
+        await using var harness = await PlatformHarness.CreateAsync(database);
+        harness.Clock.Set(Instant.Parse("2026-11-20T09:00:00Z"));
+        await harness.SendAsync(new CreateWidget("head", 1m));
+        var ct = TestContext.Current.CancellationToken;
+
+        foreach (var sql in new[]
+                 {
+                     "UPDATE plt.audit_chain_head SET last_sequence = 0",
+                     "DELETE FROM plt.audit_chain_head",
+                     "INSERT INTO plt.audit_chain_head (chain_date, last_sequence, last_hash) VALUES ('2030-01-01', 0, repeat('a', 64))",
+                 })
+        {
+            await using var command = harness.DataSource.CreateCommand(sql);
+            (await Should.ThrowAsync<PostgresException>(() => command.ExecuteNonQueryAsync(ct))).SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
+        }
+
+        // A forged row that does not extend the chain (wrong sequence, or right sequence with a wrong prev_hash) is refused.
+        foreach (var (sequence, prev) in new[] { ("99", "repeat('0', 64)"), ("2", "repeat('0', 64)") })
+        {
+            await using var forged = harness.DataSource.CreateCommand(
+                $$"""
+                INSERT INTO plt.audit_event (audit_id, chain_date, sequence, prev_hash, hash, actor_kind, actor_id, role_codes, operation,
+                    outcome, changes, correlation_id, business_keys, origin, legal_entity, jurisdiction, occurred_at, recorded_at)
+                VALUES (gen_random_uuid(), '2026-11-20', {{sequence}}, {{prev}}, repeat('b', 64), 'USER', 'x', '{}', 'wrk.Widget.create',
+                    'Succeeded', '[]', repeat('1', 32), '{}', 'LIVE', 'GR-TEST', 'GR', now(), now())
+                """);
+            (await Should.ThrowAsync<PostgresException>(() => forged.ExecuteNonQueryAsync(ct))).SqlState.ShouldBe(PostgresErrorCodes.CheckViolation);
+        }
+
+        (await Verifier(harness).VerifyAsync(new BusinessDate(2026, 11, 20), ct)).IsValid.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task A_rejection_is_audited_even_when_the_outer_commit_fails()
+    {
+        await using var harness = await PlatformHarness.CreateAsync(database, configure: s =>
+            s.AddScoped<CoreIns.Platform.Persistence.ITransactionParticipant, FailOnceParticipant>());
+        harness.Clock.Set(Instant.Parse("2026-11-21T09:00:00Z"));
+        var ct = TestContext.Current.CancellationToken;
+
+        await using (var scope = harness.Services.CreateAsyncScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<CoreIns.Platform.Context.RequestContext>();
+            context.ConfigurationHash = PlatformHarness.Hash;
+            context.IdempotencyKey = CoreIns.SharedKernel.Identifiers.IdempotencyKey.New();
+            context.LegalEntity = CoreIns.SharedKernel.Identifiers.LegalEntityCode.Parse("GR-TEST");
+            context.Jurisdiction = CoreIns.SharedKernel.Identifiers.Jurisdiction.Parse("GR");
+            var session = scope.ServiceProvider.GetRequiredService<CoreIns.Platform.Persistence.DbSession>();
+            var outer = await session.BeginTransactionAsync(ct);
+            await using (outer)
+            {
+                // A joined command is refused (its audit record must survive), then the outer commit fails.
+                var refused = await scope.ServiceProvider.GetRequiredService<CoreIns.Platform.Commands.ICommandHandler<CreateWidget, WidgetCreatedPayload>>()
+                    .HandleAsync(new CreateWidget("nested-refused", 1m, Fail: "result"), ct);
+                refused.IsFailure.ShouldBeTrue();
+                FailOnceParticipant.Armed = true;
+                await Should.ThrowAsync<InvalidOperationException>(() => outer.CommitAsync(ct));
+            }
+        }
+
+        (await harness.CountAsync("SELECT count(*) FROM plt.audit_event WHERE chain_date = '2026-11-21' AND outcome = 'Rejected' AND error_code = 'WRK-ERR-WIDGET-REFUSED'"))
+            .ShouldBe(1);
+        (await harness.CountAsync("SELECT count(*) FROM tst.widget WHERE name = 'nested-refused'")).ShouldBe(0);
+        (await Verifier(harness).VerifyAsync(new BusinessDate(2026, 11, 21), ct)).IsValid.ShouldBeTrue();
+    }
+
+    /// <summary>Makes the next commit fail after every other participant has written its rows.</summary>
+    private sealed class FailOnceParticipant : CoreIns.Platform.Persistence.ITransactionParticipant
+    {
+        public static bool Armed { get; set; }
+
+        public int Order => 5000;
+
+        public Task BeforeCommitAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken cancellationToken)
+        {
+            if (Armed)
+            {
+                Armed = false;
+                throw new InvalidOperationException("commit failure injected by the test");
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task AfterCommitAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public Task AfterRollbackAsync(CoreIns.Platform.Persistence.DbSession session, CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+
+    [Fact]
     public async Task Even_the_owner_is_refused_by_the_trigger()
     {
         await using var harness = await PlatformHarness.CreateAsync(database);

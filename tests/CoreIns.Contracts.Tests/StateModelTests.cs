@@ -18,19 +18,23 @@ namespace CoreIns.Contracts.Tests;
 public sealed class StateModelTests
 {
     [Fact]
-    public void Job_follows_contract_3_2_4_prd18_9_2_1_and_d_con_08()
+    public void Job_follows_contract_3_2_4_and_d_con_08b()
     {
         var m = JobStateModel.Machine;
         Owned(m, ModuleCode.POL);
         m.InitialStates.ShouldBe([JobState.Draft]);
         Allows(m, JobState.Draft, JobTrigger.Quote, JobState.Quoted);
         Allows(m, JobState.Quoted, JobTrigger.Bind, JobState.Bound);
-        Allows(m, JobState.Bound, JobTrigger.Schedule, JobState.Scheduled);
+        Allows(m, JobState.Quoted, JobTrigger.Schedule, JobState.Scheduled);
+        Allows(m, JobState.Scheduled, JobTrigger.Activate, JobState.Bound);
         Allows(m, JobState.Scheduled, JobTrigger.Rescind, JobState.Rescinded);
-        Forbids(m, JobState.Quoted, JobTrigger.Schedule);
+        Forbids(m, JobState.Bound, JobTrigger.Schedule);
+        Forbids(m, JobState.Draft, JobTrigger.Schedule);
         Forbids(m, JobState.Draft, JobTrigger.Bind);
         Forbids(m, JobState.Draft, JobTrigger.NotTake);
-        m.TerminalStates.ShouldBe([JobState.Rescinded, JobState.Withdrawn, JobState.Declined, JobState.NotTaken, JobState.Expired], ignoreOrder: true);
+        Enum.GetNames<JobState>().ShouldNotContain("Issued");
+        m.TerminalStates.ShouldBe(
+            [JobState.Bound, JobState.Rescinded, JobState.Withdrawn, JobState.Declined, JobState.NotTaken, JobState.Expired], ignoreOrder: true);
     }
 
     [Fact]

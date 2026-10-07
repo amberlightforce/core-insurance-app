@@ -3,7 +3,7 @@ using CoreIns.SharedKernel.StateMachines;
 
 namespace CoreIns.Modules.Policy.Contracts;
 
-/// <summary>Job states (contract §3.2.4 Job, PRD-18 §9.2.1, D-CON-08). Referred and Preempted are flags, not states.</summary>
+/// <summary>Job states (contract §3.2.4 Job, ruling D-CON-08b). Referred and Preempted are flags, not states; Issued is not a job state.</summary>
 public enum JobState
 {
     /// <summary>Being prepared (sub-states QuickQuote, Converting).</summary>
@@ -15,7 +15,7 @@ public enum JobState
     /// <summary>Bound (bind gates passed). Issued is not a job state.</summary>
     Bound,
 
-    /// <summary>Future-effective cancellation or renewal waiting for its effective time; reached from Bound only (D-CON-08).</summary>
+    /// <summary>Future-effective cancellation or renewal waiting for its effective time (Quoted → Scheduled → Bound or Rescinded).</summary>
     Scheduled,
 
     /// <summary>A scheduled job was rescinded (<c>CancellationRescinded</c>).</summary>
@@ -46,10 +46,10 @@ public enum JobTrigger
     /// <summary>Bind gates passed (<c>PolicyBound</c> / <c>RenewalBound</c>).</summary>
     Bind,
 
-    /// <summary>A bound future-effective job waits for its effective time (D-CON-08).</summary>
+    /// <summary>A quoted future-effective cancellation or renewal is scheduled for its effective time.</summary>
     Schedule,
 
-    /// <summary>The scheduled job's effective time is reached or it is accepted.</summary>
+    /// <summary>The scheduled job's effective time is reached or it is accepted: it binds.</summary>
     Activate,
 
     /// <summary>The scheduled job is rescinded.</summary>
@@ -72,8 +72,9 @@ public enum JobTrigger
 public static class JobStateModel
 {
     /// <summary>
-    /// The table. Note on D-CON-08: Scheduled is reached from Bound, and Scheduled → Bound (Activate) closes the loop when
-    /// the effective time arrives — recorded as an open question in the F-1b report.
+    /// The table (contract §3.2.4, ruling D-CON-08b): Draft → Quoted → Bound; Quoted → Scheduled for a future-effective
+    /// cancellation or renewal, then Scheduled → Bound or Rescinded; terminal Withdrawn, Declined, NotTaken, Expired.
+    /// Quoted → Draft (edit, new quote version) is PRD-18 §9.2.1.
     /// </summary>
     public static StateMachine<JobState, JobTrigger> Machine { get; } =
         StateMachine.Define<JobState, JobTrigger>(ModuleCode.POL, "Job")
@@ -81,14 +82,14 @@ public static class JobStateModel
             .Permit(JobState.Draft, JobTrigger.Quote, JobState.Quoted)
             .Permit(JobState.Quoted, JobTrigger.Edit, JobState.Draft)
             .Permit(JobState.Quoted, JobTrigger.Bind, JobState.Bound)
-            .Permit(JobState.Bound, JobTrigger.Schedule, JobState.Scheduled)
+            .Permit(JobState.Quoted, JobTrigger.Schedule, JobState.Scheduled)
             .Permit(JobState.Scheduled, JobTrigger.Activate, JobState.Bound)
             .Permit(JobState.Scheduled, JobTrigger.Rescind, JobState.Rescinded)
             .Permit([JobState.Draft, JobState.Quoted], JobTrigger.Withdraw, JobState.Withdrawn)
             .Permit([JobState.Draft, JobState.Quoted], JobTrigger.Decline, JobState.Declined)
             .Permit(JobState.Quoted, JobTrigger.NotTake, JobState.NotTaken)
             .Permit([JobState.Draft, JobState.Quoted], JobTrigger.Expire, JobState.Expired)
-            .Terminal(JobState.Rescinded, JobState.Withdrawn, JobState.Declined, JobState.NotTaken, JobState.Expired)
+            .Terminal(JobState.Bound, JobState.Rescinded, JobState.Withdrawn, JobState.Declined, JobState.NotTaken, JobState.Expired)
             .Build();
 }
 

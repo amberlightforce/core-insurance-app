@@ -113,15 +113,20 @@ public static class PlatformModule
 
     /// <summary>
     /// Privileges of the application role on <c>plt</c> (run by the migrate job after migrating): read/write on the
-    /// operational tables, and <b>INSERT and SELECT only</b> on <c>plt.audit_event</c> (D-ARC-15; a trigger also refuses
-    /// UPDATE, DELETE and TRUNCATE for every role).
+    /// operational tables, <b>INSERT and SELECT only</b> on <c>plt.audit_event</c> (D-ARC-15; a trigger also refuses
+    /// UPDATE, DELETE and TRUNCATE for every role) and <b>SELECT only</b> on <c>plt.audit_chain_head</c>. The head is
+    /// created and locked through the SECURITY DEFINER function <c>plt.audit_chain_lock(date)</c> and advanced only by the
+    /// SECURITY DEFINER insert trigger on <c>plt.audit_event</c>, which refuses a row that does not extend the chain.
     /// </summary>
     public static IReadOnlyList<string> PlatformGrants(string appRole) =>
     [
         $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
         $"GRANT SELECT, INSERT, UPDATE, DELETE ON {Schema}.outbox_message, {Schema}.aggregate_sequence, {Schema}.processed_event, "
-            + $"{Schema}.outbox_dead_letter, {Schema}.event_archive, {Schema}.idempotency_record, {Schema}.audit_chain_head TO {appRole}",
+            + $"{Schema}.outbox_dead_letter, {Schema}.event_archive, {Schema}.idempotency_record TO {appRole}",
         $"GRANT SELECT, INSERT ON {Schema}.audit_event TO {appRole}",
+        $"GRANT SELECT ON {Schema}.audit_chain_head TO {appRole}",
+        $"REVOKE ALL ON FUNCTION {Schema}.audit_chain_lock(date) FROM PUBLIC",
+        $"GRANT EXECUTE ON FUNCTION {Schema}.audit_chain_lock(date) TO {appRole}",
         $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
     ];
 }

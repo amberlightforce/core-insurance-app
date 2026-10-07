@@ -85,6 +85,8 @@ internal sealed class OutboxStaging(IClock clock) : ITransactionParticipant
         await OutboxWriter.WriteAsync(connection, transaction, envelopes, clock.Now, cancellationToken).ConfigureAwait(false);
     }
 
+    public Task AfterCommitAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
     public Task AfterRollbackAsync(DbSession session, CancellationToken cancellationToken)
     {
         _staged.Clear();

@@ -2,6 +2,7 @@ using CoreIns.Host.Database;
 using CoreIns.Host.Health;
 using CoreIns.Host.Hosting;
 using CoreIns.Platform;
+using CoreIns.Platform.Errors;
 using CoreIns.Platform.Http;
 using Hangfire;
 using Serilog;
@@ -65,6 +66,7 @@ if (role == AppRole.Api)
     app.UseCoreInsPlatform();
 
     app.MapCoreInsHealth();
+    app.MapCoreInsProblemPages();
     app.MapControllers();
 
     var openApi = app.MapOpenApi();

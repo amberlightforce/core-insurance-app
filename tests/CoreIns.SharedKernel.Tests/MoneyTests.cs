@@ -40,8 +40,67 @@ public sealed class MoneyTests
         return true;
     }
 
-    [Property(Arbitrary = [typeof(Generators)])]
-    public bool Multiplication_is_not_rounded(Money m) => (m * 1.0005m).Amount == m.Amount * 1.0005m;
+    /// <summary>
+    /// Independent oracle: the exact product from BigInteger mantissas and scales. The result equals it exactly, or the
+    /// operation throws precisely when no decimal can represent it (mantissa ≥ 2^96 or scale &gt; 28 after removing
+    /// trailing zeros).
+    /// </summary>
+    [Property(Arbitrary = [typeof(Generators)], MaxTest = 2000)]
+    public bool Multiplication_is_exact_or_refuses(MoneyTriple m)
+    {
+        var factor = m.B.Amount * 1.000001m;
+        var (am, @as) = Exact(m.A.Amount);
+        var (fm, fs) = Exact(factor);
+        var mantissa = am * fm;
+        var scale = @as + fs;
+        while (scale > 0 && !mantissa.IsZero && (mantissa % 10).IsZero)
+        {
+            mantissa /= 10;
+            scale--;
+        }
+
+        var representable = System.Numerics.BigInteger.Abs(mantissa) < (System.Numerics.BigInteger.One << 96) && scale <= 28;
+        Money product;
+        try
+        {
+            product = m.A * factor;
+        }
+        catch (PrecisionLossException)
+        {
+            return !representable;
+        }
+
+        var (pm, ps) = Exact(product.Amount);
+        return representable && pm * System.Numerics.BigInteger.Pow(10, Math.Max(0, scale - ps)) == mantissa * System.Numerics.BigInteger.Pow(10, Math.Max(0, ps - scale));
+    }
+
+    [Fact]
+    public void A_product_that_would_lose_digits_is_refused()
+    {
+        Should.Throw<PrecisionLossException>(() => Money.Of(1234567890.123456789m, "EUR") * 1.234567890123456789m);
+        (Money.Of(0.1m, "EUR") * 3m).Amount.ShouldBe(0.3m);
+        Should.Throw<PrecisionLossException>(() => Money.Of(decimal.MaxValue, "EUR") * 2m);
+    }
+
+    [Theory]
+    [InlineData("10", "3", 2, MidpointRounding.ToEven, "3.33")]
+    [InlineData("-10", "3", 2, MidpointRounding.ToEven, "-3.33")]
+    [InlineData("2", "3", 2, MidpointRounding.ToZero, "0.66")]
+    [InlineData("0.125", "1", 2, MidpointRounding.ToEven, "0.12")]
+    [InlineData("0.125", "1", 2, MidpointRounding.AwayFromZero, "0.13")]
+    [InlineData("-0.121", "1", 2, MidpointRounding.ToNegativeInfinity, "-0.13")]
+    [InlineData("0.121", "1", 2, MidpointRounding.ToPositiveInfinity, "0.13")]
+    [InlineData("1", "7", 0, MidpointRounding.AwayFromZero, "0")]
+    [InlineData("100", "0.0003", 4, MidpointRounding.ToEven, "333333.3333")]
+    public void Division_rounds_the_exact_quotient_with_the_named_mode(string amount, string divisor, int decimals, MidpointRounding mode, string expected) =>
+        Money.Of(DecimalText.Parse(amount), "EUR").Divide(DecimalText.Parse(divisor), decimals, mode).Amount.ShouldBe(DecimalText.Parse(expected));
+
+    private static (System.Numerics.BigInteger Mantissa, int Scale) Exact(decimal value)
+    {
+        var bits = decimal.GetBits(value);
+        var mantissa = ((System.Numerics.BigInteger)(uint)bits[2] << 64) | ((System.Numerics.BigInteger)(uint)bits[1] << 32) | (uint)bits[0];
+        return (bits[3] < 0 ? -mantissa : mantissa, (bits[3] >> 16) & 0xFF);
+    }
 
     [Property(Arbitrary = [typeof(Generators)])]
     public bool Json_round_trips_exactly_with_the_amount_as_a_string(Money m)
@@ -87,8 +146,7 @@ public sealed class MoneyTests
     public void Money_needs_a_currency_and_division_needs_a_divisor()
     {
         Should.Throw<ArgumentException>(() => new Money(1m, default));
-        Should.Throw<DivideByZeroException>(() => Money.Of(1m, "EUR") / 0m);
-        (Money.Of(10m, "EUR") / 3m).Amount.ShouldBe(10m / 3m);
+        Should.Throw<DivideByZeroException>(() => Money.Of(1m, "EUR").Divide(0m, 2, MidpointRounding.ToEven));
     }
 
     [Fact]

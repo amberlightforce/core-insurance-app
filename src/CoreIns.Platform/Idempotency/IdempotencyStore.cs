@@ -12,7 +12,10 @@ namespace CoreIns.Platform.Idempotency;
 /// <param name="ContentType">Stored content type.</param>
 /// <param name="Body">Stored body.</param>
 /// <param name="CreatedAt">When the key was first used.</param>
-public sealed record IdempotencyEntry(string RequestHash, bool Completed, int? ResponseStatus, string? ContentType, byte[]? Body, Instant CreatedAt);
+/// <param name="Headers">Stored response headers to replay (Location, ETag, Content-Location, Retry-After), or null.</param>
+public sealed record IdempotencyEntry(
+    string RequestHash, bool Completed, int? ResponseStatus, string? ContentType, byte[]? Body, Instant CreatedAt,
+    IReadOnlyDictionary<string, string>? Headers = null);
 
 /// <summary>
 /// <c>plt.idempotency_record</c> (contract §3.5.3, D-API-01): key → original result, kept 7 days. Scopes keep keys of
@@ -57,7 +60,7 @@ public static class IdempotencyStore
         ArgumentNullException.ThrowIfNull(connection);
         await using var command = new NpgsqlCommand(
             """
-            SELECT request_hash, status, response_status, response_content_type, response_body, created_at
+            SELECT request_hash, status, response_status, response_content_type, response_body, created_at, response_headers::text
             FROM plt.idempotency_record
             WHERE scope = @scope AND idempotency_key = @key AND expires_at > @now
             """,
@@ -78,19 +81,21 @@ public static class IdempotencyStore
             reader.IsDBNull(2) ? null : reader.GetInt32(2),
             reader.IsDBNull(3) ? null : reader.GetString(3),
             reader.IsDBNull(4) ? null : reader.GetFieldValue<byte[]>(4),
-            Instant.FromUtcDateTime(DateTime.SpecifyKind(reader.GetDateTime(5), DateTimeKind.Utc)));
+            Instant.FromUtcDateTime(DateTime.SpecifyKind(reader.GetDateTime(5), DateTimeKind.Utc)),
+            reader.IsDBNull(6) ? null : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(reader.GetString(6)));
     }
 
     /// <summary>Stores the original result.</summary>
     public static async Task CompleteAsync(
         NpgsqlConnection connection, NpgsqlTransaction? transaction, string scope, IdempotencyKey key, int status, string? contentType, byte[] body,
-        Instant now, CancellationToken cancellationToken)
+        Instant now, CancellationToken cancellationToken, IReadOnlyDictionary<string, string>? headers = null)
     {
         ArgumentNullException.ThrowIfNull(connection);
         await using var command = new NpgsqlCommand(
             """
             UPDATE plt.idempotency_record
-            SET status = 'Completed', response_status = @status, response_content_type = @type, response_body = @body, completed_at = @now
+            SET status = 'Completed', response_status = @status, response_content_type = @type, response_body = @body, completed_at = @now,
+                response_headers = @headers::jsonb
             WHERE scope = @scope AND idempotency_key = @key
             """,
             connection,
@@ -98,6 +103,10 @@ public static class IdempotencyStore
         command.Parameters.Add(new NpgsqlParameter<int>("status", status));
         command.Parameters.Add(new NpgsqlParameter("type", NpgsqlDbType.Text) { Value = (object?)contentType ?? DBNull.Value });
         command.Parameters.Add(new NpgsqlParameter<byte[]>("body", body));
+        command.Parameters.Add(new NpgsqlParameter("headers", NpgsqlDbType.Text)
+        {
+            Value = headers is { Count: > 0 } ? System.Text.Json.JsonSerializer.Serialize(headers) : DBNull.Value,
+        });
         command.Parameters.Add(new NpgsqlParameter("now", NpgsqlDbType.TimestampTz) { Value = now.ToUtcDateTime() });
         command.Parameters.Add(new NpgsqlParameter<string>("scope", scope));
         command.Parameters.Add(new NpgsqlParameter<Guid>("key", key.Value));
@@ -126,7 +135,7 @@ public static class IdempotencyStore
             """
             UPDATE plt.idempotency_record
             SET request_hash = @hash, status = 'InProgress', created_at = @now, expires_at = @expires,
-                response_status = NULL, response_content_type = NULL, response_body = NULL, completed_at = NULL
+                response_status = NULL, response_content_type = NULL, response_body = NULL, response_headers = NULL, completed_at = NULL
             WHERE scope = @scope AND idempotency_key = @key
               AND ((status = 'InProgress' AND created_at < @stale) OR expires_at <= @now)
             """,

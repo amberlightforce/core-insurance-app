@@ -246,6 +246,45 @@ public sealed partial record EventEnvelope
         }
     }
 
+    /// <summary>
+    /// The event on the wire (contracts/events/envelope.schema.json): camelCase envelope fields, the D4 set fields under
+    /// their contract names <c>set_id</c>, <c>set_size</c>, <c>index</c>, and <c>payload</c>.
+    /// </summary>
+    public JsonObject ToWireJson()
+    {
+        var json = new JsonObject
+        {
+            ["eventId"] = EventId.Value.ToString("D"),
+            ["eventType"] = EventType.Value,
+            ["schemaVersion"] = SchemaVersion,
+            ["producer"] = Producer.ToString(),
+            ["aggregateType"] = AggregateType,
+            ["aggregateId"] = AggregateId,
+            ["aggregateSequence"] = AggregateSequence,
+            ["occurredAt"] = OccurredAt.ToString(),
+            ["recordedAt"] = RecordedAt.ToString(),
+            ["legalEntity"] = LegalEntity.Value,
+            ["jurisdiction"] = Jurisdiction.Value,
+            ["configurationHash"] = ConfigurationHash.ToString(),
+            ["businessKeys"] = JsonSerializer.SerializeToNode(BusinessKeys, SharedKernel.Json.SharedKernelJson.Options),
+            ["correlationId"] = CorrelationId.Value,
+            ["causationId"] = CausationId?.ToString("D"),
+            ["actor"] = new JsonObject { ["kind"] = Actor.KindCode, ["id"] = Actor.Id },
+            ["aiInteractionId"] = AiInteractionId?.Value.ToString("D"),
+            ["origin"] = Origin.ToCode(),
+            ["dataClassification"] = DataClassification.ToString(),
+            ["payload"] = Payload.DeepClone(),
+        };
+        if (Set is { } set)
+        {
+            json["set_id"] = set.SetId.ToString("D");
+            json["set_size"] = set.Size;
+            json["index"] = set.Index;
+        }
+
+        return json;
+    }
+
     /// <summary>The routing key of this envelope's handlers.</summary>
     public string RoutingKey =>
         EventRouting.Key(Producer.ToString(), EventType.Value, int.Parse(SchemaVersion.AsSpan(0, SchemaVersion.IndexOf('.', StringComparison.Ordinal)), System.Globalization.CultureInfo.InvariantCulture));

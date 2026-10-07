@@ -31,6 +31,7 @@ internal sealed class AuditStaging(IClock clock) : ITransactionParticipant, IAud
 {
     private readonly List<AuditRecord> _transactional = [];
     private readonly List<AuditRecord> _independent = [];
+    private bool _writingIndependent;
 
     public int Order => 1000;
 
@@ -53,10 +54,16 @@ internal sealed class AuditStaging(IClock clock) : ITransactionParticipant, IAud
             return;
         }
 
+        // Nothing is cleared yet: if the commit fails, AfterRollbackAsync still writes the "regardless" records.
         var records = _transactional.Concat(_independent).ToArray();
+        await AuditStore.AppendAsync(connection, transaction, records, clock.Now, cancellationToken).ConfigureAwait(false);
+    }
+
+    public Task AfterCommitAsync(CancellationToken cancellationToken)
+    {
         _transactional.Clear();
         _independent.Clear();
-        await AuditStore.AppendAsync(connection, transaction, records, clock.Now, cancellationToken).ConfigureAwait(false);
+        return Task.CompletedTask;
     }
 
     public async Task AfterRollbackAsync(DbSession session, CancellationToken cancellationToken)
@@ -67,10 +74,25 @@ internal sealed class AuditStaging(IClock clock) : ITransactionParticipant, IAud
             return;
         }
 
-        var transaction = await session.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using (transaction.ConfigureAwait(false))
+        if (_writingIndependent)
         {
-            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            // The dedicated transaction for these records failed too: give up rather than loop.
+            _independent.Clear();
+            return;
+        }
+
+        _writingIndependent = true;
+        try
+        {
+            var transaction = await session.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+            await using (transaction.ConfigureAwait(false))
+            {
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            _writingIndependent = false;
         }
     }
 }
@@ -84,10 +106,9 @@ internal sealed class AuditStaging(IClock clock) : ITransactionParticipant, IAud
 /// </summary>
 internal static class AuditStore
 {
-    private const string LockHeadSql = """
-        INSERT INTO plt.audit_chain_head (chain_date, last_sequence, last_hash) VALUES (@d, 0, @genesis) ON CONFLICT (chain_date) DO NOTHING;
-        SELECT last_sequence, last_hash FROM plt.audit_chain_head WHERE chain_date = @d FOR UPDATE;
-        """;
+    // The head is created and locked by a SECURITY DEFINER function, and advanced by a BEFORE INSERT trigger that refuses
+    // any row that does not extend the chain: the application role can neither write the head nor skip a link.
+    private const string LockHeadSql = "SELECT last_sequence, last_hash FROM plt.audit_chain_lock(@d)";
 
     private const string InsertSql = """
         INSERT INTO plt.audit_event (
@@ -108,6 +129,7 @@ internal static class AuditStore
             authority_check_id, authority_used, operation, outcome, error_code, object_module, object_type,
             object_id, object_number, changes, reason, channel, correlation_id, causation_id, ai_interaction_id,
             business_keys, origin, legal_entity, jurisdiction, occurred_at, recorded_at)
+        ORDER BY u.sequence
         """;
 
     /// <summary>The first <c>prev_hash</c> of a day's chain.</summary>
@@ -123,13 +145,7 @@ internal static class AuditStore
         await using (var batch = new NpgsqlCommand(LockHeadSql, connection, transaction))
         {
             batch.Parameters.Add(new NpgsqlParameter<DateOnly>("d", chainDate));
-            batch.Parameters.Add(new NpgsqlParameter<string>("genesis", Genesis(chainDate)));
             await using var reader = await batch.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-            while (reader.FieldCount == 0 && await reader.NextResultAsync(cancellationToken).ConfigureAwait(false))
-            {
-                // Skip the INSERT's empty result; the SELECT ... FOR UPDATE row follows.
-            }
-
             if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 throw new InvalidOperationException("The audit chain head could not be locked.");
@@ -182,13 +198,6 @@ internal static class AuditStore
             p.Add(new NpgsqlParameter("recorded_at", NpgsqlDbType.Array | NpgsqlDbType.TimestampTz) { Value = rows.Select(r => r.RecordedAt.ToUtcDateTime()).ToArray() });
             await insert.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
-
-        await using var head = new NpgsqlCommand(
-            "UPDATE plt.audit_chain_head SET last_sequence = @s, last_hash = @h WHERE chain_date = @d", connection, transaction);
-        head.Parameters.Add(new NpgsqlParameter<long>("s", sequence));
-        head.Parameters.Add(new NpgsqlParameter<string>("h", previous));
-        head.Parameters.Add(new NpgsqlParameter<DateOnly>("d", chainDate));
-        await head.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private static NpgsqlParameter Text(string name, IEnumerable<string?> values) =>
