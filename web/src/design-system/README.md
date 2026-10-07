@@ -87,6 +87,16 @@ import { formatMoney, formatDate, toGreekUpper } from '../../format';
   async ΑΦΜ/ΔΟΥ lookup, combobox «Αναζήτηση σε όλο το σύστημα» link, read-only copy button on the advanced
   inputs, relationship graph (visx), charts (visx), web-vitals RUM.
 
+- **Built by the first feature work package that needs them (D-FE-24):** the relationship graph (visx),
+  the AI agent-plan panel and streaming-draft surfaces, and pdf.js rendering in DocumentViewer.
+- **Bundle (D-FE-23):** no code-splitting yet; module work packages lazy-load their routes from W1.
+
+## Locale split (D-FE-22)
+
+Calendar month and weekday names, and React Aria's built-in strings, follow the UI language (el-GR / en-GB
+React Aria locale). Everything we format ourselves — date previews, read-only dates, money, numbers — follows
+the region-format preference.
+
 ## Status labels awaiting glossary sign-off (D-FE-14)
 
 Labels follow design guide Part 1 §2.1.4. Only six are backed by an unmarked term in the contract glossary
