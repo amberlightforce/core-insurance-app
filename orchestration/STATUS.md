@@ -1,7 +1,7 @@
 # STATUS — Greek P&C core insurance build
 
-**Current phase:** 1 — Foundations (plan approved 2026-10-07)
-**Last updated:** 2026-10-07 (afternoon)
+**Current phase:** 2 — Thin E2E slice (foundations complete; user go-ahead 2026-10-07, D-USR-08). Plan: `SLICE-PLAN.md`
+**Last updated:** 2026-10-07 (night)
 **Repo:** https://github.com/amberlightforce/core-insurance-app (private). GitHub push works (workflow scope fixed by user 2026-10-07). main pushed; first CI run GREEN (all jobs incl. Testcontainers integration tests + Trivy).
 **Live tracker:** https://claude.ai/artifact/QwQVP63L5vGPhUskFrAzaD. Source of truth: `orchestration/backlog/backlog.json`. Update it with `tracker/set_status.py`, then push the change with ArtifactData.
 
@@ -9,27 +9,24 @@ Re-read STATUS.md, PLAN.md and DECISIONS.md at the start of every wave.
 
 ## Environment blockers (user action needed)
 1. ~~GitHub workflow scope~~: FIXED by user.
-2. Docker Desktop will not start (stale `%LOCALAPPDATA%\docker-secrets-engine\engine.sock`). Testcontainers and the image build can't run locally.
+2. ~~Docker Desktop~~: works now (Docker 29.3.1, reachable from WSL). Testcontainers are used (D-USR-08).
 3. Windows App Control blocks freshly built DLLs. Agents build and test in WSL (SDK 10.0.401 at ~/.dotnet-coreins, ICU via ~/dn.sh), with an embedded PostgreSQL 17 at ~/pg17.
 
 ## Pending user requests
-- **PAUSE after foundations (D-USR-07):** finish F-1b fixes + F-1c C# types with one light re-review, merge, write HANDOVER, then STOP and wait for the user. Next work (when approved) = thin E2E-01 slice (D-USR-06) with lighter reviews (D-USR-04) and Sonnet for routine WPs (D-USR-05).
-- **When Phase 1 (foundations) is done: write a detailed HANDOVER document** (requested 2026-10-07). It must cover what was built, how to run/test it, architecture and conventions, every ruling, known gaps and deferrals, environment issues, the backlog and how W1 starts, and how to operate the orchestration (tracker, briefs, review loop).
+- None open. Handover delivered (`HANDOVER.md`). Pause lifted by the user (D-USR-08).
 
 ## Phase 1 work packages
+All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, images green; web job red on ICU-dependent compact-number tests → SL-FIX-WEB.
 
-| WP | Status | Notes |
-|---|---|---|
-| F-1a scaffold, CI, harness | **merged, CI green** | PASS on review attempt 3 (Key Vault least privilege, SCRAM bootstrap) |
-| F-1b shared kernel + platform primitives (+ outbox throughput spike) | building | started after F-1a merge |
-| F-1c contracts: events | **merged** | 304 event schemas, PASS on attempt 2 |
-| F-1c contracts: OpenAPI | final minors, then merge | 1,110 operations; PASS with minors after D-API-06a |
-| F-1c contracts: C# records | not started | after F-1b |
-| F-1d design system | building | foundations, formatters, shell and Button committed; components in progress (nested builders started before D-PRG-15) |
-| F-1e Greek cross-cutting | not started | next free slot |
-| F-1f(a) Gotenberg PDF/A spike | **merged** | D-ARC-07a/b/c |
-| F-1f(b) outbox throughput | inside F-1b | |
-| F-1f(c) rule engine | final fix attempt (3/3) | escalate to user if it fails again |
+## Slice work packages (SLICE-PLAN.md)
+
+| WP | Status | Owner | Notes |
+|---|---|---|---|
+| SL-0 platform wiring + Party | building | opus | reference vertical |
+| SL-FIX-WEB | building | sonnet | CI red |
+| SL-MKT, SL-PFC, SL-RAT-UW, SL-POL | not started | | after SL-0 |
+| SL-BIL, SL-FIN, SL-UI | not started | | after S1 |
+| SL-E2E | not started | | after S2 |
 
 ## Module status (feature waves)
 All 116 feature WPs: **not started** (W1 starts after Phase 1 passes). See backlog/BACKLOG.md.
