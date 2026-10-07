@@ -29,7 +29,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | SL-PFC | **merged** (ae022f0) | sonnet | light review PASS; full gate green (integration 135, arch 196) |
 | SL-RAT-UW | **merged** (77a6947) | sonnet | review 1 FAIL (M1 IPT legalStatus/fail-open) → fixed 0060a00, orchestrator re-check; gate green: integration 237, all suites |
 | SL-BIL | building | opus | started early against contracts/fakes (POL still building) |
-| SL-FIN | **in review** (deep, opus, 1st round) | opus | built 413db89: posts only from BillingEntryPosted (D-SLC-12); integration 276 (19 FIN); real BIL producer unproven until E2E |
+| SL-FIN | **fixing** (review 1 FAIL: M1 lines appendable to a posted journal; 5 minors to fix) | opus | hand-checked money path OK; concurrent exactly-once OK; re-check light |
 | SL-UI | building | sonnet | staff screens |
 | SL-E2E | not started | | after S2 |
 
