@@ -119,7 +119,7 @@ internal sealed class PolicySlice : IAsyncDisposable
             [
                 new RateRateResponse.TaxeItem
                 {
-                    SegmentId = segment, CoverageCode = "MTPL", ChargeType = "GR-IPT", Category = RateRateResponse.TaxeItem.CategoryValue.Tax,
+                    SegmentId = segment, CoverageCode = "MTPL", ChargeType = "GR-IPT", Category = RateRateResponse.TaxeItem.CategoryValue.Tax, ChargeCategory = "TAX", LegalStatus = "Unverified", Provisional = true,
                     Base = new Money(312.35m, eur), Rate = 0.15m, Amount = new Money(46.85m, eur), ConfigurationKey = "test.tax.rate",
                 },
             ],

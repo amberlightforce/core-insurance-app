@@ -59,8 +59,11 @@ internal static class Charges
             }
 
             lines.Add(new ChargeDraft(
-                vehicleLocator, tax.CoverageCode ?? string.Empty, tax.ChargeType,
-                tax.Category == RateRateResponse.TaxeItem.CategoryValue.Levy ? ChargeCategories.Levy : ChargeCategories.Tax, tax.Rate, tax.Amount)
+                vehicleLocator, tax.CoverageCode, tax.ChargeType,
+                string.IsNullOrEmpty(tax.ChargeCategory)
+                    ? tax.Category == RateRateResponse.TaxeItem.CategoryValue.Levy ? ChargeCategories.Levy : ChargeCategories.Tax
+                    : tax.ChargeCategory,
+                tax.Rate, tax.Amount)
             {
                 LegalStatus = tax.LegalStatus,
                 Provisional = tax.Provisional,

@@ -44,6 +44,11 @@ public sealed class PolicyWithRealModulesTests(PostgresFixture database) : IClas
         total.ShouldBe(premium + taxes);
         var charges = quote!["charges"]!.AsArray();
         charges.Select(c => c!["chargeType"]!.GetValue<string>()).ShouldContain("GR-IPT");
+
+        // D-SLC-11: the IPT value's legal status travels onto the charge line (the GR pack's IPT is not Settled yet).
+        var ipt = charges.First(c => c!["chargeType"]!.GetValue<string>() == "GR-IPT")!;
+        ipt["legalStatus"]!.GetValue<string>().ShouldBe("Verify");
+        ipt["provisional"]!.GetValue<bool>().ShouldBeTrue();
         charges.Sum(c => decimal.Parse(c!["amount"]!["amount"]!.GetValue<string>(), CultureInfo.InvariantCulture)).ShouldBe(total);
 
         var (bound, bind) = await _slice.BindAsync(jobId);
@@ -58,6 +63,9 @@ public sealed class PolicyWithRealModulesTests(PostgresFixture database) : IClas
                 $"SELECT sum((payload->'netAmount'->>'amount')::numeric) FROM plt.outbox_message WHERE event_type = 'ChargeDeltaEmitted' AND set_id = '{transactionId}'"))
             .ShouldBe(total);
         (await ScalarAsync<long>(dataSource, $"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'PolicyBound' AND aggregate_id = '{policyId}'")).ShouldBe(1);
+        (await ScalarAsync<long>(dataSource,
+                $"SELECT count(*) FROM pol.charge_line WHERE transaction_id = '{transactionId}' AND charge_type = 'GR-IPT' AND legal_status = 'Verify' AND provisional"))
+            .ShouldBeGreaterThanOrEqualTo(1);
 
         // RAT's worksheet committed with the quote (rat.Rate.rate runs inside the quote's unit of work).
         (await ScalarAsync<long>(dataSource, $"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'RatingCalculated' AND payload->>'jobId' = '{jobId}'"))
