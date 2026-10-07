@@ -146,3 +146,22 @@ jobs:
           ignore-unfixed: true
           exit-code: "1"
           format: table
+
+  e2e01:
+    name: E2E-01 happy path on the Compose stack
+    # After the build, test and image jobs: the stack image is built again by compose (own tag coreins-host:e2e).
+    needs: [dotnet, web, image]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      # Fresh stack (project coreins-e2e, ports 26000+), API-level test, then down -v. Needs no browser.
+      - name: Run E2E-01
+        run: tests/e2e/run-e2e01.sh
