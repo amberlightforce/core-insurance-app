@@ -24,6 +24,8 @@ export interface PartySearchPanelProps {
 }
 
 const minLength = 2;
+/** A stable empty list: a fresh [] on every render makes the table re-derive its rows forever while a search is pending. */
+const noItems: PartySearchItem[] = [];
 
 /**
  * One search box posting to `pty.Party.searchByCriteria` (name, ΑΦΜ or party number all go in the body, never in
@@ -76,7 +78,7 @@ export function PartySearchPanel({ onOpen, emptyAction, label }: PartySearchPane
     [t],
   );
 
-  const items = search.data?.items ?? [];
+  const items = search.data?.items ?? noItems;
 
   return (
     <div className={styles.stack}>

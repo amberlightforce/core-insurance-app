@@ -106,11 +106,24 @@ describe('PolicyViewPage', () => {
   });
 
   it('a policy that has not started yet is read as of the start of its upcoming term, with a note', async () => {
-    const scheduled = { ...fx.policy('SCHEDULED'), riskTree: undefined, charges: [] };
+    // The term starts far in the future (in Athens: 2099-01-10), so «today» is always before it.
+    const future = (state: 'SCHEDULED' | 'IN_FORCE') => {
+      const base = fx.policy(state);
+      return {
+        ...base,
+        term: base.term && {
+          ...base.term,
+          period: { from: '2099-01-10T00:00:00+02:00', to: '2100-01-10T00:00:00+02:00' },
+        },
+      };
+    };
     const api = mockApi(
       policyRoutes((validAt) => ({
-        // Today the policy has no segment; at the term start (2026-10-08, Athens) the cover is visible.
-        body: validAt === '2026-10-08' ? fx.policy('IN_FORCE') : scheduled,
+        // Today the policy has no segment; at the term start the covers are visible.
+        body:
+          validAt === '2099-01-10'
+            ? future('IN_FORCE')
+            : { ...future('SCHEDULED'), riskTree: undefined, charges: [] },
       })),
     );
     view();
@@ -119,11 +132,11 @@ describe('PolicyViewPage', () => {
     await waitFor(() => {
       expect(within(covers).getByText('MTPL')).toBeInTheDocument();
     });
-    expect(screen.getByText('Κατάσταση κατά 08/10/2026')).toBeInTheDocument();
+    expect(screen.getByText('Κατάσταση κατά 10/01/2099')).toBeInTheDocument();
     expect(
       api
         .callsTo('GET', `/api/pol/v1/policies/${fx.policyId}`)
-        .some((c) => c.url.searchParams.get('validAt') === '2026-10-08'),
+        .some((c) => c.url.searchParams.get('validAt') === '2099-01-10'),
     ).toBe(true);
   });
 

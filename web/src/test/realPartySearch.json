@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "partyId": "01a1187c-99d4-74fc-ae4d-75bd8ba74ab9",
+      "partyNumber": "P000000001",
+      "partyType": "PERSON",
+      "status": "PROSPECT",
+      "displayName": "Νικόλαος Νικολάου",
+      "displayNameLatin": "Nikolaos Nikolaou",
+      "maskedIdentifier": { "scheme": "AFM", "maskedValue": "******783" },
+      "primaryPostcode": "10564",
+      "primaryLocality": "Αθήνα",
+      "matchQuality": "EXACT",
+      "similarity": "1.0000"
+    }
+  ],
+  "nextCursor": null,
+  "limit": 25
+}

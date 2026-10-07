@@ -1,6 +1,6 @@
 import { CalendarDate, CalendarDateTime, getDayOfWeek } from '@internationalized/date';
 import { screen, within } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 
 import i18n from '../../../i18n';
 import { expectNoA11yViolations } from '../../../test/axe';
@@ -223,6 +223,11 @@ describe('DatePicker', () => {
   });
 
   it('labels holidays, strikes unavailable dates with a reason and marks weekends', async () => {
+    // The fixture's «today» is 7 Oct 2026: pin the clock so the test does not depend on the real date.
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-07T09:00:00Z') });
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
     const reason = 'Εκτός επιτρεπόμενου διαστήματος αναδρομικότητας: έως 30 ημέρες';
     const { user } = renderWithDs(
       <DatePicker

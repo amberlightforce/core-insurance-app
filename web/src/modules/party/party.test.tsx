@@ -1,10 +1,12 @@
 import { screen, waitFor, within } from '@testing-library/react';
+import { Profiler } from 'react';
 import { Link } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import i18n from '../../i18n';
 import { expectNoA11yViolations } from '../../test/axe';
 import * as fx from '../../test/fixtures';
+import realSearch from '../../test/realPartySearch.json';
 import { mockApi, problem, renderScreen } from '../../test/mockApi';
 import { PartyCreatePage } from './PartyCreatePage';
 import { PartySearchPage } from './PartySearchPage';
@@ -19,6 +21,43 @@ describe('PartySearchPage', () => {
     method: 'POST',
     path: '/api/pty/v1/parties/search',
     respond: reply,
+  });
+
+  it('does not re-render in a loop while a search is pending, then lists the real response', async () => {
+    // Regression: a fresh [] handed to the table on every render kept it re-deriving its rows for as long as the
+    // search was pending and froze the tab in a real browser. The fixture is a captured response of the real API.
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    mockApi([
+      {
+        method: 'POST',
+        path: '/api/pty/v1/parties/search',
+        respond: async () => {
+          await gate;
+          return { body: realSearch };
+        },
+      },
+    ]);
+    let commits = 0;
+    const { user } = renderScreen(
+      <Profiler
+        id="search"
+        onRender={() => {
+          commits += 1;
+        }}
+      >
+        <PartySearchPage />
+      </Profiler>,
+      { path: '/parties', url: '/parties' },
+    );
+    await user.type(screen.getByRole('searchbox'), 'nikolaou{Enter}');
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(commits).toBeLessThan(60);
+    release();
+    expect(await screen.findByText('Νικόλαος Νικολάου')).toBeInTheDocument();
+    expect(screen.getByText('P000000001')).toBeInTheDocument();
   });
 
   it('starts with a first-use hint, posts the single search box in the body and lists masked results', async () => {
