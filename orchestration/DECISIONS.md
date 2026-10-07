@@ -154,3 +154,4 @@ co-signing access (OI-UW-04, OI-DOC-05) · BoG DORA channel (OI-CMP-09) · SMS s
 | D-CON-27 | Fraud scores and SIU case data are classified **P3** (criminal-offence data, GDPR Art. 10) | Conservative reading; PRD-07 is silent | Made |
 | D-CON-28 | Each event declares its required lineage keys (`x-business-keys` in catalog.json), and the validator enforces them | D5 lineage must be checkable | Made |
 | D-CON-29 | Lineage keys belong in the envelope `businessKeys` and need not appear in the payload. PolicyBound carries jobId + quoteId so that quote → job → transaction is traceable | D5 | Made |
+| D-CON-30 | Follow-ups from the F-1c review, to be fixed by the owning WPs: (M1) JournalPosted business key should name the posting batch or run, since its payload is a journal array (W5-FIN); (M2) CessionCalculated and BillingEntryPosted should add a charge-side lineage key (transactionId or sourceCorrelationKey) (W5-BIL, W7-RI) | Non-blocking review notes | Made |

@@ -157,6 +157,8 @@ td.num{text-align:right}
       <div class="kpi"><div class="v" id="kBlk">–</div><div class="l">Failed or blocked</div></div>
     </div>
     <div class="bar" id="overallBar" aria-hidden="true"></div>
+    <div class="note" id="overallPct"></div>
+    <div class="eyebrow">Work packages by status · click to filter</div>
     <div class="legend" id="legend"></div>
     <div class="note" id="metaNote"></div>
   </section>
@@ -236,7 +238,9 @@ function render(){
   document.getElementById("kWp").textContent = all.length? `${c["merged"]} / ${active}` : "–";
   document.getElementById("kWave").textContent = state.meta?.currentWave || "–";
   document.getElementById("kBlk").textContent = all.length? String(c["failed"]+c["blocked"]) : "–";
-  stackBar(document.getElementById("overallBar"),c,all.length);
+  const overallPct = mustTotal? Math.round(mustDone/mustTotal*1000)/10 : 0;
+  document.getElementById("overallBar").innerHTML = `<span style="width:${overallPct}%;background:var(--s-ok)"></span>`;
+  document.getElementById("overallPct").textContent = all.length? `${overallPct}% of Must requirements done` : "";
   const lg=document.getElementById("legend");
   lg.innerHTML = ORDER.map(k=>`<button type="button" class="pill ${st(k).cls}" data-status="${esc(k)}" aria-pressed="${state.statusF.has(k)}"><i></i>${st(k).label} · ${c[k]}</button>`).join("");
   const m=state.meta;

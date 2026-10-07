@@ -165,8 +165,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "in review",
-   "owner": "reviewer agent (attempt 2)",
+   "status": "building",
+   "owner": "events MERGED; builder: OpenAPI contracts (worktree); C# records after F-1a",
    "reviewAttempts": 1,
    "blockers": []
   },
@@ -18044,13 +18044,8 @@
    "wave": "W5",
    "seq": 1,
    "title": "E2E-01 Quote -> bind -> invoice -> fiscal document -> payment -> ledger",
-   "summary": "Quote/bind portion passes at end of W4; full scenario (BIL, CMP fiscal, FIN posting) first passes at end of W5. RI step 15 and DAT lineage step 16 assert via sandbox doubles until W7/W8; amounts guarded (T-02 levy split, D-REG-03).",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "Quote/bind portion passes at end of W4; full scenario (BIL, CMP fiscal, FIN posting) first passes at end of W5. RI step 15 and DAT lineage step 16 assert via sandbox doubles until W7/W8; amounts guarded (T-02 levy split, D-REG-03). (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18089,13 +18084,8 @@
    "wave": "W7",
    "seq": 2,
    "title": "E2E-02 FNOL -> reserve -> payment -> recovery -> RI recovery",
-   "summary": "First passes at end of W7. Step 1 runs on web FNOL; the offline-capable path (CHN-152) is deferred under D-USR-01. Needs a motor XoL treaty fixture (RI A-01).",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "First passes at end of W7. Step 1 runs on web FNOL; the offline-capable path (CHN-152) is deferred under D-USR-01. Needs a motor XoL treaty fixture (RI A-01). (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18127,13 +18117,8 @@
    "wave": "W6",
    "seq": 3,
    "title": "E2E-03 Policyholder cancellation -> refund -> fiscal credit note",
-   "summary": "First passes at end of W6 (RI step asserted as no-op via sandbox until W7). Levy refund treatment open (OI-POL-08), asserted structurally.",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "First passes at end of W6 (RI step asserted as no-op via sandbox until W7). Levy refund treatment open (OI-POL-08), asserted structurally. (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18160,13 +18145,8 @@
    "wave": "W6",
    "seq": 4,
    "title": "E2E-04 Renewal",
-   "summary": "First passes at end of W6 (RI contract-year step via sandbox until W7). Renewal lead value Unverified (OQ-004); acceptance by payment per D7.",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "First passes at end of W6 (RI contract-year step via sandbox until W7). Renewal lead value Unverified (OQ-004); acceptance by payment per D7. (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18192,13 +18172,8 @@
    "wave": "W9",
    "seq": 5,
    "title": "E2E-05 Migration of an in-force motor policy",
-   "summary": "First passes at end of W9 (full regression). Rollback step blocked until owners name reversal operations (OI-MIG-12, F-406).",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "First passes at end of W9 (full regression). Rollback step blocked until owners name reversal operations (OI-MIG-12, F-406). (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18228,13 +18203,8 @@
    "wave": "W7",
    "seq": 6,
    "title": "E2E-06 Friendly Settlement",
-   "summary": "First passes at end of W7 with the D1 fix (BIL FS_CLEARING source, FIN clearing netting). FS limits Unverified (OQ-018).",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "First passes at end of W7 with the D1 fix (BIL FS_CLEARING source, FIN clearing netting). FS limits Unverified (OQ-018). (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18258,13 +18228,8 @@
    "wave": "W6",
    "seq": 7,
    "title": "E2E-07 Non-payment cancellation through the waiting-period clock",
-   "summary": "First passes at end of W6. Electronic proof media open (OI-DOC-03): registered post only at go-live.",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "First passes at end of W6. Electronic proof media open (OI-DOC-03): registered post only at go-live. (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18292,13 +18257,8 @@
    "wave": "W6",
    "seq": 8,
    "title": "E2E-08 Distance withdrawal",
-   "summary": "First passes at end of W6. IPT/levy on the full refund undefined (F-401), asserted structurally.",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "First passes at end of W6. IPT/levy on the full refund undefined (F-401), asserted structurally. (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18322,13 +18282,8 @@
    "wave": "W8",
    "seq": 9,
    "title": "E2E-09 DSAR access and erasure across modules",
-   "summary": "First passes at end of W8. Retention durations unset (F-404, D-REG-07): retention-end values not asserted; MIG legacy-archive step (MIG-006) asserted via sandbox until W9.",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "First passes at end of W8. Retention durations unset (F-404, D-REG-07): retention-end values not asserted; MIG legacy-archive step (MIG-006) asserted via sandbox until W9. (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18356,13 +18311,8 @@
    "wave": "W8",
    "seq": 10,
    "title": "E2E-10 AI kill switch across modules",
-   "summary": "First passes at end of W8 (all AI ships Ai__Enabled=false; pilot enablement only in test). Adds the D4 AiSystemStatusChanged assertion.",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "First passes at end of W8 (all AI ships Ai__Enabled=false; pilot enablement only in test). Adds the D4 AiSystemStatusChanged assertion. (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18383,13 +18333,8 @@
    "wave": "W7",
    "seq": 11,
    "title": "E2E-11 Out-of-sequence change with an open claim and a cession (regression)",
-   "summary": "Partial at end of W6 (POL/BIL/FIN, guard G5 POL-108); first passes in full at end of W7 (CLM snapshot, RI). DAT assertion via sandbox until W8; GROSS run and P2 QS treaty are capability tests only (D4).",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "Partial at end of W6 (POL/BIL/FIN, guard G5 POL-108); first passes in full at end of W7 (CLM snapshot, RI). DAT assertion via sandbox until W8; GROSS run and P2 QS treaty are capability tests only (D4). (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
@@ -18412,13 +18357,8 @@
    "wave": "W5",
    "seq": 12,
    "title": "E2E-12 Pack rollback after bound business (regression)",
-   "summary": "Harness built in W1 (MKT golden suite + E2E harness); the scenario needs POL (W4) and BIL/FIN handling of the affected window, so it first passes at end of W5.",
-   "reqs": [
-    {
-     "id": "XMR-FR-250",
-     "title": "Programme E2E suite (release gate)"
-    }
-   ],
+   "summary": "Harness built in W1 (MKT golden suite + E2E harness); the scenario needs POL (W4) and BIL/FIN handling of the affected window, so it first passes at end of W5. (governed by XMR-FR-250)",
+   "reqs": [],
    "mustCount": 0,
    "points": null,
    "dependsOn": [
