@@ -3208,7 +3208,7 @@ paths:
         Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
 
         PRD inputs: legacy claim
-        PRD outputs: claim; plan → conversion result; batch or source key → reversal result
+        PRD outputs: claim
       tags:
       - Import
       x-requirement:
@@ -3222,7 +3222,6 @@ paths:
       - W9-CLM-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3281,7 +3280,7 @@ paths:
         Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
 
         PRD inputs: legacy claim
-        PRD outputs: claim; plan → conversion result; batch or source key → reversal result
+        PRD outputs: claim
       tags:
       - Import
       x-requirement:
@@ -3295,7 +3294,6 @@ paths:
       - W9-CLM-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3353,8 +3351,8 @@ paths:
       description: |-
         Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
 
-        PRD inputs: legacy claim
-        PRD outputs: claim; plan → conversion result; batch or source key → reversal result
+        PRD inputs: plan
+        PRD outputs: conversion result
       tags:
       - Import
       x-requirement:
@@ -3368,7 +3366,6 @@ paths:
       - W9-CLM-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3424,8 +3421,8 @@ paths:
       description: |-
         Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
 
-        PRD inputs: legacy claim
-        PRD outputs: claim; plan → conversion result; batch or source key → reversal result
+        PRD inputs: batch id or source key
+        PRD outputs: reversal result
       tags:
       - Import
       x-requirement:
@@ -3439,7 +3436,6 @@ paths:
       - W9-CLM-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4849,18 +4845,11 @@ components:
           description: 'PRD: "legacy claim"'
     ImportClaimResponse:
       type: object
-      description: 'clm.Import.claim result. PRD outputs: "claim; plan → conversion result; batch or source key → reversal
-        result"'
+      description: 'clm.Import.claim result. PRD outputs: "claim"'
       properties:
         claim:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "claim"'
-        planConversionResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "plan → conversion result"'
-        batchOrSourceKeyReversalResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "batch or source key → reversal result"'
     ImportFinancialHistoryRequest:
       type: object
       description: 'clm.Import.financialHistory request. PRD inputs: "legacy claim"'
@@ -4870,60 +4859,47 @@ components:
           description: 'PRD: "legacy claim"'
     ImportFinancialHistoryResponse:
       type: object
-      description: 'clm.Import.financialHistory result. PRD outputs: "claim; plan → conversion result; batch or source key
-        → reversal result"'
+      description: 'clm.Import.financialHistory result. PRD outputs: "claim"'
       properties:
         claim:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "claim"'
-        planConversionResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "plan → conversion result"'
-        batchOrSourceKeyReversalResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "batch or source key → reversal result"'
     ImportConvertCurrencyRequest:
       type: object
-      description: 'clm.Import.convertCurrency request. PRD inputs: "legacy claim"'
+      description: 'clm.Import.convertCurrency request. PRD inputs: "plan"'
       properties:
-        legacyClaim:
+        plan:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "legacy claim"'
+          description: 'PRD: "plan"'
     ImportConvertCurrencyResponse:
       type: object
-      description: 'clm.Import.convertCurrency result. PRD outputs: "claim; plan → conversion result; batch or source key
-        → reversal result"'
+      description: 'clm.Import.convertCurrency result. PRD outputs: "conversion result"'
       properties:
-        claim:
+        conversionResult:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
-        planConversionResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "plan → conversion result"'
-        batchOrSourceKeyReversalResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "batch or source key → reversal result"'
+          description: 'PRD: "conversion result"'
     ImportReverseRequest:
       type: object
-      description: 'clm.Import.reverse request. PRD inputs: "legacy claim"'
+      description: 'clm.Import.reverse request. PRD inputs: "batch id or source key"'
       properties:
-        legacyClaim:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "batch id or source key" (optional)'
+        sourceKey:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "legacy claim"'
+          description: 'PRD: "batch id or source key" (optional)'
+      oneOf:
+      - required:
+        - batchId
+      - required:
+        - sourceKey
     ImportReverseResponse:
       type: object
-      description: 'clm.Import.reverse result. PRD outputs: "claim; plan → conversion result; batch or source key → reversal
-        result"'
+      description: 'clm.Import.reverse result. PRD outputs: "reversal result"'
       properties:
-        claim:
+        reversalResult:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
-        planConversionResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "plan → conversion result"'
-        batchOrSourceKeyReversalResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "batch or source key → reversal result"'
+          description: 'PRD: "reversal result"'
     DsarExportRequest:
       type: object
       description: 'clm.Dsar.export request. PRD inputs: "party"'

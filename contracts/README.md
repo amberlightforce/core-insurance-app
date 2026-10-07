@@ -243,9 +243,12 @@ serves the UI, partners and tests only; one module never calls another over HTTP
   `Unspecified`); `minimal` = the PRD row gives only names ("as named", "per operation"). `x-io-shared: N` = the PRD row
   states one input/output list for N operations; the owning work package narrows it per operation. PRD fields that
   join two concepts are split (`source type and id` → `sourceType` + `sourceId`; `product or hash` → `product` |
-  `hash` with a `oneOf` rule). `x-typed` marks the critical-chain anchor operations (PLAN §2: quote, bind, money,
-  claims and lifecycle chains) that are fully typed now (D-API-06): required lists, PRD-stated enums, booleans, Money,
-  and ids with patterns, citing the requirements they were typed from.
+  `hash` with a `oneOf` rule). `x-typed` marks the operations fully typed now under D-API-06 as narrowed by
+  **D-API-06a**: the **quote, bind, money and claims** critical chains of PLAN §2 (required lists, PRD-stated enums,
+  booleans, Money, ids with patterns; `x-typed` cites the requirements used). The **lifecycle chain**
+  (`pol.Cancellation.*`, `cmp.Clock.*`, `bil.Refund.*`, `bil.Delinquency.*`, `mkt.StatutoryClockSet.*`) and the
+  remaining `ri.Recovery.*` operations are typed by their owning WPs (W2-CMP, W5-BIL, W6-POL, W1-MKT, W7-RI) while
+  still pre-release. `x-todo-owner` marks a field whose shape a named WP still has to type (D-API-13).
   `x-operation-families` lists `Resource.*` families whose members the PRD does not name; they are completed by the
   owning work package. No business rule is invented in either case.
 - `x-excluded` records PRD rows deliberately not modelled (OIDC endpoints and SCIM under D-ARC-03; the PLT-internal

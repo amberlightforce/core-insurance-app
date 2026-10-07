@@ -6751,17 +6751,37 @@ components:
           description: 'PRD: "value version"'
     ClockStopRequest:
       type: object
-      description: 'cmp.Clock.stop request. PRD inputs: "instance id or subject ref + clock code, outcome, stop time"'
+      description: 'cmp.Clock.stop request (PRD-11 §9.1: instance id or subject ref + clock code, outcome, stop time). Identify
+        the clock either by instanceId or by subjectRef + clockCode.'
       properties:
-        instanceIdOrSubjectRefClock:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instance id or subject ref + clock code"'
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Clock instance id
+        subjectRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: Subject of the clock
+        clockCode:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+          description: Clock code `<MOD>_<NAME>`
         outcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcome"'
+          type: string
+          enum:
+          - Met
+          - Cured
+          - Exercised
+          - Withdrawn
+          description: Stop outcome (PRD-11 §9.1 row)
         stopTime:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "stop time"'
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - outcome
+      - stopTime
+      oneOf:
+      - required:
+        - instanceId
+      - required:
+        - subjectRef
+        - clockCode
     ClockStopResponse:
       type: object
       description: 'cmp.Clock.stop result. PRD outputs: "instance state, met/late flag"'

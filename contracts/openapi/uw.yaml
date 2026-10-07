@@ -6276,7 +6276,8 @@ components:
           type: array
           items:
             $ref: common.yaml#/components/schemas/Unspecified
-          description: Risk locations (postcode, geocode)
+          description: Risk locations (postcode / hazard-zone keys via Geocoder); shape typed by W3-UW (D-API-13)
+          x-todo-owner: W3-UW
         transactionDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
         effectiveDate:

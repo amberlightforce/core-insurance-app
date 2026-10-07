@@ -18,7 +18,9 @@ Checks
   * every 4xx/5xx response is application/problem+json with the shared Problem schema; at least one 2xx response
   * error codes match `<MOD>-ERR-...`; x-in-process: true ⇒ x-exposure is [internal]; x-maturity is
     pre-release or stable (D-API-06)
-  * D-API-08: no parameter or schema property is named asOf / asAt (valid time is `validAt`, transaction time `knownAt`)
+  * D-API-08: no parameter or schema property name contains asof / asat (case-insensitive substring; the kept
+    operation names dat.Query.asOf / doc.Document.renderAsOf, their schemas and DOC-ERR-ASOF-UNSUPPORTED are allowed;
+    `x-prd-*` extension values are not checked) — valid time is `validAt`, transaction time `knownAt`
   * D-API-09: no request body carries `validAt` / `knownAt`; they are query parameters only
   * list-style queries (list*, search, query, history, ...) are paginated (cursor + limit + page envelope) or carry
     `x-bounded` with the reason
@@ -57,6 +59,18 @@ REQ_RE = re.compile(r"^REQ-[A-Z]+-\d{3,4}(\.\.REQ-[A-Z]+-\d{3,4})?$")
 ERR_RE = re.compile(r"^(%s)-ERR-[A-Z0-9]+(-[A-Z0-9]+)*$" % "|".join(MODCODES))
 IDEMPOTENCY_REF = "common.yaml#/components/parameters/IdempotencyKey"
 FORBIDDEN_TIME_NAMES = {"asof", "asat"}
+# names kept by D-API-08 / D-API-03 although they contain "asof" (operation names, their schemas, an error code)
+TIME_NAME_ALLOW = re.compile(r"^(dat\.Query\.asOf|doc\.Document\.renderAsOf|DOC-ERR-ASOF-UNSUPPORTED|"
+                             r"QueryAsOf\w*|DocumentRenderAsOf\w*)$")
+
+
+def forbidden_time_name(name: str) -> bool:
+    """Case-insensitive substring match on asof / asat, except the names D-API-08 keeps."""
+    n = str(name)
+    if TIME_NAME_ALLOW.match(n):
+        return False
+    low = n.lower()
+    return any(t in low for t in FORBIDDEN_TIME_NAMES)
 TIME_PARAMS = {"validAt", "knownAt"}
 PAGE_VERBS = {"list", "search", "query", "history", "deliveries", "outcomes", "runs", "statements", "changes",
               "calculations", "breaks", "results"}
@@ -254,7 +268,7 @@ def check_module(m: str, rep: Report, seen_ids: dict, seen_refs: set) -> None:
             if not any(str(e.get("code", "")).endswith("-ERR-IDEMPOTENCY-MISMATCH") for e in op.get("x-error-codes") or []):
                 rep.error(f"{w}: command must list <MOD>-ERR-IDEMPOTENCY-MISMATCH")
         for (pin, pname) in names:
-            if str(pname).lower() in FORBIDDEN_TIME_NAMES:
+            if forbidden_time_name(pname):
                 rep.error(f"{w}: parameter {pname!r} is forbidden; use validAt / knownAt (D-API-08)")
         # D-API-09: time-travel inputs never in the body
         rb = op.get("requestBody")
@@ -333,7 +347,7 @@ def check_module(m: str, rep: Report, seen_ids: dict, seen_refs: set) -> None:
             props = node.get("properties")
             if isinstance(props, dict):
                 for k in props:
-                    if k.lower() in FORBIDDEN_TIME_NAMES:
+                    if forbidden_time_name(k):
                         rep.error(f"{where}: property {k!r} is forbidden; use validAt / knownAt (D-API-08)")
                     elif JOINED.search(k):
                         rep.warn(f"{where}: property {k!r} may join two concepts (And/Or); split it")
@@ -361,7 +375,7 @@ def check_common(rep: Report, seen_refs: set) -> None:
     check_refs(doc, f, rep, "common.yaml", seen_refs)
     comps = doc.get("components") or {}
     for name, prm in (comps.get("parameters") or {}).items():
-        if str(prm.get("name", "")).lower() in FORBIDDEN_TIME_NAMES:
+        if forbidden_time_name(prm.get("name", "")):
             rep.error(f"common.yaml: parameter {name} uses a forbidden time name (D-API-08)")
     for need in ("IdempotencyKey", "Traceparent", "ValidAt", "KnownAt", "DryRun", "Cursor", "Limit"):
         if need not in (comps.get("parameters") or {}):

@@ -3358,9 +3358,11 @@ components:
           type: boolean
           description: False for QUICK results (REQ-RAT-040)
         worksheetId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: SHA-256 of the canonical worksheet (D-API-12, PRD-03 data model)
         worksheetHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Equals worksheetId (D-API-12); kept because the PRD names both
       required:
       - rates
       - bindable
@@ -3504,7 +3506,7 @@ components:
       description: 'rat.Worksheet.reperform request. PRD inputs: "worksheet id, language, format"'
       properties:
         worksheetId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
+          $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "worksheet id"'
         language:
           $ref: ../events/common.schema.json#/$defs/LanguageCode
@@ -3533,7 +3535,7 @@ components:
       description: 'rat.Worksheet.export request. PRD inputs: "worksheet id, language, format"'
       properties:
         worksheetId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
+          $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "worksheet id"'
         language:
           $ref: ../events/common.schema.json#/$defs/LanguageCode
@@ -3564,7 +3566,7 @@ components:
         worksheetIds:
           type: array
           items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
+            $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "worksheet ids"'
         transactionRef:
           $ref: common.yaml#/components/schemas/Unspecified
