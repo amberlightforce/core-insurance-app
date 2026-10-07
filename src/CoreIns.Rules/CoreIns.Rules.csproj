@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    CoreIns.Rules: the in-house CEL-subset rule-expression language and decision-table runtime
+    (decision D10 / D-ARC-10). Deliberately has NO package references (ADR rule 11).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <Deterministic>true</Deterministic>
+    <RootNamespace>CoreIns.Rules</RootNamespace>
+    <AssemblyName>CoreIns.Rules</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.Rules.Tests" />
+  </ItemGroup>
+
+</Project>
