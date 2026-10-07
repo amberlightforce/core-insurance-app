@@ -13,7 +13,7 @@ public sealed record RoundingApplyResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Money? AmountAfterRounding { get; init; }
 
-    /// <summary>PRD: "rule id"</summary>
+    /// <summary>PRD: "rule id" (deterministic from the rule key and mode/scale)</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'ruleId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
@@ -21,11 +21,63 @@ public sealed record RoundingApplyResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Guid? RuleId { get; init; }
 
-    /// <summary>PRD: "residual"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>PRD: "residual": amount minus amount after rounding</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("residual")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Residual { get; init; }
+    public global::CoreIns.SharedKernel.Money? Residual { get; init; }
+
+    /// <summary>Key of the rule applied, or cur.rounding.default for the currency default</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleKey")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? RuleKey { get; init; }
+
+    /// <summary>Contract member 'mode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("mode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public ModeValue? Mode { get; init; }
+
+    /// <summary>Contract member 'scale'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("scale")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? Scale { get; init; }
+
+    /// <summary>Legal status of the rule applied (same vocabulary as configuration values); tax-line rounding is Unverified until finance confirms the Greek rule (PRD-17 section 16.5 decision 10)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LegalStatus { get; init; }
+
+    /// <summary>Contract member 'provisional'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Provisional { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ModeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ModeValue
+    {
+        /// <summary><c>HALF_UP</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("HALF_UP")]
+        HalfUp,
+
+        /// <summary><c>HALF_EVEN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("HALF_EVEN")]
+        HalfEven,
+
+        /// <summary><c>DOWN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DOWN")]
+        Down,
+
+        /// <summary><c>UP</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("UP")]
+        Up,
+
+        /// <summary><c>CEILING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CEILING")]
+        Ceiling,
+
+        /// <summary><c>FLOOR</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FLOOR")]
+        Floor,
+    }
 }

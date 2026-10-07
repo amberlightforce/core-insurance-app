@@ -33,7 +33,6 @@ internal sealed class ApiHostFactory(string connectionString, string environment
         builder.UseSetting("AzureAd:ClientId", "00000000-0000-0000-0000-000000000002");
         builder.UseSetting("Stamp:LegalEntity", "GR-TEST");
         builder.UseSetting("Stamp:Country", "GR");
-        builder.UseSetting("Stamp:LegalEntityId", LegalEntityId);
         builder.UseSetting("DataProtection:LocalMasterKey", TestMasterKey);
         builder.UseSetting("Party:DefaultCallingCode", "30");
         foreach (var (key, value) in settings ?? new Dictionary<string, string?>())
