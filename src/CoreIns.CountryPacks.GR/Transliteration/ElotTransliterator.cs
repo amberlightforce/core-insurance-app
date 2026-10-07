@@ -50,50 +50,117 @@ public static class ElotTransliterator
     }
 
     /// <summary>
-    /// Search variants of <paramref name="text"/>: the ELOT transcription first, then the digraph alternatives of
-    /// REQ-PTY-067, each reduced to the search key (<see cref="GreekSearchNormalizer"/>); distinct, at most
-    /// <see cref="MaxSearchVariants"/>. Text without Greek letters yields its own search key.
+    /// Search variants of <paramref name="text"/>, all reduced to the search key (<see cref="GreekSearchNormalizer"/>),
+    /// distinct, in this order:
+    /// <list type="number">
+    /// <item>the ELOT transcription of the whole text;</item>
+    /// <item>per name part (token), its ELOT key and its variants with the digraph alternatives of REQ-PTY-067 —
+    /// every single-point alternative first (so no token ever loses one), then combinations, at most
+    /// <see cref="MaxSearchVariants"/> keys per token.</item>
+    /// </list>
+    /// Callers match token-wise: a query part matches a stored name when its key equals (or trigram-matches) one of the
+    /// stored part keys, so "Dokos" finds "… Ντόκος" in any position. At most 1 + <see cref="MaxSearchVariants"/> × parts
+    /// keys are returned. Text without Greek letters yields its own key and its part keys.
     /// </summary>
     public static IReadOnlyList<string> SearchVariants(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
         var units = Segment(text, out _);
 
-        var partials = new List<StringBuilder> { new() };
-        foreach (var unit in units)
-        {
-            var next = new List<StringBuilder>(partials.Count * unit.Alternatives.Length);
-            foreach (var alternative in unit.Alternatives)
-            {
-                foreach (var partial in partials)
-                {
-                    if (next.Count >= MaxSearchVariants * 4)
-                    {
-                        break;
-                    }
-
-                    next.Add(new StringBuilder(partial.ToString()).Append(alternative));
-                }
-            }
-
-            partials = next;
-        }
-
         var keys = new List<string>();
-        foreach (var partial in partials)
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        void Add(string candidate)
         {
-            var key = GreekSearchNormalizer.SearchKey(partial.ToString());
-            if (key.Length > 0 && !keys.Contains(key, StringComparer.Ordinal))
+            var key = GreekSearchNormalizer.SearchKey(candidate);
+            if (key.Length > 0 && seen.Add(key))
             {
                 keys.Add(key);
-                if (keys.Count == MaxSearchVariants)
-                {
-                    break;
-                }
+            }
+        }
+
+        Add(string.Concat(units.Select(unit => unit.Alternatives[0])));
+        foreach (var token in Tokens(units))
+        {
+            foreach (var variant in TokenVariants(token))
+            {
+                Add(variant);
             }
         }
 
         return keys;
+    }
+
+    /// <summary>Splits the units into name parts at units that carry no letter or digit (spaces, hyphens, punctuation).</summary>
+    private static IEnumerable<List<Unit>> Tokens(List<Unit> units)
+    {
+        var current = new List<Unit>();
+        foreach (var unit in units)
+        {
+            if (unit.Alternatives[0].EnumerateRunes().Any(GreekSearchNormalizer.IsAlphanumeric))
+            {
+                current.Add(unit);
+            }
+            else if (current.Count > 0)
+            {
+                yield return current;
+                current = [];
+            }
+        }
+
+        if (current.Count > 0)
+        {
+            yield return current;
+        }
+    }
+
+    /// <summary>
+    /// Variants of one token: primary, then each single-point alternative, then the remaining combinations (cartesian
+    /// order) until <see cref="MaxSearchVariants"/> distinct strings.
+    /// </summary>
+    private static List<string> TokenVariants(List<Unit> token)
+    {
+        var variants = new List<string>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        void Add(string candidate)
+        {
+            if (variants.Count < MaxSearchVariants && seen.Add(candidate))
+            {
+                variants.Add(candidate);
+            }
+        }
+
+        string Build(Func<int, string> choose) => string.Concat(Enumerable.Range(0, token.Count).Select(choose));
+
+        Add(Build(index => token[index].Alternatives[0]));
+        for (var point = 0; point < token.Count; point++)
+        {
+            for (var alternative = 1; alternative < token[point].Alternatives.Length; alternative++)
+            {
+                var (p, a) = (point, alternative);
+                Add(Build(index => token[index].Alternatives[index == p ? a : 0]));
+            }
+        }
+
+        // Combinations: odometer over the alternative indexes, stopping at the cap.
+        var choice = new int[token.Count];
+        while (variants.Count < MaxSearchVariants)
+        {
+            var position = 0;
+            while (position < token.Count && ++choice[position] == token[position].Alternatives.Length)
+            {
+                choice[position] = 0;
+                position++;
+            }
+
+            if (position == token.Count)
+            {
+                break;
+            }
+
+            Add(Build(index => token[index].Alternatives[choice[index]]));
+        }
+
+        return variants;
     }
 
     /// <summary>One source character as a Greek letter with its attributes, or a pass-through character.</summary>

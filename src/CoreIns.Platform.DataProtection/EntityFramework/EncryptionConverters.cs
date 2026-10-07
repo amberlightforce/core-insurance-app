@@ -21,9 +21,12 @@ public static class EncryptionConverters
         ArgumentNullException.ThrowIfNull(legalEntity);
         ArgumentException.ThrowIfNullOrWhiteSpace(fieldContext);
 
+        // Reads enforce that the row's legal entity (envelope header) is the unit of work's legal entity; a mismatch
+        // throws FieldDecryptionException instead of decrypting another entity's data. Converters cannot see the row, so
+        // no row key is bound (see FieldEncryptor remarks). Keys come from the warmed key ring (KeyRingWarmUpService).
         return new ValueConverter<string, byte[]>(
-            plaintext => encryptor.Encrypt(legalEntity.Current, fieldContext, plaintext),
-            envelope => encryptor.Decrypt(envelope, fieldContext));
+            plaintext => encryptor.Encrypt(legalEntity.Current, fieldContext, plaintext, null),
+            envelope => encryptor.DecryptForLegalEntity(envelope, fieldContext, legalEntity.Current, null));
     }
 
     /// <summary>Configures <paramref name="property"/> as a field-encrypted column (see <see cref="ForString"/>).</summary>

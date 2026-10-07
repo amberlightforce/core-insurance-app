@@ -15,7 +15,13 @@ public sealed class BlindIndexAndClassificationTests
     private static readonly LegalEntityId EntityA = new(Guid.Parse("0192d4a1-0000-7000-8000-00000000000a"));
     private static readonly LegalEntityId EntityB = new(Guid.Parse("0192d4a1-0000-7000-8000-00000000000b"));
 
-    private readonly TestKeys _keys = new();
+    private readonly ManualTimeProvider _time = new(DateTimeOffset.Parse("2026-10-07T10:00:00Z", System.Globalization.CultureInfo.InvariantCulture));
+    private readonly TestKeys _keys;
+
+    public BlindIndexAndClassificationTests()
+    {
+        _keys = new TestKeys(_time);
+    }
 
     [Fact]
     public async Task Display_variants_index_identically_and_plain_values_never_appear()
@@ -67,7 +73,8 @@ public sealed class BlindIndexAndClassificationTests
         var candidates = await _keys.Indexer.SearchCandidatesAsync(EntityA, AfmIndex, "090 000 045", cancellationToken: ct);
         candidates.ShouldBe([rewritten, stored]); // Active first; rows not yet re-indexed are still found
 
-        await _keys.Ring.RetireAsync(EntityA, KeyPurpose.BlindIndex, 1, ct);
+        _time.Advance(_keys.Ring.Options.RefreshInterval + _keys.Ring.Options.RetirementMargin + TimeSpan.FromSeconds(1));
+        await _keys.Ring.RetireAsync(EntityA, KeyPurpose.BlindIndex, 1, new FixedScan(0), ct);
         (await _keys.Indexer.SearchCandidatesAsync(EntityA, AfmIndex, "090000045", cancellationToken: ct)).ShouldBe([rewritten]);
     }
 
@@ -92,8 +99,20 @@ public sealed class BlindIndexAndClassificationTests
         }
 
         FieldEncryptor.ReadHeader(envelope).LegalEntity.ShouldBe(EntityA);
-        converter.ConvertFromProvider(envelope).ShouldBe("123456783");
+        using (AmbientLegalEntity.Enter(EntityA))
+        {
+            converter.ConvertFromProvider(envelope).ShouldBe("123456783");
+        }
+
+        // Review F-1e m6: reading a row of legal entity A inside a unit of work of B throws instead of decrypting.
+        using (AmbientLegalEntity.Enter(EntityB))
+        {
+            Should.Throw<FieldDecryptionException>(() => converter.ConvertFromProvider(envelope));
+        }
+
+        // Outside any unit of work there is no legal entity: neither write nor read.
         Should.Throw<InvalidOperationException>(() => converter.ConvertToProvider("x"));
+        Should.Throw<InvalidOperationException>(() => converter.ConvertFromProvider(envelope));
     }
 
     [Fact]

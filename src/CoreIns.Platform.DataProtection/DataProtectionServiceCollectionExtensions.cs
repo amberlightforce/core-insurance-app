@@ -8,10 +8,11 @@ namespace CoreIns.Platform.DataProtection;
 public static class DataProtectionServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="KeyRing"/>, <see cref="FieldEncryptor"/>, <see cref="BlindIndexer"/> and
-    /// <see cref="ICurrentLegalEntity"/> as singletons. The caller (Host) must register an <see cref="IKeyProvider"/>
-    /// (Key Vault in Azure, <see cref="LocalKeyProvider"/> only in development/CI) and a durable
-    /// <see cref="IDataKeyStore"/>; there is deliberately no default store, because losing wrapped keys loses data.
+    /// Registers <see cref="KeyRing"/>, <see cref="FieldEncryptor"/>, <see cref="BlindIndexer"/>,
+    /// <see cref="ICurrentLegalEntity"/> and the start-up <see cref="KeyRingWarmUpService"/>. The caller (Host) must
+    /// register an <see cref="IKeyProvider"/> (Key Vault in Azure, <see cref="LocalKeyProvider"/> only in development/CI),
+    /// a durable <see cref="IDataKeyStore"/> — there is deliberately no default store, because losing wrapped keys loses
+    /// data — and an <see cref="ILegalEntityCatalogue"/> for the warm-up.
     /// </summary>
     public static IServiceCollection AddFieldLevelProtection(this IServiceCollection services, KeyRingOptions? options = null)
     {
@@ -25,6 +26,7 @@ public static class DataProtectionServiceCollectionExtensions
             options));
         services.TryAddSingleton<FieldEncryptor>();
         services.TryAddSingleton<BlindIndexer>();
+        services.AddHostedService<KeyRingWarmUpService>();
         return services;
     }
 }

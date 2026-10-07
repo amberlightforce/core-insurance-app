@@ -77,7 +77,7 @@ public sealed class GreekSearchParityTests(SearchDatabaseFixture database) : ICl
     public async Task Text_search_matches_across_accents_and_case()
     {
         var matches = await ScalarAsync<bool>(
-            "SELECT public.coreins_search_tsvector(@stored) @@ plainto_tsquery('public.greek_unaccent', public.coreins_search_key(@query))",
+            "SELECT public.coreins_search_tsvector(@stored) @@ plainto_tsquery('public.greek_unaccent_v1', public.coreins_search_key(@query))",
             ("stored", "Λεωφ. Κηφισίας 124, 11526 Αθήνα"),
             ("query", "ΚΗΦΙΣΙΑΣ αθηνα"));
         matches.ShouldBeTrue();
@@ -90,7 +90,7 @@ public sealed class GreekSearchParityTests(SearchDatabaseFixture database) : ICl
         await using var command = new NpgsqlCommand(
             """
             CREATE TEMP TABLE party_name_probe (name text);
-            CREATE INDEX ON party_name_probe (public.coreins_search_key(name));
+            CREATE INDEX party_name_probe_key_idx ON party_name_probe (public.coreins_search_key(name));
             INSERT INTO party_name_probe VALUES ('Παπαδόπουλος'), ('Παπαδάκης');
             """,
             connection);
@@ -100,6 +100,36 @@ public sealed class GreekSearchParityTests(SearchDatabaseFixture database) : ICl
             "SELECT count(*) FROM party_name_probe WHERE public.coreins_search_key(name) = public.coreins_search_key(@q)", connection);
         query.Parameters.AddWithValue("q", "ΠΑΠΑΔΟΠΟΥΛΟΣ");
         (await query.ExecuteScalarAsync(TestContext.Current.CancellationToken)).ShouldBe(1L);
+
+        // Review F-1e m3: the planner can use the expression index (sequential scans disabled to make the choice
+        // independent of the tiny table size).
+        await using (var settings = new NpgsqlCommand("ANALYZE party_name_probe; SET enable_seqscan = off;", connection))
+        {
+            await settings.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        }
+
+        await using var explain = new NpgsqlCommand(
+            "EXPLAIN SELECT * FROM party_name_probe WHERE public.coreins_search_key(name) = public.coreins_search_key('ΠΑΠΑΔΟΠΟΥΛΟΣ')",
+            connection);
+        var plan = new List<string>();
+        await using (var reader = await explain.ExecuteReaderAsync(TestContext.Current.CancellationToken))
+        {
+            while (await reader.ReadAsync(TestContext.Current.CancellationToken))
+            {
+                plan.Add(reader.GetString(0));
+            }
+        }
+
+        string.Join('\n', plan).ShouldContain("party_name_probe_key_idx");
+    }
+
+    [Fact]
+    public async Task Text_search_configuration_name_is_versioned()
+    {
+        var exists = await ScalarAsync<bool>(
+            "SELECT EXISTS (SELECT 1 FROM pg_ts_config WHERE cfgname = @name AND cfgnamespace = 'public'::regnamespace)",
+            ("name", "greek_unaccent_v1"));
+        exists.ShouldBeTrue();
     }
 
     private async Task<List<string>> SqlKeysAsync(IReadOnlyList<string> values)

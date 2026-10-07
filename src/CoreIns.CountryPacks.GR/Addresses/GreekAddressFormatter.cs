@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using CoreIns.CountryPacks.GR.Transliteration;
+using CoreIns.Modules.Market.Contracts.ReferenceData;
 using CoreIns.Modules.Market.Contracts.Spi;
 
 namespace CoreIns.CountryPacks.GR.Addresses;
@@ -11,16 +12,38 @@ namespace CoreIns.CountryPacks.GR.Addresses;
 /// "Λεωφ. Κηφισίας 124, 11526 Αθήνα" → Latin "Leof. Kifisias 124, 11526 Athina".
 /// </summary>
 /// <remarks>
-/// Postcode–locality consistency and locality autofill (REQ-PTY-076) need the pack's postcode list, which is pack data
-/// not present in the PRDs; until it is loaded the consistency check is not performed (open item, see the F-1e report).
-/// A postcode keyed with the customary space ("115 26") is accepted and stored without it.
+/// Postcode–locality autofill (REQ-PTY-076) uses an <see cref="IPostcodeDirectory"/> when one is bound: a parsed
+/// address without a locality gets the locality, municipality, regional unit and region of a postcode that the directory
+/// maps to exactly one locality. The list itself is reference data delivered by W2-PTY (D-ARC-22); without it there is no
+/// autofill and no postcode–locality consistency check. A postcode keyed with the customary space ("115 26") is accepted
+/// and stored without it.
 /// </remarks>
-public sealed partial class GreekAddressFormatter : IAddressFormatter
+public sealed partial class GreekAddressFormatter(IPostcodeDirectory? postcodes = null) : IAddressFormatter
 {
     public IReadOnlyCollection<string> Countries { get; } = [GrPack.Country];
 
-    public ValueTask<PostalAddress> ParseAsync(
+    public async ValueTask<PostalAddress> ParseAsync(
         IReadOnlyList<string> lines, string country, CancellationToken cancellationToken = default)
+    {
+        var address = Parse(lines, country);
+        if (postcodes is null || address.Postcode is null || address.Locality is not null)
+        {
+            return address;
+        }
+
+        var entries = await postcodes.LookupAsync(country, address.Postcode, cancellationToken).ConfigureAwait(false);
+        return entries.Count == 1
+            ? address with
+            {
+                Locality = entries[0].Locality,
+                Municipality = entries[0].Municipality,
+                RegionalUnit = entries[0].RegionalUnit,
+                Region = entries[0].Region,
+            }
+            : address;
+    }
+
+    private static PostalAddress Parse(IReadOnlyList<string> lines, string country)
     {
         ArgumentNullException.ThrowIfNull(lines);
         ArgumentNullException.ThrowIfNull(country);
@@ -67,7 +90,7 @@ public sealed partial class GreekAddressFormatter : IAddressFormatter
             Locality = locality,
             FreeLines = parts.Take(3).ToList(),
         };
-        return ValueTask.FromResult(address);
+        return address;
     }
 
     public ValueTask<AddressValidationResult> ValidateAsync(PostalAddress address, CancellationToken cancellationToken = default)

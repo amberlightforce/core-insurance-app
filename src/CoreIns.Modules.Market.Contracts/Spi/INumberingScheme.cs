@@ -23,9 +23,9 @@ public interface INumberingScheme
 
 /// <summary>Context of a numbering call.</summary>
 /// <param name="LegalEntityId">Legal entity.</param>
-/// <param name="Date">Business date (series may roll by year).</param>
+/// <param name="ValidAt">Valid-time business date (series may roll by year; D-API-08 name).</param>
 /// <param name="Qualifiers">Additional pack-defined qualifiers (for example branch, product line).</param>
-public sealed record NumberingContext(Guid LegalEntityId, DateOnly Date, IReadOnlyDictionary<string, string>? Qualifiers = null);
+public sealed record NumberingContext(Guid LegalEntityId, DateOnly ValidAt, IReadOnlyDictionary<string, string>? Qualifiers = null);
 
 /// <summary>Result of <c>validate</c>.</summary>
 public sealed record NumberValidationResult(bool Valid, IReadOnlyList<SpiError> Errors);

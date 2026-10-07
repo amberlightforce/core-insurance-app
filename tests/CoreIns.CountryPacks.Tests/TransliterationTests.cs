@@ -113,11 +113,33 @@ public sealed class TransliterationTests
     }
 
     [Fact]
-    public void Search_variants_are_bounded()
+    public void Search_variants_are_bounded_per_name_part()
     {
-        var long_name = string.Join(' ', Enumerable.Repeat("Μπουμπουλίνα Χατζηχρήστου Ντούντου", 4));
-        ElotTransliterator.SearchVariants(long_name).Count.ShouldBeLessThanOrEqualTo(ElotTransliterator.MaxSearchVariants);
+        var longName = string.Join(' ', Enumerable.Repeat("Μπουμπουλίνα Χατζηχρήστου Ντούντου", 4));
+        ElotTransliterator.SearchVariants(longName).Count.ShouldBeLessThanOrEqualTo(1 + (ElotTransliterator.MaxSearchVariants * 12));
     }
+
+    /// <summary>Review F-1e M2: alternatives in a later name part are never lost to the cap.</summary>
+    [Theory]
+    [InlineData("Χατζηχριστοδούλου Παπαδοπούλου Ντόκος", "DOKOS")]
+    [InlineData("Μπουμπουλίνα Χατζηχρήστου Ντούντου", "DUDU")]
+    [InlineData("Μπουμπουλίνα Χατζηχρήστου Ντούντου", "NTOUNTOU")]
+    [InlineData("Μπουμπουλίνα Χατζηχρήστου Ντούντου", "HATZIHRISTOU")]
+    [InlineData("Μπουμπουλίνα Χατζηχρήστου Ντούντου", "BUBULINA")]
+    [InlineData("Παπαδοπούλου-Χατζηγεωργίου Γκίκας", "GIKAS")]
+    [InlineData("Ευθυμίου Αγγελική Ντόκου", "DOKU")]
+    public void Every_name_part_keeps_its_alternatives(string name, string expectedPartKey) =>
+        ElotTransliterator.SearchVariants(name).ShouldContain(expectedPartKey);
+
+    /// <summary>Property: every single-point alternative of every part of a multi-part name is present.</summary>
+    [Property(MaxTest = 200)]
+    public Property Single_point_alternatives_of_the_last_part_are_present() =>
+        Prop.ForAll(GreekWords(), prefix =>
+        {
+            var variants = ElotTransliterator.SearchVariants(prefix + " Ντόκος");
+            return (variants.Contains("DOKOS") && variants.Contains("NTOKOS") && variants[0].EndsWith(" NTOKOS", StringComparison.Ordinal))
+                .Label(prefix);
+        });
 
     /// <summary>Property: transliteration output never contains Greek letters and is already free of accents.</summary>
     [Property(MaxTest = 300)]

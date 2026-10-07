@@ -19,10 +19,12 @@ namespace CoreIns.Platform.DataProtection;
 /// [33..n-16] ciphertext
 /// [n-16..n] GCM tag (128 bits)
 /// </code>
-/// <para>The associated data is bytes [0..20] plus the UTF-8 field context (for example
-/// <c>pty.party_identifier.value</c>), so a ciphertext cannot be moved to another legal entity, key version or column
-/// without failing authentication. Decryption needs no context besides the field: the envelope names its key.
-/// Random nonces keep a key well below the 2^32-message bound when keys rotate (NFR-PTY-010).</para>
+/// <para>Associated data = bytes [0..20] ‖ UTF-8 field context (for example <c>pty.party_identifier.value</c>) ‖ 0x1F ‖
+/// UTF-8 row key (empty when none). A ciphertext therefore cannot be moved to another legal entity, key version or
+/// column. Moving it to another <b>row of the same column</b> is detected only when the caller supplies a row key (for
+/// example the row's UUID) on both encrypt and decrypt; the EF Core converters cannot see the row and pass none, so for
+/// them row binding is not provided.</para>
+/// <para>Random nonces keep a key well below the 2^32-message bound because keys rotate (NFR-PTY-010).</para>
 /// </remarks>
 public sealed class FieldEncryptor(KeyRing keyRing)
 {
@@ -36,40 +38,59 @@ public sealed class FieldEncryptor(KeyRing keyRing)
     /// <summary>Bytes added to the plaintext by the envelope.</summary>
     public const int Overhead = HeaderSize + NonceSize + TagSize;
 
-    /// <summary>Encrypts a UTF-8 string.</summary>
-    public async ValueTask<byte[]> EncryptAsync(LegalEntityId legalEntity, string fieldContext, string plaintext, CancellationToken cancellationToken = default)
+    /// <summary>Encrypts a UTF-8 string, optionally bound to a row key.</summary>
+    public async ValueTask<byte[]> EncryptAsync(
+        LegalEntityId legalEntity, string fieldContext, string plaintext, string? rowKey = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(plaintext);
         var key = await keyRing.GetActiveAsync(legalEntity, KeyPurpose.FieldEncryption, cancellationToken).ConfigureAwait(false);
-        return Seal(key, fieldContext, Encoding.UTF8.GetBytes(plaintext));
+        return Seal(key, fieldContext, rowKey, Encoding.UTF8.GetBytes(plaintext));
     }
 
-    /// <summary>Decrypts an envelope produced by <see cref="EncryptAsync"/>.</summary>
-    /// <exception cref="FieldDecryptionException">Malformed or tampered envelope, or wrong field context.</exception>
-    public async ValueTask<string> DecryptAsync(ReadOnlyMemory<byte> envelope, string fieldContext, CancellationToken cancellationToken = default)
+    /// <summary>Decrypts an envelope produced by <see cref="EncryptAsync"/> (same field context and row key).</summary>
+    /// <exception cref="FieldDecryptionException">Malformed or tampered envelope, or wrong field context / row key.</exception>
+    public async ValueTask<string> DecryptAsync(
+        ReadOnlyMemory<byte> envelope, string fieldContext, string? rowKey = null, CancellationToken cancellationToken = default)
     {
         var header = ReadHeader(envelope.Span);
         var key = await keyRing.GetAsync(header.LegalEntity, KeyPurpose.FieldEncryption, header.KeyVersion, cancellationToken).ConfigureAwait(false);
-        return Encoding.UTF8.GetString(Open(key, fieldContext, envelope.Span));
+        return Encoding.UTF8.GetString(Open(key, fieldContext, rowKey, envelope.Span));
     }
 
     /// <summary>Synchronous <see cref="EncryptAsync"/> (EF Core value converters).</summary>
-    public byte[] Encrypt(LegalEntityId legalEntity, string fieldContext, string plaintext)
+    public byte[] Encrypt(LegalEntityId legalEntity, string fieldContext, string plaintext, string? rowKey)
     {
         ArgumentNullException.ThrowIfNull(plaintext);
-        return Seal(keyRing.GetActive(legalEntity, KeyPurpose.FieldEncryption), fieldContext, Encoding.UTF8.GetBytes(plaintext));
+        return Seal(keyRing.GetActive(legalEntity, KeyPurpose.FieldEncryption), fieldContext, rowKey, Encoding.UTF8.GetBytes(plaintext));
     }
 
-    /// <summary>Synchronous <see cref="DecryptAsync"/> (EF Core value converters).</summary>
-    public string Decrypt(byte[] envelope, string fieldContext)
+    /// <summary>Synchronous <see cref="DecryptAsync"/>.</summary>
+    public string Decrypt(byte[] envelope, string fieldContext, string? rowKey)
     {
         ArgumentNullException.ThrowIfNull(envelope);
         var header = ReadHeader(envelope);
         var key = keyRing.Get(header.LegalEntity, KeyPurpose.FieldEncryption, header.KeyVersion);
-        return Encoding.UTF8.GetString(Open(key, fieldContext, envelope));
+        return Encoding.UTF8.GetString(Open(key, fieldContext, rowKey, envelope));
     }
 
-    /// <summary>True when the envelope was sealed with a version older than the Active one (re-encryption job).</summary>
+    /// <summary>
+    /// Synchronous decrypt that also requires the envelope to belong to <paramref name="expected"/> (the unit of work's
+    /// legal entity): a row of another legal entity is never decrypted under the current one (review F-1e m6).
+    /// </summary>
+    /// <exception cref="FieldDecryptionException">The envelope belongs to another legal entity, or fails authentication.</exception>
+    public string DecryptForLegalEntity(byte[] envelope, string fieldContext, LegalEntityId expected, string? rowKey)
+    {
+        ArgumentNullException.ThrowIfNull(envelope);
+        var header = ReadHeader(envelope);
+        if (header.LegalEntity != expected)
+        {
+            throw new FieldDecryptionException("The value belongs to another legal entity than the current unit of work.");
+        }
+
+        return Decrypt(envelope, fieldContext, rowKey);
+    }
+
+    /// <summary>True when the envelope was sealed with a version other than this replica's Active one (re-encryption job).</summary>
     public async ValueTask<bool> NeedsReEncryptionAsync(ReadOnlyMemory<byte> envelope, CancellationToken cancellationToken = default)
     {
         var header = ReadHeader(envelope.Span);
@@ -78,11 +99,12 @@ public sealed class FieldEncryptor(KeyRing keyRing)
     }
 
     /// <summary>Decrypts and re-encrypts under the Active version (rotation without downtime, NFR-PTY-010).</summary>
-    public async ValueTask<byte[]> ReEncryptAsync(ReadOnlyMemory<byte> envelope, string fieldContext, CancellationToken cancellationToken = default)
+    public async ValueTask<byte[]> ReEncryptAsync(
+        ReadOnlyMemory<byte> envelope, string fieldContext, string? rowKey = null, CancellationToken cancellationToken = default)
     {
         var header = ReadHeader(envelope.Span);
-        var plaintext = await DecryptAsync(envelope, fieldContext, cancellationToken).ConfigureAwait(false);
-        return await EncryptAsync(header.LegalEntity, fieldContext, plaintext, cancellationToken).ConfigureAwait(false);
+        var plaintext = await DecryptAsync(envelope, fieldContext, rowKey, cancellationToken).ConfigureAwait(false);
+        return await EncryptAsync(header.LegalEntity, fieldContext, plaintext, rowKey, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Reads the clear header of an envelope.</summary>
@@ -98,7 +120,7 @@ public sealed class FieldEncryptor(KeyRing keyRing)
         return new EnvelopeHeader(legalEntity, version);
     }
 
-    private static byte[] Seal(DataKey key, string fieldContext, byte[] plaintext)
+    private static byte[] Seal(DataKey key, string fieldContext, string? rowKey, byte[] plaintext)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fieldContext);
         var envelope = new byte[Overhead + plaintext.Length];
@@ -115,12 +137,12 @@ public sealed class FieldEncryptor(KeyRing keyRing)
             plaintext,
             span.Slice(HeaderSize + NonceSize, plaintext.Length),
             span[(HeaderSize + NonceSize + plaintext.Length)..],
-            AssociatedData(span[..HeaderSize], fieldContext));
+            AssociatedData(span[..HeaderSize], fieldContext, rowKey));
         CryptographicOperations.ZeroMemory(plaintext);
         return envelope;
     }
 
-    private static byte[] Open(DataKey key, string fieldContext, ReadOnlySpan<byte> envelope)
+    private static byte[] Open(DataKey key, string fieldContext, string? rowKey, ReadOnlySpan<byte> envelope)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fieldContext);
         var cipherLength = envelope.Length - Overhead;
@@ -133,22 +155,25 @@ public sealed class FieldEncryptor(KeyRing keyRing)
                 envelope.Slice(HeaderSize + NonceSize, cipherLength),
                 envelope[(HeaderSize + NonceSize + cipherLength)..],
                 plaintext,
-                AssociatedData(envelope[..HeaderSize], fieldContext));
+                AssociatedData(envelope[..HeaderSize], fieldContext, rowKey));
         }
         catch (AuthenticationTagMismatchException exception)
         {
-            throw new FieldDecryptionException("The envelope failed authentication (tampered, or wrong field context).", exception);
+            throw new FieldDecryptionException("The envelope failed authentication (tampered, or wrong field context or row key).", exception);
         }
 
         return plaintext;
     }
 
-    private static byte[] AssociatedData(ReadOnlySpan<byte> header, string fieldContext)
+    private static byte[] AssociatedData(ReadOnlySpan<byte> header, string fieldContext, string? rowKey)
     {
         var context = Encoding.UTF8.GetBytes(fieldContext);
-        var data = new byte[header.Length + context.Length];
+        var row = Encoding.UTF8.GetBytes(rowKey ?? string.Empty);
+        var data = new byte[header.Length + context.Length + 1 + row.Length];
         header.CopyTo(data);
         context.CopyTo(data.AsSpan(header.Length));
+        data[header.Length + context.Length] = 0x1F;
+        row.CopyTo(data.AsSpan(header.Length + context.Length + 1));
         return data;
     }
 }
@@ -158,7 +183,7 @@ public sealed class FieldEncryptor(KeyRing keyRing)
 /// <param name="KeyVersion">Data-key version.</param>
 public readonly record struct EnvelopeHeader(LegalEntityId LegalEntity, int KeyVersion);
 
-/// <summary>An envelope could not be decrypted: malformed, tampered, or opened with the wrong field context.</summary>
+/// <summary>An envelope could not be decrypted: malformed, tampered, opened with the wrong field context or row key, or of another legal entity.</summary>
 public sealed class FieldDecryptionException : CryptographicException
 {
     public FieldDecryptionException()

@@ -15,11 +15,11 @@ public interface IGeocoder
 
     /// <summary><c>hazardKeys(location, schemes[]?, date) → [{schemeCode, schemeVersion, zone, score?, source}]</c>.</summary>
     ValueTask<IReadOnlyList<HazardKey>> HazardKeysAsync(
-        GeoLocation location, IReadOnlyList<string>? schemes, DateOnly asOf, CancellationToken cancellationToken = default);
+        GeoLocation location, IReadOnlyList<string>? schemes, DateOnly validAt, CancellationToken cancellationToken = default);
 
     /// <summary><c>schemes(jurisdiction, date) → [{schemeCode, versions[], status}]</c>.</summary>
     ValueTask<IReadOnlyList<HazardScheme>> SchemesAsync(
-        string jurisdiction, DateOnly asOf, CancellationToken cancellationToken = default);
+        string jurisdiction, DateOnly validAt, CancellationToken cancellationToken = default);
 }
 
 /// <summary>A point in decimal degrees (WGS 84).</summary>

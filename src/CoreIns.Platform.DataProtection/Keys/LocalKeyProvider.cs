@@ -6,9 +6,9 @@ namespace CoreIns.Platform.DataProtection.Keys;
 
 /// <summary>
 /// Development and test key-encryption keys: one KEK per legal entity and KEK version, derived with HKDF-SHA256 from a
-/// local master secret, wrapping data keys with AES-256-GCM. Not for production — the Host binds
-/// <see cref="AzureKeyVaultKeyProvider"/> there (contract §3.9.12: keys in the platform key-management service) and
-/// refuses this provider outside development and CI.
+/// local master secret, wrapping data keys with AES-256-GCM (authenticated data: KEK id and the
+/// <see cref="DataKeyContext"/>). Not for production — the Host binds <see cref="AzureKeyVaultKeyProvider"/> there
+/// (contract §3.9.12: keys in the platform key-management service) and refuses this provider outside development and CI.
 /// </summary>
 public sealed class LocalKeyProvider : IKeyProvider
 {
@@ -38,34 +38,38 @@ public sealed class LocalKeyProvider : IKeyProvider
     /// <summary>A provider with a random master key (tests).</summary>
     public static LocalKeyProvider CreateEphemeral() => new(RandomNumberGenerator.GetBytes(32));
 
-    public ValueTask<WrapResult> WrapKeyAsync(LegalEntityId legalEntity, ReadOnlyMemory<byte> dataKey, CancellationToken cancellationToken = default)
+    public ValueTask<WrapResult> WrapKeyAsync(DataKeyContext context, ReadOnlyMemory<byte> dataKey, CancellationToken cancellationToken = default)
     {
-        var keyId = KeyId(legalEntity, CurrentVersion);
-        var kek = DeriveKek(legalEntity, CurrentVersion);
+        var keyId = KeyId(context.LegalEntity, CurrentVersion);
+        var kek = DeriveKek(context.LegalEntity, CurrentVersion);
         var output = new byte[NonceSize + dataKey.Length + TagSize];
         var nonce = output.AsSpan(0, NonceSize);
         RandomNumberGenerator.Fill(nonce);
 
-        using (var aes = new AesGcm(kek, TagSize))
+        try
         {
-            aes.Encrypt(nonce, dataKey.Span, output.AsSpan(NonceSize, dataKey.Length), output.AsSpan(NonceSize + dataKey.Length), Encoding.UTF8.GetBytes(keyId));
+            using var aes = new AesGcm(kek, TagSize);
+            aes.Encrypt(nonce, dataKey.Span, output.AsSpan(NonceSize, dataKey.Length), output.AsSpan(NonceSize + dataKey.Length), AssociatedData(keyId, context));
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(kek);
         }
 
-        CryptographicOperations.ZeroMemory(kek);
         return ValueTask.FromResult(new WrapResult(keyId, output));
     }
 
     public ValueTask<byte[]> UnwrapKeyAsync(
-        LegalEntityId legalEntity, string keyEncryptionKeyId, ReadOnlyMemory<byte> wrappedKey, CancellationToken cancellationToken = default)
+        DataKeyContext context, string keyEncryptionKeyId, ReadOnlyMemory<byte> wrappedKey, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(keyEncryptionKeyId);
-        var version = ParseVersion(legalEntity, keyEncryptionKeyId);
+        var version = ParseVersion(context.LegalEntity, keyEncryptionKeyId);
         if (wrappedKey.Length <= NonceSize + TagSize)
         {
             throw new CryptographicException("Wrapped key is too short.");
         }
 
-        var kek = DeriveKek(legalEntity, version);
+        var kek = DeriveKek(context.LegalEntity, version);
         var input = wrappedKey.Span;
         var plain = new byte[input.Length - NonceSize - TagSize];
         try
@@ -73,7 +77,7 @@ public sealed class LocalKeyProvider : IKeyProvider
             using var aes = new AesGcm(kek, TagSize);
             aes.Decrypt(
                 input[..NonceSize], input.Slice(NonceSize, plain.Length), input[(NonceSize + plain.Length)..], plain,
-                Encoding.UTF8.GetBytes(keyEncryptionKeyId));
+                AssociatedData(keyEncryptionKeyId, context));
         }
         finally
         {
@@ -81,6 +85,17 @@ public sealed class LocalKeyProvider : IKeyProvider
         }
 
         return ValueTask.FromResult(plain);
+    }
+
+    private static byte[] AssociatedData(string keyId, DataKeyContext context)
+    {
+        var id = Encoding.UTF8.GetBytes(keyId);
+        var binding = context.ToBindingBytes();
+        var data = new byte[id.Length + 1 + binding.Length];
+        id.CopyTo(data, 0);
+        data[id.Length] = 0x1F;
+        binding.CopyTo(data, id.Length + 1);
+        return data;
     }
 
     private static string KeyId(LegalEntityId legalEntity, int version) =>

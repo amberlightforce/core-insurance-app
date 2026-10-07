@@ -12,9 +12,17 @@
 --     NameTransliterator.searchVariants (REQ-MKT-178), computed by the application.
 --   * el_gr_ci_ai                - ICU non-deterministic collation for Greek sorting and accent/case-insensitive
 --     equality (UCA primary strength, numeric digit ordering), matching GreekLanguageRules.SortComparer.
---   * greek_unaccent             - text-search configuration (unaccent + simple, no stemming: names must not stem).
+--   * greek_unaccent_v1          - text-search configuration (unaccent + simple, no stemming: names must not stem).
+--     The name is versioned: the IF NOT EXISTS guard never alters an existing configuration, so a changed mapping
+--     must ship as greek_unaccent_v2 (and coreins_search_tsvector repointed, then indexes rebuilt). unaccent is kept so
+--     the configuration is also correct on raw text; over coreins_search_key input it is a no-op.
 --   * coreins_search_tsvector(text) - tsvector over the search key, so case folding does not depend on the
 --     database's LC_CTYPE.
+--
+-- Operations: expression indexes over these IMMUTABLE functions and columns sorted by el_gr_ci_ai depend on the
+-- PostgreSQL Unicode tables (normalize, upper under pg_c_utf8) and on the ICU version. After a PostgreSQL major
+-- upgrade, an ICU library change (ALTER COLLATION ... REFRESH VERSION warns) or any change to this file, REINDEX the
+-- indexes that use them (see infra/README.md).
 
 -- 1. Search key -----------------------------------------------------------------------------------------------------
 -- Steps (identical to the C# normaliser):
@@ -66,10 +74,10 @@ DO $tsconfig$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_ts_config
-    WHERE cfgname = 'greek_unaccent' AND cfgnamespace = 'public'::regnamespace
+    WHERE cfgname = 'greek_unaccent_v1' AND cfgnamespace = 'public'::regnamespace
   ) THEN
-    CREATE TEXT SEARCH CONFIGURATION public.greek_unaccent (COPY = pg_catalog.simple);
-    ALTER TEXT SEARCH CONFIGURATION public.greek_unaccent
+    CREATE TEXT SEARCH CONFIGURATION public.greek_unaccent_v1 (COPY = pg_catalog.simple);
+    ALTER TEXT SEARCH CONFIGURATION public.greek_unaccent_v1
       ALTER MAPPING FOR asciiword, asciihword, hword_asciipart, word, hword, hword_part
       WITH public.unaccent, pg_catalog.simple;
   END IF;
@@ -81,7 +89,7 @@ CREATE OR REPLACE FUNCTION public.coreins_search_tsvector(input text)
   RETURNS tsvector
   LANGUAGE sql
   IMMUTABLE STRICT PARALLEL SAFE
-RETURN to_tsvector('public.greek_unaccent'::regconfig, public.coreins_search_key(input));
+RETURN to_tsvector('public.greek_unaccent_v1'::regconfig, public.coreins_search_key(input));
 
 COMMENT ON FUNCTION public.coreins_search_tsvector(text) IS
-  'Full-text vector over coreins_search_key (greek_unaccent configuration, no stemming).';
+  'Full-text vector over coreins_search_key (greek_unaccent_v1 configuration, no stemming).';

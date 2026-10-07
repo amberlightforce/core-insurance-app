@@ -25,7 +25,7 @@ public interface ITaxCalculator
     /// NOT_APPLICABLE.
     /// </summary>
     ValueTask<TaxCalculationResult> CalculateReinsurancePremiumTaxAsync(
-        IReadOnlyList<TaxChargeLine> riPremiumLines, string jurisdiction, DateOnly asOf,
+        IReadOnlyList<TaxChargeLine> riPremiumLines, string jurisdiction, DateOnly validAt,
         CancellationToken cancellationToken = default) =>
         throw new SpiException(
             new SpiError(SpiErrorCategory.NotApplicable, "RI_PREMIUM_TAX_NOT_BOUND"),

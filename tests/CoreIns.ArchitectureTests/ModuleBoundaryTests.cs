@@ -115,6 +115,32 @@ public sealed partial class ModuleBoundaryTests
             .ShouldBeEmpty();
     }
 
+    /// <summary>
+    /// D-ARC-20: the only pack-to-pack reference allowed is CY → GR (the Cyprus stub reuses the Greek ELOT 743 engine).
+    /// Any other one must move the shared algorithm to <c>CoreIns.CountryPacks.Common</c> instead.
+    /// </summary>
+    [Fact]
+    public void Only_the_Cyprus_stub_references_another_pack_and_only_the_Greek_pack()
+    {
+        (string From, string To)[] allowed = [("CoreIns.CountryPacks.CY", "CoreIns.CountryPacks.GR")];
+
+        foreach (var pack in SolutionModel.CountryPacks)
+        {
+            var projectReferences = SolutionModel.ProjectReferences(pack)
+                .Where(reference => reference.StartsWith(SolutionModel.CountryPackPrefix, StringComparison.Ordinal));
+
+            using var assembly = ModuleDefinition.ReadModule(SolutionModel.AssemblyPath(pack));
+            var assemblyReferences = assembly.AssemblyReferences
+                .Select(reference => reference.Name)
+                .Where(name => name.StartsWith(SolutionModel.CountryPackPrefix, StringComparison.Ordinal));
+
+            projectReferences.Concat(assemblyReferences)
+                .Distinct(StringComparer.Ordinal)
+                .Where(target => !allowed.Contains((pack, target)))
+                .ShouldBeEmpty($"{pack} references another country pack outside D-ARC-20");
+        }
+    }
+
     [Fact]
     public void Country_packs_reference_no_module_implementation()
     {

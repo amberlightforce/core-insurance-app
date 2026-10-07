@@ -3,7 +3,7 @@
 | Path | Contents |
 |---|---|
 | `database/bootstrap.sql` | The one idempotent database bootstrap for every environment: roles `migrator` and `app`, database privileges, the five extensions |
-| `database/greek-search.sql` | Idempotent Greek search objects (F-1e): `coreins_search_key()` (twin of the GR pack `GreekSearchNormalizer`, parity-tested), ICU collation `el_gr_ci_ai`, text-search configuration `greek_unaccent`. Not yet run by the migrate job (wiring is a follow-up) |
+| `database/greek-search.sql` | Idempotent Greek search objects (F-1e): `coreins_search_key()` (twin of the GR pack `GreekSearchNormalizer`, parity-tested), ICU collation `el_gr_ci_ai`, text-search configuration `greek_unaccent_v1`. Not yet run by the migrate job (wiring is a follow-up). **REINDEX** every index built on `coreins_search_key()`, `coreins_search_tsvector()` or the `el_gr_ci_ai` collation after a PostgreSQL major upgrade, an ICU version change (`ALTER COLLATION public.el_gr_ci_ai REFRESH VERSION` after reindexing) or a change to this file; a changed text-search mapping ships under a new versioned name (`greek_unaccent_v2`) because the script never alters an existing one |
 | `local/` | Docker Compose stack (INFRASTRUCTURE §3.2); `pg-init/` creates `coreins` and runs `database/bootstrap.sql` |
 | `azure/` | Bicep for one stamp (INFRASTRUCTURE §6); deployed by `.github/workflows/deploy.yml` |
 

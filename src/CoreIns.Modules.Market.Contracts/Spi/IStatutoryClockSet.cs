@@ -10,11 +10,11 @@ public interface IStatutoryClockSet
 {
     /// <summary><c>get(clockCode, jurisdiction, date)</c>. RULE_MISSING when no value is valid on the date.</summary>
     ValueTask<StatutoryClockValue> GetAsync(
-        string clockCode, string jurisdiction, DateOnly asOf, CancellationToken cancellationToken = default);
+        string clockCode, string jurisdiction, DateOnly validAt, CancellationToken cancellationToken = default);
 
     /// <summary><c>list(jurisdiction, date)</c>.</summary>
     ValueTask<IReadOnlyList<StatutoryClockValue>> ListAsync(
-        string jurisdiction, DateOnly asOf, CancellationToken cancellationToken = default);
+        string jurisdiction, DateOnly validAt, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Clock duration unit (PRD-17 §7.1 StatutoryClockValue <c>unit</c>).</summary>

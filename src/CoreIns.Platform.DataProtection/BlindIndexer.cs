@@ -14,7 +14,9 @@ namespace CoreIns.Platform.DataProtection;
 /// <para>Index value: <c>v{version}:{base64url(HMAC-SHA256(key_v, indexName ‖ 0x1F ‖ normalised))}</c>. The index
 /// name (for example <c>pty.identifier.AFM</c>) separates domains, so equal values in different columns do not
 /// correlate; per-legal-entity keys mean indexes never correlate across entities.</para>
-/// <para>Rotation without downtime: writes use the Active version; searches use <see cref="SearchCandidatesAsync"/>
+/// <para>Rotation without downtime (D-ARC-23): writes use the replica's Active version; searches use
+/// <see cref="SearchCandidatesAsync"/>, whose version set is read from the key store on every call, so it includes
+/// versions newer than a replica's cached Active and rows written by stale replicas with the demoted version
 /// (one value per readable version, <c>WHERE idx = ANY(@candidates)</c>) until the re-index job has moved every row to
 /// the Active version and the old version is retired. Determinism holds per key version.</para>
 /// </remarks>

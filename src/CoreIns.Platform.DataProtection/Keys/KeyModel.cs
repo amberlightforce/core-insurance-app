@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text;
+
 namespace CoreIns.Platform.DataProtection.Keys;
 
 /// <summary>
@@ -10,10 +13,10 @@ public enum KeyPurpose
     BlindIndex = 2,
 }
 
-/// <summary>Life-cycle state of a data-key version (rotation without downtime, NFR-PTY-010).</summary>
+/// <summary>Life-cycle state of a data-key version (rotation without downtime, NFR-PTY-010, D-ARC-23).</summary>
 public enum DataKeyStatus
 {
-    /// <summary>Used for new encryptions / new index values. Exactly one per legal entity and purpose.</summary>
+    /// <summary>Used for new encryptions / new index values. The highest Active version wins.</summary>
     Active = 1,
 
     /// <summary>Superseded: still decrypts and still answers searches while data is re-encrypted / re-indexed.</summary>
@@ -30,10 +33,14 @@ public enum DataKeyStatus
 /// <param name="LegalEntity">Owning legal entity.</param>
 /// <param name="Purpose">Key purpose.</param>
 /// <param name="Version">Version, 1, 2, … per legal entity and purpose.</param>
-/// <param name="KeyEncryptionKeyId">Id of the key-encryption key version that wrapped it (Key Vault key id).</param>
+/// <param name="KeyEncryptionKeyId">Versioned id of the key-encryption key that wrapped it (Key Vault kid).</param>
 /// <param name="WrappedKey">The wrapped key bytes.</param>
 /// <param name="Status">Life-cycle state.</param>
 /// <param name="CreatedAt">When the version was created.</param>
+/// <param name="DemotedAt">
+/// When the version stopped being Active (persisted so every replica can tell when its cached view, at most
+/// <see cref="KeyRingOptions.RefreshInterval"/> old, can no longer pick it for new data; D-ARC-23).
+/// </param>
 public sealed record WrappedDataKey(
     LegalEntityId LegalEntity,
     KeyPurpose Purpose,
@@ -41,10 +48,23 @@ public sealed record WrappedDataKey(
     string KeyEncryptionKeyId,
     ReadOnlyMemory<byte> WrappedKey,
     DataKeyStatus Status,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? DemotedAt = null);
+
+/// <summary>
+/// Identity of a data key, bound into its wrapping (authenticated data in the local provider, an authenticated prefix of
+/// the wrapped payload in Key Vault), so a wrapped key cannot be replayed as another legal entity's, purpose's or
+/// version's key.
+/// </summary>
+public readonly record struct DataKeyContext(LegalEntityId LegalEntity, KeyPurpose Purpose, int Version)
+{
+    /// <summary>Canonical binding bytes.</summary>
+    public byte[] ToBindingBytes() =>
+        Encoding.UTF8.GetBytes(string.Create(CultureInfo.InvariantCulture, $"coreins-dek|{LegalEntity}|{(int)Purpose}|v{Version}"));
+}
 
 /// <summary>Result of wrapping a data key under a key-encryption key.</summary>
-/// <param name="KeyEncryptionKeyId">Id of the key-encryption key version used (needed to unwrap).</param>
+/// <param name="KeyEncryptionKeyId">Versioned id of the key-encryption key used (needed to unwrap).</param>
 /// <param name="WrappedKey">The wrapped key.</param>
 public sealed record WrapResult(string KeyEncryptionKeyId, ReadOnlyMemory<byte> WrappedKey);
 
@@ -55,12 +75,15 @@ public sealed record WrapResult(string KeyEncryptionKeyId, ReadOnlyMemory<byte> 
 /// </summary>
 public interface IKeyProvider
 {
-    /// <summary>Wraps <paramref name="dataKey"/> with the current KEK version of <paramref name="legalEntity"/>.</summary>
-    ValueTask<WrapResult> WrapKeyAsync(LegalEntityId legalEntity, ReadOnlyMemory<byte> dataKey, CancellationToken cancellationToken = default);
+    /// <summary>Wraps <paramref name="dataKey"/> with the current KEK version of the context's legal entity.</summary>
+    ValueTask<WrapResult> WrapKeyAsync(DataKeyContext context, ReadOnlyMemory<byte> dataKey, CancellationToken cancellationToken = default);
 
-    /// <summary>Unwraps a data key wrapped by KEK version <paramref name="keyEncryptionKeyId"/>.</summary>
+    /// <summary>Unwraps a data key wrapped by KEK version <paramref name="keyEncryptionKeyId"/>; the context must match.</summary>
     ValueTask<byte[]> UnwrapKeyAsync(
-        LegalEntityId legalEntity, string keyEncryptionKeyId, ReadOnlyMemory<byte> wrappedKey, CancellationToken cancellationToken = default);
+        DataKeyContext context, string keyEncryptionKeyId, ReadOnlyMemory<byte> wrappedKey, CancellationToken cancellationToken = default);
+
+    /// <summary>Forgets any cached "current KEK version" of the legal entity (called before a re-wrap after KEK rotation).</summary>
+    ValueTask RefreshAsync(LegalEntityId legalEntity, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
 }
 
 /// <summary>
@@ -77,6 +100,21 @@ public interface IDataKeyStore
 
     /// <summary>Replaces an existing version (status change, or re-wrap under a new KEK version).</summary>
     ValueTask UpdateAsync(WrappedDataKey key, CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// Counts the rows that still use a data-key version (the owning modules' re-encryption / re-index scan). Retirement is
+/// refused while any row remains (D-ARC-23).
+/// </summary>
+public interface IRetirementScan
+{
+    ValueTask<long> CountRowsUsingAsync(LegalEntityId legalEntity, KeyPurpose purpose, int version, CancellationToken cancellationToken = default);
+}
+
+/// <summary>Legal entities whose keys are pre-loaded at start-up (supplied by the Host from the MKT legal-entity registry).</summary>
+public interface ILegalEntityCatalogue
+{
+    ValueTask<IReadOnlyList<LegalEntityId>> ListAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>A data-key version already exists (another replica created it first).</summary>
