@@ -29,10 +29,10 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
 
     private static DateTimeOffset InTwoDays => DateTimeOffset.UtcNow.AddDays(2);
 
-    public ValueTask InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _slice = new PolicySlice(database.AppConnectionString);
-        return ValueTask.CompletedTask;
+        await _slice.SeedAsync();
     }
 
     public async ValueTask DisposeAsync() => await _slice.DisposeAsync();
@@ -44,7 +44,7 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         var effective = InTwoDays;
 
         // REQ-POL-145 / REQ-POL-047: a Draft submission with a job (quote) number from PLT numbering.
-        var (created, submission) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", PolicySlice.Submission(party, effective));
+        var (created, submission) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", _slice.Submission(party, effective));
         created.StatusCode.ShouldBe(HttpStatusCode.Created, submission?.ToJsonString());
         var jobId = submission.Text("jobId");
         var policyId = submission.Text("policyId");
@@ -52,7 +52,7 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         submission.Text("jobNumber").ShouldMatch("^Q[0-9]{9}$");
         submission.Text("state").ShouldBe("DRAFT");
         submission.Text("productVersion").ShouldBe("1.0");
-        submission.Text("manifest.ratingArtefactHash").ShouldBe(PolicySlice.RatingArtefactHash);
+        submission.Text("manifest.artefactHash").ShouldMatch("^[0-9a-f]{64}$");
 
         // REQ-POL-010, -036, -277, -279, -280, -282, -292, -149: risk data with static locators and a normalised plate.
         var (first, draft) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/jobs/update-draft",
@@ -62,7 +62,7 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         Guid.Parse(vehicle).Version.ShouldBe(7);
         draft.Text("riskTree.vehicles.0.plate").ShouldBe("ikx-1234");
         draft.Text("riskTree.vehicles.0.plateNormalised").ShouldNotBe("null");
-        draft.Text("riskTree.questionSets.0.questionSetCode").ShouldBe("GR_MOTOR_PREQUAL");
+        draft.Text("riskTree.questionSets.0.questionSetCode").ShouldBe("MOTOR-RISK");
         draft!["validation"]!.AsArray().Select(v => v!["code"]!.GetValue<string>()).ShouldContain("COVERAGE_REQUIRED");
         var (second, filled) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/jobs/update-draft",
             new { jobId, versionNo = 1, expectedDraftVersion = 1, instructions = PolicySlice.DriverAndCovers(vehicle, party) });
@@ -114,7 +114,7 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
                 $"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'ChargeDeltaEmitted' AND set_id = '{transactionId}' AND set_size = 3 AND business_keys->>'transactionId' = '{transactionId}'"))
             .ShouldBe(3);
         (await ScalarAsync<string>(dataSource, $"SELECT payload->>'paymentPlanRef' FROM plt.outbox_message WHERE event_type = 'PolicyBound' AND aggregate_id = '{policyId}'"))
-            .ShouldBe("TEST_PLAN_ANNUAL");
+            .ShouldBe("ANNUAL");
         (await ScalarAsync<long>(dataSource, $"SELECT count(*) FROM plt.audit_event WHERE operation LIKE 'pol.%' AND outcome = 'Succeeded' AND business_keys->>'jobId' = '{jobId}'"))
             .ShouldBe(5);
         (await ScalarAsync<string>(dataSource, $"SELECT payload::text FROM plt.outbox_message WHERE aggregate_id = '{policyId}' AND event_type = 'PolicyBound'"))
@@ -195,7 +195,7 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         var (edited, body) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/jobs/update-draft", new
         {
             jobId, versionNo = 1, expectedDraftVersion = draftVersion,
-            instructions = new object[] { new { op = "SET_ANSWERS", questionSet = new { questionSetCode = "GR_MOTOR_PREQUAL", answers = new { garagedOvernight = false } } } },
+            instructions = new object[] { new { op = "SET_ANSWERS", questionSet = new { questionSetCode = "MOTOR-RISK", answers = new Dictionary<string, string> { ["Q-USAGE"] = "PRIVATE_COMMUTE", ["Q-HIRE-REWARD"] = "NO" } } } },
         });
         edited.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("state").ShouldBe("DRAFT");
@@ -344,12 +344,12 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         var party = await _slice.CreatePartyAsync();
 
         // REQ-POL-137: new business never before now.
-        var (past, pastBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", PolicySlice.Submission(party, DateTimeOffset.UtcNow.AddDays(-1)));
+        var (past, pastBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", _slice.Submission(party, DateTimeOffset.UtcNow.AddDays(-1)));
         past.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         pastBody.Text("code").ShouldBe("POL-ERR-EFFDATE-LIMIT");
 
         // Unknown policyholder in PTY.
-        var (unknown, unknownBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", PolicySlice.Submission(Guid.CreateVersion7().ToString(), InTwoDays));
+        var (unknown, unknownBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", _slice.Submission(Guid.CreateVersion7().ToString(), InTwoDays));
         unknown.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         unknownBody.Text("code").ShouldBe("POL-ERR-VALIDATION");
 
@@ -391,33 +391,34 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
     public async Task REQ_POL_149_question_set_knock_outs_and_missing_answers_block_the_quote()
     {
         var party = await _slice.CreatePartyAsync();
-        var (jobId, _, _) = await _slice.DraftAsync(party, InTwoDays);
-        _slice.QuestionSets.Setup("pfc.QuestionSet.evaluate", new Modules.Product.Contracts.Api.QuestionSetEvaluateResponse
+        var (jobId, draftVersion, _) = await _slice.DraftAsync(party, InTwoDays);
+        async Task<(HttpStatusCode Status, string Body)> AnswerAndQuoteAsync(Dictionary<string, string> answers, int expected)
         {
-            Questions = [], Referrals = [], MissingRequired = [], Complete = true,
-            KnockOuts = [new Modules.Product.Contracts.Api.QuestionOutcomeHit { Question = "garagedOvernight", Answer = "true" }],
-        });
-        var (knockedOut, problem) = await _slice.QuoteAsync(jobId);
-        knockedOut.StatusCode.ShouldBe(HttpStatusCode.BadRequest, problem?.ToJsonString());
-        problem!.ToJsonString().ShouldContain("KNOCK_OUT");
+            var (edited, body) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/jobs/update-draft", new
+            {
+                jobId, versionNo = 1, expectedDraftVersion = expected,
+                instructions = new object[] { new { op = "SET_ANSWERS", questionSet = new { questionSetCode = "MOTOR-RISK", answers } } },
+            });
+            edited.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+            var (quoted, problem) = await _slice.QuoteAsync(jobId);
+            return (quoted.StatusCode, problem!.ToJsonString());
+        }
 
-        _slice.QuestionSets.Setup("pfc.QuestionSet.evaluate", new Modules.Product.Contracts.Api.QuestionSetEvaluateResponse
-        {
-            Questions = [], Referrals = [], KnockOuts = [], MissingRequired = ["annualMileage"], Complete = false,
-        });
-        var (missing, missingBody) = await _slice.QuoteAsync(jobId);
-        missing.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        missingBody!.ToJsonString().ShouldContain("QUESTION_REQUIRED");
-        var evaluate = (Modules.Product.Contracts.Api.QuestionSetEvaluateRequest)_slice.QuestionSets.CallsTo("pfc.QuestionSet.evaluate")[^1].Arguments[0]!;
-        evaluate.Set.ShouldBe("GR_MOTOR_PREQUAL");
-        evaluate.Answers["garagedOvernight"].ShouldBe("true");
+        // The real PFC question set MOTOR-RISK: hire or reward is a knock-out; a required answer may not be missing.
+        var knockOut = await AnswerAndQuoteAsync(new() { ["Q-USAGE"] = "PRIVATE", ["Q-HIRE-REWARD"] = "YES" }, draftVersion);
+        knockOut.Status.ShouldBe(HttpStatusCode.BadRequest, knockOut.Body);
+        knockOut.Body.ShouldContain("KNOCK_OUT");
+
+        var missing = await AnswerAndQuoteAsync(new() { ["Q-USAGE"] = "PRIVATE" }, draftVersion + 1);
+        missing.Status.ShouldBe(HttpStatusCode.BadRequest, missing.Body);
+        missing.Body.ShouldContain("QUESTION_REQUIRED");
     }
 
     [Fact]
     public async Task Permissions_are_enforced_per_operation()
     {
         var party = await _slice.CreatePartyAsync();
-        var (forbidden, _) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", PolicySlice.Submission(party, InTwoDays), roles: Billing);
+        var (forbidden, _) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/submissions", _slice.Submission(party, InTwoDays), roles: Billing);
         forbidden.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
         var (jobId, _, _) = await _slice.DraftAsync(party, InTwoDays);
         (await _slice.QuoteAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -429,16 +430,19 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
     }
 
     [Fact]
-    public async Task Without_the_sandbox_doubles_the_host_starts_and_an_unresolvable_product_answers_503()
+    public async Task Without_RAT_and_UW_wired_the_host_starts_and_quoting_answers_503()
     {
-        // The plain Host (no sandbox doubles; RAT and UW are not wired yet, D-SLC-01): it starts, and POL refuses cleanly.
+        // The plain Host: PTY, PFC and MKT are real; RAT and UW are not wired yet (S2, D-SLC-01). It starts, the submission and
+        // draft work against the real product, and the quote refuses cleanly with POL-ERR-DEPENDENCY-UNAVAILABLE.
         await using var factory = new ApiHostFactory(database.AppConnectionString);
         using var client = factory.CreateClient();
         var (party, body) = await SendAsync(client, HttpMethod.Post, "/api/pty/v1/parties", Person("Νίκος", "Γεωργίου", null));
         party.StatusCode.ShouldBe(HttpStatusCode.Created);
-        var (response, problem) = await SendAsync(client, HttpMethod.Post, "/api/pol/v1/submissions", PolicySlice.Submission(body.Text("party.partyId"), InTwoDays));
+        var (created, submission) = await SendAsync(client, HttpMethod.Post, "/api/pol/v1/submissions", _slice.Submission(body.Text("party.partyId"), InTwoDays));
+        created.StatusCode.ShouldBe(HttpStatusCode.Created, submission?.ToJsonString());
+        var (response, problem) = await SendAsync(client, HttpMethod.Post, "/api/pol/v1/jobs/quote", new { jobId = submission.Text("jobId"), versionNo = 1 });
         response.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable, problem?.ToJsonString());
-        problem.Text("code").ShouldBe("POL-ERR-PRODUCT-UNAVAILABLE");
+        problem.Text("code").ShouldBe("POL-ERR-DEPENDENCY-UNAVAILABLE");
     }
 
     private static async Task<T> ScalarAsync<T>(NpgsqlDataSource dataSource, string sql)

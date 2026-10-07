@@ -60,6 +60,7 @@ internal sealed class QuoteJobHandler(
     Dependency<IProductQuestionSetService> questionSetService,
     Dependency<IProductPolicyDraftService> draftService,
     Dependency<IRatingRateService> ratingService,
+    Dependency<IRatingRatingArtifactService> artefactService,
     Dependency<IMarketRoundingService> roundingService,
     Dependency<IUnderwritingRulesService> underwritingService,
     IOptions<PolicyOptions> options) : ICommandHandler<QuoteJob, JobQuoteResponse>
@@ -249,7 +250,30 @@ internal sealed class QuoteJobHandler(
     {
         if (job.RatingArtefactHash is null)
         {
-            return DomainError.Of(ModuleCode.POL, "RATING", "The product version has no rating artefact.");
+            // The product's rating slot floats (REQ-PFC-221): RAT resolves the active artefact once, and POL pins it on the
+            // job so every later rating of this job (and the bound term) uses the same artefact.
+            RatingArtifactResolveResponse artefact;
+            try
+            {
+                artefact = await artefactService.Value.ResolveAsync(
+                    new RatingArtifactResolveRequest
+                    {
+                        Slot = JsonSerializer.SerializeToElement(new { productCode = job.ProductCode, productArtefactHash = job.ArtefactHash }, SharedKernelJson.Options),
+                        TransactionType = JsonSerializer.SerializeToElement("NewBusiness", SharedKernelJson.Options),
+                    },
+                    ValidAt.From(job.EffectiveAt), cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
+            catch (DomainException ex) when (ex.Error.Code.Module != ModuleCode.POL)
+            {
+                return DomainError.Of(ModuleCode.POL, "RATING", $"No rating artefact could be resolved: {ex.Error.Code}.");
+            }
+
+            if (artefact.ArtefactHash is not { } resolvedHash)
+            {
+                return DomainError.Of(ModuleCode.POL, "RATING", "RAT resolved no rating artefact for the product.");
+            }
+
+            job.RatingArtefactHash = resolvedHash.Value;
         }
 
         var configuration = context.ConfigurationHash ?? throw new InvalidOperationException("No configuration hash is pinned for this command (REQ-POL-088).");

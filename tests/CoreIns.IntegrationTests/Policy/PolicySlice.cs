@@ -1,8 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using CoreIns.Modules.Product.Contracts;
-using CoreIns.Modules.Product.Contracts.Api;
+using CoreIns.IntegrationTests.Product;
 using CoreIns.Modules.Rating.Contracts;
 using CoreIns.Modules.Rating.Contracts.Api;
 using CoreIns.Modules.Underwriting.Contracts;
@@ -11,7 +10,6 @@ using CoreIns.Platform.Contracts.Common;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Json;
-using CoreIns.Testing.Contracts.Fakes.Product;
 using CoreIns.Testing.Contracts.Fakes.Rating;
 using CoreIns.Testing.Contracts.Fakes.Underwriting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -22,16 +20,13 @@ using static CoreIns.IntegrationTests.Party.PartyApi;
 namespace CoreIns.IntegrationTests.Policy;
 
 /// <summary>
-/// The POL slice host: the real Host and database (real PTY and MKT rounding), with PFC, RAT and UW replaced by their generated
-/// sandbox doubles (those modules are built in parallel, D-SLC-01). Every rate below is ILLUSTRATIVE TEST DATA
-/// (D-SLC-04): it is not a tariff, a tax rate or any regulatory value.
+/// The POL slice host: the real Host and database with the real PTY, PFC (the seeded Motor Private Car product) and MKT
+/// rounding; RAT and UW are replaced by their generated sandbox doubles (built in parallel, D-SLC-01). Every rate below
+/// is ILLUSTRATIVE TEST DATA (D-SLC-04): it is not a tariff, a tax rate or any regulatory value.
 /// </summary>
 internal sealed class PolicySlice : IAsyncDisposable
 {
-    public const string Product = "MOTOR_PRIVATE_CAR";
-    public const string ArtefactHash = "1111111111111111111111111111111111111111111111111111111111111111";
     public const string RatingArtefactHash = "2222222222222222222222222222222222222222222222222222222222222222";
-    public const string ResolutionHashValue = "3333333333333333333333333333333333333333333333333333333333333333";
     public const string WorksheetId = "4444444444444444444444444444444444444444444444444444444444444444";
 
     private readonly ApiHostFactory _root;
@@ -41,26 +36,12 @@ internal sealed class PolicySlice : IAsyncDisposable
         _root = new ApiHostFactory(connectionString);
         Factory = _root.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
         {
-            services.AddSingleton<IProductProductVersionService>(Versions);
-            services.AddSingleton<IProductQuestionSetService>(QuestionSets);
-            services.AddSingleton<IProductPolicyDraftService>(Drafts);
             services.AddSingleton<IRatingRateService>(Rating);
+            services.AddSingleton<IRatingRatingArtifactService>(RatingArtefacts);
             services.AddSingleton<IUnderwritingRulesService>(Underwriting);
         }));
         Client = Factory.CreateClient();
-
-        Versions.Setup("pfc.ProductVersion.resolve", new ProductVersionResolveResponse
-        {
-            Version = new ProductVersionNumber(1, 0),
-            ArtefactHash = Sha256Hash.Parse(ArtefactHash),
-            ResolutionManifest = new ProductVersionResolveResponse.ResolutionManifestDetail
-            {
-                ArtefactHash = Sha256Hash.Parse(ArtefactHash), RatingArtefactHash = Sha256Hash.Parse(RatingArtefactHash),
-            },
-            ResolutionHash = ResolutionHash.Parse(ResolutionHashValue),
-        });
-        QuestionSets.Setup("pfc.QuestionSet.evaluate", new QuestionSetEvaluateResponse { Questions = [], KnockOuts = [], Referrals = [], MissingRequired = [], Complete = true });
-        Drafts.Setup("pfc.PolicyDraft.validate", new PolicyDraftValidateResponse { Errors = [] });
+        RatingArtefacts.Setup("rat.RatingArtifact.resolve", new RatingArtifactResolveResponse { ArtefactHash = Sha256Hash.Parse(RatingArtefactHash) });
         Rating.Setup("rat.Rate.rate", call => Rate((RateRateRequest)call.Arguments[0]!));
         AcceptAll();
     }
@@ -69,15 +50,21 @@ internal sealed class PolicySlice : IAsyncDisposable
 
     public HttpClient Client { get; }
 
-    public FakeProductProductVersionService Versions { get; } = new();
-
-    public FakeProductQuestionSetService QuestionSets { get; } = new();
-
-    public FakeProductPolicyDraftService Drafts { get; } = new();
+    /// <summary>A product code unique to this host, so tests sharing a database never share a product version.</summary>
+    public string Product { get; } = "MOTOR-GR-" + Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();
 
     public FakeRatingRateService Rating { get; } = new();
 
+    public FakeRatingRatingArtifactService RatingArtefacts { get; } = new();
+
     public FakeUnderwritingRulesService Underwriting { get; } = new();
+
+    /// <summary>Imports and locks the PFC seed (MOTOR-GR 1.0) under this host's product code.</summary>
+    public async Task SeedAsync()
+    {
+        var (response, body) = await ProductApi.ImportAsync(Client, ProductApi.Seed(Product));
+        response.IsSuccessStatusCode.ShouldBeTrue(body?.ToJsonString());
+    }
 
     /// <summary>UW raises nothing: accept.</summary>
     public void AcceptAll() => Underwriting.Setup("uw.Rules.evaluate", new RulesEvaluateResponse { EvaluationId = Guid.CreateVersion7(), Issues = [] });
@@ -115,8 +102,8 @@ internal sealed class PolicySlice : IAsyncDisposable
 
         return new RateRateResponse
         {
-            Rates = [Item("MTPL_PREMIUM", "PREMIUM", "MTPL", 312.3456m), Item("OD_PREMIUM", "PREMIUM", "OWN_DAMAGE", 120.005m)],
-            Taxes = [JsonSerializer.SerializeToElement(Item("TEST_TAX", "TAX", "MTPL", 46.8518m), SharedKernelJson.Options)],
+            Rates = [Item("PREM-MTPL", "PREMIUM", "MTPL", 312.3456m), Item("PREM-OD", "PREMIUM", "OWN-DAMAGE", 120.005m)],
+            Taxes = [JsonSerializer.SerializeToElement(Item("GR-IPT", "TAX", "MTPL", 46.8518m), SharedKernelJson.Options)],
             Bindable = request.Envelope.Mode == RateRateRequest.EnvelopeDetail.ModeValue.Full,
             WorksheetId = Sha256Hash.Parse(WorksheetId),
             WorksheetHash = Sha256Hash.Parse(WorksheetId),
@@ -130,7 +117,7 @@ internal sealed class PolicySlice : IAsyncDisposable
         return body.Text("party.partyId");
     }
 
-    public static object Submission(string partyId, DateTimeOffset effectiveAt, string quoteType = "FULL") => new
+    public object Submission(string partyId, DateTimeOffset effectiveAt, string quoteType = "FULL") => new
     {
         policyholderPartyId = partyId,
         product = Product,
@@ -143,7 +130,7 @@ internal sealed class PolicySlice : IAsyncDisposable
     public static object[] MotorRisk() =>
     [
         new { op = "SET_VEHICLE", vehicle = new { plate = "ikx-1234", make = "Toyota", model = "Yaris", firstRegistrationYear = 2021, use = "PRIVATE" } },
-        new { op = "SET_ANSWERS", questionSet = new { questionSetCode = "GR_MOTOR_PREQUAL", questionSetVersion = "1", answers = new { garagedOvernight = "true" } } },
+        new { op = "SET_ANSWERS", questionSet = new { questionSetCode = "MOTOR-RISK", questionSetVersion = "1", answers = new Dictionary<string, string> { ["Q-USAGE"] = "PRIVATE", ["Q-HIRE-REWARD"] = "NO" } } },
     ];
 
     public static object[] DriverAndCovers(string vehicleLocator, string driverPartyId) =>
@@ -155,7 +142,7 @@ internal sealed class PolicySlice : IAsyncDisposable
             coverages = new object[]
             {
                 new { coverageCode = "MTPL", elementLocator = vehicleLocator, selected = true },
-                new { coverageCode = "OWN_DAMAGE", elementLocator = vehicleLocator, selected = true },
+                new { coverageCode = "OWN-DAMAGE", elementLocator = vehicleLocator, selected = true },
             },
         },
     ];
@@ -181,7 +168,7 @@ internal sealed class PolicySlice : IAsyncDisposable
 
     public async Task<(HttpResponseMessage Response, JsonNode? Body)> BindAsync(string jobId, int versionNo = 1, Guid? key = null, bool confirmation = true, string roles = Underwriter, bool dryRun = false) =>
         await SendAsync(Client, HttpMethod.Post, "/api/pol/v1/jobs/bind" + (dryRun ? "?dryRun=true" : string.Empty),
-            new { jobId, versionNo, paymentPlanOption = "TEST_PLAN_ANNUAL", confirmation }, roles: roles, key: key);
+            new { jobId, versionNo, paymentPlanOption = "ANNUAL", confirmation }, roles: roles, key: key);
 
     public async ValueTask DisposeAsync()
     {
