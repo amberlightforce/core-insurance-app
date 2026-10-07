@@ -277,6 +277,12 @@ internal sealed class NumberingService(
     }
 
     /// <summary>Hands out numbers of a reserved block; reserves the next block in a short independent transaction (REQ-PLT-212).</summary>
+    /// <remarks>
+    /// Constraint: the reservation opens a second pooled connection while the caller's unit of work holds one, under a
+    /// per-series lock. The pool must stay larger than the number of concurrent units of work that can need a new
+    /// block at once (one block refill per series at a time; the others wait on the lock without a second connection).
+    /// The reservation commits on its own, so a rollback of the caller loses at most the numbers it drew (gaps allowed).
+    /// </remarks>
     private async Task<long> NextFromBlockAsync(
         LegalEntityCode legalEntity, string type, string series, long max, int blockSize, CancellationToken cancellationToken)
     {

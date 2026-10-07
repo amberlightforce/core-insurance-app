@@ -22,8 +22,9 @@ docker compose -f infra/local/compose.yaml down  # add -v to drop the database v
 
 `api` and `worker` start only after `migrate` completed successfully. Migrations never run at api/worker start-up.
 
-Ports already used on your machine: set `PG_HOST_PORT`, `API_HOST_PORT` or `OTEL_HOST_PORT` in `.env` (for example
-`PG_HOST_PORT=15433`).
+Ports already used on your machine: every host port is overridable in `.env` (`PG_HOST_PORT`, `API_HOST_PORT`,
+`AZURITE_HOST_PORT`, `GOTENBERG_HOST_PORT`, `MAILPIT_UI_HOST_PORT`, `MAILPIT_SMTP_HOST_PORT`, `WIREMOCK_HOST_PORT`,
+`OTEL_UI_HOST_PORT`, `OTEL_HOST_PORT`; see `.env.example`).
 
 ## Development sign-in (D-SLC-03)
 
@@ -51,8 +52,9 @@ TOKEN=$(curl -s -X POST localhost:5000/api/plt/v1/dev/sign-in -H 'Content-Type: 
 curl -s -X POST localhost:5000/api/pty/v1/parties -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' -H "Idempotency-Key: $(uuidgen)" --data-binary @party.json
 
-curl -s "localhost:5000/api/pty/v1/parties/search?name=efthymiou" -H "Authorization: Bearer $TOKEN"
-# Identifiers (and the single search box) go in a POST body, never in a URL (D-SLC-05):
+# Names, identifiers and the single search box go in a POST body, never in a URL (D-SLC-05); GET takes only partyNumber.
+curl -s -X POST localhost:5000/api/pty/v1/parties/search -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"name":"efthymiou"}'
 curl -s -X POST localhost:5000/api/pty/v1/parties/search -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
   -d '{"identifierScheme":"AFM","identifierValue":"123456783"}'
 curl -s "localhost:5000/api/pty/v1/parties/<partyId>" -H "Authorization: Bearer $TOKEN"                     # P2 masked

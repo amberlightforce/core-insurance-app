@@ -72,17 +72,25 @@ internal sealed class ProducerCodesController : ControllerBase
         return Results.Ok(await queries.ValidateAsync(request, at.ValidAt, cancellationToken).ConfigureAwait(false));
     }
 
-    /// <summary>pty.ProducerCode.search by code prefix or intermediary name.</summary>
+    /// <summary>pty.ProducerCode.search (GET) by code prefix; names go in the POST form (D-SLC-05).</summary>
     [HttpGet("search")]
     [Authorize(Policy = PartyPermissions.ProducerCodeSearch)]
-    public async Task<IResult> SearchAsync(
-        [FromQuery] string? code,
-        [FromQuery] string? name,
-        [FromQuery] int? limit,
-        [FromQuery] string? cursor,
-        [FromServices] IntermediaryQueries queries,
-        [FromServices] NameForms names,
-        CancellationToken cancellationToken)
+    public Task<IResult> SearchAsync(
+        [FromQuery] string? code, [FromQuery] int? limit, [FromQuery] string? cursor, [FromServices] IntermediaryQueries queries,
+        [FromServices] NameForms names, CancellationToken cancellationToken) =>
+        RunAsync(code, null, limit, cursor, queries, names, cancellationToken);
+
+    /// <summary>pty.ProducerCode.searchByCriteria (POST): code prefix and intermediary name in the body.</summary>
+    [HttpPost("search")]
+    [SkipIdempotency]
+    [Authorize(Policy = PartyPermissions.ProducerCodeSearch)]
+    public Task<IResult> SearchByCriteriaAsync(
+        [FromBody] ProducerCodeSearchCriteria body, [FromQuery] int? limit, [FromQuery] string? cursor, [FromServices] IntermediaryQueries queries,
+        [FromServices] NameForms names, CancellationToken cancellationToken) =>
+        RunAsync(body.Code, body.Name, limit, cursor, queries, names, cancellationToken);
+
+    private async Task<IResult> RunAsync(
+        string? code, string? name, int? limit, string? cursor, IntermediaryQueries queries, NameForms names, CancellationToken cancellationToken)
     {
         var offset = PartySearch.DecodeCursor(cursor);
         if (offset is null || limit is < 1 or > 200)
