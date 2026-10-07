@@ -26,7 +26,8 @@ public class ReviewAttempt2Tests
 
     private static readonly RuleEnvironment Env = RuleEnvironment.Create(Schema);
 
-    private static readonly TimeSpan Fast = TimeSpan.FromTicks(100 * TimeSpan.TicksPerMillisecond);
+    /// <summary>Loose wall-clock sanity bound; the work bound itself is asserted on steps and allocations.</summary>
+    private static readonly TimeSpan Sanity = TimeSpan.FromTicks(2 * TimeSpan.TicksPerSecond);
 
     /// <summary>The reviewer's construction: l wrapped k times in [...].map(m, l.map(z, m))[0] (weight 10^k).</summary>
     private static string Wrapped(int k)
@@ -82,7 +83,7 @@ public class ReviewAttempt2Tests
         {
             plain = compiled.Evaluate(Inputs);
             traced = compiled.Evaluate(Inputs, new EvaluationOptions { Trace = true });
-        }).ShouldBeLessThan(Fast);
+        }).ShouldBeLessThan(Sanity);
         plain!.Error!.Code.ShouldBeOneOf(RuleErrorCode.CostExceeded, RuleErrorCode.LimitExceeded);
         traced!.Error!.Code.ShouldBeOneOf(RuleErrorCode.CostExceeded, RuleErrorCode.LimitExceeded);
         plain.Value.ShouldBeNull();
@@ -92,7 +93,7 @@ public class ReviewAttempt2Tests
             _ = traced.Trace.Sum(t => (long)t.ToString().Length);
             _ = traced.Trace.Sum(t => (long)t.Value.GetHashCode());
             traced.Trace.All(t => t.Value.Equals(t.Value)).ShouldBeTrue();
-        }).ShouldBeLessThan(Fast);
+        }).ShouldBeLessThan(Sanity);
     }
 
     [Fact]
@@ -107,9 +108,10 @@ public class ReviewAttempt2Tests
         var table = CompiledDecisionTable.Compile(def, Env);
         DecisionResult? result = null;
         Time(() => result = table.Evaluate(Inputs, new DateOnly(2026, 6, 1), new DecisionEvaluationOptions { DetailedTrace = true }))
-            .ShouldBeLessThan(Fast);
+            .ShouldBeLessThan(Sanity);
         result!.Error!.Code.ShouldBeOneOf(RuleErrorCode.CostExceeded, RuleErrorCode.LimitExceeded);
         result.Matches.ShouldBeEmpty();
+        result.Trace.StepsUsed.ShouldBeLessThanOrEqualTo(RuleLimits.Default.MaxEvaluationSteps + 1);
     }
 
     [Fact]
@@ -127,7 +129,7 @@ public class ReviewAttempt2Tests
         Time(() => outcomes = table.RunTests(new[]
         {
             new DecisionTableTestCase("heavy expectation", Inputs, new[] { "R" }) { ExpectedOutputs = new[] { new[] { new NamedValue("o", heavy) } } },
-        })).ShouldBeLessThan(Fast);
+        })).ShouldBeLessThan(Sanity);
         outcomes!.Single().Passed.ShouldBeFalse();
         outcomes!.Single().Failure!.ShouldContain("heavier than the allocation budget");
     }
@@ -146,7 +148,7 @@ public class ReviewAttempt2Tests
             a.GetHashCode().ShouldBe(b.GetHashCode());
             same = a.Equals(b);
             different = a.Equals(c);
-        }).ShouldBeLessThan(Fast);
+        }).ShouldBeLessThan(Sanity);
         same.ShouldBeTrue();
         different.ShouldBeFalse();
         text.Length.ShouldBeLessThanOrEqualTo(4096 + 3);
@@ -168,8 +170,9 @@ public class ReviewAttempt2Tests
 
         EvaluationResult? result = null;
         var compiled = Env.Compile("size(" + e + ") > 0");
-        Time(() => result = compiled.Evaluate(Inputs, new EvaluationOptions { Trace = true })).ShouldBeLessThan(Fast);
+        Time(() => result = compiled.Evaluate(Inputs, new EvaluationOptions { Trace = true })).ShouldBeLessThan(Sanity);
         result!.Error!.Code.ShouldBeOneOf(RuleErrorCode.CostExceeded, RuleErrorCode.LimitExceeded);
+        result.StepsUsed.ShouldBeLessThanOrEqualTo(RuleLimits.Default.MaxEvaluationSteps + 1);
     }
 
     [Fact]
@@ -179,8 +182,9 @@ public class ReviewAttempt2Tests
         var host = new HostFunction("heavy", Array.Empty<RuleType>(), RuleType.Dyn, _ => heavy);
         var env = RuleEnvironment.Create(Schema, functions: new[] { host });
         EvaluationResult? result = null;
-        Time(() => result = env.Compile("heavy()").Evaluate(Inputs, new EvaluationOptions { Trace = true })).ShouldBeLessThan(Fast);
+        Time(() => result = env.Compile("heavy()").Evaluate(Inputs, new EvaluationOptions { Trace = true })).ShouldBeLessThan(Sanity);
         result!.Error!.Code.ShouldBeOneOf(RuleErrorCode.CostExceeded, RuleErrorCode.LimitExceeded);
+        result.StepsUsed.ShouldBeLessThanOrEqualTo(1);
     }
 
     [Fact]

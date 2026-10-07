@@ -31,7 +31,7 @@ public class DynamicAndEdgeTests
 
     private static readonly HostFunction AnyOf = new("anyOf", new[] { RuleType.String }, RuleType.Dyn, args => Sample(((StringValue)args[0]).Value));
 
-    private static readonly RuleEnvironment Env = RuleEnvironment.Create(T.Schema, functions: new[] { AnyOf });
+    private static readonly RuleEnvironment Env = RuleEnvironment.Create(T.Schema, T.Functional, new[] { AnyOf });
 
     private static EvaluationResult Run(string source, RuleType? expected = null) =>
         Env.Compile(source, expected).Evaluate(T.Default, new EvaluationOptions { Trace = true });

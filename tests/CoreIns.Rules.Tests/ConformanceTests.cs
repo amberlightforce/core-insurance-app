@@ -87,7 +87,7 @@ public class ConformanceTests
         ("trim", "' motor '.trim()", "\"motor\""),
     };
 
-    private static readonly RuleEnvironment Env = RuleEnvironment.Create(InputSchema.Define().Build());
+    private static readonly RuleEnvironment Env = RuleEnvironment.Create(InputSchema.Define().Build(), T.Functional);
 
     public static IEnumerable<object[]> CaseData => Cases.Select(c => new object[] { c.Feature, c.Expression, c.Expected });
 
