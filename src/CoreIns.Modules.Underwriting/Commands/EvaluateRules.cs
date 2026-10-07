@@ -84,7 +84,13 @@ internal sealed class EvaluateRulesHandler(
             var actor = context.Actor.ToString();
 
             await store.InsertEvaluationAsync(
-                evaluationId, legalEntity, jobId, request.Checkpoint.ToString().ToUpperInvariant(), ruleSet, request.SnapshotRef, request.SnapshotHash?.Value,
+                evaluationId, legalEntity, jobId, request.Checkpoint switch
+                {
+                    RulesEvaluateRequest.CheckpointValue.PreQuote => "PRE_QUOTE",
+                    RulesEvaluateRequest.CheckpointValue.PreBind => "PRE_BIND",
+                    RulesEvaluateRequest.CheckpointValue.PreIssue => "PRE_ISSUE",
+                    _ => "RENEWAL",
+                }, ruleSet, request.SnapshotRef, request.SnapshotHash?.Value,
                 outcome, lane, JsonSerializer.Serialize(new
                 {
                     ruleSet = new { code = ruleSet.Dto.Code, version = ruleSet.Dto.Version, hash = ruleSet.Hash, dataStatus = ruleSet.Dto.DataStatus },

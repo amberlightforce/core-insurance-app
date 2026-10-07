@@ -18,7 +18,7 @@ namespace CoreIns.IntegrationTests.Rating;
 /// <summary>Shared fixtures of the rating and underwriting tests. Every number and name here is synthetic test data.</summary>
 internal static class RatingTestSupport
 {
-    public const string ProductCode = "MOTOR_PRIVATE_CAR";
+    public const string MotorProduct = "MOTOR_PRIVATE_CAR";
     public static readonly ConfigurationHash TestConfigurationHash = ConfigurationHash.Parse(new string('c', 64));
 
     /// <summary>
@@ -65,6 +65,7 @@ internal static class RatingTestSupport
         context.Roles = [.. roles.Split(',')];
         context.LegalEntity = LegalEntityCode.Parse("GR-TEST");
         context.Jurisdiction = Jurisdiction.Parse("GR");
+        context.ConfigurationHash = TestConfigurationHash;
         return scope;
     }
 
@@ -88,7 +89,7 @@ internal static class RatingTestSupport
             {
                 ["legalEntity"] = "GR-TEST",
                 ["jurisdiction"] = "GR",
-                ["productCode"] = ProductCode,
+                ["productCode"] = MotorProduct,
                 ["productVersion"] = "1.0",
                 ["productArtefactHash"] = new string('b', 64),
                 ["mode"] = mode,

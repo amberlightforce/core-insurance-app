@@ -151,6 +151,7 @@ internal sealed class RatingRateService(
                 worksheetId.Value, legalEntity.Value, envelope.Jurisdiction, artefact.Hash.Value, configurationHash.ToString(), inputHash, dataStatus,
                 worksheet.ToJsonString(), envelope.Lineage?.QuoteId, envelope.Lineage?.JobId, envelope.Lineage?.TransactionId, mode.ToString().ToUpperInvariant(),
                 cancellationToken).ConfigureAwait(false);
+            context.ConfigurationHash ??= configurationHash; // the configuration this unit of work was priced under
             events.Publish(new OutgoingEvent(
                 EventDescriptor.From(RatingCalculatedV1.Descriptor), "RatingRequest", worksheetId.Value,
                 new RatingCalculatedV1

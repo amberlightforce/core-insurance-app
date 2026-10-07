@@ -39,11 +39,27 @@ internal sealed class UnderwritingController : ControllerBase
     [HttpGet("issues/blocking-status")]
     [Authorize(Policy = UnderwritingPermissions.BlockingStatus)]
     public async Task<IResult> BlockingStatusAsync(
-        [FromQuery] Guid jobRef, [FromQuery] BlockingPoint blockingPoint, [FromServices] IUnderwritingIssueService service, CancellationToken cancellationToken)
+        [FromQuery] Guid jobRef, [FromQuery] string blockingPoint, [FromServices] IUnderwritingIssueService service, CancellationToken cancellationToken)
     {
+        BlockingPoint point;
+        switch (blockingPoint)
+        {
+            case "PRE_QUOTE":
+                point = BlockingPoint.PreQuote;
+                break;
+            case "PRE_BIND":
+                point = BlockingPoint.PreBind;
+                break;
+            case "PRE_ISSUE":
+                point = BlockingPoint.PreIssue;
+                break;
+            default:
+                return Problem(DomainError.Of(ModuleCode.UW, "VALIDATION", "blockingPoint must be PRE_QUOTE, PRE_BIND or PRE_ISSUE."), HttpContext);
+        }
+
         try
         {
-            return Results.Ok(await service.BlockingStatusAsync(JobId.From(jobRef), blockingPoint, cancellationToken).ConfigureAwait(false));
+            return Results.Ok(await service.BlockingStatusAsync(JobId.From(jobRef), point, cancellationToken).ConfigureAwait(false));
         }
         catch (DomainException ex)
         {
