@@ -146,8 +146,8 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "building",
-   "owner": "builder: shared kernel + platform primitives",
+   "status": "in review",
+   "owner": "reviewer agent",
    "reviewAttempts": 0,
    "blockers": []
   },
@@ -184,8 +184,8 @@
    "dependsOn": [
     "F-1a"
    ],
-   "status": "in review",
-   "owner": "reviewer (attempt 2)",
+   "status": "merged",
+   "owner": "merged (review PASS attempt 2)",
    "reviewAttempts": 1,
    "blockers": []
   },
