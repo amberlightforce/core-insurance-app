@@ -60,7 +60,7 @@ public sealed record ReceiptView
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.InvoiceId? InvoiceId { get; init; }
 
-    /// <summary>Why the receipt is unapplied (REQ-BIL-135), e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH</summary>
+    /// <summary>Why the receipt is unapplied (REQ-BIL-135), e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH, CONCURRENT_ALLOCATION</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("suspenseReason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? SuspenseReason { get; init; }

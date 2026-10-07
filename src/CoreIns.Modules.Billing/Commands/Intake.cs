@@ -44,9 +44,11 @@ internal sealed class IntakeChargeHandler(
     public async Task<Result<IntakeOutcome>> HandleAsync(IntakeCharge command, CancellationToken cancellationToken)
     {
         var delta = command.Delta;
+        await billing.LockTermAsync(delta.TermId, cancellationToken).ConfigureAwait(false);
         if (await db.Charges.AnyAsync(c => c.ChargeId == delta.ChargeId, cancellationToken).ConfigureAwait(false))
         {
-            return new IntakeOutcome(false, 0);
+            // A replay still lets the term progress: an earlier delivery may have stopped short of billing.
+            return new IntakeOutcome(false, await billing.ProgressAsync(delta.TermId, cancellationToken).ConfigureAwait(false));
         }
 
         // D4: ChargeDeltaEmitted always carries its set; a missing set is a contract violation and is retried/parked.
@@ -121,9 +123,10 @@ internal sealed class AttachTermHandler(
     public async Task<Result<IntakeOutcome>> HandleAsync(AttachTerm command, CancellationToken cancellationToken)
     {
         var bound = command.Bound;
+        await billing.LockTermAsync(bound.TermId, cancellationToken).ConfigureAwait(false);
         if (await db.PlanInstances.AnyAsync(p => p.TermId == bound.TermId, cancellationToken).ConfigureAwait(false))
         {
-            return new IntakeOutcome(false, 0);
+            return new IntakeOutcome(false, await billing.ProgressAsync(bound.TermId, cancellationToken).ConfigureAwait(false));
         }
 
         if (!string.Equals(bound.PaymentPlanRef, PaymentPlans.Annual, StringComparison.Ordinal))

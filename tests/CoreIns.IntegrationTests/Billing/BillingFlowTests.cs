@@ -48,6 +48,16 @@ public sealed class BillingFlowTests(PostgresFixture database) : IClassFixture<P
         Amount(invoice["invoice"]!["open"]).ShouldBe(policy.Total);
         var items = invoice["invoiceItems"]!.AsArray();
         items.Count.ShouldBe(policy.ChargeCount);
+        policy.Charges.Count.ShouldBe(policy.ChargeCount);
+        foreach (var item in items)
+        {
+            // Each invoice item is exactly one POL charge line, frozen as received (REQ-BIL-002, REQ-BIL-067).
+            var (chargeType, amount) = policy.Charges[item!["chargeId"]!.GetValue<string>()];
+            item["chargeType"]!.GetValue<string>().ShouldBe(chargeType);
+            Amount(item["amount"]).ShouldBe(amount);
+            item["transactionId"]!.GetValue<string>().ShouldBe(policy.TransactionId);
+        }
+
         items.Select(i => i!["chargeType"]!.GetValue<string>()).ShouldContain("GR-IPT");
         items.ShouldAllBe(i => i!["fiscalCategoryKey"] != null);
         (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.charge WHERE transaction_id = '{policy.TransactionId}' AND status = 'SCHEDULED'"))
@@ -187,6 +197,24 @@ public sealed class BillingFlowTests(PostgresFixture database) : IClassFixture<P
         await _slice.DrainAsync();
         (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE transaction_id = '{policy.TransactionId}'")).ShouldBe(1);
         (await _slice.ScalarAsync<decimal>($"SELECT total FROM bil.invoice WHERE transaction_id = '{policy.TransactionId}'")).ShouldBe(policy.Total);
+    }
+
+    [Fact]
+    public async Task D2_concurrent_delivery_of_the_set_members_bills_the_set_exactly_once()
+    {
+        var policy = await _slice.BindAsync();
+        var envelopes = await _slice.EnvelopesAsync(policy.PolicyId);
+        (await _slice.InvokeAsync("BIL.PolicyBound.AttachTerm", envelopes.Single(e => e.EventType.Value == "PolicyBound"))).ShouldBeTrue();
+
+        var deltas = envelopes.Where(e => e.EventType.Value == "ChargeDeltaEmitted").ToList();
+        var delivered = await Task.WhenAll(deltas.Select(d => Task.Run(() => _slice.InvokeAsync("BIL.ChargeDeltaEmitted.Intake", d))));
+        delivered.ShouldAllBe(ok => ok);
+
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE transaction_id = '{policy.TransactionId}'")).ShouldBe(1);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.charge WHERE transaction_id = '{policy.TransactionId}' AND status = 'SCHEDULED'"))
+            .ShouldBe(policy.ChargeCount);
+        await _slice.DrainAsync();
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE transaction_id = '{policy.TransactionId}'")).ShouldBe(1);
     }
 
     [Fact]

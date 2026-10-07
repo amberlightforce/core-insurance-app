@@ -7165,7 +7165,7 @@ components:
           $ref: ../events/common.schema.json#/$defs/Uuid
         suspenseReason:
           $ref: ../events/common.schema.json#/$defs/Code
-          description: Why the receipt is unapplied (REQ-BIL-135), e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH
+          description: Why the receipt is unapplied (REQ-BIL-135), e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH, CONCURRENT_ALLOCATION
         recordedAt:
           $ref: ../events/common.schema.json#/$defs/Instant
       required:

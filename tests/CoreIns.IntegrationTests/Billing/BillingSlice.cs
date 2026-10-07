@@ -11,7 +11,11 @@ using static CoreIns.IntegrationTests.Party.PartyApi;
 namespace CoreIns.IntegrationTests.Bil;
 
 /// <summary>A bound policy as BIL sees it.</summary>
-internal sealed record BoundPolicy(string PolicyId, string TermId, string TransactionId, string PartyId, decimal Total, int ChargeCount);
+internal sealed record BoundPolicy(string PolicyId, string TermId, string TransactionId, string PartyId, decimal Total, int ChargeCount)
+{
+    /// <summary>POL's frozen charge lines: charge id → (charge type, amount).</summary>
+    public IReadOnlyDictionary<string, (string ChargeType, decimal Amount)> Charges { get; init; } = new Dictionary<string, (string, decimal)>();
+}
 
 /// <summary>
 /// The BIL slice host: the real Host and database with every module real (PTY, PFC MOTOR-GR, MKT, RAT's illustrative
@@ -53,7 +57,12 @@ internal sealed class BillingSlice : IAsyncDisposable
         bind.Text("state").ShouldBe("BOUND", bind?.ToJsonString());
         var charges = bind!["chargeDeltas"]!.AsArray();
         var total = charges.Sum(c => decimal.Parse(c!["amount"]!["amount"]!.GetValue<string>(), CultureInfo.InvariantCulture));
-        return new BoundPolicy(bind.Text("policyId"), bind.Text("termId"), bind.Text("transactionId"), party, total, charges.Count);
+        return new BoundPolicy(bind.Text("policyId"), bind.Text("termId"), bind.Text("transactionId"), party, total, charges.Count)
+        {
+            Charges = charges.ToDictionary(
+                c => c!["chargeId"]!.GetValue<string>(),
+                c => (c!["chargeType"]!.GetValue<string>(), decimal.Parse(c["amount"]!["amount"]!.GetValue<string>(), CultureInfo.InvariantCulture))),
+        };
     }
 
     /// <summary>Dispatches every outbox message (events published by handlers included) as the worker would.</summary>

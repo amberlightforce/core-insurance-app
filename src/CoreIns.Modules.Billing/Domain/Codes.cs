@@ -97,6 +97,7 @@ internal static class ReceiptCodes
     public const string NoOpenInvoice = "NO_OPEN_INVOICE";
     public const string AmbiguousMatch = "AMBIGUOUS_MATCH";
     public const string InvoiceNotOpen = "INVOICE_NOT_OPEN";
+    public const string ConcurrentAllocation = "CONCURRENT_ALLOCATION";
 
     /// <summary>Deterministic matching rules (REQ-BIL-127) and the manual rule.</summary>
     public const string RuleReferencedInvoice = "REFERENCED_INVOICE";

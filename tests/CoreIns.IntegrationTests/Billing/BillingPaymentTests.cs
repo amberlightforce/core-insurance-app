@@ -168,6 +168,72 @@ public sealed class BillingPaymentTests(PostgresFixture database) : IClassFixtur
     }
 
     [Fact]
+    public async Task D_ARC_34_as_the_app_role_a_posted_entry_is_sealed_and_money_columns_are_frozen()
+    {
+        var (_, account, invoiceId) = await BilledAsync();
+        var entry = await _slice.ScalarAsync<Guid>($"SELECT entry_id FROM bil.ledger_entry WHERE billing_account_id = '{account}' AND entry_type = 'BILLED'");
+        await using var app = NpgsqlDataSource.Create(database.AppConnectionString);
+
+        // The review probe: a balanced pair appended to an existing BILLED entry in a later transaction.
+        var sealedError = await Should.ThrowAsync<PostgresException>(async () =>
+        {
+            await using var connection = await app.OpenConnectionAsync(Ct);
+            await using var transaction = await connection.BeginTransactionAsync(Ct);
+            await using (var insert = new NpgsqlCommand(
+                $"""
+                INSERT INTO bil.ledger_line (line_id, entry_id, line_no, account_code, side, amount, currency, rule_id, legal_entity_id, billing_account_id)
+                VALUES ('{Guid.CreateVersion7()}', '{entry}', 101, 'LA-02', 'DEBIT', 1000, 'EUR', 'BLR-BILLED', '{ApiHostFactory.LegalEntityId}', '{account}'),
+                       ('{Guid.CreateVersion7()}', '{entry}', 102, 'LA-01', 'CREDIT', 1000, 'EUR', 'BLR-BILLED', '{ApiHostFactory.LegalEntityId}', '{account}');
+                """, connection, transaction))
+            {
+                await insert.ExecuteNonQueryAsync(Ct);
+            }
+
+            await transaction.CommitAsync(Ct);
+        });
+        sealedError.SqlState.ShouldBe("BL005");
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.ledger_line WHERE entry_id = '{entry}' AND line_no > 100")).ShouldBe(0);
+
+        foreach (var sql in new[]
+                 {
+                     $"UPDATE bil.invoice_item SET amount = amount + 1 WHERE invoice_id = '{invoiceId}'",
+                     $"UPDATE bil.invoice SET total = total + 1 WHERE invoice_id = '{invoiceId}'",
+                     $"UPDATE bil.invoice SET invoice_number = 'INV-FORGED' WHERE invoice_id = '{invoiceId}'",
+                 })
+        {
+            var error = await Should.ThrowAsync<PostgresException>(async () =>
+            {
+                await using var command = app.CreateCommand(sql);
+                await command.ExecuteNonQueryAsync(Ct);
+            });
+            error.SqlState.ShouldBe("BL004", sql);
+        }
+
+        var (_, payment) = await _slice.PostAsync("/api/bil/v1/payments/take", new { billingAccountId = account, amount = Money(5m), method = "CASHIER", autoAllocate = false });
+        var receiptError = await Should.ThrowAsync<PostgresException>(async () =>
+        {
+            await using var command = app.CreateCommand($"UPDATE bil.receipt SET amount = 50 WHERE receipt_id = '{payment.Text("receipt.receiptId")}'");
+            await command.ExecuteNonQueryAsync(Ct);
+        });
+        receiptError.SqlState.ShouldBe("BL004");
+    }
+
+    [Fact]
+    public async Task REQ_BIL_130_concurrent_exact_payments_allocate_once_and_the_losers_stay_unapplied()
+    {
+        var (policy, account, _) = await BilledAsync();
+        var body = new { billingAccountId = account, amount = Money(policy.Total), method = "BANK_TRANSFER" };
+        var results = await Task.WhenAll(Enumerable.Range(0, 3).Select(_ => Task.Run(() => _slice.PostAsync("/api/bil/v1/payments/take", body))));
+        results.ShouldAllBe(r => r.Response.StatusCode == HttpStatusCode.Created);
+        results.Count(r => r.Body.Text("allocationOutcome") == "ALLOCATED").ShouldBe(1);
+        results.Count(r => r.Body.Text("allocationOutcome") == "SUSPENSE").ShouldBe(2);
+        (await _slice.InvoiceOfAsync(policy.PolicyId)).Text("invoice.state").ShouldBe("PAID");
+        (await _slice.ScalarAsync<decimal>($"SELECT sum(a.amount) FROM bil.allocation a JOIN bil.receipt r ON r.receipt_id = a.receipt_id WHERE r.billing_account_id = '{account}'"))
+            .ShouldBe(policy.Total);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.receipt WHERE billing_account_id = '{account}'")).ShouldBe(3);
+    }
+
+    [Fact]
     public async Task REQ_BIL_130_the_database_refuses_an_allocation_above_the_receipt()
     {
         var (policy, account, invoiceId) = await BilledAsync();

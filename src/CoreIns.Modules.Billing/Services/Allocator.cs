@@ -205,6 +205,25 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
         return items.GroupBy(i => i.TermId).ToDictionary(g => g.Key, g => g.Sum(i => i.Amount - sums.GetValueOrDefault(i.InvoiceItemId)));
     }
 
+    /// <summary>
+    /// Forgets the allocation attempt's unsaved changes after a failed save (EF has rolled the database back to its
+    /// savepoint): added rows are detached, modified rows reloaded from the database.
+    /// </summary>
+    public async Task DiscardPendingAsync(CancellationToken cancellationToken)
+    {
+        foreach (var entry in db.ChangeTracker.Entries().ToList())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.State = EntityState.Detached;
+            }
+            else if (entry.State is EntityState.Modified or EntityState.Deleted)
+            {
+                await entry.ReloadAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
     /// <summary>True when <paramref name="exception"/> is the database's over-allocation refusal.</summary>
     public static bool IsOverAllocation(Exception exception) =>
         exception is DbUpdateException { InnerException: PostgresException { SqlState: OverAllocationState } } or PostgresException { SqlState: OverAllocationState };

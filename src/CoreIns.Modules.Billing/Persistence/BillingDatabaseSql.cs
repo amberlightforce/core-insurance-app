@@ -145,4 +145,82 @@ internal static class BillingDatabaseSql
         DROP FUNCTION IF EXISTS bil.guard_allocation() CASCADE;
         DROP FUNCTION IF EXISTS bil.freeze_charge() CASCADE;
         """;
+
+    /// <summary>
+    /// D-ARC-34: each entry is sealed at its creating transaction. <c>ledger_entry.created_txid</c> records the top-level
+    /// transaction id (txid_current() is the same inside EF's savepoints); a BEFORE INSERT trigger on <c>ledger_line</c>
+    /// refuses a line whose header was not inserted by the current transaction (SQLSTATE BL005), so a balanced pair
+    /// appended to an existing entry later is refused even though it would pass the balance check. The same migration
+    /// freezes the money and number columns of invoices, items and receipts (SQLSTATE BL004): states move, amounts never.
+    /// </summary>
+    public const string Seal = """
+        ALTER TABLE bil.ledger_entry ADD COLUMN created_txid bigint NOT NULL DEFAULT txid_current();
+
+        CREATE FUNCTION bil.seal_ledger_line() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        DECLARE
+            header_txid bigint;
+        BEGIN
+            SELECT created_txid INTO header_txid FROM bil.ledger_entry WHERE entry_id = NEW.entry_id;
+            IF header_txid IS NULL THEN
+                RAISE EXCEPTION 'ledger line for entry % has no header (REQ-BIL-279)', NEW.entry_id USING ERRCODE = 'BL005';
+            END IF;
+            IF header_txid <> txid_current() THEN
+                RAISE LOG 'SECURITY: line appended to sealed ledger entry % by role % (D-ARC-34)', NEW.entry_id, current_user;
+                RAISE EXCEPTION 'ledger entry % is sealed: lines are written only by the transaction that created it (D-ARC-34)', NEW.entry_id
+                    USING ERRCODE = 'BL005';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_ledger_line_sealed BEFORE INSERT ON bil.ledger_line FOR EACH ROW EXECUTE FUNCTION bil.seal_ledger_line();
+
+        CREATE FUNCTION bil.freeze_invoice() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF (NEW.total, NEW.currency, NEW.invoice_number, NEW.billing_account_id, NEW.transaction_id, NEW.kind) IS DISTINCT FROM (OLD.total, OLD.currency, OLD.invoice_number, OLD.billing_account_id, OLD.transaction_id, OLD.kind) THEN
+                RAISE EXCEPTION 'bil.invoice amounts and numbers are frozen once written' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_invoice_frozen BEFORE UPDATE ON bil.invoice FOR EACH ROW EXECUTE FUNCTION bil.freeze_invoice();
+
+        CREATE FUNCTION bil.freeze_invoice_item() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF (NEW.amount, NEW.currency, NEW.charge_id, NEW.invoice_id) IS DISTINCT FROM (OLD.amount, OLD.currency, OLD.charge_id, OLD.invoice_id) THEN
+                RAISE EXCEPTION 'bil.invoice_item amounts and numbers are frozen once written' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_invoice_item_frozen BEFORE UPDATE ON bil.invoice_item FOR EACH ROW EXECUTE FUNCTION bil.freeze_invoice_item();
+
+        CREATE FUNCTION bil.freeze_receipt() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF (NEW.amount, NEW.currency, NEW.receipt_number, NEW.billing_account_id, NEW.value_date) IS DISTINCT FROM (OLD.amount, OLD.currency, OLD.receipt_number, OLD.billing_account_id, OLD.value_date) THEN
+                RAISE EXCEPTION 'bil.receipt amounts and numbers are frozen once written' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_receipt_frozen BEFORE UPDATE ON bil.receipt FOR EACH ROW EXECUTE FUNCTION bil.freeze_receipt();
+
+        CREATE TRIGGER tr_invoice_append_only BEFORE DELETE ON bil.invoice FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
+        CREATE TRIGGER tr_invoice_item_append_only BEFORE DELETE ON bil.invoice_item FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
+        CREATE TRIGGER tr_receipt_append_only BEFORE DELETE ON bil.receipt FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
+        """;
+
+    public const string SealDown = """
+        DROP TRIGGER IF EXISTS tr_invoice_append_only ON bil.invoice;
+        DROP TRIGGER IF EXISTS tr_invoice_item_append_only ON bil.invoice_item;
+        DROP TRIGGER IF EXISTS tr_receipt_append_only ON bil.receipt;
+        DROP FUNCTION IF EXISTS bil.freeze_invoice() CASCADE;
+        DROP FUNCTION IF EXISTS bil.freeze_invoice_item() CASCADE;
+        DROP FUNCTION IF EXISTS bil.freeze_receipt() CASCADE;
+        DROP FUNCTION IF EXISTS bil.seal_ledger_line() CASCADE;
+        ALTER TABLE bil.ledger_entry DROP COLUMN IF EXISTS created_txid;
+        """;
 }

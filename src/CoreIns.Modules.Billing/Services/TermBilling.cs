@@ -62,6 +62,7 @@ internal sealed class TermBilling(
     /// <summary>Writes and schedules what the term's state allows; returns the number of invoices created.</summary>
     public async Task<int> ProgressAsync(PolicyTermId termId, CancellationToken cancellationToken)
     {
+        await LockTermAsync(termId, cancellationToken).ConfigureAwait(false);
         var plan = await db.PlanInstances.SingleOrDefaultAsync(p => p.TermId == termId, cancellationToken).ConfigureAwait(false);
         if (plan is null)
         {
@@ -424,6 +425,18 @@ internal sealed class TermBilling(
         charge.QuarantineReason = reason;
         await RaiseAsync(ExceptionKinds.DeltaException, charge.ChargeId.Value.ToString(), reason,
             detail ?? $"Charge {charge.ChargeId.Value} ({charge.ChargeType}) is quarantined: {reason} (REQ-BIL-065).", cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Serialises every unit of work that touches the term's charges (intake, attach, progress) with a transaction-scoped
+    /// advisory lock on the term id. Under READ COMMITTED the statements after the lock see what the previous holder
+    /// committed, so of two concurrent deliveries of a set's last members exactly one sees the set complete and bills it;
+    /// none is stranded (review SL-BIL D2). Re-entrant within the transaction.
+    /// </summary>
+    public async Task LockTermAsync(PolicyTermId termId, CancellationToken cancellationToken)
+    {
+        var key = BitConverter.ToInt64(termId.Value.ToByteArray(), 8);
+        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({key})", cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Records an intake exception once (the activity of the PRD; WRK is not wired in the slice).</summary>

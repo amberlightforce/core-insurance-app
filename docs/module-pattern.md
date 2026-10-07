@@ -134,3 +134,23 @@ in the work package report.
 - In-process contract tests resolve `I<X>…Service` from `factory.Services` in a scope with a filled `RequestContext`.
 - Architecture tests must stay green (`tests/CoreIns.ArchitectureTests`).
 - Requirement ids in test names or comments, so the work package report can map REQ → test.
+
+## 10. Ledgers (D-ARC-34)
+
+Every append-only ledger (BIL sub-ledger, FIN journals, later CLM, RI, commissions) follows one pattern; the reference is
+`src/CoreIns.Modules.Billing/Persistence/BillingDatabaseSql.cs`.
+
+- **Header + lines**, written only by the owning module's ledger writer, each entry published as one event in the same
+  transaction (BIL: `LedgerWriter` → `BillingEntryPosted`).
+- **Grants:** the app role gets SELECT, INSERT only on header and line tables; no UPDATE/DELETE.
+- **Append-only triggers:** BEFORE UPDATE/DELETE (row) and BEFORE TRUNCATE (statement) refuse for every role,
+  including the owner, and log a `SECURITY:` line.
+- **Balance trigger:** a DEFERRABLE INITIALLY DEFERRED constraint trigger checks at commit that each entry has at least
+  two lines and debits = credits per currency.
+- **Seal trigger:** the header stores `created_txid bigint DEFAULT txid_current()`; a BEFORE INSERT trigger on the line
+  table refuses a line whose header was not created by the current transaction (`txid_current()` is the top-level id,
+  so EF savepoints are fine). The balance trigger alone is not enough: a balanced pair appended later passes it.
+- **Tests, connected as the `app` role:** append a balanced pair to an existing entry in a later transaction (refused),
+  UPDATE/DELETE/TRUNCATE (refused), an unbalanced entry (refused at commit), and the role's privileges.
+- Amount and number columns of the documents the ledger refers to (invoices, items, receipts) are frozen by triggers too;
+  only states move.

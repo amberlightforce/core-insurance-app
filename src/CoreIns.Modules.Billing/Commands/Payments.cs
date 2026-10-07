@@ -151,10 +151,24 @@ internal sealed class TakePaymentHandler(
             return Respond(receipt, [], PaymentTakeResponse.AllocationOutcomeValue.Suspense);
         }
 
+        // The receipt and its RECEIVED entry are saved first, so a lost race on the invoice keeps the money.
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var allocated = await allocator.AllocateAsync(receipt, [(match, request.Amount)], ruleId, "RULE", cancellationToken).ConfigureAwait(false);
         if (allocated.IsFailure)
         {
-            return allocated.Error!;
+            if (allocated.Error!.Code.Value is not ("BIL-ERR-STALE" or "BIL-ERR-OVER-ALLOCATION"))
+            {
+                return allocated.Error!;
+            }
+
+            // A concurrent payment allocated the invoice first: EF rolled the failed save back to its savepoint; drop the
+            // allocation's pending changes and keep this receipt as unapplied cash (REQ-BIL-135) instead of refusing money.
+            await allocator.DiscardPendingAsync(cancellationToken).ConfigureAwait(false);
+            receipt.State = Codes.Of(PaymentStateModel.Machine.FireOrThrow(PaymentState.Received, PaymentTrigger.MoveToSuspense));
+            receipt.SuspenseReason = ReceiptCodes.ConcurrentAllocation;
+            receipt.RecordVersion++;
+            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return Respond(receipt, [], PaymentTakeResponse.AllocationOutcomeValue.Suspense);
         }
 
         return Respond(receipt, allocated.Value, PaymentTakeResponse.AllocationOutcomeValue.Allocated);

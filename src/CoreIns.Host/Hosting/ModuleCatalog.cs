@@ -58,6 +58,7 @@ internal static class ModuleCatalog
         .. PolicyModule.Databases,
         .. BillingModule.Databases,
         .. ComplianceModule.Databases,
+        .. FinanceModule.Databases,
     ];
 
     /// <summary>Module assemblies whose (internal) <c>[ApiController]</c>s the api serves.</summary>
@@ -71,6 +72,7 @@ internal static class ModuleCatalog
         typeof(PolicyModule).Assembly,
         typeof(BillingModule).Assembly,
         typeof(ComplianceModule).Assembly,
+        typeof(FinanceModule).Assembly,
     ];
 
     /// <summary>Calls every module's registration hook. The platform registers first.</summary>

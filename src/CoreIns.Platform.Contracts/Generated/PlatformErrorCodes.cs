@@ -256,7 +256,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 36 operation(s): bil.Refund.decide, bil.Refund.get, bil.Refund.list, bil.Refund.propose, bil.Refund.resubmit, fin.ActuarialResults.approve, fin.ActuarialResults.get, fin.ActuarialResults.reject, fin.ActuarialResults.submit, fin.ActuarialResults.validate, fin.ManualJournal.create, fin.ManualJournal.decide, ….</para>
+    /// <para>Declared by 35 operation(s): bil.Refund.decide, bil.Refund.get, bil.Refund.list, bil.Refund.propose, bil.Refund.resubmit, fin.ActuarialResults.approve, fin.ActuarialResults.get, fin.ActuarialResults.reject, fin.ActuarialResults.submit, fin.ActuarialResults.validate, fin.ManualJournal.create, fin.ManualJournal.decide, ….</para>
     /// </remarks>
     public const string Sod = "PLT-ERR-SOD";
 
