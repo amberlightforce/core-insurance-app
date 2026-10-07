@@ -3703,6 +3703,11 @@ components:
           type: integer
           minimum: 1900
           maximum: 2200
+        engineCapacityCc:
+          type: integer
+          minimum: 1
+          maximum: 20000
+          description: Engine capacity (PFC vehicle field; a rating input)
         use:
           $ref: ../events/common.schema.json#/$defs/Code
           description: Vehicle use code from the PFC vehicle element
@@ -3741,6 +3746,11 @@ components:
           type: integer
           minimum: 0
           maximum: 100
+        claimsLast5Years:
+          type: integer
+          minimum: 0
+          maximum: 50
+          description: At-fault claims in the last five years (PFC driver field, question Q-CLAIMS-5Y)
         fields:
           $ref: ../events/common.schema.json#/$defs/OpenObject
           description: Further PFC driver element fields (REQ-POL-299); gender is never captured
@@ -3993,8 +4003,10 @@ components:
           enum:
           - ACCEPT
           - REFER
+          - DECLINE
           description: UW outcome at PRE_QUOTE. REFER with state DRAFT = blocked at PRE_QUOTE; with QUOTED = bind blocked until
-            approval. Declines arrive as uw.DeclineIssued (REQ-POL-156)
+            approval. DECLINE keeps the job in Draft (not quoted); the job becomes Declined when UW issues the decline record
+            (uw.DeclineIssued, REQ-POL-156)
         referred:
           type: boolean
           description: Referred flag (blocking UW issues open)

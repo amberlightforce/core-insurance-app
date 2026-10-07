@@ -42,6 +42,11 @@ public sealed record Vehicle
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public int? FirstRegistrationYear { get; init; }
 
+    /// <summary>Engine capacity (PFC vehicle field; a rating input)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("engineCapacityCc")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? EngineCapacityCc { get; init; }
+
     /// <summary>Vehicle use code from the PFC vehicle element</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("use")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]

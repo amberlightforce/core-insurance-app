@@ -54,8 +54,43 @@
         }
       ],
       "taxes": [
-        "unspecified"
+        {
+          "segmentId": "sample",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "category": "TAX",
+          "taxClass": "SAMPLE_CODE",
+          "base": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "rate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "roundingRule": "sample",
+          "configurationKey": "sample",
+          "configurationValueVersionId": "01920644-bcdd-740a-8999-0d8ecaff457c",
+          "legalStatus": "sample",
+          "legalSourceRef": "sample",
+          "provisional": true
+        }
       ],
+      "coveragePremiumTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "taxTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "grossTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "signals": [
         "unspecified"
       ],
@@ -372,6 +407,7 @@
         "jurisdiction": "GR",
         "productCode": "SAMPLE_CODE",
         "productArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "productVersion": "1.0",
         "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
         "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
         "mode": "FULL",
@@ -429,8 +465,43 @@
         }
       ],
       "taxes": [
-        "unspecified"
+        {
+          "segmentId": "sample",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "category": "TAX",
+          "taxClass": "SAMPLE_CODE",
+          "base": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "rate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "roundingRule": "sample",
+          "configurationKey": "sample",
+          "configurationValueVersionId": "0192207f-90fa-7293-879b-1a5a8be98fc5",
+          "legalStatus": "sample",
+          "legalSourceRef": "sample",
+          "provisional": true
+        }
       ],
+      "coveragePremiumTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "taxTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "grossTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "signals": [
         "unspecified"
       ],
@@ -520,7 +591,9 @@
     },
     "RatingArtifactResolveRequest": {
       "slot": "unspecified",
-      "transactionType": "unspecified"
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "1.0",
+      "transactionType": "SAMPLE_CODE"
     },
     "RatingArtifactResolveResponse": {
       "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",

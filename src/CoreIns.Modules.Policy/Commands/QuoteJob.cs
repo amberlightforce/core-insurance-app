@@ -60,9 +60,9 @@ internal sealed class QuoteJobHandler(
     Dependency<IProductQuestionSetService> questionSetService,
     Dependency<IProductPolicyDraftService> draftService,
     Dependency<IRatingRateService> ratingService,
-    Dependency<IRatingRatingArtifactService> artefactService,
     Dependency<IMarketRoundingService> roundingService,
     Dependency<IUnderwritingRulesService> underwritingService,
+    RatingInput ratingInput,
     IOptions<PolicyOptions> options) : ICommandHandler<QuoteJob, JobQuoteResponse>
 {
     public async Task<Result<JobQuoteResponse>> HandleAsync(QuoteJob command, CancellationToken cancellationToken)
@@ -100,9 +100,15 @@ internal sealed class QuoteJobHandler(
             return invalid;
         }
 
-        // 2. Rating and charge lines.
+        // 2. The rating input (with the driver's date of birth from PTY, never stored in POL), rating and charge lines.
+        var view = await ratingInput.BuildAsync(tree, job.EffectiveAt, cancellationToken).ConfigureAwait(false);
+        if (view.IsFailure)
+        {
+            return view.Error!;
+        }
+
         var currency = Currency.FromCode(job.Currency);
-        var rated = await RateAsync(job, version, tree, currency, cancellationToken).ConfigureAwait(false);
+        var rated = await RateAsync(job, version, view.Value, currency, cancellationToken).ConfigureAwait(false);
         if (rated.IsFailure)
         {
             return rated.Error!;
@@ -112,27 +118,18 @@ internal sealed class QuoteJobHandler(
         var (premium, taxes, total) = Charges.Totals(charges, currency);
 
         // 3. Underwriting at PRE_QUOTE.
-        var snapshotHash = CanonicalJson.HashOf(tree, SharedKernelJson.Options);
-        RulesEvaluateResponse evaluation;
-        try
+        var evaluated = await UwEvaluation.EvaluateAsync(
+            underwritingService.Value, context, job, version, view.Value, RulesEvaluateRequest.CheckpointValue.PreQuote, options.Value.Zone, cancellationToken)
+            .ConfigureAwait(false);
+        if (evaluated.IsFailure)
         {
-            evaluation = await underwritingService.Value.EvaluateAsync(
-                new RulesEvaluateRequest
-                {
-                    JobRef = job.JobId, Checkpoint = RulesEvaluateRequest.CheckpointValue.PreQuote,
-                    SnapshotRef = $"pol:quote:{version.QuoteId.Value:D}:{version.DraftVersion}", SnapshotHash = snapshotHash,
-                },
-                new CommandOptions(JobSupport.Derived(context.IdempotencyKey, "uw.Rules.evaluate:PRE_QUOTE")) { DryRun = context.DryRun },
-                cancellationToken).ConfigureAwait(false);
-        }
-        catch (DomainException ex)
-        {
-            return DomainError.Of(ModuleCode.POL, "VALIDATION", $"Underwriting could not evaluate the quote: {ex.Error.Code}.");
+            return evaluated.Error!;
         }
 
-        var issues = evaluation.Issues.Select(Issue).ToList();
-        var blockedAtQuote = issues.Any(i => UwOutcome.Blocks(i, BlockingPoint.PreQuote));
-        var referred = blockedAtQuote || UwOutcome.BlocksLater(issues);
+        var (evaluation, issues) = evaluated.Value;
+        var declined = evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline;
+        var blockedAtQuote = declined || issues.Any(i => UwOutcome.Blocks(i, BlockingPoint.PreQuote));
+        var referred = blockedAtQuote || UwOutcome.BlocksLater(issues) || evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Refer;
 
         // 4. Persist the version and move the job.
         var validUntil = now.Plus(TimeSpan.FromDays(options.Value.QuoteValidityDays));
@@ -145,7 +142,7 @@ internal sealed class QuoteJobHandler(
         version.Total = total.Amount;
         version.Issues = JobSupport.Json(issues);
         version.UwEvaluationId = evaluation.EvaluationId;
-        version.ConfigurationHash = context.ConfigurationHash?.Hash.Value;
+        version.ConfigurationHash = (ratingResponse.ConfigurationHash ?? context.ConfigurationHash)?.Hash.Value;
         version.RecordVersion++;
         version.UpdatedAt = now;
         job.Referred = referred;
@@ -186,7 +183,8 @@ internal sealed class QuoteJobHandler(
             QuoteId = version.QuoteId,
             VersionNo = version.VersionNo,
             State = Codes.Api(Codes.Parse<JobState>(job.State)),
-            Decision = referred ? JobQuoteResponse.DecisionValue.Refer : JobQuoteResponse.DecisionValue.Accept,
+            Decision = declined ? JobQuoteResponse.DecisionValue.Decline
+                : referred ? JobQuoteResponse.DecisionValue.Refer : JobQuoteResponse.DecisionValue.Accept,
             Referred = referred,
             Bindable = version.Bindable == true,
             Premium = premium,
@@ -246,41 +244,14 @@ internal sealed class QuoteJobHandler(
     }
 
     private async Task<Result<(RateRateResponse Response, IReadOnlyList<ChargeLine> Charges)>> RateAsync(
-        JobRow job, QuoteVersionRow version, RiskTree tree, Currency currency, CancellationToken cancellationToken)
+        JobRow job, QuoteVersionRow version, RatingView view, Currency currency, CancellationToken cancellationToken)
     {
-        if (job.RatingArtefactHash is null)
-        {
-            // The product's rating slot floats (REQ-PFC-221): RAT resolves the active artefact once, and POL pins it on the
-            // job so every later rating of this job (and the bound term) uses the same artefact.
-            RatingArtifactResolveResponse artefact;
-            try
-            {
-                artefact = await artefactService.Value.ResolveAsync(
-                    new RatingArtifactResolveRequest
-                    {
-                        Slot = JsonSerializer.SerializeToElement(new { productCode = job.ProductCode, productArtefactHash = job.ArtefactHash }, SharedKernelJson.Options),
-                        TransactionType = JsonSerializer.SerializeToElement("NewBusiness", SharedKernelJson.Options),
-                    },
-                    ValidAt.From(job.EffectiveAt), cancellationToken: cancellationToken).ConfigureAwait(false);
-            }
-            catch (DomainException ex) when (ex.Error.Code.Module != ModuleCode.POL)
-            {
-                return DomainError.Of(ModuleCode.POL, "RATING", $"No rating artefact could be resolved: {ex.Error.Code}.");
-            }
-
-            if (artefact.ArtefactHash is not { } resolvedHash)
-            {
-                return DomainError.Of(ModuleCode.POL, "RATING", "RAT resolved no rating artefact for the product.");
-            }
-
-            job.RatingArtefactHash = resolvedHash.Value;
-        }
-
-        var configuration = context.ConfigurationHash ?? throw new InvalidOperationException("No configuration hash is pinned for this command (REQ-POL-088).");
         var zone = options.Value.Zone;
         RateRateResponse response;
         try
         {
+            // rat.Rate.rate writes its worksheet and RatingCalculated in this unit of work (they commit with the quote).
+            // The rating artefact floats until the first rating, then stays pinned on the job (REQ-PFC-221).
             response = await ratingService.Value.RateAsync(
                 new RateRateRequest
                 {
@@ -290,8 +261,8 @@ internal sealed class QuoteJobHandler(
                         Jurisdiction = job.Jurisdiction,
                         ProductCode = job.ProductCode,
                         ProductArtefactHash = Sha256Hash.Parse(job.ArtefactHash),
-                        RatingArtefactHash = Sha256Hash.Parse(job.RatingArtefactHash),
-                        ConfigurationHash = configuration,
+                        ProductVersion = ProductVersionNumber.Parse(job.ProductVersion),
+                        RatingArtefactHash = job.RatingArtefactHash is null ? null : Sha256Hash.Parse(job.RatingArtefactHash),
                         Mode = job.QuoteType == "QUICK" ? RateRateRequest.EnvelopeDetail.ModeValue.Quick : RateRateRequest.EnvelopeDetail.ModeValue.Full,
                         TransactionType = "NewBusiness",
                         RatingBasisDate = job.EffectiveAt.ToBusinessDate(zone),
@@ -307,18 +278,25 @@ internal sealed class QuoteJobHandler(
                         {
                             SegmentId = version.QuoteId.Value.ToString("D"),
                             ValidPeriod = PolicyTime.Dates(job.EffectiveAt, job.ExpirationAt, zone),
-                            RiskTree = JsonSerializer.SerializeToElement(tree, SharedKernelJson.Options),
+                            RiskTree = view.Input,
                         },
                     ],
                 },
                 cancellationToken).ConfigureAwait(false);
         }
-        catch (DomainException ex)
+        catch (DomainException ex) when (ex.Error.Code.Module != ModuleCode.POL)
         {
-            return DomainError.Of(ModuleCode.POL, "RATING", $"Rating failed: {ex.Error.Code}.");
+            return DomainError.Of(ModuleCode.POL, "RATING", $"Rating failed: {ex.Error.Code} {ex.Error.Detail}");
         }
 
-        var drafts = Charges.FromRating(response, currency);
+        var pinned = response.RatingArtefactHash?.Value ?? job.RatingArtefactHash;
+        if (pinned is null || (job.RatingArtefactHash is not null && pinned != job.RatingArtefactHash))
+        {
+            return DomainError.Of(ModuleCode.POL, "RATING", "RAT did not rate with the job's rating artefact.");
+        }
+
+        job.RatingArtefactHash = pinned;
+        var drafts = Charges.FromRating(response, currency, view.VehicleLocator);
         if (drafts.IsFailure)
         {
             return drafts.Error!;
@@ -327,40 +305,57 @@ internal sealed class QuoteJobHandler(
         var lines = new List<ChargeLine>();
         foreach (var draft in drafts.Value)
         {
-            // MKT rounding purposes (PRD-17 REQ-MKT-192/193): premium lines charge.line, tax and levy lines tax.line.
-            RoundingApplyResponse rounded;
-            try
+            var amount = draft.Amount;
+            if (amount is null)
             {
-                rounded = await roundingService.Value.ApplyAsync(
-                    new RoundingApplyRequest
-                    {
-                        Amount = draft.Unrounded, Currency = currency,
-                        Purpose = draft.ChargeCategory == ChargeCategories.Premium ? "charge.line" : "tax.line",
-                        Context = new RoundingApplyRequest.ContextDetail
-                        {
-                            LegalEntity = context.LegalEntity!.Value.Value, ValidAt = job.EffectiveAt.ToBusinessDate(zone),
-                        },
-                    },
-                    cancellationToken).ConfigureAwait(false);
-            }
-            catch (DomainException ex) when (ex.Error.Code.Module != ModuleCode.POL)
-            {
-                return DomainError.Of(ModuleCode.POL, "RATING", $"Rounding failed: {ex.Error.Code}.");
-            }
+                // Premium lines are rounded by MKT (purpose charge.line, REQ-POL-123); RAT's tax and levy lines arrive
+                // already rounded on the rounded base (D-CON-11) and are taken as they are.
+                var rounded = await RoundAsync(draft, currency, job, zone, cancellationToken).ConfigureAwait(false);
+                if (rounded.IsFailure)
+                {
+                    return rounded.Error!;
+                }
 
-            if (rounded.AmountAfterRounding is not { } amount || amount.Currency != currency)
-            {
-                return DomainError.Of(ModuleCode.POL, "RATING", $"MKT rounding returned no {currency} amount for {draft.ChargeType}.");
+                amount = rounded.Value;
             }
 
             lines.Add(new ChargeLine
             {
                 ElementLocator = draft.ElementLocator, CoverageCode = draft.CoverageCode, ChargeType = draft.ChargeType,
-                ChargeCategory = draft.ChargeCategory, AnnualRate = draft.AnnualRate, Amount = amount,
+                ChargeCategory = draft.ChargeCategory, AnnualRate = draft.AnnualRate, Amount = amount.Value,
             });
         }
 
+        // The charge lines must add up to RAT's totals: anything else is a rounding disagreement between RAT and MKT.
+        if (response.GrossTotal is { } gross && Charges.Totals(lines, currency).Total != gross)
+        {
+            return DomainError.Of(ModuleCode.POL, "RATING", $"The charge lines do not add up to RAT's gross total {gross}.");
+        }
+
         return (response, lines);
+    }
+
+    private async Task<Result<Money>> RoundAsync(ChargeDraft draft, Currency currency, JobRow job, TimeZoneInfo zone, CancellationToken cancellationToken)
+    {
+        RoundingApplyResponse rounded;
+        try
+        {
+            rounded = await roundingService.Value.ApplyAsync(
+                new RoundingApplyRequest
+                {
+                    Amount = new Money(draft.AnnualRate, currency), Currency = currency, Purpose = "charge.line",
+                    Context = new RoundingApplyRequest.ContextDetail { LegalEntity = context.LegalEntity!.Value.Value, ValidAt = job.EffectiveAt.ToBusinessDate(zone) },
+                },
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (DomainException ex) when (ex.Error.Code.Module != ModuleCode.POL)
+        {
+            return DomainError.Of(ModuleCode.POL, "RATING", $"Rounding failed: {ex.Error.Code}.");
+        }
+
+        return rounded.AmountAfterRounding is { } amount && amount.Currency == currency
+            ? amount
+            : DomainError.Of(ModuleCode.POL, "RATING", $"MKT rounding returned no {currency} amount for {draft.ChargeType}.");
     }
 
     /// <summary>PFC takes answers as text by question code: strings as they are, other JSON values in their JSON form.</summary>
@@ -371,12 +366,6 @@ internal sealed class QuoteJobHandler(
                 p => p.Name,
                 p => p.Value.ValueKind == JsonValueKind.String ? p.Value.GetString()! : p.Value.GetRawText(),
                 StringComparer.Ordinal);
-
-    private static UwIssue Issue(RulesEvaluateResponse.IssueItem item) => new()
-    {
-        IssueId = item.IssueId, IssueType = item.IssueType, Severity = item.Severity, BlockingPoint = item.BlockingPoint,
-        IssueKey = item.IssueKey, Lane = item.Lane, ExplanationKeys = item.ExplanationKeys, ApprovalStatus = item.ApprovalStatus,
-    };
 
     private static DomainError Validation(string message, IEnumerable<FieldError> errors) =>
         new(ErrorCode.For(ModuleCode.POL, "VALIDATION"), message) { FieldErrors = [.. errors] };

@@ -62,6 +62,7 @@ internal sealed class BindJobHandler(
     INumberingService numbering,
     IEventPublisher events,
     Dependency<IUnderwritingRulesService> underwriting,
+    RatingInput ratingInput,
     IOptions<PolicyOptions> options) : ICommandHandler<BindJob, JobBindResponse>
 {
     private const string Block = "BLOCK";
@@ -111,16 +112,24 @@ internal sealed class BindJobHandler(
         {
             Gate("EFFECTIVE_DATE", job.EffectiveAt >= now, "RETROACTIVE_NEW_BUSINESS"),
         };
-        var uw = await EvaluateAsync(job, version, tree, cancellationToken).ConfigureAwait(false);
+        var view = await ratingInput.BuildAsync(tree, job.EffectiveAt, cancellationToken).ConfigureAwait(false);
+        if (view.IsFailure)
+        {
+            return view.Error!;
+        }
+
+        var uw = await UwEvaluation.EvaluateAsync(
+            underwriting.Value, context, job, version, view.Value, RulesEvaluateRequest.CheckpointValue.PreBind, zone, cancellationToken).ConfigureAwait(false);
         if (uw.IsFailure)
         {
             return uw.Error!;
         }
 
-        var uwBlocked = uw.Value.Any(i => UwOutcome.Blocks(i, BlockingPoint.PreBind));
-        gates.Add(Gate("UW_ISSUES", !uwBlocked, "UW_ISSUES_OPEN"));
+        var (evaluation, issues) = uw.Value;
+        var uwBlocked = evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline || issues.Any(i => UwOutcome.Blocks(i, BlockingPoint.PreBind));
+        gates.Add(Gate("UW_ISSUES", !uwBlocked, evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline ? "UW_DECLINE" : "UW_ISSUES_OPEN"));
         job.Referred = uwBlocked;
-        version.Issues = JobSupport.Json(uw.Value);
+        version.Issues = JobSupport.Json(issues);
         job.RecordVersion++;
         job.UpdatedAt = now;
 
@@ -142,7 +151,9 @@ internal sealed class BindJobHandler(
         var currency = Currency.FromCode(job.Currency);
         var charges = JobSupport.FromJson<List<ChargeLine>>(version.Charges!);
         var (premium, taxes, total) = Charges.Totals(charges, currency);
-        var configuration = context.ConfigurationHash ?? throw new InvalidOperationException("No configuration hash is pinned for this command (REQ-POL-088).");
+        // The configuration the quote was priced under (RAT returns MKT's hash) is the one the term pins (REQ-POL-088, REQ-POL-033).
+        var configuration = version.ConfigurationHash is { } priced ? ConfigurationHash.Parse(priced)
+            : context.ConfigurationHash ?? throw new InvalidOperationException("No configuration hash is pinned for this command (REQ-POL-088).");
         var today = now.ToBusinessDate(zone);
         var number = await numbering.NextAsync(new NumberRequest(NumberingSchemes.Policy, today), cancellationToken).ConfigureAwait(false);
         var policyNumber = PolicyNumber.Parse(number.Value);
@@ -255,31 +266,6 @@ internal sealed class BindJobHandler(
             ChargeDeltas = frozen,
             GateResults = gates,
         };
-    }
-
-    private async Task<Result<List<UwIssue>>> EvaluateAsync(JobRow job, QuoteVersionRow version, RiskTree tree, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var evaluation = await underwriting.Value.EvaluateAsync(
-                new RulesEvaluateRequest
-                {
-                    JobRef = job.JobId, Checkpoint = RulesEvaluateRequest.CheckpointValue.PreBind,
-                    SnapshotRef = $"pol:quote:{version.QuoteId.Value:D}:{version.DraftVersion}",
-                    SnapshotHash = CanonicalJson.HashOf(tree, SharedKernelJson.Options),
-                },
-                new CommandOptions(JobSupport.Derived(context.IdempotencyKey, "uw.Rules.evaluate:PRE_BIND")) { DryRun = context.DryRun },
-                cancellationToken).ConfigureAwait(false);
-            return evaluation.Issues.Select(i => new UwIssue
-            {
-                IssueId = i.IssueId, IssueType = i.IssueType, Severity = i.Severity, BlockingPoint = i.BlockingPoint, IssueKey = i.IssueKey,
-                Lane = i.Lane, ExplanationKeys = i.ExplanationKeys, ApprovalStatus = i.ApprovalStatus,
-            }).ToList();
-        }
-        catch (DomainException ex)
-        {
-            return DomainError.Of(ModuleCode.POL, "GATE-FAILED", $"Underwriting could not evaluate the bind: {ex.Error.Code}.");
-        }
     }
 
     private async Task<Result<T>> SaveAsync<T>(T value, CancellationToken cancellationToken)

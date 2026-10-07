@@ -82,10 +82,16 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         quote!["charges"]!.AsArray().Count.ShouldBe(3);
         quote.Text("worksheetId").ShouldBe(PolicySlice.WorksheetId);
         var rated = (Modules.Rating.Contracts.Api.RateRateRequest)_slice.Rating.CallsTo("rat.Rate.rate").Single().Arguments[0]!;
-        rated.Envelope.RatingArtefactHash.Value.ShouldBe(PolicySlice.RatingArtefactHash);
+        rated.Envelope.RatingArtefactHash.ShouldBeNull(); // floating until the first rating, then pinned on the job
+        rated.Envelope.ProductVersion!.Value.ToString().ShouldBe("1.0");
         rated.Envelope.Lineage!.JobId!.Value.Value.ShouldBe(Guid.Parse(jobId));
+        // The driver's date of birth comes from PTY (audited reveal) into the rating input only.
+        rated.Segments[0].RiskTree.GetProperty("driver").GetProperty("dateOfBirth").GetString().ShouldBe("1980-05-17");
+        rated.Segments[0].RiskTree.GetProperty("vehicle").GetProperty("engineCapacityCc").GetInt32().ShouldBe(1400);
         var uw = (Modules.Underwriting.Contracts.Api.RulesEvaluateRequest)_slice.Underwriting.CallsTo("uw.Rules.evaluate").Single().Arguments[0]!;
         uw.Checkpoint.ShouldBe(Modules.Underwriting.Contracts.Api.RulesEvaluateRequest.CheckpointValue.PreQuote);
+        uw.ProductCode.ShouldBe(_slice.Product);
+        uw.RiskSnapshot!.Value.GetProperty("driver").GetProperty("dateOfBirth").GetString().ShouldBe("1980-05-17");
 
         // REQ-POL-003, -030, -182, -119, -125, -005: bind.
         var (bound, bind) = await _slice.BindAsync(jobId);
@@ -427,22 +433,6 @@ public sealed class PolicyApiTests(PostgresFixture database) : IClassFixture<Pos
         // Idempotency-Key is required on commands.
         var (keyless, keylessBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/jobs/quote", new { jobId, versionNo = 1 }, withKey: false);
         keyless.StatusCode.ShouldBe(HttpStatusCode.BadRequest, keylessBody?.ToJsonString());
-    }
-
-    [Fact]
-    public async Task Without_RAT_and_UW_wired_the_host_starts_and_quoting_answers_503()
-    {
-        // The plain Host: PTY, PFC and MKT are real; RAT and UW are not wired yet (S2, D-SLC-01). It starts, the submission and
-        // draft work against the real product, and the quote refuses cleanly with POL-ERR-DEPENDENCY-UNAVAILABLE.
-        await using var factory = new ApiHostFactory(database.AppConnectionString);
-        using var client = factory.CreateClient();
-        var (party, body) = await SendAsync(client, HttpMethod.Post, "/api/pty/v1/parties", Person("Νίκος", "Γεωργίου", null));
-        party.StatusCode.ShouldBe(HttpStatusCode.Created);
-        var (created, submission) = await SendAsync(client, HttpMethod.Post, "/api/pol/v1/submissions", _slice.Submission(body.Text("party.partyId"), InTwoDays));
-        created.StatusCode.ShouldBe(HttpStatusCode.Created, submission?.ToJsonString());
-        var (response, problem) = await SendAsync(client, HttpMethod.Post, "/api/pol/v1/jobs/quote", new { jobId = submission.Text("jobId"), versionNo = 1 });
-        response.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable, problem?.ToJsonString());
-        problem.Text("code").ShouldBe("POL-ERR-DEPENDENCY-UNAVAILABLE");
     }
 
     private static async Task<T> ScalarAsync<T>(NpgsqlDataSource dataSource, string sql)

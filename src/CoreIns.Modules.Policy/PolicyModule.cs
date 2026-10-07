@@ -64,6 +64,7 @@ public static class PolicyModule
 
         services.AddScoped(typeof(Dependency<>));
         services.AddScoped<RiskTrees>();
+        services.AddScoped<RatingInput>();
         services.AddScoped<JobReader>();
         services.AddScoped<PolicyReader>();
 

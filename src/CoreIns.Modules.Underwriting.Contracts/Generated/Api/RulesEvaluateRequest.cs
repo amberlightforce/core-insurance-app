@@ -33,6 +33,24 @@ public sealed record RulesEvaluateRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Signals { get; init; }
 
+    /// <summary>SL-RAT-UW - selects the rule set (REQ-UW-043)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProductCode { get; init; }
+
+    /// <summary>SL-RAT-UW - the date the rule-set version and the risk are evaluated at</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.BusinessDate? EffectiveDate { get; init; }
+
+    /// <summary>SL-RAT-UW - the POL risk snapshot passed in-process; validated against the rule set's input schema (REQ-UW-055)</summary>
+    /// <remarks>
+    /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("riskSnapshot")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Text.Json.JsonElement? RiskSnapshot { get; init; }
+
     /// <summary>REQ-UW-001</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CheckpointValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

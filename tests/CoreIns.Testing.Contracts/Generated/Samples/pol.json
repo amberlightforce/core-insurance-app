@@ -150,6 +150,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -168,6 +169,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -262,6 +264,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -280,6 +283,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -474,6 +478,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -492,6 +497,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -641,6 +647,7 @@
         "make": "Sample text",
         "model": "Sample text",
         "firstRegistrationYear": 1900,
+        "engineCapacityCc": 1,
         "use": "SAMPLE_CODE",
         "value": {
           "amount": "120.50",
@@ -657,6 +664,7 @@
         "yearFirstLicensed": 1900,
         "vehicleLocator": "Sample text",
         "usagePercent": 1,
+        "claimsLast5Years": 1,
         "fields": {
           "note": "sample"
         }
@@ -687,6 +695,7 @@
       "yearFirstLicensed": 1900,
       "vehicleLocator": "Sample text",
       "usagePercent": 1,
+      "claimsLast5Years": 1,
       "fields": {
         "note": "sample"
       }
@@ -835,6 +844,7 @@
                   "make": "Sample text",
                   "model": "Sample text",
                   "firstRegistrationYear": 1900,
+                  "engineCapacityCc": 1,
                   "use": "SAMPLE_CODE",
                   "value": {
                     "amount": "120.50",
@@ -853,6 +863,7 @@
                   "yearFirstLicensed": 1900,
                   "vehicleLocator": "Sample text",
                   "usagePercent": 1,
+                  "claimsLast5Years": 1,
                   "fields": {
                     "note": "sample"
                   }
@@ -1069,6 +1080,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1085,6 +1097,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -1125,6 +1138,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1143,6 +1157,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -1216,6 +1231,7 @@
                 "make": "Sample text",
                 "model": "Sample text",
                 "firstRegistrationYear": 1900,
+                "engineCapacityCc": 1,
                 "use": "SAMPLE_CODE",
                 "value": {
                   "amount": "120.50",
@@ -1234,6 +1250,7 @@
                 "yearFirstLicensed": 1900,
                 "vehicleLocator": "Sample text",
                 "usagePercent": 1,
+                "claimsLast5Years": 1,
                 "fields": {
                   "note": "sample"
                 }
@@ -1380,6 +1397,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1398,6 +1416,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -1516,6 +1535,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1534,6 +1554,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -1711,6 +1732,7 @@
           "make": "Sample text",
           "model": "Sample text",
           "firstRegistrationYear": 1900,
+          "engineCapacityCc": 1,
           "use": "SAMPLE_CODE",
           "value": {
             "amount": "120.50",
@@ -1729,6 +1751,7 @@
           "yearFirstLicensed": 1900,
           "vehicleLocator": "Sample text",
           "usagePercent": 1,
+          "claimsLast5Years": 1,
           "fields": {
             "note": "sample"
           }
@@ -1888,6 +1911,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1906,6 +1930,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -2034,6 +2059,7 @@
       "make": "Sample text",
       "model": "Sample text",
       "firstRegistrationYear": 1900,
+      "engineCapacityCc": 1,
       "use": "SAMPLE_CODE",
       "value": {
         "amount": "120.50",
