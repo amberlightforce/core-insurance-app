@@ -16,6 +16,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "gen:contracts": "node scripts/gen-contracts.mjs",
     "gen:api": "openapi-typescript http://localhost:5000/openapi/v1.json --output src/api/schema.d.ts",
     "sbom": "cyclonedx-npm --omit dev --output-format JSON --output-file ../artifacts/sbom/web.cdx.json",
     "lint:css": "stylelint \"src/**/*.css\" --max-warnings 0",

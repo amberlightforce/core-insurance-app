@@ -1,0 +1,79 @@
+{
+  "overline": "Policies",
+  "title": "Policy {number}",
+  "asOfNote": "Status as of {date}",
+  "openJournal": "Journal entries",
+  "openPolicyholder": "Policyholder",
+  "noTermTitle": "No policy term",
+  "noTermBody": "On {date} the policy has no recorded term.",
+  "notFound": "Policy not found",
+  "asOf": {
+    "label": "Status as of",
+    "help": "Athens time, at the end of the chosen day."
+  },
+  "home": {
+    "title": "Policies",
+    "newQuote": "New quote",
+    "recent": "Recent policies",
+    "emptyTitle": "No recent policies",
+    "emptyBody": "Create a quote and bind it, or enter the id of a policy.",
+    "recentPolicy": "Policy {number}",
+    "openById": "Open by id",
+    "id": "Policy id (UUID)",
+    "idInvalid": "Enter a valid UUID.",
+    "open": "Open"
+  },
+  "term": {
+    "title": "Policy term",
+    "number": "Term number",
+    "from": "Start",
+    "to": "End",
+    "open": "Open",
+    "written": "Written date",
+    "product": "Product and version",
+    "plan": "Payment plan",
+    "currency": "Currency",
+    "none": "There is no term on the chosen date."
+  },
+  "risk": {
+    "title": "Insured vehicle",
+    "plate": "Registration number",
+    "vehicle": "Vehicle",
+    "year": "Year of first registration",
+    "drivers": "Drivers",
+    "driverCount": "{count, plural, one {# driver} other {# drivers}}",
+    "none": "There is no risk data on the chosen date."
+  },
+  "covers": {
+    "title": "Covers",
+    "included": "Included",
+    "none": "There are no covers."
+  },
+  "transactions": {
+    "title": "Policy transactions",
+    "columns": {
+      "sequence": "No.",
+      "kind": "Kind",
+      "effective": "Effective from",
+      "recorded": "Recorded",
+      "premium": "Premium",
+      "taxes": "Taxes",
+      "total": "Total"
+    }
+  },
+  "charges": {
+    "title": "Charge lines",
+    "provisional": "Provisional",
+    "columns": {
+      "transaction": "Transaction",
+      "coverage": "Cover",
+      "charge": "Charge",
+      "category": "Category",
+      "legalStatus": "Legal status",
+      "amount": "Amount"
+    }
+  },
+  "invoices": {
+    "title": "Policy invoices"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "loading": "Loading…",
+  "retry": "Try again",
+  "back": "Back",
+  "open": "Open",
+  "yes": "Yes",
+  "no": "No",
+  "problem": {
+    "generic": "The action did not complete",
+    "network": "The server cannot be reached",
+    "trace": "Trace id: {id}",
+    "codes": {
+      "POL-ERR-QUOTE-STALE": "The quote is no longer current. Calculate a new quote before binding.",
+      "POL-ERR-RETROACTIVE-MTPL": "Motor third-party liability cover cannot start retroactively.",
+      "POL-ERR-STALE": "The draft was changed by someone else. Reload it and try again.",
+      "POL-ERR-GATE-FAILED": "The conditions for binding are not met.",
+      "POL-ERR-HUMAN-CONFIRMATION-REQUIRED": "Binding needs the user's explicit confirmation.",
+      "POL-ERR-QUICK-QUOTE-NOT-BINDABLE": "A quick quote is indicative and cannot be bound.",
+      "POL-ERR-VALIDATION": "The details are incomplete or invalid.",
+      "POL-ERR-NOT-FOUND": "The record was not found.",
+      "POL-ERR-PRODUCT-UNAVAILABLE": "The product is not available on the start date.",
+      "POL-ERR-PRODUCER-INVALID": "The producer code is not allowed for the product.",
+      "POL-ERR-RATING": "The premium calculation failed.",
+      "POL-ERR-DEPENDENCY-UNAVAILABLE": "A required service is not available.",
+      "POL-ERR-IDEMPOTENCY-MISMATCH": "The same request was sent with different details. Repeat the action.",
+      "PTY-ERR-AUTHORITY-DENIED": "You do not have the required authority.",
+      "PTY-ERR-QUERY-TOO-SHORT": "The search term is too short.",
+      "BIL-ERR-OVER-ALLOCATION": "The amount exceeds the open balance of the invoice.",
+      "BIL-ERR-AMOUNT-MISMATCH": "The amount does not match the invoice.",
+      "BIL-ERR-CURRENCY": "The currency does not match the account.",
+      "BIL-ERR-IDEMPOTENCY-MISMATCH": "The same request was sent with different details. Repeat the action.",
+      "BIL-ERR-METHOD-NOT-ALLOWED": "The payment method is not allowed.",
+      "BIL-ERR-DUPLICATE": "The payment has already been recorded."
+    }
+  }
+}

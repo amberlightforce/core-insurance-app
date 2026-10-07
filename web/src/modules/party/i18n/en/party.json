@@ -1,0 +1,128 @@
+{
+  "overline": "Customers",
+  "type": {
+    "person": "Person",
+    "organisation": "Organisation"
+  },
+  "search": {
+    "title": "Customer search",
+    "create": "New person",
+    "label": "Search customers",
+    "help": "Name, tax number (ΑΦΜ) or customer number. Press Enter to search.",
+    "placeholder": "e.g. Papadopoulos, 094014201 or P000000021",
+    "tooShort": "Type at least {count, plural, one {# character} other {# characters}}.",
+    "failed": "The search failed",
+    "idleTitle": "Search for a customer",
+    "idleBody": "Search terms never appear in the page address. Identifiers in the results are masked.",
+    "results": "Customer search results",
+    "noResultsTitle": "No customers found",
+    "noResultsBody": "Try another term or create a new person.",
+    "columns": {
+      "number": "Number",
+      "name": "Name",
+      "type": "Type",
+      "identifier": "Identifier",
+      "locality": "Area",
+      "status": "Status"
+    }
+  },
+  "create": {
+    "title": "New person",
+    "subtitle": "Fields marked with an asterisk are required.",
+    "created": "Customer {number} was created.",
+    "openNew": "Open new customer",
+    "duplicates": "{count, plural, one {# possible duplicate found} other {# possible duplicates found}}",
+    "failed": "The customer could not be created",
+    "submit": "Create customer",
+    "cancel": "Cancel",
+    "errors": {
+      "required": "Fill in this field.",
+      "birthFuture": "The birth date cannot be in the future.",
+      "afm": "The tax number (ΑΦΜ) is not valid. Check the digits.",
+      "postcode": "The postcode has 5 digits.",
+      "email": "The email address is not valid.",
+      "contact": "Enter at least one contact detail."
+    },
+    "sections": {
+      "person": "Person details",
+      "address": "Address",
+      "addressHelp": "The address is recorded as legal and mailing address.",
+      "contacts": "Contact",
+      "contactsHelp": "At least one contact detail."
+    },
+    "fields": {
+      "givenNames": "First name",
+      "familyName": "Last name",
+      "fatherName": "Father's name",
+      "birthDate": "Date of birth",
+      "afm": "Tax number (ΑΦΜ)",
+      "afmHelp": "9 digits, checked with the ΑΦΜ checksum.",
+      "street": "Street",
+      "number": "Number",
+      "postcode": "Postcode",
+      "locality": "City or area",
+      "email": "Email",
+      "mobile": "Mobile phone"
+    }
+  },
+  "view": {
+    "notFound": "Customer not found",
+    "fields": {
+      "number": "Customer number",
+      "type": "Type",
+      "status": "Status",
+      "name": "Name",
+      "nameLatin": "Name (Latin)",
+      "fatherName": "Father's name",
+      "birthDate": "Date of birth",
+      "language": "Contact language"
+    },
+    "maskedReason": "Personal data. Reveal it with a purpose.",
+    "hide": "Hide personal data",
+    "reveal": "Reveal personal data",
+    "newQuote": "New quote",
+    "revealedTitle": "Personal data is showing",
+    "revealedBody": "The reveal was recorded in the audit log with its purpose. Hide the data when you are done.",
+    "hidden": "Personal data hidden.",
+    "sections": {
+      "identity": "Identity",
+      "identifiers": "Identifiers",
+      "addresses": "Addresses",
+      "contacts": "Contact"
+    },
+    "noIdentifiers": "No identifiers are recorded.",
+    "noAddresses": "No addresses.",
+    "noContacts": "No contact details.",
+    "revealDenied": "You do not have permission to reveal personal data.",
+    "revealDialog": {
+      "title": "Reveal personal data",
+      "confirm": "Reveal",
+      "purposeRequired": "Choose a purpose for the reveal.",
+      "body": "Every reveal is recorded in the audit log with its purpose and your user.",
+      "purpose": "Purpose of the reveal"
+    }
+  },
+  "addressType": {
+    "LEGAL": "Legal",
+    "MAILING": "Mailing",
+    "RISK": "Insured risk",
+    "GARAGING": "Garaging",
+    "BILLING": "Billing",
+    "BUSINESS": "Business"
+  },
+  "contactType": {
+    "MOBILE": "Mobile",
+    "LANDLINE": "Landline",
+    "WORK_PHONE": "Work phone",
+    "FAX": "Fax",
+    "EMAIL": "Email",
+    "SECURE_INBOX": "Secure inbox"
+  },
+  "purpose": {
+    "CUSTOMER_SERVICE": "Customer service",
+    "UNDERWRITING": "Underwriting",
+    "CLAIMS_HANDLING": "Claims handling",
+    "COMPLIANCE_REVIEW": "Compliance review",
+    "DATA_SUBJECT_REQUEST": "Data subject request"
+  }
+}

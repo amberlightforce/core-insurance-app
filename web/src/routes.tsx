@@ -4,17 +4,86 @@ import { AppLayout, ModulePlaceholder } from './App';
 import { adminNavItem, defaultNavItems } from './app-shell/navigation';
 import { DevSignIn } from './dev-auth/DevSignIn';
 
-/** Placeholder routes per module until the module work packages add their own route trees. */
+/** Module routes load on demand (D-FE-23): the staff screens of the thin slice. */
+const moduleRoutes: RouteObject[] = [
+  {
+    path: 'parties',
+    lazy: async () => ({
+      Component: (await import('./modules/party/PartySearchPage')).PartySearchPage,
+    }),
+  },
+  {
+    path: 'parties/new',
+    lazy: async () => ({
+      Component: (await import('./modules/party/PartyCreatePage')).PartyCreatePage,
+    }),
+  },
+  {
+    path: 'parties/:partyId',
+    lazy: async () => ({
+      Component: (await import('./modules/party/PartyViewPage')).PartyViewPage,
+    }),
+  },
+  {
+    path: 'policies',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/PoliciesHomePage')).PoliciesHomePage,
+    }),
+  },
+  {
+    path: 'policies/quotes/new',
+    lazy: async () => ({
+      Component: (await import('./modules/quote/QuoteWizardPage')).QuoteWizardPage,
+    }),
+  },
+  {
+    path: 'policies/:policyId',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/PolicyViewPage')).PolicyViewPage,
+    }),
+  },
+  {
+    path: 'billing',
+    lazy: async () => ({
+      Component: (await import('./modules/billing/BillingHomePage')).BillingHomePage,
+    }),
+  },
+  {
+    path: 'billing/accounts/:accountId',
+    lazy: async () => ({ Component: (await import('./modules/billing/AccountPage')).AccountPage }),
+  },
+  {
+    path: 'billing/invoices/:invoiceId',
+    lazy: async () => ({ Component: (await import('./modules/billing/InvoicePage')).InvoicePage }),
+  },
+  {
+    path: 'finance',
+    lazy: async () => ({
+      Component: (await import('./modules/finance/FinanceHomePage')).FinanceHomePage,
+    }),
+  },
+  {
+    path: 'finance/journals/policy/:policyNumber',
+    lazy: async () => ({ Component: (await import('./modules/finance/JournalPage')).JournalPage }),
+  },
+];
+
+const implemented = new Set(['/parties', '/policies', '/billing', '/finance']);
+
+/** Placeholder routes for modules whose work packages have not landed, plus the thin-slice staff screens. */
 export const routes: RouteObject[] = [
   {
     path: '/',
     element: <AppLayout />,
     children: [
       { index: true, element: <ModulePlaceholder /> },
-      ...[...defaultNavItems.slice(1), adminNavItem].map((item) => ({
-        path: `${item.to.slice(1)}/*`,
-        element: <ModulePlaceholder />,
-      })),
+      ...[...defaultNavItems.slice(1), adminNavItem]
+        .filter((item) => !implemented.has(item.to))
+        .map((item) => ({
+          path: `${item.to.slice(1)}/*`,
+          element: <ModulePlaceholder />,
+        })),
+      ...moduleRoutes,
       // Development-only local sign-in (D-SLC-03); shows an empty state when the API does not offer it.
       { path: 'dev/sign-in', element: <DevSignIn /> },
       { path: '*', element: <ModulePlaceholder /> },

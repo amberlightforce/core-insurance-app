@@ -52,7 +52,10 @@ describe('Select', () => {
     });
     const trigger = screen.getByRole('button', { name: /Χρήση οχήματος/ });
     expect(trigger).toHaveTextContent('Επαγγελματική χρήση');
-    expect(trigger).toHaveFocus();
+    // Focus returns to the trigger after the popover's exit; wait for it instead of asserting synchronously (D-ARC-32).
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
 
     await user.keyboard(' ');
     const selected = await screen.findByRole('option', { name: 'Επαγγελματική χρήση' });

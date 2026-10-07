@@ -1,0 +1,230 @@
+{
+  "title": "New quote · Motor",
+  "steps": {
+    "policyholder": "Policyholder and product",
+    "vehicle": "Vehicle",
+    "driver": "Driver",
+    "covers": "Covers",
+    "questions": "Risk questions",
+    "premium": "Premium",
+    "bind": "Bind"
+  },
+  "reasons": {
+    "policyholder": "Choose a policyholder and a start date from today onwards.",
+    "vehicle": "Fill in the required vehicle details correctly.",
+    "driver": "Fill in the driver and the year the licence was first issued.",
+    "covers": "Fill in the required terms of the selected covers.",
+    "questions": "Answer the required questions. A knock-out answer does not allow a quote.",
+    "premium": "Calculate a current premium for the present details first.",
+    "bind": "The quote has not been bound."
+  },
+  "issues": {
+    "required": "Fill in this field.",
+    "plate": "The plate is not valid.",
+    "year": "Enter a valid year.",
+    "range": "Enter a valid number.",
+    "postcode": "The postcode has 5 digits."
+  },
+  "policyholder": {
+    "party": "Policyholder",
+    "name": "Name",
+    "number": "Customer number",
+    "change": "Change",
+    "loadingParty": "Loading customer…",
+    "search": "Search for the policyholder",
+    "productSection": "Product",
+    "product": "Product",
+    "productName": "Private car insurance",
+    "productCode": "Product code",
+    "version": "Product version",
+    "hash": "Product fingerprint",
+    "termSection": "Period of cover",
+    "startDate": "Start date",
+    "startDateHelp": "One-year term. A start today takes effect in one hour, because new business cannot start retroactively.",
+    "plan": "Payment plan: annual (ANNUAL)."
+  },
+  "vehicle": {
+    "identity": "Vehicle identification",
+    "plate": "Registration number",
+    "vin": "Chassis number (VIN)",
+    "make": "Make",
+    "model": "Model",
+    "technical": "Technical details and use",
+    "year": "Year of first registration",
+    "engine": "Engine capacity",
+    "power": "Power",
+    "fuel": "Fuel",
+    "fuelTypes": {
+      "PETROL": "Petrol",
+      "DIESEL": "Diesel",
+      "LPG": "LPG",
+      "ELECTRIC": "Electric",
+      "HYBRID": "Hybrid"
+    },
+    "value": "Vehicle value",
+    "garaging": "Garaging postcode"
+  },
+  "driver": {
+    "who": "Main driver",
+    "same": "The driver is the policyholder ({name})",
+    "name": "Driver",
+    "search": "Search for the driver",
+    "birthDateNote": "The driver's date of birth is read from the customer record and is not shown here.",
+    "licence": "Driving licence",
+    "yearFirstLicensed": "Year the licence was first issued"
+  },
+  "covers": {
+    "required": "Compulsory cover",
+    "suggested": "Suggested cover",
+    "optional": "Optional cover",
+    "include": "Include: {cover}",
+    "illustrative": "illustrative"
+  },
+  "questions": {
+    "knockOutAnswer": "Does not allow insurance",
+    "referralAnswer": "Referred to an underwriter",
+    "knockOutTitle": "This answer rules out insurance",
+    "knockOutBody": "A quote cannot be issued with this answer. Correct the answer if it was entered by mistake.",
+    "referralTitle": "This answer leads to a referral",
+    "referralBody": "The quote will be referred to an underwriter before it can be bound."
+  },
+  "warnings": {
+    "illustrativeTariff": {
+      "title": "Illustrative tariff",
+      "body": "Premiums are calculated with illustrative test tables and are not an official rating."
+    },
+    "provisionalTax": {
+      "title": "Provisional taxes and levies",
+      "body": "The insurance premium tax or levy uses a value that has not been legally verified and may change."
+    }
+  },
+  "uw": {
+    "title": "Underwriting",
+    "decision": {
+      "ACCEPT": "Accepted",
+      "REFER": "Referred",
+      "DECLINE": "Declined"
+    },
+    "decisionBody": {
+      "ACCEPT": "The risk is accepted. The quote can be bound.",
+      "REFER": "The risk is referred to an underwriter. The quote cannot be bound until it is approved.",
+      "DECLINE": "The risk is declined. The quote cannot be bound."
+    },
+    "issues": "Underwriting issues",
+    "noIssues": "There are no open underwriting issues.",
+    "columns": {
+      "issue": "Issue",
+      "reasons": "Reasons",
+      "point": "Checkpoint",
+      "approval": "Approval"
+    },
+    "points": {
+      "PRE_QUOTE": "Before quote",
+      "PRE_BIND": "Before bind",
+      "PRE_ISSUE": "Before issue",
+      "NON_BLOCKING": "Non-blocking"
+    },
+    "reasons": {
+      "pfc": {
+        "question": {
+          "usage": { "business": "Business use of the vehicle" },
+          "hire": { "out_of_scope": "Hire or reward carriage of passengers" }
+        }
+      }
+    }
+  },
+  "breakdown": {
+    "title": "Premium breakdown by cover",
+    "columns": {
+      "charge": "Charge",
+      "category": "Category",
+      "legalStatus": "Legal status",
+      "amount": "Amount"
+    },
+    "category": {
+      "PREMIUM": "Premium",
+      "TAX": "Tax",
+      "LEVY": "Levy"
+    },
+    "provisional": "Provisional",
+    "coverTable": "Charges of cover {cover}",
+    "subtotal": "Cover total",
+    "totals": "Quote totals",
+    "premium": "Net premium",
+    "taxes": "Taxes and levies",
+    "total": "Total amount",
+    "validUntil": "The quote is valid until {date}."
+  },
+  "draft": {
+    "saved": "Draft saved.",
+    "failed": "The draft could not be saved"
+  },
+  "premium": {
+    "calculated": "Premium calculated: {total}.",
+    "failed": "The premium could not be calculated",
+    "recalculate": "Recalculate premium",
+    "calculate": "Calculate premium",
+    "staleTitle": "The details changed after the calculation",
+    "staleBody": "The premium shown is no longer valid. Calculate it again before you continue.",
+    "emptyTitle": "No premium calculated yet",
+    "emptyBody": "The calculation saves the draft, prices the risk and checks underwriting."
+  },
+  "submission": {
+    "failed": "The quote could not be started"
+  },
+  "bind": {
+    "commit": "Bind",
+    "reasons": {
+      "alreadyBound": "The quote has already been bound.",
+      "noQuote": "Calculate the premium first.",
+      "stale": "The details changed: calculate the premium again.",
+      "declined": "Cannot bind: the risk was declined.",
+      "referred": "Cannot bind: the quote awaits an underwriter's approval."
+    },
+    "bound": "Policy {number} was bound.",
+    "boundTitle": "Policy {number} was bound",
+    "boundBody": "Term status: {state}. The invoice is issued by Billing.",
+    "termState": {
+      "SCHEDULED": "Scheduled",
+      "IN_FORCE": "In force",
+      "PENDING_CANCELLATION": "Pending cancellation",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "VOIDED": "Voided",
+      "REWRITTEN": "Rewritten"
+    },
+    "openPolicy": "Open policy",
+    "noQuoteTitle": "There is no current quote",
+    "noQuoteBody": "Go back to the «Premium» step and calculate again.",
+    "gateFailedTitle": "Binding was not completed",
+    "gateFailedBody": "Not all conditions for binding are met. The quote is unchanged.",
+    "gates": "Bind gate results",
+    "gatePassed": "passed",
+    "gateFailed": "failed",
+    "gate": {
+      "EFFECTIVE_DATE": "Start date",
+      "UW_ISSUES": "Underwriting issues"
+    },
+    "summary": "Summary to bind",
+    "plan": "Payment plan",
+    "planAnnual": "Annual (ANNUAL)",
+    "planAnnualHelp": "The whole premium in one instalment.",
+    "failed": "Binding failed",
+    "dialog": {
+      "title": "Confirm binding",
+      "confirm": "Bind policy",
+      "confirmRequired": "Confirm that you want to proceed.",
+      "body": "The quote will be bound for a total of {total} with payment plan {plan}. This creates a policy and charges.",
+      "check": "I confirm binding this quote."
+    }
+  },
+  "summary": {
+    "title": "Quote summary",
+    "policyholder": "Policyholder",
+    "start": "Start",
+    "vehicle": "Vehicle",
+    "total": "Total amount",
+    "notCalculated": "Not calculated",
+    "decision": "Underwriting"
+  }
+}
