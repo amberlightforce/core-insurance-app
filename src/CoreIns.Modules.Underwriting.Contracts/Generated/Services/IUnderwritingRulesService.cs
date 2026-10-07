@@ -18,7 +18,7 @@ public interface IUnderwritingRulesService
     /// <para>Status: full; fully typed from REQ-UW-001, REQ-UW-055..058. Wave W3.</para>
     /// <para>Exposure: ui; consumers: PFC, POL.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: UW-ERR-RULESET-UNRESOLVED (422), UW-ERR-EVAL-UNAVAILABLE (503), UW-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: UW-ERR-RULESET-UNRESOLVED (422), UW-ERR-SNAPSHOT (422), UW-ERR-EVAL-UNAVAILABLE (503), UW-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Underwriting.Contracts.Api.RulesEvaluateResponse> EvaluateAsync(global::CoreIns.Modules.Underwriting.Contracts.Api.RulesEvaluateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

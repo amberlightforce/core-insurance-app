@@ -80,9 +80,17 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
 
+                    b.Property<string>("LegalStatus")
+                        .HasColumnType("text")
+                        .HasColumnName("legal_status");
+
                     b.Property<Guid>("PolicyId")
                         .HasColumnType("uuid")
                         .HasColumnName("policy_id");
+
+                    b.Property<bool?>("Provisional")
+                        .HasColumnType("boolean")
+                        .HasColumnName("provisional");
 
                     b.Property<DateTime>("RecordedAt")
                         .HasColumnType("timestamptz")

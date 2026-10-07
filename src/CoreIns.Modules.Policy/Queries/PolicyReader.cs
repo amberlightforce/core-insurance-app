@@ -33,10 +33,20 @@ internal sealed class PolicyReader(DbSession session)
 
         var term = await TermAsync($"policy_id = @policyId AND {Known} AND {Valid}", args, cancellationToken).ConfigureAwait(false);
         var content = await ContentAsync(term, args, cancellationToken).ConfigureAwait(false);
+
+        // No term covers validAt: the status and term come from the nearest term known at knownAt (the next one starting
+        // after validAt reads Scheduled, else the last one ended by validAt reads Expired); no segment is valid then.
+        var nearest = term ?? await NearestTermAsync(args, cancellationToken).ConfigureAwait(false);
+        if (term is null && nearest is not null)
+        {
+            var nearestContent = await ContentAsync(nearest, args, cancellationToken).ConfigureAwait(false);
+            content = (null, null, nearestContent.Transactions, nearestContent.Charges);
+        }
+
         return new PolicyGetResponse
         {
-            Policy = View(policy, term, validAt, legalEntityCode),
-            Term = term is null ? null : Term(term, validAt),
+            Policy = View(policy, nearest, validAt, legalEntityCode),
+            Term = nearest is null ? null : Term(nearest, validAt),
             Segment = content.Segment,
             RiskTree = content.RiskTree,
             Transactions = content.Transactions,
@@ -90,7 +100,11 @@ internal sealed class PolicyReader(DbSession session)
             """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 
-    private async Task<TermRecord?> TermAsync(string where, DynamicParameters args, CancellationToken cancellationToken)
+    private async Task<TermRecord?> NearestTermAsync(DynamicParameters args, CancellationToken cancellationToken) =>
+        await TermAsync($"policy_id = @policyId AND {Known} AND valid_from > @validAt", args, cancellationToken, "valid_from ASC").ConfigureAwait(false)
+        ?? await TermAsync($"policy_id = @policyId AND {Known} AND valid_to <= @validAt", args, cancellationToken, "valid_to DESC").ConfigureAwait(false);
+
+    private async Task<TermRecord?> TermAsync(string where, DynamicParameters args, CancellationToken cancellationToken, string order = "term_number DESC")
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         return await connection.QueryFirstOrDefaultAsync<TermRecord>(new CommandDefinition(
@@ -101,7 +115,7 @@ internal sealed class PolicyReader(DbSession session)
                     currency AS Currency, producer_code AS ProducerCode, payment_plan_ref AS PaymentPlanRef, written_date::text AS WrittenDate
                FROM pol.policy_term
               WHERE legal_entity_id = @le AND {where}
-              ORDER BY term_number DESC
+              ORDER BY {order}
              """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 
@@ -133,7 +147,8 @@ internal sealed class PolicyReader(DbSession session)
         var charges = await connection.QueryAsync<ChargeRecord>(new CommandDefinition(
             """
             SELECT charge_id AS ChargeId, transaction_id AS TransactionId, element_locator AS ElementLocator, coverage_code AS CoverageCode,
-                   charge_type AS ChargeType, charge_category AS ChargeCategory, annual_rate AS AnnualRate, amount AS Amount, currency AS Currency
+                   charge_type AS ChargeType, charge_category AS ChargeCategory, annual_rate AS AnnualRate, amount AS Amount, currency AS Currency,
+                   legal_status AS LegalStatus, provisional AS Provisional
               FROM pol.charge_line
              WHERE term_id = @term AND legal_entity_id = @le AND recorded_at <= @knownAt
              ORDER BY recorded_at, set_index
@@ -175,6 +190,8 @@ internal sealed class PolicyReader(DbSession session)
                 ChargeCategory = c.ChargeCategory,
                 AnnualRate = c.AnnualRate,
                 Amount = new Money(JobSupport.Exact(c.Amount), Currency.FromCode(c.Currency.Trim())),
+                LegalStatus = c.LegalStatus,
+                Provisional = c.Provisional,
             })]);
     }
 
@@ -185,9 +202,9 @@ internal sealed class PolicyReader(DbSession session)
     private static PolicyTermState StateAt(TermRecord term, Instant validAt)
     {
         var state = Codes.Parse<PolicyTermState>(term.State);
-        if (state == PolicyTermState.Scheduled && validAt >= JobReader.Time(term.ValidFrom))
+        if (state is PolicyTermState.Scheduled or PolicyTermState.InForce)
         {
-            state = PolicyTermState.InForce;
+            state = validAt < JobReader.Time(term.ValidFrom) ? PolicyTermState.Scheduled : PolicyTermState.InForce;
         }
 
         if (state == PolicyTermState.InForce && validAt >= JobReader.Time(term.ValidTo))
@@ -342,5 +359,9 @@ internal sealed class PolicyReader(DbSession session)
         public decimal Amount { get; set; }
 
         public string Currency { get; set; } = string.Empty;
+
+        public string? LegalStatus { get; set; }
+
+        public bool? Provisional { get; set; }
     }
 }

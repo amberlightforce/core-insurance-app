@@ -35,8 +35,8 @@ public static class PolicyModule
 
     /// <summary>
     /// The module database for the migrate job. Least privilege per table: working rows (job, quote version) and the
-    /// policy rows that are end-dated (policy, term, segment) get SELECT, INSERT, UPDATE; the append-only transaction log
-    /// and charge deltas get SELECT, INSERT only (REQ-POL-075). Nothing gets DELETE.
+    /// policy rows that are end-dated (term, segment: only their record period closes, enforced by trigger) get SELECT, INSERT,
+    /// UPDATE; the policy row, the append-only transaction log and charge deltas get SELECT, INSERT only (REQ-POL-075). Nothing gets DELETE.
     /// </summary>
     public static IReadOnlyList<ModuleDatabaseDefinition> Databases { get; } =
     [
@@ -47,8 +47,8 @@ public static class PolicyModule
             appRole =>
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
-                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy, {Schema}.policy_term, {Schema}.segment TO {appRole}",
-                $"GRANT SELECT, INSERT ON {Schema}.policy_transaction, {Schema}.charge_line TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
     ];
@@ -64,6 +64,7 @@ public static class PolicyModule
 
         services.AddScoped(typeof(Dependency<>));
         services.AddScoped<RiskTrees>();
+        services.AddScoped<RatingInput>();
         services.AddScoped<JobReader>();
         services.AddScoped<PolicyReader>();
 
@@ -100,6 +101,12 @@ public static class PolicyModule
     /// <summary>Status, bilingual title and description of every POL-ERR code the module raises (RFC 9457, D-API-15).</summary>
     internal static ErrorDefinition[] Errors { get; } =
     [
+        ErrorDefinition.For(ModuleCode.POL, "VALIDATION", 422, "Τα στοιχεία δεν είναι έγκυρα", "The data is not valid")
+            .Describe("Ένα ή περισσότερα πεδία δεν πέρασαν τον έλεγχο· το errors[] αναφέρει το πεδίο και τον λόγο.", "One or more fields failed validation; errors[] names each field and the reason."),
+        ErrorDefinition.For(ModuleCode.POL, "RETROACTIVE-MTPL", 422, "Η ασφάλιση αστικής ευθύνης δεν αρχίζει αναδρομικά", "Motor liability cover cannot start retroactively")
+            .Describe("Νέα ασφάλιση αρχίζει τώρα ή αργότερα, χωρίς εξαίρεση.", "New business starts now or later, without override."),
+        ErrorDefinition.For(ModuleCode.POL, "SEGMENT-INVARIANT", 409, "Η χρονική συνέπεια του συμβολαίου παραβιάζεται", "The policy timeline would be inconsistent")
+            .Describe("Η εγγραφή θα επικαλυπτόταν με υπάρχουσα περίοδο ισχύος.", "The record would overlap an existing period of cover."),
         ErrorDefinition.For(ModuleCode.POL, "NOT-FOUND", 404, "Δεν βρέθηκε", "Not found")
             .Describe("Η εγγραφή δεν υπάρχει στη νομική σας οντότητα.", "The record does not exist in your legal entity."),
         ErrorDefinition.For(ModuleCode.POL, "STALE", 409, "Η εργασία άλλαξε στο μεταξύ", "The job changed meanwhile")

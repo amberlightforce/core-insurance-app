@@ -36,6 +36,11 @@ public sealed record Driver
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public int? UsagePercent { get; init; }
 
+    /// <summary>At-fault claims in the last five years (PFC driver field, question Q-CLAIMS-5Y)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimsLast5Years")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? ClaimsLast5Years { get; init; }
+
     /// <summary>Further PFC driver element fields (REQ-POL-299); gender is never captured</summary>
     /// <remarks>
     /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>

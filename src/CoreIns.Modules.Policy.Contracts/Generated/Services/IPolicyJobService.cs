@@ -18,7 +18,7 @@ public interface IPolicyJobService
     /// <para>Status: full; fully typed from REQ-POL-001, REQ-POL-003, REQ-POL-170, REQ-POL-182 (SL-POL). Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-QUICK-QUOTE-NOT-BINDABLE (422), POL-ERR-ILLEGAL-TRANSITION (409), POL-ERR-STALE (409), POL-ERR-NOT-FOUND (404), POL-ERR-GATE-FAILED (422), POL-ERR-PREEMPTED (409), POL-ERR-REBASE-REQUIRED (409), POL-ERR-QUOTE-STALE (409), POL-ERR-CONFLICTS-OPEN (409), POL-ERR-HUMAN-CONFIRMATION-REQUIRED (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-SEGMENT-INVARIANT (409), POL-ERR-DEPENDENCY-UNAVAILABLE (503), POL-ERR-QUICK-QUOTE-NOT-BINDABLE (422), POL-ERR-ILLEGAL-TRANSITION (409), POL-ERR-STALE (409), POL-ERR-NOT-FOUND (404), POL-ERR-GATE-FAILED (422), POL-ERR-PREEMPTED (409), POL-ERR-REBASE-REQUIRED (409), POL-ERR-QUOTE-STALE (409), POL-ERR-CONFLICTS-OPEN (409), POL-ERR-HUMAN-CONFIRMATION-REQUIRED (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobBindResponse> BindAsync(global::CoreIns.Modules.Policy.Contracts.Api.JobBindRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -55,7 +55,7 @@ public interface IPolicyJobService
     /// <para>Status: full; fully typed from REQ-POL-011, REQ-POL-157, REQ-POL-126 (SL-POL). Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-VALIDATION (422), POL-ERR-ILLEGAL-TRANSITION (409), POL-ERR-STALE (409), POL-ERR-NOT-FOUND (404), POL-ERR-QUICK-QUOTE-NOT-BINDABLE (422), POL-ERR-RATING (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-DEPENDENCY-UNAVAILABLE (503), POL-ERR-VALIDATION (422), POL-ERR-ILLEGAL-TRANSITION (409), POL-ERR-STALE (409), POL-ERR-NOT-FOUND (404), POL-ERR-QUICK-QUOTE-NOT-BINDABLE (422), POL-ERR-RATING (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobQuoteResponse> QuoteAsync(global::CoreIns.Modules.Policy.Contracts.Api.JobQuoteRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 

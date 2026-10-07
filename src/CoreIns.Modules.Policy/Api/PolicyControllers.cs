@@ -134,7 +134,7 @@ internal static class PolicyQueryContext
     public static string LegalEntityCode(IServiceProvider services) => services.GetRequiredService<RequestContext>().LegalEntity!.Value.Value;
 
     /// <summary>
-    /// Parses <c>validAt</c> (an instant, or a date meaning the start of that day in the legal entity's zone) and
+    /// Parses <c>validAt</c> (an instant as given, or a date meaning the end of that business day in the legal entity's zone, D-SLC-13) and
     /// <c>knownAt</c> (an instant); both default to now.
     /// </summary>
     public static bool TryTime(IServiceProvider services, string? validAt, string? knownAt, out Instant valid, out Instant known)
@@ -150,7 +150,7 @@ internal static class PolicyQueryContext
             }
             else if (BusinessDate.TryParse(validAt, out var date))
             {
-                valid = PolicyTime.StartOf(date, services.GetRequiredService<IOptions<PolicyOptions>>().Value.Zone);
+                valid = PolicyTime.EndOf(date, services.GetRequiredService<IOptions<PolicyOptions>>().Value.Zone);
             }
             else
             {

@@ -21,8 +21,12 @@ internal static class PolicyTime
         return Instant.FromUtcDateTime(TimeZoneInfo.ConvertTimeToUtc(next, zone));
     }
 
-    /// <summary>The instant a <c>validAt</c> date stands for: the start of that day in the zone.</summary>
-    public static Instant StartOf(BusinessDate date, TimeZoneInfo zone) => date.StartOfDayIn(zone);
+    /// <summary>
+    /// The instant a date-form <c>validAt</c> stands for (D-SLC-13): the end of that business day in the legal entity's
+    /// zone, i.e. the last microsecond before the next day starts ("as of date D" = "at close of business on D").
+    /// </summary>
+    public static Instant EndOf(BusinessDate date, TimeZoneInfo zone) =>
+        new BusinessDate(date.Value.AddDays(1)).StartOfDayIn(zone).Plus(TimeSpan.FromTicks(-TimeSpan.TicksPerMillisecond / 1000));
 
     /// <summary>The term period as local dates, half-open (the dates the charge deltas carry).</summary>
     public static DateRange Dates(Instant from, Instant to, TimeZoneInfo zone) => DateRange.Of(from.ToBusinessDate(zone), to.ToBusinessDate(zone));

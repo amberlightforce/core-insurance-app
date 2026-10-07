@@ -56,7 +56,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "gateResults": [
@@ -115,7 +117,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -150,6 +154,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -168,6 +173,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -262,6 +268,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -280,6 +287,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -339,7 +347,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ]
     },
@@ -474,6 +484,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -492,6 +503,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -551,7 +563,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ]
     },
@@ -614,7 +628,9 @@
       "amount": {
         "amount": "120.50",
         "currency": "EUR"
-      }
+      },
+      "legalStatus": "SAMPLE_CODE",
+      "provisional": true
     },
     "ChargesReconcileRequest": {
       "termId": "01928174-f0ea-7bd5-83e2-ea5a5bbf8d4d",
@@ -641,6 +657,7 @@
         "make": "Sample text",
         "model": "Sample text",
         "firstRegistrationYear": 1900,
+        "engineCapacityCc": 1,
         "use": "SAMPLE_CODE",
         "value": {
           "amount": "120.50",
@@ -657,6 +674,7 @@
         "yearFirstLicensed": 1900,
         "vehicleLocator": "Sample text",
         "usagePercent": 1,
+        "claimsLast5Years": 1,
         "fields": {
           "note": "sample"
         }
@@ -687,6 +705,7 @@
       "yearFirstLicensed": 1900,
       "vehicleLocator": "Sample text",
       "usagePercent": 1,
+      "claimsLast5Years": 1,
       "fields": {
         "note": "sample"
       }
@@ -768,7 +787,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "gateResults": [
@@ -835,6 +856,7 @@
                   "make": "Sample text",
                   "model": "Sample text",
                   "firstRegistrationYear": 1900,
+                  "engineCapacityCc": 1,
                   "use": "SAMPLE_CODE",
                   "value": {
                     "amount": "120.50",
@@ -853,6 +875,7 @@
                   "yearFirstLicensed": 1900,
                   "vehicleLocator": "Sample text",
                   "usagePercent": 1,
+                  "claimsLast5Years": 1,
                   "fields": {
                     "note": "sample"
                   }
@@ -902,7 +925,9 @@
                 "amount": {
                   "amount": "120.50",
                   "currency": "EUR"
-                }
+                },
+                "legalStatus": "SAMPLE_CODE",
+                "provisional": true
               }
             ],
             "issues": [
@@ -997,7 +1022,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -1069,6 +1096,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1085,6 +1113,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -1125,6 +1154,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1143,6 +1173,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -1216,6 +1247,7 @@
                 "make": "Sample text",
                 "model": "Sample text",
                 "firstRegistrationYear": 1900,
+                "engineCapacityCc": 1,
                 "use": "SAMPLE_CODE",
                 "value": {
                   "amount": "120.50",
@@ -1234,6 +1266,7 @@
                 "yearFirstLicensed": 1900,
                 "vehicleLocator": "Sample text",
                 "usagePercent": 1,
+                "claimsLast5Years": 1,
                 "fields": {
                   "note": "sample"
                 }
@@ -1283,7 +1316,9 @@
               "amount": {
                 "amount": "120.50",
                 "currency": "EUR"
-              }
+              },
+              "legalStatus": "SAMPLE_CODE",
+              "provisional": true
             }
           ],
           "issues": [
@@ -1380,6 +1415,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1398,6 +1434,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -1457,7 +1494,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ]
     },
@@ -1516,6 +1555,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1534,6 +1574,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -1583,7 +1624,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ],
       "issues": [
@@ -1711,6 +1754,7 @@
           "make": "Sample text",
           "model": "Sample text",
           "firstRegistrationYear": 1900,
+          "engineCapacityCc": 1,
           "use": "SAMPLE_CODE",
           "value": {
             "amount": "120.50",
@@ -1729,6 +1773,7 @@
           "yearFirstLicensed": 1900,
           "vehicleLocator": "Sample text",
           "usagePercent": 1,
+          "claimsLast5Years": 1,
           "fields": {
             "note": "sample"
           }
@@ -1888,6 +1933,7 @@
             "make": "Sample text",
             "model": "Sample text",
             "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
             "use": "SAMPLE_CODE",
             "value": {
               "amount": "120.50",
@@ -1906,6 +1952,7 @@
             "yearFirstLicensed": 1900,
             "vehicleLocator": "Sample text",
             "usagePercent": 1,
+            "claimsLast5Years": 1,
             "fields": {
               "note": "sample"
             }
@@ -1965,7 +2012,9 @@
           "amount": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true
         }
       ]
     },
@@ -2034,6 +2083,7 @@
       "make": "Sample text",
       "model": "Sample text",
       "firstRegistrationYear": 1900,
+      "engineCapacityCc": 1,
       "use": "SAMPLE_CODE",
       "value": {
         "amount": "120.50",

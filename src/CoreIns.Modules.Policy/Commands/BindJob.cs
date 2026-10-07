@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CoreIns.Modules.Market.Contracts;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Contracts.Events;
@@ -62,6 +63,8 @@ internal sealed class BindJobHandler(
     INumberingService numbering,
     IEventPublisher events,
     Dependency<IUnderwritingRulesService> underwriting,
+    RatingInput ratingInput,
+    Dependency<IMarketConfigurationService> marketConfiguration,
     IOptions<PolicyOptions> options) : ICommandHandler<BindJob, JobBindResponse>
 {
     private const string Block = "BLOCK";
@@ -104,23 +107,44 @@ internal sealed class BindJobHandler(
             return DomainError.Of(ModuleCode.POL, "QUOTE-STALE", "The quote's validity has ended; requote it.");
         }
 
+        // The quote is bound at its quoted price only under the configuration it was priced with (REQ-POL-088, -158).
+        var current = (await marketConfiguration.Value.CurrentHashAsync(cancellationToken).ConfigureAwait(false)).Hash;
+        if (current is { } currentHash && !string.Equals(version.ConfigurationHash, currentHash.Value, StringComparison.Ordinal))
+        {
+            return new DomainError(ErrorCode.For(ModuleCode.POL, "QUOTE-STALE"), "The configuration changed since the quote was priced; requote it before binding.")
+            {
+                Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["quotedConfigurationHash"] = version.ConfigurationHash ?? string.Empty, ["currentConfigurationHash"] = currentHash.Value,
+                },
+            };
+        }
+
         var tree = JobSupport.Tree(version);
 
         // Gates in one evaluation (REQ-POL-003).
         var gates = new List<JobBindResponse.GateResultItem>
         {
-            Gate("EFFECTIVE_DATE", job.EffectiveAt >= now, "RETROACTIVE_NEW_BUSINESS"),
+            Gate("EFFECTIVE_DATE", job.EffectiveAt >= now, "POL-ERR-RETROACTIVE-MTPL"),
         };
-        var uw = await EvaluateAsync(job, version, tree, cancellationToken).ConfigureAwait(false);
+        var view = await ratingInput.BuildAsync(tree, job.EffectiveAt, cancellationToken).ConfigureAwait(false);
+        if (view.IsFailure)
+        {
+            return view.Error!;
+        }
+
+        var uw = await UwEvaluation.EvaluateAsync(
+            underwriting.Value, context, job, version, view.Value, RulesEvaluateRequest.CheckpointValue.PreBind, zone, cancellationToken).ConfigureAwait(false);
         if (uw.IsFailure)
         {
             return uw.Error!;
         }
 
-        var uwBlocked = uw.Value.Any(i => UwOutcome.Blocks(i, BlockingPoint.PreBind));
-        gates.Add(Gate("UW_ISSUES", !uwBlocked, "UW_ISSUES_OPEN"));
+        var (evaluation, issues) = uw.Value;
+        var uwBlocked = evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline || issues.Any(i => UwOutcome.Blocks(i, BlockingPoint.PreBind));
+        gates.Add(Gate("UW_ISSUES", !uwBlocked, evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline ? "UW_DECLINE" : "UW_ISSUES_OPEN"));
         job.Referred = uwBlocked;
-        version.Issues = JobSupport.Json(uw.Value);
+        version.Issues = JobSupport.Json(issues);
         job.RecordVersion++;
         job.UpdatedAt = now;
 
@@ -142,7 +166,9 @@ internal sealed class BindJobHandler(
         var currency = Currency.FromCode(job.Currency);
         var charges = JobSupport.FromJson<List<ChargeLine>>(version.Charges!);
         var (premium, taxes, total) = Charges.Totals(charges, currency);
-        var configuration = context.ConfigurationHash ?? throw new InvalidOperationException("No configuration hash is pinned for this command (REQ-POL-088).");
+        // The configuration the quote was priced under (RAT returns MKT's hash) is the one the term pins (REQ-POL-088, REQ-POL-033).
+        var configuration = version.ConfigurationHash is { } priced ? ConfigurationHash.Parse(priced)
+            : context.ConfigurationHash ?? throw new InvalidOperationException("No configuration hash is pinned for this command (REQ-POL-088).");
         var today = now.ToBusinessDate(zone);
         var number = await numbering.NextAsync(new NumberRequest(NumberingSchemes.Policy, today), cancellationToken).ConfigureAwait(false);
         var policyNumber = PolicyNumber.Parse(number.Value);
@@ -197,7 +223,7 @@ internal sealed class BindJobHandler(
                 ElementLocator = line.ElementLocator, CoverageCode = line.CoverageCode, ChargeType = line.ChargeType, ChargeCategory = line.ChargeCategory,
                 DeltaKind = DeltaKinds.Net, AnnualRate = line.AnnualRate, Amount = line.Amount.Amount, Currency = job.Currency,
                 ValidFrom = period.Start, ValidTo = period.End!.Value, BookingDate = today, CorrelationKey = transactionId.Value.ToString(),
-                SetIndex = i + 1, SetSize = charges.Count, RecordedAt = now,
+                SetIndex = i + 1, SetSize = charges.Count, RecordedAt = now, LegalStatus = line.LegalStatus, Provisional = line.Provisional,
             });
             frozen.Add(line with { ChargeId = chargeId, TransactionId = transactionId });
             events.Publish(new OutgoingEvent(
@@ -257,31 +283,6 @@ internal sealed class BindJobHandler(
         };
     }
 
-    private async Task<Result<List<UwIssue>>> EvaluateAsync(JobRow job, QuoteVersionRow version, RiskTree tree, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var evaluation = await underwriting.Value.EvaluateAsync(
-                new RulesEvaluateRequest
-                {
-                    JobRef = job.JobId, Checkpoint = RulesEvaluateRequest.CheckpointValue.PreBind,
-                    SnapshotRef = $"pol:quote:{version.QuoteId.Value:D}:{version.DraftVersion}",
-                    SnapshotHash = CanonicalJson.HashOf(tree, SharedKernelJson.Options),
-                },
-                new CommandOptions(JobSupport.Derived(context.IdempotencyKey, "uw.Rules.evaluate:PRE_BIND")) { DryRun = context.DryRun },
-                cancellationToken).ConfigureAwait(false);
-            return evaluation.Issues.Select(i => new UwIssue
-            {
-                IssueId = i.IssueId, IssueType = i.IssueType, Severity = i.Severity, BlockingPoint = i.BlockingPoint, IssueKey = i.IssueKey,
-                Lane = i.Lane, ExplanationKeys = i.ExplanationKeys, ApprovalStatus = i.ApprovalStatus,
-            }).ToList();
-        }
-        catch (DomainException ex)
-        {
-            return DomainError.Of(ModuleCode.POL, "GATE-FAILED", $"Underwriting could not evaluate the bind: {ex.Error.Code}.");
-        }
-    }
-
     private async Task<Result<T>> SaveAsync<T>(T value, CancellationToken cancellationToken)
     {
         try
@@ -293,9 +294,12 @@ internal sealed class BindJobHandler(
         {
             return JobSupport.Stale();
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation or PostgresErrorCodes.ExclusionViolation })
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation or PostgresErrorCodes.ExclusionViolation } pg)
         {
-            return JobSupport.Stale();
+            // Overlapping cover or a second current version of a term or segment: the timeline invariant (REQ-POL-079).
+            return pg.SqlState == PostgresErrorCodes.ExclusionViolation || pg.TableName is "segment" or "policy_term"
+                ? DomainError.Of(ModuleCode.POL, "SEGMENT-INVARIANT", $"The bind would break the policy timeline ({pg.ConstraintName}).")
+                : JobSupport.Stale();
         }
     }
 

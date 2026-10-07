@@ -18,7 +18,7 @@ public interface IPolicySubmissionService
     /// <para>Status: full; fully typed from REQ-POL-001, REQ-POL-145. Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-VALIDATION (422), POL-ERR-EFFDATE-LIMIT (422), POL-ERR-NOT-FOUND (404), POL-ERR-PRODUCT-UNAVAILABLE (503), POL-ERR-PRODUCER-INVALID (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-RETROACTIVE-MTPL (422), POL-ERR-VALIDATION (422), POL-ERR-EFFDATE-LIMIT (422), POL-ERR-NOT-FOUND (404), POL-ERR-PRODUCT-UNAVAILABLE (503), POL-ERR-PRODUCER-INVALID (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.SubmissionCreateResponse> CreateAsync(global::CoreIns.Modules.Policy.Contracts.Api.SubmissionCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

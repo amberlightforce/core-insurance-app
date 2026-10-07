@@ -73,13 +73,20 @@ public sealed record RateRateRequest
         [global::System.Text.Json.Serialization.JsonPropertyName("productArtefactHash")]
         public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ProductArtefactHash { get; init; }
 
-        /// <summary>Contract member 'ratingArtefactHash'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("ratingArtefactHash")]
-        public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash RatingArtefactHash { get; init; }
+        /// <summary>SL-RAT-UW addition. The PFC product version being rated; the rating artefact is bound to it</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("productVersion")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber? ProductVersion { get; init; }
 
-        /// <summary>Contract member 'configurationHash'.</summary>
+        /// <summary>SL-RAT-UW - optional. When absent, RAT resolves the artefact active for the product version on ratingBasisDate (REQ-RAT-064)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("ratingArtefactHash")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? RatingArtefactHash { get; init; }
+
+        /// <summary>SL-RAT-UW - optional. When absent, the current MKT configuration hash is used and recorded in the worksheet</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("configurationHash")]
-        public required global::CoreIns.SharedKernel.Identifiers.ConfigurationHash ConfigurationHash { get; init; }
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Identifiers.ConfigurationHash? ConfigurationHash { get; init; }
 
         /// <summary>Rating mode (REQ-RAT-038..041; DRY_RUN per PRD-03 §9.1; CANDIDATE is RAT-internal, REQ-RAT-043)</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("mode")]

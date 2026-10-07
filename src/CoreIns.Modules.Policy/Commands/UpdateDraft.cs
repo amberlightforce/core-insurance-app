@@ -130,6 +130,11 @@ internal sealed class UpdateDraftHandler(
         {
             return JobSupport.Stale();
         }
+        catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation })
+        {
+            // A parallel edit of the same quoted job created the next version first.
+            return JobSupport.Stale();
+        }
 
         return new JobUpdateDraftResponse
         {

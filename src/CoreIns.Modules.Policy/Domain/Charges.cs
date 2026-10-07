@@ -1,63 +1,73 @@
-using System.Text.Json;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Rating.Contracts.Api;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
-using CoreIns.SharedKernel.Json;
 using CoreIns.SharedKernel.Results;
 
 namespace CoreIns.Modules.Policy.Domain;
 
-/// <summary>An unrounded charge line of a term: an annual rate from RAT and its term amount before rounding.</summary>
-internal sealed record ChargeDraft(string ElementLocator, string CoverageCode, string ChargeType, string ChargeCategory, decimal AnnualRate, Money Unrounded);
+/// <summary>
+/// A charge line of a term from RAT: the annual rate and, for tax and levy lines, the amount RAT already computed and
+/// rounded on the rounded premium (null for premium lines, which POL rounds through MKT).
+/// </summary>
+internal sealed record ChargeDraft(string ElementLocator, string CoverageCode, string ChargeType, string ChargeCategory, decimal AnnualRate, Money? Amount)
+{
+    /// <summary>Legal status of the configured tax or levy value (tax and levy lines).</summary>
+    public string? LegalStatus { get; init; }
+
+    /// <summary>The tax or levy value is not Settled.</summary>
+    public bool? Provisional { get; init; }
+}
 
 /// <summary>
 /// Turns a RAT rating result into the term's charge lines (REQ-POL-115, REQ-POL-124): rates, not amounts, cross the RAT
-/// boundary; premium and the tax and levy lines RAT returns after premium are separate charge types. POL never computes
-/// tax itself. SL-POL binds full annual terms only, so the proration factor is exactly one and the term amount equals the
-/// annual rate; rounding is applied afterwards through <c>mkt.Rounding.apply</c> (REQ-POL-123). Pure: no I/O.
+/// boundary for premium; taxes and levies are separate charge types computed by RAT after premium (POL never computes
+/// tax). SL-POL binds full annual terms only, so the proration factor is exactly one: the term premium is the annual
+/// rate before rounding. Pure: no I/O.
 /// </summary>
 internal static class Charges
 {
     /// <summary>The charge lines of a rating response, or POL-ERR-RATING when a line is unusable.</summary>
-    public static Result<IReadOnlyList<ChargeDraft>> FromRating(RateRateResponse rating, Currency currency)
+    public static Result<IReadOnlyList<ChargeDraft>> FromRating(RateRateResponse rating, Currency currency, string vehicleLocator)
     {
         var lines = new List<ChargeDraft>();
         foreach (var rate in rating.Rates)
         {
-            var line = Line(rate, ChargeCategories.Premium, currency);
-            if (line.IsFailure)
+            if (rate.Currency != currency)
             {
-                return line.Error!;
+                return Rating($"RAT rated {rate.ChargeType} in {rate.Currency}, the term currency is {currency}.");
             }
 
-            lines.Add(line.Value);
+            if (string.IsNullOrWhiteSpace(rate.CoverageCode))
+            {
+                return Rating($"RAT returned {rate.ChargeType} without a coverage code.");
+            }
+
+            lines.Add(new ChargeDraft(rate.ElementId, rate.CoverageCode, rate.ChargeType, rate.ChargeCategory ?? ChargeCategories.Premium, rate.AnnualRate, null));
         }
 
-        foreach (var (tax, index) in (rating.Taxes ?? []).Select((t, i) => (t, i)))
+        foreach (var tax in rating.Taxes ?? [])
         {
-            RateRateResponse.RateItem? item;
-            try
+            if (tax.Amount.Currency != currency)
             {
-                item = tax.Deserialize<RateRateResponse.RateItem>(SharedKernelJson.Options);
-            }
-            catch (JsonException ex)
-            {
-                return Rating($"Tax line {index} from RAT does not have the rate-item shape: {ex.Message}");
+                return Rating($"RAT computed {tax.ChargeType} in {tax.Amount.Currency}, the term currency is {currency}.");
             }
 
-            if (item is null || item.ChargeCategory is null)
+            if (!tax.Amount.IsRoundedToMinorUnits)
             {
-                return Rating($"Tax line {index} from RAT has no charge category.");
+                return Rating($"RAT returned {tax.ChargeType} unrounded ({tax.Amount}).");
             }
 
-            var line = Line(item, item.ChargeCategory, currency);
-            if (line.IsFailure)
+            lines.Add(new ChargeDraft(
+                vehicleLocator, tax.CoverageCode, tax.ChargeType,
+                string.IsNullOrEmpty(tax.ChargeCategory)
+                    ? tax.Category == RateRateResponse.TaxeItem.CategoryValue.Levy ? ChargeCategories.Levy : ChargeCategories.Tax
+                    : tax.ChargeCategory,
+                tax.Rate, tax.Amount)
             {
-                return line.Error!;
-            }
-
-            lines.Add(line.Value);
+                LegalStatus = tax.LegalStatus,
+                Provisional = tax.Provisional,
+            });
         }
 
         if (lines.Count == 0)
@@ -75,22 +85,6 @@ internal static class Charges
         var premium = Money.Sum(all.Where(l => l.ChargeCategory == ChargeCategories.Premium).Select(l => l.Amount), currency);
         var taxes = Money.Sum(all.Where(l => l.ChargeCategory != ChargeCategories.Premium).Select(l => l.Amount), currency);
         return (premium, taxes, premium + taxes);
-    }
-
-    private static Result<ChargeDraft> Line(RateRateResponse.RateItem rate, string defaultCategory, Currency currency)
-    {
-        if (rate.Currency != currency)
-        {
-            return Rating($"RAT rated {rate.ChargeType} in {rate.Currency}, the term currency is {currency}.");
-        }
-
-        if (string.IsNullOrWhiteSpace(rate.CoverageCode))
-        {
-            return Rating($"RAT returned {rate.ChargeType} on {rate.ElementId} without a coverage code.");
-        }
-
-        // Full annual term: proration factor 1 (the annual rate is the term amount before rounding).
-        return new ChargeDraft(rate.ElementId, rate.CoverageCode, rate.ChargeType, rate.ChargeCategory ?? defaultCategory, rate.AnnualRate, new Money(rate.AnnualRate, currency));
     }
 
     private static DomainError Rating(string detail) => DomainError.Of(ModuleCode.POL, "RATING", detail);

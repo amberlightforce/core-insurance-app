@@ -37,6 +37,10 @@ internal enum JobType
 internal static class ChargeCategories
 {
     public const string Premium = "PREMIUM";
+
+    public const string Tax = "TAX";
+
+    public const string Levy = "LEVY";
 }
 
 /// <summary>Delta kinds of a charge delta (PRD-05 §7.1). NET is the P1 mode (REQ-POL-121).</summary>

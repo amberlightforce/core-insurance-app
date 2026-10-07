@@ -42,4 +42,14 @@ public sealed record ChargeLine
     /// <summary>Term amount, rounded through mkt.Rounding.apply (REQ-POL-123)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
     public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+
+    /// <summary>Legal status of the configured tax or levy value RAT used (D-REG; tax and levy lines only)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LegalStatus { get; init; }
+
+    /// <summary>True when the tax or levy value is not Settled (refused in production, D-REG-02)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Provisional { get; init; }
 }

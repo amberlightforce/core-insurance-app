@@ -71,7 +71,7 @@ internal sealed class CreateSubmissionHandler(
 
         if (request.EffectiveAt < now)
         {
-            return DomainError.Of(ModuleCode.POL, "EFFDATE-LIMIT", "New business cannot start before now (REQ-POL-137).");
+            return DomainError.Of(ModuleCode.POL, "RETROACTIVE-MTPL", "New business cannot start before now, without override (REQ-POL-137).");
         }
 
         // The policyholder exists in PTY (masked read: POL never holds official identifiers, REQ-POL-300).

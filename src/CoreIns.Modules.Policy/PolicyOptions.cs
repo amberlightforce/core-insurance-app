@@ -26,6 +26,12 @@ internal sealed class PolicyOptions
     [Range(1, 366)]
     public int QuoteValidityDays { get; set; }
 
+    /// <summary>
+    /// Quote without <c>pfc.PolicyDraft.validate</c> when PFC does not provide it. Off by default (fail closed); only for
+    /// Development and tests, and every such quote logs a warning.
+    /// </summary>
+    public bool AllowMissingDraftValidation { get; set; }
+
     /// <summary>The configured zone.</summary>
     public TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
 
