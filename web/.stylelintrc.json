@@ -39,8 +39,15 @@
     ],
     "declaration-property-value-disallowed-list": [
       {
-        "/^(margin|padding|gap|row-gap|column-gap|inset|top|right|bottom|left)(-.*)?$/": [
-          "/(^|[\\s(,])-?(?!0(?:px|rem|em)?(?![.\\d]))\\d*\\.?\\d+(px|rem|em)\\b/"
+        "/^(margin|padding|gap|row-gap|column-gap|inset|top|right|bottom|left|scroll-margin|scroll-padding|text-indent)(-.*)?$/": [
+          "/(^|[\\s(,])-?(?!0(?:px|rem|em|ch|ex)?(?![.\\d]))\\d*\\.?\\d+(px|rem|em|ch|ex)\\b/"
+        ],
+        "/^(border(-(top|right|bottom|left|block|inline)(-(start|end))?)?(-width)?|outline(-width|-offset)?)$/": [
+          "/(^|[\\s(,])-?(?!0(?:px|rem|em|ch|ex)?(?![.\\d]))\\d*\\.?\\d+(px|rem|em|ch|ex)\\b/",
+          "/(^|\\s)(thin|medium|thick)(\\s|$)/"
+        ],
+        "font-weight": [
+          "/^(?!(400|450|500|600|normal|inherit|initial|unset|var\\(.*\\)|\\d{3} \\d{3})$).*$/"
         ],
         "/^border(-[a-z]+)*-radius$/": ["/\\d+(px|rem|em)\\b/"],
         "z-index": ["/^-?\\d+$/"],
@@ -56,7 +63,9 @@
           "/(^|[\\s(,])-?(?!0(?![.\\d\\w%]))\\d*\\.?\\d+/"
         ],
         "font": ["/(^|[\\s,/])\\d*\\.?\\d+(px|rem|em|%)?(?![\\w-])/"],
-        "box-shadow": ["/(^|[\\s(,])-?(?!0(?:px|rem|em)?(?![.\\d]))\\d*\\.?\\d+(px|rem|em)\\b/"]
+        "box-shadow": [
+          "/(^|[\\s(,])-?(?!0(?:px|rem|em|ch|ex)?(?![.\\d]))\\d*\\.?\\d+(px|rem|em|ch|ex)\\b/"
+        ]
       },
       {
         "message": "Off-token value: use space/size/radius/z/motion/type/elevation tokens; animate transform and opacity only (rules 1, 10)"
