@@ -108,7 +108,20 @@
           ],
           "approvalStatus": "SAMPLE_CODE"
         }
-      ]
+      ],
+      "outcome": "ACCEPT",
+      "reasons": [
+        {
+          "ruleId": "sample",
+          "issueType": "SAMPLE_CODE",
+          "outcome": "REFER",
+          "messageEn": "sample",
+          "messageEl": "sample"
+        }
+      ],
+      "ruleSetCode": "SAMPLE_CODE",
+      "ruleSetVersion": "sample",
+      "ruleSetHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     }
   },
   "schemas": {
@@ -741,7 +754,12 @@
       "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "signals": [
         "unspecified"
-      ]
+      ],
+      "productCode": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07",
+      "riskSnapshot": {
+        "note": "sample"
+      }
     },
     "RulesEvaluateResponse": {
       "evaluationId": "0192dc19-250e-7bef-832d-c7d6571eb739",
@@ -759,7 +777,20 @@
           ],
           "approvalStatus": "SAMPLE_CODE"
         }
-      ]
+      ],
+      "outcome": "ACCEPT",
+      "reasons": [
+        {
+          "ruleId": "sample",
+          "issueType": "SAMPLE_CODE",
+          "outcome": "REFER",
+          "messageEn": "sample",
+          "messageEl": "sample"
+        }
+      ],
+      "ruleSetCode": "SAMPLE_CODE",
+      "ruleSetVersion": "sample",
+      "ruleSetHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "ValuationComputeRequest": {
       "subject": "unspecified",

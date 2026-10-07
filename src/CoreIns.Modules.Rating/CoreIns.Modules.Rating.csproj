@@ -1,15 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- PRD-03 Rating: implementation of the Rating module (PostgreSQL schema `rat`). -->
+  <!-- PRD-03 Rating: implementation of the Rating module (PostgreSQL schema `rat`). SL-RAT-UW slice. -->
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Rating.Contracts\CoreIns.Modules.Rating.Contracts.csproj" />
+    <!-- Tax and levy rates come from MKT configuration: contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
+    <ProjectReference Include="..\CoreIns.Rules\CoreIns.Rules.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
+    <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
+    <InternalsVisibleTo Include="CoreIns.Rating.Tests" />
   </ItemGroup>
 
 </Project>

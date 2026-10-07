@@ -3196,10 +3196,15 @@ components:
               $ref: ../events/common.schema.json#/$defs/Code
             productArtefactHash:
               $ref: ../events/common.schema.json#/$defs/Sha256
+            productVersion:
+              $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+              description: SL-RAT-UW addition. The PFC product version being rated; the rating artefact is bound to it
             ratingArtefactHash:
               $ref: ../events/common.schema.json#/$defs/Sha256
+              description: SL-RAT-UW - optional. When absent, RAT resolves the artefact active for the product version on ratingBasisDate (REQ-RAT-064)
             configurationHash:
               $ref: ../events/common.schema.json#/$defs/Sha256
+              description: SL-RAT-UW - optional. When absent, the current MKT configuration hash is used and recorded in the worksheet
             mode:
               type: string
               enum:
@@ -3242,8 +3247,6 @@ components:
           - jurisdiction
           - productCode
           - productArtefactHash
-          - ratingArtefactHash
-          - configurationHash
           - mode
           - transactionType
           - ratingBasisDate
@@ -3330,8 +3333,60 @@ components:
         taxes:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: Tax and levy lines from TaxCalculator (REQ-RAT-009)
+            type: object
+            properties:
+              segmentId:
+                type: string
+              coverageCode:
+                $ref: ../events/common.schema.json#/$defs/Code
+              chargeType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              category:
+                type: string
+                enum:
+                - TAX
+                - LEVY
+              taxClass:
+                $ref: ../events/common.schema.json#/$defs/Code
+              base:
+                $ref: common.yaml#/components/schemas/Money
+              rate:
+                $ref: ../events/common.schema.json#/$defs/Decimal
+                description: Rate read from MKT configuration (decimal fraction, e.g. 0.15)
+              amount:
+                $ref: common.yaml#/components/schemas/Money
+              roundingRule:
+                type: string
+                description: Explicit rounding applied to the amount (places and mode)
+              configurationKey:
+                type: string
+                description: MKT configuration key the rate came from
+              configurationValueVersionId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+            required:
+            - segmentId
+            - chargeType
+            - category
+            - base
+            - rate
+            - amount
+            - configurationKey
+          description: Tax and levy lines whose rates come from MKT configuration (REQ-RAT-009, REQ-RAT-110)
+        coveragePremiumTotal:
+          $ref: common.yaml#/components/schemas/Money
+          description: Sum of the premium per coverage (SL-RAT-UW addition)
+        taxTotal:
+          $ref: common.yaml#/components/schemas/Money
+          description: Sum of the tax and levy lines (SL-RAT-UW addition)
+        grossTotal:
+          $ref: common.yaml#/components/schemas/Money
+          description: Premium plus taxes (SL-RAT-UW addition)
+        ratingArtefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: The artefact that rated (SL-RAT-UW addition)
+        configurationHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: The MKT configuration hash the taxes were resolved under (SL-RAT-UW addition)
         signals:
           type: array
           items:
@@ -3866,8 +3921,13 @@ components:
         slot:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "slot"'
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: SL-RAT-UW - the slot is identified by product code and version
+        productVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
         transactionType:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/Code
           description: 'PRD: "transaction type"'
     RatingArtifactResolveResponse:
       type: object

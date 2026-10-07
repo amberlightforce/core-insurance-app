@@ -16,11 +16,18 @@ public sealed record RatingArtifactResolveRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? Slot { get; init; }
 
+    /// <summary>SL-RAT-UW - the slot is identified by product code and version</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProductCode { get; init; }
+
+    /// <summary>Contract member 'productVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber? ProductVersion { get; init; }
+
     /// <summary>PRD: "transaction type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("transactionType")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? TransactionType { get; init; }
+    public string? TransactionType { get; init; }
 }

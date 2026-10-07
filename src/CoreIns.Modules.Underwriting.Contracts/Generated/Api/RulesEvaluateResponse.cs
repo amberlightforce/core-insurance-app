@@ -24,6 +24,30 @@ public sealed record RulesEvaluateResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
     public required global::System.Collections.Generic.IReadOnlyList<IssueItem> Issues { get; init; }
 
+    /// <summary>SL-RAT-UW - the decision of the evaluation, derived from the hits (decline beats refer beats accept)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
+
+    /// <summary>SL-RAT-UW - why the outcome is not ACCEPT, in both languages (REQ-UW-061)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasons")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<ReasonItem>? Reasons { get; init; }
+
+    /// <summary>Contract member 'ruleSetCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? RuleSetCode { get; init; }
+
+    /// <summary>Contract member 'ruleSetVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? RuleSetVersion { get; init; }
+
+    /// <summary>Content hash of the decision table that was evaluated (REQ-UW-042)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? RuleSetHash { get; init; }
+
     /// <summary>UW issue as returned by evaluate (REQ-UW-001)</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record IssueItem
@@ -62,5 +86,66 @@ public sealed record RulesEvaluateResponse
         /// <summary>Issue state (PRD-04 §7.3)</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("approvalStatus")]
         public required string ApprovalStatus { get; init; }
+    }
+
+    /// <summary>SL-RAT-UW - the decision of the evaluation, derived from the hits (decline beats refer beats accept)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>ACCEPT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACCEPT")]
+        Accept,
+
+        /// <summary><c>REFER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFER")]
+        Refer,
+
+        /// <summary><c>DECLINE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DECLINE")]
+        Decline,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ReasonItem
+    {
+        /// <summary>Contract member 'ruleId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("ruleId")]
+        public required string RuleId { get; init; }
+
+        /// <summary>Contract member 'issueType'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("issueType")]
+        public required string IssueType { get; init; }
+
+        /// <summary>Contract member 'outcome'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+        public required OutcomeValue Outcome { get; init; }
+
+        /// <summary>Contract member 'messageEn'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("messageEn")]
+        public required string MessageEn { get; init; }
+
+        /// <summary>Contract member 'messageEl'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("messageEl")]
+        public required string MessageEl { get; init; }
+
+        /// <summary>Generated contract member.</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum OutcomeValue
+        {
+            /// <summary><c>REFER</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFER")]
+            Refer,
+
+            /// <summary><c>DECLINE</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DECLINE")]
+            Decline,
+
+            /// <summary><c>WARN</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WARN")]
+            Warn,
+        }
     }
 }

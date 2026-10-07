@@ -73,6 +73,8 @@ paths:
       x-error-codes:
       - code: UW-ERR-RULESET-UNRESOLVED
         status: 422
+      - code: UW-ERR-SNAPSHOT
+        status: 422
       - code: UW-ERR-EVAL-UNAVAILABLE
         retryable: true
         status: 503
@@ -225,11 +227,7 @@ paths:
         required: true
         description: Blocking point
         schema:
-          type: string
-          enum:
-          - PRE_QUOTE
-          - PRE_BIND
-          - PRE_ISSUE
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
       responses:
         '200':
           description: Success
@@ -5543,6 +5541,15 @@ components:
           items:
             $ref: common.yaml#/components/schemas/Unspecified
           description: RAT referral signals (REQ-RAT-006)
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: SL-RAT-UW - selects the rule set (REQ-UW-043)
+        effectiveDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: SL-RAT-UW - the date the rule-set version and the risk are evaluated at
+        riskSnapshot:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: SL-RAT-UW - the POL risk snapshot passed in-process; validated against the rule set's input schema (REQ-UW-055)
       required:
       - jobRef
       - checkpoint
@@ -5588,9 +5595,50 @@ components:
             - issueKey
             - approvalStatus
             description: UW issue as returned by evaluate (REQ-UW-001)
+        outcome:
+          type: string
+          enum:
+          - ACCEPT
+          - REFER
+          - DECLINE
+          description: SL-RAT-UW - the decision of the evaluation, derived from the hits (decline beats refer beats accept)
+        reasons:
+          type: array
+          items:
+            type: object
+            properties:
+              ruleId:
+                type: string
+              issueType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              outcome:
+                type: string
+                enum:
+                - REFER
+                - DECLINE
+                - WARN
+              messageEn:
+                type: string
+              messageEl:
+                type: string
+            required:
+            - ruleId
+            - issueType
+            - outcome
+            - messageEn
+            - messageEl
+          description: SL-RAT-UW - why the outcome is not ACCEPT, in both languages (REQ-UW-061)
+        ruleSetCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        ruleSetVersion:
+          type: string
+        ruleSetHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Content hash of the decision table that was evaluated (REQ-UW-042)
       required:
       - evaluationId
       - issues
+      - outcome
       description: 'Typed from REQ-UW-001, REQ-UW-055..058. PRD outputs: "issues, lane, evaluation id"'
     RulesEvaluateBatchRequest:
       type: object
