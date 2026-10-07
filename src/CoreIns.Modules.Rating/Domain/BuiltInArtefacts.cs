@@ -65,7 +65,7 @@ internal static class BuiltInArtefacts
 
     private static TableDto BaseRate() => Table(
         "BASE_RATE", "Base premium per coverage.", "First", [],
-        [new("coverage", "string", "coverage"), new("engineCc", "int", "engineCc")],
+        [new("coverageCode", "string", "coverage"), new("displacement", "int", "engineCc")],
         [new("value", "decimal"), new("basis", "string")],
         [
             R("MTPL-CC-1", ["\"MTPL\"", "[0..1199]"], "110.00", "\"FLAT\""),
@@ -82,7 +82,7 @@ internal static class BuiltInArtefacts
     private static TableDto DriverAgeFactor() => Table(
         "DRIVER_AGE_FACTOR", "Factor by the age of the youngest driver.", "First",
         [new("youngestDriverAge", "int", "ageAt(max(driverBirthDates), effectiveDate)")],
-        [new("coverage", "string", "coverage"), new("driverAge", "int", "youngestDriverAge")],
+        [new("coverageCode", "string", "coverage"), new("driverAgeBand", "int", "youngestDriverAge")],
         [new("value", "decimal")],
         [
             R("AGE-0-24", ["in [\"MTPL\", \"OWN_DAMAGE\"]", "[0..24]"], "1.4500"),
@@ -93,8 +93,8 @@ internal static class BuiltInArtefacts
 
     private static TableDto VehicleAgeFactor() => Table(
         "VEHICLE_AGE_FACTOR", "Factor by the age of the vehicle.", "First",
-        [new("vehicleAge", "int", "yearsBetween(vehicleFirstRegistration, effectiveDate)")],
-        [new("coverage", "string", "coverage"), new("vehicleAge", "int", "vehicleAge")],
+        [new("vehicleAgeYears", "int", "yearsBetween(vehicleFirstRegistration, effectiveDate)")],
+        [new("coverageCode", "string", "coverage"), new("vehicleAgeBand", "int", "vehicleAgeYears")],
         [new("value", "decimal")],
         [
             R("VAGE-0-2", ["in [\"OWN_DAMAGE\", \"THEFT\", \"FIRE\"]", "[0..2]"], "1.1000"),
@@ -105,7 +105,7 @@ internal static class BuiltInArtefacts
 
     private static TableDto ClaimsFactor() => Table(
         "CLAIMS_FACTOR", "Factor by claims in the last three years.", "First", [],
-        [new("coverage", "string", "coverage"), new("claims", "int", "claimsLast3Years")],
+        [new("coverageCode", "string", "coverage"), new("claimCount", "int", "claimsLast3Years")],
         [new("value", "decimal")],
         [
             R("CLAIMS-0", ["in [\"MTPL\", \"OWN_DAMAGE\"]", "== 0"], "0.9000"),
@@ -116,7 +116,7 @@ internal static class BuiltInArtefacts
 
     private static TableDto MinimumPremium() => Table(
         "MINIMUM_PREMIUM", "Minimum premium per coverage.", "First", [],
-        [new("coverage", "string", "coverage")],
+        [new("coverageCode", "string", "coverage")],
         [new("value", "decimal")],
         [
             R("MIN-MTPL", ["\"MTPL\""], "80.00"),

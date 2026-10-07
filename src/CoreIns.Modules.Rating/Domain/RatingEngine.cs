@@ -127,7 +127,7 @@ internal static class RatingEngine
         {
             return premium.Multiply(rate).Round(plan.Places, mode);
         }
-        catch (Exception ex) when (ex is OverflowException or InvalidOperationException or ArgumentException)
+        catch (Exception ex) when (ex is OverflowException or InvalidOperationException or ArgumentException or PrecisionLossException)
         {
             throw new DomainException(DomainError.Of(ModuleCode.RAT, "SCALE", $"The {plan.ChargeType} amount cannot be represented exactly: {ex.Message}"));
         }

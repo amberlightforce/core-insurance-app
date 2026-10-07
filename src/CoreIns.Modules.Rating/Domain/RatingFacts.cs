@@ -79,7 +79,7 @@ internal sealed record MotorRisk(
             OptionalString(vehicle, "usage") ?? "PRIVATE",
             OptionalString(vehicle, "territory"),
             drivers,
-            coverages);
+            [.. coverages.Order(StringComparer.Ordinal)]);
     }
 
     /// <summary>The normalised input as canonical-JSON friendly nodes (decimals as strings), for the input hash (REQ-RAT-032).</summary>
