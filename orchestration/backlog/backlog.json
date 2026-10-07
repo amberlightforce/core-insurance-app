@@ -224,8 +224,8 @@
    "dependsOn": [
     "F-1b"
    ],
-   "status": "in review",
-   "owner": "reviewer: rule engine (final attempt 3)",
+   "status": "building",
+   "owner": "rule engine + PDF/A spike MERGED; outbox throughput inside F-1b",
    "reviewAttempts": 2,
    "blockers": []
   },
