@@ -6,7 +6,7 @@ namespace CoreIns.CountryPacks.GR.Configuration;
 /// Data-only contribution of the Greece pack to the country layer: premium tax (IPT), the Auxiliary Fund contribution
 /// readings and the IPT liability point, for motor (SL-MKT, E2E-01). Every value is taken from the PRDs and carries its
 /// legal status and source (D-REG-01). What the PRDs do not state is absent and fails closed: the Auxiliary Fund
-/// components, establishment condition, policyholder stamp-duty rate, mid-term base and cancellation treatment (REQ-MKT-322),
+/// components, the insurer/policyholder split (D-REG-06a: 70/30 contradicts REQ-FIN-190), establishment condition, policyholder stamp-duty rate, mid-term base and cancellation treatment (REQ-MKT-322),
 /// the stamp-duty rate (stated nowhere) and any road-safety or other levy (no PRD names one). Greek rounding rules
 /// per tax class are also absent (PRD-17 section 16.5 decision 10: no Greek value is given).
 /// </summary>
@@ -52,14 +52,6 @@ public sealed class GrPackConfiguration : IPackConfigurationSource
             "PRD-17 REQ-MKT-322 provisional reading (MTPL 300.00 gives PH 5.40, INS 12.60)",
             MotorPath: true,
             Note: "Alternative COMPONENT_4_5 selectable by data after the opinion."),
-        new("tax.levy.auxfund.split.insurer_share", ConfigValueType.ExactDecimal, "0.70", LegalStatus.Unverified,
-            AuxFund + ": 70% insurer / 30% policyholder",
-            MotorPath: true,
-            Note: "OQ-010 / D-REG-06: PRD-17 reads 4.2% / 1.8% of premium, REQ-FIN-190 reads 4.5% / 1.5%. Only the 70/30 burden of REQ-MKT-322 is encoded; neither percentage pair is."),
-        new("tax.levy.auxfund.split.policyholder_share", ConfigValueType.ExactDecimal, "0.30", LegalStatus.Unverified,
-            AuxFund + ": 70% insurer / 30% policyholder",
-            MotorPath: true,
-            Note: "OQ-010 / D-REG-06 (see insurer_share)."),
         new("tax.levy.auxfund.base", ConfigValueType.Text, "WRITTEN_PREMIUM", LegalStatus.PendingOpinion,
             "PRD-17 REQ-MKT-322 (.base: written premium as defined of record under D5, unless the opinion says otherwise)",
             MotorPath: true),

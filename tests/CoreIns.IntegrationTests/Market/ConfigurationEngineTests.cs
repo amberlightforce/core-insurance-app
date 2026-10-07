@@ -63,11 +63,11 @@ public sealed class ConfigurationEngineTests
     {
         var engine = Engine("Production");
 
-        var refused = Should.Throw<DomainException>(() => engine.Resolve(Request("tax.ipt.rate.general", "tax.levy.auxfund.ceiling_rate", "tax.levy.auxfund.split.insurer_share"), null, null));
+        var refused = Should.Throw<DomainException>(() => engine.Resolve(Request("tax.ipt.rate.general", "tax.levy.auxfund.ceiling_rate", "tax.levy.auxfund.split_basis"), null, null));
 
         refused.Error.Code.ToString().ShouldBe("MKT-ERR-CFG-NOT-SETTLED");
         refused.Error.Detail!.ShouldContain("tax.levy.auxfund.ceiling_rate (PendingOpinion)");
-        refused.Error.Detail!.ShouldContain("tax.levy.auxfund.split.insurer_share (Unverified)");
+        refused.Error.Detail!.ShouldContain("tax.levy.auxfund.split_basis (PendingOpinion)");
         refused.Error.Detail!.ShouldNotContain("tax.ipt.rate.general");
         engine.Resolve(Request("tax.ipt.rate.general", "tax.ipt.rate.fire"), null, null).HasProvisionalValues.ShouldBeFalse();
     }
@@ -95,12 +95,15 @@ public sealed class ConfigurationEngineTests
     }
 
     [Fact]
-    public void D_REG_06_neither_auxiliary_fund_percentage_pair_is_encoded()
+    public void D_REG_06a_the_split_keys_are_absent_and_neither_auxiliary_fund_percentage_pair_is_encoded()
     {
         var all = new GrPackConfiguration().Values;
 
         all.Any(v => v.Value is "0.042" or "0.018" or "0.045" or "0.015").ShouldBeFalse();
-        all.Single(v => v.Key == "tax.levy.auxfund.split.insurer_share").LegalStatus.ShouldBe(LegalStatus.Unverified);
+        all.ShouldNotContain(v => v.Key.StartsWith("tax.levy.auxfund.split.", StringComparison.Ordinal));
+        var response = Engine("Development").Resolve(Request("tax.levy.auxfund.split.insurer_share", "tax.levy.auxfund.split.policyholder_share"), null, null);
+        response.Values.ShouldBeEmpty();
+        response.MissingKeys.Count.ShouldBe(2);
     }
 
     [Fact]

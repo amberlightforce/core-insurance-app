@@ -51,7 +51,7 @@ assemblies with `AddModuleControllers` (`src/CoreIns.Platform/Http/ModuleControl
 - **Bitemporal child rows** (`BitemporalRow`): `valid_from/valid_to` (dates, half-open) and
   `recorded_from/recorded_to` (instants). Change = close the current row and insert its successor; never DELETE.
 - **Migrations live in the module**: `dotnet tool restore`, then
-  `dotnet ef migrations add <Name> -c Release --project src/CoreIns.Modules.<X> --startup-project src/CoreIns.Modules.<X> --context <X>DbContext --output-dir Persistence/Migrations`
+  `dotnet ef migrations add <Name> --project src/CoreIns.Modules.<X> --startup-project src/CoreIns.Modules.<X> --context <X>DbContext --output-dir Persistence/Migrations` (no `-c`: it means `--context`, not configuration)
   (copy `Persistence/Migrations/.editorconfig` from Party: generated code).
 - **The migrate job applies them**: expose `public static IReadOnlyList<ModuleDatabaseDefinition> Databases { get; } =
   [ModuleDbContextRegistration.Define<XDbContext>(ModuleCode.X, Schema)];` and add `.. XModule.Databases` to
