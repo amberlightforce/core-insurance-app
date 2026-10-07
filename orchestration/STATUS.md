@@ -30,8 +30,8 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | SL-RAT-UW | **merged** (77a6947) | sonnet | review 1 FAIL (M1 IPT legalStatus/fail-open) → fixed 0060a00, orchestrator re-check; gate green: integration 237, all suites |
 | SL-BIL | **merged** (0d4ac79) | opus | review 1 FAIL (D1 mutable posted entry, D2 stranded set) → fixed e064cbc, orchestrator re-check; gate green: integration 295 |
 | SL-FIN | **merged** (511c73f) | opus | review 1 FAIL (M1 appendable posted journal) → fixed 4f40ac9 (D-ARC-34 seal), orchestrator re-check; real-BIL trial posted cleanly; gate green: integration 279 |
-| SL-UI | building | sonnet | staff screens |
-| SL-E2E | building | sonnet | API-level E2E-01 on compose + D-SLC-15/19a integration; Playwright after SL-UI |
+| SL-UI | **merged** (8533652) | sonnet | light review PASS; web 1189 tests; viewed live on Docker |
+| SL-E2E | **merged** (b541059) | sonnet | E2E-01 API test passes on fresh Docker stack (465.76 EUR, 8 balanced journals); CI job e2e01; Playwright UI run next |
 
 ## Module status (feature waves)
 All 116 feature WPs: **not started** (W1 starts after Phase 1 passes). See backlog/BACKLOG.md.
