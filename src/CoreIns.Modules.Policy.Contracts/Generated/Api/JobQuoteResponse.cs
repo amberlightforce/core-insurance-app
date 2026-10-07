@@ -65,6 +65,11 @@ public sealed record JobQuoteResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Instant? ValidUntil { get; init; }
 
+    /// <summary>Non-blocking warnings of the quote (additive; none when the quote is clean)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("warnings")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<WarningItem>? Warnings { get; init; }
+
     /// <summary>UW outcome at PRE_QUOTE. REFER with state DRAFT = blocked at PRE_QUOTE; with QUOTED = bind blocked until approval. DECLINE keeps the job in Draft (not quoted); the job becomes Declined when UW issues the decline record (uw.DeclineIssued, REQ-POL-156)</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
@@ -81,5 +86,18 @@ public sealed record JobQuoteResponse
         /// <summary><c>DECLINE</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DECLINE")]
         Decline,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record WarningItem
+    {
+        /// <summary>RAT-WARN-* from rating or UW-WARN-* from underwriting, passed through (e.g. RAT-WARN-ILLUSTRATIVE-TARIFF, RAT-WARN-PROVISIONAL-TAX, UW-WARN-ILLUSTRATIVE-RULES)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("code")]
+        public required string Code { get; init; }
+
+        /// <summary>Text in the request language</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("message")]
+        public required string Message { get; init; }
     }
 }

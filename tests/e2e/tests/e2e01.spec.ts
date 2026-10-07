@@ -172,6 +172,13 @@ test('E2E-01 happy path: quote, bind, invoice, fiscal MARK, payment, ledger jour
   expect(cents(quote['taxes'])).toBe(iptCents);
   expect(cents(quote['total'])).toBe(premiumCents + iptCents);
 
+  // The quote passes RAT's and UW's non-blocking warnings through, with a text in the request language (en here).
+  const warnings = quote['warnings'] as Json[];
+  expect(warnings.map((w) => w['code']).sort()).toEqual(['RAT-WARN-ILLUSTRATIVE-TARIFF', 'RAT-WARN-PROVISIONAL-TAX', 'UW-WARN-ILLUSTRATIVE-RULES']);
+  for (const warning of warnings) {
+    expect(warning['message']).toMatch(/illustrative|provisional/i);
+  }
+
   await test.step('the rating worksheet marks the tariff illustrative (D-SLC-04)', async () => {
     const worksheet = await call(request, underwriter, 'GET', `/api/rat/v1/worksheets/${quote['worksheetId']}`);
     expect(worksheet.status, JSON.stringify(worksheet.body)).toBe(200);
@@ -222,7 +229,11 @@ test('E2E-01 happy path: quote, bind, invoice, fiscal MARK, payment, ledger jour
     }
   }
   // Stub fiscal channel: a registered document with a MARK and UID (D3).
-  const fiscal = invoice['fiscalStatus'] ?? invoiceBody['fiscalStatus'];
+  // The invoice exists before CMP has transmitted it, so poll until the stub channel has registered it.
+  const fiscal = await eventually('the stub fiscal document to be REGISTERED', async () => {
+    const read = (await call(request, billing, 'GET', `/api/bil/v1/invoices/${invoiceId}`)).body['fiscalStatus'] as Json;
+    return read['status'] === 'REGISTERED' ? read : undefined;
+  });
   expect(fiscal['status']).toBe('REGISTERED');
   expect(fiscal['mark'], 'the stub MARK').toMatch(/^STUB-\d+$/);
   expect(fiscal['uid']).toMatch(/^STUB-[0-9A-F]+$/);

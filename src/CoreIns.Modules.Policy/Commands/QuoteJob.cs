@@ -195,6 +195,7 @@ internal sealed partial class QuoteJobHandler(
             Charges = charges,
             WorksheetId = ratingResponse.WorksheetId,
             Issues = issues,
+            Warnings = QuoteWarnings.From([.. (ratingResponse.Warnings ?? []).Select(w => w.Code), .. evaluation.Warnings ?? []], context.Language),
             ValidUntil = blockedAtQuote ? null : validUntil,
         };
     }

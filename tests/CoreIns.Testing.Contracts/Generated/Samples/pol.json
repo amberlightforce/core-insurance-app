@@ -137,7 +137,13 @@
           "approvalStatus": "SAMPLE_CODE"
         }
       ],
-      "validUntil": "2026-10-07T09:00:00Z"
+      "validUntil": "2026-10-07T09:00:00Z",
+      "warnings": [
+        {
+          "code": "SAMPLE_CODE",
+          "message": "Sample text"
+        }
+      ]
     },
     "pol.Job.updateDraft": {
       "jobId": "01921855-41d9-7752-8ad7-bde9a93d257a",
@@ -1043,7 +1049,13 @@
           "approvalStatus": "SAMPLE_CODE"
         }
       ],
-      "validUntil": "2026-10-07T09:00:00Z"
+      "validUntil": "2026-10-07T09:00:00Z",
+      "warnings": [
+        {
+          "code": "SAMPLE_CODE",
+          "message": "Sample text"
+        }
+      ]
     },
     "JobRebaseRequest": {
       "jobId": "0192abca-0d82-779f-8107-831002687be9"

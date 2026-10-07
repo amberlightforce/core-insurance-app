@@ -4049,6 +4049,21 @@ components:
         validUntil:
           $ref: ../events/common.schema.json#/$defs/Instant
           description: Quote validity
+        warnings:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: 'RAT-WARN-* from rating or UW-WARN-* from underwriting, passed through (e.g. RAT-WARN-ILLUSTRATIVE-TARIFF, RAT-WARN-PROVISIONAL-TAX, UW-WARN-ILLUSTRATIVE-RULES)'
+              message:
+                $ref: ../events/common.schema.json#/$defs/Text
+                description: Text in the request language
+            required:
+            - code
+            - message
+          description: Non-blocking warnings of the quote (additive; none when the quote is clean)
       required:
       - jobId
       - quoteId
