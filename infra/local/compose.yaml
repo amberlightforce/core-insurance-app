@@ -1,0 +1,91 @@
+# Local stack (INFRASTRUCTURE §3.2). Every port is bound to 127.0.0.1. Synthetic data only.
+# Usage (from the repository root):
+#   cp infra/local/.env.example infra/local/.env   # then set the passwords
+#   docker compose -f infra/local/compose.yaml up -d --build
+name: coreins
+
+services:
+  postgres:
+    image: postgres:17.11
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?set PG_PASSWORD in infra/local/.env}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD in infra/local/.env}
+      MIGRATOR_DB_PASSWORD: ${MIGRATOR_DB_PASSWORD:?set MIGRATOR_DB_PASSWORD in infra/local/.env}
+    ports: ["127.0.0.1:5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./pg-init:/docker-entrypoint-initdb.d:ro # creates database, roles and extensions
+    command: ["postgres", "-c", "timezone=UTC", "-c", "shared_preload_libraries=pg_stat_statements"]
+    healthcheck:
+      # TCP only: the temporary server that runs pg-init listens on the socket, so this waits for init to finish.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d coreins"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.37.0
+    command: azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck
+    ports: ["127.0.0.1:10000:10000"]
+
+  gotenberg:
+    image: gotenberg/gotenberg:8.37.0
+    ports: ["127.0.0.1:3000:3000"]
+
+  mailpit:
+    image: axllent/mailpit:v1.31.4
+    ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
+
+  wiremock:
+    image: wiremock/wiremock:3.13.2
+    volumes: ["./wiremock:/home/wiremock"]
+    ports: ["127.0.0.1:8089:8080"]
+
+  otel:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:13.6.0
+    environment:
+      ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true" # local only; bound to 127.0.0.1
+    ports: ["127.0.0.1:18888:18888", "127.0.0.1:4317:18889"]
+
+  migrate:
+    build: ../..
+    environment:
+      APP_ROLE: migrate
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build: ../..
+    environment:
+      APP_ROLE: api
+    env_file: .env
+    ports: ["127.0.0.1:5000:8080"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      azurite:
+        condition: service_started
+      gotenberg:
+        condition: service_started
+
+  worker:
+    build: ../..
+    environment:
+      APP_ROLE: worker
+    env_file: .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      azurite:
+        condition: service_started
+      gotenberg:
+        condition: service_started
+      mailpit:
+        condition: service_started
+      wiremock:
+        condition: service_started
+
+volumes:
+  pgdata:
