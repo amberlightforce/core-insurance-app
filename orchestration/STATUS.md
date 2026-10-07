@@ -13,6 +13,7 @@ Re-read STATUS.md, PLAN.md and DECISIONS.md at the start of every wave.
 3. Windows App Control blocks freshly built DLLs. Agents build and test in WSL (SDK 10.0.401 at ~/.dotnet-coreins, ICU via ~/dn.sh), with an embedded PostgreSQL 17 at ~/pg17.
 
 ## Pending user requests
+- **PAUSE after foundations (D-USR-07):** finish F-1b fixes + F-1c C# types with one light re-review, merge, write HANDOVER, then STOP and wait for the user. Next work (when approved) = thin E2E-01 slice (D-USR-06) with lighter reviews (D-USR-04) and Sonnet for routine WPs (D-USR-05).
 - **When Phase 1 (foundations) is done: write a detailed HANDOVER document** (requested 2026-10-07). It must cover what was built, how to run/test it, architecture and conventions, every ruling, known gaps and deferrals, environment issues, the backlog and how W1 starts, and how to operate the orchestration (tracker, briefs, review loop).
 
 ## Phase 1 work packages
