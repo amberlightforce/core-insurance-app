@@ -51,12 +51,14 @@ internal static class ModuleCatalog
     [
         .. PlatformModule.Databases,
         .. PartyModule.Databases,
+        .. MarketModule.Databases,
     ];
 
     /// <summary>Module assemblies whose (internal) <c>[ApiController]</c>s the api serves.</summary>
     public static IReadOnlyList<System.Reflection.Assembly> ApiAssemblies { get; } =
     [
         typeof(PartyModule).Assembly,
+        typeof(MarketModule).Assembly,
     ];
 
     /// <summary>Calls every module's registration hook. The platform registers first.</summary>

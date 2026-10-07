@@ -3200,15 +3200,49 @@ components:
                 items:
                   $ref: common.yaml#/components/schemas/Unspecified
                 description: Merge trace
+              legalStatus:
+                type: string
+                enum: [NotRegulatory, Settled, PendingOpinion, Verify, Unverified, Uncertain, MarketPractice, Draft]
+                description: 'Legal status of the value (REQ-MKT-343, D-REG-01). Anything but Settled or NotRegulatory is refused
+                  when the environment is Production (D-REG-02).'
+              legalSourceRef:
+                type: string
+                description: 'Source of the value: PRD id and section, plus the law where the PRD cites it (D-REG-01)'
+              motorPath:
+                type: boolean
+                description: The value sits on the motor path (REQ-MKT-343)
+              provisional:
+                type: boolean
+                description: 'Visible flag (REQ-MKT-343): true when the value is not Settled and was served in a non-production
+                  environment'
+              packId:
+                type: string
+                description: Pack that supplied the value; absent for core defaults
+              timeBasis:
+                type: string
+                description: Time basis the value was resolved on (REQ-MKT-043)
             required:
             - key
             - value
             - sourceLayer
             - valueVersionId
             - final
+            - legalStatus
+            - provisional
+        missingKeys:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: 'Registered keys that have no value for the context. Empty keys fail closed (D-REG-01): callers must
+            not substitute a default.'
+        hasProvisionalValues:
+          type: boolean
+          description: At least one returned value is not Settled (non-production environments only)
       required:
       - configurationHash
       - values
+      - missingKeys
+      - hasProvisionalValues
       description: 'Typed from REQ-MKT-001, REQ-MKT-044, REQ-MKT-045. PRD outputs: "values with source, version, validity,
         final, trace; hash"'
     ConfigurationCurrentHashResponse:
@@ -3691,7 +3725,8 @@ components:
           description: 'PRD: "entries"'
     RoundingApplyRequest:
       type: object
-      description: 'mkt.Rounding.apply request. PRD inputs: "amount, currency, purpose, context"'
+      description: 'mkt.Rounding.apply request. PRD inputs: "amount, currency, purpose, context" (REQ-MKT-195). Precedence:
+        tax-class rule, then purpose rule, then currency default (BR-MKT-027).'
       properties:
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
@@ -3700,11 +3735,21 @@ components:
           $ref: ../events/common.schema.json#/$defs/CurrencyCode
           description: 'PRD: "currency"'
         purpose:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "purpose"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: 'PRD: "purpose", for example charge.line or tax.line (key cur.rounding.<purpose>)'
         context:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: object
           description: 'PRD: "context"'
+          properties:
+            legalEntity:
+              $ref: ../events/common.schema.json#/$defs/Code
+            taxClass:
+              $ref: ../events/common.schema.json#/$defs/Code
+              description: Tax class whose rule overrides the purpose rule (key cur.rounding.tax.<class>, REQ-MKT-193)
+            validAt:
+              $ref: ../events/common.schema.json#/$defs/LocalDate
+          required:
+          - legalEntity
     RoundingApplyResponse:
       type: object
       description: 'mkt.Rounding.apply result. PRD outputs: "amount after rounding, rule id, residual"'
@@ -3714,10 +3759,23 @@ components:
           description: 'PRD: "amount after rounding"'
         ruleId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "rule id"'
+          description: 'PRD: "rule id" (deterministic from the rule key and mode/scale)'
         residual:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "residual"'
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: 'PRD: "residual": amount minus amount after rounding'
+        ruleKey:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Key of the rule applied, or cur.rounding.default for the currency default
+        mode:
+          type: string
+          enum: [HALF_UP, HALF_EVEN, DOWN, UP, CEILING, FLOOR]
+        scale:
+          type: integer
+        legalStatus:
+          type: string
+          description: Legal status of the rule applied (same vocabulary as configuration values); tax-line rounding is Unverified until finance confirms the Greek rule (PRD-17 section 16.5 decision 10)
+        provisional:
+          type: boolean
     CurrencyRuleResponse:
       type: object
       description: 'mkt.Currency.rule result. PRD outputs: "rule"'
