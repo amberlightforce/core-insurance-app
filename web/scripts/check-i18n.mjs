@@ -122,7 +122,8 @@ export function check() {
   }
 
   // Keys used in code.
-  const files = walk(src, (f) => /\.(ts|tsx)$/.test(f) && !f.endsWith('.d.ts'));
+  // Tests are skipped: they may register ad-hoc keys to exercise fallbacks.
+  const files = walk(src, (f) => /\.(ts|tsx)$/.test(f) && !/\.(d|test)\.tsx?$/.test(f));
   for (const file of files) {
     const source = readFileSync(file, 'utf8');
     const keys = findKeys(source);
