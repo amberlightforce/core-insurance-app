@@ -215,7 +215,7 @@ test('E2E-02a through the claims screens', async ({ page, browser, request }) =>
   await expect(sets.first().getByText(/^Εγκρίσεις: 0 από \d+$/)).toBeVisible();
 
   // ---- 5. Maker-checker: the handler cannot approve their own request.
-  await checklist.getByRole('link', { name: 'Άνοιγμα αιτήματος' }).first().click();
+  await checklist.getByRole('button', { name: 'Άνοιγμα αιτήματος' }).first().click();
   await expect(page).toHaveURL(/\/claims\/approvals\/[0-9a-f-]{36}$/);
   await alive(page);
   await page.getByRole('button', { name: 'Έγκριση', exact: true }).click();
@@ -235,10 +235,12 @@ test('E2E-02a through the claims screens', async ({ page, browser, request }) =>
   await expect(page.getByRole('grid', { name: 'Υπόλοιπα ανά γραμμή αποθεματικού' }).getByText(euro('6.500,00')).first()).toBeVisible({ timeout: 30_000 });
 
   // ---- 7. FINAL payment 6,200.00 to the captured account: the preview shows the system-added release of -300.00.
-  await builder.getByRole('radio', { name: 'Πληρωμή', exact: true }).check();
+  await builder.locator('label').filter({ hasText: /^Πληρωμή$/ }).click(); // radios are visually hidden
+  await expect(builder.getByRole('radio', { name: 'Πληρωμή', exact: true })).toBeChecked();
   await builder.getByRole('textbox', { name: /^Ποσό πληρωμής/ }).fill('6200,00');
   await pick(page, /Λογαριασμός δικαιούχου/, /0695/);
-  await builder.getByRole('radio', { name: 'Τελική', exact: true }).check();
+  await builder.locator('label').filter({ hasText: /^Τελική$/ }).click(); // radios are visually hidden
+  await expect(builder.getByRole('radio', { name: 'Τελική', exact: true })).toBeChecked();
   await builder.getByRole('button', { name: 'Προεπισκόπηση' }).click();
   const previewLines = page.getByRole('grid', { name: /^Συναλλαγές της προεπισκόπησης/ });
   await expect(previewLines).toBeVisible();
