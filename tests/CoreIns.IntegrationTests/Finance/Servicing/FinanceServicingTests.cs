@@ -223,7 +223,7 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
         (await NetAsync("GL-2411", lines)).ShouldBe(-3.00m);
         (await NetAsync("GL-1215", lines)).ShouldBe(23.00m);
         (await ScalarAsync<string>(_db, $"SELECT string_agg(DISTINCT rule_code, ',' ORDER BY rule_code) FROM fin.journal_line WHERE {lines}"))
-            .ShouldBe("WR-PREMIUM,WR-TAX-NOT-DUE,WR-UNBILLED");
+            .ShouldBe("WR-PREMIUM,WR-TAX-NOT-DUE,WR-WRITTEN-UNBILLED");
         _treatment.Requests.ShouldHaveSingleItem().TransactionKind.ShouldBe(TaxTransactionKind.EndorsementDebit);
     }
 

@@ -319,14 +319,14 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
         var (response, body) = await PartyApi.SendAsync(_client, HttpMethod.Get, $"/api/fin/v1/posting-rules?book=IFRS17&validAt={Day}&limit=200", roles: FinanceRole);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         var items = body!["items"]!.AsArray();
-        items.Count.ShouldBe(24, "rule set v2: the 16 premium rules of v1 plus 4 disbursement and 4 claim rules (SL2-FIN-CLM)");
+        items.Count.ShouldBe(32, "rule set v3 from 2026-10-01: the 24 rules of v2 (16 premium of v1, 4 disbursement, 4 claim) plus 8 credit, refund and refund-release rules (SL3-FIN-RULES)");
         var premium = items.Single(i => i.Text("ruleCode") == "WR-PREMIUM")!;
         premium.Text("entryType").ShouldBe("WRITTEN");
         premium.Text("sourceAccount").ShouldBe("LA-04");
         premium.Text("chargeCategory").ShouldBe("PREMIUM");
         premium.Text("deriveFrom").ShouldBe("GL_KEY");
         premium.Text("specificity").ShouldBe("1");
-        premium.Text("ruleSetVersion").ShouldBe("2");
+        premium.Text("ruleSetVersion").ShouldBe("3");
         premium.Text("contentHash").ShouldMatch("^[0-9a-f]{64}$");
         premium.Text("accountOrigin").ShouldBe("null");
         var cash = items.Single(i => i.Text("ruleCode") == "RC-CASH")!;
