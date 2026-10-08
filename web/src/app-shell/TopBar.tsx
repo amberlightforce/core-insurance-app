@@ -1,39 +1,37 @@
-import { CircleHelp, Search } from 'lucide-react';
+import { Building2, ChevronDown, Search } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button as AriaButton } from 'react-aria-components';
 
-import { Button } from '../design-system/components/Button';
 import { Kbd } from '../design-system/components/Kbd';
 import { Icon } from '../design-system/icons';
 import { cx } from '../design-system/utils/cx';
 import styles from './AppShell.module.css';
-import { LanguageSwitch } from './LanguageSwitch';
 
 export interface TopBarProps {
-  /** Shown only when the user works for more than one legal entity (Part 1 §3.4). */
+  /** Legal entity chip (v3 mockup `.crumb .entity`); a switcher only when the user works for several. */
   entityName?: string;
   entityCount?: number;
+  /** Where the user is: a breadcrumb, or the page title. */
   breadcrumb?: ReactNode;
+  pageTitle?: string;
   onOpenPalette: () => void;
-  onOpenHelp: () => void;
   /** Notification bell (design-system NotificationBell). */
   notifications?: ReactNode;
-  /** User menu trigger with presence (design-system Avatar inside a menu). */
+  /** Avatar menu: user, role, appearance settings, help. */
   userMenu?: ReactNode;
 }
 
 /**
- * Top bar (v3 mockup `.top`): glass chrome, entity chip, breadcrumb/title, centred palette trigger
- * («Αναζήτηση ή εντολή…» + Ctrl K), bell, «?» help in the same place on every screen (WCAG 3.2.6),
- * language switch, user menu.
+ * Top bar (v3 mockup `.top`): glass chrome, entity chip and the current page, centred palette trigger
+ * («Αναζήτηση ή εντολή…» + Ctrl K), bell and the avatar menu — nothing else, so the right edge stays quiet.
  */
 export function TopBar({
   entityName,
   entityCount = 1,
   breadcrumb,
+  pageTitle,
   onOpenPalette,
-  onOpenHelp,
   notifications,
   userMenu,
 }: TopBarProps) {
@@ -46,19 +44,21 @@ export function TopBar({
       data-print="hide"
     >
       <div className={cx(styles.crumbs)}>
-        {entityName && entityCount > 1 ? (
+        {entityName ? (
           <span className={cx(styles.entity)} title={t('topBar.entity', { name: entityName })}>
-            {entityName}
+            <Icon icon={Building2} size={14} />
+            <span className={cx(styles.entityName)}>{entityName}</span>
+            {entityCount > 1 ? <Icon icon={ChevronDown} size={12} /> : null}
           </span>
         ) : null}
-        {breadcrumb}
+        {breadcrumb ?? (pageTitle ? <span className={cx(styles.pageCrumb)}>{pageTitle}</span> : null)}
       </div>
       <AriaButton
         className={cx(styles.paletteTrigger)}
         onPress={onOpenPalette}
         aria-label={t('topBar.searchLabel')}
       >
-        <Icon icon={Search} size={16} />
+        <Icon icon={Search} size={14} />
         <span className={cx(styles.paletteText)}>{t('topBar.search')}</span>
         <span className={cx(styles.paletteKbd)}>
           <Kbd shortcut="Mod+K" />
@@ -66,14 +66,6 @@ export function TopBar({
       </AriaButton>
       <div className={cx(styles.topActions)}>
         {notifications}
-        <Button
-          variant="ghost"
-          icon={CircleHelp}
-          label={t('topBar.help')}
-          shortcut="?"
-          onPress={onOpenHelp}
-        />
-        <LanguageSwitch />
         {userMenu}
       </div>
     </header>

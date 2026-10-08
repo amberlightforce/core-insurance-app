@@ -1,9 +1,7 @@
-import { Sparkles, Wifi, WifiOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useRegionFormat } from '../design-system/preferences';
-import { Icon } from '../design-system/icons';
 import { cx } from '../design-system/utils/cx';
 import { athensZoneAbbreviation, formatDate, formatTime } from '../format/dates';
 import styles from './AppShell.module.css';
@@ -27,7 +25,8 @@ const weekdayShort = (date: Date, region: string) =>
 
 /**
  * Status bar (Part 1 §3.4): entity · environment · connectivity · AI state · Europe/Athens date and time with
- * EET/EEST · background jobs. The time updates once a minute without animation.
+ * EET/EEST · background jobs, with the v3 mockup's coloured state dots. The time updates once a minute without
+ * animation.
  */
 export function StatusBar({
   entityName,
@@ -59,14 +58,14 @@ export function StatusBar({
       data-print="hide"
     >
       <span className={styles.statusItem} data-tone={online ? 'success' : 'warning'}>
-        <Icon icon={online ? Wifi : WifiOff} size={12} />
+        <span className={styles.statusDot} aria-hidden="true" />
         {online ? t('statusBar.online') : t('statusBar.offline')}
       </span>
       <span className={styles.statusItem}>
         {entityName} · {environmentName}
       </span>
       <span className={styles.statusItem} data-tone={aiEnabled ? 'ai' : 'neutral'}>
-        <Icon icon={Sparkles} size={12} />
+        <span className={styles.statusDot} aria-hidden="true" />
         {aiEnabled ? t('statusBar.aiOn') : t('statusBar.aiOff')}
       </span>
       {backgroundJobs > 0 ? (

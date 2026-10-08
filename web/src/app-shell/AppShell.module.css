@@ -26,13 +26,97 @@
   --_inset: var(--space-3);
 }
 
-/* Ambient canvas: the static gradient blooms; chrome refracts only this (C-01). */
+/*
+ * Ambient canvas (v3 mockup `.ambient`): four large blurred sea blooms under a scrim, drifting slowly. Chrome
+ * refracts only this (C-01). The drift stops under reduced motion; the blooms stay.
+ */
 .ambient {
   position: absolute;
   inset: 0;
   z-index: calc(var(--z-raised) * -1);
-  background: var(--gradient-ambient);
+  overflow: hidden;
+  background-color: var(--color-surface-canvas);
   pointer-events: none;
+}
+
+.ambient i {
+  position: absolute;
+  border-radius: var(--radius-full);
+  opacity: var(--opacity-ambient-bloom);
+  filter: blur(var(--blur-ambient));
+  animation: drift var(--motion-duration-drift-1) var(--motion-ease-standard) infinite alternate;
+  will-change: transform;
+}
+
+.ambient i:nth-child(1) {
+  inset-block-start: -30%;
+  inset-inline-start: -10%;
+  inline-size: 60%;
+  block-size: 70%;
+  background-color: var(--color-ambient-sea-1);
+}
+
+.ambient i:nth-child(2) {
+  inset-block-start: -20%;
+  inset-inline-end: -8%;
+  inline-size: 45%;
+  block-size: 55%;
+  background-color: var(--color-ambient-sea-2);
+  animation-duration: var(--motion-duration-drift-2);
+  animation-delay: var(--motion-delay-drift-2);
+}
+
+.ambient i:nth-child(3) {
+  inset-block-start: 10%;
+  inset-inline-start: 30%;
+  inline-size: 40%;
+  block-size: 40%;
+  background-color: var(--color-ambient-sea-3);
+  opacity: var(--opacity-ambient-bloom-soft);
+  animation-duration: var(--motion-duration-drift-3);
+  animation-delay: var(--motion-delay-drift-3);
+}
+
+.ambient i:nth-child(4) {
+  inset-block-end: -30%;
+  inset-inline-end: 10%;
+  inline-size: 50%;
+  block-size: 50%;
+  background-color: var(--color-ambient-sea-4);
+  opacity: var(--opacity-ambient-bloom-faint);
+  animation-duration: var(--motion-duration-drift-4);
+  animation-delay: var(--motion-delay-drift-4);
+}
+
+.ambient::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-ambient-scrim);
+}
+
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(6%, 4%, 0) scale(1.1);
+  }
+
+  100% {
+    transform: translate3d(-4%, 7%, 0) scale(0.95);
+  }
+}
+
+:global(:root[data-reduce-motion='true']) .ambient i {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(:root:not([data-reduce-motion='false'])) .ambient i {
+    animation: none;
+  }
 }
 
 .skipLink {
@@ -88,15 +172,14 @@
 .logo {
   display: grid;
   place-items: center;
-  inline-size: 32px;
-  block-size: 32px;
+  flex: none;
+  inline-size: var(--size-logo);
+  block-size: var(--size-logo);
   margin: var(--space-0) auto var(--space-2);
-  border: var(--border-width-control) solid transparent;
-  border-radius: var(--radius-md);
-  background:
-    linear-gradient(var(--color-surface-sheet), var(--color-surface-sheet)) padding-box,
-    var(--gradient-cta) border-box;
-  color: var(--color-text-primary);
+  border-radius: var(--radius-lg);
+  background: var(--gradient-logo);
+  box-shadow: var(--shadow-logo);
+  color: var(--color-logo-fg);
   font: var(--type-heading-4);
 }
 
@@ -229,12 +312,35 @@
   white-space: nowrap;
 }
 
+.crumbs {
+  font: var(--type-label-lg);
+  letter-spacing: var(--type-label-lg-tracking);
+}
+
+/* v3 mockup `.crumb .entity`: a quiet chip on the sheet colour. */
 .entity {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1_5);
+  max-inline-size: 260px;
   padding: var(--space-0_5) var(--space-2);
-  border: var(--border-width-hairline) solid var(--color-border-default);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-secondary);
   font: var(--type-caption);
+}
+
+.entityName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pageCrumb {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  text-overflow: ellipsis;
 }
 
 .paletteTrigger {
@@ -347,20 +453,25 @@
   overflow: auto;
 }
 
-/* The only content scroll container; opaque sheet (C-01). */
-.mainSheet {
+/*
+ * The only content scroll container (v3 mockup `.main`): transparent over the canvas with an 8 px inset; the
+ * page supplies the opaque surfaces (record sheet, cards), so working surfaces stay opaque (C-01).
+ */
+.main {
+  display: flex;
+  flex-direction: column;
   min-block-size: 0;
-  margin: var(--_inset);
-  padding: var(--space-6);
+  padding: var(--_inset);
   overflow: auto;
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface-sheet);
-  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-border-subtle);
   scroll-padding-block: var(--space-12);
   outline: none;
 }
 
-.mainSheet:focus-visible {
+.main > * {
+  flex: 1 0 auto;
+}
+
+.main:focus-visible {
   outline: var(--focus-ring-width) solid var(--color-border-focus);
   outline-offset: calc(var(--focus-ring-offset) * -1);
 }
@@ -394,20 +505,130 @@
   gap: var(--space-1);
 }
 
-.statusItem[data-tone='success'] svg {
-  color: var(--color-status-success-solid);
+/* v3 mockup `.dot`: 7 px state dots instead of icons. */
+.statusDot {
+  flex: none;
+  inline-size: var(--size-status-dot-sm);
+  block-size: var(--size-status-dot-sm);
+  margin-inline-end: var(--space-0_5);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-neutral-solid);
+}
+
+.statusItem[data-tone='success'] .statusDot {
+  background-color: var(--color-status-success-solid);
 }
 
 .statusItem[data-tone='warning'] {
   color: var(--color-status-warning-fg);
 }
 
-.statusItem[data-tone='ai'] svg {
-  color: var(--color-status-ai-solid);
+.statusItem[data-tone='warning'] .statusDot {
+  background-color: var(--color-status-warning-solid);
+}
+
+.statusItem[data-tone='ai'] .statusDot {
+  background-color: var(--color-status-ai-solid);
 }
 
 .statusSpacer {
   flex: 1;
+}
+
+/* Avatar menu trigger (v3 mockup `.avatar`, 28 px) and its popover. */
+.avatarTrigger {
+  display: grid;
+  place-items: center;
+  padding: var(--space-0);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+.avatarTrigger[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.avatarEmpty,
+.avatarEmptyLg {
+  display: grid;
+  place-items: center;
+  inline-size: var(--size-control-md);
+  block-size: var(--size-control-md);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-secondary);
+}
+
+.avatarEmptyLg {
+  inline-size: var(--size-control-lg);
+  block-size: var(--size-control-lg);
+}
+
+.userMenu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.userHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block-end: var(--space-3);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.userText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.userName {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font: var(--type-heading-4);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userRole {
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+}
+
+.userField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-label-gap);
+}
+
+.userFieldLabel {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+}
+
+.userField .language {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+}
+
+.userActions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-block-start: var(--space-2);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.userActions > * {
+  justify-content: flex-start;
 }
 
 /* Overflow menu used by the bottom tab bar. */
@@ -548,10 +769,12 @@
     display: none;
   }
 
-  .mainSheet {
-    margin: var(--space-0);
-    padding: var(--space-4);
-    border-radius: var(--radius-none);
+  .main {
+    padding: var(--space-2);
+  }
+
+  .entity {
+    display: none;
   }
 }
 
@@ -562,10 +785,9 @@
     overflow: visible;
   }
 
-  .mainSheet {
-    margin: var(--space-0);
+  .main {
+    padding: var(--space-0);
     overflow: visible;
-    box-shadow: none;
   }
 
   .ambient,

@@ -14,6 +14,8 @@ import { NavRail } from './NavRail';
 import { defaultNavItems, type Environment, type NavItem } from './navigation';
 import { StatusBar } from './StatusBar';
 import { TopBar } from './TopBar';
+import type { ShellUser } from './user';
+import { UserMenu } from './UserMenu';
 
 declare module 'react-aria-components' {
   interface RouterConfig {
@@ -35,7 +37,10 @@ export interface AppShellProps {
   onOpenPalette: () => void;
   onOpenHelp: () => void;
   notifications?: ReactNode;
-  userMenu?: ReactNode;
+  /** Signed-in user shown in the avatar menu; `null` when signed out. */
+  user?: ShellUser | null;
+  /** Avatar menu account action: sign in, or switch user / sign out. */
+  onAccount?: () => void;
   /** Work-views sidebar (IB-03), workbenches only. */
   workViews?: ReactNode;
   /** Context panel (assistant, activity, notes, documents). */
@@ -46,9 +51,11 @@ export interface AppShellProps {
 
 /**
  * Staff app shell from the approved v3 mockup (Part 1 §3.4): skip link → env ribbon → glass rail + top bar
- * over the ambient canvas → opaque main sheet (the only content scroll container) → optional work views and
- * context panel → glass status bar. Landmarks in order; F6 / Shift+F6 cycle regions; Ctrl/⌘+K opens the
- * palette from anywhere; `?` opens help and `[` toggles the rail (single-key shortcuts honour the user setting).
+ * over the ambient canvas → main region (the only content scroll container) → optional work views and
+ * context panel → glass status bar. The main region is transparent: pages put their own sheets and cards on
+ * the canvas (home canopy, record sheet), so the ambient sea shows between them. Landmarks in order;
+ * F6 / Shift+F6 cycle regions; Ctrl/⌘+K opens the palette from anywhere; `?` opens help and `[` toggles the
+ * rail (single-key shortcuts honour the user setting).
  */
 export function AppShell({
   children,
@@ -63,7 +70,8 @@ export function AppShell({
   onOpenPalette,
   onOpenHelp,
   notifications,
-  userMenu,
+  user = null,
+  onAccount,
   workViews,
   contextPanel,
   now,
@@ -131,16 +139,32 @@ export function AppShell({
         <a className={styles.skipLink} href="#main-content">
           {t('shell:skipLink')}
         </a>
-        <div className={styles.ambient} aria-hidden="true" />
+        <div className={styles.ambient} aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
         {environment ? <EnvRibbon environment={environment} /> : null}
         <TopBar
           entityName={entityName}
           entityCount={entityCount}
           breadcrumb={breadcrumb}
+          pageTitle={pageTitle}
           onOpenPalette={onOpenPalette}
-          onOpenHelp={onOpenHelp}
           notifications={notifications}
-          userMenu={userMenu}
+          userMenu={
+            <UserMenu
+              user={user}
+              onOpenHelp={onOpenHelp}
+              onAccount={
+                onAccount ??
+                (() => {
+                  void navigate('/dev/sign-in');
+                })
+              }
+            />
+          }
         />
         <NavRail
           items={navItems}
@@ -165,7 +189,7 @@ export function AppShell({
           ) : null}
           <main
             id="main-content"
-            className={styles.mainSheet}
+            className={styles.main}
             tabIndex={-1}
             data-shell-region="main"
           >
