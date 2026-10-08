@@ -18,13 +18,6 @@ namespace CoreIns.Modules.Policy.Queries;
 /// <summary>What a snapshot request names: exactly one of a policy id, a policy number or a snapshot reference.</summary>
 internal sealed record SnapshotQuery(Guid? PolicyId, string? PolicyNumber, string? SnapshotRef, Instant? ValidAt, Instant? KnownAt);
 
-/// <summary>
-/// The live supersession metadata of a snapshot (D-SL3-03 c), outside its immutable content: whether the policy content at the
-/// same valid-time instant now differs from what the reference shows, the reference of the current view and the record time at
-/// which the content first differed.
-/// </summary>
-internal sealed record SnapshotSupersession(bool Superseded, string? SuccessorRef, Instant? SupersededAt);
-
 /// <summary>A snapshot answer with the effective knownAt it was given at and its live supersession metadata.</summary>
 internal sealed record SnapshotResult(SnapshotGetResponse Snapshot, Instant EffectiveKnownAt, SnapshotSupersession Supersession);
 
@@ -53,7 +46,7 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
     public async Task<Result<SnapshotGetResponse>> GetAsync(SnapshotQuery query, CancellationToken cancellationToken)
     {
         var result = await GetDetailedAsync(query, cancellationToken).ConfigureAwait(false);
-        return result.IsFailure ? result.Error! : result.Value.Snapshot;
+        return result.IsFailure ? result.Error! : result.Value.Snapshot with { EffectiveKnownAt = result.Value.EffectiveKnownAt, Supersession = result.Value.Supersession };
     }
 
     public async Task<Result<SnapshotResult>> GetDetailedAsync(SnapshotQuery query, CancellationToken cancellationToken)
@@ -155,7 +148,7 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
     {
         if (snapshot.KnownAt >= watermark)
         {
-            return new SnapshotSupersession(false, null, null);
+            return new SnapshotSupersession { Superseded = false };
         }
 
         var code = context.LegalEntity!.Value.Value;
@@ -163,7 +156,7 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
         var hash = SnapshotContentHash(snapshot);
         if (current is null || SnapshotContentHash(current) == hash)
         {
-            return new SnapshotSupersession(false, null, null);
+            return new SnapshotSupersession { Superseded = false };
         }
 
         // The first record instant after the snapshot's knownAt at which the content differs (the last candidate is the watermark itself).
@@ -179,7 +172,7 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
         }
 
         var successor = MakeRef(policyId, current.Content?.Segment.SegmentId.Value, snapshot.ValidAt, watermark);
-        return new SnapshotSupersession(true, successor, supersededAt);
+        return new SnapshotSupersession { Superseded = true, SuccessorRef = successor, SupersededAt = supersededAt };
     }
 
     /// <summary>
