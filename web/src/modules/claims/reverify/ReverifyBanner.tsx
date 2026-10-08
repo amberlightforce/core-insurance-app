@@ -15,7 +15,6 @@ import {
   TextField,
 } from '../../../design-system';
 import { useFormat } from '../../staff/useFormat';
-import { readSession } from '../../../dev-auth/devAuth';
 import { problemOf } from '../../staff/problem';
 import { ProblemBanner } from '../../staff/ProblemBanner';
 import styles from '../../staff/staff.module.css';
@@ -23,9 +22,6 @@ import { useReverify } from './api';
 import { reverifyDecisions, reverifyReasons, type ReverifyDecision } from './reasons';
 import file from './reverify.module.css';
 import { SnapshotCompare } from './SnapshotCompare';
-
-/** Roles that may take the decision (clm.Coverage.reverify, authority CLM.COVERAGE_DECISION). */
-const deciderRoles = ['Staff.ClaimsHandler', 'Staff.ClaimsManager'];
 
 function DecisionForm({ claim, onDone }: { claim: ClaimView; onDone: () => void }) {
   const { t } = useTranslation('claims');
@@ -147,7 +143,6 @@ export function ReverifyBanner({ claim }: { claim: ClaimView }) {
     );
   }
 
-  const canDecide = (readSession()?.user.roles ?? []).some((r) => deciderRoles.includes(r));
   return (
     <>
       <Banner
@@ -155,42 +150,40 @@ export function ReverifyBanner({ claim }: { claim: ClaimView }) {
         live="none"
         title={t('reverify.banner.title')}
         actions={
-          canDecide ? (
-            <Button
-              variant="link"
-              onPress={() => {
-                setOpen(true);
-              }}
-            >
-              {t('reverify.banner.review')}
-            </Button>
-          ) : undefined
+          <Button
+            variant="link"
+            onPress={() => {
+              setOpen(true);
+            }}
+          >
+            {t('reverify.banner.review')}
+          </Button>
         }
       >
         <p>
           {t('reverify.banner.body')}
-          {pending.raisedAt ? ` ${t('reverify.banner.raisedAt', { at: fmt.dateTime(pending.raisedAt) })}` : ''}
+          {pending.raisedAt
+            ? ` ${t('reverify.banner.raisedAt', { at: fmt.dateTime(pending.raisedAt) })}`
+            : ''}
         </p>
-        <p>{canDecide ? t('reverify.banner.keepsOld') : t('reverify.noPermission.body')}</p>
+        <p>{t('reverify.banner.keepsOld')}</p>
       </Banner>
-      {canDecide ? (
-        <Dialog
-          title={t('reverify.dialog.title')}
-          icon={GitCompare}
-          tone="warning"
-          size="xl"
-          isOpen={open}
-          onOpenChange={setOpen}
-          hideCancel
-        >
-          <DecisionForm
-            claim={claim}
-            onDone={() => {
-              setOpen(false);
-            }}
-          />
-        </Dialog>
-      ) : null}
+      <Dialog
+        title={t('reverify.dialog.title')}
+        icon={GitCompare}
+        tone="warning"
+        size="xl"
+        isOpen={open}
+        onOpenChange={setOpen}
+        hideCancel
+      >
+        <DecisionForm
+          claim={claim}
+          onDone={() => {
+            setOpen(false);
+          }}
+        />
+      </Dialog>
     </>
   );
 }

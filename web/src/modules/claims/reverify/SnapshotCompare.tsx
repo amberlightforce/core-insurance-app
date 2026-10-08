@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Banner, KeyValueList } from '../../../design-system';
+import { cx } from '../../../design-system/utils/cx';
 import { QueryView } from '../../staff/QueryView';
 import styles from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
@@ -56,7 +57,7 @@ function SnapshotColumn({
               {
                 id: 'version',
                 label: t('reverify.compare.productVersion'),
-                value: String(content.productVersion),
+                value: content.productVersion,
                 kind: 'mono',
               },
             ]}
@@ -70,7 +71,7 @@ function SnapshotColumn({
                     <span className="ds-mono">{code}</span>
                   ) : (
                     <>
-                      <span className={`ds-mono ${file.changed}`}>{code}</span>{' '}
+                      <span className={cx('ds-mono', file.changed)}>{code}</span>{' '}
                       <span className="ds-caption">{t('reverify.compare.onlyHere')}</span>
                     </>
                   )}

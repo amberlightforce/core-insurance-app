@@ -1,7 +1,7 @@
 .compare {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4, 16px);
+  gap: var(--space-4);
 }
 
 @media (width <= 720px) {
@@ -12,12 +12,12 @@
 
 .column {
   display: grid;
-  gap: var(--space-2, 8px);
+  gap: var(--space-2);
   align-content: start;
   min-width: 0;
-  padding: var(--space-3, 12px);
-  border: 1px solid var(--border-subtle, var(--border));
-  border-radius: var(--radius-lg, 10px);
+  padding: var(--space-3);
+  border: var(--border-width-control) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
 }
 
 .column h3 {
@@ -26,18 +26,18 @@
 
 .codes {
   display: grid;
-  gap: var(--space-1, 4px);
+  gap: var(--space-1);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .changed {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .form {
   display: grid;
-  gap: var(--space-4, 16px);
-  margin-block-start: var(--space-4, 16px);
+  gap: var(--space-4);
+  margin-block-start: var(--space-4);
 }
