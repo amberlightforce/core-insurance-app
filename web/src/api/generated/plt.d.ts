@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/bil/v1/billing-accounts": {
+    "/api/plt/v1/tokens/exchange": {
         parameters: {
             query?: never;
             header?: never;
@@ -14,20 +14,44 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Account lifecycle and query
-         * @description Account lifecycle and query
+         * Delegated tokens for AI agents and services
+         * @description Delegated tokens for AI agents and services
          *
-         *     PRD inputs: payer, currency, preferences / criteria
-         *     PRD outputs: account, balances by state
+         *     PRD inputs: subject token, actor token, scopes
+         *     PRD outputs: token
+         *     PRD error notes: invalid_scope
          */
-        post: operations["bil.BillingAccount.create"];
+        post: operations["plt.Token.exchange"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/billing-accounts/{id}": {
+    "/api/plt/v1/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * User administration
+         * @description User administration
+         *
+         *     PRD inputs: user fields
+         *     PRD outputs: user
+         */
+        post: operations["plt.User.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -35,52 +59,29 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Account lifecycle and query
-         * @description Account lifecycle and query
+         * User administration
+         * @description User administration
          *
-         *     PRD inputs: payer, currency, preferences / criteria
-         *     PRD outputs: account, balances by state
+         *     PRD inputs: user fields
+         *     PRD outputs: user
          */
-        get: operations["bil.BillingAccount.get"];
+        get: operations["plt.User.get"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         /**
-         * Account lifecycle and query
-         * @description Account lifecycle and query
+         * User administration
+         * @description User administration
          *
-         *     PRD inputs: payer, currency, preferences / criteria
-         *     PRD outputs: account, balances by state
+         *     PRD inputs: user fields
+         *     PRD outputs: user
          */
-        patch: operations["bil.BillingAccount.update"];
+        patch: operations["plt.User.update"];
         trace?: never;
     };
-    "/api/bil/v1/billing-accounts/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Account lifecycle and query
-         * @description Account lifecycle and query
-         *
-         *     PRD inputs: payer, currency, preferences / criteria
-         *     PRD outputs: account, balances by state
-         */
-        get: operations["bil.BillingAccount.search"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/billing-accounts/close": {
+    "/api/plt/v1/users/suspend": {
         parameters: {
             query?: never;
             header?: never;
@@ -90,20 +91,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Account lifecycle and query
-         * @description Account lifecycle and query
+         * User administration
+         * @description User administration
          *
-         *     PRD inputs: payer, currency, preferences / criteria
-         *     PRD outputs: account, balances by state
+         *     PRD inputs: user fields
+         *     PRD outputs: user
          */
-        post: operations["bil.BillingAccount.close"];
+        post: operations["plt.User.suspend"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/billing-accounts/reopen": {
+    "/api/plt/v1/users/reactivate": {
         parameters: {
             query?: never;
             header?: never;
@@ -113,20 +114,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Account lifecycle and query
-         * @description Account lifecycle and query
+         * User administration
+         * @description User administration
          *
-         *     PRD inputs: payer, currency, preferences / criteria
-         *     PRD outputs: account, balances by state
+         *     PRD inputs: user fields
+         *     PRD outputs: user
          */
-        post: operations["bil.BillingAccount.reopen"];
+        post: operations["plt.User.reactivate"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/billing-accounts/change-payer": {
+    "/api/plt/v1/users/disable": {
         parameters: {
             query?: never;
             header?: never;
@@ -136,66 +137,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Ownership change
-         * @description Ownership change
+         * User administration
+         * @description User administration
          *
-         *     PRD inputs: new payer, effective date, reason
-         *     PRD outputs: account, approval ref
+         *     PRD inputs: user fields
+         *     PRD outputs: user
          */
-        post: operations["bil.BillingAccount.changePayer"];
+        post: operations["plt.User.disable"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/billing-accounts/attach-term": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Attach or move a term
-         * @description Attach or move a term
-         *
-         *     PRD inputs: term ref, target account, billed-items choice
-         *     PRD outputs: plan instance, preview
-         */
-        post: operations["bil.BillingAccount.attachTerm"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/billing-accounts/move-term": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Move a policy term between billing accounts (called by POL on PolicyMoved flows and by staff)
-         * @description Move a policy term between billing accounts (called by POL on `PolicyMoved` flows and by staff)
-         *
-         *     PRD inputs: term ref, target account, billed-items choice
-         *     PRD outputs: plan instance, preview
-         */
-        post: operations["bil.BillingAccount.moveTerm"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/payment-plans": {
+    "/api/plt/v1/users/search": {
         parameters: {
             query?: never;
             header?: never;
@@ -203,13 +158,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Eligible plans
-         * @description Eligible plans
+         * User administration
+         * @description User administration
          *
-         *     PRD inputs: product version, channel, producer, term data
-         *     PRD outputs: plans, exclusions with reasons
+         *     PRD inputs: user fields
+         *     PRD outputs: user
          */
-        get: operations["bil.PaymentPlan.list"];
+        get: operations["plt.User.search"];
         put?: never;
         post?: never;
         delete?: never;
@@ -218,7 +173,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/payment-plans/select": {
+    "/api/plt/v1/external-users/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -228,20 +183,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Select at bind; change mid-term
-         * @description Select at bind; change mid-term
+         * External identity journeys used by CHN
+         * @description External identity journeys used by CHN
          *
-         *     PRD inputs: term or job, plan, method, due day
-         *     PRD outputs: plan instance, schedule
+         *     PRD inputs: per journey
+         *     PRD outputs: —
          */
-        post: operations["bil.PaymentPlan.select"];
+        post: operations["plt.ExternalUser.register"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/payment-plans/change": {
+    "/api/plt/v1/external-users/link": {
         parameters: {
             query?: never;
             header?: never;
@@ -251,20 +206,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Select at bind; change mid-term
-         * @description Select at bind; change mid-term
+         * External identity journeys used by CHN
+         * @description External identity journeys used by CHN
          *
-         *     PRD inputs: term or job, plan, method, due day
-         *     PRD outputs: plan instance, schedule
+         *     PRD inputs: per journey
+         *     PRD outputs: —
          */
-        post: operations["bil.PaymentPlan.change"];
+        post: operations["plt.ExternalUser.link"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/billing-preview/compute": {
+    "/api/plt/v1/external-users/recover": {
         parameters: {
             query?: never;
             header?: never;
@@ -274,20 +229,250 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Billing calculator
-         * @description Billing calculator
+         * External identity journeys used by CHN
+         * @description External identity journeys used by CHN
          *
-         *     PRD inputs: quote/job/term, hypothetical plan or delta
-         *     PRD outputs: full schedule, first due, credits, refund
+         *     PRD inputs: per journey
+         *     PRD outputs: —
          */
-        post: operations["bil.BillingPreview.compute"];
+        post: operations["plt.ExternalUser.recover"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/down-payment/status": {
+    "/api/plt/v1/external-users/invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Named entry of plt.ExternalUser.*: invite an external user pre-linked to a party or intermediary scope
+         * @description Named entry of `plt.ExternalUser.*`: invite an external user pre-linked to a party or intermediary scope
+         *
+         *     PRD inputs: party or intermediary ref, contact point, roles, scope
+         *     PRD outputs: invitation
+         */
+        post: operations["plt.ExternalUser.invite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/role-assignments/grant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Roles and assignments
+         * @description Roles and assignments
+         *
+         *     PRD inputs: role, user, scope, dates
+         *     PRD outputs: —
+         */
+        post: operations["plt.RoleAssignment.grant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/role-assignments/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Roles and assignments
+         * @description Roles and assignments
+         *
+         *     PRD inputs: role, user, scope, dates
+         *     PRD outputs: —
+         */
+        post: operations["plt.RoleAssignment.revoke"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/policies/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * RBAC + ABAC decision
+         * @description RBAC + ABAC decision
+         *
+         *     PRD inputs: principal, action, resource attributes
+         *     PRD outputs: permit/deny, reason, policy version
+         */
+        post: operations["plt.Policy.evaluate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/privileged-accesses/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Governance
+         * @description Governance
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: —
+         */
+        post: operations["plt.PrivilegedAccess.request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/privileged-accesses/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Governance
+         * @description Governance
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: —
+         */
+        post: operations["plt.PrivilegedAccess.approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/privileged-accesses/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Governance
+         * @description Governance
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: —
+         */
+        post: operations["plt.PrivilegedAccess.revoke"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/authority-types/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Module registers types (build-time manifest and runtime)
+         * @description Module registers types (build-time manifest and runtime)
+         *
+         *     PRD inputs: type definition
+         *     PRD outputs: —
+         */
+        post: operations["plt.AuthorityType.register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/authorities/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Authority decision
+         * @description Authority decision
+         *
+         *     PRD inputs: actor, type, dimensions, objectRef, asAt
+         *     PRD outputs: decision, limit, referral targets, check id
+         */
+        post: operations["plt.Authority.check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/authorities/attach-decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Link check id to executed decision
+         * @description Link check id to executed decision
+         *
+         *     PRD inputs: check id, decision ref
+         *     PRD outputs: —
+         */
+        post: operations["plt.Authority.attachDecision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/authorities/who-can-approve": {
         parameters: {
             query?: never;
             header?: never;
@@ -295,13 +480,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bind gate
-         * @description Bind gate
+         * Administration and queries
+         * @description Administration and queries
          *
-         *     PRD inputs: job or term; method
-         *     PRD outputs: status, amount, reference/QR/link
+         *     PRD inputs: per op
+         *     PRD outputs: —
          */
-        get: operations["bil.DownPayment.status"];
+        get: operations["plt.Authority.whoCanApprove"];
         put?: never;
         post?: never;
         delete?: never;
@@ -310,7 +495,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/down-payment/initiate": {
+    "/api/plt/v1/approval-types/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -320,20 +505,89 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bind gate
-         * @description Bind gate
+         * Maker-checker
+         * @description Maker-checker
          *
-         *     PRD inputs: job or term; method
-         *     PRD outputs: status, amount, reference/QR/link
+         *     PRD inputs: type, object ref, payload hash, diff
+         *     PRD outputs: request; decision
          */
-        post: operations["bil.DownPayment.initiate"];
+        post: operations["plt.ApprovalType.register"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/invoices/{id}": {
+    "/api/plt/v1/approval/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Maker-checker
+         * @description Maker-checker
+         *
+         *     PRD inputs: type, object ref, payload hash, diff
+         *     PRD outputs: request; decision
+         */
+        post: operations["plt.Approval.request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/approval/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Maker-checker
+         * @description Maker-checker
+         *
+         *     PRD inputs: type, object ref, payload hash, diff
+         *     PRD outputs: request; decision
+         */
+        post: operations["plt.Approval.decide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/approval/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Maker-checker
+         * @description Maker-checker
+         *
+         *     PRD inputs: type, object ref, payload hash, diff
+         *     PRD outputs: request; decision
+         */
+        post: operations["plt.Approval.withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/approval/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -341,13 +595,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Invoices
-         * @description Invoices
+         * Maker-checker
+         * @description Maker-checker
          *
-         *     PRD inputs: ids, filters
-         *     PRD outputs: invoice with items, allocations, fiscal and delivery status
+         *     PRD inputs: type, object ref, payload hash, diff
+         *     PRD outputs: request; decision
          */
-        get: operations["bil.Invoice.get"];
+        get: operations["plt.Approval.get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -356,7 +610,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/invoices": {
+    "/api/plt/v1/approval": {
         parameters: {
             query?: never;
             header?: never;
@@ -364,13 +618,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Invoices
-         * @description Invoices
+         * Maker-checker
+         * @description Maker-checker
          *
-         *     PRD inputs: ids, filters
-         *     PRD outputs: invoice with items, allocations, fiscal and delivery status
+         *     PRD inputs: type, object ref, payload hash, diff
+         *     PRD outputs: request; decision
          */
-        get: operations["bil.Invoice.list"];
+        get: operations["plt.Approval.list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -379,7 +633,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/invoices/send-copy": {
+    "/api/plt/v1/approval/verify-for-execution": {
         parameters: {
             query?: never;
             header?: never;
@@ -389,20 +643,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Invoices
-         * @description Invoices
+         * Module confirms approval matches hash
+         * @description Module confirms approval matches hash
          *
-         *     PRD inputs: ids, filters
-         *     PRD outputs: invoice with items, allocations, fiscal and delivery status
+         *     PRD inputs: request id, hash
+         *     PRD outputs: ok
          */
-        post: operations["bil.Invoice.sendCopy"];
+        post: operations["plt.Approval.verifyForExecution"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/invoices/dispute": {
+    "/api/plt/v1/audit/append": {
         parameters: {
             query?: never;
             header?: never;
@@ -412,66 +666,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Invoices
-         * @description Invoices
+         * Write audit in caller transaction
+         * @description Write audit in caller transaction
          *
-         *     PRD inputs: ids, filters
-         *     PRD outputs: invoice with items, allocations, fiscal and delivery status
+         *     PRD inputs: AuditEvent
+         *     PRD outputs: —
          */
-        post: operations["bil.Invoice.dispute"];
+        post: operations["plt.Audit.append"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/payment-instruments/add": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Payer instruments (collection)
-         * @description Payer instruments (collection)
-         *
-         *     PRD inputs: IBAN and holder, or card token
-         *     PRD outputs: instrument (masked), VoP result
-         */
-        post: operations["bil.PaymentInstrument.add"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/payment-instruments/remove": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Payer instruments (collection)
-         * @description Payer instruments (collection)
-         *
-         *     PRD inputs: IBAN and holder, or card token
-         *     PRD outputs: instrument (masked), VoP result
-         */
-        post: operations["bil.PaymentInstrument.remove"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/payment-instruments": {
+    "/api/plt/v1/audit/query": {
         parameters: {
             query?: never;
             header?: never;
@@ -479,13 +687,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Payer instruments (collection)
-         * @description Payer instruments (collection)
+         * Search, export, verify
+         * @description Search, export, verify
          *
-         *     PRD inputs: IBAN and holder, or card token
-         *     PRD outputs: instrument (masked), VoP result
+         *     PRD inputs: filters
+         *     PRD outputs: page; export job; verification result
          */
-        get: operations["bil.PaymentInstrument.list"];
+        get: operations["plt.Audit.query"];
         put?: never;
         post?: never;
         delete?: never;
@@ -494,37 +702,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/payee-accounts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Query accounts by party, purpose, as-of date (masked unless P2 permission)
-         * @description Query accounts by party, purpose, as-of date (masked unless P2 permission)
-         *
-         *     PRD inputs: party id, purpose, validAt
-         *     PRD outputs: accounts with periods, verification, cooling-off
-         */
-        get: operations["bil.PayeeAccount.list"];
-        put?: never;
-        /**
-         * Register or change a payee bank account for any party (refund, claim, vendor, commission, levy) with source …
-         * @description Register or change a payee bank account for any party (refund, claim, vendor, commission, levy) with source and evidence; a change supersedes the prior valid period and starts the cooling-off window
-         *
-         *     PRD inputs: party id, purpose, IBAN, holder name, source, evidence ref
-         *     PRD outputs: `payee_account_id`, verification status, cooling_off_until
-         */
-        post: operations["bil.PayeeAccount.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/payee-accounts/verify": {
+    "/api/plt/v1/audit/export": {
         parameters: {
             query?: never;
             header?: never;
@@ -534,20 +712,135 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Run or re-run verification of payee
-         * @description Run or re-run verification of payee
+         * Search, export, verify
+         * @description Search, export, verify
          *
-         *     PRD inputs: payee_account_id (or IBAN + name for a pre-check)
-         *     PRD outputs: Match / CloseMatch (suggested name) / NoMatch / NotAvailable, checked at
+         *     PRD inputs: filters
+         *     PRD outputs: page; export job; verification result
          */
-        post: operations["bil.PayeeAccount.verify"];
+        post: operations["plt.Audit.export"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/payee-accounts/{id}": {
+    "/api/plt/v1/audit/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Search, export, verify
+         * @description Search, export, verify
+         *
+         *     PRD inputs: filters
+         *     PRD outputs: page; export job; verification result
+         */
+        post: operations["plt.Audit.verify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/outbox/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Write event to outbox
+         * @description Write event to outbox
+         *
+         *     PRD inputs: event type, aggregate, payload
+         *     PRD outputs: —
+         */
+        post: operations["plt.Outbox.publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/schemas/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Schema registry (CI)
+         * @description Schema registry (CI)
+         *
+         *     PRD inputs: schema
+         *     PRD outputs: compatibility result
+         */
+        post: operations["plt.Schema.register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/schemas/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Schema registry (CI)
+         * @description Schema registry (CI)
+         *
+         *     PRD inputs: schema
+         *     PRD outputs: compatibility result
+         */
+        post: operations["plt.Schema.check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/consumers/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Replay and DLQ
+         * @description Replay and DLQ
+         *
+         *     PRD inputs: consumer, from position; dead-letter ids
+         *     PRD outputs: —
+         */
+        post: operations["plt.Consumer.replay"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/dead-letters": {
         parameters: {
             query?: never;
             header?: never;
@@ -555,13 +848,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Query accounts by party, purpose, as-of date (masked unless P2 permission)
-         * @description Query accounts by party, purpose, as-of date (masked unless P2 permission)
+         * Replay and DLQ
+         * @description Replay and DLQ
          *
-         *     PRD inputs: party id, purpose, validAt
-         *     PRD outputs: accounts with periods, verification, cooling-off
+         *     PRD inputs: consumer, from position; dead-letter ids
+         *     PRD outputs: —
          */
-        get: operations["bil.PayeeAccount.get"];
+        get: operations["plt.DeadLetter.list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -570,7 +863,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/mandates": {
+    "/api/plt/v1/dead-letters/replay": {
         parameters: {
             query?: never;
             header?: never;
@@ -580,20 +873,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * SEPA mandates
-         * @description SEPA mandates
+         * Replay and DLQ
+         * @description Replay and DLQ
          *
-         *     PRD inputs: account, instrument, signature evidence
-         *     PRD outputs: mandate
+         *     PRD inputs: consumer, from position; dead-letter ids
+         *     PRD outputs: —
          */
-        post: operations["bil.Mandate.create"];
+        post: operations["plt.DeadLetter.replay"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/mandates/sign": {
+    "/api/plt/v1/dead-letters/discard": {
         parameters: {
             query?: never;
             header?: never;
@@ -603,20 +896,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * SEPA mandates
-         * @description SEPA mandates
+         * Replay and DLQ
+         * @description Replay and DLQ
          *
-         *     PRD inputs: account, instrument, signature evidence
-         *     PRD outputs: mandate
+         *     PRD inputs: consumer, from position; dead-letter ids
+         *     PRD outputs: —
          */
-        post: operations["bil.Mandate.sign"];
+        post: operations["plt.DeadLetter.discard"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/mandates/amend": {
+    "/api/plt/v1/adapters/invoke": {
         parameters: {
             query?: never;
             header?: never;
@@ -626,43 +919,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * SEPA mandates
-         * @description SEPA mandates
+         * Call external system
+         * @description Call external system
          *
-         *     PRD inputs: account, instrument, signature evidence
-         *     PRD outputs: mandate
+         *     PRD inputs: adapter, operation, payload, idempotency key
+         *     PRD outputs: response
          */
-        post: operations["bil.Mandate.amend"];
+        post: operations["plt.Adapter.invoke"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/mandates/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * SEPA mandates
-         * @description SEPA mandates
-         *
-         *     PRD inputs: account, instrument, signature evidence
-         *     PRD outputs: mandate
-         */
-        post: operations["bil.Mandate.cancel"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/mandates/{id}": {
+    "/api/plt/v1/exchanges/search": {
         parameters: {
             query?: never;
             header?: never;
@@ -670,13 +940,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * SEPA mandates
-         * @description SEPA mandates
+         * Disclosures and audit
+         * @description Disclosures and audit
          *
-         *     PRD inputs: account, instrument, signature evidence
-         *     PRD outputs: mandate
+         *     PRD inputs: party ref, period
+         *     PRD outputs: exchanges
          */
-        get: operations["bil.Mandate.get"];
+        get: operations["plt.Exchange.search"];
         put?: never;
         post?: never;
         delete?: never;
@@ -685,7 +955,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/payments/take": {
+    "/api/plt/v1/workflows/start": {
         parameters: {
             query?: never;
             header?: never;
@@ -695,20 +965,43 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Staff or channel payment (link, card hosted, cashier)
-         * @description Staff or channel payment (link, card hosted, cashier)
+         * Workflow engine
+         * @description Workflow engine
          *
-         *     PRD inputs: account, amount, method
-         *     PRD outputs: receipt or link, allocation preview
+         *     PRD inputs: type, business key, input
+         *     PRD outputs: —
          */
-        post: operations["bil.Payment.take"];
+        post: operations["plt.Workflow.start"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/receipts/{id}": {
+    "/api/plt/v1/workflows/signal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Named entry of plt.Workflow.*: send a signal to a running workflow (PTY caller)
+         * @description Named entry of `plt.Workflow.*`: send a signal to a running workflow (PTY caller)
+         *
+         *     PRD inputs: workflow id or business key, signal, payload
+         *     PRD outputs: ack
+         */
+        post: operations["plt.Workflow.signal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/workflows/query": {
         parameters: {
             query?: never;
             header?: never;
@@ -716,13 +1009,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Receipts
-         * @description Receipts
+         * Workflow engine
+         * @description Workflow engine
          *
-         *     PRD inputs: ids, filters
-         *     PRD outputs: receipt, allocations, reversals
+         *     PRD inputs: type, business key, input
+         *     PRD outputs: —
          */
-        get: operations["bil.Receipt.get"];
+        get: operations["plt.Workflow.query"];
         put?: never;
         post?: never;
         delete?: never;
@@ -731,7 +1024,122 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/receipts": {
+    "/api/plt/v1/workflows/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Workflow engine
+         * @description Workflow engine
+         *
+         *     PRD inputs: type, business key, input
+         *     PRD outputs: —
+         */
+        post: operations["plt.Workflow.cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/workflows/terminate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Workflow engine
+         * @description Workflow engine
+         *
+         *     PRD inputs: type, business key, input
+         *     PRD outputs: —
+         */
+        post: operations["plt.Workflow.terminate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/jobs/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Jobs
+         * @description Jobs
+         *
+         *     PRD inputs: job code
+         *     PRD outputs: —
+         */
+        post: operations["plt.Job.run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/jobs/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Jobs
+         * @description Jobs
+         *
+         *     PRD inputs: job code
+         *     PRD outputs: —
+         */
+        post: operations["plt.Job.stop"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/jobs/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Jobs
+         * @description Jobs
+         *
+         *     PRD inputs: job code
+         *     PRD outputs: —
+         */
+        post: operations["plt.Job.schedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/jobs/history": {
         parameters: {
             query?: never;
             header?: never;
@@ -739,13 +1147,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Receipts
-         * @description Receipts
+         * Jobs
+         * @description Jobs
          *
-         *     PRD inputs: ids, filters
-         *     PRD outputs: receipt, allocations, reversals
+         *     PRD inputs: job code
+         *     PRD outputs: —
          */
-        get: operations["bil.Receipt.list"];
+        get: operations["plt.Job.history"];
         put?: never;
         post?: never;
         delete?: never;
@@ -754,7 +1162,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/allocations/allocate": {
+    "/api/plt/v1/decision-tables/evaluate": {
         parameters: {
             query?: never;
             header?: never;
@@ -764,20 +1172,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Manual allocation
-         * @description Manual allocation
+         * Decision tables
+         * @description Decision tables
          *
-         *     PRD inputs: receipt or suspense, lines
-         *     PRD outputs: allocations
+         *     PRD inputs: table, version or as-at, inputs
+         *     PRD outputs: outputs, rule ids, evaluation id
          */
-        post: operations["bil.Allocation.allocate"];
+        post: operations["plt.DecisionTable.evaluate"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/allocations/unallocate": {
+    "/api/plt/v1/decision-tables/test": {
         parameters: {
             query?: never;
             header?: never;
@@ -787,20 +1195,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Manual allocation
-         * @description Manual allocation
+         * Decision tables
+         * @description Decision tables
          *
-         *     PRD inputs: receipt or suspense, lines
-         *     PRD outputs: allocations
+         *     PRD inputs: table, version or as-at, inputs
+         *     PRD outputs: outputs, rule ids, evaluation id
          */
-        post: operations["bil.Allocation.unallocate"];
+        post: operations["plt.DecisionTable.test"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/allocations/reallocate": {
+    "/api/plt/v1/decision-tables/activate": {
         parameters: {
             query?: never;
             header?: never;
@@ -810,20 +1218,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Manual allocation
-         * @description Manual allocation
+         * Decision tables
+         * @description Decision tables
          *
-         *     PRD inputs: receipt or suspense, lines
-         *     PRD outputs: allocations
+         *     PRD inputs: table, version or as-at, inputs
+         *     PRD outputs: outputs, rule ids, evaluation id
          */
-        post: operations["bil.Allocation.reallocate"];
+        post: operations["plt.DecisionTable.activate"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/suspense": {
+    "/api/plt/v1/decision-tables/explain": {
         parameters: {
             query?: never;
             header?: never;
@@ -831,13 +1239,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Suspense workbench
-         * @description Suspense workbench
+         * Decision tables
+         * @description Decision tables
          *
-         *     PRD inputs: filters, item
-         *     PRD outputs: items, suggestions
+         *     PRD inputs: table, version or as-at, inputs
+         *     PRD outputs: outputs, rule ids, evaluation id
          */
-        get: operations["bil.Suspense.list"];
+        get: operations["plt.DecisionTable.explain"];
         put?: never;
         post?: never;
         delete?: never;
@@ -846,7 +1254,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/suspense/suggest": {
+    "/api/plt/v1/feature-flags/evaluate": {
         parameters: {
             query?: never;
             header?: never;
@@ -856,112 +1264,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Suspense workbench
-         * @description Suspense workbench
+         * Flags
+         * @description Flags
          *
-         *     PRD inputs: filters, item
-         *     PRD outputs: items, suggestions
+         *     PRD inputs: flag, context
+         *     PRD outputs: state
          */
-        post: operations["bil.Suspense.suggest"];
+        post: operations["plt.FeatureFlag.evaluate"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/suspense/transfer": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Suspense workbench
-         * @description Suspense workbench
-         *
-         *     PRD inputs: filters, item
-         *     PRD outputs: items, suggestions
-         */
-        post: operations["bil.Suspense.transfer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/suspense/refund-to-sender": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Suspense workbench
-         * @description Suspense workbench
-         *
-         *     PRD inputs: filters, item
-         *     PRD outputs: items, suggestions
-         */
-        post: operations["bil.Suspense.refundToSender"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/intermediary-collections/report": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Agency collections
-         * @description Agency collections
-         *
-         *     PRD inputs: producer code, items, receipt data
-         *     PRD outputs: per-line outcome
-         */
-        post: operations["bil.IntermediaryCollection.report"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/intermediary-collections/report-file": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Agency collections
-         * @description Agency collections
-         *
-         *     PRD inputs: producer code, items, receipt data
-         *     PRD outputs: per-line outcome
-         */
-        post: operations["bil.IntermediaryCollection.reportFile"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/account-currents/{id}": {
+    "/api/plt/v1/calendars/is-business-day": {
         parameters: {
             query?: never;
             header?: never;
@@ -969,13 +1285,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Agency statements
-         * @description Agency statements
+         * Business-day arithmetic
+         * @description Business-day arithmetic
          *
-         *     PRD inputs: intermediary, period
-         *     PRD outputs: statement, items
+         *     PRD inputs: calendar set, date(s), n
+         *     PRD outputs: date or count, calendar versions
          */
-        get: operations["bil.AccountCurrent.get"];
+        get: operations["plt.Calendar.isBusinessDay"];
         put?: never;
         post?: never;
         delete?: never;
@@ -984,7 +1300,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/account-currents": {
+    "/api/plt/v1/calendars/add-business-days": {
         parameters: {
             query?: never;
             header?: never;
@@ -992,13 +1308,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Agency statements
-         * @description Agency statements
+         * Named entry of the business-day operations (BIL, WRK callers)
+         * @description Named entry of the business-day operations (BIL, WRK callers)
          *
-         *     PRD inputs: intermediary, period
-         *     PRD outputs: statement, items
+         *     PRD inputs: calendar set, date, n (±)
+         *     PRD outputs: date, calendar versions
          */
-        get: operations["bil.AccountCurrent.list"];
+        get: operations["plt.Calendar.addBusinessDays"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1007,30 +1323,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/account-currents/dispute": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Intermediary dispute of account-current items (called by CHN)
-         * @description Intermediary dispute of account-current items (called by CHN)
-         *
-         *     PRD inputs: statement id, item ids, reason
-         *     PRD outputs: dispute, held items
-         */
-        post: operations["bil.AccountCurrent.dispute"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/delinquencies/{id}": {
+    "/api/plt/v1/calendars/next-business-day": {
         parameters: {
             query?: never;
             header?: never;
@@ -1038,13 +1331,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Collections
-         * @description Collections
+         * Business-day arithmetic
+         * @description Business-day arithmetic
          *
-         *     PRD inputs: process, data
-         *     PRD outputs: process
+         *     PRD inputs: calendar set, date(s), n
+         *     PRD outputs: date or count, calendar versions
          */
-        get: operations["bil.Delinquency.get"];
+        get: operations["plt.Calendar.nextBusinessDay"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1053,7 +1346,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/delinquencies": {
+    "/api/plt/v1/calendars/previous-business-day": {
         parameters: {
             query?: never;
             header?: never;
@@ -1061,13 +1354,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Collections
-         * @description Collections
+         * Business-day arithmetic
+         * @description Business-day arithmetic
          *
-         *     PRD inputs: process, data
-         *     PRD outputs: process
+         *     PRD inputs: calendar set, date(s), n
+         *     PRD outputs: date or count, calendar versions
          */
-        get: operations["bil.Delinquency.list"];
+        get: operations["plt.Calendar.previousBusinessDay"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1076,99 +1369,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/delinquencies/record-contact": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Collections
-         * @description Collections
-         *
-         *     PRD inputs: process, data
-         *     PRD outputs: process
-         */
-        post: operations["bil.Delinquency.recordContact"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/delinquencies/arrange": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Collections
-         * @description Collections
-         *
-         *     PRD inputs: process, data
-         *     PRD outputs: process
-         */
-        post: operations["bil.Delinquency.arrange"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/delinquencies/release-hold": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Collections
-         * @description Collections
-         *
-         *     PRD inputs: process, data
-         *     PRD outputs: process
-         */
-        post: operations["bil.Delinquency.releaseHold"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/refunds/propose": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Refunds
-         * @description Refunds
-         *
-         *     PRD inputs: account, credits / decision
-         *     PRD outputs: refund
-         */
-        post: operations["bil.Refund.propose"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/refunds/{id}": {
+    "/api/plt/v1/calendars/business-days-between": {
         parameters: {
             query?: never;
             header?: never;
@@ -1176,13 +1377,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Read one refund with status, payout method, breakdown and disbursement status (called by CHN and DOC)
-         * @description Read one refund with status, payout method, breakdown and disbursement status (called by CHN and DOC)
+         * Business-day arithmetic
+         * @description Business-day arithmetic
          *
-         *     PRD inputs: refund id
-         *     PRD outputs: refund
+         *     PRD inputs: calendar set, date(s), n
+         *     PRD outputs: date or count, calendar versions
          */
-        get: operations["bil.Refund.get"];
+        get: operations["plt.Calendar.businessDaysBetween"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1191,7 +1392,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/refunds": {
+    "/api/plt/v1/calendars/end-of-period": {
         parameters: {
             query?: never;
             header?: never;
@@ -1199,13 +1400,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Refunds
-         * @description Refunds
+         * Business-day arithmetic
+         * @description Business-day arithmetic
          *
-         *     PRD inputs: account, credits / decision
-         *     PRD outputs: refund
+         *     PRD inputs: calendar set, date(s), n
+         *     PRD outputs: date or count, calendar versions
          */
-        get: operations["bil.Refund.list"];
+        get: operations["plt.Calendar.endOfPeriod"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1214,7 +1415,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/refunds/decide": {
+    "/api/plt/v1/calendars/generate": {
         parameters: {
             query?: never;
             header?: never;
@@ -1224,20 +1425,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Approve, reject or return a refund under BIL.Refund authority and SoD (called by WRK approval activities …
-         * @description Approve, reject or return a refund under `BIL.Refund` authority and SoD (called by WRK approval activities, `REQ-WRK-200`)
+         * Calendar maintenance
+         * @description Calendar maintenance
          *
-         *     PRD inputs: refund id, decision, comment
-         *     PRD outputs: refund, disbursement id on approval
+         *     PRD inputs: calendar, years
+         *     PRD outputs: —
          */
-        post: operations["bil.Refund.decide"];
+        post: operations["plt.Calendar.generate"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/refunds/resubmit": {
+    "/api/plt/v1/calendars/publish": {
         parameters: {
             query?: never;
             header?: never;
@@ -1247,20 +1448,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Refunds
-         * @description Refunds
+         * Calendar maintenance
+         * @description Calendar maintenance
          *
-         *     PRD inputs: account, credits / decision
-         *     PRD outputs: refund
+         *     PRD inputs: calendar, years
+         *     PRD outputs: —
          */
-        post: operations["bil.Refund.resubmit"];
+        post: operations["plt.Calendar.publish"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/disbursements/request": {
+    "/api/plt/v1/holidays/add-exception": {
         parameters: {
             query?: never;
             header?: never;
@@ -1270,20 +1471,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (RI_SETTLEMENT), CLM …
-         * @description Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (`RI_SETTLEMENT`), CLM Friendly Settlement (`FS_CLEARING`), CMP (`CMP_REDRESS`), FIN (`TAX_REMITTANCE`); `stop` by a source user requires `BIL.DisbursementStop`
+         * Calendar maintenance
+         * @description Calendar maintenance
          *
-         *     PRD inputs: source type and id, payee, amount, method, approval evidence, statement or return reference
-         *     PRD outputs: disbursement
+         *     PRD inputs: calendar, years
+         *     PRD outputs: —
          */
-        post: operations["bil.Disbursement.request"];
+        post: operations["plt.Holiday.addException"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/disbursements/{id}": {
+    "/api/plt/v1/fx/get-rate": {
         parameters: {
             query?: never;
             header?: never;
@@ -1291,13 +1492,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (RI_SETTLEMENT), CLM …
-         * @description Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (`RI_SETTLEMENT`), CLM Friendly Settlement (`FS_CLEARING`), CMP (`CMP_REDRESS`), FIN (`TAX_REMITTANCE`); `stop` by a source user requires `BIL.DisbursementStop`
+         * FX and currencies
+         * @description FX and currencies
          *
-         *     PRD inputs: source type and id, payee, amount, method, approval evidence, statement or return reference
-         *     PRD outputs: disbursement
+         *     PRD inputs: pair, date, type
+         *     PRD outputs: rate, rate id
          */
-        get: operations["bil.Disbursement.get"];
+        get: operations["plt.Fx.getRate"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1306,7 +1507,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/disbursements": {
+    "/api/plt/v1/fx/list-rates": {
         parameters: {
             query?: never;
             header?: never;
@@ -1314,13 +1515,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (RI_SETTLEMENT), CLM …
-         * @description Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (`RI_SETTLEMENT`), CLM Friendly Settlement (`FS_CLEARING`), CMP (`CMP_REDRESS`), FIN (`TAX_REMITTANCE`); `stop` by a source user requires `BIL.DisbursementStop`
+         * FX and currencies
+         * @description FX and currencies
          *
-         *     PRD inputs: source type and id, payee, amount, method, approval evidence, statement or return reference
-         *     PRD outputs: disbursement
+         *     PRD inputs: pair, date, type
+         *     PRD outputs: rate, rate id
          */
-        get: operations["bil.Disbursement.list"];
+        get: operations["plt.Fx.listRates"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1329,7 +1530,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/disbursements/stop": {
+    "/api/plt/v1/fx/correct": {
         parameters: {
             query?: never;
             header?: never;
@@ -1339,227 +1540,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (RI_SETTLEMENT), CLM …
-         * @description Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (`RI_SETTLEMENT`), CLM Friendly Settlement (`FS_CLEARING`), CMP (`CMP_REDRESS`), FIN (`TAX_REMITTANCE`); `stop` by a source user requires `BIL.DisbursementStop`
+         * FX and currencies
+         * @description FX and currencies
          *
-         *     PRD inputs: source type and id, payee, amount, method, approval evidence, statement or return reference
-         *     PRD outputs: disbursement
+         *     PRD inputs: pair, date, type
+         *     PRD outputs: rate, rate id
          */
-        post: operations["bil.Disbursement.stop"];
+        post: operations["plt.Fx.correct"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/disbursements/void": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (RI_SETTLEMENT), CLM …
-         * @description Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (`RI_SETTLEMENT`), CLM Friendly Settlement (`FS_CLEARING`), CMP (`CMP_REDRESS`), FIN (`TAX_REMITTANCE`); `stop` by a source user requires `BIL.DisbursementStop`
-         *
-         *     PRD inputs: source type and id, payee, amount, method, approval evidence, statement or return reference
-         *     PRD outputs: disbursement
-         */
-        post: operations["bil.Disbursement.void"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/receivables/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Register non-premium receivables: reinsurer receivables (source RI_SETTLEMENT), Friendly Settlement net …
-         * @description Register non-premium receivables: reinsurer receivables (source `RI_SETTLEMENT`), Friendly Settlement net receivables (source `FS_CLEARING`) and CLM deductible/salvage items
-         *
-         *     PRD inputs: source, counterparty, references, amount, currency, due date
-         *     PRD outputs: receivable id, payment reference
-         */
-        post: operations["bil.Receivable.register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/disbursement-batches/prepare": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Batches
-         * @description Batches
-         *
-         *     PRD inputs: bank account, value date
-         *     PRD outputs: batch, file ref
-         */
-        post: operations["bil.DisbursementBatch.prepare"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/disbursement-batches/release": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Batches
-         * @description Batches
-         *
-         *     PRD inputs: bank account, value date
-         *     PRD outputs: batch, file ref
-         */
-        post: operations["bil.DisbursementBatch.release"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/disbursement-batches/approve-release": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Batches
-         * @description Batches
-         *
-         *     PRD inputs: bank account, value date
-         *     PRD outputs: batch, file ref
-         */
-        post: operations["bil.DisbursementBatch.approveRelease"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/write-offs/propose": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Write-offs
-         * @description Write-offs
-         *
-         *     PRD inputs: items, reason
-         *     PRD outputs: write-off, posting preview
-         */
-        post: operations["bil.WriteOff.propose"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/write-offs/decide": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Write-offs
-         * @description Write-offs
-         *
-         *     PRD inputs: items, reason
-         *     PRD outputs: write-off, posting preview
-         */
-        post: operations["bil.WriteOff.decide"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/write-offs/post": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Write-offs
-         * @description Write-offs
-         *
-         *     PRD inputs: items, reason
-         *     PRD outputs: write-off, posting preview
-         */
-        post: operations["bil.WriteOff.post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/transfers/money": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Move money
-         * @description Move money
-         *
-         *     PRD inputs: source, target, amounts
-         *     PRD outputs: entries preview
-         */
-        post: operations["bil.Transfer.money"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/commission/calculations": {
+    "/api/plt/v1/currencies/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1567,13 +1561,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Commission
-         * @description Commission
+         * FX and currencies
+         * @description FX and currencies
          *
-         *     PRD inputs: intermediary, period
-         *     PRD outputs: lines, statements, run
+         *     PRD inputs: pair, date, type
+         *     PRD outputs: rate, rate id
          */
-        get: operations["bil.Commission.calculations"];
+        get: operations["plt.Currency.get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1582,7 +1576,237 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/commission/statements": {
+    "/api/plt/v1/numbers/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Numbering
+         * @description Numbering
+         *
+         *     PRD inputs: scheme, context
+         *     PRD outputs: number
+         */
+        post: operations["plt.Number.next"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/numbers/reserve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Named entry of plt.Number.*: reserve a range and register legacy numbers as used (MIG caller)
+         * @description Named entry of `plt.Number.*`: reserve a range and register legacy numbers as used (MIG caller)
+         *
+         *     PRD inputs: scheme, context, range or legacy numbers
+         *     PRD outputs: reservation
+         */
+        post: operations["plt.Number.reserve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/numbers/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Numbering
+         * @description Numbering
+         *
+         *     PRD inputs: scheme, context
+         *     PRD outputs: number
+         */
+        post: operations["plt.Number.void"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/ai/invoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI control plane
+         * @description AI control plane
+         *
+         *     PRD inputs: feature, inputs (allow-listed)
+         *     PRD outputs: output, interaction id; outcome
+         */
+        post: operations["plt.Ai.invoke"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/ai/record-outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI control plane
+         * @description AI control plane
+         *
+         *     PRD inputs: feature, inputs (allow-listed)
+         *     PRD outputs: output, interaction id; outcome
+         */
+        post: operations["plt.Ai.recordOutcome"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/ai-toggle/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI control plane
+         * @description AI control plane
+         *
+         *     PRD inputs: feature, inputs (allow-listed)
+         *     PRD outputs: output, interaction id; outcome
+         */
+        post: operations["plt.AiToggle.resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/ai-toggle/set": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI control plane
+         * @description AI control plane
+         *
+         *     PRD inputs: feature, inputs (allow-listed)
+         *     PRD outputs: output, interaction id; outcome
+         */
+        post: operations["plt.AiToggle.set"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/ai/kill-switch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI control plane
+         * @description AI control plane
+         *
+         *     PRD inputs: feature, inputs (allow-listed)
+         *     PRD outputs: output, interaction id; outcome
+         */
+        post: operations["plt.Ai.killSwitch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/retention/register-dataset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Data protection
+         * @description Data protection
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: —
+         */
+        post: operations["plt.Retention.registerDataset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/retention/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Named entry of plt.Retention.*: read or submit (maker-checker) the retention schedule of an RC code and …
+         * @description Named entry of `plt.Retention.*`: read or submit (maker-checker) the retention schedule of an RC code and jurisdiction
+         *
+         *     PRD inputs: RC code, jurisdiction
+         *     PRD outputs: schedule; change → approval request
+         */
+        post: operations["plt.Retention.schedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/retention/runs": {
         parameters: {
             query?: never;
             header?: never;
@@ -1590,13 +1814,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List and read commission statements per intermediary and period (called by CHN and DOC)
-         * @description List and read commission statements per intermediary and period (called by CHN and DOC)
+         * Data protection
+         * @description Data protection
          *
-         *     PRD inputs: intermediary, period
-         *     PRD outputs: statements with lines
+         *     PRD inputs: per op
+         *     PRD outputs: —
          */
-        get: operations["bil.Commission.statements"];
+        get: operations["plt.Retention.runs"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1605,7 +1829,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/commission/dispute": {
+    "/api/plt/v1/legal-holds/apply": {
         parameters: {
             query?: never;
             header?: never;
@@ -1615,20 +1839,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Intermediary dispute of commission lines (called by CHN)
-         * @description Intermediary dispute of commission lines (called by CHN)
+         * Data protection
+         * @description Data protection
          *
-         *     PRD inputs: statement id, line ids, reason
-         *     PRD outputs: dispute; adjustment line when accepted
+         *     PRD inputs: per op
+         *     PRD outputs: —
          */
-        post: operations["bil.Commission.dispute"];
+        post: operations["plt.LegalHold.apply"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/commission/run-payments": {
+    "/api/plt/v1/legal-holds/release": {
         parameters: {
             query?: never;
             header?: never;
@@ -1638,20 +1862,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Commission
-         * @description Commission
+         * Data protection
+         * @description Data protection
          *
-         *     PRD inputs: intermediary, period
-         *     PRD outputs: lines, statements, run
+         *     PRD inputs: per op
+         *     PRD outputs: —
          */
-        post: operations["bil.Commission.runPayments"];
+        post: operations["plt.LegalHold.release"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/commission/simulate": {
+    "/api/plt/v1/legal-holds/check": {
         parameters: {
             query?: never;
             header?: never;
@@ -1661,20 +1885,89 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Draft agreement simulation
-         * @description Draft agreement simulation
+         * Data protection
+         * @description Data protection
          *
-         *     PRD inputs: draft version, period
-         *     PRD outputs: totals
+         *     PRD inputs: per op
+         *     PRD outputs: —
          */
-        post: operations["bil.Commission.simulate"];
+        post: operations["plt.LegalHold.check"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/tax-levy/periods": {
+    "/api/plt/v1/erasure/execute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Data protection
+         * @description Data protection
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: —
+         */
+        post: operations["plt.Erasure.execute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/subject/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Data protection
+         * @description Data protection
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: —
+         */
+        post: operations["plt.Subject.export"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/ror/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * DORA operations
+         * @description DORA operations
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: —
+         */
+        post: operations["plt.Ror.export"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/time/now": {
         parameters: {
             query?: never;
             header?: never;
@@ -1682,13 +1975,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Levy payment periods; IPT accrual totals only (tax payments are TAX_REMITTANCE disbursements requested by FIN)
-         * @description Levy payment periods; IPT accrual totals only (tax payments are `TAX_REMITTANCE` disbursements requested by FIN)
+         * Time service
+         * @description Time service
          *
-         *     PRD inputs: type, period
-         *     PRD outputs: totals, detail
+         *     PRD inputs: context
+         *     PRD outputs: instant (offset applied in non-production)
          */
-        get: operations["bil.TaxLevy.periods"];
+        get: operations["plt.Time.now"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1697,7 +1990,99 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/tax-levy/detail": {
+    "/api/plt/v1/import/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Migration imports per REQ-MIG-001
+         * @description Migration imports per `REQ-MIG-001`
+         *
+         *     PRD inputs: batch id, records
+         *     PRD outputs: per-record outcomes (Loaded, Rejected, Skipped-duplicate), legacy xref entries
+         */
+        post: operations["plt.Import.users"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/import/role-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Migration imports per REQ-MIG-001
+         * @description Migration imports per `REQ-MIG-001`
+         *
+         *     PRD inputs: batch id, records
+         *     PRD outputs: per-record outcomes (Loaded, Rejected, Skipped-duplicate), legacy xref entries
+         */
+        post: operations["plt.Import.roleAssignments"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/import/authority-grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Migration imports per REQ-MIG-001
+         * @description Migration imports per `REQ-MIG-001`
+         *
+         *     PRD inputs: batch id, records
+         *     PRD outputs: per-record outcomes (Loaded, Rejected, Skipped-duplicate), legacy xref entries
+         */
+        post: operations["plt.Import.authorityGrants"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/import/identity-invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Migration imports per REQ-MIG-001
+         * @description Migration imports per `REQ-MIG-001`
+         *
+         *     PRD inputs: batch id, records
+         *     PRD outputs: per-record outcomes (Loaded, Rejected, Skipped-duplicate), legacy xref entries
+         */
+        post: operations["plt.Import.identityInvitations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/transfers": {
         parameters: {
             query?: never;
             header?: never;
@@ -1705,13 +2090,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Levy payment periods; IPT accrual totals only (tax payments are TAX_REMITTANCE disbursements requested by FIN)
-         * @description Levy payment periods; IPT accrual totals only (tax payments are `TAX_REMITTANCE` disbursements requested by FIN)
+         * File-transfer view and retry
+         * @description File-transfer view and retry
          *
-         *     PRD inputs: type, period
-         *     PRD outputs: totals, detail
+         *     PRD inputs: filters
+         *     PRD outputs: transfers; transfer id → retry
          */
-        get: operations["bil.TaxLevy.detail"];
+        get: operations["plt.Transfer.list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1720,7 +2105,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/tax-levy/request-levy-payment": {
+    "/api/plt/v1/transfers/retry": {
         parameters: {
             query?: never;
             header?: never;
@@ -1730,20 +2115,43 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Levy payment periods; IPT accrual totals only (tax payments are TAX_REMITTANCE disbursements requested by FIN)
-         * @description Levy payment periods; IPT accrual totals only (tax payments are `TAX_REMITTANCE` disbursements requested by FIN)
+         * File-transfer view and retry
+         * @description File-transfer view and retry
          *
-         *     PRD inputs: type, period
-         *     PRD outputs: totals, detail
+         *     PRD inputs: filters
+         *     PRD outputs: transfers; transfer id → retry
          */
-        post: operations["bil.TaxLevy.requestLevyPayment"];
+        post: operations["plt.Transfer.retry"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/ledger/query": {
+    "/api/plt/v1/tokens/grant-agent-scope": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Scope gate for agent clients
+         * @description Scope gate for agent clients
+         *
+         *     PRD inputs: client, scope
+         *     PRD outputs: granted or refused
+         */
+        post: operations["plt.Token.grantAgentScope"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/user-profile/get-preferences": {
         parameters: {
             query?: never;
             header?: never;
@@ -1751,13 +2159,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Ledger
-         * @description Ledger
+         * Read and save the language choice and preferences of the signed-in user (staff shell, hosted sign-in, CHN …
+         * @description Read and save the language choice and preferences of the signed-in user (staff shell, hosted sign-in, CHN external shells)
          *
-         *     PRD inputs: dimensions, dates
-         *     PRD outputs: entries, balances
+         *     PRD inputs: user (from token), ui_language (BCP 47 `el` or `en`), source
+         *     PRD outputs: saved preferences
          */
-        get: operations["bil.Ledger.query"];
+        get: operations["plt.UserProfile.getPreferences"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1766,7 +2174,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/ledger/balance": {
+    "/api/plt/v1/user-profile/set-language": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Read and save the language choice and preferences of the signed-in user (staff shell, hosted sign-in, CHN …
+         * @description Read and save the language choice and preferences of the signed-in user (staff shell, hosted sign-in, CHN external shells)
+         *
+         *     PRD inputs: user (from token), ui_language (BCP 47 `el` or `en`), source
+         *     PRD outputs: saved preferences
+         */
+        post: operations["plt.UserProfile.setLanguage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plt/v1/lineage/walk": {
         parameters: {
             query?: never;
             header?: never;
@@ -1774,13 +2205,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Ledger
-         * @description Ledger
+         * Reconstruct a business journey by lineage keys
+         * @description Reconstruct a business journey by lineage keys
          *
-         *     PRD inputs: dimensions, dates
-         *     PRD outputs: entries, balances
+         *     PRD inputs: start key (type, id), direction, depth
+         *     PRD outputs: ordered steps with keys and trace links
          */
-        get: operations["bil.Ledger.balance"];
+        get: operations["plt.Lineage.walk"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1789,7 +2220,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/reconciliation/bank": {
+    "/api/plt/v1/expressions/check": {
         parameters: {
             query?: never;
             header?: never;
@@ -1799,20 +2230,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bank reconciliation and invariant results
-         * @description Bank reconciliation and invariant results
+         * Rule-expression language (CEL-compatible)
+         * @description Rule-expression language (CEL-compatible)
          *
-         *     PRD inputs: account, date
-         *     PRD outputs: status, breaks
+         *     PRD inputs: expression, declared types, inputs
+         *     PRD outputs: type check result; value
          */
-        post: operations["bil.Reconciliation.bank"];
+        post: operations["plt.Expression.check"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/reconciliation/invariants": {
+    "/api/plt/v1/expressions/evaluate": {
         parameters: {
             query?: never;
             header?: never;
@@ -1822,20 +2253,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bank reconciliation and invariant results
-         * @description Bank reconciliation and invariant results
+         * Rule-expression language (CEL-compatible)
+         * @description Rule-expression language (CEL-compatible)
          *
-         *     PRD inputs: account, date
-         *     PRD outputs: status, breaks
+         *     PRD inputs: expression, declared types, inputs
+         *     PRD outputs: type check result; value
          */
-        post: operations["bil.Reconciliation.invariants"];
+        post: operations["plt.Expression.evaluate"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/bil/v1/reconciliation/fin": {
+    "/api/plt/v1/pipeline/e2e-gate": {
         parameters: {
             query?: never;
             header?: never;
@@ -1845,128 +2276,13 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Read-only query of BIL's daily control totals for break investigation by FIN (REQ-FIN-244); never triggers or …
-         * @description Read-only query of BIL's daily control totals for break investigation by FIN (`REQ-FIN-244`); never triggers or replaces the daily push to `fin.Reconciliation.exchange` (XMR-F-106, -344)
+         * Run E2E-01 … E2E-12 on a release candidate
+         * @description Run E2E-01 … E2E-12 on a release candidate
          *
-         *     PRD inputs: legal entity, accounting date, optional sub-ledger account and event type
-         *     PRD outputs: control totals per account and event type, entry ids on request
+         *     PRD inputs: release candidate, pack set
+         *     PRD outputs: per-scenario result, failing step and lineage key
          */
-        post: operations["bil.Reconciliation.fin"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/import/reverse": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Named reversal of origin=MIGRATION objects (XMR-F-406)
-         * @description Named reversal of `origin=MIGRATION` objects (XMR-F-406)
-         *
-         *     PRD inputs: batch id or source key
-         *     PRD outputs: reversal report per object
-         */
-        post: operations["bil.Import.reverse"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/import/convert-currency": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Later-market currency changeover
-         * @description Later-market currency changeover
-         *
-         *     PRD inputs: plan id
-         *     PRD outputs: conversion report, residuals
-         */
-        post: operations["bil.Import.convertCurrency"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/dsar/export": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Data-subject rights
-         * @description Data-subject rights
-         *
-         *     PRD inputs: party id
-         *     PRD outputs: export, outcome
-         */
-        post: operations["bil.Dsar.export"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/dsar/restrict": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Restrict processing of a party's billing data where statutory retention applies (called by CMP's DSAR …
-         * @description Restrict processing of a party's billing data where statutory retention applies (called by CMP's DSAR fan-out, `REQ-CMP-005`)
-         *
-         *     PRD inputs: party id, DSAR id, scope
-         *     PRD outputs: restriction outcome per object with reason
-         */
-        post: operations["bil.Dsar.restrict"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/bil/v1/dsar/erase": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Erase saved payment instruments and other data not needed for open obligations; restrict the rest with the …
-         * @description Erase saved payment instruments and other data not needed for open obligations; restrict the rest with the retention conflict recorded (called by CMP's DSAR fan-out, `REQ-CMP-005`)
-         *
-         *     PRD inputs: party id, DSAR id
-         *     PRD outputs: per-object outcome (erased, restricted with reason)
-         */
-        post: operations["bil.Dsar.erase"];
+        post: operations["plt.Pipeline.e2eGate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1977,1421 +2293,1126 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description bil.BillingAccount.create request. PRD inputs: "payer, currency, preferences / criteria" */
-        BillingAccountCreateRequest: {
-            /** @description PRD: "payer" */
-            payer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
-            /** @description PRD: "preferences" */
-            preferences?: components["schemas"]["Unspecified"];
-            /** @description PRD: "criteria" */
-            criteria?: components["schemas"]["Unspecified"];
+        /** @description plt.Token.exchange request. PRD inputs: "subject token, actor token, scopes" */
+        TokenExchangeRequest: {
+            /** @description PRD: "subject token" */
+            subjectToken?: components["schemas"]["Unspecified"];
+            /** @description PRD: "actor token" */
+            actorToken?: components["schemas"]["Unspecified"];
+            /** @description PRD: "scopes" */
+            scopes?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.BillingAccount.create result. PRD outputs: "account, balances by state" */
-        BillingAccountCreateResponse: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "balances by state" */
-            balancesByState?: components["schemas"]["Unspecified"];
+        /** @description plt.Token.exchange result. PRD outputs: "token" */
+        TokenExchangeResponse: {
+            /** @description PRD: "token" */
+            token?: components["schemas"]["Unspecified"];
         };
-        /** @description Typed from REQ-BIL-001, REQ-BIL-030. PRD outputs: "account, balances by state". Balances are sums of the account sub-ledger lines per money state (REQ-BIL-001 acceptance). */
-        BillingAccountGetResponse: {
-            account: components["schemas"]["BillingAccountView"];
-            balancesByState: components["schemas"]["BillingAccountBalances"];
+        /** @description plt.User.create request. PRD inputs: "user fields" */
+        UserCreateRequest: {
+            /** @description PRD: "user fields" */
+            userFields?: components["schemas"]["Unspecified"];
         };
-        /** @description A billing account with its policy terms and plan instances (REQ-BIL-001, REQ-BIL-030, REQ-BIL-052) */
-        BillingAccountView: {
-            billingAccountId: components["schemas"]["Uuid"];
-            /** @description Billing account number from PLT numbering (scheme BILLING_ACCOUNT, REQ-BIL-030) */
-            accountNumber: components["schemas"]["BusinessNumber"];
-            /** @description PTY party of the payer (P1 reference, no personal data) */
-            payerPartyId: components["schemas"]["Uuid"];
-            currency: components["schemas"]["CurrencyCode"];
-            /** @enum {string} */
-            status: "ACTIVE" | "SUSPENDED" | "CLOSING" | "CLOSED";
-            createdAt: components["schemas"]["Instant"];
-            terms: components["schemas"]["BillingTermView"][];
+        /** @description plt.User.create result. PRD outputs: "user" */
+        UserCreateResponse: {
+            /** @description PRD: "user" */
+            user?: components["schemas"]["Unspecified"];
         };
-        /** @description A policy term attached to the account with its plan instance (REQ-BIL-052) */
-        BillingTermView: {
-            policyTermId: components["schemas"]["Uuid"];
-            policyId: components["schemas"]["Uuid"];
-            policyNumber: components["schemas"]["BusinessNumber"];
-            termNumber: components["schemas"]["NonNegativeInt"];
-            productCode: components["schemas"]["Code"];
-            /** @description Payment plan code (SL-BIL serves ANNUAL only, D-SLC-10c) */
-            planCode: components["schemas"]["Code"];
-            /** @enum {string} */
-            billMode: "DIRECT_BILL" | "AGENCY_BILL";
-            termPeriod: components["schemas"]["DatePeriod"];
+        /** @description plt.User.update request. PRD inputs: "user fields" */
+        UserUpdateRequest: {
+            /** @description PRD: "user fields" */
+            userFields?: components["schemas"]["Unspecified"];
         };
-        /** @description Balances by money state, derived from the sub-ledger lines of the account (REQ-BIL-001, REQ-BIL-285) */
-        BillingAccountBalances: {
-            /** @description LA-01 written unbilled receivable */
-            writtenUnbilled: components["schemas"]["Money"];
-            /** @description LA-02 billed receivable still open */
-            billed: components["schemas"]["Money"];
-            /** @description Open amount of Overdue invoices */
-            overdue: components["schemas"]["Money"];
-            /** @description Cash received on the account (LA-10 debits) */
-            collected: components["schemas"]["Money"];
-            /** @description LA-11 suspense / unapplied cash of the account */
-            unapplied: components["schemas"]["Money"];
-            /** @description LA-12 refunds payable / customer credit */
-            credit: components["schemas"]["Money"];
+        /** @description plt.User.update result. PRD outputs: "user" */
+        UserUpdateResponse: {
+            /** @description PRD: "user" */
+            user?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.BillingAccount.search result. PRD outputs: "account, balances by state" */
-        BillingAccountSearchItem: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "balances by state" */
-            balancesByState?: components["schemas"]["Unspecified"];
+        /** @description plt.User.suspend request. PRD inputs: "user fields" */
+        UserSuspendRequest: {
+            /** @description PRD: "user fields" */
+            userFields?: components["schemas"]["Unspecified"];
         };
-        /** @description Page of bil.BillingAccount.search results (cursor pagination, contract §3.5.5) */
-        BillingAccountSearchPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["BillingAccountSearchItem"][];
+        /** @description plt.User.suspend result. PRD outputs: "user" */
+        UserSuspendResponse: {
+            /** @description PRD: "user" */
+            user?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.BillingAccount.update request. PRD inputs: "payer, currency, preferences / criteria" */
-        BillingAccountUpdateRequest: {
-            /** @description PRD: "payer" */
-            payer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
-            /** @description PRD: "preferences" */
-            preferences?: components["schemas"]["Unspecified"];
-            /** @description PRD: "criteria" */
-            criteria?: components["schemas"]["Unspecified"];
+        /** @description plt.User.reactivate request. PRD inputs: "user fields" */
+        UserReactivateRequest: {
+            /** @description PRD: "user fields" */
+            userFields?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.BillingAccount.update result. PRD outputs: "account, balances by state" */
-        BillingAccountUpdateResponse: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "balances by state" */
-            balancesByState?: components["schemas"]["Unspecified"];
+        /** @description plt.User.reactivate result. PRD outputs: "user" */
+        UserReactivateResponse: {
+            /** @description PRD: "user" */
+            user?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.BillingAccount.close request. PRD inputs: "payer, currency, preferences / criteria" */
-        BillingAccountCloseRequest: {
-            /** @description PRD: "payer" */
-            payer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
-            /** @description PRD: "preferences" */
-            preferences?: components["schemas"]["Unspecified"];
-            /** @description PRD: "criteria" */
-            criteria?: components["schemas"]["Unspecified"];
+        /** @description plt.User.disable request. PRD inputs: "user fields" */
+        UserDisableRequest: {
+            /** @description PRD: "user fields" */
+            userFields?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.BillingAccount.close result. PRD outputs: "account, balances by state" */
-        BillingAccountCloseResponse: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "balances by state" */
-            balancesByState?: components["schemas"]["Unspecified"];
+        /** @description plt.User.disable result. PRD outputs: "user" */
+        UserDisableResponse: {
+            /** @description PRD: "user" */
+            user?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.BillingAccount.reopen request. PRD inputs: "payer, currency, preferences / criteria" */
-        BillingAccountReopenRequest: {
-            /** @description PRD: "payer" */
-            payer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
-            /** @description PRD: "preferences" */
-            preferences?: components["schemas"]["Unspecified"];
-            /** @description PRD: "criteria" */
-            criteria?: components["schemas"]["Unspecified"];
+        /** @description plt.User.get result. PRD outputs: "user" */
+        UserGetResponse: {
+            /** @description PRD: "user" */
+            user?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.BillingAccount.reopen result. PRD outputs: "account, balances by state" */
-        BillingAccountReopenResponse: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "balances by state" */
-            balancesByState?: components["schemas"]["Unspecified"];
+        /** @description plt.User.search result. PRD outputs: "user" */
+        UserSearchItem: {
+            /** @description PRD: "user" */
+            user?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.BillingAccount.changePayer request. PRD inputs: "new payer, effective date, reason" */
-        BillingAccountChangePayerRequest: {
-            /** @description PRD: "new payer" */
-            newPayer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effective date" */
-            effectiveDate?: components["schemas"]["LocalDate"];
+        /** @description Page of plt.User.search results (cursor pagination, contract §3.5.5) */
+        UserSearchPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["UserSearchItem"][];
+        };
+        /** @description plt.ExternalUser.register request. PRD inputs: "per journey" */
+        ExternalUserRegisterRequest: Record<string, never>;
+        /** @description plt.ExternalUser.register result. PRD outputs: "—" */
+        ExternalUserRegisterResponse: Record<string, never>;
+        /** @description plt.ExternalUser.link request. PRD inputs: "per journey" */
+        ExternalUserLinkRequest: Record<string, never>;
+        /** @description plt.ExternalUser.link result. PRD outputs: "—" */
+        ExternalUserLinkResponse: Record<string, never>;
+        /** @description plt.ExternalUser.recover request. PRD inputs: "per journey" */
+        ExternalUserRecoverRequest: Record<string, never>;
+        /** @description plt.ExternalUser.recover result. PRD outputs: "—" */
+        ExternalUserRecoverResponse: Record<string, never>;
+        /** @description plt.ExternalUser.invite request. PRD inputs: "party or intermediary ref, contact point, roles, scope" */
+        ExternalUserInviteRequest: {
+            /** @description PRD: "party or intermediary ref" (optional) */
+            partyRef?: components["schemas"]["Unspecified"];
+            /** @description PRD: "party or intermediary ref" (optional) */
+            intermediaryRef?: components["schemas"]["Unspecified"];
+            /** @description PRD: "contact point" */
+            contactPoint?: components["schemas"]["Unspecified"];
+            /** @description PRD: "roles" */
+            roles?: components["schemas"]["Unspecified"];
+            /** @description PRD: "scope" */
+            scope?: components["schemas"]["Unspecified"];
+        } & (unknown | unknown);
+        /** @description plt.ExternalUser.invite result. PRD outputs: "invitation" */
+        ExternalUserInviteResponse: {
+            /** @description PRD: "invitation" */
+            invitation?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.RoleAssignment.grant request. PRD inputs: "role, user, scope, dates" */
+        RoleAssignmentGrantRequest: {
+            /** @description PRD: "role" */
+            role?: components["schemas"]["Unspecified"];
+            /** @description PRD: "user" */
+            user?: components["schemas"]["Unspecified"];
+            /** @description PRD: "scope" */
+            scope?: components["schemas"]["Unspecified"];
+            /** @description PRD: "dates" */
+            dates?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.RoleAssignment.grant result. PRD outputs: "—" */
+        RoleAssignmentGrantResponse: Record<string, never>;
+        /** @description plt.RoleAssignment.revoke request. PRD inputs: "role, user, scope, dates" */
+        RoleAssignmentRevokeRequest: {
+            /** @description PRD: "role" */
+            role?: components["schemas"]["Unspecified"];
+            /** @description PRD: "user" */
+            user?: components["schemas"]["Unspecified"];
+            /** @description PRD: "scope" */
+            scope?: components["schemas"]["Unspecified"];
+            /** @description PRD: "dates" */
+            dates?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.RoleAssignment.revoke result. PRD outputs: "—" */
+        RoleAssignmentRevokeResponse: Record<string, never>;
+        /** @description plt.Policy.evaluate request. PRD inputs: "principal, action, resource attributes" */
+        PolicyEvaluateRequest: {
+            /** @description PRD: "principal" */
+            principal?: components["schemas"]["Unspecified"];
+            /** @description PRD: "action" */
+            action?: components["schemas"]["Unspecified"];
+            /** @description PRD: "resource attributes" */
+            resourceAttributes?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Policy.evaluate result. PRD outputs: "permit/deny, reason, policy version" */
+        PolicyEvaluateResponse: {
+            /** @description PRD: "permit/deny" */
+            permitDeny?: components["schemas"]["Unspecified"];
             /** @description PRD: "reason" */
             reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.BillingAccount.changePayer result. PRD outputs: "account, approval ref" */
-        BillingAccountChangePayerResponse: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "approval ref" */
-            approvalRef?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.BillingAccount.attachTerm request. PRD inputs: "term ref, target account, billed-items choice" */
-        BillingAccountAttachTermRequest: {
-            /** @description PRD: "term ref" */
-            termRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "target account" */
-            targetAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "billed-items choice" */
-            billedItemsChoice?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.BillingAccount.attachTerm result. PRD outputs: "plan instance, preview" */
-        BillingAccountAttachTermResponse: {
-            /** @description PRD: "plan instance" */
-            planInstance?: components["schemas"]["Unspecified"];
-            /** @description PRD: "preview" */
-            preview?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.BillingAccount.moveTerm request. PRD inputs: "term ref, target account, billed-items choice" */
-        BillingAccountMoveTermRequest: {
-            /** @description PRD: "term ref" */
-            termRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "target account" */
-            targetAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "billed-items choice" */
-            billedItemsChoice?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.BillingAccount.moveTerm result. PRD outputs: "plan instance, preview" */
-        BillingAccountMoveTermResponse: {
-            /** @description PRD: "plan instance" */
-            planInstance?: components["schemas"]["Unspecified"];
-            /** @description PRD: "preview" */
-            preview?: components["schemas"]["Unspecified"];
-        };
-        /** @description Typed from REQ-BIL-003, REQ-BIL-047. PRD outputs: "plans, exclusions with reasons" */
-        PaymentPlanListResponse: {
-            plans: {
-                planCode: components["schemas"]["Code"];
-                planVersion: components["schemas"]["Code"];
-            }[];
-            exclusions: {
-                planCode: components["schemas"]["Code"];
-                reason: components["schemas"]["Code"];
-            }[];
-        };
-        /** @description Typed from REQ-BIL-003, REQ-BIL-052. PRD inputs: "term or job, plan, method, due day" */
-        PaymentPlanSelectRequest: {
-            termId?: components["schemas"]["Uuid"];
-            jobId?: components["schemas"]["Uuid"];
-            planCode: components["schemas"]["Code"];
-            method: components["schemas"]["Code"];
-            /** @description Due day */
-            dueDay?: number;
-        } & (unknown | unknown);
-        /** @description Typed from REQ-BIL-003, REQ-BIL-052. PRD outputs: "plan instance, schedule" */
-        PaymentPlanSelectResponse: {
-            planInstanceId: components["schemas"]["Uuid"];
-            planCode?: components["schemas"]["Code"];
-            planVersion?: components["schemas"]["Code"];
-            downPayment?: components["schemas"]["Money"];
-            schedule: {
-                dueDate: components["schemas"]["LocalDate"];
-                amount: components["schemas"]["Money"];
-            }[];
-        };
-        /** @description bil.PaymentPlan.change request. PRD inputs: "term or job, plan, method, due day" */
-        PaymentPlanChangeRequest: {
-            /** @description PRD: "term or job" (optional) */
-            term?: components["schemas"]["Unspecified"];
-            /** @description PRD: "term or job" (optional) */
-            job?: components["schemas"]["Unspecified"];
-            /** @description PRD: "plan" */
-            plan?: components["schemas"]["Unspecified"];
-            /** @description PRD: "method" */
-            method?: components["schemas"]["Unspecified"];
-            /** @description PRD: "due day" */
-            dueDay?: components["schemas"]["Unspecified"];
-        } & (unknown | unknown);
-        /** @description bil.PaymentPlan.change result. PRD outputs: "plan instance, schedule" */
-        PaymentPlanChangeResponse: {
-            /** @description PRD: "plan instance" */
-            planInstance?: components["schemas"]["Unspecified"];
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.BillingPreview.compute request. PRD inputs: "quote/job/term, hypothetical plan or delta" */
-        BillingPreviewComputeRequest: {
-            /** @description PRD: "quote/job/term" */
-            quoteJobTerm?: components["schemas"]["Unspecified"];
-            /** @description PRD: "hypothetical plan or delta" (optional) */
-            hypotheticalPlan?: components["schemas"]["Unspecified"];
-            /** @description PRD: "hypothetical plan or delta" (optional) */
-            delta?: components["schemas"]["Unspecified"];
-        } & (unknown | unknown);
-        /** @description bil.BillingPreview.compute result. PRD outputs: "full schedule, first due, credits, refund" */
-        BillingPreviewComputeResponse: {
-            /** @description PRD: "full schedule" */
-            fullSchedule?: components["schemas"]["Unspecified"];
-            /** @description PRD: "first due" */
-            firstDue?: components["schemas"]["Unspecified"];
-            /** @description PRD: "credits" */
-            credits?: components["schemas"]["Unspecified"];
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
-        };
-        /** @description Typed from REQ-BIL-003, REQ-BIL-054. PRD outputs: "status, amount, reference/QR/link" */
-        DownPaymentStatusResponse: {
-            /**
-             * @description REQ-BIL-003
-             * @enum {string}
-             */
-            status: "NOT_REQUIRED" | "PENDING" | "CLEARED" | "DEFERRED";
-            /** @description Down payment required (REQ-BIL-054) */
-            amount?: components["schemas"]["Money"];
-        };
-        /** @description Typed from REQ-BIL-055. PRD inputs: "job or term; method" */
-        DownPaymentInitiateRequest: {
-            jobId?: components["schemas"]["Uuid"];
-            quoteId?: components["schemas"]["Uuid"];
-            method: components["schemas"]["Code"];
-        } & (unknown | unknown);
-        /** @description Typed from REQ-BIL-055. PRD outputs: "status, amount, reference/QR/link" */
-        DownPaymentInitiateResponse: {
-            /**
-             * @description REQ-BIL-003
-             * @enum {string}
-             */
-            status: "NOT_REQUIRED" | "PENDING" | "CLEARED" | "DEFERRED";
-            amount: components["schemas"]["Money"];
-            paymentReference?: string;
-            qrPayload?: string;
-            /** Format: uri */
-            paymentLink?: string;
-        };
-        /** @description Typed from REQ-BIL-067, REQ-BIL-086..088, REQ-BIL-098. PRD outputs: "invoice with items, allocations, fiscal and delivery status". An invoice is a non-fiscal payment demand («ειδοποίηση πληρωμής», never «τιμολόγιο», D3). */
-        InvoiceGetResponse: {
-            invoice: components["schemas"]["InvoiceView"];
-            invoiceItems: components["schemas"]["InvoiceItemView"][];
-            allocations: components["schemas"]["AllocationView"][];
-            fiscalStatus: components["schemas"]["InvoiceFiscalStatus"];
-            /**
-             * @description DOC rendering and delivery are not wired in SL-BIL (REQ-BIL-089 open)
-             * @enum {string}
-             */
-            deliveryStatus: "NOT_REQUESTED";
-        };
-        /** @description Invoice header (REQ-BIL-086, REQ-BIL-087) */
-        InvoiceView: {
-            invoiceId: components["schemas"]["Uuid"];
-            /** @description Number from the non-fiscal gapless PLT series INVOICE (REQ-BIL-086) */
-            invoiceNumber: components["schemas"]["BusinessNumber"];
-            /** @enum {string} */
-            kind: "INVOICE" | "CREDIT_NOTE";
-            /** @enum {string} */
-            state: "PLANNED" | "BILLED" | "DUE" | "PAID" | "PARTIALLY_PAID" | "OVERDUE" | "WRITTEN_OFF" | "REVERSED";
-            billingAccountId: components["schemas"]["Uuid"];
-            policyId: components["schemas"]["Uuid"];
-            policyTermId: components["schemas"]["Uuid"];
-            /** @description Source POL transaction of the invoiced charges */
-            transactionId: components["schemas"]["Uuid"];
-            issueDate: components["schemas"]["LocalDate"];
-            dueDate: components["schemas"]["LocalDate"];
-            method: components["schemas"]["Code"];
-            total: components["schemas"]["Money"];
-            /** @description Sum of allocations */
-            paid: components["schemas"]["Money"];
-            /** @description total − paid */
-            open: components["schemas"]["Money"];
-            totalsByCategory: components["schemas"]["CategoryTotal"][];
-        };
-        /** @description Invoice item traced to its POL charge (REQ-BIL-067) */
-        InvoiceItemView: {
-            invoiceItemId: components["schemas"]["Uuid"];
-            chargeId: components["schemas"]["Uuid"];
-            transactionId: components["schemas"]["Uuid"];
-            elementLocator: components["schemas"]["Text"];
-            coverageCode: components["schemas"]["Code"];
-            chargeType: components["schemas"]["Code"];
-            chargeCategory: components["schemas"]["Code"];
-            /** @description PFC fiscal-category key of the charge type (REQ-PFC-121) */
-            fiscalCategoryKey?: components["schemas"]["Code"];
-            /** @description Legal status of the rate behind a tax or levy line, carried from POL (absent for premium) */
-            legalStatus?: components["schemas"]["Code"];
-            /** @description True when the line rests on a value that is not Settled (D-REG-02) */
-            provisional?: boolean;
-            validPeriod: components["schemas"]["DatePeriod"];
-            amount: components["schemas"]["Money"];
-            open: components["schemas"]["Money"];
-            /** @enum {string} */
-            state: "PLANNED" | "BILLED" | "OPEN" | "SETTLED" | "CANCELLED" | "WRITTEN_OFF";
-        };
-        /** @description One allocation row of a receipt to an invoice item (REQ-BIL-130) */
-        AllocationView: {
-            allocationId: components["schemas"]["Uuid"];
-            receiptId: components["schemas"]["Uuid"];
-            invoiceId: components["schemas"]["Uuid"];
-            invoiceItemId: components["schemas"]["Uuid"];
-            amount: components["schemas"]["Money"];
-            /** @description Matching or allocation rule that produced the row (e.g. REFERENCED_INVOICE, UNIQUE_OPEN_AMOUNT, MANUAL) */
-            ruleId: components["schemas"]["Code"];
-            /** @enum {string} */
-            source: "RULE" | "MANUAL";
-            recordedAt: components["schemas"]["Instant"];
-        };
-        /** @description The fiscal document CMP issued for the invoiced transaction (REQ-BIL-086, REQ-BIL-096, REQ-BIL-098). CMP is the sole fiscal issuer (D3); BIL stores its references for display. */
-        InvoiceFiscalStatus: {
-            /** @enum {string} */
-            status: "NOT_REQUESTED" | "PENDING" | "REGISTERED" | "REJECTED" | "REQUEST_FAILED";
-            fiscalDocumentId?: components["schemas"]["Uuid"];
-            /** @enum {string} */
-            triggerPoint?: "TRANSACTION" | "INVOICE";
-            series?: components["schemas"]["Text"];
-            number?: components["schemas"]["Text"];
-            mark?: components["schemas"]["Text"];
-            uid?: components["schemas"]["Text"];
-            /** @description Placeholder until the myDATA document types are settled (OQ-012); never an AADE code */
-            documentType?: components["schemas"]["Code"];
-            rejectionCodes?: components["schemas"]["Code"][];
-        };
-        /** @description Typed from REQ-BIL-086, REQ-BIL-087. PRD outputs: "invoice with items, allocations, fiscal and delivery status" (the list carries the header and fiscal status; items and allocations come from bil.Invoice.get) */
-        InvoiceListItem: {
-            invoice: components["schemas"]["InvoiceView"];
-            fiscalStatus: components["schemas"]["InvoiceFiscalStatus"];
-        };
-        /** @description Page of bil.Invoice.list results (cursor pagination, contract §3.5.5) */
-        InvoiceListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["InvoiceListItem"][];
-        };
-        /** @description bil.Invoice.sendCopy request. PRD inputs: "ids, filters" */
-        InvoiceSendCopyRequest: {
-            /** @description PRD: "ids" */
-            ids?: components["schemas"]["Uuid"][];
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Invoice.sendCopy result. PRD outputs: "invoice with items, allocations, fiscal and delivery status" */
-        InvoiceSendCopyResponse: {
-            /** @description PRD: "invoice with items" */
-            invoiceItems?: components["schemas"]["Unspecified"];
-            /** @description PRD: "allocations" */
-            allocations?: components["schemas"]["Unspecified"];
-            /** @description PRD: "fiscal and delivery status" */
-            fiscalStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "fiscal and delivery status" */
-            deliveryStatus?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Invoice.dispute request. PRD inputs: "ids, filters" */
-        InvoiceDisputeRequest: {
-            /** @description PRD: "ids" */
-            ids?: components["schemas"]["Uuid"][];
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Invoice.dispute result. PRD outputs: "invoice with items, allocations, fiscal and delivery status" */
-        InvoiceDisputeResponse: {
-            /** @description PRD: "invoice with items" */
-            invoiceItems?: components["schemas"]["Unspecified"];
-            /** @description PRD: "allocations" */
-            allocations?: components["schemas"]["Unspecified"];
-            /** @description PRD: "fiscal and delivery status" */
-            fiscalStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "fiscal and delivery status" */
-            deliveryStatus?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.PaymentInstrument.add request. PRD inputs: "IBAN and holder, or card token" */
-        PaymentInstrumentAddRequest: {
-            /** @description PRD: "IBAN and holder" */
-            iban?: components["schemas"]["Unspecified"];
-            /** @description PRD: "IBAN and holder" */
-            holder?: components["schemas"]["Unspecified"];
-            /** @description PRD: "or card token" */
-            orCardToken?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.PaymentInstrument.add result. PRD outputs: "instrument (masked), VoP result" */
-        PaymentInstrumentAddResponse: {
-            /** @description PRD: "instrument (masked)" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "VoP result" */
-            vopResult?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.PaymentInstrument.remove request. PRD inputs: "IBAN and holder, or card token" */
-        PaymentInstrumentRemoveRequest: {
-            /** @description PRD: "IBAN and holder" */
-            iban?: components["schemas"]["Unspecified"];
-            /** @description PRD: "IBAN and holder" */
-            holder?: components["schemas"]["Unspecified"];
-            /** @description PRD: "or card token" */
-            orCardToken?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.PaymentInstrument.remove result. PRD outputs: "instrument (masked), VoP result" */
-        PaymentInstrumentRemoveResponse: {
-            /** @description PRD: "instrument (masked)" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "VoP result" */
-            vopResult?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.PaymentInstrument.list result. PRD outputs: "instrument (masked), VoP result" */
-        PaymentInstrumentListItem: {
-            /** @description PRD: "instrument (masked)" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "VoP result" */
-            vopResult?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of bil.PaymentInstrument.list results (cursor pagination, contract §3.5.5) */
-        PaymentInstrumentListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["PaymentInstrumentListItem"][];
-        };
-        /** @description Typed from REQ-BIL-343, REQ-BIL-103 (SL2-BIL-DISB). PRD inputs: "party id, purpose, IBAN, holder name, source, evidence ref". The IBAN is P2: stored field-encrypted with a blind index, never returned, logged or published; responses show only the masked form. */
-        PayeeAccountCreateRequest: {
-            /** @description Payee party (PTY) */
-            partyId: components["schemas"]["Uuid"];
-            /**
-             * @description Purpose of the account (PRD-06 §7.1 PaymentInstrument purposes; cooling-off is per purpose, BR-BIL-062)
-             * @enum {string}
-             */
-            purpose: "COLLECTION" | "REFUND" | "CLAIM_PAYMENT" | "COMMISSION" | "LEVY" | "RI" | "CLEARING" | "REDRESS" | "TAX";
-            /** @description IBAN (ISO 13616, mod-97 checked; spaces allowed). P2. */
-            iban: string;
-            /** @description Account holder name as the bank holds it (verification of payee, REQ-BIL-203) */
-            holderName: string;
-            /**
-             * @description Where the details came from; defaults to STAFF
-             * @enum {string}
-             */
-            source?: "STAFF" | "CUSTOMER_PORTAL" | "VENDOR_MASTER" | "INBOUND_DOCUMENT" | "INTERMEDIARY" | "MIGRATION";
-            /** @description Evidence document reference (DOC id or external reference, no personal data) */
-            evidenceRef?: string;
-        };
-        /** @description Typed from REQ-BIL-343 (SL2-BIL-DISB). PRD outputs: "`payee_account_id`, verification status, cooling_off_until". Registering the same IBAN again for the same party and purpose returns the existing account. */
-        PayeeAccountCreateResponse: {
-            /** @description PRD: "payee_account_id" */
-            payeeAccountId: components["schemas"]["Uuid"];
-            verificationStatus: components["schemas"]["PayeeVerificationStatus"];
-            /** @description End of the cooling-off window of `bil.payee.cooling_off.<purpose>` for a changed account (REQ-BIL-199, BR-BIL-062); equals the registration date for a first account, which is not held */
-            coolingOffUntil: components["schemas"]["LocalDate"];
-            /** @description IBAN masked except the last four characters (REQ-BIL-345) */
-            maskedIban: string;
-            /** @description True when this account superseded another account of the party for the purpose (a bank-account change, four-eyes within cooling-off, REQ-BIL-199) */
-            change: boolean;
-        };
-        /**
-         * @description Verification status of a payee account (REQ-BIL-345)
-         * @enum {string}
-         */
-        PayeeVerificationStatus: "Unverified" | "VoPMatched" | "VoPCloseMatch" | "VoPNoMatch" | "VoPNotAvailable" | "Confirmed";
-        /** @description bil.PayeeAccount.verify request. PRD inputs: "payee_account_id (or IBAN + name for a pre-check)" */
-        PayeeAccountVerifyRequest: {
-            /** @description PRD: "payee_account_id (or IBAN + name for a pre-check)" */
-            payeeAccountId?: components["schemas"]["Uuid"];
-        };
-        /** @description bil.PayeeAccount.verify result. PRD outputs: "Match / CloseMatch (suggested name) / NoMatch / NotAvailable, checked at" */
-        PayeeAccountVerifyResponse: {
-            /** @description PRD: "Match" */
-            match?: components["schemas"]["Unspecified"];
-            /** @description PRD: "CloseMatch (suggested name)" */
-            closeMatch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "NoMatch" */
-            noMatch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "NotAvailable" */
-            notAvailable?: components["schemas"]["Unspecified"];
-            /** @description PRD: "checked at" */
-            checkedAt?: components["schemas"]["Instant"];
-        };
-        /** @description Typed from REQ-BIL-345 (SL2-BIL-DISB). PRD outputs: "accounts with periods, verification, cooling-off". The IBAN is masked except the last four characters; revealing it (P2 permission plus purpose) is not built yet. */
-        PayeeAccountGetResponse: {
-            payeeAccountId: components["schemas"]["Uuid"];
-            partyId: components["schemas"]["Uuid"];
-            purpose: components["schemas"]["Code"];
-            /** @description IBAN masked except the last four characters */
-            maskedIban: string;
-            holderName: string;
-            source?: components["schemas"]["Code"];
-            /** @enum {string} */
-            status: "Active" | "Superseded" | "Revoked";
-            verificationStatus: components["schemas"]["PayeeVerificationStatus"];
-            /**
-             * @description Last verification-of-payee outcome (REQ-BIL-203)
-             * @enum {string}
-             */
-            vopResult?: "Match" | "CloseMatch" | "NoMatch" | "NotAvailable";
-            vopCheckedAt?: components["schemas"]["Instant"];
-            validPeriod: components["schemas"]["DatePeriod"];
-            coolingOffUntil: components["schemas"]["LocalDate"];
-            /** @description True when the account superseded another account of the party for the purpose */
-            change: boolean;
-        };
-        /** @description bil.PayeeAccount.list result. PRD outputs: "accounts with periods, verification, cooling-off" */
-        PayeeAccountListItem: {
-            /** @description PRD: "accounts with periods" */
-            accountsPeriods?: components["schemas"]["Unspecified"];
-            /** @description PRD: "verification" */
-            verification?: components["schemas"]["Unspecified"];
-            /** @description PRD: "cooling-off" */
-            coolingOff?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of bil.PayeeAccount.list results (cursor pagination, contract §3.5.5) */
-        PayeeAccountListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["PayeeAccountListItem"][];
-        };
-        /** @description bil.Mandate.create request. PRD inputs: "account, instrument, signature evidence" */
-        MandateCreateRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "instrument" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "signature evidence" */
-            signatureEvidence?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Mandate.create result. PRD outputs: "mandate" */
-        MandateCreateResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
-        };
-        /** @description bil.Mandate.sign request. PRD inputs: "account, instrument, signature evidence" */
-        MandateSignRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "instrument" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "signature evidence" */
-            signatureEvidence?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Mandate.sign result. PRD outputs: "mandate" */
-        MandateSignResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
-        };
-        /** @description bil.Mandate.amend request. PRD inputs: "account, instrument, signature evidence" */
-        MandateAmendRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "instrument" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "signature evidence" */
-            signatureEvidence?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Mandate.amend result. PRD outputs: "mandate" */
-        MandateAmendResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
-        };
-        /** @description bil.Mandate.cancel request. PRD inputs: "account, instrument, signature evidence" */
-        MandateCancelRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "instrument" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "signature evidence" */
-            signatureEvidence?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Mandate.cancel result. PRD outputs: "mandate" */
-        MandateCancelResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
-        };
-        /** @description bil.Mandate.get result. PRD outputs: "mandate" */
-        MandateGetResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
-        };
-        /** @description Typed from REQ-BIL-004, REQ-BIL-126, REQ-BIL-127. PRD inputs: "account, amount, method". SL-BIL records money already received by bank transfer or at a cashier; card and link payments need the acquirer (OI-BIL-07). */
-        PaymentTakeRequest: {
-            billingAccountId: components["schemas"]["Uuid"];
-            /** @description Amount received, in the account currency, rounded to minor units */
-            amount: components["schemas"]["Money"];
-            /** @enum {string} */
-            method: "BANK_TRANSFER" | "CASHIER";
-            /** @description Value date of the money; defaults to today's business date */
-            valueDate?: components["schemas"]["LocalDate"];
-            /** @description Invoice the payer referenced (matching rule REFERENCED_INVOICE, REQ-BIL-127) */
-            invoiceId?: components["schemas"]["Uuid"];
-            /** @description Bank transaction reference (no personal data) */
-            bankReference?: string;
-            /**
-             * @description Match and allocate deterministically at once (REQ-BIL-127, REQ-BIL-129)
-             * @default true
-             */
-            autoAllocate: boolean;
-        };
-        /** @description Typed from REQ-BIL-004, REQ-BIL-129, REQ-BIL-135. PRD outputs: "receipt or link, allocation preview". An amount that does not equal the matched invoice's open amount is never allocated: it stays as unapplied cash in suspense with a reason (REQ-BIL-135). */
-        PaymentTakeResponse: {
-            receipt: components["schemas"]["ReceiptView"];
-            allocations: components["schemas"]["AllocationView"][];
-            /** @enum {string} */
-            allocationOutcome: "ALLOCATED" | "SUSPENSE" | "NOT_REQUESTED";
-        };
-        /** @description A receipt (incoming payment, REQ-BIL-126) */
-        ReceiptView: {
-            receiptId: components["schemas"]["Uuid"];
-            receiptNumber: components["schemas"]["BusinessNumber"];
-            billingAccountId: components["schemas"]["Uuid"];
-            /** @enum {string} */
-            state: "RECEIVED" | "ALLOCATED" | "PARTIALLY_ALLOCATED" | "SUSPENSE" | "REVERSED" | "REFUNDED";
-            channel: components["schemas"]["Code"];
-            method: components["schemas"]["Code"];
-            amount: components["schemas"]["Money"];
-            allocated: components["schemas"]["Money"];
-            unallocated: components["schemas"]["Money"];
-            valueDate: components["schemas"]["LocalDate"];
-            accountingDate: components["schemas"]["LocalDate"];
-            invoiceId?: components["schemas"]["Uuid"];
-            /** @description Why the receipt is unapplied (REQ-BIL-135), e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH, CONCURRENT_ALLOCATION */
-            suspenseReason?: components["schemas"]["Code"];
-            recordedAt: components["schemas"]["Instant"];
-        };
-        /** @description Typed from REQ-BIL-004, REQ-BIL-126. PRD outputs: "receipt, allocations, reversals" */
-        ReceiptGetResponse: {
-            receipt: components["schemas"]["ReceiptView"];
-            allocations: components["schemas"]["AllocationView"][];
-            /** @description Reversals (none in SL-BIL) */
-            reversals: components["schemas"]["OpenObject"][];
-        };
-        /** @description bil.Receipt.list result. PRD outputs: "receipt, allocations, reversals" */
-        ReceiptListItem: {
-            /** @description PRD: "receipt" */
-            receipt?: components["schemas"]["Unspecified"];
-            /** @description PRD: "allocations" */
-            allocations?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reversals" */
-            reversals?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of bil.Receipt.list results (cursor pagination, contract §3.5.5) */
-        ReceiptListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["ReceiptListItem"][];
-        };
-        /** @description Typed from REQ-BIL-130, REQ-BIL-136. PRD inputs: "receipt or suspense, lines". SL-BIL allocates a receipt's unapplied cash to whole invoices: each line must equal the invoice's open amount. */
-        AllocationAllocateRequest: {
-            receiptId: components["schemas"]["Uuid"];
-            lines: {
-                invoiceId: components["schemas"]["Uuid"];
-                amount: components["schemas"]["Money"];
-            }[];
-        };
-        /** @description Typed from REQ-BIL-130. PRD outputs: "allocations" */
-        AllocationAllocateResponse: {
-            allocations: components["schemas"]["AllocationView"][];
-            receipt: components["schemas"]["ReceiptView"];
-        };
-        /** @description bil.Allocation.unallocate request. PRD inputs: "receipt or suspense, lines" */
-        AllocationUnallocateRequest: {
-            /** @description PRD: "receipt or suspense" (optional) */
-            receipt?: components["schemas"]["Unspecified"];
-            /** @description PRD: "receipt or suspense" (optional) */
-            suspense?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-        } & (unknown | unknown);
-        /** @description bil.Allocation.unallocate result. PRD outputs: "allocations" */
-        AllocationUnallocateResponse: {
-            /** @description PRD: "allocations" */
-            allocations?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Allocation.reallocate request. PRD inputs: "receipt or suspense, lines" */
-        AllocationReallocateRequest: {
-            /** @description PRD: "receipt or suspense" (optional) */
-            receipt?: components["schemas"]["Unspecified"];
-            /** @description PRD: "receipt or suspense" (optional) */
-            suspense?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-        } & (unknown | unknown);
-        /** @description bil.Allocation.reallocate result. PRD outputs: "allocations" */
-        AllocationReallocateResponse: {
-            /** @description PRD: "allocations" */
-            allocations?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Suspense.list result. PRD outputs: "items, suggestions" */
-        SuspenseListItem: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "suggestions" */
-            suggestions?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of bil.Suspense.list results (cursor pagination, contract §3.5.5) */
-        SuspenseListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["SuspenseListItem"][];
-        };
-        /** @description bil.Suspense.suggest request. PRD inputs: "filters, item" */
-        SuspenseSuggestRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Suspense.suggest result. PRD outputs: "items, suggestions" */
-        SuspenseSuggestResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "suggestions" */
-            suggestions?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Suspense.transfer request. PRD inputs: "filters, item" */
-        SuspenseTransferRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Suspense.transfer result. PRD outputs: "items, suggestions" */
-        SuspenseTransferResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "suggestions" */
-            suggestions?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Suspense.refundToSender request. PRD inputs: "filters, item" */
-        SuspenseRefundToSenderRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Suspense.refundToSender result. PRD outputs: "items, suggestions" */
-        SuspenseRefundToSenderResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "suggestions" */
-            suggestions?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.IntermediaryCollection.report request. PRD inputs: "producer code, items, receipt data" */
-        IntermediaryCollectionReportRequest: {
-            /** @description PRD: "producer code" */
-            producerCode?: components["schemas"]["Unspecified"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "receipt data" */
-            receiptData?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.IntermediaryCollection.report result. PRD outputs: "per-line outcome" */
-        IntermediaryCollectionReportResponse: {
-            /** @description PRD: "per-line outcome" */
-            perLineOutcome?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.IntermediaryCollection.reportFile request. PRD inputs: "producer code, items, receipt data" */
-        IntermediaryCollectionReportFileRequest: {
-            /** @description PRD: "producer code" */
-            producerCode?: components["schemas"]["Unspecified"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "receipt data" */
-            receiptData?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.IntermediaryCollection.reportFile result. PRD outputs: "per-line outcome" */
-        IntermediaryCollectionReportFileResponse: {
-            /** @description PRD: "per-line outcome" */
-            perLineOutcome?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.AccountCurrent.get result. PRD outputs: "statement, items" */
-        AccountCurrentGetResponse: {
-            /** @description PRD: "statement" */
-            statement?: components["schemas"]["Unspecified"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-        };
-        /** @description bil.AccountCurrent.list result. PRD outputs: "statement, items" */
-        AccountCurrentListItem: {
-            /** @description PRD: "statement" */
-            statement?: components["schemas"]["Unspecified"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-        };
-        /** @description Page of bil.AccountCurrent.list results (cursor pagination, contract §3.5.5) */
-        AccountCurrentListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["AccountCurrentListItem"][];
-        };
-        /** @description bil.AccountCurrent.dispute request. PRD inputs: "statement id, item ids, reason" */
-        AccountCurrentDisputeRequest: {
-            /** @description PRD: "statement id" */
-            statementId?: components["schemas"]["Uuid"];
-            /** @description PRD: "item ids" */
-            itemIds?: components["schemas"]["Uuid"][];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.AccountCurrent.dispute result. PRD outputs: "dispute, held items" */
-        AccountCurrentDisputeResponse: {
-            /** @description PRD: "dispute" */
-            dispute?: components["schemas"]["Unspecified"];
-            /** @description PRD: "held items" */
-            heldItems?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Delinquency.get result. PRD outputs: "process" */
-        DelinquencyGetResponse: {
-            /** @description PRD: "process" */
-            process?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Delinquency.list result. PRD outputs: "process" */
-        DelinquencyListItem: {
-            /** @description PRD: "process" */
-            process?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of bil.Delinquency.list results (cursor pagination, contract §3.5.5) */
-        DelinquencyListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["DelinquencyListItem"][];
-        };
-        /** @description bil.Delinquency.recordContact request. PRD inputs: "process, data" */
-        DelinquencyRecordContactRequest: {
-            /** @description PRD: "process" */
-            process?: components["schemas"]["Unspecified"];
-            /** @description PRD: "data" */
-            data?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Delinquency.recordContact result. PRD outputs: "process" */
-        DelinquencyRecordContactResponse: {
-            /** @description PRD: "process" */
-            process?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Delinquency.arrange request. PRD inputs: "process, data" */
-        DelinquencyArrangeRequest: {
-            /** @description PRD: "process" */
-            process?: components["schemas"]["Unspecified"];
-            /** @description PRD: "data" */
-            data?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Delinquency.arrange result. PRD outputs: "process" */
-        DelinquencyArrangeResponse: {
-            /** @description PRD: "process" */
-            process?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Delinquency.releaseHold request. PRD inputs: "process, data" */
-        DelinquencyReleaseHoldRequest: {
-            /** @description PRD: "process" */
-            process?: components["schemas"]["Unspecified"];
-            /** @description PRD: "data" */
-            data?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Delinquency.releaseHold result. PRD outputs: "process" */
-        DelinquencyReleaseHoldResponse: {
-            /** @description PRD: "process" */
-            process?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Refund.propose request. PRD inputs: "account, credits / decision" */
-        RefundProposeRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "credits" */
-            credits?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Refund.propose result. PRD outputs: "refund" */
-        RefundProposeResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Refund.get result. PRD outputs: "refund" */
-        RefundGetResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Refund.list result. PRD outputs: "refund" */
-        RefundListItem: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of bil.Refund.list results (cursor pagination, contract §3.5.5) */
-        RefundListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["RefundListItem"][];
-        };
-        /** @description bil.Refund.decide request. PRD inputs: "refund id, decision, comment" */
-        RefundDecideRequest: {
-            /** @description PRD: "refund id" */
-            refundId?: components["schemas"]["Uuid"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
-            /** @description PRD: "comment" */
-            comment?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Refund.decide result. PRD outputs: "refund, disbursement id on approval" */
-        RefundDecideResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
-            /** @description PRD: "disbursement id on approval" */
-            disbursementIdOnApproval?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Refund.resubmit request. PRD inputs: "account, credits / decision" */
-        RefundResubmitRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "credits" */
-            credits?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Refund.resubmit result. PRD outputs: "refund" */
-        RefundResubmitResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
-        };
-        /** @description Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method, approval evidence, statement or return reference". SL2-BIL-DISB serves source type CLM_CLAIM_PAYMENT (method SEPA_CT, EUR, payeePartyId with payeeAccountId); other sources are refused with BIL-ERR-SOURCE. */
-        DisbursementRequestRequest: {
-            /** @description Open code (D-CON-24), registered in the source register (REQ-BIL-354) */
-            sourceType: components["schemas"]["DisbursementSourceType"];
-            /** @description Id of the source object */
-            sourceId: string;
-            payeePartyId?: components["schemas"]["Uuid"];
-            /** @description Ad hoc payee (name, birth date, nationality, country, identifiers) */
-            adHocPayee?: components["schemas"]["OpenObject"];
-            coPayees?: components["schemas"]["Uuid"][];
-            amount: components["schemas"]["Money"];
-            /** @description REQ-BIL-209; defaults from the source */
-            method: components["schemas"]["Code"];
-            /** @description BIL payee account (REQ-BIL-343) */
-            payeeAccountId?: components["schemas"]["Uuid"];
-            cardToken?: string;
-            /** @description REQ-BIL-347 */
-            offsetInstruction?: components["schemas"]["OpenObject"];
-            requestedValueDate?: components["schemas"]["LocalDate"];
-            /** @description Source approval evidence, verified against the content hash (REQ-BIL-198) */
-            approvalEvidenceRef?: string;
-            /** @description Content hash the source approved (REQ-BIL-198): SHA-256 of the canonical JSON (RFC 8785) of {sourceType, sourceId, payeePartyId, payeeAccountId, amount}; computed with CoreIns.Modules.Billing.Contracts.DisbursementContent.Hash. A request whose content differs is refused with BIL-ERR-APPROVAL-MISMATCH. Required for CLM_CLAIM_PAYMENT (SL2-BIL-DISB). */
-            approvalContentHash?: components["schemas"]["Sha256"];
-            /** @description CLM sources only (required for CLM_CLAIM_PAYMENT) - the claim the payment belongs to; the source reference of the duplicate key (payee account, amount, claim; REQ-BIL-202) and a ledger dimension for FIN (D-SL2-08); not part of the content hash */
-            claimId?: components["schemas"]["Uuid"];
-            purposeText?: string;
-            statementReference?: string;
-            returnReference?: string;
-        } & (unknown | unknown);
-        /** @description Disbursement (REQ-BIL-009, REQ-BIL-213) Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD outputs: "disbursement" */
-        DisbursementRequestResponse: {
-            disbursementId: components["schemas"]["Uuid"];
-            /**
-             * @description Canonical disbursement state (REQ-BIL-009)
-             * @enum {string}
-             */
-            status: "Requested" | "PendingApproval" | "Approved" | "Released" | "Issued" | "Cleared" | "Rejected" | "Stopped" | "Voided" | "Returned";
-            sourceType: components["schemas"]["DisbursementSourceType"];
-            /** @description Id of the source object in the source module */
-            sourceId: string;
-            amount: components["schemas"]["Money"];
-            /** @description Disbursement method (REQ-BIL-209: SEPA credit transfer, SEPA instant, card refund, intermediary account, CLEARING) */
-            method?: components["schemas"]["Code"];
-            requestedValueDate?: components["schemas"]["LocalDate"];
-            /** @description Masked payee account (REQ-BIL-213) */
-            maskedPayeeAccount?: string;
-            /** @description Disbursement number from PLT numbering (REQ-BIL-197) */
-            disbursementNumber?: components["schemas"]["BusinessNumber"];
-            /** @description Calling module from the source register (REQ-BIL-354) */
-            sourceModule?: components["schemas"]["ModuleCode"];
-            payeePartyId?: components["schemas"]["Uuid"];
-            payeeAccountId?: components["schemas"]["Uuid"];
-            claimId?: components["schemas"]["Uuid"];
-            /** @description Value date of the payment once released */
-            valueDate?: components["schemas"]["LocalDate"];
-            approvalEvidenceRef?: string;
-            requestedAt?: components["schemas"]["Instant"];
-            releasedAt?: components["schemas"]["Instant"];
-            issuedAt?: components["schemas"]["Instant"];
-            clearedAt?: components["schemas"]["Instant"];
-        };
-        /** @description Typed from REQ-BIL-213 (SL2-BIL-DISB). PRD outputs: "disbursement": state, dates, method and masked payee account. */
-        DisbursementGetResponse: {
-            /** @description PRD: "disbursement" */
-            disbursement: components["schemas"]["DisbursementRequestResponse"];
-        };
-        /** @description bil.Disbursement.list result. PRD outputs: "disbursement" */
-        DisbursementListItem: {
-            /** @description PRD: "disbursement" */
-            disbursement?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of bil.Disbursement.list results (cursor pagination, contract §3.5.5) */
-        DisbursementListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["DisbursementListItem"][];
-        };
-        /** @description Typed from REQ-BIL-009, REQ-CLM-126. PRD inputs: "source type and id, payee, amount, method, approval evidence, statement or return reference" */
-        DisbursementStopRequest: {
-            disbursementId: components["schemas"]["Uuid"];
-            reason: components["schemas"]["Code"];
-        };
-        /** @description Typed from REQ-BIL-009, REQ-CLM-126. PRD outputs: "disbursement" */
-        DisbursementStopResponse: {
-            /** @description Disbursement (REQ-BIL-009, REQ-BIL-213) */
-            disbursement: {
-                disbursementId: components["schemas"]["Uuid"];
-                /**
-                 * @description Canonical disbursement state (REQ-BIL-009)
-                 * @enum {string}
-                 */
-                status: "Requested" | "PendingApproval" | "Approved" | "Released" | "Issued" | "Cleared" | "Rejected" | "Stopped" | "Voided" | "Returned";
-                sourceType: components["schemas"]["DisbursementSourceType"];
-                /** @description Id of the source object in the source module */
-                sourceId: string;
-                amount: components["schemas"]["Money"];
-                /** @description Disbursement method (REQ-BIL-209: SEPA credit transfer, SEPA instant, card refund, intermediary account, CLEARING) */
-                method?: components["schemas"]["Code"];
-                requestedValueDate?: components["schemas"]["LocalDate"];
-                /** @description Masked payee account (REQ-BIL-213) */
-                maskedPayeeAccount?: string;
+            /** @description PRD: "policy version" */
+            policyVersion?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.PrivilegedAccess.request request. PRD inputs: "per op" */
+        PrivilegedAccessRequestRequest: Record<string, never>;
+        /** @description plt.PrivilegedAccess.request result. PRD outputs: "—" */
+        PrivilegedAccessRequestResponse: Record<string, never>;
+        /** @description plt.PrivilegedAccess.approve request. PRD inputs: "per op" */
+        PrivilegedAccessApproveRequest: Record<string, never>;
+        /** @description plt.PrivilegedAccess.approve result. PRD outputs: "—" */
+        PrivilegedAccessApproveResponse: Record<string, never>;
+        /** @description plt.PrivilegedAccess.revoke request. PRD inputs: "per op" */
+        PrivilegedAccessRevokeRequest: Record<string, never>;
+        /** @description plt.PrivilegedAccess.revoke result. PRD outputs: "—" */
+        PrivilegedAccessRevokeResponse: Record<string, never>;
+        /** @description plt.AuthorityType.register request. PRD inputs: "type definition" */
+        AuthorityTypeRegisterRequest: {
+            /** @description PRD: "type definition" */
+            typeDefinition?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.AuthorityType.register result. PRD outputs: "—" */
+        AuthorityTypeRegisterResponse: Record<string, never>;
+        /** @description Typed from REQ-PLT-003, REQ-PLT-103. PRD inputs: "actor, type, dimensions, objectRef, asAt" */
+        AuthorityCheckRequest: {
+            actor: components["schemas"]["Actor"];
+            /** @description Registered authority type, e.g. CLM.PAYMENT */
+            authorityType: components["schemas"]["Code"];
+            /** @description Dimension values of the registered type (amounts as Money objects) */
+            dimensions: {
+                [key: string]: components["schemas"]["OpenValue"];
             };
-            /** @description Dry-run: stoppability */
-            stoppable?: boolean;
-            reversalEntries?: components["schemas"]["Unspecified"][];
-            sourcePayableRestored?: components["schemas"]["Money"];
+            objectRef?: components["schemas"]["ObjectRef"];
         };
-        /** @description Typed from REQ-BIL-009, REQ-CLM-125. PRD inputs: "source type and id, payee, amount, method, approval evidence, statement or return reference" */
-        DisbursementVoidRequest: {
-            disbursementId: components["schemas"]["Uuid"];
-            reason: components["schemas"]["Code"];
+        /** @description Typed from REQ-PLT-003, REQ-PLT-103. PRD outputs: "decision, limit, referral targets, check id" */
+        AuthorityCheckResponse: {
+            /**
+             * @description REQ-PLT-103 (allow, refer, deny)
+             * @enum {string}
+             */
+            decision: "ALLOW" | "REFER" | "DENY";
+            /** @description e.g. AMOUNT_ABOVE_LIMIT */
+            reasonCode: components["schemas"]["Code"];
+            /** @description Applicable limit (amount or rate, per type) */
+            limit?: components["schemas"]["Money"] | components["schemas"]["Decimal"];
+            sourceGrantId?: components["schemas"]["Uuid"];
+            referralTargets?: {
+                userId?: components["schemas"]["Uuid"];
+                roleCode?: components["schemas"]["Code"];
+                groupCode?: components["schemas"]["Code"];
+            }[];
+            checkId: components["schemas"]["Uuid"];
         };
-        /** @description Typed from REQ-BIL-009, REQ-CLM-125. PRD outputs: "disbursement" */
-        DisbursementVoidResponse: {
-            /** @description Disbursement (REQ-BIL-009, REQ-BIL-213) */
-            disbursement: {
-                disbursementId: components["schemas"]["Uuid"];
-                /**
-                 * @description Canonical disbursement state (REQ-BIL-009)
-                 * @enum {string}
-                 */
-                status: "Requested" | "PendingApproval" | "Approved" | "Released" | "Issued" | "Cleared" | "Rejected" | "Stopped" | "Voided" | "Returned";
-                sourceType: components["schemas"]["DisbursementSourceType"];
-                /** @description Id of the source object in the source module */
-                sourceId: string;
-                amount: components["schemas"]["Money"];
-                /** @description Disbursement method (REQ-BIL-209: SEPA credit transfer, SEPA instant, card refund, intermediary account, CLEARING) */
-                method?: components["schemas"]["Code"];
-                requestedValueDate?: components["schemas"]["LocalDate"];
-                /** @description Masked payee account (REQ-BIL-213) */
-                maskedPayeeAccount?: string;
-            };
-            reversalEntries?: components["schemas"]["Unspecified"][];
-            sourcePayableRestored?: components["schemas"]["Money"];
+        /** @description plt.Authority.attachDecision request. PRD inputs: "check id, decision ref" */
+        AuthorityAttachDecisionRequest: {
+            /** @description PRD: "check id" */
+            checkId?: components["schemas"]["Uuid"];
+            /** @description PRD: "decision ref" */
+            decisionRef?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Receivable.register request. PRD inputs: "source, counterparty, references, amount, currency, due date" */
-        ReceivableRegisterRequest: {
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "counterparty" */
-            counterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "references" */
-            references?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amount" */
-            amount?: components["schemas"]["Money"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
-            /** @description PRD: "due date" */
-            dueDate?: components["schemas"]["LocalDate"];
-        };
-        /** @description bil.Receivable.register result. PRD outputs: "receivable id, payment reference" */
-        ReceivableRegisterResponse: {
-            /** @description PRD: "receivable id" */
-            receivableId?: components["schemas"]["Uuid"];
-            /** @description PRD: "payment reference" */
-            paymentReference?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.DisbursementBatch.prepare request. PRD inputs: "bank account, value date" */
-        DisbursementBatchPrepareRequest: {
-            /** @description PRD: "bank account" */
-            bankAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "value date" */
-            valueDate?: components["schemas"]["LocalDate"];
-        };
-        /** @description bil.DisbursementBatch.prepare result. PRD outputs: "batch, file ref" */
-        DisbursementBatchPrepareResponse: {
-            /** @description PRD: "batch" */
-            batch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file ref" */
-            fileRef?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.DisbursementBatch.release request. PRD inputs: "bank account, value date" */
-        DisbursementBatchReleaseRequest: {
-            /** @description PRD: "bank account" */
-            bankAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "value date" */
-            valueDate?: components["schemas"]["LocalDate"];
-        };
-        /** @description bil.DisbursementBatch.release result. PRD outputs: "batch, file ref" */
-        DisbursementBatchReleaseResponse: {
-            /** @description PRD: "batch" */
-            batch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file ref" */
-            fileRef?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.DisbursementBatch.approveRelease request. PRD inputs: "bank account, value date" */
-        DisbursementBatchApproveReleaseRequest: {
-            /** @description PRD: "bank account" */
-            bankAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "value date" */
-            valueDate?: components["schemas"]["LocalDate"];
-        };
-        /** @description bil.DisbursementBatch.approveRelease result. PRD outputs: "batch, file ref" */
-        DisbursementBatchApproveReleaseResponse: {
-            /** @description PRD: "batch" */
-            batch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file ref" */
-            fileRef?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.WriteOff.propose request. PRD inputs: "items, reason" */
-        WriteOffProposeRequest: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.WriteOff.propose result. PRD outputs: "write-off, posting preview" */
-        WriteOffProposeResponse: {
-            /** @description PRD: "write-off" */
-            writeOff?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posting preview" */
-            postingPreview?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.WriteOff.decide request. PRD inputs: "items, reason" */
-        WriteOffDecideRequest: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.WriteOff.decide result. PRD outputs: "write-off, posting preview" */
-        WriteOffDecideResponse: {
-            /** @description PRD: "write-off" */
-            writeOff?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posting preview" */
-            postingPreview?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.WriteOff.post request. PRD inputs: "items, reason" */
-        WriteOffPostRequest: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.WriteOff.post result. PRD outputs: "write-off, posting preview" */
-        WriteOffPostResponse: {
-            /** @description PRD: "write-off" */
-            writeOff?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posting preview" */
-            postingPreview?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Transfer.money request. PRD inputs: "source, target, amounts" */
-        TransferMoneyRequest: {
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "target" */
-            target?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amounts" */
-            amounts?: components["schemas"]["Money"][];
-        };
-        /** @description bil.Transfer.money result. PRD outputs: "entries preview" */
-        TransferMoneyResponse: {
-            /** @description PRD: "entries preview" */
-            entriesPreview?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Commission.calculations result. PRD outputs: "lines, statements, run" */
-        CommissionCalculationsItem: {
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "statements" */
-            statements?: components["schemas"]["Unspecified"];
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of bil.Commission.calculations results (cursor pagination, contract §3.5.5) */
-        CommissionCalculationsPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["CommissionCalculationsItem"][];
-        };
-        /** @description bil.Commission.statements result. PRD outputs: "statements with lines" */
-        CommissionStatementsItem: {
-            /** @description PRD: "statements with lines" */
-            statementsLines?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of bil.Commission.statements results (cursor pagination, contract §3.5.5) */
-        CommissionStatementsPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["CommissionStatementsItem"][];
-        };
-        /** @description bil.Commission.dispute request. PRD inputs: "statement id, line ids, reason" */
-        CommissionDisputeRequest: {
-            /** @description PRD: "statement id" */
-            statementId?: components["schemas"]["Uuid"];
-            /** @description PRD: "line ids" */
-            lineIds?: components["schemas"]["Uuid"][];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Commission.dispute result. PRD outputs: "dispute; adjustment line when accepted" */
-        CommissionDisputeResponse: {
-            /** @description PRD: "dispute" */
-            dispute?: components["schemas"]["Unspecified"];
-            /** @description PRD: "adjustment line when accepted" */
-            adjustmentLineWhenAccepted?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Commission.runPayments request. PRD inputs: "intermediary, period" */
-        CommissionRunPaymentsRequest: {
-            /** @description PRD: "intermediary" */
-            intermediary?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Commission.runPayments result. PRD outputs: "lines, statements, run" */
-        CommissionRunPaymentsResponse: {
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "statements" */
-            statements?: components["schemas"]["Unspecified"];
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Commission.simulate request. PRD inputs: "draft version, period" */
-        CommissionSimulateRequest: {
-            /** @description PRD: "draft version" */
-            draftVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.Commission.simulate result. PRD outputs: "totals" */
-        CommissionSimulateResponse: {
-            /** @description PRD: "totals" */
-            totals?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.TaxLevy.periods result. PRD outputs: "totals, detail" */
-        TaxLevyPeriodsResponse: {
-            /** @description PRD: "totals" */
-            totals?: components["schemas"]["Unspecified"];
-            /** @description PRD: "detail" */
-            detail?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.TaxLevy.detail result. PRD outputs: "totals, detail" */
-        TaxLevyDetailResponse: {
-            /** @description PRD: "totals" */
-            totals?: components["schemas"]["Unspecified"];
-            /** @description PRD: "detail" */
-            detail?: components["schemas"]["Unspecified"];
-        };
-        /** @description bil.TaxLevy.requestLevyPayment request. PRD inputs: "type, period" */
-        TaxLevyRequestLevyPaymentRequest: {
+        /** @description plt.Authority.attachDecision result. PRD outputs: "—" */
+        AuthorityAttachDecisionResponse: Record<string, never>;
+        /** @description plt.Authority.whoCanApprove result. PRD outputs: "—" */
+        AuthorityWhoCanApproveResponse: Record<string, never>;
+        /** @description plt.ApprovalType.register request. PRD inputs: "type, object ref, payload hash, diff" */
+        ApprovalTypeRegisterRequest: {
             /** @description PRD: "type" */
             type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            /** @description PRD: "object ref" */
+            objectRef?: components["schemas"]["Unspecified"];
+            /** @description PRD: "payload hash" */
+            payloadHash?: components["schemas"]["Sha256"];
+            /** @description PRD: "diff" */
+            diff?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.TaxLevy.requestLevyPayment result. PRD outputs: "totals, detail" */
-        TaxLevyRequestLevyPaymentResponse: {
-            /** @description PRD: "totals" */
-            totals?: components["schemas"]["Unspecified"];
-            /** @description PRD: "detail" */
-            detail?: components["schemas"]["Unspecified"];
+        /** @description plt.ApprovalType.register result. PRD outputs: "request; decision" */
+        ApprovalTypeRegisterResponse: {
+            /** @description PRD: "request" */
+            request?: components["schemas"]["Unspecified"];
+            /** @description PRD: "decision" */
+            decision?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Ledger.query result. PRD outputs: "entries, balances" */
-        LedgerQueryItem: {
-            /** @description PRD: "entries" */
-            entries?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "balances" */
-            balances?: components["schemas"]["Unspecified"];
+        /**
+         * @description Approval request state (REQ-PLT-114 subset built by SL2-PLT; Returned, Expired and Consumed come with W1-PLT-02). Withdrawn = superseded by a newer request for the same subject.
+         * @enum {string}
+         */
+        ApprovalStatus: "PendingApproval" | "Approved" | "Rejected" | "Withdrawn";
+        /** @description The authority a checker must hold to decide (plt.Authority.check of the checker on these dimensions). */
+        ApprovalAuthority: {
+            /** @description Registered authority type, e.g. CLM.PAYMENT */
+            type: components["schemas"]["Code"];
+            /** @description Value of the type's `amount` money dimension */
+            amount?: components["schemas"]["Money"];
+            /** @description Values of the type's code dimensions by dimension name (e.g. costType) */
+            codes?: {
+                [key: string]: components["schemas"]["Code"];
+            };
         };
-        /** @description Page of bil.Ledger.query results (cursor pagination, contract §3.5.5) */
-        LedgerQueryPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["LedgerQueryItem"][];
+        /** @description The decision of a checker (REQ-PLT-114). */
+        ApprovalDecisionView: {
+            /** @enum {string} */
+            decision: "Approved" | "Rejected";
+            checker: components["schemas"]["Actor"];
+            comment?: string;
+            /** @description plt.Authority.check result that allowed the checker */
+            authorityCheckId: components["schemas"]["Uuid"];
+            decidedAt: components["schemas"]["Instant"];
         };
-        /** @description bil.Ledger.balance result. PRD outputs: "entries, balances" */
-        LedgerBalanceResponse: {
-            /** @description PRD: "entries" */
-            entries?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "balances" */
-            balances?: components["schemas"]["Unspecified"];
+        /** @description An approval request (REQ-PLT-004, REQ-PLT-114, REQ-PLT-117). */
+        ApprovalView: {
+            requestId: components["schemas"]["Uuid"];
+            /** @description Approval type code, e.g. CLM.TRANSACTION_SET */
+            type: components["schemas"]["Code"];
+            /** @description The subject to approve */
+            objectRef: components["schemas"]["ObjectRef"];
+            /** @description SHA-256 content hash of the subject the maker submitted */
+            payloadHash: components["schemas"]["Sha256"];
+            status: components["schemas"]["ApprovalStatus"];
+            maker: components["schemas"]["Actor"];
+            authority: components["schemas"]["ApprovalAuthority"];
+            /** @description Role whose holders work the request in their inbox */
+            referralRole: components["schemas"]["Code"];
+            reason?: string;
+            /** @description Field-level diff shown to the checker (no P2 values) */
+            diff?: components["schemas"]["OpenObject"];
+            /** @description The earlier request for the same subject this one replaced */
+            supersedes?: components["schemas"]["Uuid"];
+            requestedAt: components["schemas"]["Instant"];
+            version: number;
         };
-        /** @description bil.Reconciliation.bank request. PRD inputs: "account, date" */
-        ReconciliationBankRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
+        /** @description Typed from REQ-PLT-004, REQ-PLT-114, REQ-PLT-117 (SL2-PLT). PRD inputs: "type, object ref, payload hash, diff". The maker is the calling actor. A new request for a subject that already has a pending request of the same type supersedes it (the old one becomes Withdrawn; its maker and editors may not decide the new one). */
+        ApprovalRequestRequest: {
+            /** @description PRD: "type". Approval type code, e.g. CLM.TRANSACTION_SET */
+            type: components["schemas"]["Code"];
+            /** @description PRD: "object ref" */
+            objectRef: components["schemas"]["ObjectRef"];
+            /** @description PRD: "payload hash" */
+            payloadHash: components["schemas"]["Sha256"];
+            /** @description PRD: "diff" */
+            diff?: components["schemas"]["OpenObject"];
+            authority: components["schemas"]["ApprovalAuthority"];
+            /** @description Role that works the request (the referral target of the maker's authority check) */
+            referralRole: components["schemas"]["Code"];
+            reason?: string;
         };
-        /** @description bil.Reconciliation.bank result. PRD outputs: "status, breaks" */
-        ReconciliationBankResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
-            /** @description PRD: "breaks" */
-            breaks?: components["schemas"]["Unspecified"];
+        /** @description plt.Approval.request result. PRD outputs: "request; decision" */
+        ApprovalRequestResponse: {
+            /** @description PRD: "request" */
+            request: components["schemas"]["ApprovalView"];
+            /** @description PRD: "decision" */
+            decision?: components["schemas"]["ApprovalDecisionView"] | null;
         };
-        /** @description bil.Reconciliation.invariants request. PRD inputs: "account, date" */
-        ReconciliationInvariantsRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
+        /** @description Typed from REQ-PLT-114, REQ-PLT-115, REQ-PLT-117 (SL2-PLT). The checker is the calling actor; the decision carries the content hash the checker saw and fails with PLT-ERR-APPROVAL-STALE when it is no longer the request's hash or the request is no longer pending. */
+        ApprovalDecideRequest: {
+            requestId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "Approve" | "Reject";
+            /** @description PRD: "payload hash". The hash of the content the checker reviewed */
+            payloadHash: components["schemas"]["Sha256"];
+            /** @description Mandatory on reject (REQ-PLT-114) */
+            comment?: string;
         };
-        /** @description bil.Reconciliation.invariants result. PRD outputs: "status, breaks" */
-        ReconciliationInvariantsResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
-            /** @description PRD: "breaks" */
-            breaks?: components["schemas"]["Unspecified"];
+        /** @description plt.Approval.decide result. PRD outputs: "request; decision" */
+        ApprovalDecideResponse: {
+            /** @description PRD: "request" */
+            request: components["schemas"]["ApprovalView"];
+            /** @description PRD: "decision" */
+            decision: components["schemas"]["ApprovalDecisionView"];
         };
-        /** @description bil.Reconciliation.fin request. PRD inputs: "legal entity, accounting date, optional sub-ledger account and event type" */
-        ReconciliationFinRequest: {
-            /** @description PRD: "legal entity" */
-            legalEntity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "accounting date" */
-            accountingDate?: components["schemas"]["LocalDate"];
-            /** @description PRD: "optional sub-ledger account and event type" (optional) */
-            subLedgerAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "optional sub-ledger account and event type" (optional) */
+        /** @description plt.Approval.withdraw request. PRD inputs: "type, object ref, payload hash, diff" */
+        ApprovalWithdrawRequest: {
+            /** @description PRD: "type" */
+            type?: components["schemas"]["Unspecified"];
+            /** @description PRD: "object ref" */
+            objectRef?: components["schemas"]["Unspecified"];
+            /** @description PRD: "payload hash" */
+            payloadHash?: components["schemas"]["Sha256"];
+            /** @description PRD: "diff" */
+            diff?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Approval.withdraw result. PRD outputs: "request; decision" */
+        ApprovalWithdrawResponse: {
+            /** @description PRD: "request" */
+            request?: components["schemas"]["Unspecified"];
+            /** @description PRD: "decision" */
+            decision?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Approval.get result. PRD outputs: "request; decision" */
+        ApprovalGetResponse: {
+            /** @description PRD: "request" */
+            request: components["schemas"]["ApprovalView"];
+            /** @description PRD: "decision" */
+            decision?: components["schemas"]["ApprovalDecisionView"] | null;
+        };
+        /** @description plt.Approval.list result. PRD outputs: "request; decision" */
+        ApprovalListItem: {
+            /** @description PRD: "request" */
+            request: components["schemas"]["ApprovalView"];
+            /** @description PRD: "decision" */
+            decision?: components["schemas"]["ApprovalDecisionView"] | null;
+        };
+        /** @description Page of plt.Approval.list results (cursor pagination, contract §3.5.5) */
+        ApprovalListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ApprovalListItem"][];
+        };
+        /** @description plt.Approval.verifyForExecution request. PRD inputs: "request id, hash" */
+        ApprovalVerifyForExecutionRequest: {
+            /** @description PRD: "request id" */
+            requestId: components["schemas"]["Uuid"];
+            /** @description PRD: "hash" */
+            hash: components["schemas"]["Sha256"];
+            /** @description Approval type the executing module expects (SL2-PLT review D1) */
+            type: components["schemas"]["Code"];
+            /** @description Subject the executing module is about to execute (SL2-PLT review D1) */
+            objectRef: components["schemas"]["ObjectRef"];
+        };
+        /** @description plt.Approval.verifyForExecution result. PRD outputs: "ok". ok is true only for an Approved request whose hash equals the given one; a different hash fails with PLT-ERR-APPROVAL-HASH-MISMATCH. */
+        ApprovalVerifyForExecutionResponse: {
+            /** @description PRD: "ok" */
+            ok: boolean;
+            status: components["schemas"]["ApprovalStatus"];
+            /** @description The authority (type and dimensions) the approval was decided under; the executing module compares it with the dimensions it computes for what it executes */
+            authority: components["schemas"]["ApprovalAuthority"];
+        };
+        /** @description plt.Audit.append request. PRD inputs: "AuditEvent" */
+        AuditAppendRequest: {
+            /** @description PRD: "AuditEvent" */
+            auditEvent?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Audit.append result. PRD outputs: "—" */
+        AuditAppendResponse: Record<string, never>;
+        /** @description plt.Audit.query result. PRD outputs: "page; export job; verification result" */
+        AuditQueryItem: {
+            /** @description PRD: "page" */
+            page?: components["schemas"]["Unspecified"];
+            /** @description PRD: "export job" */
+            exportJob?: components["schemas"]["Unspecified"];
+            /** @description PRD: "verification result" */
+            verificationResult?: components["schemas"]["Unspecified"];
+        };
+        /** @description Page of plt.Audit.query results (cursor pagination, contract §3.5.5) */
+        AuditQueryPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["AuditQueryItem"][];
+        };
+        /** @description plt.Audit.export request. PRD inputs: "filters" */
+        AuditExportRequest: {
+            /** @description PRD: "filters" */
+            filters?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Audit.export result. PRD outputs: "page; export job; verification result" */
+        AuditExportResponse: {
+            /** @description PRD: "page" */
+            page?: components["schemas"]["Unspecified"];
+            /** @description PRD: "export job" */
+            exportJob?: components["schemas"]["Unspecified"];
+            /** @description PRD: "verification result" */
+            verificationResult?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Audit.verify request. PRD inputs: "filters" */
+        AuditVerifyRequest: {
+            /** @description PRD: "filters" */
+            filters?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Audit.verify result. PRD outputs: "page; export job; verification result" */
+        AuditVerifyResponse: {
+            /** @description PRD: "page" */
+            page?: components["schemas"]["Unspecified"];
+            /** @description PRD: "export job" */
+            exportJob?: components["schemas"]["Unspecified"];
+            /** @description PRD: "verification result" */
+            verificationResult?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Outbox.publish request. PRD inputs: "event type, aggregate, payload" */
+        OutboxPublishRequest: {
+            /** @description PRD: "event type" */
             eventType?: components["schemas"]["Unspecified"];
+            /** @description PRD: "aggregate" */
+            aggregate?: components["schemas"]["Unspecified"];
+            /** @description PRD: "payload" */
+            payload?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Reconciliation.fin result. PRD outputs: "control totals per account and event type, entry ids on request" */
-        ReconciliationFinResponse: {
-            /** @description PRD: "control totals per account and event type" */
-            controlTotalsPerAccountAndEvent?: components["schemas"]["Unspecified"];
-            /** @description PRD: "entry ids on request" */
-            entryIdsOnRequest?: components["schemas"]["Unspecified"];
+        /** @description plt.Outbox.publish result. PRD outputs: "—" */
+        OutboxPublishResponse: Record<string, never>;
+        /** @description plt.Schema.register request. PRD inputs: "schema" */
+        SchemaRegisterRequest: {
+            /** @description PRD: "schema" */
+            schema?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Import.reverse request. PRD inputs: "batch id or source key" */
-        ImportReverseRequest: {
-            /** @description PRD: "batch id or source key" (optional) */
-            batchId?: components["schemas"]["Uuid"];
-            /** @description PRD: "batch id or source key" (optional) */
-            sourceKey?: components["schemas"]["Unspecified"];
+        /** @description plt.Schema.register result. PRD outputs: "compatibility result" */
+        SchemaRegisterResponse: {
+            /** @description PRD: "compatibility result" */
+            compatibilityResult?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Schema.check request. PRD inputs: "schema" */
+        SchemaCheckRequest: {
+            /** @description PRD: "schema" */
+            schema?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Schema.check result. PRD outputs: "compatibility result" */
+        SchemaCheckResponse: {
+            /** @description PRD: "compatibility result" */
+            compatibilityResult?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Consumer.replay request. PRD inputs: "consumer, from position; dead-letter ids" */
+        ConsumerReplayRequest: {
+            /** @description PRD: "consumer" */
+            consumer?: components["schemas"]["Unspecified"];
+            /** @description PRD: "from position" */
+            fromPosition?: components["schemas"]["Unspecified"];
+            /** @description PRD: "dead-letter ids" */
+            deadLetterIds?: components["schemas"]["Uuid"][];
+        };
+        /** @description plt.Consumer.replay result. PRD outputs: "—" */
+        ConsumerReplayResponse: Record<string, never>;
+        /** @description plt.DeadLetter.list result. PRD outputs: "—" */
+        DeadLetterListItem: Record<string, never>;
+        /** @description Page of plt.DeadLetter.list results (cursor pagination, contract §3.5.5) */
+        DeadLetterListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["DeadLetterListItem"][];
+        };
+        /** @description plt.DeadLetter.replay request. PRD inputs: "consumer, from position; dead-letter ids" */
+        DeadLetterReplayRequest: {
+            /** @description PRD: "consumer" */
+            consumer?: components["schemas"]["Unspecified"];
+            /** @description PRD: "from position" */
+            fromPosition?: components["schemas"]["Unspecified"];
+            /** @description PRD: "dead-letter ids" */
+            deadLetterIds?: components["schemas"]["Uuid"][];
+        };
+        /** @description plt.DeadLetter.replay result. PRD outputs: "—" */
+        DeadLetterReplayResponse: Record<string, never>;
+        /** @description plt.DeadLetter.discard request. PRD inputs: "consumer, from position; dead-letter ids" */
+        DeadLetterDiscardRequest: {
+            /** @description PRD: "consumer" */
+            consumer?: components["schemas"]["Unspecified"];
+            /** @description PRD: "from position" */
+            fromPosition?: components["schemas"]["Unspecified"];
+            /** @description PRD: "dead-letter ids" */
+            deadLetterIds?: components["schemas"]["Uuid"][];
+        };
+        /** @description plt.DeadLetter.discard result. PRD outputs: "—" */
+        DeadLetterDiscardResponse: Record<string, never>;
+        /** @description plt.Adapter.invoke request. PRD inputs: "adapter, operation, payload, idempotency key" */
+        AdapterInvokeRequest: {
+            /** @description PRD: "adapter" */
+            adapter?: components["schemas"]["Unspecified"];
+            /** @description PRD: "operation" */
+            operation?: components["schemas"]["Unspecified"];
+            /** @description PRD: "payload" */
+            payload?: components["schemas"]["Unspecified"];
+            /** @description PRD: "idempotency key" */
+            idempotencyKey?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Adapter.invoke result. PRD outputs: "response" */
+        AdapterInvokeResponse: {
+            /** @description PRD: "response" */
+            response?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Exchange.search result. PRD outputs: "exchanges" */
+        ExchangeSearchItem: {
+            /** @description PRD: "exchanges" */
+            exchanges?: components["schemas"]["Unspecified"];
+        };
+        /** @description Page of plt.Exchange.search results (cursor pagination, contract §3.5.5) */
+        ExchangeSearchPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ExchangeSearchItem"][];
+        };
+        /** @description plt.Workflow.start request. PRD inputs: "type, business key, input" */
+        WorkflowStartRequest: {
+            /** @description PRD: "type" */
+            type?: components["schemas"]["Unspecified"];
+            /** @description PRD: "business key" */
+            businessKey?: components["schemas"]["Unspecified"];
+            /** @description PRD: "input" */
+            input?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Workflow.start result. PRD outputs: "—" */
+        WorkflowStartResponse: Record<string, never>;
+        /** @description plt.Workflow.signal request. PRD inputs: "workflow id or business key, signal, payload" */
+        WorkflowSignalRequest: {
+            /** @description PRD: "workflow id or business key" (optional) */
+            workflowId?: components["schemas"]["Uuid"];
+            /** @description PRD: "workflow id or business key" (optional) */
+            businessKey?: components["schemas"]["Unspecified"];
+            /** @description PRD: "signal" */
+            signal?: components["schemas"]["Unspecified"];
+            /** @description PRD: "payload" */
+            payload?: components["schemas"]["Unspecified"];
         } & (unknown | unknown);
-        /** @description bil.Import.reverse result. PRD outputs: "reversal report per object" */
-        ImportReverseResponse: {
-            /** @description PRD: "reversal report per object" */
-            reversalReportPerObject?: components["schemas"]["Unspecified"];
+        /** @description plt.Workflow.signal result. PRD outputs: "ack" */
+        WorkflowSignalResponse: {
+            /** @description PRD: "ack" */
+            ack?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Import.convertCurrency request. PRD inputs: "plan id" */
-        ImportConvertCurrencyRequest: {
-            /** @description PRD: "plan id" */
-            planId?: components["schemas"]["Uuid"];
+        /** @description plt.Workflow.query result. PRD outputs: "—" */
+        WorkflowQueryItem: Record<string, never>;
+        /** @description Page of plt.Workflow.query results (cursor pagination, contract §3.5.5) */
+        WorkflowQueryPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["WorkflowQueryItem"][];
         };
-        /** @description bil.Import.convertCurrency result. PRD outputs: "conversion report, residuals" */
-        ImportConvertCurrencyResponse: {
-            /** @description PRD: "conversion report" */
-            conversionReport?: components["schemas"]["Unspecified"];
-            /** @description PRD: "residuals" */
-            residuals?: components["schemas"]["Unspecified"];
+        /** @description plt.Workflow.cancel request. PRD inputs: "type, business key, input" */
+        WorkflowCancelRequest: {
+            /** @description PRD: "type" */
+            type?: components["schemas"]["Unspecified"];
+            /** @description PRD: "business key" */
+            businessKey?: components["schemas"]["Unspecified"];
+            /** @description PRD: "input" */
+            input?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Dsar.export request. PRD inputs: "party id" */
-        DsarExportRequest: {
-            /** @description PRD: "party id" */
-            partyId?: components["schemas"]["Uuid"];
+        /** @description plt.Workflow.cancel result. PRD outputs: "—" */
+        WorkflowCancelResponse: Record<string, never>;
+        /** @description plt.Workflow.terminate request. PRD inputs: "type, business key, input" */
+        WorkflowTerminateRequest: {
+            /** @description PRD: "type" */
+            type?: components["schemas"]["Unspecified"];
+            /** @description PRD: "business key" */
+            businessKey?: components["schemas"]["Unspecified"];
+            /** @description PRD: "input" */
+            input?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Dsar.export result. PRD outputs: "export, outcome" */
-        DsarExportResponse: {
-            /** @description PRD: "export" */
-            export?: components["schemas"]["Unspecified"];
+        /** @description plt.Workflow.terminate result. PRD outputs: "—" */
+        WorkflowTerminateResponse: Record<string, never>;
+        /** @description plt.Job.run request. PRD inputs: "job code" */
+        JobRunRequest: {
+            /** @description PRD: "job code" */
+            jobCode?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Job.run result. PRD outputs: "—" */
+        JobRunResponse: Record<string, never>;
+        /** @description plt.Job.stop request. PRD inputs: "job code" */
+        JobStopRequest: {
+            /** @description PRD: "job code" */
+            jobCode?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Job.stop result. PRD outputs: "—" */
+        JobStopResponse: Record<string, never>;
+        /** @description plt.Job.schedule request. PRD inputs: "job code" */
+        JobScheduleRequest: {
+            /** @description PRD: "job code" */
+            jobCode?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Job.schedule result. PRD outputs: "—" */
+        JobScheduleResponse: Record<string, never>;
+        /** @description plt.Job.history result. PRD outputs: "—" */
+        JobHistoryItem: Record<string, never>;
+        /** @description Page of plt.Job.history results (cursor pagination, contract §3.5.5) */
+        JobHistoryPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["JobHistoryItem"][];
+        };
+        /** @description plt.DecisionTable.evaluate request. PRD inputs: "table, version or as-at, inputs" */
+        DecisionTableEvaluateRequest: {
+            /** @description PRD: "table" */
+            table?: components["schemas"]["Unspecified"];
+            /** @description PRD: "version or as-at" (optional) */
+            version?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.DecisionTable.evaluate result. PRD outputs: "outputs, rule ids, evaluation id" */
+        DecisionTableEvaluateResponse: {
+            /** @description PRD: "outputs" */
+            outputs?: components["schemas"]["Unspecified"];
+            /** @description PRD: "rule ids" */
+            ruleIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "evaluation id" */
+            evaluationId?: components["schemas"]["Uuid"];
+        };
+        /** @description plt.DecisionTable.test request. PRD inputs: "table, version or as-at, inputs" */
+        DecisionTableTestRequest: {
+            /** @description PRD: "table" */
+            table?: components["schemas"]["Unspecified"];
+            /** @description PRD: "version or as-at" (optional) */
+            version?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.DecisionTable.test result. PRD outputs: "outputs, rule ids, evaluation id" */
+        DecisionTableTestResponse: {
+            /** @description PRD: "outputs" */
+            outputs?: components["schemas"]["Unspecified"];
+            /** @description PRD: "rule ids" */
+            ruleIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "evaluation id" */
+            evaluationId?: components["schemas"]["Uuid"];
+        };
+        /** @description plt.DecisionTable.activate request. PRD inputs: "table, version or as-at, inputs" */
+        DecisionTableActivateRequest: {
+            /** @description PRD: "table" */
+            table?: components["schemas"]["Unspecified"];
+            /** @description PRD: "version or as-at" (optional) */
+            version?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.DecisionTable.activate result. PRD outputs: "outputs, rule ids, evaluation id" */
+        DecisionTableActivateResponse: {
+            /** @description PRD: "outputs" */
+            outputs?: components["schemas"]["Unspecified"];
+            /** @description PRD: "rule ids" */
+            ruleIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "evaluation id" */
+            evaluationId?: components["schemas"]["Uuid"];
+        };
+        /** @description plt.DecisionTable.explain result. PRD outputs: "outputs, rule ids, evaluation id" */
+        DecisionTableExplainResponse: {
+            /** @description PRD: "outputs" */
+            outputs?: components["schemas"]["Unspecified"];
+            /** @description PRD: "rule ids" */
+            ruleIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "evaluation id" */
+            evaluationId?: components["schemas"]["Uuid"];
+        };
+        /** @description plt.FeatureFlag.evaluate request. PRD inputs: "flag, context" */
+        FeatureFlagEvaluateRequest: {
+            /** @description PRD: "flag" */
+            flag?: boolean;
+            /** @description PRD: "context" */
+            context?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.FeatureFlag.evaluate result. PRD outputs: "state" */
+        FeatureFlagEvaluateResponse: {
+            /** @description PRD: "state" */
+            state?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Calendar.isBusinessDay result. PRD outputs: "date or count, calendar versions" */
+        CalendarIsBusinessDayResponse: {
+            /** @description PRD: "date or count" */
+            dateOrCount?: components["schemas"]["Unspecified"];
+            /** @description PRD: "calendar versions" */
+            calendarVersions?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Calendar.addBusinessDays result. PRD outputs: "date, calendar versions" */
+        CalendarAddBusinessDaysResponse: {
+            /** @description PRD: "date" */
+            date?: components["schemas"]["LocalDate"];
+            /** @description PRD: "calendar versions" */
+            calendarVersions?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Calendar.nextBusinessDay result. PRD outputs: "date or count, calendar versions" */
+        CalendarNextBusinessDayResponse: {
+            /** @description PRD: "date or count" */
+            dateOrCount?: components["schemas"]["Unspecified"];
+            /** @description PRD: "calendar versions" */
+            calendarVersions?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Calendar.previousBusinessDay result. PRD outputs: "date or count, calendar versions" */
+        CalendarPreviousBusinessDayResponse: {
+            /** @description PRD: "date or count" */
+            dateOrCount?: components["schemas"]["Unspecified"];
+            /** @description PRD: "calendar versions" */
+            calendarVersions?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Calendar.businessDaysBetween result. PRD outputs: "date or count, calendar versions" */
+        CalendarBusinessDaysBetweenResponse: {
+            /** @description PRD: "date or count" */
+            dateOrCount?: components["schemas"]["Unspecified"];
+            /** @description PRD: "calendar versions" */
+            calendarVersions?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Calendar.endOfPeriod result. PRD outputs: "date or count, calendar versions" */
+        CalendarEndOfPeriodResponse: {
+            /** @description PRD: "date or count" */
+            dateOrCount?: components["schemas"]["Unspecified"];
+            /** @description PRD: "calendar versions" */
+            calendarVersions?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Calendar.generate request. PRD inputs: "calendar, years" */
+        CalendarGenerateRequest: {
+            /** @description PRD: "calendar" */
+            calendar?: components["schemas"]["Unspecified"];
+            /** @description PRD: "years" */
+            years?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Calendar.generate result. PRD outputs: "—" */
+        CalendarGenerateResponse: Record<string, never>;
+        /** @description plt.Calendar.publish request. PRD inputs: "calendar, years" */
+        CalendarPublishRequest: {
+            /** @description PRD: "calendar" */
+            calendar?: components["schemas"]["Unspecified"];
+            /** @description PRD: "years" */
+            years?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Calendar.publish result. PRD outputs: "—" */
+        CalendarPublishResponse: Record<string, never>;
+        /** @description plt.Holiday.addException request. PRD inputs: "calendar, years" */
+        HolidayAddExceptionRequest: {
+            /** @description PRD: "calendar" */
+            calendar?: components["schemas"]["Unspecified"];
+            /** @description PRD: "years" */
+            years?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Holiday.addException result. PRD outputs: "—" */
+        HolidayAddExceptionResponse: Record<string, never>;
+        /** @description plt.Fx.getRate result. PRD outputs: "rate, rate id" */
+        FxGetRateResponse: {
+            /** @description PRD: "rate" */
+            rate?: components["schemas"]["Unspecified"];
+            /** @description PRD: "rate id" */
+            rateId?: components["schemas"]["Uuid"];
+        };
+        /** @description plt.Fx.listRates result. PRD outputs: "rate, rate id" */
+        FxListRatesResponse: {
+            /** @description PRD: "rate" */
+            rate?: components["schemas"]["Unspecified"];
+            /** @description PRD: "rate id" */
+            rateId?: components["schemas"]["Uuid"];
+        };
+        /** @description plt.Fx.correct request. PRD inputs: "pair, date, type" */
+        FxCorrectRequest: {
+            /** @description PRD: "pair" */
+            pair?: components["schemas"]["Unspecified"];
+            /** @description PRD: "date" */
+            date?: components["schemas"]["LocalDate"];
+            /** @description PRD: "type" */
+            type?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Fx.correct result. PRD outputs: "rate, rate id" */
+        FxCorrectResponse: {
+            /** @description PRD: "rate" */
+            rate?: components["schemas"]["Unspecified"];
+            /** @description PRD: "rate id" */
+            rateId?: components["schemas"]["Uuid"];
+        };
+        /** @description plt.Currency.get result. PRD outputs: "rate, rate id" */
+        CurrencyGetResponse: {
+            /** @description PRD: "rate" */
+            rate?: components["schemas"]["Unspecified"];
+            /** @description PRD: "rate id" */
+            rateId?: components["schemas"]["Uuid"];
+        };
+        /** @description plt.Number.next request. PRD inputs: "scheme, context" */
+        NumberNextRequest: {
+            /** @description PRD: "scheme" */
+            scheme?: components["schemas"]["Unspecified"];
+            /** @description PRD: "context" */
+            context?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Number.next result. PRD outputs: "number" */
+        NumberNextResponse: {
+            /** @description PRD: "number" */
+            number?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Number.reserve request. PRD inputs: "scheme, context, range or legacy numbers" */
+        NumberReserveRequest: {
+            /** @description PRD: "scheme" */
+            scheme?: components["schemas"]["Unspecified"];
+            /** @description PRD: "context" */
+            context?: components["schemas"]["Unspecified"];
+            /** @description PRD: "range or legacy numbers" (optional) */
+            rangeNumbers?: components["schemas"]["Unspecified"];
+            /** @description PRD: "range or legacy numbers" (optional) */
+            legacyNumbers?: components["schemas"]["Unspecified"];
+        } & (unknown | unknown);
+        /** @description plt.Number.reserve result. PRD outputs: "reservation" */
+        NumberReserveResponse: {
+            /** @description PRD: "reservation" */
+            reservation?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Number.void request. PRD inputs: "scheme, context" */
+        NumberVoidRequest: {
+            /** @description PRD: "scheme" */
+            scheme?: components["schemas"]["Unspecified"];
+            /** @description PRD: "context" */
+            context?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Number.void result. PRD outputs: "number" */
+        NumberVoidResponse: {
+            /** @description PRD: "number" */
+            number?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Ai.invoke request. PRD inputs: "feature, inputs (allow-listed)" */
+        AiInvokeRequest: {
+            /** @description PRD: "feature" */
+            feature?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs (allow-listed)" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Ai.invoke result. PRD outputs: "output, interaction id; outcome" */
+        AiInvokeResponse: {
+            /** @description PRD: "output" */
+            output?: components["schemas"]["Unspecified"];
+            /** @description PRD: "interaction id" */
+            interactionId?: components["schemas"]["Uuid"];
             /** @description PRD: "outcome" */
             outcome?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Dsar.restrict request. PRD inputs: "party id, DSAR id, scope" */
-        DsarRestrictRequest: {
-            /** @description PRD: "party id" */
-            partyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "DSAR id" */
-            dsarId?: components["schemas"]["Uuid"];
+        /** @description plt.Ai.recordOutcome request. PRD inputs: "feature, inputs (allow-listed)" */
+        AiRecordOutcomeRequest: {
+            /** @description PRD: "feature" */
+            feature?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs (allow-listed)" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Ai.recordOutcome result. PRD outputs: "output, interaction id; outcome" */
+        AiRecordOutcomeResponse: {
+            /** @description PRD: "output" */
+            output?: components["schemas"]["Unspecified"];
+            /** @description PRD: "interaction id" */
+            interactionId?: components["schemas"]["Uuid"];
+            /** @description PRD: "outcome" */
+            outcome?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.AiToggle.resolve request. PRD inputs: "feature, inputs (allow-listed)" */
+        AiToggleResolveRequest: {
+            /** @description PRD: "feature" */
+            feature?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs (allow-listed)" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.AiToggle.resolve result. PRD outputs: "output, interaction id; outcome" */
+        AiToggleResolveResponse: {
+            /** @description PRD: "output" */
+            output?: components["schemas"]["Unspecified"];
+            /** @description PRD: "interaction id" */
+            interactionId?: components["schemas"]["Uuid"];
+            /** @description PRD: "outcome" */
+            outcome?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.AiToggle.set request. PRD inputs: "feature, inputs (allow-listed)" */
+        AiToggleSetRequest: {
+            /** @description PRD: "feature" */
+            feature?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs (allow-listed)" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.AiToggle.set result. PRD outputs: "output, interaction id; outcome" */
+        AiToggleSetResponse: {
+            /** @description PRD: "output" */
+            output?: components["schemas"]["Unspecified"];
+            /** @description PRD: "interaction id" */
+            interactionId?: components["schemas"]["Uuid"];
+            /** @description PRD: "outcome" */
+            outcome?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Ai.killSwitch request. PRD inputs: "feature, inputs (allow-listed)" */
+        AiKillSwitchRequest: {
+            /** @description PRD: "feature" */
+            feature?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs (allow-listed)" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Ai.killSwitch result. PRD outputs: "output, interaction id; outcome" */
+        AiKillSwitchResponse: {
+            /** @description PRD: "output" */
+            output?: components["schemas"]["Unspecified"];
+            /** @description PRD: "interaction id" */
+            interactionId?: components["schemas"]["Uuid"];
+            /** @description PRD: "outcome" */
+            outcome?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Retention.registerDataset request. PRD inputs: "per op" */
+        RetentionRegisterDatasetRequest: Record<string, never>;
+        /** @description plt.Retention.registerDataset result. PRD outputs: "—" */
+        RetentionRegisterDatasetResponse: Record<string, never>;
+        /** @description plt.Retention.schedule request. PRD inputs: "RC code, jurisdiction" */
+        RetentionScheduleRequest: {
+            /** @description PRD: "RC code" */
+            rcCode?: components["schemas"]["Unspecified"];
+            /** @description PRD: "jurisdiction" */
+            jurisdiction?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Retention.schedule result. PRD outputs: "schedule; change → approval request" */
+        RetentionScheduleResponse: {
+            /** @description PRD: "schedule" */
+            schedule?: components["schemas"]["Unspecified"];
+            /** @description PRD: "change → approval request" */
+            changeApprovalRequest?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Retention.runs result. PRD outputs: "—" */
+        RetentionRunsItem: Record<string, never>;
+        /** @description Page of plt.Retention.runs results (cursor pagination, contract §3.5.5) */
+        RetentionRunsPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["RetentionRunsItem"][];
+        };
+        /** @description plt.LegalHold.apply request. PRD inputs: "per op" */
+        LegalHoldApplyRequest: Record<string, never>;
+        /** @description plt.LegalHold.apply result. PRD outputs: "—" */
+        LegalHoldApplyResponse: Record<string, never>;
+        /** @description plt.LegalHold.release request. PRD inputs: "per op" */
+        LegalHoldReleaseRequest: Record<string, never>;
+        /** @description plt.LegalHold.release result. PRD outputs: "—" */
+        LegalHoldReleaseResponse: Record<string, never>;
+        /** @description plt.LegalHold.check request. PRD inputs: "per op" */
+        LegalHoldCheckRequest: Record<string, never>;
+        /** @description plt.LegalHold.check result. PRD outputs: "—" */
+        LegalHoldCheckResponse: Record<string, never>;
+        /** @description plt.Erasure.execute request. PRD inputs: "per op" */
+        ErasureExecuteRequest: Record<string, never>;
+        /** @description plt.Erasure.execute result. PRD outputs: "—" */
+        ErasureExecuteResponse: Record<string, never>;
+        /** @description plt.Subject.export request. PRD inputs: "per op" */
+        SubjectExportRequest: Record<string, never>;
+        /** @description plt.Subject.export result. PRD outputs: "—" */
+        SubjectExportResponse: Record<string, never>;
+        /** @description plt.Ror.export request. PRD inputs: "per op" */
+        RorExportRequest: Record<string, never>;
+        /** @description plt.Ror.export result. PRD outputs: "—" */
+        RorExportResponse: Record<string, never>;
+        /** @description plt.Time.now result. PRD outputs: "instant (offset applied in non-production)" */
+        TimeNowResponse: {
+            /** @description PRD: "instant (offset applied in non-production)" */
+            instant?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Import.users request. PRD inputs: "batch id, records" */
+        ImportUsersRequest: {
+            /** @description PRD: "batch id" */
+            batchId?: components["schemas"]["Uuid"];
+            /** @description PRD: "records" */
+            records?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Import.users result. PRD outputs: "per-record outcomes (Loaded, Rejected, Skipped-duplicate), legacy xref entries" */
+        ImportUsersResponse: {
+            /** @description PRD: "per-record outcomes (Loaded, Rejected, Skipped-duplicate)" */
+            perRecordOutcomes?: components["schemas"]["Unspecified"];
+            /** @description PRD: "legacy xref entries" */
+            legacyXrefEntries?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Import.roleAssignments request. PRD inputs: "batch id, records" */
+        ImportRoleAssignmentsRequest: {
+            /** @description PRD: "batch id" */
+            batchId?: components["schemas"]["Uuid"];
+            /** @description PRD: "records" */
+            records?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Import.roleAssignments result. PRD outputs: "per-record outcomes (Loaded, Rejected, Skipped-duplicate), legacy xref entries" */
+        ImportRoleAssignmentsResponse: {
+            /** @description PRD: "per-record outcomes (Loaded, Rejected, Skipped-duplicate)" */
+            perRecordOutcomes?: components["schemas"]["Unspecified"];
+            /** @description PRD: "legacy xref entries" */
+            legacyXrefEntries?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Import.authorityGrants request. PRD inputs: "batch id, records" */
+        ImportAuthorityGrantsRequest: {
+            /** @description PRD: "batch id" */
+            batchId?: components["schemas"]["Uuid"];
+            /** @description PRD: "records" */
+            records?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Import.authorityGrants result. PRD outputs: "per-record outcomes (Loaded, Rejected, Skipped-duplicate), legacy xref entries" */
+        ImportAuthorityGrantsResponse: {
+            /** @description PRD: "per-record outcomes (Loaded, Rejected, Skipped-duplicate)" */
+            perRecordOutcomes?: components["schemas"]["Unspecified"];
+            /** @description PRD: "legacy xref entries" */
+            legacyXrefEntries?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Import.identityInvitations request. PRD inputs: "batch id, records" */
+        ImportIdentityInvitationsRequest: {
+            /** @description PRD: "batch id" */
+            batchId?: components["schemas"]["Uuid"];
+            /** @description PRD: "records" */
+            records?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Import.identityInvitations result. PRD outputs: "per-record outcomes (Loaded, Rejected, Skipped-duplicate), legacy xref entries" */
+        ImportIdentityInvitationsResponse: {
+            /** @description PRD: "per-record outcomes (Loaded, Rejected, Skipped-duplicate)" */
+            perRecordOutcomes?: components["schemas"]["Unspecified"];
+            /** @description PRD: "legacy xref entries" */
+            legacyXrefEntries?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Transfer.list result. PRD outputs: "transfers; transfer id → retry" */
+        TransferListItem: {
+            /** @description PRD: "transfers" */
+            transfers?: components["schemas"]["Unspecified"];
+            /** @description PRD: "transfer id → retry" */
+            transferIdRetry?: components["schemas"]["Unspecified"];
+        };
+        /** @description Page of plt.Transfer.list results (cursor pagination, contract §3.5.5) */
+        TransferListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["TransferListItem"][];
+        };
+        /** @description plt.Transfer.retry request. PRD inputs: "filters" */
+        TransferRetryRequest: {
+            /** @description PRD: "filters" */
+            filters?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Transfer.retry result. PRD outputs: "transfers; transfer id → retry" */
+        TransferRetryResponse: {
+            /** @description PRD: "transfers" */
+            transfers?: components["schemas"]["Unspecified"];
+            /** @description PRD: "transfer id → retry" */
+            transferIdRetry?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Token.grantAgentScope request. PRD inputs: "client, scope" */
+        TokenGrantAgentScopeRequest: {
+            /** @description PRD: "client" */
+            client?: components["schemas"]["Unspecified"];
             /** @description PRD: "scope" */
             scope?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Dsar.restrict result. PRD outputs: "restriction outcome per object with reason" */
-        DsarRestrictResponse: {
-            /** @description PRD: "restriction outcome per object with reason" */
-            restrictionOutcomePerObjectReason?: components["schemas"]["Unspecified"];
+        /** @description plt.Token.grantAgentScope result. PRD outputs: "granted or refused" */
+        TokenGrantAgentScopeResponse: {
+            /** @description PRD: "granted or refused" */
+            grantedOrRefused?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Dsar.erase request. PRD inputs: "party id, DSAR id" */
-        DsarEraseRequest: {
-            /** @description PRD: "party id" */
-            partyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "DSAR id" */
-            dsarId?: components["schemas"]["Uuid"];
+        /** @description plt.UserProfile.getPreferences result. PRD outputs: "saved preferences" */
+        UserProfileGetPreferencesResponse: {
+            /** @description PRD: "saved preferences" */
+            savedPreferences?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Dsar.erase result. PRD outputs: "per-object outcome (erased, restricted with reason)" */
-        DsarEraseResponse: {
-            /** @description PRD: "per-object outcome (erased, restricted with reason)" */
-            perObjectOutcome?: components["schemas"]["Unspecified"];
+        /** @description plt.UserProfile.setLanguage request. PRD inputs: "user (from token), ui_language (BCP 47 `el` or `en`), source" */
+        UserProfileSetLanguageRequest: {
+            /** @description PRD: "user (from token)" */
+            user?: components["schemas"]["Unspecified"];
+            /** @description PRD: "ui_language (BCP 47 `el` or `en`)" */
+            uiLanguage?: components["schemas"]["LanguageCode"];
+            /** @description PRD: "source" */
+            source?: components["schemas"]["Unspecified"];
         };
-        /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
-        Uuid: string;
+        /** @description plt.UserProfile.setLanguage result. PRD outputs: "saved preferences" */
+        UserProfileSetLanguageResponse: {
+            /** @description PRD: "saved preferences" */
+            savedPreferences?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Lineage.walk result. PRD outputs: "ordered steps with keys and trace links" */
+        LineageWalkResponse: {
+            /** @description PRD: "ordered steps with keys and trace links" */
+            orderedStepsKeysAndTraceLinks?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Expression.check request. PRD inputs: "expression, declared types, inputs" */
+        ExpressionCheckRequest: {
+            /** @description PRD: "expression" */
+            expression?: components["schemas"]["Unspecified"];
+            /** @description PRD: "declared types" */
+            declaredTypes?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Expression.check result. PRD outputs: "type check result; value" */
+        ExpressionCheckResponse: {
+            /** @description PRD: "type check result" */
+            typeCheckResult?: components["schemas"]["Unspecified"];
+            /** @description PRD: "value" */
+            value?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Expression.evaluate request. PRD inputs: "expression, declared types, inputs" */
+        ExpressionEvaluateRequest: {
+            /** @description PRD: "expression" */
+            expression?: components["schemas"]["Unspecified"];
+            /** @description PRD: "declared types" */
+            declaredTypes?: components["schemas"]["Unspecified"];
+            /** @description PRD: "inputs" */
+            inputs?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Expression.evaluate result. PRD outputs: "type check result; value" */
+        ExpressionEvaluateResponse: {
+            /** @description PRD: "type check result" */
+            typeCheckResult?: components["schemas"]["Unspecified"];
+            /** @description PRD: "value" */
+            value?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Pipeline.e2eGate request. PRD inputs: "release candidate, pack set" */
+        PipelineE2eGateRequest: {
+            /** @description PRD: "release candidate" */
+            releaseCandidate?: components["schemas"]["LocalDate"];
+            /** @description PRD: "pack set" */
+            packSet?: components["schemas"]["Unspecified"];
+        };
+        /** @description plt.Pipeline.e2eGate result. PRD outputs: "per-scenario result, failing step and lineage key" */
+        PipelineE2eGateResponse: {
+            /** @description PRD: "per-scenario result" */
+            perScenarioResult?: components["schemas"]["Unspecified"];
+            /** @description PRD: "failing step and lineage key" */
+            failingStep?: components["schemas"]["Unspecified"];
+            /** @description PRD: "failing step and lineage key" */
+            lineageKey?: components["schemas"]["Unspecified"];
+        };
         /**
          * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
          *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
          *     members until then.
          */
         Unspecified: unknown;
-        /** @description ISO 4217 alphabetic code. */
-        CurrencyCode: string;
         ProblemFieldError: {
             /** @description JSON pointer or dotted path of the field. */
             path: string;
@@ -3435,30 +3456,8 @@ export interface components {
             /** @description Field-level errors. */
             errors?: components["schemas"]["ProblemFieldError"][];
         };
-        /** @description Business number issued through PLT numbering (NumberingScheme); format is configuration. */
-        BusinessNumber: string;
-        /**
-         * Format: date-time
-         * @description RFC 3339 timestamp in UTC (suffix Z).
-         */
-        Instant: string;
-        NonNegativeInt: number;
-        /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
-        Code: string;
-        /** Format: date */
-        LocalDate: string;
-        /** @description Date period; `to` is null when open-ended. */
-        DatePeriod: {
-            from: components["schemas"]["LocalDate"];
-            to: components["schemas"]["LocalDate"] | null;
-        };
-        /** @description Decimal number as a string (no binary floating point for money or rates). */
-        Decimal: string;
-        /** @description Amount as a decimal string plus ISO 4217 currency. */
-        Money: {
-            amount: components["schemas"]["Decimal"];
-            currency: components["schemas"]["CurrencyCode"];
-        };
+        /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
+        Uuid: string;
         /** @description Cursor page (contract §3.5.5). Lists are filtered by the caller's legal entity and ABAC scope. */
         PageEnvelope: {
             items: unknown[];
@@ -3466,39 +3465,53 @@ export interface components {
             nextCursor: string | null;
             limit?: number;
         };
-        /** @description Product version `major.minor` (contract §3.2.3). */
-        ProductVersionNumber: string;
-        CategoryTotal: {
-            category: components["schemas"]["Code"];
-            amount: components["schemas"]["Money"];
+        /** Format: date */
+        LocalDate: string;
+        /**
+         * Format: date-time
+         * @description RFC 3339 timestamp in UTC (suffix Z).
+         */
+        Instant: string;
+        /** @description Who acted: user, service or AI agent id (contract §3.4.1 actor). */
+        Actor: {
+            /** @enum {string} */
+            kind: "USER" | "SERVICE" | "AI_AGENT";
+            id: string;
         };
-        Text: string;
+        /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
+        Code: string;
         /** @description Value inside an open structure. JSON numbers are not allowed at any depth: amounts are Money objects or decimal strings, counts are integers only where a typed field says so. */
         OpenValue: string | boolean | null | components["schemas"]["OpenValue"][] | {
             [key: string]: components["schemas"]["OpenValue"];
         };
-        /** @description Structure not specified by the owning PRD; consumers must not rely on members until the producer defines them in a minor version. Bare JSON numbers are rejected at any depth (amounts must be Money or decimal strings). */
-        OpenObject: {
-            [key: string]: components["schemas"]["OpenValue"];
-        };
-        /**
-         * @description Disbursement source (contract D1/D4, D-CON-21): refund (BIL), claim payment (CLM; CLM_CLAIM_PAYMENT in the PRD-06 source register, REQ-BIL-354), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change.
-         * @example BIL
-         * @example CLM
-         * @example CLM_CLAIM_PAYMENT
-         * @example RI_SETTLEMENT
-         * @example FS_CLEARING
-         * @example CMP_REDRESS
-         * @example TAX_REMITTANCE
-         */
-        DisbursementSourceType: string;
-        /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
-        Sha256: string;
         /**
          * @description Module code (contract §3.6.1).
          * @enum {string}
          */
         ModuleCode: "PTY" | "PFC" | "RAT" | "UW" | "POL" | "BIL" | "CLM" | "RI" | "FIN" | "DOC" | "CMP" | "CHN" | "WRK" | "PLT" | "DAT" | "MIG" | "MKT";
+        /** @description Reference to a business object owned by a module. */
+        ObjectRef: {
+            module: components["schemas"]["ModuleCode"];
+            type: components["schemas"]["Code"];
+            id: string;
+        };
+        /** @description Decimal number as a string (no binary floating point for money or rates). */
+        Decimal: string;
+        /** @description ISO 4217 alphabetic code. */
+        CurrencyCode: string;
+        /** @description Amount as a decimal string plus ISO 4217 currency. */
+        Money: {
+            amount: components["schemas"]["Decimal"];
+            currency: components["schemas"]["CurrencyCode"];
+        };
+        /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
+        Sha256: string;
+        /** @description Structure not specified by the owning PRD; consumers must not rely on members until the producer defines them in a minor version. Bare JSON numbers are rejected at any depth (amounts must be Money or decimal strings). */
+        OpenObject: {
+            [key: string]: components["schemas"]["OpenValue"];
+        };
+        /** @description BCP 47 language tag (el, en, el-GR). */
+        LanguageCode: string;
     };
     responses: {
         /** @description Malformed request or failed schema validation. */
@@ -3528,6 +3541,15 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
+        /** @description Unexpected error. */
+        InternalError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
         /** @description Idempotency mismatch (`<MOD>-ERR-IDEMPOTENCY-MISMATCH`), stale version, lock or state conflict. */
         Conflict: {
             headers: {
@@ -3546,28 +3568,9 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description Unexpected error. */
-        InternalError: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
         /** @description Object not found in the caller's scope. */
         NotFound: {
             headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
-        /** @description Throttled (partner quotas, REQ-CHN-001). */
-        TooManyRequests: {
-            headers: {
-                "Retry-After"?: number;
                 [name: string]: unknown;
             };
             content: {
@@ -3586,18 +3589,18 @@ export interface components {
     };
     parameters: {
         /**
-         * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-         *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-         *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-         */
-        IdempotencyKey: components["schemas"]["Uuid"];
-        /**
          * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
          *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
          */
         Traceparent: string;
         /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
         AcceptLanguage: string;
+        /**
+         * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+         *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+         *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+         */
+        IdempotencyKey: components["schemas"]["Uuid"];
         /**
          * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
          *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
@@ -3621,7 +3624,43 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    "bil.BillingAccount.create": {
+    "plt.Token.exchange": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenExchangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenExchangeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.User.create": {
         parameters: {
             query?: {
                 /**
@@ -3651,7 +3690,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["BillingAccountCreateRequest"];
+                "application/json": components["schemas"]["UserCreateRequest"];
             };
         };
         responses: {
@@ -3661,7 +3700,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BillingAccountCreateResponse"];
+                    "application/json": components["schemas"]["UserCreateResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -3672,7 +3711,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.BillingAccount.get": {
+    "plt.User.get": {
         parameters: {
             query?: never;
             header?: {
@@ -3685,7 +3724,7 @@ export interface operations {
                 "Accept-Language"?: components["parameters"]["AcceptLanguage"];
             };
             path: {
-                /** @description Identifier of the BillingAccount */
+                /** @description Identifier of the User */
                 id: string;
             };
             cookie?: never;
@@ -3698,21 +3737,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BillingAccountGetResponse"];
+                    "application/json": components["schemas"]["UserGetResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
-            422: components["responses"]["UnprocessableContent"];
-            429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.BillingAccount.update": {
+    "plt.User.update": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -3729,14 +3773,14 @@ export interface operations {
                 "Accept-Language"?: components["parameters"]["AcceptLanguage"];
             };
             path: {
-                /** @description Identifier of the BillingAccount */
+                /** @description Identifier of the User */
                 id: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["BillingAccountUpdateRequest"];
+                "application/json": components["schemas"]["UserUpdateRequest"];
             };
         };
         responses: {
@@ -3746,7 +3790,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BillingAccountUpdateResponse"];
+                    "application/json": components["schemas"]["UserUpdateResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -3758,7 +3802,160 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.BillingAccount.search": {
+    "plt.User.suspend": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserSuspendRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserSuspendResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.User.reactivate": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserReactivateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserReactivateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.User.disable": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserDisableRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDisableResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.User.search": {
         parameters: {
             query?: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
@@ -3786,68 +3983,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BillingAccountSearchPage"];
+                    "application/json": components["schemas"]["UserSearchPage"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.BillingAccount.close": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BillingAccountCloseRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BillingAccountCloseResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.BillingAccount.reopen": {
+    "plt.ExternalUser.register": {
         parameters: {
             query?: never;
             header: {
@@ -3870,7 +4015,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["BillingAccountReopenRequest"];
+                "application/json": components["schemas"]["ExternalUserRegisterRequest"];
             };
         };
         responses: {
@@ -3880,7 +4025,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BillingAccountReopenResponse"];
+                    "application/json": components["schemas"]["ExternalUserRegisterResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -3891,515 +4036,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.BillingAccount.changePayer": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BillingAccountChangePayerRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BillingAccountChangePayerResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.BillingAccount.attachTerm": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BillingAccountAttachTermRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BillingAccountAttachTermResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.BillingAccount.moveTerm": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BillingAccountMoveTermRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BillingAccountMoveTermResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.PaymentPlan.list": {
-        parameters: {
-            query: {
-                /** @description Product version */
-                productVersion: components["schemas"]["ProductVersionNumber"];
-                /** @description Product code */
-                product: components["schemas"]["Code"];
-                /** @description R-84 channel code */
-                channel: components["schemas"]["Code"];
-                /** @description Producer code */
-                producerCode?: components["schemas"]["Code"];
-                /** @description Term length */
-                termLength?: components["schemas"]["Code"];
-                /** @description Premium band */
-                premiumBand?: components["schemas"]["Code"];
-                /** @description Risk flags supplied by POL */
-                riskFlags?: components["schemas"]["Code"][];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaymentPlanListResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.PaymentPlan.select": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PaymentPlanSelectRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaymentPlanSelectResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            429: components["responses"]["TooManyRequests"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.PaymentPlan.change": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PaymentPlanChangeRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaymentPlanChangeResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.BillingPreview.compute": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BillingPreviewComputeRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BillingPreviewComputeResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.DownPayment.status": {
-        parameters: {
-            query?: {
-                /** @description Quote id (one of quoteId / jobId) */
-                quoteId?: components["schemas"]["Uuid"];
-                /** @description Job id */
-                jobId?: components["schemas"]["Uuid"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DownPaymentStatusResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    "bil.DownPayment.initiate": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DownPaymentInitiateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DownPaymentInitiateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    "bil.Invoice.get": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the Invoice (PRD input: "ids") */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvoiceGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Invoice.list": {
-        parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-                /** @description Invoices of this billing account */
-                billingAccountId?: components["schemas"]["Uuid"];
-                /** @description Invoices of this policy */
-                policyId?: components["schemas"]["Uuid"];
-                /** @description Invoices of this policy term */
-                policyTermId?: components["schemas"]["Uuid"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvoiceListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Invoice.sendCopy": {
+    "plt.ExternalUser.link": {
         parameters: {
             query?: never;
             header: {
@@ -4422,7 +4059,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["InvoiceSendCopyRequest"];
+                "application/json": components["schemas"]["ExternalUserLinkRequest"];
             };
         };
         responses: {
@@ -4432,7 +4069,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvoiceSendCopyResponse"];
+                    "application/json": components["schemas"]["ExternalUserLinkResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4443,7 +4080,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Invoice.dispute": {
+    "plt.ExternalUser.recover": {
         parameters: {
             query?: never;
             header: {
@@ -4466,7 +4103,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["InvoiceDisputeRequest"];
+                "application/json": components["schemas"]["ExternalUserRecoverRequest"];
             };
         };
         responses: {
@@ -4476,7 +4113,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvoiceDisputeResponse"];
+                    "application/json": components["schemas"]["ExternalUserRecoverResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4487,7 +4124,51 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.PaymentInstrument.add": {
+    "plt.ExternalUser.invite": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalUserInviteRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalUserInviteResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.RoleAssignment.grant": {
         parameters: {
             query?: {
                 /**
@@ -4517,7 +4198,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PaymentInstrumentAddRequest"];
+                "application/json": components["schemas"]["RoleAssignmentGrantRequest"];
             };
         };
         responses: {
@@ -4527,7 +4208,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaymentInstrumentAddResponse"];
+                    "application/json": components["schemas"]["RoleAssignmentGrantResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4538,7 +4219,94 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.PaymentInstrument.remove": {
+    "plt.RoleAssignment.revoke": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleAssignmentRevokeRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleAssignmentRevokeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Policy.evaluate": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PolicyEvaluateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyEvaluateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.PrivilegedAccess.request": {
         parameters: {
             query?: never;
             header: {
@@ -4561,7 +4329,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PaymentInstrumentRemoveRequest"];
+                "application/json": components["schemas"]["PrivilegedAccessRequestRequest"];
             };
         };
         responses: {
@@ -4571,7 +4339,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaymentInstrumentRemoveResponse"];
+                    "application/json": components["schemas"]["PrivilegedAccessRequestResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4582,15 +4350,16 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.PaymentInstrument.list": {
+    "plt.PrivilegedAccess.approve": {
         parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
                  *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
@@ -4602,7 +4371,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrivilegedAccessApproveRequest"];
+            };
+        };
         responses: {
             /** @description Success */
             200: {
@@ -4610,17 +4383,106 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaymentInstrumentListPage"];
+                    "application/json": components["schemas"]["PrivilegedAccessApproveResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.PayeeAccount.list": {
+    "plt.PrivilegedAccess.revoke": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrivilegedAccessRevokeRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivilegedAccessRevokeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.AuthorityType.register": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthorityTypeRegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthorityTypeRegisterResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Authority.check": {
         parameters: {
             query?: {
                 /**
@@ -4629,14 +4491,341 @@ export interface operations {
                  *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
                  */
                 validAt?: components["parameters"]["ValidAt"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthorityCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthorityCheckResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Authority.attachDecision": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthorityAttachDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthorityAttachDecisionResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Authority.whoCanApprove": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthorityWhoCanApproveResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.ApprovalType.register": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalTypeRegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalTypeRegisterResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Approval.request": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalRequestResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Approval.decide": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalDecideRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalDecideResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Approval.withdraw": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalWithdrawRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalWithdrawResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Approval.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the Approval */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalGetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Approval.list": {
+        parameters: {
+            query?: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
-                /** @description PRD: "party id" */
-                partyId?: components["schemas"]["Uuid"];
-                /** @description PRD: "purpose" */
-                purpose?: string;
+                /** @description Request status to list (default PendingApproval) */
+                status?: components["schemas"]["ApprovalStatus"];
+                /** @description Referral role to list (one of the caller's roles); default all of the caller's roles. Requests the caller made or edited are never listed as decidable work (REQ-PLT-115). */
+                role?: components["schemas"]["Code"];
             };
             header?: {
                 /**
@@ -4658,16 +4847,268 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PayeeAccountListPage"];
+                    "application/json": components["schemas"]["ApprovalListPage"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.PayeeAccount.create": {
+    "plt.Approval.verifyForExecution": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalVerifyForExecutionRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalVerifyForExecutionResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Audit.append": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuditAppendRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditAppendResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Audit.query": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditQueryPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Audit.export": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuditExportRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditExportResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Audit.verify": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuditVerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditVerifyResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Outbox.publish": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OutboxPublishRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OutboxPublishResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Schema.register": {
         parameters: {
             query?: {
                 /**
@@ -4697,17 +5138,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PayeeAccountCreateRequest"];
+                "application/json": components["schemas"]["SchemaRegisterRequest"];
             };
         };
         responses: {
             /** @description Success */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PayeeAccountCreateResponse"];
+                    "application/json": components["schemas"]["SchemaRegisterResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4718,7 +5159,235 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.PayeeAccount.verify": {
+    "plt.Schema.check": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SchemaCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaCheckResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Consumer.replay": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsumerReplayRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsumerReplayResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.DeadLetter.list": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeadLetterListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.DeadLetter.replay": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeadLetterReplayRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeadLetterReplayResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.DeadLetter.discard": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeadLetterDiscardRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeadLetterDiscardResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Adapter.invoke": {
         parameters: {
             query?: never;
             header: {
@@ -4741,7 +5410,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PayeeAccountVerifyRequest"];
+                "application/json": components["schemas"]["AdapterInvokeRequest"];
             };
         };
         responses: {
@@ -4751,7 +5420,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PayeeAccountVerifyResponse"];
+                    "application/json": components["schemas"]["AdapterInvokeResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4763,2115 +5432,15 @@ export interface operations {
             503: components["responses"]["ServiceUnavailable"];
         };
     };
-    "bil.PayeeAccount.get": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
-                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
-                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
-                 */
-                validAt?: components["parameters"]["ValidAt"];
-                /** @description PRD: "purpose" */
-                purpose?: string;
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the PayeeAccount (PRD input: "party id") */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PayeeAccountGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Mandate.create": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MandateCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MandateCreateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Mandate.sign": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MandateSignRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MandateSignResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Mandate.amend": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MandateAmendRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MandateAmendResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Mandate.cancel": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MandateCancelRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MandateCancelResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Mandate.get": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the Mandate */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MandateGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Payment.take": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PaymentTakeRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaymentTakeResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            429: components["responses"]["TooManyRequests"];
-            500: components["responses"]["InternalError"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    "bil.Receipt.get": {
-        parameters: {
-            query?: {
-                /** @description PRD: "filters" */
-                filters?: string;
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the Receipt (PRD input: "ids") */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReceiptGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Receipt.list": {
+    "plt.Exchange.search": {
         parameters: {
             query?: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
-                /** @description PRD: "ids" */
-                ids?: string[];
-                /** @description PRD: "filters" */
-                filters?: string;
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReceiptListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Allocation.allocate": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AllocationAllocateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AllocationAllocateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Allocation.unallocate": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AllocationUnallocateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AllocationUnallocateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Allocation.reallocate": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AllocationReallocateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AllocationReallocateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Suspense.list": {
-        parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuspenseListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Suspense.suggest": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SuspenseSuggestRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuspenseSuggestResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Suspense.transfer": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SuspenseTransferRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuspenseTransferResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Suspense.refundToSender": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SuspenseRefundToSenderRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuspenseRefundToSenderResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.IntermediaryCollection.report": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["IntermediaryCollectionReportRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IntermediaryCollectionReportResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            429: components["responses"]["TooManyRequests"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.IntermediaryCollection.reportFile": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["IntermediaryCollectionReportFileRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IntermediaryCollectionReportFileResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.AccountCurrent.get": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the AccountCurrent */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AccountCurrentGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            429: components["responses"]["TooManyRequests"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.AccountCurrent.list": {
-        parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AccountCurrentListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.AccountCurrent.dispute": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AccountCurrentDisputeRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AccountCurrentDisputeResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Delinquency.get": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the Delinquency */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DelinquencyGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Delinquency.list": {
-        parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DelinquencyListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Delinquency.recordContact": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DelinquencyRecordContactRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DelinquencyRecordContactResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Delinquency.arrange": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DelinquencyArrangeRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DelinquencyArrangeResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Delinquency.releaseHold": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DelinquencyReleaseHoldRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DelinquencyReleaseHoldResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Refund.propose": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefundProposeRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RefundProposeResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Refund.get": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the Refund (PRD input: "refund id") */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RefundGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Refund.list": {
-        parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RefundListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Refund.decide": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefundDecideRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RefundDecideResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Refund.resubmit": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefundResubmitRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RefundResubmitResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Disbursement.request": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DisbursementRequestRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DisbursementRequestResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Disbursement.get": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the Disbursement (PRD input: "source type and id") */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DisbursementGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Disbursement.list": {
-        parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DisbursementListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Disbursement.stop": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DisbursementStopRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DisbursementStopResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Disbursement.void": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DisbursementVoidRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DisbursementVoidResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Receivable.register": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReceivableRegisterRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReceivableRegisterResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.DisbursementBatch.prepare": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DisbursementBatchPrepareRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DisbursementBatchPrepareResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.DisbursementBatch.release": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DisbursementBatchReleaseRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DisbursementBatchReleaseResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.DisbursementBatch.approveRelease": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DisbursementBatchApproveReleaseRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DisbursementBatchApproveReleaseResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.WriteOff.propose": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WriteOffProposeRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WriteOffProposeResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.WriteOff.decide": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WriteOffDecideRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WriteOffDecideResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.WriteOff.post": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WriteOffPostRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WriteOffPostResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Transfer.money": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TransferMoneyRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TransferMoneyResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Commission.calculations": {
-        parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CommissionCalculationsPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Commission.statements": {
-        parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-                /** @description PRD: "intermediary" */
-                intermediary?: string;
+                /** @description PRD: "party ref" */
+                partyRef?: string;
                 /** @description PRD: "period" */
                 period?: string;
             };
@@ -6895,7 +5464,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CommissionStatementsPage"];
+                    "application/json": components["schemas"]["ExchangeSearchPage"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -6904,7 +5473,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Commission.dispute": {
+    "plt.Workflow.start": {
         parameters: {
             query?: never;
             header: {
@@ -6927,7 +5496,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CommissionDisputeRequest"];
+                "application/json": components["schemas"]["WorkflowStartRequest"];
             };
         };
         responses: {
@@ -6937,7 +5506,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CommissionDisputeResponse"];
+                    "application/json": components["schemas"]["WorkflowStartResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -6948,16 +5517,9 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Commission.runPayments": {
+    "plt.Workflow.signal": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -6978,7 +5540,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CommissionRunPaymentsRequest"];
+                "application/json": components["schemas"]["WorkflowSignalRequest"];
             };
         };
         responses: {
@@ -6988,179 +5550,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CommissionRunPaymentsResponse"];
+                    "application/json": components["schemas"]["WorkflowSignalResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Commission.simulate": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CommissionSimulateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CommissionSimulateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.TaxLevy.periods": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TaxLevyPeriodsResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.TaxLevy.detail": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TaxLevyDetailResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.TaxLevy.requestLevyPayment": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TaxLevyRequestLevyPaymentRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TaxLevyRequestLevyPaymentResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Ledger.query": {
+    "plt.Workflow.query": {
         parameters: {
             query?: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
-                /** @description PRD: "dimensions" */
-                dimensions?: string;
-                /** @description PRD: "dates" */
-                dates?: string;
             };
             header?: {
                 /**
@@ -7182,22 +5590,243 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LedgerQueryPage"];
+                    "application/json": components["schemas"]["WorkflowQueryPage"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Ledger.balance": {
+    "plt.Workflow.cancel": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowCancelRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowCancelResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Workflow.terminate": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowTerminateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowTerminateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Job.run": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobRunResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Job.stop": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobStopRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobStopResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Job.schedule": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobScheduleRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobScheduleResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Job.history": {
         parameters: {
             query?: {
-                /** @description PRD: "dimensions" */
-                dimensions?: string;
-                /** @description PRD: "dates" */
-                dates?: string;
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
             };
             header?: {
                 /**
@@ -7219,16 +5848,215 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LedgerBalanceResponse"];
+                    "application/json": components["schemas"]["JobHistoryPage"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Reconciliation.bank": {
+    "plt.DecisionTable.evaluate": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionTableEvaluateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionTableEvaluateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.DecisionTable.test": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionTableTestRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionTableTestResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.DecisionTable.activate": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionTableActivateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionTableActivateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.DecisionTable.explain": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionTableExplainResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.FeatureFlag.evaluate": {
         parameters: {
             query?: never;
             header?: {
@@ -7245,7 +6073,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ReconciliationBankRequest"];
+                "application/json": components["schemas"]["FeatureFlagEvaluateRequest"];
             };
         };
         responses: {
@@ -7255,16 +6083,749 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ReconciliationBankResponse"];
+                    "application/json": components["schemas"]["FeatureFlagEvaluateResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Reconciliation.invariants": {
+    "plt.Calendar.isBusinessDay": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarIsBusinessDayResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Calendar.addBusinessDays": {
+        parameters: {
+            query?: {
+                /** @description PRD: "calendar set" */
+                calendarSet?: string;
+                /** @description PRD: "date" */
+                date?: components["schemas"]["LocalDate"];
+                /** @description PRD: "n (±)" */
+                n?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarAddBusinessDaysResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Calendar.nextBusinessDay": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarNextBusinessDayResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Calendar.previousBusinessDay": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarPreviousBusinessDayResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Calendar.businessDaysBetween": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarBusinessDaysBetweenResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Calendar.endOfPeriod": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarEndOfPeriodResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Calendar.generate": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalendarGenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarGenerateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Calendar.publish": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalendarPublishRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarPublishResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Holiday.addException": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HolidayAddExceptionRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HolidayAddExceptionResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Fx.getRate": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FxGetRateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Fx.listRates": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FxListRatesResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Fx.correct": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FxCorrectRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FxCorrectResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Currency.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the Currency */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CurrencyGetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Number.next": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NumberNextRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NumberNextResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Number.reserve": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NumberReserveRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NumberReserveResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Number.void": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NumberVoidRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NumberVoidResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Ai.invoke": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiInvokeRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiInvokeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Ai.recordOutcome": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiRecordOutcomeRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiRecordOutcomeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.AiToggle.resolve": {
         parameters: {
             query?: never;
             header?: {
@@ -7281,7 +6842,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ReconciliationInvariantsRequest"];
+                "application/json": components["schemas"]["AiToggleResolveRequest"];
             };
         };
         responses: {
@@ -7291,16 +6852,347 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ReconciliationInvariantsResponse"];
+                    "application/json": components["schemas"]["AiToggleResolveResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Reconciliation.fin": {
+    "plt.AiToggle.set": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiToggleSetRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiToggleSetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Ai.killSwitch": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiKillSwitchRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiKillSwitchResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Retention.registerDataset": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RetentionRegisterDatasetRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetentionRegisterDatasetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Retention.schedule": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RetentionScheduleRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetentionScheduleResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Retention.runs": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetentionRunsPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.LegalHold.apply": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegalHoldApplyRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalHoldApplyResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.LegalHold.release": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegalHoldReleaseRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalHoldReleaseResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.LegalHold.check": {
         parameters: {
             query?: never;
             header?: {
@@ -7317,7 +7209,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ReconciliationFinRequest"];
+                "application/json": components["schemas"]["LegalHoldCheckRequest"];
             };
         };
         responses: {
@@ -7327,7 +7219,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ReconciliationFinResponse"];
+                    "application/json": components["schemas"]["LegalHoldCheckResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -7337,7 +7229,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Import.reverse": {
+    "plt.Erasure.execute": {
         parameters: {
             query?: {
                 /**
@@ -7367,7 +7259,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ImportReverseRequest"];
+                "application/json": components["schemas"]["ErasureExecuteRequest"];
             };
         };
         responses: {
@@ -7377,58 +7269,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ImportReverseResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "bil.Import.convertCurrency": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ImportConvertCurrencyRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImportConvertCurrencyResponse"];
+                    "application/json": components["schemas"]["ErasureExecuteResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -7439,7 +7280,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Dsar.export": {
+    "plt.Subject.export": {
         parameters: {
             query?: {
                 /**
@@ -7469,7 +7310,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DsarExportRequest"];
+                "application/json": components["schemas"]["SubjectExportRequest"];
             };
         };
         responses: {
@@ -7479,7 +7320,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DsarExportResponse"];
+                    "application/json": components["schemas"]["SubjectExportResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -7490,16 +7331,9 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Dsar.restrict": {
+    "plt.Ror.export": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -7520,7 +7354,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DsarRestrictRequest"];
+                "application/json": components["schemas"]["RorExportRequest"];
             };
         };
         responses: {
@@ -7530,7 +7364,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DsarRestrictResponse"];
+                    "application/json": components["schemas"]["RorExportResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -7541,7 +7375,42 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "bil.Dsar.erase": {
+    "plt.Time.now": {
+        parameters: {
+            query?: {
+                /** @description PRD: "context" */
+                context?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimeNowResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Import.users": {
         parameters: {
             query?: {
                 /**
@@ -7571,7 +7440,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DsarEraseRequest"];
+                "application/json": components["schemas"]["ImportUsersRequest"];
             };
         };
         responses: {
@@ -7581,7 +7450,523 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DsarEraseResponse"];
+                    "application/json": components["schemas"]["ImportUsersResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Import.roleAssignments": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportRoleAssignmentsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportRoleAssignmentsResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Import.authorityGrants": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportAuthorityGrantsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportAuthorityGrantsResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Import.identityInvitations": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportIdentityInvitationsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportIdentityInvitationsResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Transfer.list": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description PRD: "filters" */
+                filters?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransferListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Transfer.retry": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferRetryRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransferRetryResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Token.grantAgentScope": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenGrantAgentScopeRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenGrantAgentScopeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.UserProfile.getPreferences": {
+        parameters: {
+            query?: {
+                /** @description PRD: "user (from token)" */
+                user?: string;
+                /** @description PRD: "ui_language (BCP 47 `el` or `en`)" */
+                uiLanguage?: components["schemas"]["LanguageCode"];
+                /** @description PRD: "source" */
+                source?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileGetPreferencesResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.UserProfile.setLanguage": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserProfileSetLanguageRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileSetLanguageResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Lineage.walk": {
+        parameters: {
+            query?: {
+                /** @description PRD: "start key (type, id)" */
+                startKey?: string;
+                /** @description PRD: "direction" */
+                direction?: string;
+                /** @description PRD: "depth" */
+                depth?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LineageWalkResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Expression.check": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpressionCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpressionCheckResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Expression.evaluate": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpressionEvaluateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpressionEvaluateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.Pipeline.e2eGate": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineE2eGateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineE2eGateResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];

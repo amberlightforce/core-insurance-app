@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { routes } from './routes';
 import { expectNoA11yViolations } from './test/axe';
@@ -10,6 +10,21 @@ function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
   return renderWithDs(<RouterProvider router={router} />);
 }
+
+function signInAs(roles: string[]) {
+  sessionStorage.setItem(
+    'coreins.devSession',
+    JSON.stringify({
+      accessToken: 'test-token',
+      expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+      user: { id: 'dev', name: 'Dev', roles },
+    }),
+  );
+}
+
+afterEach(() => {
+  sessionStorage.clear();
+});
 
 describe('App', () => {
   it('renders the shell with the home placeholder in Greek', () => {
@@ -21,22 +36,43 @@ describe('App', () => {
   });
 
   it('routes a module and marks it current', () => {
-    renderAt('/claims');
+    renderAt('/underwriting');
     const nav = screen.getByRole('navigation', { name: 'Κύρια πλοήγηση' });
-    expect(within(nav).getByRole('link', { name: 'Ζημίες' })).toHaveAttribute(
+    expect(within(nav).getByRole('link', { name: 'Ανάληψη κινδύνου' })).toHaveAttribute(
       'aria-current',
       'page',
     );
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Ζημίες');
   });
+
+  it('shows the claims entry only to claims roles', () => {
+    renderAt('/');
+    expect(
+      within(screen.getByRole('navigation', { name: 'Κύρια πλοήγηση' })).queryByRole('link', {
+        name: 'Ζημίες',
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it.each(['Staff.ClaimsHandler', 'Staff.ClaimsManager'])(
+    'shows the claims entry to %s',
+    (role) => {
+      signInAs([role]);
+      renderAt('/');
+      expect(
+        within(screen.getByRole('navigation', { name: 'Κύρια πλοήγηση' })).getByRole('link', {
+          name: 'Ζημίες',
+        }),
+      ).toBeInTheDocument();
+    },
+  );
 
   it('opens the command palette from the top bar and navigates', async () => {
     const { user } = renderAt('/');
     await user.click(screen.getByRole('button', { name: /Αναζήτηση ή εντολή/ }));
     const dialog = await screen.findByRole('dialog');
-    await user.keyboard('ζημ');
-    await user.click(within(dialog).getByRole('menuitem', { name: /Ζημίες/ }));
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Ζημίες');
+    await user.keyboard('ανάλ');
+    await user.click(within(dialog).getByRole('menuitem', { name: /Ανάληψη κινδύνου/ }));
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Ανάληψη κινδύνου');
   });
 
   it('opens the shortcut help with the «?» button', async () => {

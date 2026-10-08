@@ -60,6 +60,37 @@ describe('staff screens in the app shell', () => {
     );
   });
 
+  it.each([
+    ['/claims', 'Ζημίες'],
+    ['/claims/new', 'Αναγγελία ζημίας'],
+    ['/claims/approvals', 'Εγκρίσεις'],
+  ])(
+    '%s opens in the shell for a claims role with the claims entry current',
+    async (path, heading) => {
+      sessionStorage.setItem(
+        'coreins.devSession',
+        JSON.stringify({
+          accessToken: 'test-token',
+          expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+          user: { id: 'claims', name: 'Claims', roles: ['Staff.ClaimsHandler'] },
+        }),
+      );
+      try {
+        renderAt(path);
+        expect(
+          await screen.findByRole('heading', { level: 1, name: heading }, { timeout: 15_000 }),
+        ).toBeInTheDocument();
+        const nav = screen.getByRole('navigation', { name: 'Κύρια πλοήγηση' });
+        expect(within(nav).getByRole('link', { name: 'Ζημίες' })).toHaveAttribute(
+          'aria-current',
+          'page',
+        );
+      } finally {
+        sessionStorage.clear();
+      }
+    },
+  );
+
   it('has no axe violations on the party search inside the shell', async () => {
     const { container } = renderAt('/parties');
     await screen.findByRole(

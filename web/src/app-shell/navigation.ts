@@ -4,7 +4,12 @@ import type { ModuleIconName } from '../design-system/icons';
 export interface NavItem {
   id: ModuleIconName;
   to: string;
+  /** When set, only users holding one of these roles see the entry (the API still enforces permissions). */
+  roles?: readonly string[];
 }
+
+/** Roles that work claims (dev users `claims` and `claimsmgr`). */
+const claimsRoles = ['Staff.ClaimsHandler', 'Staff.ClaimsManager'] as const;
 
 /** Default staff navigation (role-configured order arrives with PLT; Part 1 §3.4). */
 export const defaultNavItems: NavItem[] = [
@@ -13,7 +18,7 @@ export const defaultNavItems: NavItem[] = [
   { id: 'parties', to: '/parties' },
   { id: 'policies', to: '/policies' },
   { id: 'underwriting', to: '/underwriting' },
-  { id: 'claims', to: '/claims' },
+  { id: 'claims', to: '/claims', roles: claimsRoles },
   { id: 'billing', to: '/billing' },
   { id: 'reinsurance', to: '/reinsurance' },
   { id: 'finance', to: '/finance' },
@@ -22,6 +27,11 @@ export const defaultNavItems: NavItem[] = [
   { id: 'reports', to: '/reports' },
   { id: 'products', to: '/products' },
 ];
+
+/** Entries without a `roles` restriction are visible to everyone; restricted ones need one of their roles. */
+export function visibleNavItems(items: NavItem[], userRoles: readonly string[]): NavItem[] {
+  return items.filter((item) => !item.roles || item.roles.some((role) => userRoles.includes(role)));
+}
 
 /** Settings sits at the bottom of the rail. */
 export const adminNavItem: NavItem = { id: 'admin', to: '/admin' };

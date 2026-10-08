@@ -57,6 +57,34 @@ const moduleRoutes: RouteObject[] = [
     lazy: async () => ({ Component: (await import('./modules/billing/InvoicePage')).InvoicePage }),
   },
   {
+    path: 'claims',
+    lazy: async () => ({
+      Component: (await import('./modules/claims/ClaimsHomePage')).ClaimsHomePage,
+    }),
+  },
+  {
+    path: 'claims/new',
+    lazy: async () => ({ Component: (await import('./modules/claims/FnolPage')).FnolPage }),
+  },
+  {
+    path: 'claims/approvals',
+    lazy: async () => ({
+      Component: (await import('./modules/claims/ApprovalsInboxPage')).ApprovalsInboxPage,
+    }),
+  },
+  {
+    path: 'claims/approvals/:requestId',
+    lazy: async () => ({
+      Component: (await import('./modules/claims/ApprovalDetailPage')).ApprovalDetailPage,
+    }),
+  },
+  {
+    path: 'claims/:claimId',
+    lazy: async () => ({
+      Component: (await import('./modules/claims/ClaimViewPage')).ClaimViewPage,
+    }),
+  },
+  {
     path: 'finance',
     lazy: async () => ({
       Component: (await import('./modules/finance/FinanceHomePage')).FinanceHomePage,
@@ -68,7 +96,7 @@ const moduleRoutes: RouteObject[] = [
   },
 ];
 
-const implemented = new Set(['/parties', '/policies', '/billing', '/finance']);
+const implemented = new Set(['/parties', '/policies', '/billing', '/finance', '/claims']);
 
 /** Placeholder routes for modules whose work packages have not landed, plus the thin-slice staff screens. */
 export const routes: RouteObject[] = [
