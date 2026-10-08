@@ -4,36 +4,41 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Approval.decide request. PRD inputs: "type, object ref, payload hash, diff"</summary>
+/// <summary>Typed from REQ-PLT-114, REQ-PLT-115, REQ-PLT-117 (SL2-PLT). The checker is the calling actor; the decision carries the content hash the checker saw and fails with PLT-ERR-APPROVAL-STALE when it is no longer the request's hash or the request is no longer pending.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ApprovalDecideRequest
 {
-    /// <summary>PRD: "type"</summary>
+    /// <summary>Contract member 'requestId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'requestId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("type")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Type { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("requestId")]
+    public required global::System.Guid RequestId { get; init; }
 
-    /// <summary>PRD: "object ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("objectRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ObjectRef { get; init; }
+    /// <summary>Contract member 'decision'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    public required DecisionValue Decision { get; init; }
 
-    /// <summary>PRD: "payload hash"</summary>
+    /// <summary>PRD: "payload hash". The hash of the content the checker reviewed</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("payloadHash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? PayloadHash { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash PayloadHash { get; init; }
 
-    /// <summary>PRD: "diff"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("diff")]
+    /// <summary>Mandatory on reject (REQ-PLT-114)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Diff { get; init; }
+    public string? Comment { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DecisionValue
+    {
+        /// <summary><c>Approve</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Approve")]
+        Approve,
+
+        /// <summary><c>Reject</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Reject")]
+        Reject,
+    }
 }

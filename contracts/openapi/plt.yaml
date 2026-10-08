@@ -1707,6 +1707,7 @@ paths:
       - W1-PLT-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-PLT-004, REQ-PLT-114, REQ-PLT-116, REQ-PLT-117 (SL2-PLT)
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1735,6 +1736,14 @@ paths:
         status: 403
       - code: PLT-ERR-CHECKER-MUST-BE-HUMAN
         status: 422
+      - code: PLT-ERR-VALIDATION
+        status: 400
+      - code: PLT-ERR-UNKNOWN-TYPE
+        note: the authority type named for the checker is not registered
+        status: 400
+      - code: PLT-ERR-APPROVAL-STALE
+        note: another request for the same subject was created concurrently; retry
+        status: 409
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1790,6 +1799,7 @@ paths:
       - W1-PLT-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-PLT-004, REQ-PLT-114, REQ-PLT-115, REQ-PLT-116, REQ-PLT-117, REQ-PLT-121 (SL2-PLT)
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1809,6 +1819,20 @@ paths:
         status: 403
       - code: PLT-ERR-CHECKER-MUST-BE-HUMAN
         status: 422
+      - code: PLT-ERR-VALIDATION
+        note: a reject needs a comment
+        status: 400
+      - code: PLT-ERR-NOT-FOUND
+        status: 404
+      - code: PLT-ERR-AUTHORITY-DENIED
+        note: the checker holds no authority of the request's type for its dimensions
+        status: 403
+      - code: PLT-ERR-AUTHORITY-REFERRAL-REQUIRED
+        note: the checker's authority is below the request's dimensions; referralTargets in the metadata
+        status: 403
+      - code: PLT-ERR-APPROVAL-STALE
+        note: the request is no longer pending (decided, superseded) or its content hash differs from the one the checker saw
+        status: 409
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1934,6 +1958,7 @@ paths:
       - W1-PLT-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-PLT-114 (SL2-PLT)
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -1941,6 +1966,9 @@ paths:
       x-dry-run-note: 'PRD dry-run: No; PRD idempotency: Yes'
       x-exposure:
       - ui
+      x-consumers:
+      - BIL
+      - CLM
       x-permission: plt.Approval.get
       x-error-codes:
       - code: PLT-ERR-SELF-APPROVAL
@@ -1949,6 +1977,8 @@ paths:
         status: 403
       - code: PLT-ERR-CHECKER-MUST-BE-HUMAN
         status: 422
+      - code: PLT-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-14 §9.1 l.1965
       parameters:
@@ -2000,6 +2030,7 @@ paths:
       - W1-PLT-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-PLT-120 (SL2-PLT; approvals inbox of the caller's roles)
       x-io-shared: 6
       x-operation-kind: query
       x-idempotency: none
@@ -2022,6 +2053,19 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: status
+        in: query
+        required: false
+        description: Request status to list (default PendingApproval)
+        schema:
+          $ref: '#/components/schemas/ApprovalStatus'
+      - name: role
+        in: query
+        required: false
+        description: Referral role to list (one of the caller's roles); default all of the caller's roles. Requests the
+          caller made or edited are never listed as decidable work (REQ-PLT-115).
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
       responses:
         '200':
           description: Success
@@ -2057,6 +2101,7 @@ paths:
       - W1-PLT-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-PLT-117 (SL2-PLT)
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -2065,6 +2110,8 @@ paths:
       x-exposure:
       - internal
       x-consumers:
+      - BIL
+      - CLM
       - MIG
       - MKT
       - PFC
@@ -2073,6 +2120,8 @@ paths:
       x-error-codes:
       - code: PLT-ERR-APPROVAL-HASH-MISMATCH
         status: 422
+      - code: PLT-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-14 §9.1 l.1966
       parameters:
@@ -7310,58 +7359,186 @@ components:
         decision:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "decision"'
-    ApprovalRequestRequest:
+    ApprovalStatus:
+      type: string
+      enum:
+      - PendingApproval
+      - Approved
+      - Rejected
+      - Withdrawn
+      description: Approval request state (REQ-PLT-114 subset built by SL2-PLT; Returned, Expired and Consumed come with
+        W1-PLT-02). Withdrawn = superseded by a newer request for the same subject.
+    ApprovalAuthority:
       type: object
-      description: 'plt.Approval.request request. PRD inputs: "type, object ref, payload hash, diff"'
+      description: The authority a checker must hold to decide (plt.Authority.check of the checker on these dimensions).
       properties:
         type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Registered authority type, e.g. CLM.PAYMENT
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Value of the type's `amount` money dimension
+        codes:
+          type: object
+          additionalProperties:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Values of the type's code dimensions by dimension name (e.g. costType)
+      required:
+      - type
+    ApprovalDecisionView:
+      type: object
+      description: The decision of a checker (REQ-PLT-114).
+      properties:
+        decision:
+          type: string
+          enum:
+          - Approved
+          - Rejected
+        checker:
+          $ref: ../events/common.schema.json#/$defs/Actor
+        comment:
+          type: string
+        authorityCheckId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: plt.Authority.check result that allowed the checker
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - decision
+      - checker
+      - authorityCheckId
+      - decidedAt
+    ApprovalView:
+      type: object
+      description: An approval request (REQ-PLT-004, REQ-PLT-114, REQ-PLT-117).
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        type:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Approval type code, e.g. CLM.TRANSACTION_SET
         objectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: The subject to approve
+        payloadHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: SHA-256 content hash of the subject the maker submitted
+        status:
+          $ref: '#/components/schemas/ApprovalStatus'
+        maker:
+          $ref: ../events/common.schema.json#/$defs/Actor
+        authority:
+          $ref: '#/components/schemas/ApprovalAuthority'
+        referralRole:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Role whose holders work the request in their inbox
+        reason:
+          type: string
+        diff:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Field-level diff shown to the checker (no P2 values)
+        supersedes:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The earlier request for the same subject this one replaced
+        requestedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        version:
+          type: integer
+          minimum: 1
+      required:
+      - requestId
+      - type
+      - objectRef
+      - payloadHash
+      - status
+      - maker
+      - authority
+      - referralRole
+      - requestedAt
+      - version
+    ApprovalRequestRequest:
+      type: object
+      description: 'Typed from REQ-PLT-004, REQ-PLT-114, REQ-PLT-117 (SL2-PLT). PRD inputs: "type, object ref, payload hash,
+        diff". The maker is the calling actor. A new request for a subject that already has a pending request of the same
+        type supersedes it (the old one becomes Withdrawn; its maker and editors may not decide the new one).'
+      properties:
+        type:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: 'PRD: "type". Approval type code, e.g. CLM.TRANSACTION_SET'
+        objectRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
           description: 'PRD: "object ref"'
         payloadHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "payload hash"'
         diff:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/OpenObject
           description: 'PRD: "diff"'
+        authority:
+          $ref: '#/components/schemas/ApprovalAuthority'
+        referralRole:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Role that works the request (the referral target of the maker's authority check)
+        reason:
+          type: string
+          maxLength: 1024
+      required:
+      - type
+      - objectRef
+      - payloadHash
+      - authority
+      - referralRole
     ApprovalRequestResponse:
       type: object
       description: 'plt.Approval.request result. PRD outputs: "request; decision"'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/ApprovalView'
           description: 'PRD: "request"'
         decision:
-          $ref: common.yaml#/components/schemas/Unspecified
+          oneOf:
+          - $ref: '#/components/schemas/ApprovalDecisionView'
+          - type: 'null'
           description: 'PRD: "decision"'
+      required:
+      - request
     ApprovalDecideRequest:
       type: object
-      description: 'plt.Approval.decide request. PRD inputs: "type, object ref, payload hash, diff"'
+      description: 'Typed from REQ-PLT-114, REQ-PLT-115, REQ-PLT-117 (SL2-PLT). The checker is the calling actor; the
+        decision carries the content hash the checker saw and fails with PLT-ERR-APPROVAL-STALE when it is no longer the
+        request''s hash or the request is no longer pending.'
       properties:
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
-        objectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "object ref"'
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - Approve
+          - Reject
         payloadHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "payload hash"'
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+          description: 'PRD: "payload hash". The hash of the content the checker reviewed'
+        comment:
+          type: string
+          maxLength: 1024
+          description: Mandatory on reject (REQ-PLT-114)
+      required:
+      - requestId
+      - decision
+      - payloadHash
     ApprovalDecideResponse:
       type: object
       description: 'plt.Approval.decide result. PRD outputs: "request; decision"'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/ApprovalView'
           description: 'PRD: "request"'
         decision:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/ApprovalDecisionView'
           description: 'PRD: "decision"'
+      required:
+      - request
+      - decision
     ApprovalWithdrawRequest:
       type: object
       description: 'plt.Approval.withdraw request. PRD inputs: "type, object ref, payload hash, diff"'
@@ -7393,21 +7570,29 @@ components:
       description: 'plt.Approval.get result. PRD outputs: "request; decision"'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/ApprovalView'
           description: 'PRD: "request"'
         decision:
-          $ref: common.yaml#/components/schemas/Unspecified
+          oneOf:
+          - $ref: '#/components/schemas/ApprovalDecisionView'
+          - type: 'null'
           description: 'PRD: "decision"'
+      required:
+      - request
     ApprovalListItem:
       type: object
       description: 'plt.Approval.list result. PRD outputs: "request; decision"'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/ApprovalView'
           description: 'PRD: "request"'
         decision:
-          $ref: common.yaml#/components/schemas/Unspecified
+          oneOf:
+          - $ref: '#/components/schemas/ApprovalDecisionView'
+          - type: 'null'
           description: 'PRD: "decision"'
+      required:
+      - request
     ApprovalListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7428,13 +7613,22 @@ components:
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "hash"'
+      required:
+      - requestId
+      - hash
     ApprovalVerifyForExecutionResponse:
       type: object
-      description: 'plt.Approval.verifyForExecution result. PRD outputs: "ok"'
+      description: 'plt.Approval.verifyForExecution result. PRD outputs: "ok". ok is true only for an Approved request whose
+        hash equals the given one; a different hash fails with PLT-ERR-APPROVAL-HASH-MISMATCH.'
       properties:
         ok:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: boolean
           description: 'PRD: "ok"'
+        status:
+          $ref: '#/components/schemas/ApprovalStatus'
+      required:
+      - ok
+      - status
     AuditAppendRequest:
       type: object
       description: 'plt.Audit.append request. PRD inputs: "AuditEvent"'

@@ -38,6 +38,8 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
 
     public DbSet<DataKeyRow> DataKeys => Set<DataKeyRow>();
 
+    public DbSet<ApprovalRequestRow> ApprovalRequests => Set<ApprovalRequestRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -236,6 +238,65 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
             entity.Property(e => e.DemotedAt).HasColumnName("demoted_at").HasColumnType("timestamptz");
             entity.Property(e => e.RetiringAt).HasColumnName("retiring_at").HasColumnType("timestamptz");
         });
+        // Maker-checker requests (REQ-PLT-004, -114, -117; SL2-PLT). One pending request per subject and approval type;
+        // a decided request is frozen by trigger (migration ApprovalRequests).
+        modelBuilder.Entity<ApprovalRequestRow>(entity =>
+        {
+            entity.ToTable("approval_request", table =>
+            {
+                table.HasCheckConstraint("ck_approval_request_status", "status IN ('PendingApproval', 'Approved', 'Rejected', 'Withdrawn')");
+                table.HasCheckConstraint("ck_approval_request_hash", "payload_hash ~ '^[0-9a-f]{64}$'");
+                table.HasCheckConstraint("ck_approval_request_maker_kind", "maker_kind IN ('USER', 'SERVICE', 'AI_AGENT')");
+                table.HasCheckConstraint("ck_approval_request_checker_kind", "checker_kind IS NULL OR checker_kind = 'USER'");
+                table.HasCheckConstraint("ck_approval_request_amount", "(authority_amount IS NULL) = (authority_currency IS NULL)");
+                table.HasCheckConstraint("ck_approval_request_currency", "authority_currency IS NULL OR authority_currency ~ '^[A-Z]{3}$'");
+                table.HasCheckConstraint("ck_approval_request_codes", "jsonb_typeof(authority_codes) = 'object'");
+                table.HasCheckConstraint("ck_approval_request_diff", "diff IS NULL OR jsonb_typeof(diff) = 'object'");
+                table.HasCheckConstraint("ck_approval_request_version", "version >= 1");
+                table.HasCheckConstraint(
+                    "ck_approval_request_decision",
+                    "(status IN ('Approved', 'Rejected') AND decision = status AND checker_kind IS NOT NULL AND checker_id IS NOT NULL "
+                    + "AND authority_check_id IS NOT NULL AND decided_at IS NOT NULL) "
+                    + "OR (status = 'PendingApproval' AND decision IS NULL AND checker_id IS NULL AND decided_at IS NULL) "
+                    + "OR (status = 'Withdrawn' AND decision IS NULL AND checker_id IS NULL AND decided_at IS NOT NULL)");
+                table.HasCheckConstraint("ck_approval_request_reject_comment", "decision IS DISTINCT FROM 'Rejected' OR decision_comment IS NOT NULL");
+            });
+            entity.HasKey(e => e.RequestId).HasName("pk_approval_request");
+            entity.Property(e => e.RequestId).HasColumnName("request_id");
+            entity.Property(e => e.LegalEntity).HasColumnName("legal_entity").IsRequired();
+            entity.Property(e => e.ApprovalType).HasColumnName("approval_type").IsRequired();
+            entity.Property(e => e.ObjectModule).HasColumnName("object_module").IsRequired();
+            entity.Property(e => e.ObjectType).HasColumnName("object_type").IsRequired();
+            entity.Property(e => e.ObjectId).HasColumnName("object_id").IsRequired();
+            entity.Property(e => e.PayloadHash).HasColumnName("payload_hash").IsRequired();
+            entity.Property(e => e.Status).HasColumnName("status").IsRequired();
+            entity.Property(e => e.MakerKind).HasColumnName("maker_kind").IsRequired();
+            entity.Property(e => e.MakerId).HasColumnName("maker_id").IsRequired();
+            entity.Property(e => e.Editors).HasColumnName("editors").HasColumnType("text[]").IsRequired();
+            entity.Property(e => e.AuthorityType).HasColumnName("authority_type").IsRequired();
+            entity.Property(e => e.AuthorityAmount).HasColumnName("authority_amount").HasColumnType("numeric");
+            entity.Property(e => e.AuthorityCurrency).HasColumnName("authority_currency");
+            entity.Property(e => e.AuthorityCodes).HasColumnName("authority_codes").HasColumnType("jsonb").IsRequired();
+            entity.Property(e => e.ReferralRole).HasColumnName("referral_role").IsRequired();
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.Diff).HasColumnName("diff").HasColumnType("jsonb");
+            entity.Property(e => e.Supersedes).HasColumnName("supersedes");
+            entity.Property(e => e.RequestedAt).HasColumnName("requested_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Decision).HasColumnName("decision");
+            entity.Property(e => e.CheckerKind).HasColumnName("checker_kind");
+            entity.Property(e => e.CheckerId).HasColumnName("checker_id");
+            entity.Property(e => e.DecisionComment).HasColumnName("decision_comment");
+            entity.Property(e => e.AuthorityCheckId).HasColumnName("authority_check_id");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Version).HasColumnName("version");
+            entity.HasIndex(e => new { e.LegalEntity, e.ApprovalType, e.ObjectModule, e.ObjectType, e.ObjectId })
+                .IsUnique()
+                .HasFilter("status = 'PendingApproval'")
+                .HasDatabaseName("ux_approval_request_pending_subject");
+            entity.HasIndex(e => new { e.LegalEntity, e.Status, e.ReferralRole, e.RequestedAt }).HasDatabaseName("ix_approval_request_inbox");
+            entity.HasIndex(e => new { e.ObjectModule, e.ObjectType, e.ObjectId }).HasDatabaseName("ix_approval_request_subject");
+        });
+
         modelBuilder.Entity<AuditChainHeadRow>(entity =>
         {
             entity.ToTable("audit_chain_head", table =>
@@ -573,4 +634,62 @@ internal sealed class DataKeyRow
     public DateTime? DemotedAt { get; set; }
 
     public DateTime? RetiringAt { get; set; }
+}
+
+/// <summary><c>plt.approval_request</c>: one maker-checker request (runtime access is SQL in <c>ApprovalStore</c>).</summary>
+internal sealed class ApprovalRequestRow
+{
+    public Guid RequestId { get; set; }
+
+    public string LegalEntity { get; set; } = string.Empty;
+
+    public string ApprovalType { get; set; } = string.Empty;
+
+    public string ObjectModule { get; set; } = string.Empty;
+
+    public string ObjectType { get; set; } = string.Empty;
+
+    public string ObjectId { get; set; } = string.Empty;
+
+    public string PayloadHash { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
+
+    public string MakerKind { get; set; } = string.Empty;
+
+    public string MakerId { get; set; } = string.Empty;
+
+    public string[] Editors { get; set; } = [];
+
+    public string AuthorityType { get; set; } = string.Empty;
+
+    public decimal? AuthorityAmount { get; set; }
+
+    public string? AuthorityCurrency { get; set; }
+
+    public string AuthorityCodes { get; set; } = "{}";
+
+    public string ReferralRole { get; set; } = string.Empty;
+
+    public string? Reason { get; set; }
+
+    public string? Diff { get; set; }
+
+    public Guid? Supersedes { get; set; }
+
+    public DateTime RequestedAt { get; set; }
+
+    public string? Decision { get; set; }
+
+    public string? CheckerKind { get; set; }
+
+    public string? CheckerId { get; set; }
+
+    public string? DecisionComment { get; set; }
+
+    public Guid? AuthorityCheckId { get; set; }
+
+    public DateTime? DecidedAt { get; set; }
+
+    public int Version { get; set; }
 }

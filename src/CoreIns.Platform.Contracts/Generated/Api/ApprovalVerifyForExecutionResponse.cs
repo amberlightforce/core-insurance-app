@@ -4,15 +4,15 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Approval.verifyForExecution result. PRD outputs: "ok"</summary>
+/// <summary>plt.Approval.verifyForExecution result. PRD outputs: "ok". ok is true only for an Approved request whose hash equals the given one; a different hash fails with PLT-ERR-APPROVAL-HASH-MISMATCH.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ApprovalVerifyForExecutionResponse
 {
     /// <summary>PRD: "ok"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("ok")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Ok { get; init; }
+    public required bool Ok { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required global::CoreIns.Platform.Contracts.Api.ApprovalStatus Status { get; init; }
 }

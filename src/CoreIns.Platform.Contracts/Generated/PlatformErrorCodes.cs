@@ -38,6 +38,12 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string ApprovalHashMismatch = "PLT-ERR-APPROVAL-HASH-MISMATCH";
 
+    /// <summary>PLT-ERR-APPROVAL-STALE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): plt.Approval.decide, plt.Approval.request.</para>
+    /// </remarks>
+    public const string ApprovalStale = "PLT-ERR-APPROVAL-STALE";
+
     /// <summary>PLT-ERR-AUDIT-INVALID (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): plt.Audit.append.</para>
@@ -50,15 +56,15 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string Authority = "PLT-ERR-AUTHORITY";
 
-    /// <summary>PLT-ERR-AUTHORITY-DENIED.</summary>
+    /// <summary>PLT-ERR-AUTHORITY-DENIED (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Registered by D-API-14.</para>
+    /// <para>Declared by 1 operation(s): plt.Approval.decide.</para>
     /// </remarks>
     public const string AuthorityDenied = "PLT-ERR-AUTHORITY-DENIED";
 
-    /// <summary>PLT-ERR-AUTHORITY-REFERRAL-REQUIRED.</summary>
+    /// <summary>PLT-ERR-AUTHORITY-REFERRAL-REQUIRED (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Registered by D-API-14.</para>
+    /// <para>Declared by 1 operation(s): plt.Approval.decide.</para>
     /// </remarks>
     public const string AuthorityReferralRequired = "PLT-ERR-AUTHORITY-REFERRAL-REQUIRED";
 
@@ -188,6 +194,12 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string NoRate = "PLT-ERR-NO-RATE";
 
+    /// <summary>PLT-ERR-NOT-FOUND (HTTP 404).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.verifyForExecution.</para>
+    /// </remarks>
+    public const string NotFound = "PLT-ERR-NOT-FOUND";
+
     /// <summary>PLT-ERR-NOT-RETRYABLE (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 2 operation(s): plt.Transfer.list, plt.Transfer.retry.</para>
@@ -284,9 +296,9 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string UnknownKey = "PLT-ERR-UNKNOWN-KEY";
 
-    /// <summary>PLT-ERR-UNKNOWN-TYPE (HTTP 422).</summary>
+    /// <summary>PLT-ERR-UNKNOWN-TYPE (HTTP 400).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): plt.Authority.check.</para>
+    /// <para>Declared by 2 operation(s): plt.Approval.request, plt.Authority.check.</para>
     /// </remarks>
     public const string UnknownType = "PLT-ERR-UNKNOWN-TYPE";
 
@@ -296,9 +308,9 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string UnsupportedLanguage = "PLT-ERR-UNSUPPORTED-LANGUAGE";
 
-    /// <summary>PLT-ERR-VALIDATION.</summary>
+    /// <summary>PLT-ERR-VALIDATION (HTTP 400).</summary>
     /// <remarks>
-    /// <para>Registered by D-API-14.</para>
+    /// <para>Declared by 2 operation(s): plt.Approval.decide, plt.Approval.request.</para>
     /// </remarks>
     public const string Validation = "PLT-ERR-VALIDATION";
 
@@ -324,7 +336,7 @@ public static class PlatformErrorCodes
     public const string Prefix = "PLT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiNotRegistered, AiOff, ApprovalHashMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotRetryable, NotRunnable, OutOfOrgScope, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotRetryable, NotRunnable, OutOfOrgScope, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -334,8 +346,11 @@ public static class PlatformErrorCodes
         [AiNotRegistered] = 422,
         [AiOff] = 422,
         [ApprovalHashMismatch] = 422,
+        [ApprovalStale] = 409,
         [AuditInvalid] = 422,
         [Authority] = 403,
+        [AuthorityDenied] = 403,
+        [AuthorityReferralRequired] = 403,
         [CalendarNotPublished] = 422,
         [CheckExpired] = 422,
         [CheckerMustBeHuman] = 422,
@@ -352,6 +367,7 @@ public static class PlatformErrorCodes
         [Incompatible] = 422,
         [InvalidTransition] = 422,
         [NoRate] = 422,
+        [NotFound] = 404,
         [NotRetryable] = 422,
         [NotRunnable] = 422,
         [OutOfOrgScope] = 403,
@@ -368,8 +384,9 @@ public static class PlatformErrorCodes
         [TemplateInvalid] = 422,
         [TypeExists] = 409,
         [UnknownKey] = 422,
-        [UnknownType] = 422,
+        [UnknownType] = 400,
         [UnsupportedLanguage] = 422,
+        [Validation] = 400,
         [VerificationFailed] = 422,
         [WorkflowExists] = 409,
         [WorkflowNotFound] = 404,

@@ -93,6 +93,8 @@ public static class PartyModule
             .Describe("Ο ταχυδρομικός κώδικας δεν ταιριάζει με τη μορφή της χώρας της διεύθυνσης.", "The postcode does not match the format of the address's country."),
         ErrorDefinition.For(ModuleCode.PTY, "ACTIVATION-INCOMPLETE", 422, "Η ενεργοποίηση δεν είναι δυνατή ακόμη", "Activation is not possible yet")
             .Describe("Λείπουν προϋποθέσεις (missing). Συμπληρώστε τες και επαναλάβετε.", "Preconditions are missing (missing). Complete them and try again."),
+        ErrorDefinition.For(ModuleCode.PTY, "SCREEN-INPUT", 422, "Τα στοιχεία ελέγχου κυρώσεων δεν είναι έγκυρα", "The screening input is not valid")
+            .Describe("Δώστε είτε πρόσωπο (partyId) είτε έκτακτο δικαιούχο με όνομα, όχι και τα δύο.", "Give either a party (partyId) or an ad-hoc payee with a name, not both."),
         ErrorDefinition.For(ModuleCode.PTY, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

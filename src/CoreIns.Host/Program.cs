@@ -1,6 +1,7 @@
 using CoreIns.Host.Database;
 using CoreIns.Host.Health;
 using CoreIns.Host.Hosting;
+using CoreIns.Modules.Party.Services;
 using CoreIns.Platform;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Http;
@@ -41,6 +42,9 @@ builder.Services.AddCoreInsDataSource(connectionString);
 builder.Services.AddCoreInsHealthChecks();
 builder.Services.AddCoreInsJobs(connectionString, role);
 builder.Services.AddCountryPacks(builder.Configuration, builder.Environment);
+
+// D-SL2-05: PTY sanctions screening is a stub (Clear, marked) outside Production; in Production it fails closed.
+builder.Services.AddPartyScreening(builder.Environment);
 builder.Services.AddCoreInsDataProtection(builder.Configuration, builder.Environment);
 
 if (role == AppRole.Worker)

@@ -1,3 +1,4 @@
+using CoreIns.Modules.Claims.Authority;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,11 +16,12 @@ public static class ClaimsModule
     /// <summary>All PostgreSQL schemas owned by this module, created by the migrate job.</summary>
     public static IReadOnlyList<string> Schemas { get; } = [Schema];
 
-    /// <summary>Registers the module's services. The module has no services yet (placeholder until its feature package).</summary>
+    /// <summary>Registers the module's services: so far the claims authority types (SL2-PLT, D-SL2-03).</summary>
     public static IServiceCollection AddClaimsModule(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
+        services.AddClaimsAuthorityTypes();
         return services;
     }
 }

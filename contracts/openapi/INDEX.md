@@ -1109,10 +1109,10 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `plt.AiToggle.resolve` | POST `/api/plt/v1/ai-toggle/resolve` | Q |  | ui | CHN, PTY | W8 | full | REQ-PLT-010, REQ-PLT-217..REQ-PLT-231 |
 | `plt.AiToggle.set` | POST `/api/plt/v1/ai-toggle/set` | C |  | ui |  | W8 | full | REQ-PLT-010, REQ-PLT-217..REQ-PLT-231 |
 | `plt.Approval.decide` | POST `/api/plt/v1/approval/decide` | C |  | ui | CLM, MIG, UW | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
-| `plt.Approval.get` | GET `/api/plt/v1/approval/{id}` | Q |  | ui |  | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
+| `plt.Approval.get` | GET `/api/plt/v1/approval/{id}` | Q |  | ui | BIL, CLM | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Approval.list` | GET `/api/plt/v1/approval` | Q |  | ui |  | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Approval.request` | POST `/api/plt/v1/approval/request` | C |  | ui | BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT, UW | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
-| `plt.Approval.verifyForExecution` | POST `/api/plt/v1/approval/verify-for-execution` | Q |  | internal | MIG, MKT, PFC, PTY | W1 | full | REQ-PLT-117 |
+| `plt.Approval.verifyForExecution` | POST `/api/plt/v1/approval/verify-for-execution` | Q |  | internal | BIL, CLM, MIG, MKT, PFC, PTY | W1 | full | REQ-PLT-117 |
 | `plt.Approval.withdraw` | POST `/api/plt/v1/approval/withdraw` | C |  | ui |  | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.ApprovalType.register` | POST `/api/plt/v1/approval-types/register` | C |  | internal | MKT | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Audit.append` | POST `/api/plt/v1/audit/append` | C |  | internal | BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT | W1 | minimal | REQ-PLT-002, REQ-PLT-124 |

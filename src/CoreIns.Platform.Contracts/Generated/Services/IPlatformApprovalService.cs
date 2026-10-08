@@ -15,21 +15,32 @@ public interface IPlatformApprovalService
     /// <remarks>
     /// <para>Operation plt.Approval.decide (command; HTTP POST /api/plt/v1/approval/decide).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W1.</para>
+    /// <para>Status: full; fully typed from REQ-PLT-004, REQ-PLT-114, REQ-PLT-115, REQ-PLT-116, REQ-PLT-117, REQ-PLT-121 (SL2-PLT). Wave W1.</para>
     /// <para>Exposure: ui; consumers: CLM, MIG, UW.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: PLT-ERR-SELF-APPROVAL (403), PLT-ERR-EDITOR-CANNOT-APPROVE (403), PLT-ERR-CHECKER-MUST-BE-HUMAN (422), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PLT-ERR-SELF-APPROVAL (403), PLT-ERR-EDITOR-CANNOT-APPROVE (403), PLT-ERR-CHECKER-MUST-BE-HUMAN (422), PLT-ERR-VALIDATION (400), PLT-ERR-NOT-FOUND (404), PLT-ERR-AUTHORITY-DENIED (403), PLT-ERR-AUTHORITY-REFERRAL-REQUIRED (403), PLT-ERR-APPROVAL-STALE (409), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalDecideResponse> DecideAsync(global::CoreIns.Platform.Contracts.Api.ApprovalDecideRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Maker-checker</summary>
     /// <remarks>
+    /// <para>Operation plt.Approval.get (query; HTTP GET /api/plt/v1/approval/{id}).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full; fully typed from REQ-PLT-114 (SL2-PLT). Wave W1.</para>
+    /// <para>Exposure: ui; consumers: BIL, CLM.</para>
+    /// <para>Errors: PLT-ERR-SELF-APPROVAL (403), PLT-ERR-EDITOR-CANNOT-APPROVE (403), PLT-ERR-CHECKER-MUST-BE-HUMAN (422), PLT-ERR-NOT-FOUND (404).</para>
+    /// </remarks>
+    /// <param name="id">Identifier of the Approval</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>Maker-checker</summary>
+    /// <remarks>
     /// <para>Operation plt.Approval.request (command; HTTP POST /api/plt/v1/approval/request).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W1.</para>
+    /// <para>Status: full; fully typed from REQ-PLT-004, REQ-PLT-114, REQ-PLT-116, REQ-PLT-117 (SL2-PLT). Wave W1.</para>
     /// <para>Exposure: ui; consumers: BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT, UW.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: PLT-ERR-SELF-APPROVAL (403), PLT-ERR-EDITOR-CANNOT-APPROVE (403), PLT-ERR-CHECKER-MUST-BE-HUMAN (422), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PLT-ERR-SELF-APPROVAL (403), PLT-ERR-EDITOR-CANNOT-APPROVE (403), PLT-ERR-CHECKER-MUST-BE-HUMAN (422), PLT-ERR-VALIDATION (400), PLT-ERR-UNKNOWN-TYPE (400), PLT-ERR-APPROVAL-STALE (409), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalRequestResponse> RequestAsync(global::CoreIns.Platform.Contracts.Api.ApprovalRequestRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -37,9 +48,9 @@ public interface IPlatformApprovalService
     /// <remarks>
     /// <para>Operation plt.Approval.verifyForExecution (query; HTTP POST /api/plt/v1/approval/verify-for-execution).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W1.</para>
-    /// <para>Exposure: internal; consumers: MIG, MKT, PFC, PTY.</para>
-    /// <para>Errors: PLT-ERR-APPROVAL-HASH-MISMATCH (422).</para>
+    /// <para>Status: full; fully typed from REQ-PLT-117 (SL2-PLT). Wave W1.</para>
+    /// <para>Exposure: internal; consumers: BIL, CLM, MIG, MKT, PFC, PTY.</para>
+    /// <para>Errors: PLT-ERR-APPROVAL-HASH-MISMATCH (422), PLT-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalVerifyForExecutionResponse> VerifyForExecutionAsync(global::CoreIns.Platform.Contracts.Api.ApprovalVerifyForExecutionRequest request, global::System.Threading.CancellationToken cancellationToken = default);
 }

@@ -19,15 +19,143 @@
       "outcome": "unspecified"
     },
     "plt.Approval.decide": {
-      "request": "unspecified",
-      "decision": "unspecified"
+      "request": {
+        "requestId": "0192e4a5-eea0-782b-89bb-ae25ea0b8392",
+        "type": "SAMPLE_CODE",
+        "objectRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "01925919-a2ec-7c84-8769-bc5d6c391114"
+        },
+        "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "status": "PendingApproval",
+        "maker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "authority": {
+          "type": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "codes": {
+            "sample": "SAMPLE_CODE"
+          }
+        },
+        "referralRole": "SAMPLE_CODE",
+        "reason": "sample",
+        "diff": {
+          "note": "sample"
+        },
+        "supersedes": "019287fd-e76d-79a8-8231-cad364a2e215",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "version": 1
+      },
+      "decision": {
+        "decision": "Approved",
+        "checker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "comment": "sample",
+        "authorityCheckId": "0192cd41-6b36-7fb4-8a04-7d8ed469dbc7",
+        "decidedAt": "2026-10-07T09:00:00Z"
+      }
+    },
+    "plt.Approval.get": {
+      "request": {
+        "requestId": "0192a064-f2b0-7b1d-8a7b-de45e4405375",
+        "type": "SAMPLE_CODE",
+        "objectRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "0192c443-e7df-71ba-86fa-ba9771ca33f6"
+        },
+        "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "status": "PendingApproval",
+        "maker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "authority": {
+          "type": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "codes": {
+            "sample": "SAMPLE_CODE"
+          }
+        },
+        "referralRole": "SAMPLE_CODE",
+        "reason": "sample",
+        "diff": {
+          "note": "sample"
+        },
+        "supersedes": "01925bcc-2e30-7138-8974-304d8f8c9014",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "version": 1
+      },
+      "decision": {
+        "decision": "Approved",
+        "checker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "comment": "sample",
+        "authorityCheckId": "01921066-3d68-777f-83be-5f7d2a9601f4",
+        "decidedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "plt.Approval.request": {
-      "request": "unspecified",
-      "decision": "unspecified"
+      "request": {
+        "requestId": "0192f8a4-c157-7784-899f-a0917a1bc1c1",
+        "type": "SAMPLE_CODE",
+        "objectRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "0192626d-329d-7f92-8ab5-f72d365ca2bb"
+        },
+        "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "status": "PendingApproval",
+        "maker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "authority": {
+          "type": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "codes": {
+            "sample": "SAMPLE_CODE"
+          }
+        },
+        "referralRole": "SAMPLE_CODE",
+        "reason": "sample",
+        "diff": {
+          "note": "sample"
+        },
+        "supersedes": "01924331-8cea-7aa1-8632-d434b644b436",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "version": 1
+      },
+      "decision": {
+        "decision": "Approved",
+        "checker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "comment": "sample",
+        "authorityCheckId": "019210d9-7956-71e8-8730-3cfd0a159ced",
+        "decidedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "plt.Approval.verifyForExecution": {
-      "ok": "unspecified"
+      "ok": true,
+      "status": "PendingApproval"
     },
     "plt.ApprovalType.register": {
       "request": "unspecified",
@@ -316,43 +444,286 @@
       "interactionId": "0192091b-c952-7407-820f-6e30e5dcbba1",
       "outcome": "unspecified"
     },
+    "ApprovalAuthority": {
+      "type": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "codes": {
+        "sample": "SAMPLE_CODE"
+      }
+    },
     "ApprovalDecideRequest": {
-      "type": "unspecified",
-      "objectRef": "unspecified",
+      "requestId": "01926432-7283-7c0c-83f9-35317d7723ce",
+      "decision": "Approve",
       "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "diff": "unspecified"
+      "comment": "sample"
     },
     "ApprovalDecideResponse": {
-      "request": "unspecified",
-      "decision": "unspecified"
+      "request": {
+        "requestId": "01922c02-13d9-7c2d-851f-372bbe0b6c7f",
+        "type": "SAMPLE_CODE",
+        "objectRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "019238c4-5f5f-7207-885c-7daa3f6abe22"
+        },
+        "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "status": "PendingApproval",
+        "maker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "authority": {
+          "type": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "codes": {
+            "sample": "SAMPLE_CODE"
+          }
+        },
+        "referralRole": "SAMPLE_CODE",
+        "reason": "sample",
+        "diff": {
+          "note": "sample"
+        },
+        "supersedes": "0192053a-8421-7d42-8175-32eda50f0152",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "version": 1
+      },
+      "decision": {
+        "decision": "Approved",
+        "checker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "comment": "sample",
+        "authorityCheckId": "01921723-0672-70bf-84f5-c2be103210d5",
+        "decidedAt": "2026-10-07T09:00:00Z"
+      }
+    },
+    "ApprovalDecisionView": {
+      "decision": "Approved",
+      "checker": {
+        "kind": "USER",
+        "id": "user-sample"
+      },
+      "comment": "sample",
+      "authorityCheckId": "019214b5-b35e-7030-8b02-4aab039b7d1c",
+      "decidedAt": "2026-10-07T09:00:00Z"
     },
     "ApprovalGetResponse": {
-      "request": "unspecified",
-      "decision": "unspecified"
+      "request": {
+        "requestId": "0192fbf3-2953-7529-8bed-50ff03dad512",
+        "type": "SAMPLE_CODE",
+        "objectRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "01920e0a-047c-77bb-8643-7004621ae5e8"
+        },
+        "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "status": "PendingApproval",
+        "maker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "authority": {
+          "type": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "codes": {
+            "sample": "SAMPLE_CODE"
+          }
+        },
+        "referralRole": "SAMPLE_CODE",
+        "reason": "sample",
+        "diff": {
+          "note": "sample"
+        },
+        "supersedes": "01921a5f-94a5-7105-8e9b-cb2a18409990",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "version": 1
+      },
+      "decision": {
+        "decision": "Approved",
+        "checker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "comment": "sample",
+        "authorityCheckId": "0192e2ca-02f2-7e43-8eab-2dcbf3e5f672",
+        "decidedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ApprovalListItem": {
-      "request": "unspecified",
-      "decision": "unspecified"
+      "request": {
+        "requestId": "01929679-1a5c-7b66-8f56-34e77830e091",
+        "type": "SAMPLE_CODE",
+        "objectRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "019272f5-ad2f-77c4-864e-e1bd2d89da05"
+        },
+        "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "status": "PendingApproval",
+        "maker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "authority": {
+          "type": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "codes": {
+            "sample": "SAMPLE_CODE"
+          }
+        },
+        "referralRole": "SAMPLE_CODE",
+        "reason": "sample",
+        "diff": {
+          "note": "sample"
+        },
+        "supersedes": "0192017e-d94b-7740-80b0-c960ed2e3dd5",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "version": 1
+      },
+      "decision": {
+        "decision": "Approved",
+        "checker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "comment": "sample",
+        "authorityCheckId": "01928a39-60d7-7b7f-8f95-b465d83f593f",
+        "decidedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ApprovalListPage": {
       "items": [
         {
-          "request": "unspecified",
-          "decision": "unspecified"
+          "request": {
+            "requestId": "0192da5d-7e36-77d7-891f-fbc01f36fc13",
+            "type": "SAMPLE_CODE",
+            "objectRef": {
+              "module": "POL",
+              "type": "Policy",
+              "id": "0192a12d-ddaf-7679-853a-2c54517a42be"
+            },
+            "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "status": "PendingApproval",
+            "maker": {
+              "kind": "USER",
+              "id": "user-sample"
+            },
+            "authority": {
+              "type": "SAMPLE_CODE",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "codes": {
+                "sample": "SAMPLE_CODE"
+              }
+            },
+            "referralRole": "SAMPLE_CODE",
+            "reason": "sample",
+            "diff": {
+              "note": "sample"
+            },
+            "supersedes": "01927236-d83c-7eaa-88e7-534d1f27fde0",
+            "requestedAt": "2026-10-07T09:00:00Z",
+            "version": 1
+          },
+          "decision": {
+            "decision": "Approved",
+            "checker": {
+              "kind": "USER",
+              "id": "user-sample"
+            },
+            "comment": "sample",
+            "authorityCheckId": "01923baa-6663-7de1-868f-ecf0d256aec8",
+            "decidedAt": "2026-10-07T09:00:00Z"
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "ApprovalRequestRequest": {
-      "type": "unspecified",
-      "objectRef": "unspecified",
+      "type": "SAMPLE_CODE",
+      "objectRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "0192bc51-a845-7388-8337-21406f50e3f2"
+      },
       "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "diff": "unspecified"
+      "diff": {
+        "note": "sample"
+      },
+      "authority": {
+        "type": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "codes": {
+          "sample": "SAMPLE_CODE"
+        }
+      },
+      "referralRole": "SAMPLE_CODE",
+      "reason": "sample"
     },
     "ApprovalRequestResponse": {
-      "request": "unspecified",
-      "decision": "unspecified"
+      "request": {
+        "requestId": "01926c1b-906a-7263-8e89-f8d51fde8640",
+        "type": "SAMPLE_CODE",
+        "objectRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "01920957-d9d9-7deb-8234-be98612e8623"
+        },
+        "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "status": "PendingApproval",
+        "maker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "authority": {
+          "type": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "codes": {
+            "sample": "SAMPLE_CODE"
+          }
+        },
+        "referralRole": "SAMPLE_CODE",
+        "reason": "sample",
+        "diff": {
+          "note": "sample"
+        },
+        "supersedes": "019278ee-2506-7f30-8ca8-096d475bcd62",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "version": 1
+      },
+      "decision": {
+        "decision": "Approved",
+        "checker": {
+          "kind": "USER",
+          "id": "user-sample"
+        },
+        "comment": "sample",
+        "authorityCheckId": "01924f82-bdf9-783e-8b5e-d7bf36ed1d0c",
+        "decidedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ApprovalTypeRegisterRequest": {
       "type": "unspecified",
@@ -369,7 +740,41 @@
       "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "ApprovalVerifyForExecutionResponse": {
-      "ok": "unspecified"
+      "ok": true,
+      "status": "PendingApproval"
+    },
+    "ApprovalView": {
+      "requestId": "01924384-292e-7cf9-8e4b-550776f52e2d",
+      "type": "SAMPLE_CODE",
+      "objectRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "0192ed33-cc7b-7836-8c63-38b13f3f284c"
+      },
+      "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "status": "PendingApproval",
+      "maker": {
+        "kind": "USER",
+        "id": "user-sample"
+      },
+      "authority": {
+        "type": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "codes": {
+          "sample": "SAMPLE_CODE"
+        }
+      },
+      "referralRole": "SAMPLE_CODE",
+      "reason": "sample",
+      "diff": {
+        "note": "sample"
+      },
+      "supersedes": "01922b34-e782-718a-88ca-ae14dd163d5b",
+      "requestedAt": "2026-10-07T09:00:00Z",
+      "version": 1
     },
     "ApprovalWithdrawRequest": {
       "type": "unspecified",

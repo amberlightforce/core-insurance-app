@@ -13,11 +13,9 @@ public sealed record ApprovalVerifyForExecutionRequest
     /// <para>Untyped id: no SharedKernel id type is mapped for 'requestId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("requestId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? RequestId { get; init; }
+    public required global::System.Guid RequestId { get; init; }
 
     /// <summary>PRD: "hash"</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Hash { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
 }

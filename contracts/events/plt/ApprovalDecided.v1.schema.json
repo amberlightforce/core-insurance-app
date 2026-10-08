@@ -90,6 +90,21 @@
         "decidedAt": {
           "$ref": "../common.schema.json#/$defs/Instant",
           "x-classification": "P0"
+        },
+        "approvalType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "description": "Approval type code (added by SL2-PLT, pre-release): lets the owning module pick its own decisions",
+          "x-classification": "P0"
+        },
+        "objectRef": {
+          "$ref": "../common.schema.json#/$defs/ObjectRef",
+          "description": "The subject decided (added by SL2-PLT, pre-release)",
+          "x-classification": "P0"
+        },
+        "payloadHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "description": "Content hash the decision was made on (added by SL2-PLT, pre-release; REQ-PLT-117)",
+          "x-classification": "P0"
         }
       }
     }

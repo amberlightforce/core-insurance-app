@@ -172,7 +172,14 @@
       "requestId": "01920768-13c9-7447-8944-e811589abaa3",
       "decision": "SAMPLE_CODE",
       "checkerUserId": "0192782b-f511-78e6-897e-4d8eb7fc7e42",
-      "decidedAt": "2026-10-07T09:00:00Z"
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "approvalType": "SAMPLE_CODE",
+      "objectRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "01923f13-5821-7dad-8708-06860c320321"
+      },
+      "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     }
   },
   {

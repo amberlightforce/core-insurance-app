@@ -64,6 +64,7 @@ internal static class ModuleCatalog
     /// <summary>Module assemblies whose (internal) <c>[ApiController]</c>s the api serves.</summary>
     public static IReadOnlyList<System.Reflection.Assembly> ApiAssemblies { get; } =
     [
+        typeof(PlatformModule).Assembly,
         typeof(PartyModule).Assembly,
         typeof(RatingModule).Assembly,
         typeof(UnderwritingModule).Assembly,
