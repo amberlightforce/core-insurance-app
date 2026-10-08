@@ -136,6 +136,12 @@ public sealed record TaxLine
 
     /// <summary>Legal status of the value used (D-REG-01).</summary>
     public required LegalStatus LegalStatus { get; init; }
+
+    /// <summary>SHA-256 of the configuration the rate was resolved under (PRD-17 section 7.5). Optional so existing producers compile.</summary>
+    public string? ConfigurationHash { get; init; }
+
+    /// <summary>True when <see cref="LegalStatus"/> is anything but Settled; such a line is provisional (D-REG-02, PITFALLS 36).</summary>
+    public bool Provisional => LegalStatus != LegalStatus.Settled;
 }
 
 /// <summary>Transaction kind of a treatment request (PRD-17 §9.4.4).</summary>
