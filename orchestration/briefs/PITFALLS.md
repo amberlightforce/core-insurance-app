@@ -82,3 +82,8 @@ found by a review or by CI in slices 1–2; the decision id says where.
 37. **Config keys that can never match are load errors**: a key shape the lookup never uses (a source on a kind that
     ignores sources, an `ANY` where lookups are always explicit) must be rejected at load, or a pack believes it has
     supplied a rule it hasn't.
+38. **No lingering MSBuild nodes**: before any `dotnet build`/`test`/`run`, set `MSBUILDDISABLENODEREUSE=1` and
+    `DOTNET_CLI_USE_MSBUILD_SERVER=0` (PowerShell: `$env:MSBUILDDISABLENODEREUSE='1'; $env:DOTNET_CLI_USE_MSBUILD_SERVER='0'`)
+    and pass `-m:2`. Node reuse left 114 idle workers (14 GB) on the laptop and capped how many agents could run.
+39. **Unique log/output paths**: write test logs under your own worktree or scratchpad (e.g. `<worktree>/.logs/<class>.log`),
+    never a shared path like `.claude/worktrees/t1.log`; another agent clobbered one.
