@@ -55,6 +55,8 @@ internal sealed class OfferRenewalHandler(
     RenewalPricing pricing,
     IOptions<PolicyOptions> options) : ICommandHandler<OfferRenewal, RenewalOfferResponse>
 {
+    private const int MaxVersions = 20;
+
     public async Task<Result<RenewalOfferResponse>> HandleAsync(OfferRenewal command, CancellationToken cancellationToken)
     {
         var termId = command.Request.TermId;
@@ -102,6 +104,57 @@ internal sealed class OfferRenewalHandler(
 
         var version = await RenewalSupport.CurrentVersionAsync(db, job, cancellationToken).ConfigureAwait(false);
         var state = Codes.Parse<JobState>(job.State);
+
+        // Rebase (REQ-POL-246, D-SL3-10): a change or cancellation was bound on the expiring term after this renewal was created or
+        // last offered, so its base is no longer the head. The risk tree is copied again from the current head's segment at expiry,
+        // the base moves to the head, and the offer is rated afresh; a quote version already issued is superseded and kept.
+        if (job.BaseTransactionId != term.HeadTransactionId)
+        {
+            var current = await RenewalSupport.RiskTreeAtExpiryAsync(db, termId, term.ValidTo, cancellationToken).ConfigureAwait(false);
+            if (current is null)
+            {
+                return DomainError.Of(ModuleCode.POL, "SEGMENT-INVARIANT", "The expiring term has no segment at its end.");
+            }
+
+            if (state == JobState.Quoted)
+            {
+                var edit = JobSupport.Fire(job, JobTrigger.Edit);
+                var superseded = JobSupport.Fire(version, QuoteTrigger.Supersede);
+                if (edit.IsFailure || superseded.IsFailure)
+                {
+                    return JobSupport.Stale();
+                }
+
+                if (version.VersionNo >= MaxVersions)
+                {
+                    return DomainError.Of(ModuleCode.POL, "VALIDATION", $"A job holds at most {MaxVersions} quote versions.");
+                }
+
+                job.State = Codes.Of(edit.Value);
+                version.State = Codes.Of(superseded.Value);
+                version.RecordVersion++;
+                version.UpdatedAt = now;
+                version = new QuoteVersionRow
+                {
+                    QuoteId = QuoteId.New(), JobId = job.JobId, LegalEntityId = job.LegalEntityId, VersionNo = version.VersionNo + 1,
+                    State = Codes.Of(QuoteStateModel.Machine.Start(QuoteState.Draft).Value), DraftVersion = 0, RiskTree = current,
+                    RecordVersion = 1, CreatedAt = now, UpdatedAt = now,
+                };
+                db.QuoteVersions.Add(version);
+                job.CurrentVersionNo = version.VersionNo;
+            }
+            else
+            {
+                version.RiskTree = current;
+                version.DraftVersion++;
+                version.UpdatedAt = now;
+            }
+
+            job.BaseTransactionId = term.HeadTransactionId;
+            job.SubState = null;
+            job.Referred = false;
+            state = JobState.Draft;
+        }
         var currency = Currency.FromCode(job.Currency);
         if (state is not (JobState.Draft or JobState.Quoted))
         {
@@ -223,6 +276,7 @@ internal sealed class OfferRenewalHandler(
             PremiumSummary = new PremiumSummary { Premium = offerPremium, Taxes = offerTaxes, Total = offerTotal },
             AcceptanceMode = RenewalSupport.AcceptanceModeExplicit,
             Deadline = term.ValidTo,
+            Referred = blocked,
         };
     }
 }

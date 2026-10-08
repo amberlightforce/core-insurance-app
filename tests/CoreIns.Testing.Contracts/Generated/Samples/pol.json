@@ -785,6 +785,7 @@
       },
       "acceptanceMode": "SAMPLE_CODE",
       "deadline": "2026-10-07T09:00:00Z",
+      "referred": true,
       "servicingPreview": {
         "annualBefore": {
           "amount": "120.50",
@@ -2754,6 +2755,7 @@
       },
       "acceptanceMode": "SAMPLE_CODE",
       "deadline": "2026-10-07T09:00:00Z",
+      "referred": true,
       "servicingPreview": {
         "annualBefore": {
           "amount": "120.50",

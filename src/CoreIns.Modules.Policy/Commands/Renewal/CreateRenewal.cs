@@ -113,11 +113,8 @@ internal sealed class CreateRenewalHandler(
         var policy = await db.Policies.AsNoTracking().SingleAsync(p => p.PolicyId == policyId, cancellationToken).ConfigureAwait(false);
 
         // The risk tree valid at the end of the expiring term (half-open: the segment that ends at the expiry), as known now.
-        var segments = await db.Segments.AsNoTracking()
-            .Where(s => s.TermId == termId && s.RecordedTo == null && s.ValidFrom < expiry && s.ValidTo >= expiry)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-        var segment = segments.OrderByDescending(s => s.ValidFrom).FirstOrDefault();
-        if (segment is null)
+        var riskTree = await RenewalSupport.RiskTreeAtExpiryAsync(db, termId, expiry, cancellationToken).ConfigureAwait(false);
+        if (riskTree is null)
         {
             return DomainError.Of(ModuleCode.POL, "SEGMENT-INVARIANT", "The expiring term has no segment at its end.");
         }
@@ -175,7 +172,7 @@ internal sealed class CreateRenewalHandler(
             VersionNo = 1,
             State = Codes.Of(QuoteStateModel.Machine.Start(QuoteState.Draft).Value),
             DraftVersion = 0,
-            RiskTree = segment.Snapshot,
+            RiskTree = riskTree,
             RecordVersion = 1,
             CreatedAt = now,
             UpdatedAt = now,

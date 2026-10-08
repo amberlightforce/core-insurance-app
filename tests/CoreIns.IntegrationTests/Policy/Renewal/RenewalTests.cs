@@ -123,7 +123,7 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         bound.Text("producerOfRecord").ShouldBe("DIRECT");
         (await _renewal.ScalarAsync<string>($"SELECT accepted_by FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe("USER:uw-anna");
         // PITFALLS 5 / D-UW-01: the creator, the offerer and the acceptor are all participants UW refuses as deciders.
-        (await _renewal.ScalarAsync<long>($"SELECT cardinality(participants) FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe(2);
+        (await _renewal.ScalarAsync<int>($"SELECT cardinality(participants) FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe(2);
         (await _renewal.ScalarAsync<bool>($"SELECT 'USER:uw-anna' = ANY(participants) FROM pol.job WHERE job_id = '{jobId}'")).ShouldBeTrue();
         (await _renewal.ScalarAsync<string>($"SELECT acceptance_channel FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe("STAFF");
         (await _renewal.ScalarAsync<bool>($"SELECT accepted_at IS NOT NULL FROM pol.job WHERE job_id = '{jobId}'")).ShouldBeTrue();
@@ -218,6 +218,7 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         var (referred, referral) = await _renewal.OfferAsync();
         referred.StatusCode.ShouldBe(HttpStatusCode.OK, referral?.ToJsonString());
         referral.Text("state").ShouldBe("QUOTED");
+        referral.Text("referred").ShouldBe("true");
         (await _renewal.ReferredAsync()).ShouldBeTrue();
         (await _renewal.SubStateAsync()).ShouldBe("NONE");
         (await _renewal.CountEventsAsync("RenewalOffered")).ShouldBe(0);
@@ -293,6 +294,43 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         RenewalHarness.ShouldFailWith(response, body, HttpStatusCode.Conflict, "POL-ERR-REBASE-REQUIRED");
         (await _renewal.TermVersionsAsync()).ShouldBe(1);
         (await _renewal.CountEventsAsync("RenewalBound")).ShouldBe(0);
+
+        // Recovery: offering again rebases the job on the new head (superseding the stale quote, which is kept) and rates afresh;
+        // the acceptance then binds.
+        var (reoffered, reoffer) = await _renewal.OfferAsync();
+        reoffered.StatusCode.ShouldBe(HttpStatusCode.OK, reoffer?.ToJsonString());
+        reoffer.Text("offerVersion").ShouldBe("2");
+        reoffer.Text("referred").ShouldBe("false");
+        var head = await _renewal.ScalarAsync<Guid>($"SELECT head_transaction_id FROM pol.policy_term WHERE term_id = '{_renewal.TermId}' AND recorded_to IS NULL");
+        (await _renewal.ScalarAsync<Guid>($"SELECT base_transaction_id FROM pol.job WHERE job_id = '{_renewal.JobId}'")).ShouldBe(head);
+        (await _renewal.ScalarAsync<string>($"SELECT string_agg(state, ',' ORDER BY version_no) FROM pol.quote_version WHERE job_id = '{_renewal.JobId}'")).ShouldBe("SUPERSEDED,QUOTED");
+        var (bound, binding) = await _renewal.AcceptAsync();
+        bound.StatusCode.ShouldBe(HttpStatusCode.OK, binding?.ToJsonString());
+        binding.Text("state").ShouldBe("BOUND");
+        (await _renewal.TermVersionsAsync()).ShouldBe(2);
+        (await _renewal.CountEventsAsync("RenewalOffered")).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task REQ_POL_257_the_acceptance_time_must_lie_between_the_offer_and_now()
+    {
+        await _renewal.GoToAsync(30);
+        (await _renewal.CreateAsync()).Response.StatusCode.ShouldBe(HttpStatusCode.Created);
+        (await _renewal.OfferAsync()).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var now = _renewal.Clock.Now.ToDateTimeOffset().UtcDateTime;
+        string At(TimeSpan shift) => now.Add(shift).ToString("O", CultureInfo.InvariantCulture);
+
+        var (before, beforeBody) = await _renewal.AcceptAsync(acceptedAt: At(TimeSpan.FromMinutes(-10)));
+        before.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, beforeBody?.ToJsonString());
+        beforeBody.Text("errors.0.code").ShouldBe("ACCEPTED_BEFORE_OFFER");
+        var (farPast, farPastBody) = await _renewal.AcceptAsync(acceptedAt: At(TimeSpan.FromDays(-365)));
+        farPast.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, farPastBody?.ToJsonString());
+        var (future, futureBody) = await _renewal.AcceptAsync(acceptedAt: At(TimeSpan.FromMinutes(10)));
+        future.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, futureBody?.ToJsonString());
+        futureBody.Text("errors.0.code").ShouldBe("ACCEPTED_IN_FUTURE");
+        (await _renewal.TermVersionsAsync()).ShouldBe(1);
+
+        (await _renewal.AcceptAsync(acceptedAt: At(TimeSpan.FromSeconds(-30)))).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     [Fact]

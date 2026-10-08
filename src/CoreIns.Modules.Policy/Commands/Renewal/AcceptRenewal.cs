@@ -65,7 +65,7 @@ internal sealed class AcceptRenewalHandler(
     RatingInput ratingInput,
     IOptions<PolicyOptions> options) : ICommandHandler<AcceptRenewal, RenewalAcceptResponse>
 {
-    private const string Block = "BLOCK";
+    private static readonly TimeSpan AcceptanceSkew = TimeSpan.FromMinutes(2);
 
     public async Task<Result<RenewalAcceptResponse>> HandleAsync(AcceptRenewal command, CancellationToken cancellationToken)
     {
@@ -91,7 +91,7 @@ internal sealed class AcceptRenewalHandler(
         }
 
         var now = locked.Value;
-        if (request.AcceptedAt > now)
+        if (request.AcceptedAt > now.Plus(AcceptanceSkew))
         {
             return RenewalSupport.Validation("acceptedAt", "ACCEPTED_IN_FUTURE", "The acceptance cannot be dated after the time it is recorded.");
         }
@@ -129,7 +129,7 @@ internal sealed class AcceptRenewalHandler(
         if (term.HeadTransactionId != job.BaseTransactionId)
         {
             return DomainError.Of(
-                ModuleCode.POL, PolicyErrorNames.RebaseRequired, "A change was bound on the expiring term after the renewal was created; offer the renewal again.");
+                ModuleCode.POL, PolicyErrorNames.RebaseRequired, "A change was bound on the expiring term after the renewal was created; offer the renewal again to rebuild it on the latest state.");
         }
 
         if (await db.Terms.AnyAsync(t => t.PredecessorTermId == termId && t.RecordedTo == null, cancellationToken).ConfigureAwait(false) || job.EffectiveAt != term.ValidTo)
@@ -141,6 +141,11 @@ internal sealed class AcceptRenewalHandler(
         if (Codes.Parse<QuoteState>(version.State) != QuoteState.Quoted || version.ValidUntil is not { } validUntil || validUntil <= now)
         {
             return DomainError.Of(ModuleCode.POL, "QUOTE-STALE", "The renewal offer is no longer valid; offer it again.");
+        }
+
+        if (version.QuotedAt is { } quotedAt && request.AcceptedAt < quotedAt.Plus(-AcceptanceSkew))
+        {
+            return RenewalSupport.Validation("acceptedAt", "ACCEPTED_BEFORE_OFFER", "The acceptance cannot be dated before the offer it accepts was made.");
         }
 
         // Accepted at the price it was offered at, and only under the configuration it was priced with (REQ-POL-088).
@@ -210,24 +215,28 @@ internal sealed class AcceptRenewalHandler(
         var transactionId = PolicyTransactionId.New();
         var termRow = new ServicingTerm(job.EffectiveAt, job.ExpirationAt, currency, convention.Value, zone);
         var premiumLines = charges.Where(c => c.ChargeCategory == ChargeCategories.Premium).ToList();
-        var engine = new ServicingEngine(new FullTermProration(), amount => OfferedAmount(premiumLines, amount));
-        var opened = engine.Apply(
-            null,
-            new NewTermIntent(
-                termRow,
-                [.. premiumLines.Select(l => new ChargeRate(l.ElementLocator, l.CoverageCode, l.ChargeType, l.ChargeCategory, l.AnnualRate))]),
-            new DeltaCorrelation(transactionId.Value.ToString(), transactionId.Value.ToString()));
-        if (!opened.IsAccepted)
-        {
-            return DomainError.Of(ModuleCode.POL, "RATING", $"The servicing engine refused the new term: {opened.Refusal}. {opened.Message}");
-        }
-
+        var correlation = new DeltaCorrelation(transactionId.Value.ToString(), transactionId.Value.ToString());
         var frozen = new List<FrozenLine>();
-        foreach (var delta in opened.Deltas)
+        foreach (var source in premiumLines)
         {
-            var source = premiumLines.First(l => l.ElementLocator == delta.Key.ElementLocator && l.CoverageCode == delta.Key.CoverageCode && l.ChargeType == delta.Key.ChargeType);
-            frozen.Add(new FrozenLine(
-                source.ElementLocator, source.CoverageCode, source.ChargeType, delta.ChargeCategory, source.AnnualRate, delta.Amount, source.LegalStatus, source.Provisional));
+            // One engine call per offered line, rounding to that line's own offered amount: the amount is keyed by locator,
+            // coverage and charge type, never by annual rate (two lines can share a rate and differ in rounding).
+            var amount = source.Amount.Amount;
+            var engine = new ServicingEngine(new FullTermProration(), _ => amount);
+            var opened = engine.Apply(
+                null,
+                new NewTermIntent(termRow, [new ChargeRate(source.ElementLocator, source.CoverageCode, source.ChargeType, source.ChargeCategory, source.AnnualRate)]),
+                correlation);
+            if (!opened.IsAccepted)
+            {
+                return DomainError.Of(ModuleCode.POL, "RATING", $"The servicing engine refused the new term: {opened.Refusal}. {opened.Message}");
+            }
+
+            foreach (var delta in opened.Deltas)
+            {
+                frozen.Add(new FrozenLine(
+                    source.ElementLocator, source.CoverageCode, source.ChargeType, delta.ChargeCategory, source.AnnualRate, delta.Amount, source.LegalStatus, source.Provisional));
+            }
         }
 
         frozen.AddRange(charges.Where(c => c.ChargeCategory != ChargeCategories.Premium).Select(c => new FrozenLine(
@@ -354,19 +363,6 @@ internal sealed class AcceptRenewalHandler(
             RecordedAt = now,
             ChargeDeltas = emitted,
         };
-    }
-
-    private static decimal OfferedAmount(List<ChargeLine> premiumLines, decimal annualRate)
-    {
-        foreach (var line in premiumLines)
-        {
-            if (line.AnnualRate == annualRate)
-            {
-                return line.Amount.Amount;
-            }
-        }
-
-        throw new InvalidOperationException($"No offered premium line has annual rate {annualRate}.");
     }
 
     /// <summary>The day-count convention the artefact declares; unknown or missing conventions fail closed (PITFALLS 10).</summary>

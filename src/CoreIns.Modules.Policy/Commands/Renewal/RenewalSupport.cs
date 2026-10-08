@@ -45,8 +45,8 @@ internal static class RenewalErrors
     [
         ErrorDefinition.For(ModuleCode.POL, PolicyErrorNames.RebaseRequired, 409, "Ο όρος άλλαξε μετά τη δημιουργία της ανανέωσης", "The term changed after the renewal was created")
             .Describe(
-                "Μετά την προσφορά ανανέωσης δεσμεύτηκε αλλαγή στον τρέχοντα όρο. Δημιουργήστε ξανά την προσφορά πάνω στην τελευταία κατάσταση.",
-                "A change was bound on the expiring term after the renewal was offered. Create the offer again on the latest state."),
+                "Μετά τη δημιουργία της ανανέωσης δεσμεύτηκε αλλαγή στον τρέχοντα όρο. Κάντε νέα προσφορά· ξαναχτίζεται πάνω στην τελευταία κατάσταση.",
+                "A change was bound on the expiring term after the renewal was created. Offer the renewal again; it is rebuilt on the latest state."),
     ];
 }
 
@@ -76,6 +76,18 @@ internal static class RenewalSupport
     public static Task<JobRow?> RenewalJobAsync(PolicyDbContext db, LegalEntityId legalEntity, JobId jobId, PolicyTermId termId, CancellationToken cancellationToken) =>
         db.Jobs.SingleOrDefaultAsync(
             j => j.JobId == jobId && j.LegalEntityId == legalEntity && j.JobType == Codes.Of(JobType.Renewal) && j.ExpiringTermId == termId, cancellationToken);
+
+    /// <summary>
+    /// The risk tree valid at the end of the expiring term (half-open: the current segment that ends at the expiry), as known now;
+    /// null when the term has none.
+    /// </summary>
+    public static async Task<string?> RiskTreeAtExpiryAsync(PolicyDbContext db, PolicyTermId termId, Instant expiry, CancellationToken cancellationToken)
+    {
+        var segments = await db.Segments.AsNoTracking()
+            .Where(s => s.TermId == termId && s.RecordedTo == null && s.ValidFrom < expiry && s.ValidTo >= expiry)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return segments.OrderByDescending(s => s.ValidFrom).FirstOrDefault()?.Snapshot;
+    }
 
     /// <summary>The quote version a renewal job currently points to, tracked.</summary>
     public static Task<QuoteVersionRow> CurrentVersionAsync(PolicyDbContext db, JobRow job, CancellationToken cancellationToken) =>
