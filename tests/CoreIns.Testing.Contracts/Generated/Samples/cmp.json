@@ -183,7 +183,8 @@
         ],
         "rejectionCodes": [
           "SAMPLE_CODE"
-        ]
+        ],
+        "correlatedDocumentId": "019282a0-b05d-756a-84d2-aa6e8d49eadb"
       },
       "identifiers": {
         "series": "Sample text",
@@ -801,7 +802,8 @@
         ],
         "rejectionCodes": [
           "SAMPLE_CODE"
-        ]
+        ],
+        "correlatedDocumentId": "0192e330-56a1-7f27-8154-8adf80608b9b"
       },
       "identifiers": {
         "series": "Sample text",
@@ -913,7 +915,8 @@
       ],
       "rejectionCodes": [
         "SAMPLE_CODE"
-      ]
+      ],
+      "correlatedDocumentId": "0192b4e1-e616-7235-83c2-94dc838bba15"
     },
     "FiscalReconciliationBreaksItem": {
       "breaks": "unspecified"
