@@ -87,4 +87,56 @@ internal static class LineDimensionKeys
     public const string BillingAccountId = "billingAccountId";
     public const string InvoiceId = "invoiceId";
     public const string ReceiptId = "receiptId";
+
+    /// <summary>BIL disbursement entries (SL2-BIL-DISB, D-SL2-08) and the CLM legs FIN builds (<see cref="ClaimLegs"/>).</summary>
+    public const string ClaimId = "claimId";
+    public const string DisbursementId = "disbursementId";
+    public const string SourceType = "sourceType";
+    public const string SourceId = "sourceId";
+
+    /// <summary>Keys FIN sets on the legs of a CLM fact (no BIL counterpart).</summary>
+    public const string ExposureId = "exposureId";
+    public const string ReserveLineId = "reserveLineId";
+    public const string CostType = "costType";
+    public const string CostCategory = "costCategory";
+    public const string ClaimPaymentId = "claimPaymentId";
+}
+
+/// <summary>Disbursement source types FIN reads on BIL disbursement entries (PRD-06 source register, D-SL2-10b).</summary>
+internal static class DisbursementSources
+{
+    /// <summary>A CLM claim payment: the entry's <c>sourceId</c> is the claim payment id.</summary>
+    public const string ClaimPayment = "CLM_CLAIM_PAYMENT";
+}
+
+/// <summary>
+/// CLM events carry no sub-ledger accounts, so FIN expands each claim fact into fixed debit/credit legs whose "source
+/// account" is one of these leg roles (D-SL2-08). The posting rules map each role to a book account, so the accounts
+/// stay data (REQ-FIN-048); a role without a rule is an intake exception (NO_RULE), never a default account.
+/// </summary>
+internal static class ClaimLegs
+{
+    /// <summary>Incurred claims expense side of a case-reserve change.</summary>
+    public const string Incurred = "CLM-INCURRED";
+
+    /// <summary>LIC case reserve: credited by a reserve increase, debited by an eroding payment.</summary>
+    public const string CaseReserve = "CLM-CASE-RESERVE";
+
+    /// <summary>Claim payment clearing: credited by PaymentIssued, debited by BIL's DISBURSEMENT_RELEASED (REQ-FIN-037).</summary>
+    public const string PaymentClearing = "CLM-PAYMENT-CLEARING";
+
+    /// <summary>Debit side of a non-eroding payment (no rule in the slice: PRD-09 names no account for it).</summary>
+    public const string PaidNonEroding = "CLM-PAID-NON-ERODING";
+
+    /// <summary>Debit side of a recovery-reserve change (no rule in the slice: recoveries are out, D-SL2-01).</summary>
+    public const string RecoveryReserve = "CLM-RECOVERY-RESERVE";
+
+    /// <summary>Entry type of a reserve change: the reserve kind (RESERVE, RECOVERY_RESERVE).</summary>
+    public const string Reserve = "RESERVE";
+
+    /// <summary>Entry type of a recovery-reserve change.</summary>
+    public const string RecoveryReserveKind = "RECOVERY_RESERVE";
+
+    /// <summary>Entry type of an issued claim payment.</summary>
+    public const string Payment = "PAYMENT";
 }

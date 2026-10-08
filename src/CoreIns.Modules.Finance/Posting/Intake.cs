@@ -12,6 +12,7 @@ using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CoreIns.Modules.Finance.Posting;
 
@@ -19,10 +20,12 @@ namespace CoreIns.Modules.Finance.Posting;
 /// Business-event intake (REQ-FIN-001, -030…-036, -040, -080). Every consumed event is recorded once as a
 /// <c>fin.business_event</c> (idempotent on the source event id, REQ-FIN-031) with its catalogue relevance:
 /// <list type="bullet">
-/// <item>POSTING (BIL BillingEntryPosted, D-SLC-12): posted into every active book, or held as Waiting when the policy
+/// <item>POSTING (BIL BillingEntryPosted, D-SLC-12; CLM ReserveChanged and PaymentIssued, D-SL2-08, normalised by
+/// <see cref="ClaimFacts"/>): posted into every active book, or (BIL premium facts) held as Waiting when the policy
 /// context it needs has not arrived (REQ-FIN-040), or Suspended as an intake exception when no rule, derivation or
 /// account fits (REQ-FIN-080; never a suspense account, REQ-FIN-084). A suspension publishes BusinessEventSuspended.</item>
-/// <item>CONTEXT (POL PolicyBound, ChargeDeltaEmitted; BIL InvoiceIssued, PaymentReceived, CashAllocated): stored for
+/// <item>CONTEXT (POL PolicyBound, ChargeDeltaEmitted; BIL InvoiceIssued, PaymentReceived, CashAllocated, Disbursement*;
+/// CLM ClaimReported, ExposureCreated, TransactionSetApproved, ClaimClosed): stored for
 /// lineage and reconciliation, never journalised (REQ-FIN-036).</item>
 /// <item>An event type missing from the catalogue, or an envelope whose legal entity this stamp does not serve, is
 /// Suspended (UNKNOWN_EVENT, INVALID_ENVELOPE) — FIN's own dead letter, visible in the intake exception queue.</item>
@@ -39,6 +42,7 @@ internal sealed partial class Intake(
     IEventPublisher events,
     DbSession session,
     IClock clock,
+    IOptions<FinanceOptions> options,
     ILogger<Intake> logger)
 {
     /// <summary>Registry name of the posting source (REQ-FIN-036).</summary>
@@ -133,19 +137,35 @@ internal sealed partial class Intake(
     /// </summary>
     public async Task PostAsync(BusinessEventRow row, CancellationToken cancellationToken)
     {
-        if (row.RegistryName != BillingEntryPosted)
+        SourceEntry entry;
+        if (row.RegistryName == BillingEntryPosted)
+        {
+            entry = Normalise(JsonSerializer.Deserialize<BillingEntryPostedV1>(row.Payload, SharedKernelJson.Options)
+                ?? throw new JsonException("BillingEntryPosted payload is empty."));
+        }
+        else if (ClaimFacts.IsClaimSource(row.RegistryName))
+        {
+            // CLM claim facts (D-SL2-08): the claim is the event's aggregate; the date falls back to occurredAt in the entity zone.
+            Guid? claim = row.AggregateType == "Claim" && Guid.TryParse(row.AggregateId, out var aggregate) ? aggregate : null;
+            entry = ClaimFacts.Normalise(row.RegistryName, row.SourceEventId, row.Payload, claim, row.OccurredAt.ToBusinessDate(options.Value.Zone));
+        }
+        else
         {
             await SuspendAsync(row, ExceptionReasons.UnknownEvent, $"No posting source mapping exists for {row.RegistryName}.", null, cancellationToken).ConfigureAwait(false);
             return;
         }
 
-        var entry = Normalise(JsonSerializer.Deserialize<BillingEntryPostedV1>(row.Payload, SharedKernelJson.Options)
-            ?? throw new JsonException("BillingEntryPosted payload is empty."));
         row.AccountingDate = entry.AccountingDate;
+        if (entry.Problem is { } problem)
+        {
+            await SuspendAsync(row, ExceptionReasons.Unbalanced, problem, entry, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
         var legalEntity = new LegalEntityId(row.LegalEntityId!.Value);
 
         var contexts = new Dictionary<(Guid?, Guid?), PolicyContext>();
-        foreach (var policyRef in EntryPosting.PolicyReferences(entry))
+        foreach (var policyRef in entry.NeedsPolicyContext ? EntryPosting.PolicyReferences(entry) : [])
         {
             var dependency = Dependency(policyRef.TermId, policyRef.PolicyId);
             await reference.LockAsync(dependency, cancellationToken).ConfigureAwait(false);
@@ -180,7 +200,7 @@ internal sealed partial class Intake(
                 return;
             }
 
-            var outcome = EntryPosting.Map(BillingEntryPosted, entry, setup,
+            var outcome = EntryPosting.Map(row.RegistryName, entry, setup,
                 line => contexts.TryGetValue((line.Id(LineDimensionKeys.PolicyTermId), line.Id(LineDimensionKeys.PolicyId)), out var c) ? c : null,
                 (hash, chargeType) => glKeys.TryGetValue((hash, chargeType), out var key) ? key : null);
             if (outcome.Reason == ExceptionReasons.Empty)
@@ -200,7 +220,7 @@ internal sealed partial class Intake(
             drafts.Add((outcome.Journal, setup.FunctionalCurrency));
         }
 
-        var source = new JournalSource(legalEntity, row.LegalEntityCode, row.Jurisdiction, row.SourceModule, row.EventType, [row.SourceEventId], entry.EntryId.ToString("D"));
+        var source = new JournalSource(legalEntity, row.LegalEntityCode, row.Jurisdiction, row.SourceModule, row.EventType, [row.SourceEventId], entry.SourceRef);
         var written = new List<WrittenJournal>();
         foreach (var (draft, functional) in drafts)
         {

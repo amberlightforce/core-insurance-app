@@ -66,4 +66,38 @@ public sealed record JournalLineDimensions
     /// <summary>Contract member 'receiptId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("receiptId")]
     public global::CoreIns.SharedKernel.Identifiers.PaymentId? ReceiptId { get; init; }
+
+    /// <summary>Claim (CLM postings and the BIL disbursement entries of claim payments)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>Exposure of the reserve line</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("exposureId")]
+    public global::CoreIns.SharedKernel.Identifiers.ExposureId? ExposureId { get; init; }
+
+    /// <summary>CLM reserve line</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'reserveLineId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reserveLineId")]
+    public global::System.Guid? ReserveLineId { get; init; }
+
+    /// <summary>Reserve line key cost type</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("costType")]
+    public string? CostType { get; init; }
+
+    /// <summary>Reserve line key cost category</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("costCategory")]
+    public string? CostCategory { get; init; }
+
+    /// <summary>CLM claim payment (PaymentIssued paymentId; the BIL disbursement's source id). GL-2510 nets to zero per claim payment (REQ-FIN-037)</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'claimPaymentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimPaymentId")]
+    public global::System.Guid? ClaimPaymentId { get; init; }
+
+    /// <summary>BIL disbursement that pays the claim payment</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("disbursementId")]
+    public global::CoreIns.SharedKernel.Identifiers.DisbursementId? DisbursementId { get; init; }
 }

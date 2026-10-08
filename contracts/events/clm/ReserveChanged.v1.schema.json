@@ -80,8 +80,32 @@
         "handlingSegment"
       ],
       "properties": {
+        "claimId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Claim (the aggregate id, repeated so FIN and RI post from payload fields only, REQ-CLM-005); CLM always sets it",
+          "x-classification": "P0"
+        },
         "exposureId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0"
+        },
+        "reserveLineId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Reserve line changed (PRD-07 §7.1 ReserveLine; key = reserveLine cost type + category); CLM always sets it",
           "x-classification": "P0"
         },
         "reserveLine": {
@@ -148,6 +172,18 @@
         },
         "handlingSegment": {
           "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "accountingDate": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/LocalDate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Accounting date of the claim financial transaction (PRD-07 §7.1 ClaimFinancialTransaction.accounting_date); FIN derives it from occurredAt in the entity zone when absent",
           "x-classification": "P0"
         }
       }

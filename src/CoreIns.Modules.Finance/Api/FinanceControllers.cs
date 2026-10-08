@@ -75,11 +75,12 @@ internal static class FinanceHttp
 [Route("api/fin/v1/journals")]
 internal sealed class JournalsController : ControllerBase
 {
-    /// <summary>fin.Journal.query: journals with lines by policy business key, source event type, book and accounting-date range.</summary>
+    /// <summary>fin.Journal.query: journals with lines by policy business key, claim, source event type, book and accounting-date range.</summary>
     [HttpGet("query")]
     [Authorize(Policy = FinancePermissions.JournalQuery)]
     public async Task<IResult> QueryAsync(
         [FromQuery] string? policyNumber,
+        [FromQuery] string? claimId,
         [FromQuery] string? sourceEventType,
         [FromQuery] string? book,
         [FromQuery] string? accountingDateFrom,
@@ -107,6 +108,17 @@ internal sealed class JournalsController : ControllerBase
             return this.Problem(FinanceHttp.Invalid($"limit must be within 1..{FinanceHttp.MaxLimit} and policyNumber a business number."));
         }
 
+        Guid? claim = null;
+        if (claimId is not null)
+        {
+            if (!Guid.TryParse(claimId, out var parsedClaim))
+            {
+                return this.Problem(FinanceHttp.Invalid("claimId must be a UUID."));
+            }
+
+            claim = parsedClaim;
+        }
+
         if (FinanceHttp.LegalEntity(HttpContext) is not (var legalEntity, _))
         {
             return Results.Ok(new JournalQueryPage { Items = [], NextCursor = null, Limit = limit ?? FinanceHttp.DefaultLimit });
@@ -114,7 +126,7 @@ internal sealed class JournalsController : ControllerBase
 
         try
         {
-            var page = await reader.QueryAsync(legalEntity, new JournalFilter(policyNumber, sourceEventType, book, from, to, known), cursor, limit ?? FinanceHttp.DefaultLimit, cancellationToken)
+            var page = await reader.QueryAsync(legalEntity, new JournalFilter(policyNumber, sourceEventType, book, from, to, known) { ClaimId = claim }, cursor, limit ?? FinanceHttp.DefaultLimit, cancellationToken)
                 .ConfigureAwait(false);
             return Results.Ok(page);
         }
