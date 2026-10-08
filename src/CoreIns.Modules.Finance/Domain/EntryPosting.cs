@@ -74,6 +74,13 @@ internal static class EntryPosting
         var ruleCodes = new List<string>();
         foreach (var line in entry.Lines)
         {
+            // A zero line moves nothing and posts nothing, so it needs no rule: a credit that carries an explicit 0.00 IPT
+            // line (KEEP_NOT_REDUCED, D-SL3-05) leaves the tax payable untouched instead of becoming an intake exception.
+            if (line.Amount.IsZero)
+            {
+                continue;
+            }
+
             var category = line.Dimension(LineDimensionKeys.ChargeCategory);
             var chargeType = line.Dimension(LineDimensionKeys.ChargeType);
             var match = PostingRules.Resolve(book.RuleSet.Rules, sourceEvent, entry.EntryType, line.Account, category, chargeType);
@@ -125,11 +132,6 @@ internal static class EntryPosting
             if (line.Side is not (Sides.Debit or Sides.Credit))
             {
                 return PostingOutcome.Fail(ExceptionReasons.Unbalanced, $"Source line side {line.Side} is unknown.");
-            }
-
-            if (line.Amount.IsZero)
-            {
-                continue;
             }
 
             var side = line.Amount.IsNegative ? Sides.Opposite(line.Side) : line.Side;
