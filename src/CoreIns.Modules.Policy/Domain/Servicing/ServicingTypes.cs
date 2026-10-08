@@ -108,8 +108,12 @@ internal sealed record ChargeRate(
     public ChargeKey Key => new(ElementLocator, CoverageCode, ChargeType);
 }
 
-/// <summary>A charge segment: the annual rate valid over [From, To) and the premium written for it (4 dp).</summary>
-internal sealed record ServicingSegment(ChargeRate Rate, Instant From, Instant To, decimal Amount)
+/// <summary>
+/// A charge segment: the annual rate valid over [From, To) and the premium written for it (<paramref name="Amount"/>,
+/// rounded). <paramref name="Exact"/> is the unrounded value behind it (null = same as Amount); persisting it lets rounding
+/// residuals be carried across any number of changes (REQ-POL-123).
+/// </summary>
+internal sealed record ServicingSegment(ChargeRate Rate, Instant From, Instant To, decimal Amount, decimal? Exact = null)
 {
     public ChargeKey Key => Rate.Key;
 }

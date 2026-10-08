@@ -152,15 +152,30 @@ public sealed class ServicingEngineTests
     }
 
     [Fact]
-    public void Act365F_FullTermIsCappedAtTheAnnualRate_AndCancellationIsBoundedByWritten()
+    public void Act365F_LeapTerm_EarnsDaysOver365_AndUnearnedIsWrittenMinusEarned_REQ_POL_118()
     {
         var term = Term366 with { Convention = DayCountConvention.Act365F };
-        var state = Open(term, Premium(430.00m));
-        Assert.Equal(430.00m, Written(state, Premium(1).Key)); // not 430 x 366/365
+        var state = Open(term, Premium(1000.00m));
+        Assert.Equal(1000.00m, Written(state, Premium(1).Key)); // full term capped at the annual rate, not x 366/365
 
-        var result = Engine().Apply(state, new EndCoverIntent(At(2027, 6, 29, 14, 0), RefundMethod.ProRata), Corr);
+        var result = Engine().Apply(state, new EndCoverIntent(At(2027, 6, 9, 14, 0), RefundMethod.ProRata), Corr); // day 100
 
-        Assert.Equal(-289.02m, Assert.Single(result.Deltas).Amount);
+        var delta = Assert.Single(result.Deltas);
+        Assert.Equal(-726.03m, delta.Amount);
+        Assert.Equal(273.97m, Assert.Single(result.State!.Segments).Amount); // 1000 x 100/365
+    }
+
+    [Fact]
+    public void Act365F_LeapTerm_ChangeAndCancelShareOneBasis_NoNegativeSegments()
+    {
+        var term = Term366 with { Convention = DayCountConvention.Act365F };
+        var state = Open(term, Premium(743.88m));
+
+        var result = Engine().Apply(state, new ChangeIntent(At(2027, 3, 17, 15, 0), [Premium(0.05m)]), Corr); // day 16
+
+        Assert.True(result.IsAccepted, result.Message);
+        Assert.All(result.State!.Segments, s => Assert.True(s.Amount >= 0m));
+        Assert.True(Written(result.State, Premium(1).Key) >= 0m);
     }
 
     // ---- Athens day count, DST ----------------------------------------------------------------------------------
@@ -261,10 +276,17 @@ public sealed class ServicingEngineTests
     }
 
     [Fact]
-    public void RoundingRuleReturningMoreThanFourDecimals_IsAProgrammingError()
+    public void RoundingRuleBeyondCurrencyScale_OverflowAndIdentityRules_AreTypedRefusals_NotExceptions()
     {
-        var bad = new ServicingEngine(new ReferenceProration(), a => a);
-        Assert.Throws<InvalidOperationException>(() => bad.Apply(null, new NewTermIntent(Term365, [Premium(430.123456m)]), Corr));
+        var identity = new ServicingEngine(new ReferenceProration(), a => a);
+        Assert.Equal(ServicingRefusal.InvalidInput, identity.Apply(null, new NewTermIntent(Term365, [Premium(430.123456m)]), Corr).Refusal);
+
+        var threeDp = new ServicingEngine(new ReferenceProration(), a => decimal.Round(a, 3));
+        Assert.Equal(ServicingRefusal.InvalidInput, threeDp.Apply(null, new NewTermIntent(Term365, [Premium(430.1239m)]), Corr).Refusal);
+
+        var state = Open(Term365, Premium(430.00m));
+        var huge = Engine().Apply(state, new ChangeIntent(At(2026, 9, 17), [Premium(decimal.MaxValue / 2)]), Corr);
+        Assert.Equal(ServicingRefusal.InvalidInput, huge.Refusal);
     }
 
     // ---- flat charges, new and removed charge types -------------------------------------------------------------
@@ -286,15 +308,84 @@ public sealed class ServicingEngineTests
     }
 
     [Fact]
-    public void FlatCharge_RateChange_IsTheDifferenceNotProrated()
+    public void FlatCharge_MidTermRateChange_IsRefused_D4()
     {
-        var fee = new ChargeRate("POL", "ALL", "POLICY_FEE", "FEE", 12.00m, Flat: true);
-        var state = Open(Term365, fee);
+        var fee = new ChargeRate("POL", "ALL", "POLICY_FEE", "FEE", 50.00m, Flat: true);
+        var state = Open(Term365, Premium(430.00m), fee);
 
-        var result = Engine().Apply(state, new ChangeIntent(At(2026, 9, 17), [fee with { AnnualRate = 15.00m }]), Corr);
+        var down = Engine().Apply(state, new ChangeIntent(At(2026, 6, 9), [Premium(430.00m), fee with { AnnualRate = 20.00m }]), Corr);
+        var omitted = Engine().Apply(state, new ChangeIntent(At(2026, 6, 9), [Premium(430.00m)]), Corr);
+        var same = Engine().Apply(state, new ChangeIntent(At(2026, 6, 9), [Premium(430.00m), fee]), Corr);
 
-        Assert.Equal(3.00m, Assert.Single(result.Deltas).Amount);
-        Assert.Equal(15.00m, Written(result.State!, fee.Key));
+        Assert.Equal(ServicingRefusal.InvalidInput, down.Refusal);
+        Assert.Equal(ServicingRefusal.InvalidInput, omitted.Refusal);
+        Assert.True(same.IsAccepted);
+    }
+
+    [Fact]
+    public void ChangingFlatRefundableOrCategoryOfAnExistingCharge_IsRefused_D5()
+    {
+        var state = Open(Term365, Premium(430.00m));
+        var asFlat = Premium(430.00m) with { Flat = true };
+        var otherCategory = Premium(500.00m) with { ChargeCategory = "FEE" };
+        var refundable = Premium(500.00m) with { RefundableOnCancel = true };
+
+        foreach (var rate in new[] { asFlat, otherCategory, refundable })
+        {
+            Assert.Equal(ServicingRefusal.InvalidInput, Engine().Apply(state, new ChangeIntent(At(2026, 9, 17), [rate]), Corr).Refusal);
+        }
+    }
+
+    [Fact]
+    public void FlatCancel_KeepsNonRefundableFlatChargeConsistent_D3()
+    {
+        var fee = new ChargeRate("POL", "ALL", "POLICY_FEE", "FEE", 30.00m, Flat: true);
+        var state = Open(Term365, Premium(430.00m), fee);
+
+        var result = Engine().Apply(state, new EndCoverIntent(Term365.From, RefundMethod.FullRefund), Corr);
+
+        Assert.True(result.IsAccepted, result.Message);
+        Assert.Equal(-430.00m, Assert.Single(result.Deltas).Amount);
+        Assert.Equal(30.00m, Written(result.State!, fee.Key));
+        Assert.Equal(0m, Written(result.State!, Premium(1).Key));
+    }
+
+    [Fact]
+    public void FlatCancel_OnTheFirstAthensDate_BeforeTheTermStartsAtTime_IsAccepted_D8()
+    {
+        var state = Open(Term365, Premium(430.00m)); // term starts 14:23
+        var result = Engine().Apply(state, new EndCoverIntent(At(2026, 3, 1, 9, 0), RefundMethod.FullRefund), Corr);
+
+        Assert.True(result.IsAccepted, result.Message);
+        Assert.Equal(-430.00m, Assert.Single(result.Deltas).Amount);
+        Assert.Equal(Term365.From, result.State!.CoverEndedAt);
+        Assert.Equal(ServicingRefusal.EffectiveOutsideTerm, Engine().Apply(state, new EndCoverIntent(At(2026, 2, 28, 23, 0), RefundMethod.FullRefund), Corr).Refusal);
+    }
+
+    [Fact]
+    public void ManyChanges_CarryResiduals_CumulativeWrittenStaysWithinOneCentOfExact_D6()
+    {
+        for (var seed = 1; seed <= 200; seed++)
+        {
+            var rng = new Random(seed);
+            var rate = Math.Round(rng.Next(10_000, 90_000) / 100m, 2);
+            var state = Open(Term365, Premium(rate));
+            var exact = (double)rate; // an oracle in a test only, never on a money path
+            var day = 0;
+            for (var i = 0; i < 8; i++)
+            {
+                day += rng.Next(1, 40);
+                var next = Math.Round(rng.Next(10_000, 90_000) / 100m, 2);
+                var oldRate = state.Segments[state.Segments.Count - 1].Rate.AnnualRate;
+                var result = Engine().Apply(state, new ChangeIntent(DayAt(Term365, day, 12), [Premium(next)]), Corr);
+                Assert.True(result.IsAccepted, result.Message);
+                exact += (double)(next - oldRate) * (Term365.Days - day) / Term365.Days;
+                state = result.State!;
+                var written = (double)Written(state, Premium(1).Key);
+                Assert.True(Math.Abs(written - exact) <= 0.0051, $"seed {seed} step {i}: written {written} exact {exact}");
+                Assert.All(state.Segments, s => Assert.True(s.Amount >= 0m));
+            }
+        }
     }
 
     [Fact]
@@ -358,8 +449,24 @@ public sealed class ServicingEngineTests
             var term = rng.Next(2) == 0 ? Term365 : Term366;
             var keys = Enumerable.Range(0, rng.Next(1, 4)).Select(i => (Type: $"CT{i}", Flat: i == 2)).ToList();
 
-            ChargeRate RateFor(string type, bool flat) =>
-                new("VEH-1", "COV", type, flat ? "FEE" : "PREMIUM", Math.Round((decimal)rng.Next(0, 200_000) / 100m + (decimal)rng.Next(0, 100) / 10_000m, 4), flat, flat && rng.Next(2) == 0);
+            var flatRates = new Dictionary<string, decimal>();
+            var refundable = rng.Next(2) == 0;
+
+            ChargeRate RateFor(string type, bool flat)
+            {
+                if (flat)
+                {
+                    if (!flatRates.TryGetValue(type, out var fixedRate))
+                    {
+                        fixedRate = Math.Round((decimal)rng.Next(0, 20_000) / 100m, 2);
+                        flatRates[type] = fixedRate;
+                    }
+
+                    return new ChargeRate("VEH-1", "COV", type, "FEE", fixedRate, true, refundable);
+                }
+
+                return new ChargeRate("VEH-1", "COV", type, "PREMIUM", Math.Round((decimal)rng.Next(0, 200_000) / 100m + (decimal)rng.Next(0, 100) / 10_000m, 4));
+            }
 
             var state = Open(term, keys.Select(k => RateFor(k.Type, k.Flat)).ToArray());
             var cumulative = new Dictionary<ChargeKey, decimal>();
@@ -376,7 +483,7 @@ public sealed class ServicingEngineTests
                     effective = latest;
                 }
 
-                var rates = keys.Where(_ => rng.Next(8) != 0).Select(k => RateFor(k.Type, k.Flat)).ToArray();
+                var rates = keys.Where(k => k.Flat || rng.Next(8) != 0).Select(k => RateFor(k.Type, k.Flat)).ToArray();
                 var result = Engine().Apply(state, new ChangeIntent(effective, rates), Corr);
                 Assert.True(result.IsAccepted, $"seed {seed}: {result.Message}");
                 CheckStep(seed, term, state, result, cumulative);
@@ -489,6 +596,7 @@ public sealed class ServicingEngineTests
             Assert.True(d.ValidFrom >= term.From && d.ValidTo <= term.To && d.ValidFrom < d.ValidTo, $"seed {seed}: delta outside term");
             Assert.NotEqual(0m, d.Amount);
         });
+        Assert.All(result.State!.Segments, s => Assert.True(s.Amount >= 0m, $"seed {seed}: negative segment"));
         Assert.Equal(result.Deltas.Count, result.Deltas.Select(d => d.Key).Distinct().Count());
         Assert.Equal(Enumerable.Range(1, result.Deltas.Count), result.Deltas.Select(d => d.SetSequence));
 
