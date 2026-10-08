@@ -87,3 +87,14 @@ found by a review or by CI in slices 1–2; the decision id says where.
     and pass `-m:2`. Node reuse left 114 idle workers (14 GB) on the laptop and capped how many agents could run.
 39. **Unique log/output paths**: write test logs under your own worktree or scratchpad (e.g. `<worktree>/.logs/<class>.log`),
     never a shared path like `.claude/worktrees/t1.log`; another agent clobbered one.
+    (Note: pass `-m:2` to `dotnet build` only; with `dotnet test` it can make test discovery find zero tests. Build with
+    `-m:2`, then `dotnet test --no-build` with the two env vars set.)
+    With `dotnet test --project …` (Microsoft.Testing.Platform) select tests with `--filter-class <Class>` (or
+    `--filter-namespace`); `--filter "FullyQualifiedName~…"` can silently select zero tests.
+40. **DB guards check the lock was taken in this transaction**, not just that a stamp equals a committed value; an
+    unlocked writer can otherwise reuse a committed watermark and change history behind issued refs (SL3-POL-TEMPORAL D1).
+41. **Backfills must not invalidate what was already issued**: a migration that derives a new bound (watermark, version,
+    limit) from old rows must keep every ref, token or id issued before deploy valid (e.g. `GREATEST(derived, now())`),
+    with a test on seeded pre-migration data (SL3-POL-TEMPORAL D2).
+42. **Money engines refuse, never clamp**: a clamp that "keeps amounts in range" turns corrupt or stale state into
+    plausible wrong money; validate the state and return a typed refusal (SL3-POL-ENGINE R2).
