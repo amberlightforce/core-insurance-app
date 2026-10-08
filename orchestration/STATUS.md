@@ -1,6 +1,6 @@
 # STATUS — Greek P&C core insurance build
 
-**Current phase:** 3 — Claims slice (SLICE-PLAN-2.md, D-USR-10) **COMPLETE** (2026-10-08): all slice-2 WPs merged; E2E-02a passes at API and UI level locally. Next: slice 3 (W6 servicing) when the user says so. Phase 2 thin E2E slice **COMPLETE** (2026-10-08): all 10 slice WPs merged; E2E-01 passes on Docker (API + Playwright UI) and in GitHub CI; accepted after a real-Chrome walkthrough (D-SLC-21).
+**Current phase:** 3 — Claims slice (SLICE-PLAN-2.md, D-USR-10) **COMPLETE** (2026-10-08): all slice-2 WPs merged; E2E-02a passes at API and UI level locally and in GitHub CI (run 37813614543, all 6 jobs green on 9a08c1a). Next: slice 3 (W6 servicing) when the user says so. Phase 2 thin E2E slice **COMPLETE** (2026-10-08): all 10 slice WPs merged; E2E-01 passes on Docker (API + Playwright UI) and in GitHub CI; accepted after a real-Chrome walkthrough (D-SLC-21).
 **Last updated:** 2026-10-07 (night)
 **Repo:** https://github.com/amberlightforce/core-insurance-app (private). GitHub push works (workflow scope fixed by user 2026-10-07). main pushed; first CI run GREEN (all jobs incl. Testcontainers integration tests + Trivy).
 **Live tracker:** https://claude.ai/artifact/QwQVP63L5vGPhUskFrAzaD. Source of truth: `orchestration/backlog/backlog.json`. Update it with `tracker/set_status.py`, then push the change with ArtifactData.
@@ -58,7 +58,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | Dev superuser | **merged** | all roles, Development only, SoD unchanged |
 | SL-UX restyle (D-USR-11/13) | **merged** (1ea0ad2) | accepted by user; focus ring + claim file |
 | UW referral workbench (D-USR-13) | **paused by user** (WIP branch worktree-agent-ac9c66400c2402b05) | |
-| Wizard vehicle value + plain rating errors | building | user report 2026-10-08 |
+| Wizard vehicle value + plain rating errors | **merged** | user report 2026-10-08 |
 
 ## Module status (feature waves)
 All 116 feature WPs: **not started** (W1 starts after Phase 1 passes). See backlog/BACKLOG.md.
