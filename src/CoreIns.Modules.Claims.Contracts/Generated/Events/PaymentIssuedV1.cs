@@ -46,6 +46,10 @@ public sealed record PaymentIssuedV1 : global::CoreIns.Platform.Contracts.Events
     /// <inheritdoc />
     global::CoreIns.Platform.Contracts.Events.EventContract global::CoreIns.Platform.Contracts.Events.IEventPayload.Contract => Descriptor;
 
+    /// <summary>Claim (the aggregate id, repeated so FIN and RI post from payload fields only, REQ-CLM-005); CLM always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
     /// <summary>Contract member 'paymentId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("paymentId")]
     public required global::CoreIns.SharedKernel.Identifiers.PaymentId PaymentId { get; init; }
@@ -54,9 +58,9 @@ public sealed record PaymentIssuedV1 : global::CoreIns.Platform.Contracts.Events
     [global::System.Text.Json.Serialization.JsonPropertyName("transactionIds")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.PolicyTransactionId> TransactionIds { get; init; }
 
-    /// <summary>Contract member 'lines'.</summary>
+    /// <summary>Per reserve line paid: transaction id, reserve line, exposure, cost type and category, amount in three currencies, eroding flag</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.LineAmount> Lines { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.ClaimPaymentLine> Lines { get; init; }
 
     /// <summary>Contract member 'amount'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
@@ -84,4 +88,8 @@ public sealed record PaymentIssuedV1 : global::CoreIns.Platform.Contracts.Events
     /// <summary>Redress payments (REQ-CLM-265)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("complaintRef")]
     public string? ComplaintRef { get; init; }
+
+    /// <summary>Accounting date of the payment transactions (PRD-07 §7.1 ClaimFinancialTransaction.accounting_date); FIN derives it from occurredAt in the entity zone when absent</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accountingDate")]
+    public global::CoreIns.SharedKernel.BusinessDate? AccountingDate { get; init; }
 }

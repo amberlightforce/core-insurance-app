@@ -33,6 +33,22 @@ internal sealed record LineDimensions
 
     public Guid? ReceiptId { get; init; }
 
+    /// <summary>Claim (CLM facts and the BIL disbursement entries of claim payments, D-SL2-08).</summary>
+    public Guid? ClaimId { get; init; }
+
+    public Guid? ExposureId { get; init; }
+
+    public Guid? ReserveLineId { get; init; }
+
+    public string? CostType { get; init; }
+
+    public string? CostCategory { get; init; }
+
+    /// <summary>CLM claim payment: GL-2510 nets to zero per claim payment (REQ-FIN-037).</summary>
+    public Guid? ClaimPaymentId { get; init; }
+
+    public Guid? DisbursementId { get; init; }
+
     public static LineDimensions None { get; } = new();
 }
 

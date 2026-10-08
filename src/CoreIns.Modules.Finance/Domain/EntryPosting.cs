@@ -10,8 +10,21 @@ internal sealed record SourceLine(string Account, string Side, Money Amount, IRe
     public Guid? Id(string key) => Guid.TryParse(Dimension(key), out var id) ? id : null;
 }
 
-/// <summary>A posting-source fact normalised for posting (REQ-FIN-034): entry id, entry type, dates and lines.</summary>
-internal sealed record SourceEntry(Guid EntryId, string EntryType, BusinessDate AccountingDate, BusinessDate BusinessDate, IReadOnlyList<SourceLine> Lines);
+/// <summary>
+/// A posting-source fact normalised for posting (REQ-FIN-034): entry id, entry type, dates and lines. The source
+/// reference on the journal is the BIL entry id, the claim payment id or the reserve line change's source event id.
+/// </summary>
+internal sealed record SourceEntry(Guid EntryId, string EntryType, BusinessDate AccountingDate, BusinessDate BusinessDate, IReadOnlyList<SourceLine> Lines)
+{
+    /// <summary>Journal source reference (REQ-FIN-079); defaults to the entry id.</summary>
+    public string SourceRef { get; init; } = EntryId.ToString("D");
+
+    /// <summary>True when the lines need the POL policy context first (BIL premium facts); CLM facts carry their own dimensions.</summary>
+    public bool NeedsPolicyContext { get; init; } = true;
+
+    /// <summary>Why the source fact cannot be posted as received (an UNBALANCED intake exception), or null.</summary>
+    public string? Problem { get; init; }
+}
 
 /// <summary>Policy context FIN keeps from POL PolicyBound (CONTEXT relevance): business key, product and artefact.</summary>
 internal sealed record PolicyContext(
@@ -158,5 +171,13 @@ internal static class EntryPosting
         BillingAccountId = line.Id(LineDimensionKeys.BillingAccountId),
         InvoiceId = line.Id(LineDimensionKeys.InvoiceId),
         ReceiptId = line.Id(LineDimensionKeys.ReceiptId),
+        ClaimId = line.Id(LineDimensionKeys.ClaimId),
+        ExposureId = line.Id(LineDimensionKeys.ExposureId),
+        ReserveLineId = line.Id(LineDimensionKeys.ReserveLineId),
+        CostType = line.Dimension(LineDimensionKeys.CostType),
+        CostCategory = line.Dimension(LineDimensionKeys.CostCategory),
+        ClaimPaymentId = line.Id(LineDimensionKeys.ClaimPaymentId)
+            ?? (line.Dimension(LineDimensionKeys.SourceType) == DisbursementSources.ClaimPayment ? line.Id(LineDimensionKeys.SourceId) : null),
+        DisbursementId = line.Id(LineDimensionKeys.DisbursementId),
     };
 }

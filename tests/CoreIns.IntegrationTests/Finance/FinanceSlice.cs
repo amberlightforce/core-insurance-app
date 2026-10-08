@@ -22,10 +22,11 @@ internal sealed class FinanceSlice(ApiHostFactory factory)
 
     private static readonly Lazy<JsonArray> PolSamples = new(() => Samples("pol"));
     private static readonly Lazy<JsonArray> BilSamples = new(() => Samples("bil"));
+    private static readonly Lazy<JsonArray> ClmSamples = new(() => Samples("clm"));
 
     /// <summary>A sample payload of an event type (a deep copy to modify).</summary>
     public static JsonObject Sample(string module, string eventType) =>
-        (module == "pol" ? PolSamples.Value : BilSamples.Value)
+        (module switch { "pol" => PolSamples.Value, "clm" => ClmSamples.Value, _ => BilSamples.Value })
         .Select(e => e!.AsObject())
         .First(e => e["eventType"]!.GetValue<string>() == eventType)["payload"]!.DeepClone().AsObject();
 
@@ -80,6 +81,42 @@ internal sealed class FinanceSlice(ApiHostFactory factory)
         payload["lines"] = new JsonArray([.. lines]);
         return PublishAsync(BillingEntryPostedV1.Descriptor, "BillingAccount", billingAccount.ToString(), payload,
             BusinessKeys.Empty.With("entryId", entryId.ToString()).With("billingAccountId", billingAccount.ToString()));
+    }
+
+    /// <summary>
+    /// BIL BillingEntryPosted for a disbursement (SL2-BIL-DISB: aggregate Disbursement, no billing account): one leg pair
+    /// with the disbursement dimensions BIL sets (disbursementId, sourceType, sourceId = claim payment id, claimId).
+    /// </summary>
+    public Task<EventEnvelope> DisbursementEntryAsync(
+        string entryType, string date, Guid disbursementId, Guid claimPaymentId, Guid claimId, string amount, string debitAccount, string creditAccount)
+    {
+        var entryId = Guid.CreateVersion7();
+        var payload = Sample("bil", "BillingEntryPosted");
+        payload["entryId"] = entryId.ToString();
+        payload["eventType"] = entryType;
+        payload["accountingDate"] = date;
+        payload["businessDate"] = date;
+        JsonObject Leg(string account, string side) => new()
+        {
+            ["account"] = account,
+            ["side"] = side,
+            ["amount"] = new JsonObject { ["amount"] = amount, ["currency"] = "EUR" },
+            ["dimensions"] = new JsonObject
+            {
+                ["legalEntity"] = "GR-TEST",
+                ["jurisdiction"] = "GR",
+                ["ruleId"] = entryType == "DISBURSEMENT_RELEASED" ? "BLR-DISB-RELEASED-CLM" : "BLR-DISB-CLEARED",
+                ["billingAccountId"] = null,
+                ["disbursementId"] = disbursementId.ToString(),
+                ["sourceType"] = "CLM_CLAIM_PAYMENT",
+                ["sourceId"] = claimPaymentId.ToString(),
+                ["claimId"] = claimId.ToString(),
+            },
+        };
+        payload["lines"] = new JsonArray(Leg(debitAccount, "DEBIT"), Leg(creditAccount, "CREDIT"));
+        return PublishAsync(BillingEntryPostedV1.Descriptor, "Disbursement", disbursementId.ToString(), payload,
+            BusinessKeys.Empty.With("entryId", entryId.ToString()).With("disbursementId", disbursementId.ToString())
+                .With("sourceId", claimPaymentId.ToString()).With("claimId", claimId.ToString()));
     }
 
     /// <summary>One sub-ledger line with the dimension keys agreed with SL-BIL.</summary>

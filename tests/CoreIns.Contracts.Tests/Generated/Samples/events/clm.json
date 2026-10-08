@@ -979,6 +979,7 @@
     "origin": "LIVE",
     "dataClassification": "P1",
     "payload": {
+      "claimId": "0192c70e-6db1-733b-8cc3-74e0cc290cbf",
       "paymentId": "0192ce84-1bfd-7a61-8cbb-419acd8b48e4",
       "transactionIds": [
         "0192d06f-d7d8-7a68-8913-09f4b057a4d9"
@@ -999,7 +1000,12 @@
               "amount": "120.50",
               "currency": "EUR"
             }
-          }
+          },
+          "reserveLineId": "01924d00-68ec-7825-80e0-39fc2af9f8a4",
+          "exposureId": "0192d2ab-ef6b-731c-8b21-4fc5f08cdd15",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "eroding": true
         }
       ],
       "amount": {
@@ -1020,7 +1026,8 @@
       "method": "SAMPLE_CODE",
       "disbursementId": "0192522e-a680-7692-887a-68de0fc63e06",
       "exGratia": true,
-      "complaintRef": "Sample text"
+      "complaintRef": "Sample text",
+      "accountingDate": "2026-10-07"
     }
   },
   {
@@ -1051,6 +1058,7 @@
     "origin": "LIVE",
     "dataClassification": "P1",
     "payload": {
+      "claimId": null,
       "paymentId": "01923e8f-f069-7d2f-8718-713b9d2e5fbf",
       "transactionIds": [
         "01920806-550e-789e-8b6e-30ad595918aa"
@@ -1071,7 +1079,12 @@
               "amount": "120.50",
               "currency": "EUR"
             }
-          }
+          },
+          "reserveLineId": "01923058-3441-7f38-8655-cc74b939aa83",
+          "exposureId": "01921f9a-bda2-73c5-8deb-002ad4856023",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "eroding": true
         }
       ],
       "amount": {
@@ -1092,7 +1105,8 @@
       "method": "SAMPLE_CODE",
       "disbursementId": "0192b838-9ffd-7380-8139-6f6e768e9ca7",
       "exGratia": true,
-      "complaintRef": null
+      "complaintRef": null,
+      "accountingDate": null
     }
   },
   {
@@ -1322,7 +1336,9 @@
     "origin": "LIVE",
     "dataClassification": "P0",
     "payload": {
+      "claimId": "01923af0-4831-7307-8821-20ea9a383df4",
       "exposureId": "01926264-7c19-71e2-88a8-e7faf90df820",
+      "reserveLineId": "01928349-e4ee-7a29-8c8c-f2f3fdfb639c",
       "reserveLine": {
         "costType": "SAMPLE_CODE",
         "category": "SAMPLE_CODE"
@@ -1363,7 +1379,8 @@
       "siiLob": "SAMPLE_CODE",
       "ifrs17GroupRef": "Sample text",
       "catCode": "SAMPLE_CODE",
-      "handlingSegment": "SAMPLE_CODE"
+      "handlingSegment": "SAMPLE_CODE",
+      "accountingDate": "2026-10-07"
     }
   },
   {
@@ -1395,7 +1412,9 @@
     "origin": "LIVE",
     "dataClassification": "P0",
     "payload": {
+      "claimId": null,
       "exposureId": "01926e1f-94c7-706b-8235-6ffcc622e28f",
+      "reserveLineId": null,
       "reserveLine": {
         "costType": "SAMPLE_CODE",
         "category": "SAMPLE_CODE"
@@ -1436,7 +1455,8 @@
       "siiLob": "SAMPLE_CODE",
       "ifrs17GroupRef": null,
       "catCode": null,
-      "handlingSegment": "SAMPLE_CODE"
+      "handlingSegment": "SAMPLE_CODE",
+      "accountingDate": null
     }
   },
   {

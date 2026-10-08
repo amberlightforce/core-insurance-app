@@ -348,8 +348,17 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
             entity.Property(e => e.InvoiceId).HasColumnName("invoice_id");
             entity.Property(e => e.ReceiptId).HasColumnName("receipt_id");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.ExposureId).HasColumnName("exposure_id");
+            entity.Property(e => e.ReserveLineId).HasColumnName("reserve_line_id");
+            entity.Property(e => e.CostType).HasColumnName("cost_type");
+            entity.Property(e => e.CostCategory).HasColumnName("cost_category");
+            entity.Property(e => e.ClaimPaymentId).HasColumnName("claim_payment_id");
+            entity.Property(e => e.DisbursementId).HasColumnName("disbursement_id");
             entity.HasIndex(e => new { e.JournalId, e.LineNo }).IsUnique().HasDatabaseName("ux_journal_line_no");
             entity.HasIndex(e => new { e.LegalEntityId, e.PolicyNumber }).HasFilter("policy_number IS NOT NULL").HasDatabaseName("ix_journal_line_policy");
+            entity.HasIndex(e => new { e.LegalEntityId, e.ClaimId }).HasFilter("claim_id IS NOT NULL").HasDatabaseName("ix_journal_line_claim");
+            entity.HasIndex(e => new { e.LegalEntityId, e.ClaimPaymentId, e.AccountCode }).HasFilter("claim_payment_id IS NOT NULL").HasDatabaseName("ix_journal_line_claim_payment");
             entity.HasOne<JournalEntryRow>().WithMany().HasForeignKey(e => e.JournalId).HasConstraintName("fk_journal_line_entry").OnDelete(DeleteBehavior.Restrict);
         });
     }

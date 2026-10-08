@@ -10,7 +10,11 @@ namespace CoreIns.Modules.Finance.Queries;
 
 /// <summary>Filters of <c>fin.Journal.query</c> (slice subset of REQ-FIN-078).</summary>
 internal sealed record JournalFilter(
-    string? PolicyNumber, string? SourceEventType, string? Book, BusinessDate? From, BusinessDate? To, Instant KnownAt);
+    string? PolicyNumber, string? SourceEventType, string? Book, BusinessDate? From, BusinessDate? To, Instant KnownAt)
+{
+    /// <summary>Journals with at least one line for this claim (CLM postings and its payments' BIL disbursement entries, D-SL2-08).</summary>
+    public Guid? ClaimId { get; init; }
+}
 
 /// <summary>
 /// The read side of the journals (REQ-FIN-078, -079): Dapper over the scope's connection. Every query is filtered by the
@@ -57,6 +61,7 @@ internal sealed class JournalReader(DbSession session)
         {
             le = legalEntity.Value,
             policy = filter.PolicyNumber,
+            claim = filter.ClaimId,
             sourceEventType = filter.SourceEventType,
             book = filter.Book,
             knownAt = filter.KnownAt.ToUtcDateTime(),
@@ -76,6 +81,7 @@ internal sealed class JournalReader(DbSession session)
                 AND (@from::date IS NULL OR j.accounting_date >= @from)
                 AND (@to::date IS NULL OR j.accounting_date <= @to)
                 AND (@policy::text IS NULL OR EXISTS (SELECT 1 FROM fin.journal_line l WHERE l.journal_id = j.journal_id AND l.policy_number = @policy))
+                AND (@claim::uuid IS NULL OR EXISTS (SELECT 1 FROM fin.journal_line l WHERE l.journal_id = j.journal_id AND l.legal_entity_id = @le AND l.claim_id = @claim))
                 AND (@afterDateValue::date IS NULL OR (j.accounting_date, j.journal_number) > (@afterDateValue, @afterNumber::text))
               ORDER BY j.accounting_date, j.journal_number
               LIMIT @take
@@ -107,7 +113,9 @@ internal sealed class JournalReader(DbSession session)
                    l.rule_code AS RuleCode, l.product_code AS ProductCode, l.product_version AS ProductVersion, l.coverage_code AS CoverageCode,
                    l.charge_type AS ChargeType, l.charge_category AS ChargeCategory, l.gl_key AS GlKey, l.policy_id AS PolicyId,
                    l.policy_number AS PolicyNumber, l.policy_term_id AS PolicyTermId, l.policy_transaction_id AS PolicyTransactionId,
-                   l.charge_id AS ChargeId, l.billing_account_id AS BillingAccountId, l.invoice_id AS InvoiceId, l.receipt_id AS ReceiptId
+                   l.charge_id AS ChargeId, l.billing_account_id AS BillingAccountId, l.invoice_id AS InvoiceId, l.receipt_id AS ReceiptId,
+                   l.claim_id AS ClaimId, l.exposure_id AS ExposureId, l.reserve_line_id AS ReserveLineId, l.cost_type AS CostType,
+                   l.cost_category AS CostCategory, l.claim_payment_id AS ClaimPaymentId, l.disbursement_id AS DisbursementId
               FROM fin.journal_line l
               JOIN fin.journal_entry j ON j.journal_id = l.journal_id
               LEFT JOIN fin.gl_account a ON a.legal_entity_code = j.legal_entity_code AND a.book = l.book AND a.account_code = l.account_code
@@ -173,6 +181,13 @@ internal sealed class JournalReader(DbSession session)
             BillingAccountId = l.BillingAccountId is { } account ? new BillingAccountId(account) : null,
             InvoiceId = l.InvoiceId is { } invoice ? new InvoiceId(invoice) : null,
             ReceiptId = l.ReceiptId is { } receipt ? new PaymentId(receipt) : null,
+            ClaimId = l.ClaimId is { } claim ? new ClaimId(claim) : null,
+            ExposureId = l.ExposureId is { } exposure ? new ExposureId(exposure) : null,
+            ReserveLineId = l.ReserveLineId,
+            CostType = l.CostType,
+            CostCategory = l.CostCategory,
+            ClaimPaymentId = l.ClaimPaymentId,
+            DisbursementId = l.DisbursementId is { } disbursement ? new DisbursementId(disbursement) : null,
         },
     };
 
@@ -308,5 +323,19 @@ internal sealed class JournalReader(DbSession session)
         public Guid? InvoiceId { get; set; }
 
         public Guid? ReceiptId { get; set; }
+
+        public Guid? ClaimId { get; set; }
+
+        public Guid? ExposureId { get; set; }
+
+        public Guid? ReserveLineId { get; set; }
+
+        public string? CostType { get; set; }
+
+        public string? CostCategory { get; set; }
+
+        public Guid? ClaimPaymentId { get; set; }
+
+        public Guid? DisbursementId { get; set; }
     }
 }
