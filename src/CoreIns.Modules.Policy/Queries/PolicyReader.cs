@@ -171,7 +171,8 @@ internal sealed partial class PolicyReader(DbSession session)
              SELECT term_id AS TermId, policy_id AS PolicyId, term_number AS TermNumber, valid_from AS ValidFrom, valid_to AS ValidTo,
                     recorded_from AS RecordedFrom, state AS State, product_version AS ProductVersion, artefact_hash AS ArtefactHash,
                     rating_artefact_hash AS RatingArtefactHash, resolution_hash AS ResolutionHash, configuration_hash AS ConfigurationHash,
-                    currency AS Currency, producer_code AS ProducerCode, payment_plan_ref AS PaymentPlanRef, written_date::text AS WrittenDate
+                    currency AS Currency, producer_code AS ProducerCode, payment_plan_ref AS PaymentPlanRef, written_date::text AS WrittenDate,
+                    cancelled_at AS CancelledAt
                FROM pol.policy_term
               WHERE legal_entity_id = @le AND {where}
               ORDER BY {order}
@@ -256,11 +257,18 @@ internal sealed partial class PolicyReader(DbSession session)
 
     /// <summary>
     /// The term state at <paramref name="validAt"/>: stored states are facts of bind or later transactions; Scheduled →
-    /// InForce and InForce → Expired follow from the period and are derived on read, never written (REQ-POL-131).
+    /// InForce and InForce → Expired follow from the period and are derived on read, never written (REQ-POL-131). A cancelled
+    /// term was Cancelled only from its cancellation date: before it, the as-of state is the one the period gives (the knownAt
+    /// dimension is the caller's, by which term version it passes).
     /// </summary>
     private static PolicyTermState StateAt(TermRecord term, Instant validAt)
     {
         var state = Codes.Parse<PolicyTermState>(term.State);
+        if (state == PolicyTermState.Cancelled && term.CancelledAt is { } cancelledAt && validAt < JobReader.Time(cancelledAt))
+        {
+            state = PolicyTermState.InForce;
+        }
+
         if (state is PolicyTermState.Scheduled or PolicyTermState.InForce)
         {
             state = validAt < JobReader.Time(term.ValidFrom) ? PolicyTermState.Scheduled : PolicyTermState.InForce;
@@ -358,6 +366,8 @@ internal sealed partial class PolicyReader(DbSession session)
         public string Currency { get; set; } = string.Empty;
 
         public string? ProducerCode { get; set; }
+
+        public DateTime? CancelledAt { get; set; }
 
         public string PaymentPlanRef { get; set; } = string.Empty;
 

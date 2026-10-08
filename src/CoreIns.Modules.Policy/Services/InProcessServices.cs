@@ -80,12 +80,14 @@ internal sealed class PolicyPolicyService(
 {
     public async Task<PolicyGetResponse> GetAsync(string id, ValidAt? validAt = null, Instant? knownAt = null, CancellationToken cancellationToken = default)
     {
-        var response = Guid.TryParse(id, out var policyId)
-            ? await reader.GetPolicyAsync(
+        var answered = Guid.TryParse(id, out var policyId)
+            ? await reader.GetPolicyEffectiveAsync(
                 JobSupport.LegalEntity(context, legalEntities), context.LegalEntity!.Value.Value, policyId,
                 InProcess.Valid(validAt, clock, options.Value), knownAt ?? clock.Now, cancellationToken).ConfigureAwait(false)
             : null;
-        return response ?? throw new DomainException(JobSupport.NotFound("policy"));
+        return answered is var (response, effectiveKnownAt)
+            ? response with { EffectiveKnownAt = effectiveKnownAt }
+            : throw new DomainException(JobSupport.NotFound("policy"));
     }
 
     public Task<PolicyGetManyResponse> GetManyAsync(ValidAt? validAt = null, Instant? knownAt = null, IReadOnlyList<string>? ids = null, CancellationToken cancellationToken = default) =>
