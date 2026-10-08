@@ -1,12 +1,14 @@
+import { useQueries } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import type { ApprovalView } from '../../api/types';
+import type { ApprovalView, TransactionSetView } from '../../api/types';
 import {
   EmptyState,
   dateColumn,
   moneyColumn,
+  statusColumn,
   textColumn,
   type DataColumn,
 } from '../../design-system';
@@ -15,8 +17,18 @@ import { PageHeader, Section } from '../staff/PageHeader';
 import { QueryView } from '../staff/QueryView';
 import { SimpleTable } from '../staff/SimpleTable';
 import styles from '../staff/staff.module.css';
-import { useApprovals } from './api';
+import { approvalClaimId, approvalSetId, fetchSet, useApprovals } from './api';
 import { approvalTypeKey } from './approvalFormat';
+
+function setsById(results: { data?: { set: TransactionSetView } | undefined }[]) {
+  return new Map(results.flatMap((q) => (q.data ? [[q.data.set.setId, q.data.set] as const] : [])));
+}
+
+interface Row {
+  request: ApprovalView;
+  claimId: string | null;
+  rejected: boolean;
+}
 
 /** Approvals inbox: requests waiting for a decision (plt.Approval.list, status PendingApproval). */
 export function ApprovalsInboxPage() {
@@ -24,35 +36,78 @@ export function ApprovalsInboxPage() {
   const navigate = useNavigate();
   const query = useApprovals('PendingApproval');
 
-  const rows = useMemo<ApprovalView[]>(
+  const all = useMemo<ApprovalView[]>(
     () =>
       (query.data?.items as { request: ApprovalView }[] | undefined)?.map((i) => i.request) ?? [],
     [query.data],
   );
 
-  const columns = useMemo<DataColumn<ApprovalView>[]>(
+  // Reserve approvals point at their transaction set: it gives the claim to open and shows stale leftovers.
+  const setIds = useMemo(
+    () => [...new Set(all.map((r) => approvalSetId(r)).filter((id) => id !== null))],
+    [all],
+  );
+  const sets = useQueries({
+    queries: setIds.map((id) => ({
+      queryKey: ['clm', 'set', id],
+      queryFn: ({ signal }: { signal: AbortSignal }) => fetchSet(id, signal),
+    })),
+    combine: setsById,
+  });
+  // Rows carry the claim of their set so the cells depend on the row only (never on a closure).
+  const rows = useMemo<Row[]>(
+    () =>
+      all
+        .map((request) => {
+          const id = approvalSetId(request);
+          const set = id ? sets.get(id) : undefined;
+          return {
+            request,
+            claimId: approvalClaimId(request) ?? set?.claimId ?? null,
+            rejected: set?.status === 'REJECTED',
+          };
+        })
+        .filter((row) => !row.rejected),
+    [all, sets],
+  );
+  const hidden = all.length - rows.length;
+
+  const columns = useMemo<DataColumn<Row>[]>(
     () => [
-      textColumn<ApprovalView>('type', t('approvals.columns.type'), (r) =>
-        t(approvalTypeKey(r.type), { defaultValue: r.type }),
+      textColumn<Row>('type', t('approvals.columns.type'), (r) =>
+        t(approvalTypeKey(r.request.type), { defaultValue: r.request.type }),
       ),
-      textColumn<ApprovalView>(
+      textColumn<Row>(
         'subject',
         t('approvals.columns.subject'),
-        (r) => `${r.objectRef.module} · ${r.objectRef.type}`,
+        (r) => `${r.request.objectRef.module} · ${r.request.objectRef.type}`,
       ),
-      moneyColumn<ApprovalView>(
+      moneyColumn<Row>(
         'amount',
         t('approvals.columns.amount'),
-        (r) => r.authority.amount?.amount ?? null,
+        (r) => r.request.authority.amount?.amount ?? null,
         { currency: 'EUR' },
       ),
-      textColumn<ApprovalView>('maker', t('approvals.columns.maker'), (r) => r.maker.id),
-      dateColumn<ApprovalView>(
+      textColumn<Row>('maker', t('approvals.columns.maker'), (r) => r.request.maker.id),
+      dateColumn<Row>(
         'requested',
         t('approvals.columns.requestedAt'),
-        (r) => r.requestedAt,
+        (r) => r.request.requestedAt,
       ),
-      textColumn<ApprovalView>('reason', t('approvals.columns.reason'), (r) => r.reason ?? null),
+      textColumn<Row>('reason', t('approvals.columns.reason'), (r) => r.request.reason ?? null),
+      statusColumn<Row>(
+        'claim',
+        t('approvals.columns.claim'),
+        (r) => r.claimId ?? '',
+        (r) =>
+          r.claimId ? (
+            <LinkButton to={`/claims/${r.claimId}?tab=financials`}>
+              {t('approvals.openClaim')}
+            </LinkButton>
+          ) : (
+            <span className="ds-caption">{t('approvals.noClaimLink')}</span>
+          ),
+      ),
     ],
     [t],
   );
@@ -72,23 +127,28 @@ export function ApprovalsInboxPage() {
       <Section title={t('approvals.pending')}>
         <QueryView query={query}>
           {() => (
-            <SimpleTable<ApprovalView>
-              aria-label={t('approvals.pending')}
-              columns={columns}
-              data={rows}
-              getRowId={(r) => r.requestId}
-              onOpen={(r) => {
-                void navigate(`/claims/approvals/${r.requestId}`);
-              }}
-              emptyState={
-                <EmptyState
-                  kind="done"
-                  headingLevel={3}
-                  headline={t('approvals.emptyTitle')}
-                  description={t('approvals.emptyBody')}
-                />
-              }
-            />
+            <div className={styles.stack}>
+              {hidden > 0 ? (
+                <p className={styles.muted}>{t('approvals.hiddenStale', { count: hidden })}</p>
+              ) : null}
+              <SimpleTable<Row>
+                aria-label={t('approvals.pending')}
+                columns={columns}
+                data={rows}
+                getRowId={(r) => r.request.requestId}
+                onOpen={(r) => {
+                  void navigate(`/claims/approvals/${r.request.requestId}`);
+                }}
+                emptyState={
+                  <EmptyState
+                    kind="done"
+                    headingLevel={3}
+                    headline={t('approvals.emptyTitle')}
+                    description={t('approvals.emptyBody')}
+                  />
+                }
+              />
+            </div>
           )}
         </QueryView>
       </Section>

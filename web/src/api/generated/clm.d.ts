@@ -479,6 +479,98 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clm/v1/transaction-sets/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Financial sets
+         * @description A transaction set with its transactions, derived statuses and approval binding (SL2-CLM-MONEY).
+         *
+         *     PRD inputs: set id
+         *     PRD outputs: set
+         */
+        get: operations["clm.TransactionSet.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/claims/{id}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Payments of a claim
+         * @description The claim's payments with their status from BIL's disbursement events (REQ-CLM-004, REQ-CLM-128); masked payee account only.
+         *
+         *     PRD inputs: claim
+         *     PRD outputs: payments
+         */
+        get: operations["clm.Payment.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/payee-accounts/capture": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Capture a payee bank account
+         * @description Registers a payee's bank account with BIL (bil.PayeeAccount.create, purpose CLAIM_PAYMENT) in the claim's context and keeps CLM's masked read model (REQ-CLM-123, REQ-CLM-131; R-38: CLM stores no IBAN).
+         *
+         *     PRD inputs: claim, party, IBAN, holder name, evidence
+         *     PRD outputs: payee account id, masked IBAN, verification status, cooling-off
+         */
+        post: operations["clm.PayeeAccount.capture"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/claims/{id}/payee-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Payee accounts captured on a claim
+         * @description CLM's masked read model of the payee accounts captured on the claim (REQ-CLM-123), to pick one for a payment.
+         *
+         *     PRD inputs: claim
+         *     PRD outputs: payee accounts (masked)
+         */
+        get: operations["clm.PayeeAccount.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clm/v1/payments/void": {
         parameters: {
             query?: never;
@@ -1614,7 +1706,7 @@ export interface components {
             /** @description PRD: "decision record" */
             decisionRecord?: components["schemas"]["Unspecified"];
         };
-        /** @description Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions" */
+        /** @description Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions". Builds a Draft set: reserve lines are created on first use (REQ-CLM-093), an eroding payment above the open reserve adds a reserve increase to the same set (REQ-CLM-097, auto-adjust on by default) and a FINAL payment proposes the release of the remainder (REQ-CLM-099). With dryRun nothing is stored (preview only). */
         TransactionSetBuildRequest: {
             claimId: components["schemas"]["Uuid"];
             transactions: {
@@ -1629,9 +1721,15 @@ export interface components {
                 amount: components["schemas"]["Money"];
                 /** @description Payment transactions */
                 payeePartyId?: components["schemas"]["Uuid"];
-                /** @description BIL payee account (REQ-BIL-343) */
+                /** @description BIL payee account (REQ-BIL-343), captured with clm.PayeeAccount.capture */
                 payeeAccountId?: components["schemas"]["Uuid"];
+                /** @description Reason code; required for every manual reserve change (REQ-CLM-098, CLM-ERR-RESERVE-REASON) */
                 reason?: components["schemas"]["Code"];
+                /**
+                 * @description Payment transactions (REQ-CLM-119; default PARTIAL). A FINAL payment proposes the release of the line's remaining open reserve in the same set (REQ-CLM-099)
+                 * @enum {string}
+                 */
+                paymentType?: "PARTIAL" | "FINAL";
             }[];
         };
         /** @description Typed from REQ-CLM-003, REQ-CLM-107. PRD outputs: "set with preview, checks, approval request" */
@@ -1639,21 +1737,142 @@ export interface components {
             setId: components["schemas"]["Uuid"];
             status: components["schemas"]["Code"];
             contentHash?: components["schemas"]["Sha256"];
-            /** @description Balances before → after per line */
+            /** @description Balances before → after per line (REQ-CLM-107) */
             preview: {
                 exposureId?: components["schemas"]["Uuid"];
                 costType?: components["schemas"]["Code"];
                 costCategory?: components["schemas"]["Code"];
+                /** @description Open reserve before the set */
                 before?: components["schemas"]["Money"];
+                /** @description Open reserve after the set */
                 after?: components["schemas"]["Money"];
+                paidBefore?: components["schemas"]["Money"];
+                paidAfter?: components["schemas"]["Money"];
             }[];
             checks?: components["schemas"]["Unspecified"][];
+            set?: components["schemas"]["TransactionSetView"];
+        };
+        /** @description A claim transaction set (PRD-07 §7.1 TransactionSet, §7.3.2) with its transactions and derived states */
+        TransactionSetView: {
+            setId: components["schemas"]["Uuid"];
+            claimId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "DRAFT" | "SUBMITTED" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "POSTED";
+            /** @description SHA-256 of the canonical set (RFC 8785) */
+            contentHash: components["schemas"]["Sha256"];
+            /** @description Actor who built the set */
+            maker?: string;
+            /** @description PLT approval request when referred (REQ-CLM-109) */
+            approvalRequestId?: components["schemas"]["Uuid"];
+            /** @description Hash the PLT approval is bound to (the set content hash, or the disbursement content hash of the set's payment) */
+            approvalPayloadHash?: components["schemas"]["Sha256"];
+            fourEyes?: boolean;
+            rejectionReason?: components["schemas"]["Code"];
+            createdAt?: components["schemas"]["Instant"];
+            submittedAt?: components["schemas"]["Instant"];
+            decidedAt?: components["schemas"]["Instant"];
+            transactions: components["schemas"]["FinancialTransactionView"][];
+            /** @description One PLT approval request per referred (authority type, cost type) (D-SL2-13); the set executes when all are approved */
+            approvals?: components["schemas"]["SetApprovalView"][];
+        };
+        /** @description One PLT approval request of a referred set and the authority it must cover (D-SL2-13) */
+        SetApprovalView: {
+            approvalRequestId: components["schemas"]["Uuid"];
+            /** @description CLM.CLAIM_PAYMENT (subject the payment) or CLM.TRANSACTION_SET */
+            approvalType: string;
+            authorityType: string;
+            costType: components["schemas"]["Code"];
+            amount: components["schemas"]["Money"];
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED";
+            decidedAt?: components["schemas"]["Instant"];
+        };
+        /** @description An immutable claim financial transaction (PRD-07 §7.1); status is derived from its set and payment */
+        FinancialTransactionView: {
+            txnId: components["schemas"]["Uuid"];
+            /** @description Per-claim transaction number (D-SL2-07) */
+            txnNumber: string;
+            /** @enum {string} */
+            kind: "RESERVE" | "PAYMENT";
+            exposureId: components["schemas"]["Uuid"];
+            reserveLineId?: components["schemas"]["Uuid"];
+            costType: components["schemas"]["Code"];
+            costCategory: components["schemas"]["Code"];
+            amount: components["schemas"]["Money"];
+            functionalAmount?: components["schemas"]["Money"];
+            groupAmount?: components["schemas"]["Money"];
+            eroding?: boolean;
+            paymentType?: components["schemas"]["Code"];
+            claimPaymentId?: components["schemas"]["Uuid"];
+            reasonCode?: components["schemas"]["Code"];
+            /** @description Added by the system (reserve top-up REQ-CLM-097, final release REQ-CLM-099) */
+            proposed?: boolean;
+            status: components["schemas"]["Code"];
+        };
+        /** @description clm.TransactionSet.get result */
+        TransactionSetGetResponse: {
+            set: components["schemas"]["TransactionSetView"];
+        };
+        /** @description A claim payment (PRD-07 §7.1 ClaimPayment, §7.3.3). No IBAN: the BIL payee account id and the masked account only (R-38) */
+        ClaimPaymentView: {
+            claimPaymentId: components["schemas"]["Uuid"];
+            setId: components["schemas"]["Uuid"];
+            exposureId: components["schemas"]["Uuid"];
+            payeePartyId: components["schemas"]["Uuid"];
+            payeeAccountId: components["schemas"]["Uuid"];
+            maskedAccount?: string;
+            method?: components["schemas"]["Code"];
+            paymentType?: components["schemas"]["Code"];
+            amount: components["schemas"]["Money"];
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "ON_HOLD" | "SUBMITTED" | "ISSUED" | "CLEARED" | "REJECTED";
+            holdReason?: components["schemas"]["Code"];
+            disbursementId?: components["schemas"]["Uuid"];
+            approvalEvidenceRef?: string;
+            createdAt?: components["schemas"]["Instant"];
+            submittedAt?: components["schemas"]["Instant"];
+            issuedAt?: components["schemas"]["Instant"];
+            clearedAt?: components["schemas"]["Instant"];
+        };
+        /** @description Page of clm.Payment.list results (cursor pagination, contract §3.5.5) */
+        PaymentListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ClaimPaymentView"][];
+        };
+        /** @description clm.PayeeAccount.capture (REQ-CLM-123, REQ-CLM-131): registers the payee's bank account with BIL (bil.PayeeAccount.create, purpose CLAIM_PAYMENT) in the claim's context. The IBAN is P2: passed to BIL only, never stored, logged, audited or published by CLM */
+        PayeeAccountCaptureRequest: {
+            claimId: components["schemas"]["Uuid"];
+            /** @description The payee (the insured or a claimant of the claim) */
+            partyId: components["schemas"]["Uuid"];
+            /** @description IBAN (ISO 13616). P2. */
+            iban: string;
+            holderName: string;
+            /** @description Change evidence (document reference) */
+            evidenceRef?: string;
+        };
+        /** @description CLM's read model of a BIL payee account (PRD-07 §7.1 PayeeAccountView); masked only */
+        ClaimPayeeAccountView: {
+            payeeAccountId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+            claimId?: components["schemas"]["Uuid"];
+            /** @description Last four characters, masked */
+            maskedIban: string;
+            verificationStatus: components["schemas"]["Code"];
+            coolingOffUntil?: components["schemas"]["LocalDate"];
+            change?: boolean;
+            capturedAt?: components["schemas"]["Instant"];
+        };
+        PayeeAccountCaptureResponse: {
+            payeeAccount: components["schemas"]["ClaimPayeeAccountView"];
+        };
+        /** @description Page of clm.PayeeAccount.list results (cursor pagination, contract §3.5.5) */
+        PayeeAccountListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ClaimPayeeAccountView"][];
         };
         /** @description Typed from REQ-CLM-108, REQ-CLM-109. PRD inputs: "transactions" */
         TransactionSetSubmitRequest: {
             setId: components["schemas"]["Uuid"];
         };
-        /** @description Typed from REQ-CLM-108, REQ-CLM-109. PRD outputs: "set with preview, checks, approval request" */
+        /** @description Typed from REQ-CLM-108, REQ-CLM-109. PRD outputs: "set with preview, checks, approval request". All checks ALLOW: the set is APPROVED at once (no four-eyes); any REFER: PENDING_APPROVAL with a PLT approval request (decided in the PLT inbox; CLM applies the decision from ApprovalDecided); any DENY: CLM-ERR-AUTHORITY. */
         TransactionSetSubmitResponse: {
             setId: components["schemas"]["Uuid"];
             status: components["schemas"]["Code"];
@@ -1665,7 +1884,22 @@ export interface components {
                  * @enum {string}
                  */
                 decision?: "ALLOW" | "REFER" | "DENY";
+                /** @description Not set since D-SL2-13 (checks are per requirement, not per transaction) */
+                txnId?: components["schemas"]["Uuid"];
+                /** @description Authority type (CLM.RESERVE, CLM.PAYMENT) */
+                type?: string;
+                costType?: components["schemas"]["Code"];
+                /**
+                 * @description What the amount is (D-SL2-13, REQ-CLM-108)
+                 * @enum {string}
+                 */
+                basis?: "EXPOSURE_TOTAL_RESERVE" | "RESERVE_DECREASE" | "PAYMENT" | "CLAIM_CUMULATIVE_PAID";
+                amount?: components["schemas"]["Money"];
+                referralRole?: string;
             }[];
+            set?: components["schemas"]["TransactionSetView"];
+            /** @description Payments of the set (Submitted to BIL when the set is approved within authority) */
+            payments?: components["schemas"]["ClaimPaymentView"][];
         };
         /** @description Typed from REQ-CLM-110..113, REQ-CLM-004. PRD inputs: "transactions" */
         TransactionSetApproveRequest: {
@@ -1762,10 +1996,41 @@ export interface components {
             /** @description PRD: "status" */
             status?: components["schemas"]["Unspecified"];
         };
-        /** @description clm.Financials.get result. PRD outputs: "balances by line" */
+        /** @description clm.Financials.get result. PRD outputs: "balances by line". Derived from the approved transactions recorded at or before knownAt (REQ-CLM-095, -096, -101); never stored as editable totals */
         FinancialsGetResponse: {
-            /** @description PRD: "balances by line" */
-            balancesByLine?: components["schemas"]["Unspecified"];
+            claimId: components["schemas"]["Uuid"];
+            /** @description The record time the balances are as of (PRD asOf, D-API-08) */
+            knownAt: components["schemas"]["Instant"];
+            balancesByLine: components["schemas"]["FinancialLineBalance"][];
+            exposures: components["schemas"]["FinancialBalance"][];
+            totals: components["schemas"]["FinancialBalance"];
+        };
+        /** @description Derived balances (REQ-CLM-095, -096); exposureId is set on exposure totals */
+        FinancialBalance: {
+            exposureId?: components["schemas"]["Uuid"];
+            /** @description Σ approved reserve transactions */
+            reserved: components["schemas"]["Money"];
+            /** @description Σ approved payments */
+            paid: components["schemas"]["Money"];
+            /** @description Σ reserve − Σ eroding payments, never below zero */
+            openReserve: components["schemas"]["Money"];
+            /** @description paid + open reserve */
+            incurred: components["schemas"]["Money"];
+            /** @description A payment is pending approval, approved, on hold or submitted (not yet issued) */
+            paymentPending?: boolean;
+        };
+        /** @description Balances of one reserve line (exposure × cost type × cost category × currency, REQ-CLM-093) */
+        FinancialLineBalance: {
+            reserveLineId: components["schemas"]["Uuid"];
+            exposureId: components["schemas"]["Uuid"];
+            costType: components["schemas"]["Code"];
+            costCategory: components["schemas"]["Code"];
+            /** @description FinalLine (final payment or release to zero, PRD-07 §7.3.9) */
+            final: boolean;
+            reserved: components["schemas"]["Money"];
+            paid: components["schemas"]["Money"];
+            openReserve: components["schemas"]["Money"];
+            incurred: components["schemas"]["Money"];
         };
         /** @description clm.Financials.dailyTotals result. PRD outputs: "totals by currency and cost type with transaction ids" */
         FinancialsDailyTotalsResponse: {
@@ -3357,6 +3622,169 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.TransactionSet.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the TransactionSet */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionSetGetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Payment.list": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the Claim */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.PayeeAccount.capture": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PayeeAccountCaptureRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayeeAccountCaptureResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.PayeeAccount.list": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the Claim */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayeeAccountListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
         };
     };

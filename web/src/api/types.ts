@@ -91,3 +91,21 @@ export type ApprovalGetResponse = Plt['schemas']['ApprovalGetResponse'];
 export type ApprovalListPage = Plt['schemas']['ApprovalListPage'];
 export type ApprovalDecideRequest = Plt['schemas']['ApprovalDecideRequest'];
 export type ApprovalDecideResponse = Plt['schemas']['ApprovalDecideResponse'];
+
+// Claim money (clm.yaml)
+export type TransactionSetBuildRequest = Clm['schemas']['TransactionSetBuildRequest'];
+export type TransactionSetBuildResponse = Clm['schemas']['TransactionSetBuildResponse'];
+export type TransactionSetView = Clm['schemas']['TransactionSetView'];
+export type TransactionSetGetResponse = Clm['schemas']['TransactionSetGetResponse'];
+export type TransactionSetSubmitResponse = Clm['schemas']['TransactionSetSubmitResponse'];
+export type SetApprovalView = Clm['schemas']['SetApprovalView'];
+export type FinancialTransactionView = Clm['schemas']['FinancialTransactionView'];
+export type ClaimPaymentView = Clm['schemas']['ClaimPaymentView'];
+export type PaymentListPage = Clm['schemas']['PaymentListPage'];
+export type ClaimPayeeAccountView = Clm['schemas']['ClaimPayeeAccountView'];
+export type PayeeAccountListPage = Clm['schemas']['PayeeAccountListPage'];
+export type PayeeAccountCaptureRequest = Clm['schemas']['PayeeAccountCaptureRequest'];
+export type PayeeAccountCaptureResponse = Clm['schemas']['PayeeAccountCaptureResponse'];
+export type FinancialsGetResponse = Clm['schemas']['FinancialsGetResponse'];
+export type FinancialLineBalance = Clm['schemas']['FinancialLineBalance'];
+export type FinancialBalance = Clm['schemas']['FinancialBalance'];

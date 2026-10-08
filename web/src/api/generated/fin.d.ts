@@ -2155,6 +2155,20 @@ export interface components {
             billingAccountId?: components["schemas"]["Uuid"] | null;
             invoiceId?: components["schemas"]["Uuid"] | null;
             receiptId?: components["schemas"]["Uuid"] | null;
+            /** @description Claim (CLM postings and the BIL disbursement entries of claim payments) */
+            claimId?: components["schemas"]["Uuid"] | null;
+            /** @description Exposure of the reserve line */
+            exposureId?: components["schemas"]["Uuid"] | null;
+            /** @description CLM reserve line */
+            reserveLineId?: components["schemas"]["Uuid"] | null;
+            /** @description Reserve line key cost type */
+            costType?: components["schemas"]["Code"] | null;
+            /** @description Reserve line key cost category */
+            costCategory?: components["schemas"]["Code"] | null;
+            /** @description CLM claim payment (PaymentIssued paymentId; the BIL disbursement's source id). GL-2510 nets to zero per claim payment (REQ-FIN-037) */
+            claimPaymentId?: components["schemas"]["Uuid"] | null;
+            /** @description BIL disbursement that pays the claim payment */
+            disbursementId?: components["schemas"]["Uuid"] | null;
         };
         /**
          * @description Where an account code comes from: PRD09_ILLUSTRATIVE (illustrative code of the PRD-09 §7.1.4 reference chart) or TECHNICAL_PLACEHOLDER (not in the PRD). Neither is the Greek statutory chart (OI-FIN-11).
@@ -3664,6 +3678,8 @@ export interface operations {
                 limit?: components["parameters"]["Limit"];
                 /** @description Policy business key (line dimension, REQ-FIN-075): journals with at least one line for this policy. PRD: "dimensions". SL-FIN typed the PRD inputs as the filters the slice needs (D-API-06a). */
                 policyNumber?: components["schemas"]["BusinessNumber"];
+                /** @description Claim (line dimension, REQ-FIN-075): journals with at least one line for this claim, from CLM ReserveChanged/PaymentIssued and the BIL disbursement entries of its payments (SL2-FIN-CLM). PRD: "dimensions" */
+                claimId?: components["schemas"]["Uuid"];
                 /** @description Source business event type, e.g. ChargeDeltaEmitted (REQ-FIN-079). PRD: "refs" */
                 sourceEventType?: components["schemas"]["Code"];
                 /** @description Book code (IFRS17, SOLVENCY_II, LOCAL_GAAP) */

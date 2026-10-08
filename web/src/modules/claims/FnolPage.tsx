@@ -37,7 +37,7 @@ import { problemOf } from '../staff/problem';
 import { rememberRecent } from '../staff/recent';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
-import { searchPolicies, submitFnol, validateFnol } from './api';
+import { searchPolicies, submitFnol, usePolicyCoverages, validateFnol } from './api';
 import { duplicateReasons, lossCauses, receiptMedia } from './codes';
 import { athensInstant, timePattern } from './time';
 
@@ -114,6 +114,11 @@ export function FnolPage() {
   const [policyNumber, setPolicyNumber] = useState('');
   const [policy, setPolicy] = useState<PolicySearchItem | null>(null);
   const [candidatesFound, setCandidatesFound] = useState<PolicySearchItem[] | null>(null);
+  // The chooser shows after the first check finds duplicates; a missing decision is an error from the next submit on.
+  const [decisionShown, setDecisionShown] = useState(false);
+  const [decisionTried, setDecisionTried] = useState(false);
+  const coverages = usePolicyCoverages(policy?.policyId ?? null);
+  const ownDamageCode = coverages.data?.ownDamage ?? null;
   const [form, setForm] = useState<FormState>(initialForm);
   const [decision, setDecision] = useState<Decision>({
     action: 'OVERRIDE',
@@ -172,7 +177,7 @@ export function FnolPage() {
   const needsDecision = duplicates.length > 0;
   const decisionReady = !needsDecision || isDecisionReady(decision);
   const decisionErrors: Record<string, string> = {};
-  if (needsDecision && attempts > 0 && !decisionReady)
+  if (needsDecision && decisionTried && !decisionReady)
     decisionErrors['fnol-duplicate'] = t('fnol.errors.decision');
 
   const all = { ...errors, ...serverErrors, ...decisionErrors };
@@ -208,7 +213,9 @@ export function FnolPage() {
       channel: 'STAFF',
       ...(form.receiptMedium ? { receiptMedium: form.receiptMedium } : {}),
       reporter: { partyId: policy.insuredPartyId, relationship: 'INSURED' },
-      ...(form.ownDamage ? { exposures: [{ kind: 'OWN_DAMAGE', coverageCode: 'OD' }] } : {}),
+      ...(form.ownDamage && ownDamageCode
+        ? { exposures: [{ kind: 'OWN_DAMAGE', coverageCode: ownDamageCode }] }
+        : {}),
       ...(duplicateDecision ? { duplicateDecision } : {}),
     };
   };
@@ -237,9 +244,16 @@ export function FnolPage() {
     const request = buildRequest(true);
     if (!request) return null;
     try {
-      const result = await check.mutateAsync(request);
+      const raw = await check.mutateAsync(request);
+      // Probable duplicates are answered by the chooser below, not reported as a failed check.
+      const issues = raw.issues.filter((i) => i.code !== 'CLM-ERR-DUPLICATE-CANDIDATES');
+      const result = {
+        ...raw,
+        issues,
+        valid: raw.valid || (issues.length === 0 && raw.duplicateCandidates.length > 0),
+      };
       setValidation(result);
-      applyIssues(result.issues);
+      applyIssues(issues);
       return result;
     } catch (error) {
       applyProblem(error);
@@ -266,7 +280,11 @@ export function FnolPage() {
     if (Object.keys(errors).length > 0 || lossInFuture()) return;
     const result = await runCheck();
     if (!result?.valid) return;
-    if (result.duplicateCandidates.length > 0 && !isDecisionReady(decision)) return;
+    if (result.duplicateCandidates.length > 0 && !isDecisionReady(decision)) {
+      if (decisionShown) setDecisionTried(true);
+      setDecisionShown(true);
+      return;
+    }
     const request = buildRequest(result.duplicateCandidates.length > 0);
     if (!request) return;
     try {
@@ -343,6 +361,8 @@ export function FnolPage() {
               setValidation(null);
               setServerErrors({});
               setAttempts(0);
+              setDecisionShown(false);
+              setDecisionTried(false);
               setDecision({ action: 'OVERRIDE', linkedClaimId: null, reasonCode: null });
             }}
           >
@@ -528,7 +548,8 @@ export function FnolPage() {
           errorMessage={shown['fnol-description']}
         />
         <Checkbox
-          isSelected={form.ownDamage}
+          isSelected={form.ownDamage && ownDamageCode !== null}
+          isDisabled={ownDamageCode === null}
           onChange={(ownDamage) => {
             patch({ ownDamage });
           }}

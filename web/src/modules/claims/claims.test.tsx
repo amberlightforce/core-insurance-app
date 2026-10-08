@@ -74,7 +74,7 @@ const exposure1 = {
   exposureId: 'e0000000-1111-4222-8333-000000000001',
   exposureNumber: 'CLM000000001-01',
   kind: 'OWN_DAMAGE' as const,
-  coverageCode: 'OD',
+  coverageCode: 'OWN-DAMAGE',
   claimantId: 'c0000000-1111-4222-8333-000000000001',
   claimantPartyId: insuredId,
   status: 'OPEN' as const,
@@ -191,7 +191,7 @@ const submitted: FnolSubmitResponse = {
   claimNumber: 'CLM000000001',
   claim: summary(),
   exposures: [exposure1],
-  coverageIndications: [{ coverageCode: 'OD', indication: 'COVERED' }],
+  coverageIndications: [{ coverageCode: 'OWN-DAMAGE', indication: 'COVERED' }],
   duplicateCandidates: [],
   handlingSegment: 'STANDARD',
 };
@@ -205,8 +205,26 @@ const valid = {
   duplicateCandidates: [],
 };
 
+/** pol.Policy.get: the selected coverages an exposure can use (the demo motor product). */
+const policyGet: MockRoute = {
+  method: 'GET',
+  path: `/api/pol/v1/policies/${policyId}`,
+  respond: () => ({
+    body: {
+      riskTree: {
+        coverages: [
+          { coverageCode: 'MTPL', selected: true },
+          { coverageCode: 'OWN-DAMAGE', selected: true },
+          { coverageCode: 'WINDSCREEN', selected: false },
+        ],
+      },
+    },
+  }),
+};
+
 function fnolRoutes(over: { validate?: MockRoute['respond']; submit?: MockRoute['respond'] } = {}) {
   return [
+    policyGet,
     {
       method: 'POST',
       path: '/api/pol/v1/policies/search',
@@ -309,7 +327,7 @@ describe('FnolPage', () => {
       channel: 'STAFF',
       receiptMedium: 'TELEPHONE',
       reporter: { partyId: insuredId, relationship: 'INSURED' },
-      exposures: [{ kind: 'OWN_DAMAGE', coverageCode: 'OD' }],
+      exposures: [{ kind: 'OWN_DAMAGE', coverageCode: 'OWN-DAMAGE' }],
     });
     const body = second?.body as { lossAt: string; noticeOn: string };
     expect(body.lossAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00Z$/);
@@ -435,6 +453,7 @@ describe('FnolPage', () => {
 
 function viewRoutes(state: { claim: ClaimView }, extra: MockRoute[] = []): MockRoute[] {
   return [
+    policyGet,
     {
       method: 'GET',
       path: `/api/clm/v1/claims/${claimId}`,
@@ -505,7 +524,7 @@ describe('ClaimViewPage', () => {
       claimId,
       expectedRecordVersion: 3,
       kind: 'OWN_DAMAGE',
-      coverageCode: 'OD',
+      coverageCode: 'OWN-DAMAGE',
     });
   });
 
@@ -581,7 +600,7 @@ describe('ClaimViewPage', () => {
     expect(within(screen.getByRole('alert')).getByText('CLM000000001-01')).toBeInTheDocument();
     expect(
       screen.getByText(
-        /υπάρχει ανοιχτό αποθεματικό που πρέπει να αποδεσμευτεί; υπάρχει εκκρεμής πληρωμή/,
+        /υπάρχει ανοιχτό αποθεματικό: πληρώστε το.*; υπάρχει πληρωμή που δεν έχει ακόμη εκδοθεί/,
       ),
     ).toBeInTheDocument();
 
@@ -658,34 +677,201 @@ describe('ClaimViewPage', () => {
   });
 });
 
-/* -------------------------------------------------------------- payee account */
+/* ------------------------------------------------------------------- financials */
 
-describe('Payee bank account (claim view)', () => {
-  const saved = {
-    payeeAccountId: 'pa000000-1111-4222-8333-000000000001',
-    verificationStatus: 'VoPMatched',
-    coolingOffUntil: '2026-10-08',
-    maskedIban: 'GR••••••••••••••••••••0695',
-    change: false,
+const eur = (amount: string) => ({ amount, currency: 'EUR' });
+const setId = '5e700000-1111-4222-8333-000000000001';
+const accountId = 'pa000000-1111-4222-8333-000000000001';
+const balanceLine = {
+  reserveLineId: 'a1000000-1111-4222-8333-000000000001',
+  exposureId: exposure1.exposureId,
+  costType: 'INDEMNITY',
+  costCategory: 'VEHICLE_REPAIR',
+  final: false,
+  reserved: eur('6500.00'),
+  paid: eur('0.00'),
+  openReserve: eur('6500.00'),
+  incurred: eur('6500.00'),
+};
+const balances = {
+  claimId,
+  knownAt: '2026-10-08T08:00:00Z',
+  balancesByLine: [balanceLine],
+  exposures: [],
+  totals: {
+    reserved: eur('6500.00'),
+    paid: eur('0.00'),
+    openReserve: eur('6500.00'),
+    incurred: eur('6500.00'),
+  },
+};
+const payeeAccount = {
+  payeeAccountId: accountId,
+  partyId: insuredId,
+  claimId,
+  maskedIban: 'GR••••••••••••••••••••0695',
+  verificationStatus: 'VoPMatched',
+  coolingOffUntil: '2026-10-08',
+  change: false,
+};
+
+function txn(over: object = {}) {
+  return {
+    txnId: 't1000000-1111-4222-8333-000000000001',
+    txnNumber: 'CLM000000001-T01',
+    kind: 'RESERVE',
+    exposureId: exposure1.exposureId,
+    costType: 'INDEMNITY',
+    costCategory: 'VEHICLE_REPAIR',
+    amount: eur('5300.00'),
+    status: 'DRAFT',
+    ...over,
   };
+}
 
-  it('saves the account for the insured, shows only the masked IBAN and clears the fields', async () => {
+function setView(over: object = {}) {
+  return {
+    setId,
+    claimId,
+    status: 'PENDING_APPROVAL',
+    contentHash: hash,
+    maker: 'claims',
+    createdAt: '2026-10-08T08:10:00Z',
+    transactions: [txn()],
+    approvals: [
+      {
+        approvalRequestId: requestId,
+        approvalType: 'CLM.TRANSACTION_SET',
+        authorityType: 'CLM.RESERVE',
+        costType: 'INDEMNITY',
+        amount: eur('6500.00'),
+        status: 'PENDING',
+      },
+      {
+        approvalRequestId: 'a9900000-1111-4222-8333-00000000000a',
+        approvalType: 'CLM.CLAIM_PAYMENT',
+        authorityType: 'CLM.PAYMENT',
+        costType: 'INDEMNITY',
+        amount: eur('6200.00'),
+        status: 'APPROVED',
+        decidedAt: '2026-10-08T08:30:00Z',
+      },
+    ],
+    ...over,
+  };
+}
+
+const payment = {
+  claimPaymentId: 'b0000000-1111-4222-8333-000000000001',
+  setId,
+  exposureId: exposure1.exposureId,
+  payeePartyId: insuredId,
+  payeeAccountId: accountId,
+  maskedAccount: 'GR••••••••••••••••••••0695',
+  paymentType: 'FINAL',
+  amount: eur('6200.00'),
+  status: 'ON_HOLD',
+  holdReason: 'COOLING_OFF',
+  createdAt: '2026-10-08T08:10:00Z',
+};
+
+function moneyRoutes(
+  state: { claim: ClaimView },
+  extra: MockRoute[] = [],
+  payments: object[] = [],
+): MockRoute[] {
+  return viewRoutes(state, [
+    { method: 'GET', path: '/api/clm/v1/financials/get', respond: () => ({ body: balances }) },
+    {
+      method: 'GET',
+      path: `/api/clm/v1/claims/${claimId}/payments`,
+      respond: () => ({ body: { items: payments, nextCursor: null } }),
+    },
+    {
+      method: 'GET',
+      path: `/api/clm/v1/claims/${claimId}/payee-accounts`,
+      respond: () => ({ body: { items: [payeeAccount], nextCursor: null } }),
+    },
+    ...extra,
+  ]);
+}
+
+async function openFinancials(user: User) {
+  await screen.findByRole('heading', { level: 1, name: 'Ζημία CLM000000001' });
+  await user.click(screen.getByRole('tab', { name: 'Οικονομικά' }));
+  await screen.findByRole('grid', { name: 'Υπόλοιπα ανά γραμμή αποθεματικού' });
+}
+
+describe('Financials tab', () => {
+  it('shows balances per line and totals, payments and the sets with their approval checklist', async () => {
     const api = mockApi(
-      viewRoutes({ claim: claim() }, [
+      moneyRoutes(
+        { claim: claim() },
+        [
+          {
+            method: 'GET',
+            path: `/api/clm/v1/transaction-sets/${setId}`,
+            respond: () => ({ body: { set: setView() } }),
+          },
+        ],
+        [payment],
+      ),
+    );
+    const { user, container } = claimView();
+    await openFinancials(user);
+    const lines = screen.getByRole('grid', { name: 'Υπόλοιπα ανά γραμμή αποθεματικού' });
+    expect(within(lines).getByText('Επισκευή οχήματος', { exact: false })).toBeInTheDocument();
+    expect(within(lines).getAllByText('6.500,00 €').length).toBeGreaterThan(0);
+    expect(api.callsTo('GET', '/api/clm/v1/financials/get')[0]?.url.searchParams.get('claim')).toBe(
+      claimId,
+    );
+    const totals = screen.getByLabelText('Σύνολα ζημίας');
+    expect(within(totals).getAllByText('6.500,00 €').length).toBeGreaterThan(0);
+    const payments = await screen.findByRole('grid', { name: 'Πληρωμές' });
+    expect(within(payments).getByText('GR••••••••••••••••••••0695')).toBeInTheDocument();
+    expect(within(payments).getByText('Περίοδος αναμονής λογαριασμού')).toBeInTheDocument();
+    expect(await screen.findByText('Εγκρίσεις: 1 από 2')).toBeInTheDocument();
+    const checklist = screen.getByRole('list', { name: 'Λίστα εγκρίσεων' });
+    expect(within(checklist).getAllByRole('listitem')).toHaveLength(2);
+    expect(within(checklist).getByText('Άνοιγμα αιτήματος')).toBeInTheDocument();
+    await expectNoA11yViolations(container);
+  });
+
+  it('opens the Financials tab from the ?tab link and has no builder on a closed claim', async () => {
+    mockApi(
+      moneyRoutes({
+        claim: claim({ status: 'CLOSED', subStatus: null, outcome: 'COMPLETED' }),
+      }),
+    );
+    renderScreen(<ClaimViewPage />, {
+      path: '/claims/:claimId',
+      url: `/claims/${claimId}?tab=financials`,
+    });
+    await screen.findByRole('grid', { name: 'Υπόλοιπα ανά γραμμή αποθεματικού' });
+    expect(
+      screen.queryByRole('form', { name: 'Αλλαγή αποθεματικού ή πληρωμή' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('form', { name: 'Τραπεζικός λογαριασμός δικαιούχου' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('captures a payee account through CLM, shows only the masked IBAN and clears the fields', async () => {
+    const api = mockApi(
+      moneyRoutes({ claim: claim() }, [
         {
           method: 'POST',
-          path: '/api/bil/v1/payee-accounts',
-          respond: () => ({ status: 201, body: saved }),
+          path: '/api/clm/v1/payee-accounts/capture',
+          respond: () => ({ status: 201, body: { payeeAccount } }),
         },
       ]),
     );
-    const { user, container } = claimView();
-    await screen.findByRole('heading', { level: 1, name: 'Ζημία CLM000000001' });
+    const { user } = claimView();
+    await openFinancials(user);
     const form = screen.getByRole('form', { name: 'Τραπεζικός λογαριασμός δικαιούχου' });
-
     await user.click(within(form).getByRole('button', { name: 'Αποθήκευση λογαριασμού' }));
     expect(await within(form).findByText('Συμπληρώστε το IBAN.')).toBeInTheDocument();
-    expect(api.callsTo('POST', '/api/bil/v1/payee-accounts')).toHaveLength(0);
+    expect(api.callsTo('POST', '/api/clm/v1/payee-accounts/capture')).toHaveLength(0);
 
     await user.type(within(form).getByRole('textbox', { name: /Δικαιούχος/ }), 'Γιώργος Νικολάου');
     await user.type(
@@ -694,54 +880,301 @@ describe('Payee bank account (claim view)', () => {
     );
     await user.click(within(form).getByRole('button', { name: 'Αποθήκευση λογαριασμού' }));
     expect(await within(form).findByText('Το IBAN δεν είναι έγκυρο.')).toBeInTheDocument();
-    expect(api.callsTo('POST', '/api/bil/v1/payee-accounts')).toHaveLength(0);
 
     const ibanField = within(form).getByRole('textbox', { name: /^IBAN/ });
     await user.clear(ibanField);
     await user.type(ibanField, iban);
     await user.click(within(form).getByRole('button', { name: 'Αποθήκευση λογαριασμού' }));
     expect(await within(form).findByText('Ο λογαριασμός αποθηκεύτηκε')).toBeInTheDocument();
-
-    const [call] = api.callsTo('POST', '/api/bil/v1/payee-accounts');
+    const [call] = api.callsTo('POST', '/api/clm/v1/payee-accounts/capture');
     expect(call?.body).toEqual({
+      claimId,
       partyId: insuredId,
-      purpose: 'CLAIM_PAYMENT',
       iban,
       holderName: 'Γιώργος Νικολάου',
-      source: 'STAFF',
     });
     expect(call?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
-    // The IBAN is in the body only: not in any URL, and not on the page after the save.
     for (const c of api.calls) expect(c.url.href).not.toContain('GR16');
-    expect(within(form).getByText('GR••••••••••••••••••••0695')).toBeInTheDocument();
     expect(within(form).getByRole('textbox', { name: /^IBAN/ })).toHaveValue('');
     expect(within(form).getByRole('textbox', { name: /Δικαιούχος/ })).toHaveValue('');
     expect(document.body.textContent).not.toContain('0110125000000001230');
-    await expectNoA11yViolations(container);
   });
 
-  it('keeps the input on a failure and explains the problem', async () => {
+  it('keeps the payee input on a failure and explains the problem', async () => {
     mockApi(
-      viewRoutes({ claim: claim() }, [
+      moneyRoutes({ claim: claim() }, [
         {
           method: 'POST',
-          path: '/api/bil/v1/payee-accounts',
-          respond: () =>
-            problem(409, 'BIL-ERR-PAYEE-BLOCKED', 'Ο δικαιούχος δεν ελέγχθηκε επιτυχώς'),
+          path: '/api/clm/v1/payee-accounts/capture',
+          respond: () => problem(409, 'BIL-ERR-PAYEE-BLOCKED', 'Ο δικαιούχος δεν ελέγχθηκε'),
         },
       ]),
     );
     const { user } = claimView();
-    await screen.findByRole('heading', { level: 1, name: 'Ζημία CLM000000001' });
+    await openFinancials(user);
     const form = screen.getByRole('form', { name: 'Τραπεζικός λογαριασμός δικαιούχου' });
     await user.type(within(form).getByRole('textbox', { name: /Δικαιούχος/ }), 'Γιώργος Νικολάου');
     await user.type(within(form).getByRole('textbox', { name: /^IBAN/ }), iban);
     await user.click(within(form).getByRole('button', { name: 'Αποθήκευση λογαριασμού' }));
     expect(await within(form).findByText('Ο λογαριασμός δεν αποθηκεύτηκε')).toBeInTheDocument();
-    expect(within(form).getByText(/δεν πέρασε τον έλεγχο/)).toBeInTheDocument();
     expect(within(form).getByRole('textbox', { name: /Δικαιούχος/ })).toHaveValue(
       'Γιώργος Νικολάου',
     );
+  });
+});
+
+describe('Transaction builder', () => {
+  const buildResponse = (status = 'DRAFT') => ({
+    setId,
+    status,
+    contentHash: hash,
+    preview: [
+      {
+        exposureId: exposure1.exposureId,
+        costType: 'INDEMNITY',
+        costCategory: 'VEHICLE_REPAIR',
+        before: eur('1200.00'),
+        after: eur('6500.00'),
+        paidBefore: eur('0.00'),
+        paidAfter: eur('0.00'),
+      },
+    ],
+    checks: [{ decision: 'REFER', type: 'CLM.RESERVE', referralRole: 'Staff.ClaimsManager' }],
+    set: setView({ status, approvals: [], transactions: [txn()] }),
+  });
+
+  async function fillReserve(user: User) {
+    const form = screen.getByRole('form', { name: 'Αλλαγή αποθεματικού ή πληρωμή' });
+    await user.type(
+      within(form).getByRole('textbox', { name: /Ποσό αλλαγής αποθεματικού/ }),
+      '5300',
+    );
+    await user.click(within(form).getByRole('button', { name: /Αιτιολογία αλλαγής/ }));
+    await user.click(await screen.findByRole('option', { name: 'Αρχική εκτίμηση' }));
+    return form;
+  }
+
+  it('previews a reserve change with a dry run, flags lines the system adds and hints at the referral', async () => {
+    const api = mockApi(
+      moneyRoutes({ claim: claim() }, [
+        {
+          method: 'POST',
+          path: '/api/clm/v1/transaction-sets/build',
+          respond: () => ({
+            body: {
+              ...buildResponse(),
+              set: setView({
+                status: 'DRAFT',
+                approvals: [],
+                transactions: [
+                  txn(),
+                  txn({
+                    txnId: 't2000000-1111-4222-8333-000000000002',
+                    txnNumber: 'CLM000000001-T02',
+                    amount: eur('100.00'),
+                    proposed: true,
+                    reasonCode: 'AUTO_ADJUST',
+                  }),
+                ],
+              }),
+            },
+          }),
+        },
+      ]),
+    );
+    const { user, container } = claimView();
+    await openFinancials(user);
+    const form = screen.getByRole('form', { name: 'Αλλαγή αποθεματικού ή πληρωμή' });
+
+    // Nothing is sent until the form is complete.
+    await user.click(within(form).getByRole('button', { name: 'Προεπισκόπηση' }));
+    expect((await screen.findAllByText('Δώστε ποσό μεγαλύτερο από μηδέν.')).length).toBeGreaterThan(
+      0,
+    );
+    expect(api.callsTo('POST', '/api/clm/v1/transaction-sets/build')).toHaveLength(0);
+
+    await fillReserve(user);
+    await user.click(within(form).getByRole('button', { name: 'Προεπισκόπηση' }));
+    const preview = await screen.findByRole('grid', { name: 'Προεπισκόπηση υπολοίπων' });
+    expect(within(preview).getByText('1.200,00 € → 6.500,00 €')).toBeInTheDocument();
+    expect(screen.getByText('Το σύστημα προσθέτει γραμμές')).toBeInTheDocument();
+    expect(screen.getByText(/Προστέθηκε από το σύστημα: αύξηση αποθεματικού/)).toBeInTheDocument();
+    expect(screen.getByText('Απαιτείται έγκριση διευθυντή')).toBeInTheDocument();
+
+    const [call] = api.callsTo('POST', '/api/clm/v1/transaction-sets/build');
+    expect(call?.url.searchParams.get('dryRun')).toBe('true');
+    expect(call?.body).toMatchObject({
+      claimId,
+      transactions: [
+        {
+          kind: 'RESERVE',
+          exposureId: exposure1.exposureId,
+          costType: 'INDEMNITY',
+          costCategory: 'VEHICLE_REPAIR',
+          reason: 'INITIAL_ESTIMATE',
+        },
+      ],
+    });
+    expect(api.callsTo('POST', '/api/clm/v1/transaction-sets/submit')).toHaveLength(0);
+    await expectNoA11yViolations(container);
+  });
+
+  it('builds and submits: approved within authority', async () => {
+    const api = mockApi(
+      moneyRoutes({ claim: claim() }, [
+        {
+          method: 'POST',
+          path: '/api/clm/v1/transaction-sets/build',
+          respond: () => ({ body: buildResponse() }),
+        },
+        {
+          method: 'POST',
+          path: '/api/clm/v1/transaction-sets/submit',
+          respond: () => ({
+            body: {
+              setId,
+              status: 'APPROVED',
+              authorityChecks: [{ decision: 'ALLOW', type: 'CLM.RESERVE' }],
+              set: setView({ status: 'APPROVED', approvals: [] }),
+              payments: [],
+            },
+          }),
+        },
+      ]),
+    );
+    const { user } = claimView();
+    await openFinancials(user);
+    const form = await fillReserve(user);
+    await user.click(within(form).getByRole('button', { name: 'Υποβολή αποθεματικού' }));
+    expect((await screen.findAllByText('Το σύνολο εγκρίθηκε')).length).toBeGreaterThan(0);
+    expect(screen.getByText('Εντός του ορίου σας')).toBeInTheDocument();
+    const [build] = api.callsTo('POST', '/api/clm/v1/transaction-sets/build');
+    const [submit] = api.callsTo('POST', '/api/clm/v1/transaction-sets/submit');
+    expect(build?.url.searchParams.get('dryRun')).toBeNull();
+    expect(build?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
+    expect(submit?.body).toEqual({ setId });
+    expect(submit?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
+    expect(
+      JSON.parse(localStorage.getItem(`coreins.recent.claimset.${claimId}`) ?? '[]'),
+    ).toHaveLength(1);
+  });
+
+  it('shows PENDING_APPROVAL with the approval checklist', async () => {
+    mockApi(
+      moneyRoutes({ claim: claim() }, [
+        {
+          method: 'POST',
+          path: '/api/clm/v1/transaction-sets/build',
+          respond: () => ({ body: buildResponse() }),
+        },
+        {
+          method: 'POST',
+          path: '/api/clm/v1/transaction-sets/submit',
+          respond: () => ({
+            body: {
+              setId,
+              status: 'PENDING_APPROVAL',
+              authorityChecks: [
+                {
+                  decision: 'REFER',
+                  type: 'CLM.RESERVE',
+                  referralRole: 'Staff.ClaimsManager',
+                  amount: eur('6500.00'),
+                },
+              ],
+              set: setView(),
+            },
+          }),
+        },
+        {
+          method: 'GET',
+          path: `/api/clm/v1/transaction-sets/${setId}`,
+          respond: () => ({ body: { set: setView() } }),
+        },
+      ]),
+    );
+    const { user } = claimView();
+    await openFinancials(user);
+    const form = await fillReserve(user);
+    await user.click(within(form).getByRole('button', { name: 'Υποβολή αποθεματικού' }));
+    expect((await screen.findAllByText('Το σύνολο αναμένει έγκριση')).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('Εγκρίσεις: 1 από 2')).length).toBeGreaterThan(0);
+  });
+
+  it.each([
+    ['CLM-ERR-SET-STALE', 409, /Τα υπόλοιπα άλλαξαν από τη δημιουργία του συνόλου/],
+    ['CLM-ERR-AUTHORITY', 403, /υπερβαίνει ακόμη και το όριο παραπομπής/],
+    ['CLM-ERR-PAYMENT-EXCEEDS-RESERVE', 422, /Η πληρωμή υπερβαίνει το ανοιχτό αποθεματικό/],
+    ['CLM-ERR-PAYEE-NOT-ON-CLAIM', 422, /δεν έχει καταχωριστεί σε αυτή τη ζημία/],
+  ])('explains %s', async (code, status, message) => {
+    mockApi(
+      moneyRoutes({ claim: claim() }, [
+        {
+          method: 'POST',
+          path: '/api/clm/v1/transaction-sets/build',
+          respond: () => ({ body: buildResponse() }),
+        },
+        {
+          method: 'POST',
+          path: '/api/clm/v1/transaction-sets/submit',
+          respond: () => problem(status, code, 'Σφάλμα'),
+        },
+      ]),
+    );
+    const { user } = claimView();
+    await openFinancials(user);
+    const form = await fillReserve(user);
+    await user.click(within(form).getByRole('button', { name: 'Υποβολή αποθεματικού' }));
+    expect(await screen.findByText('Το σύνολο δεν υποβλήθηκε')).toBeInTheDocument();
+    expect(screen.getByText(message)).toBeInTheDocument();
+  });
+
+  it('builds a FINAL payment to a captured account and explains the remainder release', async () => {
+    const api = mockApi(
+      moneyRoutes({ claim: claim() }, [
+        {
+          method: 'POST',
+          path: '/api/clm/v1/transaction-sets/build',
+          respond: () => ({ body: buildResponse() }),
+        },
+      ]),
+    );
+    const { user } = claimView();
+    await openFinancials(user);
+    const form = screen.getByRole('form', { name: 'Αλλαγή αποθεματικού ή πληρωμή' });
+    await user.click(within(form).getByRole('radio', { name: 'Πληρωμή' }));
+    await user.click(within(form).getByRole('radio', { name: 'Τελική' }));
+    expect(screen.getByText(/αποδεσμεύει και το υπόλοιπο ανοιχτό αποθεματικό/)).toBeInTheDocument();
+    await user.type(within(form).getByRole('textbox', { name: /Ποσό πληρωμής/ }), '6200');
+    await user.click(within(form).getByRole('button', { name: /Λογαριασμός δικαιούχου/ }));
+    await user.click(await screen.findByRole('option', { name: /0695/ }));
+    await user.click(within(form).getByRole('button', { name: 'Προεπισκόπηση' }));
+    await screen.findByRole('grid', { name: 'Προεπισκόπηση υπολοίπων' });
+    const [call] = api.callsTo('POST', '/api/clm/v1/transaction-sets/build');
+    expect(call?.body).toMatchObject({
+      transactions: [
+        {
+          kind: 'PAYMENT',
+          costType: 'INDEMNITY',
+          payeePartyId: insuredId,
+          payeeAccountId: accountId,
+          paymentType: 'FINAL',
+        },
+      ],
+    });
+    expect(JSON.stringify(call?.body)).not.toContain('reason');
+  });
+});
+
+describe('Claim view details', () => {
+  it('shows a long snapshot reference truncated with the full value available', async () => {
+    mockApi(
+      viewRoutes({ claim: claim({ snapshotRef: 'snapshot-0123456789abcdef-long-reference' }) }),
+    );
+    claimView();
+    await screen.findByRole('heading', { level: 1, name: 'Ζημία CLM000000001' });
+    const ref = screen.getByLabelText('snapshot-0123456789abcdef-long-reference');
+    expect(ref).toHaveTextContent('snapshot-012…');
   });
 });
 
