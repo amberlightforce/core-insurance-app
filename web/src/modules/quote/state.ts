@@ -112,7 +112,36 @@ export const fuelTypes = ['PETROL', 'DIESEL', 'LPG', 'ELECTRIC', 'HYBRID'] as co
 
 /* Validation ------------------------------------------------------------------------------------------- */
 
-export type FieldIssue = 'required' | 'plate' | 'year' | 'range' | 'postcode';
+export type FieldIssue =
+  'required' | 'plate' | 'year' | 'range' | 'postcode' | 'valueForCover' | 'integer';
+
+/**
+ * Covers whose rating base is the vehicle value (rating table BASE_RATE basis VEHICLE_VALUE): without the value
+ * the rating engine refuses with RAT-ERR-INPUT «vehicle.vehicleValue is required to rate <cover>» (D-SLC-21).
+ */
+export const vehicleValueCovers: readonly string[] = ['OWN-DAMAGE'];
+
+/** The selected covers that need the vehicle value to be rated. */
+export function coversNeedingVehicleValue(
+  coverages: readonly CatalogueCoverage[],
+  covers: Record<string, CoverForm>,
+): string[] {
+  return coverages
+    .filter(
+      (c) =>
+        vehicleValueCovers.includes(c.code) &&
+        (c.existence === 'REQUIRED' || covers[c.code]?.selected === true),
+    )
+    .map((c) => c.code);
+}
+
+/** A vehicle value is a positive amount of at most 9 whole digits (RatingFacts.Money). */
+export function vehicleValueIssue(value: string, needed: boolean): FieldIssue | undefined {
+  const text = value.trim();
+  if (text === '') return needed ? 'valueForCover' : undefined;
+  const amount = Number(text);
+  return Number.isFinite(amount) && amount > 0 && amount < 1_000_000_000 ? undefined : 'range';
+}
 
 export function isInteger(text: string): boolean {
   return /^\d+$/.test(text.trim());
@@ -130,7 +159,7 @@ export function validateVehicle(
   if (v.firstRegistrationYear.trim() === '') issues.firstRegistrationYear = 'required';
   else if (
     !isInteger(v.firstRegistrationYear) ||
-    Number(v.firstRegistrationYear) < 1900 ||
+    Number(v.firstRegistrationYear) < 1950 ||
     Number(v.firstRegistrationYear) > thisYear + 1
   ) {
     issues.firstRegistrationYear = 'year';
@@ -185,6 +214,23 @@ export function missingCoverTerms(
     }
   }
   return missing;
+}
+
+/** Answers the rating reads as numbers must be whole numbers (claims 0..50, RatingFacts.Integer). */
+export function invalidAnswers(
+  questions: readonly Question[],
+  answers: Record<string, string>,
+): Record<string, FieldIssue> {
+  const out: Record<string, FieldIssue> = {};
+  for (const q of questions) {
+    const value = (answers[q.code] ?? '').trim();
+    if (value === '' || !questionState(q, answers).visible) continue;
+    if (q.answerType === 'INTEGER' && !isInteger(value)) out[q.code] = 'integer';
+    else if (q.answerType === 'DECIMAL' && !Number.isFinite(Number(value))) out[q.code] = 'range';
+    else if (q.mapsToField === 'driver.claimsLast5Years' && Number(value) > 50)
+      out[q.code] = 'range';
+  }
+  return out;
 }
 
 /** Whether a question is visible and whether it is required, given the current answers (PFC `visibleWhen`/`requiredWhen`). */

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
@@ -20,7 +20,6 @@ import {
 } from '../../design-system';
 import { LinkButton } from '../staff/LinkButton';
 import { PageHeader } from '../staff/PageHeader';
-import { ProblemBanner } from '../staff/ProblemBanner';
 import { rememberRecent } from '../staff/recent';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
@@ -36,13 +35,17 @@ import {
   useQuestionSet,
 } from './api';
 import { BindReferrals } from './BindReferrals';
+import { focusFieldByLabel, InputProblemBanner } from './InputProblemBanner';
+import type { InputField } from './inputProblems';
 import { QuoteResult, QuoteWarnings } from './QuoteResult';
 import {
   answersInstruction,
   coverageInstruction,
+  coversNeedingVehicleValue,
   driverInstruction,
   emptyDraft,
   fingerprint,
+  invalidAnswers,
   knockOuts,
   missingCoverTerms,
   questionState,
@@ -53,6 +56,7 @@ import {
   validateDriver,
   validateVehicle,
   vehicleInstruction,
+  vehicleValueIssue,
   type Draft,
   type JobRef,
   type StepId,
@@ -142,15 +146,36 @@ export function QuoteWizardPage() {
   const quoteIsFresh = quote !== null && quote.fingerprint === currentFingerprint;
   const thisYear = new Date().getFullYear();
 
+  const valueNeeded = coversNeedingVehicleValue(coverages, draft.covers).length > 0;
+  const valueMissing = vehicleValueIssue(draft.vehicle.value, valueNeeded) !== undefined;
+  const [pendingFocus, setPendingFocus] = useState<{ step: StepId; label: string } | null>(null);
+  /** Labels of the PFC questions that feed the rating (vehicle use, claims), for the input-problem banner. */
+  const questionLabels = useMemo(() => {
+    const out: Partial<Record<InputField, string>> = {};
+    const byField: [InputField, string][] = [
+      ['usage', 'vehicle.usage'],
+      ['claims', 'driver.claimsLast5Years'],
+    ];
+    for (const [field, mapsTo] of byField) {
+      const q = questions.find((x) => x.mapsToField === mapsTo);
+      if (q) out[field] = localised(q.text);
+    }
+    return out;
+  }, [questions, localised]);
+
   const valid: Record<StepId, boolean> = {
     policyholder:
       draft.policyholder !== null && draft.startDate >= athensToday() && product.isSuccess,
-    vehicle: Object.keys(validateVehicle(draft.vehicle, thisYear)).length === 0,
+    vehicle: Object.keys(validateVehicle(draft.vehicle, thisYear)).length === 0 && !valueMissing,
     driver: Object.keys(validateDriver(draft.driver, thisYear)).length === 0,
-    covers: catalogue.isSuccess && missingCoverTerms(coverages, draft.covers).length === 0,
+    covers:
+      catalogue.isSuccess &&
+      missingCoverTerms(coverages, draft.covers).length === 0 &&
+      !valueMissing,
     questions:
       questionSet.isSuccess &&
       unansweredRequired(questions, draft.answers).length === 0 &&
+      Object.keys(invalidAnswers(questions, draft.answers)).length === 0 &&
       knockOuts(questions, draft.answers).length === 0,
     premium: quoteIsFresh,
     bind: bound !== null,
@@ -167,7 +192,15 @@ export function QuoteWizardPage() {
           : 'upcoming',
   }));
 
-  const nextReason = valid[stepId] ? undefined : t(`reasons.${stepId}`);
+  const nextReason = valid[stepId]
+    ? undefined
+    : t(
+        stepId === 'covers' &&
+          valueMissing &&
+          missingCoverTerms(coverages, draft.covers).length === 0
+          ? 'reasons.vehicleValue'
+          : `reasons.${stepId}`,
+      );
 
   const showError = (title: string) => (cause: unknown) => {
     setError({ error: cause, title });
@@ -345,6 +378,23 @@ export function QuoteWizardPage() {
     setVisited((s) => new Set(s).add(id));
   };
 
+  /** «Go to <step>» of an input-problem banner: jump there, then focus the field once the step has rendered. */
+  const goToField = (step: StepId, label: string | undefined) => {
+    void navigateTo(step).then(() => {
+      if (label) setPendingFocus({ step, label });
+    });
+  };
+  useEffect(() => {
+    if (!pendingFocus || pendingFocus.step !== stepId) return;
+    const timer = setTimeout(() => {
+      focusFieldByLabel(pendingFocus.label);
+      setPendingFocus(null);
+    }, 50);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [pendingFocus, stepId]);
+
   const commitReason = bound
     ? t('bind.reasons.alreadyBound')
     : !quote
@@ -423,7 +473,15 @@ export function QuoteWizardPage() {
         lastSavedAt={syncedAt?.at ?? null}
       >
         <div className={styles.stack}>
-          {error ? <ProblemBanner error={error.error} title={error.title} /> : null}
+          {error ? (
+            <InputProblemBanner
+              error={error.error}
+              title={error.title}
+              questionLabels={questionLabels}
+              coverNames={coverNames}
+              onGo={goToField}
+            />
+          ) : null}
           {stepId === 'policyholder' ? (
             <PolicyholderStep
               draft={draft}
@@ -432,7 +490,9 @@ export function QuoteWizardPage() {
               initialPartyId={initialPartyId}
             />
           ) : null}
-          {stepId === 'vehicle' ? <VehicleStep draft={draft} setDraft={setDraft} /> : null}
+          {stepId === 'vehicle' ? (
+            <VehicleStep draft={draft} setDraft={setDraft} valueNeeded={valueNeeded} />
+          ) : null}
           {stepId === 'driver' ? <DriverStep draft={draft} setDraft={setDraft} /> : null}
           {stepId === 'covers' ? (
             <CoversStep draft={draft} setDraft={setDraft} catalogue={catalogue} />
