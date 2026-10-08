@@ -1,7 +1,11 @@
-"""Demo data for the local stack (synthetic only): one fully paid policy and one open quote. Usage: python infra/local/seed-demo.py [http://127.0.0.1:5000]"""
+"""Demo data for the local stack (synthetic only): one fully paid policy and one open quote.
+Usage: python infra/local/seed-demo.py [http://127.0.0.1:5000] [--claims]
+--claims also leaves, on a motor policy in force, one CLOSED claim with a cleared payment and one OPEN claim with a reserve."""
 import json, pathlib, sys, time, uuid, datetime, urllib.request, urllib.error
 
-API = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:5000"
+_args = [a for a in sys.argv[1:] if not a.startswith("--")]
+API = _args[0] if _args else "http://127.0.0.1:5000"
+WITH_CLAIMS = "--claims" in sys.argv[1:]
 PRODUCT = str(pathlib.Path(__file__).resolve().parents[2] / "src" / "CoreIns.Modules.Product" / "Seed" / "motor-gr.product.json")
 
 
@@ -63,8 +67,8 @@ def make_party(given, family, birth):
     return b["party"]["partyId"], b["party"].get("partyNumber")
 
 
-def quote_for(party_id, usage="PRIVATE"):
-    eff = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)).replace(microsecond=0)
+def quote_for(party_id, usage="PRIVATE", eff=None):
+    eff = eff or (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)).replace(microsecond=0)
     sub = must("submission", *call("POST", "/api/pol/v1/submissions", {
         "policyholderPartyId": party_id, "product": "MOTOR-GR", "channel": "STAFF",
         "effectiveAt": eff.strftime("%Y-%m-%dT%H:%M:%SZ"), "quoteType": "FULL"}, uw))
@@ -120,5 +124,72 @@ print("payment:", paid.get("allocationOutcome"))
 pid2, pno2 = make_party("Κώστας", "Παπαδάκης", "1979-11-21")
 job2, q2 = quote_for(pid2)
 print("open quote:", job2, q2.get("state"))
-print(json.dumps({"paidPolicy": bound.get("policyNumber"), "policyId": policy_id, "invoiceId": invoice_id,
-                  "billingAccountId": account, "openQuoteJob": job2, "parties": [pno, pno2]}, ensure_ascii=False))
+summary = {"paidPolicy": bound.get("policyNumber"), "policyId": policy_id, "invoiceId": invoice_id,
+           "billingAccountId": account, "openQuoteJob": job2, "parties": [pno, pno2]}
+
+
+def eur(amount):
+    return {"amount": amount, "currency": "EUR"}
+
+
+def wait_for(label, read, tries=60):
+    for _ in range(tries):
+        v = read()
+        if v:
+            return v
+        time.sleep(2)
+    print("!! timed out waiting for", label)
+    sys.exit(1)
+
+
+def seed_claims():
+    """3) Claims flow (E2E-02a): a motor policy whose term has started, a CLOSED paid claim and an OPEN claim with a reserve."""
+    handler = token("claims")  # both amounts stay within the handler's illustrative EUR 5,000.00 authority: no approval needed
+    iban = "GR1601101250000000012300695"  # synthetic test IBAN
+    holder_id, _ = make_party("Μαρία", "Ιωάννου", "1988-07-02")
+    # A policy cannot start in the past (REQ-POL-137): start it in a few seconds and wait for the loss time to be inside the term
+    start = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=20)).replace(microsecond=0)
+    job3, _ = quote_for(holder_id, eff=start)
+    bound3 = must("bind (claims policy)", *call("POST", "/api/pol/v1/jobs/bind", {"jobId": job3, "versionNo": 1, "paymentPlanOption": "ANNUAL", "confirmation": True}, uw))
+    policy3 = bound3["policyId"]
+    print("claims policy:", bound3.get("policyNumber"), "term starts", start.strftime("%H:%M:%S"), "UTC")
+    while datetime.datetime.now(datetime.timezone.utc) < start + datetime.timedelta(seconds=2):
+        time.sleep(1)
+    loss_at = (start + datetime.timedelta(seconds=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def fnol(cause):
+        return must("fnol", *call("POST", "/api/clm/v1/fnol/submit", {
+            "lineOfBusiness": "MOTOR", "policyId": policy3, "lossAt": loss_at, "lossCause": cause, "lossLocation": "Λεωφ. Κηφισίας 124, Αθήνα",
+            "description": "Demo claim (synthetic)", "channel": "STAFF", "receiptMedium": "TELEPHONE",
+            "incidents": [{"incidentType": "VEHICLE", "vehicleRef": "IKX1234", "drivable": True, "damageAreas": ["FRONT"]}],
+            "exposures": [{"kind": "OWN_DAMAGE", "coverageCode": "OWN-DAMAGE"}]}, handler))
+
+    def run_set(claim_id, transactions, label):
+        built = must(label + " build", *call("POST", "/api/clm/v1/transaction-sets/build", {"claimId": claim_id, "transactions": transactions}, handler))
+        must(label + " submit", *call("POST", "/api/clm/v1/transaction-sets/submit", {"setId": built["setId"]}, handler))
+        return built["setId"]
+
+    def line(kind, exposure, amount, **more):
+        return {"kind": kind, "exposureId": exposure, "costType": "INDEMNITY", "costCategory": "VEHICLE_REPAIR", "amount": eur(amount), **more}
+
+    # CLOSED claim: reserve 1,200.00 (within the handler's authority), pay it as the final payment, close
+    c1 = fnol("COLLISION")
+    cid1, insured, exp1 = c1["claimId"], c1["claim"]["insuredPartyId"], c1["exposures"][0]["exposureId"]
+    payee = must("payee", *call("POST", "/api/clm/v1/payee-accounts/capture", {"claimId": cid1, "partyId": insured, "iban": iban, "holderName": "Μαρία Ιωάννου"}, handler))["payeeAccount"]["payeeAccountId"]
+    run_set(cid1, [line("RESERVE", exp1, "1200.00", reason="INITIAL_ESTIMATE")], "reserve")
+    run_set(cid1, [line("PAYMENT", exp1, "1200.00", payeePartyId=insured, payeeAccountId=payee, paymentType="FINAL")], "payment")
+    wait_for("payment cleared", lambda: any(p["status"] == "CLEARED" for p in must("payments", *call("GET", f"/api/clm/v1/claims/{cid1}/payments", token=handler, key=False))["items"]))
+    claim1 = must("claim", *call("GET", f"/api/clm/v1/claims/{cid1}", token=handler, key=False))
+    closed = must("close", *call("POST", "/api/clm/v1/claims/close", {"claimId": cid1, "expectedRecordVersion": claim1["claim"]["summary"]["recordVersion"], "outcome": "COMPLETED"}, handler))
+    print("closed claim:", c1["claimNumber"], (closed.get("claim") or closed).get("status"))
+
+    # OPEN claim with a reserve of 2,500.00
+    c2 = fnol("GLASS_BREAKAGE")
+    run_set(c2["claimId"], [line("RESERVE", c2["exposures"][0]["exposureId"], "2500.00", reason="INITIAL_ESTIMATE")], "open reserve")
+    print("open claim:", c2["claimNumber"], "reserve 2500.00")
+    return {"claimsPolicy": bound3.get("policyNumber"), "closedClaim": c1["claimNumber"], "openClaim": c2["claimNumber"]}
+
+
+if WITH_CLAIMS:
+    summary["claims"] = seed_claims()
+print(json.dumps(summary, ensure_ascii=False))

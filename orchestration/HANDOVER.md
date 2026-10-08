@@ -100,6 +100,14 @@ KEEP_STACK=1 tests/e2e/run-e2e01.sh   # leave it running;  SKIP_BUILD=1 reuses t
 - **What it asserts:** the full money path in integer cents (premium, IPT, total, invoice items = policy charge lines, PAID, every journal balanced, clearing accounts net to zero) and as-of reads.
 - **UI spec:** calls `alive(page)` after every navigation to catch render loops.
 
+### Automated E2E-02a (claims happy path, API level)
+```bash
+tests/e2e/run-e2e02.sh          # fresh "coreins-e2e02" stack (ports 26500+, image coreins-host:e2e02), then down -v
+python infra/local/seed-demo.py http://127.0.0.1:5000 --claims   # demo data plus one CLOSED paid claim and one OPEN claim with a reserve
+```
+- **Path:** policy in force (term starts seconds ahead, loss dated inside it) → FNOL → payee account → reserves (1,200.00 approved at submit; +5,300.00 referred, self-approval refused, manager approves) → FINAL payment 6,200.00 (release of 300.00 proposed) → BIL CLEARED → FIN journals → close.
+- **Asserts (integer cents):** open reserve 0, paid = incurred = 620000, every claim journal balanced, GL-5110 net debit 620000, GL-2210/2510/2530 net 0, GL-1110 −620000, disbursement `sourceId` = claim payment id, no IBAN in any response.
+
 ### CI (`.github/workflows/`)
 - **`ci.yml`:**
   - .NET build and tests (including Testcontainers), web gates (including Prettier `format:check`), Bicep plus the Key Vault least-privilege guard, container image and Trivy scan, SBOMs.
