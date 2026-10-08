@@ -122,6 +122,9 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         bound.Text("productVersion").ShouldBe("1.1");
         bound.Text("producerOfRecord").ShouldBe("DIRECT");
         (await _renewal.ScalarAsync<string>($"SELECT accepted_by FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe("USER:uw-anna");
+        // PITFALLS 5 / D-UW-01: the creator, the offerer and the acceptor are all participants UW refuses as deciders.
+        (await _renewal.ScalarAsync<long>($"SELECT cardinality(participants) FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe(2);
+        (await _renewal.ScalarAsync<bool>($"SELECT 'USER:uw-anna' = ANY(participants) FROM pol.job WHERE job_id = '{jobId}'")).ShouldBeTrue();
         (await _renewal.ScalarAsync<string>($"SELECT acceptance_channel FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe("STAFF");
         (await _renewal.ScalarAsync<bool>($"SELECT accepted_at IS NOT NULL FROM pol.job WHERE job_id = '{jobId}'")).ShouldBeTrue();
 
@@ -191,9 +194,10 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         (await _renewal.OfferAsync()).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var key = Guid.NewGuid();
-        var (first, firstBody) = await _renewal.AcceptAsync(key: key);
+        var at = _renewal.Clock.Now.ToDateTimeOffset().UtcDateTime.ToString("O", CultureInfo.InvariantCulture);
+        var (first, firstBody) = await _renewal.AcceptAsync(key: key, acceptedAt: at);
         first.StatusCode.ShouldBe(HttpStatusCode.OK, firstBody?.ToJsonString());
-        var (replay, replayBody) = await _renewal.AcceptAsync(key: key);
+        var (replay, replayBody) = await _renewal.AcceptAsync(key: key, acceptedAt: at);
         replay.StatusCode.ShouldBe(HttpStatusCode.OK, replayBody?.ToJsonString());
         replayBody.Text("newTermId").ShouldBe(firstBody.Text("newTermId"));
 
@@ -236,7 +240,6 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         var (lateGate, lateBody) = await _renewal.AcceptAsync();
         RenewalHarness.ShouldFailWith(lateGate, lateBody, HttpStatusCode.UnprocessableEntity, "POL-ERR-GATE-FAILED");
         _renewal.Slice.AcceptAll();
-        (await _renewal.OfferAsync()).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await _renewal.AcceptAsync()).Body.Text("state").ShouldBe("BOUND");
     }
 

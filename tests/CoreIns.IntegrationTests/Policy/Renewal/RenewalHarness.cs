@@ -84,10 +84,10 @@ internal sealed class RenewalHarness(PolicySlice slice, string superuserConnecti
         PostAsync("/api/pol/v1/renewals/offer", new { jobId = JobId, termId = termId ?? TermId }, null, roles, user);
 
     public Task<(HttpResponseMessage Response, JsonNode? Body)> AcceptAsync(
-        string? termId = null, bool dryRun = false, Guid? key = null, string roles = Underwriter, string? user = null, string channel = "STAFF") =>
+        string? termId = null, bool dryRun = false, Guid? key = null, string roles = Underwriter, string? user = null, string channel = "STAFF", string? acceptedAt = null) =>
         PostAsync(
             "/api/pol/v1/renewals/accept" + (dryRun ? "?dryRun=true" : string.Empty),
-            new { jobId = JobId, termId = termId ?? TermId, channel, acceptedAt = Clock.Now.ToDateTimeOffset().UtcDateTime.ToString("O", System.Globalization.CultureInfo.InvariantCulture) },
+            new { jobId = JobId, termId = termId ?? TermId, channel, acceptedAt = acceptedAt ?? Clock.Now.ToDateTimeOffset().UtcDateTime.ToString("O", System.Globalization.CultureInfo.InvariantCulture) },
             key, roles, user);
 
     public Task<string> JobStateAsync() => ScalarAsync<string>($"SELECT state FROM pol.job WHERE job_id = '{JobId}'");
