@@ -26,10 +26,10 @@ internal sealed record BoundPolicy(string PolicyId, string TermId, string Transa
 /// </summary>
 internal sealed class BillingSlice : IAsyncDisposable
 {
-    public BillingSlice(PostgresFixture database)
+    public BillingSlice(PostgresFixture database, Action<IServiceCollection>? configureServices = null)
     {
         Database = database;
-        Policy = new PolicySlice(database.AppConnectionString, realRatingAndUnderwriting: true);
+        Policy = new PolicySlice(database.AppConnectionString, realRatingAndUnderwriting: true, configureServices: configureServices);
         DataSource = NpgsqlDataSource.Create(database.SuperuserConnectionString);
     }
 

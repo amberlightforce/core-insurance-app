@@ -19,8 +19,10 @@ using CoreIns.Platform.Numbering;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.Modules.Market.Contracts.Spi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace CoreIns.Modules.Billing.Services;
 
@@ -48,7 +50,9 @@ internal sealed class TermBilling(
     INumberingService numbering,
     IEventPublisher events,
     IClock clock,
-    IServiceProvider services)
+    IServiceProvider services,
+    Allocator allocator,
+    IOptions<BillingOptions> options)
 {
     /// <summary>Fiscal trigger point of the slice: one fiscal document per bound transaction (PRD-06 REQ-BIL-096, D3; Greek motor).</summary>
     public const string FiscalTriggerPoint = "TRANSACTION";
@@ -84,7 +88,20 @@ internal sealed class TermBilling(
             await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return await ScheduleAsync(plan, account, cancellationToken).ConfigureAwait(false);
+        // A credit waits until the invoice it credits is billed (possibly by another set of this very pass): schedule again
+        // while a pass creates documents.
+        var total = 0;
+        for (var pass = 0; pass < 5; pass++)
+        {
+            var made = await ScheduleAsync(plan, account, cancellationToken).ConfigureAwait(false);
+            total += made;
+            if (made == 0)
+            {
+                break;
+            }
+        }
+
+        return total;
     }
 
     private async Task WriteAsync(ChargeRow charge, PlanInstanceRow plan, BillingAccountRow account, IReadOnlyDictionary<string, ChargeTypeListItem> catalogue, CancellationToken cancellationToken)
@@ -105,10 +122,6 @@ internal sealed class TermBilling(
         {
             reason = "AMOUNT-NOT-ROUNDED";
         }
-        else if (amount.IsNegative)
-        {
-            reason = "CREDIT-NOT-SUPPORTED";
-        }
         else if (type is null)
         {
             reason = "CHARGE-TYPE-UNKNOWN";
@@ -122,9 +135,45 @@ internal sealed class TermBilling(
             reason = "PERIOD-OUTSIDE-TERM";
         }
 
+        reason ??= ServicingReason(charge, plan);
         if (reason is not null)
         {
             await QuarantineAsync(charge, reason, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        // REQ-BIL-079: every tax and levy delta must follow TaxCalculator.treatment (fail closed).
+        if (charge.TransactionKind is not null && charge.ChargeCategory is ChargeCategories.Tax or ChargeCategories.Levy)
+        {
+            var mismatch = await CheckTreatmentAsync(charge, cancellationToken).ConfigureAwait(false);
+            if (mismatch is not null)
+            {
+                await QuarantineAsync(charge, mismatch.Value.Reason, cancellationToken, mismatch.Value.Detail).ConfigureAwait(false);
+                return;
+            }
+        }
+
+        if (amount.IsNegative)
+        {
+            if (charge.ChargeCategory is ChargeCategories.Tax or ChargeCategories.Levy)
+            {
+                // The treatment allows it (REDUCE / VOID), but the slice has no tested mechanics for reducing IPT or levy payable
+                // (D-SL3-05/06): fail closed. KEEP_NOT_REDUCED credits are zero and never reach this point (INV-05).
+                await QuarantineAsync(charge, QuarantineReasons.TaxCreditNotSupported, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            // A credit posts nothing yet: CREDIT_WRITTEN and CREDIT_BILLED are posted together, with the credit note, when
+            // its set is complete and the invoice it credits is known (ScheduleAsync). Only its ledger rule is checked here.
+            var creditRule = await ledger.RuleAsync(ledger.Key(EntryTypes.CreditWritten, charge.ChargeCategory, RuleQualifiers.Any), cancellationToken).ConfigureAwait(false);
+            if (creditRule.IsFailure)
+            {
+                await QuarantineAsync(charge, "NO-RULE", cancellationToken, creditRule.Error!.Detail).ConfigureAwait(false);
+                return;
+            }
+
+            charge.FiscalCategoryKey = type!.FiscalCategoryKey;
+            charge.Status = Codes.Of(ChargeStatus.Written);
             return;
         }
 
@@ -190,14 +239,44 @@ internal sealed class TermBilling(
                 continue;
             }
 
-            var billable = members.Where(m => m.Status == Codes.Of(ChargeStatus.Written) && m.Amount > 0m).ToList();
-            if (billable.Count == 0)
+            var written = Codes.Of(ChargeStatus.Written);
+            var billable = members.Where(m => m.Status == written && m.Amount > 0m).ToList();
+            var credits = members.Where(m => m.Status == written && m.Amount < 0m).ToList();
+            if (billable.Count == 0 && credits.Count == 0)
             {
                 continue;
             }
 
-            await BillAsync(plan, account, billable, cancellationToken).ConfigureAwait(false);
-            created++;
+            IReadOnlyList<CreditAllocation> allocations = [];
+            if (credits.Count > 0)
+            {
+                var resolution = await ResolveCreditsAsync(credits, cancellationToken).ConfigureAwait(false);
+                if (resolution.Waiting)
+                {
+                    continue; // the invoice to credit is not billed yet (REQ-BIL-073); the set waits, nothing is posted
+                }
+
+                if (resolution.Failed is { } failed)
+                {
+                    await QuarantineAsync(failed.Charge, QuarantineReasons.CreditExceedsBilled, cancellationToken, failed.Detail).ConfigureAwait(false);
+                    await RaiseAsync(ExceptionKinds.SetBlocked, set.Key.ToString(), "QUARANTINED-MEMBER",
+                        "A credit exceeds what was billed on its element and charge type; the set is never billed partially (REQ-BIL-364).", cancellationToken).ConfigureAwait(false);
+                    continue;
+                }
+
+                allocations = resolution.Allocations;
+            }
+
+            if (billable.Count > 0)
+            {
+                await BillAsync(plan, account, billable, cancellationToken).ConfigureAwait(false);
+                created++;
+            }
+
+            if (credits.Count > 0)
+            {
+                created += await BillCreditsAsync(plan, account, credits, allocations, cancellationToken).ConfigureAwait(false);
+            }
         }
 
         return created;
@@ -267,6 +346,9 @@ internal sealed class TermBilling(
                 Currency = charge.Currency,
                 State = Codes.Of(InvoiceItemState.Open), // Billed, and Open at once: the ANNUAL item is due on billing
                 LineNo = ++line,
+                TransactionKind = charge.TransactionKind,
+                CancellationSource = charge.CancellationSource,
+                TreatmentRuleId = charge.TreatmentRuleId,
             };
             items.Add(item);
             charge.Status = Codes.Of(ChargeStatus.Scheduled);
@@ -421,6 +503,400 @@ internal sealed class TermBilling(
         return _liabilityQualifier;
     }
 
+    /// <summary>
+    /// The servicing checks of a delta that do not need MKT: the transaction kind (always set from slice 3; a negative
+    /// delta without one is refused, a positive legacy delta is new business), the sign against the kind, the cancellation
+    /// source of a CANCELLATION or VOID, and no new debit on a cancelled term. Null when the delta passes.
+    /// </summary>
+    private static string? ServicingReason(ChargeRow charge, PlanInstanceRow plan)
+    {
+        var kind = charge.TransactionKind;
+        if (kind is null)
+        {
+            return charge.Amount < 0m ? QuarantineReasons.TransactionKindMissing : null;
+        }
+
+        if (!TransactionKinds.IsAccepted(kind))
+        {
+            return QuarantineReasons.TransactionKindUnsupported;
+        }
+
+        if (charge.Amount < 0m && !TransactionKinds.AllowsCredit(kind))
+        {
+            return QuarantineReasons.KindAmountMismatch;
+        }
+
+        if (TransactionKinds.NeedsCancellationSource(kind) && string.IsNullOrWhiteSpace(charge.CancellationSource))
+        {
+            return QuarantineReasons.CancellationSourceMissing;
+        }
+
+        if (plan.CancelledEffective is { } stopped && charge.Amount > 0m && !TransactionKinds.NeedsCancellationSource(kind) && charge.ValidFrom >= stopped)
+        {
+            return QuarantineReasons.TermCancelled;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// REQ-BIL-079: asks <c>TaxCalculator.treatment</c> for the line and compares (see <see cref="TreatmentCheck"/>). A missing
+    /// rule, an invalid request or a non-Settled rule in Production quarantines the set; a missing binding or an
+    /// unavailable or slow service throws so the event is retried and nothing is stored (never a guess).
+    /// </summary>
+    private async Task<(string Reason, string Detail)?> CheckTreatmentAsync(ChargeRow charge, CancellationToken cancellationToken)
+    {
+        var calculator = services.GetService<ITaxCalculator>()
+                         ?? throw new InvalidOperationException("TaxCalculator (MKT SPI 4) is not bound: tax and levy deltas cannot be validated (REQ-BIL-079); the event is retried.");
+        var kind = TransactionKinds.ToTax(charge.TransactionKind!);
+        var request = new TaxTreatmentRequest
+        {
+            LegalEntityId = ledger.LegalEntityId.Value,
+            RiskJurisdiction = ledger.Jurisdiction.Value,
+            TaxPointDate = charge.BookingDate.Value,
+            ChargeType = charge.ChargeType,
+            Category = charge.ChargeCategory == ChargeCategories.Levy ? TaxCategory.Levy : TaxCategory.Tax,
+            ChargeOrigin = ChargeOrigin.Pol,
+            TransactionKind = kind,
+            CancellationSource = charge.CancellationSource,
+            PolicyholderType = options.Value.TreatmentPolicyholderType,
+            BusinessBasis = options.Value.TreatmentBusinessBasis,
+        };
+
+        TaxTreatmentResult result;
+        try
+        {
+            result = await calculator.TreatmentAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+        catch (SpiException ex) when (ex.Error.Category == SpiErrorCategory.RuleMissing)
+        {
+            return (QuarantineReasons.TreatmentRuleMissing, $"No treatment rule for {charge.ChargeType} under {charge.TransactionKind}: {ex.Error.Code} (REQ-BIL-079).");
+        }
+        catch (SpiException ex) when (ex.Error.Category is SpiErrorCategory.Validation or SpiErrorCategory.NotApplicable)
+        {
+            return (QuarantineReasons.TreatmentInvalid, $"The treatment request was refused: {ex.Error.Code}.");
+        }
+        catch (DomainException ex) when (ex.Error.Code.Value.EndsWith("CFG-NOT-SETTLED", StringComparison.Ordinal))
+        {
+            return (QuarantineReasons.TreatmentNotSettled, "The treatment rule is not Settled and Production refuses it (D-REG-02).");
+        }
+
+        var servicing = TransactionKinds.IsServicing(charge.TransactionKind);
+        var mismatch = TreatmentCheck.Mismatch(result, charge.Amount, charge.TreatmentRuleId, charge.TreatmentRuleVersion, charge.Provisional, servicing);
+        return mismatch is null
+            ? null
+            : (mismatch, $"The delta of {charge.ChargeType} ({charge.Amount}) disagrees with treatment {result.Action} rule {result.RuleId} {result.RuleVersion} (REQ-BIL-079): {mismatch}.");
+    }
+
+    /// <summary>One slice of a credit charge applied to one original invoice item (newest first).</summary>
+    private sealed record CreditAllocation(ChargeRow Charge, InvoiceItemRow OriginalItem, InvoiceRow OriginalInvoice, decimal Amount);
+
+    private sealed record CreditResolution(IReadOnlyList<CreditAllocation> Allocations, bool Waiting, (ChargeRow Charge, string Detail)? Failed);
+
+    /// <summary>
+    /// Finds the billed invoice items each credit charge reduces (REQ-BIL-073, REQ-BIL-091): the same term, element,
+    /// coverage and charge type, newest invoice first, never more than an item still has uncredited. ANNUAL bills every
+    /// written charge in the unit of work that writes it, so there is no unbilled item to net against first; the credit
+    /// becomes a billed credit item. A credit whose original is still on its way (a pending positive charge of the
+    /// element and type) waits; one that exceeds everything billed is refused (fail closed, PITFALLS 10).
+    /// </summary>
+    private async Task<CreditResolution> ResolveCreditsAsync(List<ChargeRow> credits, CancellationToken cancellationToken)
+    {
+        var allocations = new List<CreditAllocation>();
+        var reserved = new Dictionary<Guid, decimal>();
+        foreach (var credit in credits.OrderBy(c => c.SetIndex))
+        {
+            var items = await db.InvoiceItems.Where(i => i.CreditsItemId == null && i.TermId == credit.TermId && i.ElementLocator == credit.ElementLocator
+                                                          && i.ChargeType == credit.ChargeType && i.CoverageCode == credit.CoverageCode)
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+            var invoiceIds = items.Select(i => i.InvoiceId).Distinct().ToList();
+            var invoices = await db.Invoices.Where(i => invoiceIds.Contains(i.InvoiceId)).ToListAsync(cancellationToken).ConfigureAwait(false);
+            var itemIds = items.Select(i => i.InvoiceItemId).ToList();
+            var credited = (await db.InvoiceItems.Where(i => i.CreditsItemId != null && itemIds.Contains(i.CreditsItemId.Value))
+                    .GroupBy(i => i.CreditsItemId!.Value).Select(g => new { Item = g.Key, Sum = g.Sum(i => i.Amount) })
+                    .ToListAsync(cancellationToken).ConfigureAwait(false))
+                .ToDictionary(x => x.Item, x => x.Sum);
+
+            var remaining = -credit.Amount;
+            foreach (var item in items.OrderByDescending(i => invoices.Single(v => v.InvoiceId == i.InvoiceId).CreatedAt).ThenBy(i => i.LineNo).ThenBy(i => i.InvoiceItemId))
+            {
+                var creditable = item.Amount - credited.GetValueOrDefault(item.InvoiceItemId) - reserved.GetValueOrDefault(item.InvoiceItemId);
+                if (creditable <= 0m || remaining <= 0m)
+                {
+                    continue;
+                }
+
+                var take = Math.Min(creditable, remaining);
+                allocations.Add(new CreditAllocation(credit, item, invoices.Single(v => v.InvoiceId == item.InvoiceId), take));
+                reserved[item.InvoiceItemId] = reserved.GetValueOrDefault(item.InvoiceItemId) + take;
+                remaining -= take;
+            }
+
+            if (remaining > 0m)
+            {
+                var received = Codes.Of(ChargeStatus.Received);
+                var written = Codes.Of(ChargeStatus.Written);
+                var pending = await db.Charges.AnyAsync(
+                    c => c.TermId == credit.TermId && c.ChargeType == credit.ChargeType && c.ElementLocator == credit.ElementLocator
+                         && c.CoverageCode == credit.CoverageCode && c.Amount > 0m && c.SetId != credit.SetId && (c.Status == received || c.Status == written),
+                    cancellationToken).ConfigureAwait(false);
+                return pending
+                    ? new CreditResolution([], true, null)
+                    : new CreditResolution([], false, (credit, $"Credit {-credit.Amount} exceeds the {-credit.Amount - remaining} billed and still uncredited on {credit.ChargeType} of {credit.ElementLocator}."));
+            }
+        }
+
+        return new CreditResolution(allocations, false, null);
+    }
+
+    /// <summary>
+    /// Bills the credits of a complete set at once (REQ-BIL-074): per credit charge a CREDIT_WRITTEN entry (premium or fee
+    /// clearing → written unbilled), per original invoice one CREDIT_NOTE referencing it with its own gapless number and a
+    /// CREDIT_BILLED entry (written unbilled → billed receivable), the credit offset against the original's open balance
+    /// (REQ-BIL-073; what is left is the account's credit balance), the fiscal CREDIT request correlated to the original
+    /// document (REQ-BIL-096, REQ-BIL-097) and the events. Everything is sealed at this transaction (D-ARC-34).
+    /// Returns the number of credit notes.
+    /// </summary>
+    private async Task<int> BillCreditsAsync(
+        PlanInstanceRow plan, BillingAccountRow account, List<ChargeRow> credits, IReadOnlyList<CreditAllocation> allocations, CancellationToken cancellationToken)
+    {
+        var today = ledger.Today;
+        var now = clock.Now;
+        var currency = Currency.FromCode(account.Currency);
+        var transactionId = credits[0].TransactionId;
+
+        foreach (var credit in credits.OrderBy(c => c.SetIndex))
+        {
+            var rule = Unwrap(await ledger.RuleAsync(ledger.Key(EntryTypes.CreditWritten, credit.ChargeCategory, RuleQualifiers.Any), cancellationToken).ConfigureAwait(false));
+            credit.WrittenEntryId = ledger.Post(new EntrySpec(
+                EntryTypes.CreditWritten, account.BillingAccountId,
+                [new PostingLeg(rule, new Money(-credit.Amount, currency), ChargeDimensions(credit, plan))],
+                Lineage(credit.PolicyId, credit.TermId, credit.TransactionId).With("chargeId", credit.ChargeId.Value.ToString()),
+                "bil.Charge.intake"));
+            credit.Status = Codes.Of(ChargeStatus.Scheduled);
+        }
+
+        var notes = 0;
+        foreach (var group in allocations.GroupBy(a => a.OriginalInvoice.InvoiceId).OrderBy(g => g.Key.Value))
+        {
+            var original = group.First().OriginalInvoice;
+            var number = await numbering.NextAsync(new NumberRequest(BillingNumbering.CreditNote, today), cancellationToken).ConfigureAwait(false);
+            var state = InvoiceStateModel.Machine.FireOrThrow(InvoiceStateModel.Machine.Start(InvoiceState.Planned).Value, InvoiceTrigger.Bill);
+            var noteId = InvoiceId.New();
+            var total = Money.Sum(group.Select(a => new Money(a.Amount, currency)), currency);
+            var note = new InvoiceRow
+            {
+                InvoiceId = noteId,
+                LegalEntityId = account.LegalEntityId,
+                Jurisdiction = account.Jurisdiction,
+                BillingAccountId = account.BillingAccountId,
+                InvoiceNumber = number.Value,
+                Kind = "CREDIT_NOTE",
+                State = Codes.Of(state),
+                PolicyId = plan.PolicyId,
+                TermId = plan.TermId,
+                TransactionId = transactionId,
+                IssueDate = today,
+                DueDate = today,
+                Method = plan.Method,
+                Total = total.Amount,
+                Currency = currency.Code,
+                FiscalStatus = Codes.Of(FiscalStatus.NotRequested),
+                CreatedAt = now,
+                CreatedBy = context.Actor.ToString(),
+                RecordVersion = 1,
+                OriginalInvoiceId = original.InvoiceId,
+            };
+            db.Invoices.Add(note);
+
+            var items = new List<(InvoiceItemRow Item, CreditAllocation Allocation)>();
+            var line = 0;
+            foreach (var allocation in group.OrderBy(a => a.Charge.SetIndex).ThenBy(a => a.OriginalItem.LineNo))
+            {
+                var charge = allocation.Charge;
+                items.Add((new InvoiceItemRow
+                {
+                    InvoiceItemId = Guid.CreateVersion7(),
+                    InvoiceId = noteId,
+                    LegalEntityId = account.LegalEntityId,
+                    ChargeId = charge.ChargeId,
+                    TermId = charge.TermId,
+                    TransactionId = charge.TransactionId,
+                    ElementLocator = charge.ElementLocator,
+                    CoverageCode = charge.CoverageCode,
+                    ChargeType = charge.ChargeType,
+                    ChargeCategory = charge.ChargeCategory,
+                    FiscalCategoryKey = charge.FiscalCategoryKey,
+                    LegalStatus = charge.LegalStatus,
+                    Provisional = charge.Provisional,
+                    ValidFrom = charge.ValidFrom,
+                    ValidTo = charge.ValidTo,
+                    Amount = allocation.Amount,
+                    Currency = charge.Currency,
+                    State = Codes.Of(InvoiceItemState.Open),
+                    LineNo = ++line,
+                    TransactionKind = charge.TransactionKind,
+                    CancellationSource = charge.CancellationSource,
+                    TreatmentRuleId = charge.TreatmentRuleId,
+                    CreditsItemId = allocation.OriginalItem.InvoiceItemId,
+                }, allocation));
+            }
+
+            db.InvoiceItems.AddRange(items.Select(i => i.Item));
+            var lineage = Lineage(plan.PolicyId, plan.TermId, transactionId).With("invoiceId", noteId.Value.ToString())
+                .With("originalInvoiceId", original.InvoiceId.Value.ToString());
+
+            var billedLegs = new List<PostingLeg>();
+            foreach (var (item, allocation) in items)
+            {
+                var rule = Unwrap(await ledger.RuleAsync(ledger.Key(EntryTypes.CreditBilled, item.ChargeCategory, RuleQualifiers.Any), cancellationToken).ConfigureAwait(false));
+                var dimensions = ChargeDimensions(allocation.Charge, plan) with { InvoiceId = noteId, InvoiceItemId = item.InvoiceItemId };
+                billedLegs.Add(new PostingLeg(rule, new Money(item.Amount, currency), dimensions));
+            }
+
+            ledger.Post(new EntrySpec(EntryTypes.CreditBilled, account.BillingAccountId, billedLegs, lineage, "bil.CreditNote.bill"));
+
+            await ApplyToOriginalAsync(note, original, items, currency, now, cancellationToken).ConfigureAwait(false);
+            await RequestCreditFiscalDocumentAsync(note, original, account, [.. items.Select(i => i.Item)], cancellationToken).ConfigureAwait(false);
+
+            var keys = lineage.With("billingAccountId", account.BillingAccountId.Value.ToString());
+            events.Publish(new OutgoingEvent(
+                EventDescriptor.From(ChargesScheduledV1.Descriptor), "BillingAccount", account.BillingAccountId.Value.ToString(),
+                new ChargesScheduledV1
+                {
+                    TermId = plan.TermId,
+                    TransactionId = transactionId,
+                    ChargeIds = [.. items.Select(i => i.Item.ChargeId).Distinct()],
+                    Items = [.. items.Select(i => new ScheduledItem { ItemId = i.Item.InvoiceItemId, Status = ScheduledItem.StatusValue.Billed })],
+                },
+                keys) { OccurredAt = now });
+            events.Publish(new OutgoingEvent(
+                EventDescriptor.From(InvoiceIssuedV1.Descriptor), "BillingAccount", account.BillingAccountId.Value.ToString(),
+                new InvoiceIssuedV1
+                {
+                    InvoiceId = noteId,
+                    InvoiceNumber = InvoiceNumber.Parse(note.InvoiceNumber),
+                    Kind = InvoiceIssuedV1.KindValue.CreditNote,
+                    TermIds = [plan.TermId],
+                    TotalsByCategory = [.. items.GroupBy(i => i.Item.ChargeCategory).OrderBy(g => g.Key, StringComparer.Ordinal)
+                        .Select(g => new CategoryTotal { Category = g.Key, Amount = Money.Sum(g.Select(i => new Money(i.Item.Amount, currency)), currency) })],
+                    DueDate = note.DueDate,
+                    Method = note.Method,
+                    FiscalTriggerRef = note.FiscalDocumentId?.Value.ToString("D"),
+                },
+                keys) { OccurredAt = now });
+            notes++;
+            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return notes;
+    }
+
+    /// <summary>
+    /// REQ-BIL-073: a credit note offsets the open balance of the invoice item it credits (a credit application, no ledger
+    /// entry: both sides are already in LA-02 through CREDIT_BILLED). What the original no longer asks for is its open
+    /// amount less the credit; what could not be applied (the original was paid) stays on the credit note as account
+    /// credit for a refund. An original left with nothing open is Reversed (the credit note offsets it in full).
+    /// </summary>
+    private async Task ApplyToOriginalAsync(
+        InvoiceRow note, InvoiceRow original, List<(InvoiceItemRow Item, CreditAllocation Allocation)> items, Currency currency, Instant now, CancellationToken cancellationToken)
+    {
+        var open = await allocator.OpenByItemAsync([original.InvoiceId], cancellationToken).ConfigureAwait(false);
+        foreach (var (item, allocation) in items)
+        {
+            var target = allocation.OriginalItem;
+            var apply = Math.Min(item.Amount, open.GetValueOrDefault(target.InvoiceItemId));
+            if (apply <= 0m)
+            {
+                continue;
+            }
+
+            db.CreditApplications.Add(new CreditApplicationRow
+            {
+                CreditApplicationId = Guid.CreateVersion7(),
+                LegalEntityId = note.LegalEntityId,
+                BillingAccountId = note.BillingAccountId,
+                CreditNoteId = note.InvoiceId,
+                CreditItemId = item.InvoiceItemId,
+                TargetKind = CreditApplicationTargets.InvoiceItem,
+                TargetInvoiceId = original.InvoiceId,
+                TargetInvoiceItemId = target.InvoiceItemId,
+                Amount = apply,
+                Currency = currency.Code,
+                Actor = context.Actor.ToString(),
+                RecordedAt = now,
+            });
+            open[target.InvoiceItemId] -= apply;
+            if (open[target.InvoiceItemId] == 0m && target.State == Codes.Of(InvoiceItemState.Open))
+            {
+                target.State = Codes.Of(InvoiceItemState.Settled);
+            }
+
+            if (apply == item.Amount)
+            {
+                item.State = Codes.Of(InvoiceItemState.Settled);
+            }
+        }
+
+        var originalState = Codes.Parse<InvoiceState>(original.State);
+        if (open.Values.All(v => v == 0m) && InvoiceStateModel.Machine.CanFire(originalState, InvoiceTrigger.Reverse))
+        {
+            original.State = Codes.Of(InvoiceStateModel.Machine.FireOrThrow(originalState, InvoiceTrigger.Reverse));
+            original.UpdatedAt = now;
+            original.RecordVersion++;
+        }
+    }
+
+    /// <summary>
+    /// One fiscal request of role CREDIT per credit note (REQ-BIL-096, REQ-BIL-097), correlated to the original invoice's
+    /// fiscal document (D-SL3-07). Never blocks billing (REQ-BIL-099); without the original's document the credit is not
+    /// requested (an uncorrelated credit would be fiscally wrong) and an exception is raised.
+    /// </summary>
+    private async Task RequestCreditFiscalDocumentAsync(InvoiceRow note, InvoiceRow original, BillingAccountRow account, List<InvoiceItemRow> items, CancellationToken cancellationToken)
+    {
+        note.FiscalTriggerPoint = FiscalTriggerPoint;
+        var cmp = services.GetService<IComplianceFiscalDocumentService>();
+        if (cmp is null || original.FiscalDocumentId is null || items.Any(i => i.FiscalCategoryKey is null))
+        {
+            note.FiscalStatus = Codes.Of(FiscalStatus.RequestFailed);
+            await RaiseAsync(ExceptionKinds.FiscalRequestFailed, note.InvoiceId.Value.ToString(),
+                cmp is null ? "CMP-UNAVAILABLE" : original.FiscalDocumentId is null ? "FISCAL-ORIGINAL-MISSING" : "FISCAL-CATEGORY-MISSING",
+                "The credit's fiscal request could not be sent; billing continues (REQ-BIL-099).", cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        var currency = Currency.FromCode(note.Currency);
+        var request = new FiscalDocumentRequestRequest
+        {
+            SourceType = "CREDIT",
+            SourceId = note.InvoiceId.Value.ToString("D"),
+            Role = FiscalDocumentRequestRequest.RoleValue.Credit,
+            Revision = 0,
+            OriginalFiscalDocumentId = original.FiscalDocumentId,
+            CorrelatedDocumentId = original.FiscalDocumentId.Value.Value,
+            Lines = [.. items.Select(i => new FiscalDocumentRequestRequest.LineItem
+            {
+                FiscalCategoryKey = i.FiscalCategoryKey!, Amount = new Money(i.Amount, currency), ChargeId = i.ChargeId,
+            })],
+            CounterpartyPartyId = account.PayerPartyId,
+            IssueDate = note.IssueDate,
+        };
+        try
+        {
+            var response = await cmp.RequestAsync(request, new CommandOptions(DerivedKey($"bil.fiscal:{request.SourceType}:{request.SourceId}")), cancellationToken)
+                .ConfigureAwait(false);
+            note.FiscalDocumentId = response.FiscalDocumentId;
+            note.FiscalDocumentType = response.DocumentType;
+            note.FiscalStatus = Codes.Of(response.Status == "REJECTED" ? FiscalStatus.Rejected : FiscalStatus.Pending);
+        }
+        catch (DomainException ex)
+        {
+            note.FiscalStatus = Codes.Of(FiscalStatus.RequestFailed);
+            await RaiseAsync(ExceptionKinds.FiscalRequestFailed, note.InvoiceId.Value.ToString(), ex.Error.Code.Value,
+                "CMP refused the credit's fiscal request; billing continues (REQ-BIL-099).", cancellationToken).ConfigureAwait(false);
+        }
+    }
+
     private async Task QuarantineAsync(ChargeRow charge, string reason, CancellationToken cancellationToken, string? detail = null)
     {
         charge.Status = Codes.Of(ChargeStatus.Quarantined);
@@ -455,19 +931,21 @@ internal sealed class TermBilling(
             cancellationToken).ConfigureAwait(false);
     }
 
-    private static LineDimensions ChargeDimensions(ChargeRow charge, PlanInstanceRow plan) => new()
-    {
-        BillingAccountId = plan.BillingAccountId,
-        PolicyId = charge.PolicyId,
-        PolicyTermId = charge.TermId,
-        TransactionId = charge.TransactionId,
-        ChargeId = charge.ChargeId,
-        ChargeType = charge.ChargeType,
-        ChargeCategory = charge.ChargeCategory,
-        CoverageCode = charge.CoverageCode,
-        ProductCode = plan.ProductCode,
-        BillMode = plan.BillMode,
-    };
+    private static LineDimensions ChargeDimensions(ChargeRow charge, PlanInstanceRow plan) => ServicingDimensions.Apply(
+        new LineDimensions
+        {
+            BillingAccountId = plan.BillingAccountId,
+            PolicyId = charge.PolicyId,
+            PolicyTermId = charge.TermId,
+            TransactionId = charge.TransactionId,
+            ChargeId = charge.ChargeId,
+            ChargeType = charge.ChargeType,
+            ChargeCategory = charge.ChargeCategory,
+            CoverageCode = charge.CoverageCode,
+            ProductCode = plan.ProductCode,
+            BillMode = plan.BillMode,
+        },
+        charge.TransactionKind, charge.CancellationSource, charge.TreatmentRuleId);
 
     private static BusinessKeys Lineage(PolicyId policyId, PolicyTermId termId, PolicyTransactionId transactionId) =>
         BusinessKeys.Empty.With("policyId", policyId.Value.ToString()).With("policyTermId", termId.Value.ToString())
