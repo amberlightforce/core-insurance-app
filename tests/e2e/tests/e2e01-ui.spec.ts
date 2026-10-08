@@ -65,7 +65,7 @@ test('E2E-01 through the staff screens', async ({ page }) => {
   test.setTimeout(300_000);
 
   // ---- Dev sign-in as the underwriter; the mouse click on the option must select it.
-  await signInAs(page, /Underwriter|Ανάδοχος|underwriter/i);
+  await signInAs(page, 'Dev Underwriter (synthetic)');
 
   // ---- Create the party.
   await go(page, '/parties/new');
@@ -249,7 +249,7 @@ async function createParty(request: import('@playwright/test').APIRequestContext
 test('the quote wizard chooses the policyholder with a single click', async ({ page, request }) => {
   const family = `Επιλογής${Date.now().toString().slice(-6)}`;
   await createParty(request, family);
-  await signInAs(page, /Underwriter|Ανάδοχος|underwriter/i);
+  await signInAs(page, 'Dev Underwriter (synthetic)');
   await go(page, '/policies/quotes/new');
   await page.getByRole('searchbox').fill(family);
   await page.keyboard.press('Enter');
