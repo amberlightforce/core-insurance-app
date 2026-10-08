@@ -24,6 +24,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
+using CancellationKind = CoreIns.Modules.Policy.Domain.CancellationKind;
+using CancellationSources = CoreIns.Modules.Policy.Domain.CancellationSources;
+
 namespace CoreIns.Modules.Policy.Commands.Cancellation;
 
 internal sealed class CancelPolicyValidator : AbstractValidator<CancelPolicy>
@@ -33,7 +36,7 @@ internal sealed class CancelPolicyValidator : AbstractValidator<CancelPolicy>
         RuleFor(c => c.Request.PolicyId.Value).NotEmpty().WithErrorCode("POLICY_REQUIRED");
         RuleFor(c => c.Request.Source).NotEmpty().MaximumLength(64).WithErrorCode("SOURCE_REQUIRED");
         RuleFor(c => c.Request.ReasonCode).NotEmpty().MaximumLength(64).WithErrorCode("REASON_REQUIRED");
-        RuleFor(c => c.Request.Kind).Must(k => CancellationText.TryKind(k, out _)).WithErrorCode("KIND_UNKNOWN");
+        RuleFor(c => c.Request.Kind).IsInEnum().WithErrorCode("KIND_UNKNOWN");
     }
 }
 
@@ -67,16 +70,16 @@ internal sealed class CancelPolicyHandler(
     Dependency<IMarketRoundingService> rounding,
     Dependency<ITaxCalculator> taxCalculator,
     ICancellationRefundMethods refundMethods,
-    IOptions<PolicyOptions> options) : ICommandHandler<CancelPolicy, CancellationResponse>
+    IOptions<PolicyOptions> options) : ICommandHandler<CancelPolicy, CancellationCreateResponse>
 {
     private const string BusinessBasis = "ESTABLISHMENT";
 
-    public async Task<Result<CancellationResponse>> HandleAsync(CancelPolicy command, CancellationToken cancellationToken)
+    public async Task<Result<CancellationCreateResponse>> HandleAsync(CancelPolicy command, CancellationToken cancellationToken)
     {
         var request = command.Request;
         var zone = options.Value.Zone;
         var now = PolicyWriteLock.Truncate(clock.Now);
-        CancellationText.TryKind(request.Kind, out var kind);
+        var kind = CancellationText.Kind(request.Kind);
 
         // ---- request checks that need no data (fail closed) ----------------------------------------------------------
         if (!CancellationSources.All.Contains(request.Source, StringComparer.Ordinal))
@@ -94,16 +97,20 @@ internal sealed class CancelPolicyHandler(
             return Validation("source", "SOURCE_NOT_AVAILABLE", $"Cancellation by source {request.Source} is not available in this release.");
         }
 
-        if (kind == CancellationKind.Standard && request.EffectiveAt is { } requested)
+        if (kind == CancellationKind.Standard)
         {
-            if (requested > now)
+            // REQ-POL-208/209: "cancel now" only. The effective time is the request receipt time; the requested date must be today
+            // (Athens). A later date is a scheduled cancellation, an earlier one a backdated cancellation: both are refused.
+            var requestedDate = request.EffectiveAt.ToBusinessDate(zone);
+            var today = now.ToBusinessDate(zone);
+            if (requestedDate > today)
             {
-                return DomainError.Of(ModuleCode.POL, PolicyErrorNames.EffdateLimit, "Scheduled cancellation is not available in this release: cancel now, or leave the effective time empty (REQ-POL-209).");
+                return DomainError.Of(ModuleCode.POL, PolicyErrorNames.EffdateLimit, "Scheduled cancellation is not available in this release: cancel now (REQ-POL-209).");
             }
 
-            if (requested < now)
+            if (requestedDate < today)
             {
-                return DomainError.Of(ModuleCode.POL, PolicyErrorNames.EffdateLimit, "A cancellation cannot be backdated: the effective time is the request time (0 days back).");
+                return DomainError.Of(ModuleCode.POL, PolicyErrorNames.EffdateLimit, "A cancellation cannot be backdated (0 days back, REQ-POL-208): the effective time is the request time.");
             }
         }
 
@@ -220,11 +227,11 @@ internal sealed class CancelPolicyHandler(
 
         var jobId = JobId.New();
         var jobNumber = await numbering.NextAsync(new NumberRequest(NumberingSchemes.Job, now.ToBusinessDate(zone)), cancellationToken).ConfigureAwait(false);
-        var preview = Preview(currency, lines, premiumDeltas, treated, includeTax);
+        var preview = Preview(term, servicingTerm, state, premiumDeltas, treated, includeTax, request.Source, applied, currency);
         var intent = JobSupport.Json(new
         {
             kind = Codes.Of(kind), source = request.Source, reasonCode = request.ReasonCode, refundMethod = CancellationText.Code(applied),
-            effectiveAt = effective, notices = CancellationText.NoticesNotSent, refundDue = preview.RefundDue,
+            effectiveAt = effective, notices = CancellationText.NoticesNotSent, refundDue = preview.RefundDue.Amount,
         });
         db.Transactions.Add(new PolicyTransactionRow
         {
@@ -274,14 +281,14 @@ internal sealed class CancelPolicyHandler(
                 ChargeId = chargeId, TransactionId = transactionId, ElementLocator = delta.Key.ElementLocator, CoverageCode = delta.Key.CoverageCode,
                 ChargeType = delta.Key.ChargeType, ChargeCategory = delta.ChargeCategory, AnnualRate = RateOf(state, delta.Key), Amount = credit,
             });
-            Emit(policy, term, transactionId, chargeId, delta.Key, delta.ChargeCategory, credit, new DateRange(new BusinessDate(delta.DateFrom), new BusinessDate(delta.DateTo)), booking, null, index, count, t);
+            Emit(policy, term, transactionId, chargeId, delta.Key, delta.ChargeCategory, credit, new DateRange(new BusinessDate(delta.DateFrom), new BusinessDate(delta.DateTo)), booking, null, index, count, t, request.Source);
         }
 
         foreach (var line in taxToWrite)
         {
             index++;
             var chargeId = ChargeId.New();
-            var treatmentRef = $"{line.Treatment.RuleId}/{line.Treatment.RuleVersion}/{line.Treatment.Action}";
+            var treatmentRef = $"{line.Treatment.RuleId}/{line.Treatment.RuleVersion}/KEEP_NOT_REDUCED";
             db.ChargeLines.Add(new ChargeLineRow
             {
                 ChargeId = chargeId, TransactionId = transactionId, TermId = term.TermId, PolicyId = term.PolicyId, LegalEntityId = legalEntity,
@@ -302,7 +309,7 @@ internal sealed class CancelPolicyHandler(
             Emit(
                 policy, term, transactionId, chargeId, line.Key, line.ChargeCategory, new Money(line.Amount, currency),
                 new DateRange(new BusinessDate(effectiveDate), new BusinessDate(termEndDate)), booking,
-                (treatmentRef, line.Treatment.LegalStatus, line.Treatment.Provisional), index, count, t);
+                (treatmentRef, line.Treatment.LegalStatus, line.Treatment.Provisional, line.Treatment.RuleId, line.Treatment.RuleVersion), index, count, t, request.Source);
         }
 
         events.Publish(new OutgoingEvent(
@@ -310,7 +317,7 @@ internal sealed class CancelPolicyHandler(
             new PolicyCancelledV1
             {
                 TransactionId = transactionId, TermId = term.TermId, Source = request.Source, Reason = request.ReasonCode,
-                EffectiveDate = effective.ToBusinessDate(zone), RefundMethod = CancellationText.Code(applied),
+                EffectiveDate = effective.ToBusinessDate(zone), RefundMethod = CancellationText.Code(applied), Kind = Codes.Of(kind),
             },
             BusinessKeys.Empty.With("policyId", policy.PolicyId.Value.ToString()).With("policyTermId", term.TermId.Value.ToString())
                 .With("transactionId", transactionId.Value.ToString()).With("jobId", jobId.Value.ToString()))
@@ -346,12 +353,9 @@ internal sealed class CancelPolicyHandler(
             return saved.Error!;
         }
 
-        return new CancellationResponse
+        return new CancellationCreateResponse
         {
-            JobId = jobId, JobNumber = jobNumber.Value, State = Codes.Api(boundState).ToString(), PolicyId = policy.PolicyId, TermId = term.TermId,
-            TermNumber = term.TermNumber, TermState = Codes.Api(fired.Value).ToString(), TransactionId = transactionId, Source = request.Source,
-            ReasonCode = request.ReasonCode, Kind = Codes.Of(kind), RefundMethod = CancellationText.Code(applied), EffectiveAt = effective, RecordedAt = t,
-            RefundPreview = preview, Notices = CancellationText.NoticesNotSent,
+            JobId = jobId, State = Codes.Api(boundState), Kind = request.Kind, EffectiveAt = effective, ServicingPreview = preview,
         };
     }
 
@@ -361,7 +365,7 @@ internal sealed class CancelPolicyHandler(
 
     private void Emit(
         PolicyRow policy, PolicyTermRow term, PolicyTransactionId transactionId, ChargeId chargeId, ChargeKey key, string category, Money amount,
-        DateRange period, BusinessDate booking, (string Ref, string Status, bool Provisional)? treatment, int index, int count, Instant t) =>
+        DateRange period, BusinessDate booking, (string Ref, string Status, bool Provisional, string RuleId, string RuleVersion)? treatment, int index, int count, Instant t, string source) =>
         events.Publish(new OutgoingEvent(
             EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), "Policy", policy.PolicyId.Value.ToString(),
             new ChargeDeltaEmittedV1
@@ -370,6 +374,8 @@ internal sealed class CancelPolicyHandler(
                 ChargeCategory = category, DeltaKind = DeltaKinds.Net, NetAmount = amount, ValidPeriod = period, BookingDate = booking,
                 TransactionId = transactionId, CorrelationKey = transactionId.Value.ToString(),
                 TaxTreatmentRef = treatment?.Ref, LegalStatus = treatment?.Status, Provisional = treatment?.Provisional,
+                TransactionKind = ChargeDeltaEmittedV1.TransactionKindValue.Cancellation, CancellationSource = source,
+                TreatmentRuleId = treatment?.RuleId, TreatmentRuleVersion = treatment?.RuleVersion,
             },
             BusinessKeys.Empty.With("policyId", policy.PolicyId.Value.ToString()).With("chargeId", chargeId.Value.ToString())
                 .With("policyTermId", term.TermId.Value.ToString()).With("transactionId", transactionId.Value.ToString()))
@@ -468,50 +474,59 @@ internal sealed class CancelPolicyHandler(
             var provisional = treatment.LegalStatus != TreatmentLegalStatus.Settled;
             treated.Add(new TreatedTaxLine(
                 group.Key, first.ChargeCategory, first.AnnualRate, 0m, group.Sum(l => l.Amount),
-                new TreatmentView
-                {
-                    Action = "KEEP_NOT_REDUCED", RuleId = treatment.RuleId, RuleVersion = treatment.RuleVersion,
-                    LegalStatus = provisional ? "PendingOpinion" : "Settled", Provisional = provisional,
-                }));
+                new TreatmentInfo(treatment.RuleId, treatment.RuleVersion, provisional ? "PendingOpinion" : "Settled", provisional, treatment.LegalSourceRef)));
         }
 
         return treated;
     }
 
-    private static RefundPreview Preview(
-        Currency currency, IReadOnlyList<ChargeLineRow> lines, IReadOnlyList<ServicingDelta> premiumDeltas, IReadOnlyList<TreatedTaxLine> tax, bool includeTax)
+    /// <summary>The contract's servicing preview of the cancellation: what the bind writes, line by line (REQ-POL-207).</summary>
+    private static ServicingPreview Preview(
+        PolicyTermRow term, ServicingTerm servicingTerm, ServicingState before, IReadOnlyList<ServicingDelta> premiumDeltas,
+        IReadOnlyList<TreatedTaxLine> tax, bool includeTax, string source, RefundMethod method, Currency currency)
     {
-        var rows = new List<RefundPreviewLine>();
-        foreach (var group in lines.Where(l => l.ChargeCategory == ChargeCategories.Premium)
-                     .GroupBy(l => new ChargeKey(l.ElementLocator, l.CoverageCode, l.ChargeType)).OrderBy(g => g.Key))
+        var prorated = new List<ServicingProratedLine>();
+        foreach (var delta in premiumDeltas)
         {
-            var delta = premiumDeltas.FirstOrDefault(d => d.Key == group.Key);
-            rows.Add(new RefundPreviewLine
+            var written = before.Segments.Where(s => s.Key == delta.Key).Sum(s => s.Amount);
+            prorated.Add(new ServicingProratedLine
             {
-                ElementLocator = group.Key.ElementLocator, CoverageCode = group.Key.CoverageCode, ChargeType = group.Key.ChargeType,
-                ChargeCategory = ChargeCategories.Premium, Written = group.Sum(l => l.Amount), Amount = delta?.Amount ?? 0m,
-                Days = delta?.FractionNumerator ?? 0, Basis = delta?.FractionDenominator ?? 0,
+                ElementLocator = delta.Key.ElementLocator, CoverageCode = delta.Key.CoverageCode, ChargeType = delta.Key.ChargeType,
+                ChargeCategory = delta.ChargeCategory, Period = new DateRange(new BusinessDate(delta.DateFrom), new BusinessDate(delta.DateTo)),
+                Days = delta.Days, TermDays = servicingTerm.Days,
+                Fraction = ExactDecimal.Divide(delta.FractionNumerator, delta.FractionDenominator, 10, MidpointRounding.ToZero),
+                AnnualAmount = new Money(written, currency), Amount = new Money(delta.Amount, currency),
             });
         }
 
-        var notes = new List<string>();
-        foreach (var line in tax)
+        var taxLines = tax.Select(line => new ServicingTaxLine
         {
-            rows.Add(new RefundPreviewLine
-            {
-                ElementLocator = line.Key.ElementLocator, CoverageCode = line.Key.CoverageCode, ChargeType = line.Key.ChargeType,
-                ChargeCategory = line.ChargeCategory, Written = line.Written, Amount = includeTax ? line.Amount : 0m, Days = 0, Basis = 0, Treatment = line.Treatment,
-            });
-            notes.Add(line.ChargeCategory == ChargeCategories.Tax
-                ? line.Treatment.Provisional ? "IPT not refunded (provisional)" : "IPT not refunded"
-                : $"{line.Key.ChargeType} not refunded{(line.Treatment.Provisional ? " (provisional)" : string.Empty)}");
-        }
+            ElementLocator = line.Key.ElementLocator, ChargeType = line.Key.ChargeType, ChargeCategory = line.ChargeCategory.ToUpperInvariant(),
+            Amount = new Money(includeTax ? line.Amount : 0m, currency), TreatmentAction = TreatmentActionCode.KeepNotReduced,
+            RuleId = line.Treatment.RuleId, RuleVersion = line.Treatment.RuleVersion, LegalStatus = line.Treatment.LegalStatus,
+            Provisional = line.Treatment.Provisional, LegalSourceRef = line.Treatment.LegalSourceRef,
+        }).ToList();
 
-        var premium = rows.Where(r => r.ChargeCategory == ChargeCategories.Premium).Sum(r => r.Amount);
-        var taxes = rows.Where(r => r.ChargeCategory != ChargeCategories.Premium).Sum(r => r.Amount);
-        return new RefundPreview
+        var premiumChange = premiumDeltas.Sum(d => d.Amount);
+        var taxChange = taxLines.Sum(l => l.Amount.Amount);
+        var total = premiumChange + taxChange;
+        var annualBefore = before.Segments.GroupBy(s => s.Key).Sum(g => g.OrderBy(s => s.From).Last().Rate.AnnualRate);
+        return new ServicingPreview
         {
-            Currency = currency.Code, Lines = rows, PremiumCredit = premium, TaxCredit = taxes, RefundDue = -(premium + taxes), Notes = [.. notes.Distinct()],
+            AnnualBefore = new Money(annualBefore, currency).RoundToMinorUnits(MidpointRounding.AwayFromZero),
+            AnnualAfter = Money.Zero(currency),
+            ProratedLines = prorated,
+            TaxLines = taxLines,
+            PremiumChange = new Money(premiumChange, currency),
+            TaxChange = new Money(taxChange, currency),
+            TotalChange = new Money(total, currency),
+            RefundDue = new Money(total < 0m ? -total : 0m, currency),
+            AdditionalDue = Money.Zero(currency),
+            TransactionKind = TransactionKindCode.Cancellation,
+            CancellationSource = source,
+            RefundMethod = CancellationText.Code(method),
+            ConfigurationHash = ConfigurationHash.Parse(term.ConfigurationHash),
+            Provisional = taxLines.Any(l => l.Provisional),
         };
     }
 
@@ -572,13 +587,16 @@ internal sealed class CancelPolicyHandler(
     }
 }
 
+/// <summary>The MKT treatment of a tax or levy line (action KEEP_NOT_REDUCED is the only one implemented).</summary>
+internal sealed record TreatmentInfo(string RuleId, string RuleVersion, string LegalStatus, bool Provisional, string LegalSourceRef);
+
 /// <summary>A tax or levy line after the MKT treatment: the delta is 0.00 for KEEP_NOT_REDUCED.</summary>
-internal sealed record TreatedTaxLine(ChargeKey Key, string ChargeCategory, decimal AnnualRate, decimal Amount, decimal Written, TreatmentView Treatment);
+internal sealed record TreatedTaxLine(ChargeKey Key, string ChargeCategory, decimal AnnualRate, decimal Amount, decimal Written, TreatmentInfo Treatment);
 
 /// <summary>Audit facts of <c>pol.Cancellation.create</c>: the job, the policy and lineage keys (no personal data).</summary>
-internal sealed class CancelPolicyAuditor : ICommandAuditor<CancelPolicy, CancellationResponse>
+internal sealed class CancelPolicyAuditor : ICommandAuditor<CancelPolicy, CancellationCreateResponse>
 {
-    public CommandAuditFacts Describe(CancelPolicy command, Result<CancellationResponse>? result)
+    public CommandAuditFacts Describe(CancelPolicy command, Result<CancellationCreateResponse>? result)
     {
         if (result is not { IsSuccess: true } success)
         {
@@ -588,11 +606,13 @@ internal sealed class CancelPolicyAuditor : ICommandAuditor<CancelPolicy, Cancel
         var r = success.Value;
         return new CommandAuditFacts
         {
-            ObjectRef = ObjectRef.For(ModuleCode.POL, "Policy", r.PolicyId),
-            ObjectNumber = r.JobNumber,
-            BusinessKeys = BusinessKeys.Empty.With("policyId", r.PolicyId.Value.ToString()).With("jobId", r.JobId.Value.ToString())
-                .With("transactionId", r.TransactionId.Value.ToString()).With("policyTermId", r.TermId.Value.ToString()),
-            Changes = AuditDiff.Compute(null, new { source = r.Source, reasonCode = r.ReasonCode, kind = r.Kind, refundMethod = r.RefundMethod, refundDue = r.RefundPreview.RefundDue.ToString(CultureInfo.InvariantCulture) }),
+            ObjectRef = ObjectRef.For(ModuleCode.POL, "Policy", command.Request.PolicyId),
+            BusinessKeys = BusinessKeys.Empty.With("policyId", command.Request.PolicyId.Value.ToString()).With("jobId", r.JobId.Value.ToString()),
+            Changes = AuditDiff.Compute(null, new
+            {
+                source = command.Request.Source, reasonCode = command.Request.ReasonCode, kind = r.Kind.ToString(),
+                refundMethod = r.ServicingPreview.RefundMethod, refundDue = r.ServicingPreview.RefundDue.Amount.ToString(CultureInfo.InvariantCulture),
+            }),
         };
     }
 }

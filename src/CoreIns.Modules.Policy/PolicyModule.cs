@@ -103,8 +103,8 @@ public static class PolicyModule
         // SL3-POL-CANCEL: policyholder cancellation now / flat (pol.Cancellation.create; dry run = the refund preview).
         services.AddScoped<ICancellationRefundMethods, IllustrativeRefundMethods>();
         services.AddScoped<IValidator<CancelPolicy>, CancelPolicyValidator>();
-        services.AddCommandAuditor<CancelPolicy, CancellationResponse, CancelPolicyAuditor>();
-        services.AddCommand<CancelPolicy, CancellationResponse, CancelPolicyHandler>(CommandDescriptor.For("pol.Cancellation.create") with { SupportsDryRun = true });
+        services.AddCommandAuditor<CancelPolicy, CancellationCreateResponse, CancelPolicyAuditor>();
+        services.AddCommand<CancelPolicy, CancellationCreateResponse, CancelPolicyHandler>(CommandDescriptor.For("pol.Cancellation.create") with { SupportsDryRun = true });
 
         services.AddErrorDefinitions(Errors);
         return services;

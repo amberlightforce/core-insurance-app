@@ -1,4 +1,5 @@
 using CoreIns.Modules.Policy.Commands.Cancellation;
+using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Http;
@@ -20,6 +21,6 @@ internal sealed class CancellationController : ControllerBase
     [HttpPost("cancellations")]
     [Authorize(Policy = CreatePermission)]
     public async Task<IResult> CreateAsync(
-        [FromBody] CancellationRequest request, [FromServices] ICommandHandler<CancelPolicy, CancellationResponse> handler, CancellationToken cancellationToken) =>
+        [FromBody] CancellationCreateRequest request, [FromServices] ICommandHandler<CancelPolicy, CancellationCreateResponse> handler, CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new CancelPolicy(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }
