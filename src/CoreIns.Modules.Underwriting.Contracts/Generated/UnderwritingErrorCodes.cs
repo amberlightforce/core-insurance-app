@@ -86,6 +86,12 @@ public static class UnderwritingErrorCodes
     /// </remarks>
     public const string NotAutomated = "UW-ERR-NOT-AUTOMATED";
 
+    /// <summary>UW-ERR-NOT-FOUND (HTTP 404).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): uw.Issue.decide.</para>
+    /// </remarks>
+    public const string NotFound = "UW-ERR-NOT-FOUND";
+
     /// <summary>UW-ERR-NOT-REFERRABLE (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 6 operation(s): uw.Referral.get, uw.Referral.list, uw.Referral.referUp, uw.Referral.request, uw.Referral.requestInformation, uw.Referral.withdraw.</para>
@@ -196,7 +202,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 11 operation(s): uw.RuleSet.approve, uw.RuleSet.create, uw.RuleSet.draft, uw.RuleSet.edit, uw.RuleSet.export, uw.RuleSet.import, uw.RuleSet.schedule, uw.RuleSet.simulate, uw.RuleSet.submit, uw.RuleSet.test, uw.RuleSet.validate.</para>
+    /// <para>Declared by 13 operation(s): uw.Issue.decide, uw.Issue.list, uw.RuleSet.approve, uw.RuleSet.create, uw.RuleSet.draft, uw.RuleSet.edit, uw.RuleSet.export, uw.RuleSet.import, uw.RuleSet.schedule, uw.RuleSet.simulate, uw.RuleSet.submit, uw.RuleSet.test, ….</para>
     /// </remarks>
     public const string Validation = "UW-ERR-VALIDATION";
 
@@ -204,7 +210,7 @@ public static class UnderwritingErrorCodes
     public const string Prefix = "UW-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AuthorityDenied, AuthorityRefer, CodeDuplicate, ConsentMissing, Duplicate, EvalUnavailable, HumanDecisionRequired, IdempotencyMismatch, IssueTransition, LicenceInvalid, LimitExceeded, LockedByOther, NotAutomated, NotReferrable, NoticeDeadlinePassed, PackRuleMissing, Permission, ProtectedInput, ProviderInactive, ReasonRequired, ReviewOpen, RiUnavailable, RuleUntested, RulesetUnresolved, Snapshot, Sod, Stale, State, TableUnresolved, TranslationMissing, UnverifiedValues, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AuthorityDenied, AuthorityRefer, CodeDuplicate, ConsentMissing, Duplicate, EvalUnavailable, HumanDecisionRequired, IdempotencyMismatch, IssueTransition, LicenceInvalid, LimitExceeded, LockedByOther, NotAutomated, NotFound, NotReferrable, NoticeDeadlinePassed, PackRuleMissing, Permission, ProtectedInput, ProviderInactive, ReasonRequired, ReviewOpen, RiUnavailable, RuleUntested, RulesetUnresolved, Snapshot, Sod, Stale, State, TableUnresolved, TranslationMissing, UnverifiedValues, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -222,6 +228,7 @@ public static class UnderwritingErrorCodes
         [LimitExceeded] = 422,
         [LockedByOther] = 409,
         [NotAutomated] = 422,
+        [NotFound] = 404,
         [NotReferrable] = 422,
         [NoticeDeadlinePassed] = 422,
         [PackRuleMissing] = 422,

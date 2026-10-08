@@ -262,6 +262,7 @@ paths:
       - W3-UW-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-UW-075, REQ-UW-077 (referral workbench subset; issues of a job or the open referrals of the legal entity)
       x-io-shared: 4
       x-operation-kind: query
       x-idempotency: none
@@ -273,6 +274,8 @@ paths:
       x-error-codes:
       - code: UW-ERR-PERMISSION
         status: 403
+      - code: UW-ERR-VALIDATION
+        status: 400
       x-source:
       - PRD-04 §9.1 l.1573
       parameters:
@@ -280,6 +283,18 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: jobRef
+        in: query
+        required: false
+        description: POL job id; when given, every issue of the job (any status), oldest first
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: status
+        in: query
+        required: false
+        description: Issue status to list; without a job the default is Open (the referral queue)
+        schema:
+          $ref: '#/components/schemas/IssueStatusCode'
       responses:
         '200':
           description: Success
@@ -489,6 +504,8 @@ paths:
       - W3-UW-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-UW-079, REQ-UW-091, REQ-UW-109, REQ-UW-111, REQ-UW-115, REQ-UW-116 (approve or reject; scope, validity,
+        tolerance and conditions come with the full referral workbench)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -497,6 +514,10 @@ paths:
       - ui
       x-permission: uw.Issue.decide
       x-error-codes:
+      - code: UW-ERR-VALIDATION
+        status: 400
+      - code: UW-ERR-NOT-FOUND
+        status: 404
       - code: UW-ERR-AUTHORITY-DENIED
         status: 403
       - code: UW-ERR-AUTHORITY-REFER
@@ -539,6 +560,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -5715,18 +5738,112 @@ components:
       - blocked
       - issues
       description: 'Typed from REQ-UW-002. PRD outputs: "blocked, issues"'
+    IssueStatusCode:
+      type: string
+      enum:
+      - Open
+      - Approved
+      - ApprovedWithConditions
+      - Rejected
+      - Invalidated
+      - Closed
+      description: UW issue state (PRD-04 §7.3). Open, Rejected and Invalidated block their point (BR-UW-001).
+    IssueDecisionCode:
+      type: string
+      enum:
+      - APPROVE
+      - REJECT
+      description: Decision on an Open issue (REQ-UW-079). APPROVE_WITH_CONDITIONS comes with the condition templates (REQ-UW-095).
+    IssueDecisionView:
+      type: object
+      description: The decision recorded on an issue (REQ-UW-111).
+      properties:
+        decision:
+          $ref: '#/components/schemas/IssueDecisionCode'
+        decidedBy:
+          type: string
+          description: Actor that decided (a person, REQ-UW-115)
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        reason:
+          type: string
+          description: Mandatory reason given by the decider
+        message:
+          type:
+          - string
+          - 'null'
+          description: Optional message to the requester
+        authorityCheckId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: plt.Authority.check id of the binding check (REQ-UW-109)
+      required:
+      - decision
+      - decidedBy
+      - decidedAt
+      - reason
+      - authorityCheckId
     IssueListItem:
       type: object
-      description: 'uw.Issue.list result. PRD outputs: "issues, explanation"'
+      description: One UW issue (REQ-UW-075).
       properties:
-        issues:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
-        explanation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "explanation"'
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        jobRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: POL job id
+        issueType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        issueKey:
+          type: string
+          description: Issue key, e.g. `VEHICLE_AGE_REFERRAL:<elementId>` (REQ-UW-001)
+        ruleId:
+          type: string
+          description: Raising rule of the rule set
+        severity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        blockingPoint:
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
+        lane:
+          $ref: ../events/common.schema.json#/$defs/Code
+        status:
+          $ref: '#/components/schemas/IssueStatusCode'
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: Optimistic concurrency version (pass it to uw.Issue.decide)
+        messageEn:
+          type: string
+        messageEl:
+          type: string
+        raisedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        raisedBy:
+          type: string
+          description: Actor of the evaluation that raised the issue
+        decision:
+          oneOf:
+          - $ref: '#/components/schemas/IssueDecisionView'
+          - type: 'null'
+        closeReason:
+          type:
+          - string
+          - 'null'
+          description: RULE_NO_LONGER_HITS, VALUE_CHANGED (approval invalidated) or another closing reason
+      required:
+      - id
+      - jobRef
+      - issueType
+      - issueKey
+      - ruleId
+      - severity
+      - blockingPoint
+      - lane
+      - status
+      - recordVersion
+      - messageEn
+      - messageEl
+      - raisedAt
+      - raisedBy
     IssueListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5786,40 +5903,58 @@ components:
     IssueDecideRequest:
       type: object
       description: 'uw.Issue.decide request. PRD inputs: "issue ids, decision, scope, validity, tolerance, conditions, reason,
-        message"'
+        message". Scope, validity, tolerance and conditions come with the full referral workbench: an approval holds through
+        the issue''s blocking point while the facts it relied on are unchanged (REQ-UW-091).'
       properties:
         issueIds:
           type: array
+          minItems: 1
+          maxItems: 20
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "issue ids"'
+          description: 'PRD: "issue ids" (one decision per issue, REQ-UW-079)'
         decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
-        scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
-        validity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validity"'
-        tolerance:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tolerance"'
-        conditions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "conditions"'
+          $ref: '#/components/schemas/IssueDecisionCode'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: 'PRD: "reason" (mandatory)'
         message:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: string
+          maxLength: 2000
           description: 'PRD: "message"'
+        expectedRecordVersions:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Record version of each issue as read (issue id → version); a different version is UW-ERR-STALE
+      required:
+      - issueIds
+      - decision
+      - reason
     IssueDecideResponse:
       type: object
       description: 'uw.Issue.decide result. PRD outputs: "decisions, check ids, pending second approval"'
       properties:
         decisions:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: array
+          items:
+            type: object
+            properties:
+              issueId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              status:
+                $ref: '#/components/schemas/IssueStatusCode'
+              recordVersion:
+                type: integer
+              authorityCheckId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+            required:
+            - issueId
+            - status
+            - recordVersion
+            - authorityCheckId
           description: 'PRD: "decisions"'
         checkIds:
           type: array
@@ -5827,8 +5962,12 @@ components:
             $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "check ids"'
         pendingSecondApproval:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pending second approval"'
+          type: boolean
+          description: 'PRD: "pending second approval" (always false until the four-eyes thresholds of BR-UW-012 apply)'
+      required:
+      - decisions
+      - checkIds
+      - pendingSecondApproval
     IssueReopenRequest:
       type: object
       description: 'uw.Issue.reopen request. PRD inputs: "issue id / job ref, type, reason"'
