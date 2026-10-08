@@ -4,47 +4,15 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Contract.submit request. PRD inputs: "contract, section, layer, clause data; reason"</summary>
+/// <summary>ri.Contract.submit request: Draft -&gt; PendingApproval; opens the PLT approval RI.CONTRACT_APPROVE (enterer is the maker).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ContractSubmitRequest
 {
-    /// <summary>PRD: "contract"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contract")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Contract { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "section"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("section")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Section { get; init; }
-
-    /// <summary>PRD: "layer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("layer")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Layer { get; init; }
-
-    /// <summary>PRD: "clause data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("clauseData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ClauseData { get; init; }
-
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    /// <summary>Contract member 'expectedRecordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 }

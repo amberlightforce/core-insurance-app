@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Events;
 
-/// <summary>Payload of clm.RecoveryRecorded v1.0: recovery received and approved.</summary>
+/// <summary>Payload of clm.RecoveryRecorded v1.0: recovery received and approved. Slice 4 (D-SL4-06): published when CLM records received cash for a salvage, subrogation or Friendly Settlement recovery from an evidence-backed system set (BIL allocation). Fields marked always-set are always set by CLM..</summary>
 /// <remarks>
 /// <para>Schema contracts/events/clm/RecoveryRecorded.v1.schema.json; aggregate Claim (ordering key claim_id); trigger: recovery received and approved.</para>
 /// <para>Payload status full.</para>
@@ -50,7 +50,7 @@ public sealed record RecoveryRecordedV1 : global::CoreIns.Platform.Contracts.Eve
     [global::System.Text.Json.Serialization.JsonPropertyName("recoveryId")]
     public required global::CoreIns.SharedKernel.Identifiers.RecoveryId RecoveryId { get; init; }
 
-    /// <summary>Contract member 'recoveryType'.</summary>
+    /// <summary>Recovery type (open Code): SALVAGE, SUBROGATION or FRIENDLY_SETTLEMENT in slice 4</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("recoveryType")]
     public required string RecoveryType { get; init; }
 
@@ -65,7 +65,33 @@ public sealed record RecoveryRecordedV1 : global::CoreIns.Platform.Contracts.Eve
     [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
     public required global::CoreIns.Platform.Contracts.Common.MoneyByCurrency3 Amount { get; init; }
 
-    /// <summary>Contract member 'allocationByLine'.</summary>
+    /// <summary>Recovery received per reserve line (ClaimPaymentLine is a superset of LineAmount, so v1.0 instances stay valid): lineKey = the CLM financial transaction id, amount in three currencies, reserveLineId, exposureId, costType, costCategory. CLM always fills every member (SL4-CONTRACTS, PITFALLS 12).</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("allocationByLine")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.LineAmount> AllocationByLine { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.ClaimPaymentLine> AllocationByLine { get; init; }
+
+    /// <summary>Claim (the aggregate id, repeated so FIN and RI post from payload fields only); CLM always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>Accounting date of the recovery transaction (ClaimFinancialTransaction.accounting_date); CLM always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accountingDate")]
+    public global::CoreIns.SharedKernel.BusinessDate? AccountingDate { get; init; }
+
+    /// <summary>BIL receivable the cash settled (D-SL4-06). Always set for SALVAGE and SUBROGATION, null otherwise</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'receivableId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receivableId")]
+    public global::System.Guid? ReceivableId { get; init; }
+
+    /// <summary>CLM Friendly Settlement statement the recovery belongs to. Always set for FRIENDLY_SETTLEMENT, null otherwise</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'fsStatementId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fsStatementId")]
+    public global::System.Guid? FsStatementId { get; init; }
+
+    /// <summary>Evidence of the system-recorded set: the BIL allocation id, or the FS statement line reference. Always set (client amounts are never accepted, PITFALLS 7)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("evidenceRef")]
+    public string? EvidenceRef { get; init; }
 }

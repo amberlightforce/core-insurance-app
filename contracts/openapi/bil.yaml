@@ -2182,6 +2182,9 @@ paths:
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: BIL-ERR-AMOUNT-MISMATCH
+        note: the amount differs from the receivable open amount
+        status: 422
       x-source:
       - PRD-06 §9.1 l.1793
       parameters:
@@ -2208,6 +2211,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -3951,7 +3956,7 @@ paths:
       - W5-BIL-05
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-BIL-009, REQ-BIL-197, REQ-BIL-198, REQ-BIL-200, REQ-BIL-202, REQ-BIL-207, REQ-BIL-211 (SL2-BIL-DISB, CLM_CLAIM_PAYMENT through the stub bank channel)
+      x-typed: 'SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12); REQ-BIL-009, REQ-BIL-197, REQ-BIL-198'
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4014,6 +4019,9 @@ paths:
       - code: BIL-ERR-SCREENING-UNAVAILABLE
         note: sanctions screening could not run (REQ-BIL-214); fail closed
         status: 503
+      - code: BIL-ERR-LINES-MISMATCH
+        note: FS_CLEARING lines are missing or do not sum to the amount
+        status: 422
       x-source:
       - PRD-06 §9.1 l.1801
       parameters:
@@ -4040,6 +4048,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -4234,7 +4244,7 @@ paths:
       - W5-BIL-05
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-BIL-009, REQ-CLM-126
+      x-typed: 'REQ-BIL-009, REQ-CLM-125, REQ-CLM-126, REQ-BIL-208 (SL4-CONTRACTS: typed events DisbursementStopped/Voided/Returned/Rejected, D-SL4-13)'
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4276,6 +4286,11 @@ paths:
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-SOD
+        note: a source user without BIL.DisbursementStop authority
+        status: 403
       x-source:
       - PRD-06 §9.1 l.1801
       parameters:
@@ -4302,6 +4317,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -4329,7 +4346,7 @@ paths:
       - W5-BIL-05
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-BIL-009, REQ-CLM-125
+      x-typed: 'REQ-BIL-009, REQ-CLM-125, REQ-CLM-126, REQ-BIL-208 (SL4-CONTRACTS: typed events DisbursementStopped/Voided/Returned/Rejected, D-SL4-13)'
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4369,6 +4386,11 @@ paths:
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-SOD
+        note: a source user without BIL.DisbursementStop authority
+        status: 403
       x-source:
       - PRD-06 §9.1 l.1801
       parameters:
@@ -4395,6 +4417,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -4415,7 +4439,10 @@ paths:
       x-requirement:
       - REQ-BIL-346
       - REQ-BIL-349
+      - REQ-BIL-354
+      - REQ-BIL-355
       - REQ-BIL-356
+      - REQ-BIL-357
       x-wave: W7
       x-work-packages:
       - W7-BIL-01
@@ -4437,6 +4464,19 @@ paths:
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: BIL-ERR-VALIDATION
+        note: a source-specific member is missing, purpose does not match the source, or amount is not positive
+        status: 422
+      - code: BIL-ERR-DUPLICATE
+        note: a receivable for this source type and id already exists with different content
+        status: 409
+      - code: BIL-ERR-FISCAL-TREATMENT-OPEN
+        note: 'Production: the fiscal treatment of CLM receivables is open, so BIL refuses them (D-SL4-06)'
+        status: 422
+      - code: BIL-ERR-NOT-FOUND
+        note: unknown counterparty party
+        status: 404
+      x-typed: 'SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12)'
       x-source:
       - PRD-06 §9.1 l.1802
       parameters:
@@ -4463,6 +4503,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -6069,6 +6111,252 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/bil/v1/receivables/{id}:
+    get:
+      operationId: bil.Receivable.get
+      summary: Receivable
+      description: 'One receivable (slice addition, D-SL4-06).
+    
+    
+        PRD inputs: receivable id
+    
+        PRD outputs: receivable'
+      tags:
+      - Receivable
+      x-requirement:
+      - REQ-BIL-346
+      - REQ-BIL-354
+      - REQ-BIL-355
+      - REQ-BIL-356
+      - REQ-BIL-357
+      x-wave: W7
+      x-work-packages:
+      - W7-BIL-01
+      - SL4-BIL-RECV
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12)'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      x-permission: bil.Receivable.get
+      x-error-codes:
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-06 §9.1
+      - SLICE-PLAN-4 §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceivableGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/bil/v1/receivables:
+    get:
+      operationId: bil.Receivable.list
+      summary: Receivables
+      description: 'Receivables by account, counterparty, claim, recovery, statement or status (slice addition, D-SL4-06).
+    
+    
+        PRD inputs: filters
+    
+        PRD outputs: receivables'
+      tags:
+      - Receivable
+      x-requirement:
+      - REQ-BIL-346
+      - REQ-BIL-354
+      - REQ-BIL-355
+      - REQ-BIL-356
+      - REQ-BIL-357
+      x-wave: W7
+      x-work-packages:
+      - W7-BIL-01
+      - SL4-BIL-RECV
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12)'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      x-permission: bil.Receivable.list
+      x-error-codes: []
+      x-source:
+      - PRD-06 §9.1
+      - SLICE-PLAN-4 §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: billingAccountId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: counterpartyPartyId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: claimId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: recoveryId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: statementRef
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: paymentReference
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: sourceType
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/ReceivableSourceType'
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/ReceivableStatus'
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceivableListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/bil/v1/disbursements/approve-release:
+    post:
+      operationId: bil.Disbursement.approveRelease
+      summary: Approve the release of a disbursement
+      description: 'Release approval by a second user (slice addition, D-SL4-12). Every FS_CLEARING disbursement needs it, whatever the amount; reissues
+        to a changed account need it too (REQ-BIL-199).
+    
+    
+        PRD inputs: disbursement, decision, reason
+    
+        PRD outputs: disbursement'
+      tags:
+      - Disbursement
+      x-requirement:
+      - REQ-BIL-199
+      - REQ-BIL-206
+      - REQ-BIL-357
+      x-wave: W7
+      x-work-packages:
+      - W7-BIL-02
+      - SL4-BIL-FSOUT
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'SL4: dry-run supported'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      x-permission: bil.Disbursement.approveRelease
+      x-error-codes:
+      - code: BIL-ERR-SOD
+        note: the approver is the requester or changed the payee account
+        status: 403
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-APPROVAL-REQUIRED
+        note: the disbursement is not awaiting a release approval
+        status: 422
+      - code: BIL-ERR-STALE
+        status: 409
+      - code: BIL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-06 §9.1 (DisbursementBatch.approveRelease analogue)
+      - SLICE-PLAN-4 §6, D-SL4-12
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DisbursementApproveReleaseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisbursementApproveReleaseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 x-operation-families:
 - family: bil.Import.*
   summary: Migration (same validation as live)
@@ -7257,8 +7545,8 @@ components:
           description: 'PRD: "mandate"'
     PaymentTakeRequest:
       type: object
-      description: 'Typed from REQ-BIL-004, REQ-BIL-126, REQ-BIL-127. PRD inputs: "account, amount, method". SL-BIL records
-        money already received by bank transfer or at a cashier; card and link payments need the acquirer (OI-BIL-07).'
+      description: 'Typed from REQ-BIL-004, REQ-BIL-126, REQ-BIL-127. PRD inputs: "account, amount, method". SL-BIL records money already received
+        by bank transfer or at a cashier; card and link payments need the acquirer (OI-BIL-07).'
       properties:
         billingAccountId:
           $ref: ../events/common.schema.json#/$defs/Uuid
@@ -7285,15 +7573,24 @@ components:
           type: boolean
           default: true
           description: Match and allocate deterministically at once (REQ-BIL-127, REQ-BIL-129)
+        paymentReference:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: 'Payment reference of a receivable (D-SL4-06): matches the cash to the receivable instead of an invoice. billingAccountId must
+            be the receivable''s account; a reference that matches no receivable of the account is BIL-ERR-NOT-FOUND'
+        receivableId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Receivable the payer referenced (alternative to paymentReference); the amount must equal its open amount (BIL-ERR-AMOUNT-MISMATCH,
+            REQ-BIL-135)
       required:
       - billingAccountId
       - amount
       - method
     PaymentTakeResponse:
       type: object
-      description: 'Typed from REQ-BIL-004, REQ-BIL-129, REQ-BIL-135. PRD outputs: "receipt or link, allocation preview".
-        An amount that does not equal the matched invoice''s open amount is never allocated: it stays as unapplied cash in
-        suspense with a reason (REQ-BIL-135).'
+      description: 'Typed from REQ-BIL-004, REQ-BIL-129, REQ-BIL-135. PRD outputs: "receipt or link, allocation preview". An amount that does not
+        equal the matched invoice''s open amount is never allocated: it stays as unapplied cash in suspense with a reason (REQ-BIL-135).'
       properties:
         receipt:
           $ref: '#/components/schemas/ReceiptView'
@@ -7307,6 +7604,31 @@ components:
           - ALLOCATED
           - SUSPENSE
           - NOT_REQUESTED
+          - RECEIVABLE_ALLOCATED
+        receivableAllocation:
+          oneOf:
+          - type: object
+            properties:
+              receivableId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              allocationId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+                description: 'The BIL allocation id: the evidence CLM records the recovery against'
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+              openAmountAfter:
+                $ref: ../events/common.schema.json#/$defs/Money
+              status:
+                $ref: '#/components/schemas/ReceivableStatus'
+            required:
+            - receivableId
+            - allocationId
+            - amount
+            - openAmountAfter
+            - status
+          - type: 'null'
+          description: Set (outcome RECEIVABLE_ALLOCATED) when the cash settled a receivable; allocations is then empty. Publishes CashAllocated with
+            the receivable, claim, recovery and statement references
       required:
       - receipt
       - allocations
@@ -8044,7 +8366,8 @@ components:
       properties:
         sourceType:
           $ref: ../events/common.schema.json#/$defs/DisbursementSourceType
-          description: Open code (D-CON-24), registered in the source register (REQ-BIL-354)
+          description: 'Open code (D-CON-24), registered in the source register (REQ-BIL-354). Served: CLM_CLAIM_PAYMENT (SEPA_CT) and FS_CLEARING
+            (method CLEARING only, D-SL4-02); others are refused with BIL-ERR-SOURCE'
         sourceId:
           type: string
           description: Id of the source object
@@ -8061,7 +8384,8 @@ components:
           $ref: ../events/common.schema.json#/$defs/Money
         method:
           $ref: ../events/common.schema.json#/$defs/Code
-          description: REQ-BIL-209; defaults from the source
+          description: REQ-BIL-209; defaults from the source. CLEARING is valid only for source FS_CLEARING (BIL-ERR-SOURCE otherwise) and is the
+            only method for it
         payeeAccountId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: BIL payee account (REQ-BIL-343)
@@ -8077,21 +8401,28 @@ components:
           description: Source approval evidence, verified against the content hash (REQ-BIL-198)
         approvalContentHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'Content hash the source approved (REQ-BIL-198): SHA-256 of the canonical JSON (RFC 8785) of
-            {sourceType, sourceId, payeePartyId, payeeAccountId, amount}; computed with
-            CoreIns.Modules.Billing.Contracts.DisbursementContent.Hash. A request whose content differs is refused with
-            BIL-ERR-APPROVAL-MISMATCH. Required for CLM_CLAIM_PAYMENT (SL2-BIL-DISB).'
+          description: 'Content hash the source approved (REQ-BIL-198): SHA-256 of the canonical JSON (RFC 8785) of {sourceType, sourceId, payeePartyId,
+            payeeAccountId, amount}; computed with CoreIns.Modules.Billing.Contracts.DisbursementContent.Hash. A request whose content differs is
+            refused with BIL-ERR-APPROVAL-MISMATCH. Required for CLM_CLAIM_PAYMENT (SL2-BIL-DISB).'
         claimId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: CLM sources only (required for CLM_CLAIM_PAYMENT) - the claim the payment belongs to; the source reference
-            of the duplicate key (payee account, amount, claim; REQ-BIL-202) and a ledger dimension for FIN (D-SL2-08); not part
-            of the content hash
+          description: CLM sources only (required for CLM_CLAIM_PAYMENT) - the claim the payment belongs to; the source reference of the duplicate
+            key (payee account, amount, claim; REQ-BIL-202) and a ledger dimension for FIN (D-SL2-08); not part of the content hash
         purposeText:
           type: string
         statementReference:
           type: string
+          description: Statement reference. Required for FS_CLEARING (the FS statement reference shared with CLM); also carried on its ledger entries
+            and events
         returnReference:
           type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/FsClearingLine'
+          minItems: 1
+          description: 'FS_CLEARING only: claim-level lines [claim id, fs case id, amount] that must sum to amount (BIL-ERR-LINES-MISMATCH). Lines
+            are the audit trail of the net; no per-claimant VoP is made (D-SL4-12)'
       required:
       - sourceType
       - sourceId
@@ -8102,9 +8433,24 @@ components:
         - payeePartyId
       - required:
         - adHocPayee
-      description: 'Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method,
-        approval evidence, statement or return reference". SL2-BIL-DISB serves source type CLM_CLAIM_PAYMENT (method SEPA_CT,
-        EUR, payeePartyId with payeeAccountId); other sources are refused with BIL-ERR-SOURCE.'
+      description: 'Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method, approval evidence, statement
+        or return reference". SL2-BIL-DISB serves source type CLM_CLAIM_PAYMENT (method SEPA_CT, EUR, payeePartyId with payeeAccountId); other sources
+        are refused with BIL-ERR-SOURCE.'
+    FsClearingLine:
+      type: object
+      description: 'Claim-level line of an FS_CLEARING disbursement (D-SL4-02): the lines must sum to the net amount (BIL-ERR-LINES-MISMATCH).'
+      properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        fsCaseId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: 'Signed contribution of the claim to the net: positive payable, negative receivable'
+      required:
+      - claimId
+      - fsCaseId
+      - amount
     DisbursementRequestResponse:
       type: object
       properties:
@@ -8133,8 +8479,7 @@ components:
           $ref: ../events/common.schema.json#/$defs/Money
         method:
           $ref: ../events/common.schema.json#/$defs/Code
-          description: 'Disbursement method (REQ-BIL-209: SEPA credit transfer, SEPA instant, card refund, intermediary account,
-            CLEARING)'
+          description: 'Disbursement method (REQ-BIL-209: SEPA credit transfer, SEPA instant, card refund, intermediary account, CLEARING)'
         requestedValueDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
         maskedPayeeAccount:
@@ -8165,14 +8510,43 @@ components:
           $ref: ../events/common.schema.json#/$defs/Instant
         clearedAt:
           $ref: ../events/common.schema.json#/$defs/Instant
+        statementReference:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: FS_CLEARING statement reference; always set for FS_CLEARING
+        releaseApproval:
+          oneOf:
+          - type: object
+            properties:
+              required:
+                type: boolean
+                description: True for every FS_CLEARING disbursement, whatever the amount (D-SL4-12)
+              approvalRequestId:
+                oneOf:
+                - $ref: ../events/common.schema.json#/$defs/Uuid
+                - type: 'null'
+              requestedBy:
+                type: string
+                description: Requester (cannot approve the release)
+            required:
+            - required
+          - type: 'null'
+          description: Release approval state. Always set for FS_CLEARING; the disbursement stays PendingApproval until bil.Disbursement.approveRelease
+        lines:
+          oneOf:
+          - type: array
+            items:
+              $ref: '#/components/schemas/FsClearingLine'
+          - type: 'null'
+          description: FS_CLEARING lines as accepted; always set for FS_CLEARING
       required:
       - disbursementId
       - status
       - sourceType
       - sourceId
       - amount
-      description: 'Disbursement (REQ-BIL-009, REQ-BIL-213) Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD outputs:
-        "disbursement"'
+      description: 'Disbursement (REQ-BIL-009, REQ-BIL-213) Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD outputs: "disbursement"'
     DisbursementGetResponse:
       type: object
       description: 'Typed from REQ-BIL-213 (SL2-BIL-DISB). PRD outputs: "disbursement": state, dates, method and masked payee
@@ -8337,27 +8711,50 @@ components:
       description: 'Typed from REQ-BIL-009, REQ-CLM-125. PRD outputs: "disbursement"'
     ReceivableRegisterRequest:
       type: object
-      description: 'bil.Receivable.register request. PRD inputs: "source, counterparty, references, amount, currency, due
-        date"'
+      description: bil.Receivable.register request (REQ-BIL-346, -356). Typed by SL4-CONTRACTS. Missing source-specific members are BIL-ERR-VALIDATION;
+        the counterparty account is created on first use. Idempotent on the Idempotency-Key and on (sourceType, sourceId).
       properties:
-        source:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "source"'
-        counterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "counterparty"'
-        references:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "references"'
+        sourceType:
+          $ref: '#/components/schemas/ReceivableSourceType'
+        sourceId:
+          type: string
+          minLength: 1
+          description: Id of the source object; with sourceType it is the duplicate key (BIL-ERR-DUPLICATE)
+        counterpartyPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PTY party that owes the money
+        claimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Required for CLM_CLAIM_PAYMENT
+        recoveryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Required for CLM_CLAIM_PAYMENT
+        statementRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: Required for FS_CLEARING
+        purpose:
+          $ref: '#/components/schemas/ReceivablePurpose'
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amount"'
+          description: Amount owed (positive, EUR in slice 4)
         currency:
           $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
+          description: Redundant with amount.currency; when sent it must equal it (kept from the PRD input list)
         dueDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "due date"'
+      required:
+      - sourceType
+      - sourceId
+      - counterpartyPartyId
+      - purpose
+      - amount
+      - dueDate
     ReceivableRegisterResponse:
       type: object
       description: 'bil.Receivable.register result. PRD outputs: "receivable id, payment reference"'
@@ -8365,9 +8762,108 @@ components:
         receivableId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "receivable id"'
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Counterparty billing account
         paymentReference:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: string
           description: 'PRD: "payment reference"'
+        receivable:
+          $ref: '#/components/schemas/ReceivableView'
+          description: The registered receivable; always set
+      required:
+      - receivableId
+      - billingAccountId
+      - paymentReference
+    ReceivableSourceType:
+      type: string
+      enum:
+      - CLM_CLAIM_PAYMENT
+      - FS_CLEARING
+      description: Source of a receivable (source register, REQ-BIL-354, direction "in"). Slice 4 serves CLM_CLAIM_PAYMENT (salvage and subrogation
+        recoveries, D-SL4-06) and FS_CLEARING (Friendly Settlement net receivable, D-SL4-02). RI_SETTLEMENT and the deductible purpose are refused
+        with BIL-ERR-SOURCE until their work packages land.
+    ReceivablePurpose:
+      type: string
+      enum:
+      - SALVAGE
+      - SUBROGATION
+      - FS_NET
+      description: What the money is for; FS_NET is valid only for source FS_CLEARING, SALVAGE and SUBROGATION only for CLM_CLAIM_PAYMENT
+    ReceivableStatus:
+      type: string
+      enum:
+      - OPEN
+      - PARTIALLY_PAID
+      - PAID
+      - CANCELLED
+      description: Receivable state; PAID is reached when cash is allocated in full (CashAllocated)
+    ReceivableView:
+      type: object
+      description: 'A BIL receivable (REQ-BIL-346, -356). No fiscal document is requested (fiscal treatment open): Production refuses CLM receivables
+        with BIL-ERR-FISCAL-TREATMENT-OPEN (D-SL4-06).'
+      properties:
+        receivableId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        sourceType:
+          $ref: '#/components/schemas/ReceivableSourceType'
+        sourceId:
+          type: string
+          description: Id of the source object (CLM recovery id for CLM_CLAIM_PAYMENT, the FS statement id for FS_CLEARING)
+        counterpartyPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PTY party that owes the money (organisation party for insurers and the clearing office)
+        claimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Always set for CLM_CLAIM_PAYMENT
+        recoveryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Always set for CLM_CLAIM_PAYMENT
+        statementRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: Always set for FS_CLEARING
+        purpose:
+          $ref: '#/components/schemas/ReceivablePurpose'
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        openAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Amount not yet allocated; always set
+        status:
+          $ref: '#/components/schemas/ReceivableStatus'
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Counterparty billing account (type CLAIM_RECOVERY for CLM sources, CLEARING for FS_CLEARING)
+        paymentReference:
+          type: string
+          description: Reference the payer quotes; unique; bil.Payment.take matches on it
+        registeredAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - receivableId
+      - sourceType
+      - sourceId
+      - counterpartyPartyId
+      - purpose
+      - amount
+      - openAmount
+      - status
+      - dueDate
+      - billingAccountId
+      - paymentReference
+      - registeredAt
+      - recordVersion
     DisbursementBatchPrepareRequest:
       type: object
       description: 'bil.DisbursementBatch.prepare request. PRD inputs: "bank account, value date"'
@@ -8859,3 +9355,55 @@ components:
         perObjectOutcome:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "per-object outcome (erased, restricted with reason)"'
+
+    ReceivableGetResponse:
+      type: object
+      description: bil.Receivable.get result (slice addition, D-SL4-06)
+      properties:
+        receivable:
+          $ref: '#/components/schemas/ReceivableView'
+      required:
+      - receivable
+    ReceivableListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ReceivableView'
+      description: Page of bil.Receivable.list results (cursor pagination, contract §3.5.5)
+    DisbursementApproveReleaseRequest:
+      type: object
+      description: bil.Disbursement.approveRelease request (slice addition, D-SL4-12; REQ-BIL-206, -357). The approver must hold Staff.BillingManager
+        and must not be the requester or the user who changed the payee account (BIL-ERR-SOD, REQ-BIL-199).
+      properties:
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Required for REJECT
+      required:
+      - disbursementId
+      - decision
+    DisbursementApproveReleaseResponse:
+      type: object
+      description: 'bil.Disbursement.approveRelease result: APPROVE moves the disbursement to Approved/Released; REJECT to Rejected (DisbursementRejected,
+        rejecting party APPROVER).'
+      properties:
+        disbursement:
+          $ref: '#/components/schemas/DisbursementRequestResponse'
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+      required:
+      - disbursement
+      - decision

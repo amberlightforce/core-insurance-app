@@ -8,7 +8,7 @@ namespace CoreIns.Modules.Compliance.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalDocumentRequestRequest
 {
-    /// <summary>Fiscal source type. REQ-CMP-030 lists TRANSACTION, INVOICE, CREDIT, FEE, COMMISSION, CLAIM_PAYMENT; integration review XRF-001 names BIL_INVOICE / BIL_CREDIT / BIL_COMMISSION. Open code until CMP settles one list.</summary>
+    /// <summary>Fiscal source type. REQ-CMP-030 lists TRANSACTION, INVOICE, CREDIT, FEE, COMMISSION, CLAIM_PAYMENT; integration review XRF-001 names BIL_INVOICE / BIL_CREDIT / BIL_COMMISSION. Open code until CMP settles one list. Slice 4 (D-SL4-11) adds CLM_CLAIM_PAYMENT: a CLM claim payment settlement receipt, role ISSUE, documentCategory CLAIM_SETTLEMENT_RECEIPT, sourceId = the CLM claim payment id, idempotency…</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("sourceType")]
     public required string SourceType { get; init; }
 
@@ -49,6 +49,10 @@ public sealed record FiscalDocumentRequestRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("correlatedDocumentId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Guid? CorrelatedDocumentId { get; init; }
+
+    /// <summary>Document category. For sourceType CLM_CLAIM_PAYMENT it is CLAIM_SETTLEMENT_RECEIPT (always set there); null otherwise. Cyprus resolves NotRequired.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentCategory")]
+    public string? DocumentCategory { get; init; }
 
     /// <summary>Document role (REQ-CMP-031)</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<RoleValue>))]

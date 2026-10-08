@@ -13,14 +13,18 @@ public sealed record ReceivableRegisterResponse
     /// <para>Untyped id: no SharedKernel id type is mapped for 'receivableId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("receivableId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? ReceivableId { get; init; }
+    public required global::System.Guid ReceivableId { get; init; }
+
+    /// <summary>Counterparty billing account</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("billingAccountId")]
+    public required global::CoreIns.SharedKernel.Identifiers.BillingAccountId BillingAccountId { get; init; }
 
     /// <summary>PRD: "payment reference"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("paymentReference")]
+    public required string PaymentReference { get; init; }
+
+    /// <summary>The registered receivable; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receivable")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PaymentReference { get; init; }
+    public global::CoreIns.Modules.Billing.Contracts.Api.ReceivableView? Receivable { get; init; }
 }
