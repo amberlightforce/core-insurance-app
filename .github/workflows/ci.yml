@@ -1,9 +1,24 @@
 name: CI
 
+# Docs-only changes skip CI (D-USR-17). Markdown under contracts/openapi (INDEX.md, spi.md) is a checked input of
+# contracts/openapi/validate.py, so the Markdown patterns deliberately do not cover contracts/openapi. Pushes to main skip only
+# orchestration/**.
+
 on:
   pull_request:
+    paths-ignore:
+      - "orchestration/**"
+      - "*.md"
+      - "docs/**/*.md"
+      - "infra/**/*.md"
+      - "spikes/**/*.md"
+      - "src/**/*.md"
+      - "web/**/*.md"
+      - "contracts/README.md"
   push:
     branches: [main]
+    paths-ignore:
+      - "orchestration/**"
 
 permissions:
   contents: read
@@ -196,3 +211,28 @@ jobs:
 
       - name: Run E2E-02a (API and UI)
         run: tests/e2e/run-e2e02.sh
+
+  e2e03:
+    name: E2E-03 time-shifted journeys on the Compose stack
+    # Same shape as e2e02 but its own stack (project coreins-e2e03, image tag coreins-host:e2e03, ports 27000+, shiftable dev
+    # clock for api and worker), so the jobs never share state. Runs the e2e03*, e2e04* and change* specs, then down -v.
+    needs: [dotnet, web, image]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install the Playwright browser (the UI run of E2E-03)
+        working-directory: tests/e2e
+        run: |
+          npm ci --no-audit
+          npx playwright install --with-deps chromium
+
+      - name: Run E2E-03 (API and UI)
+        run: tests/e2e/run-e2e03.sh
