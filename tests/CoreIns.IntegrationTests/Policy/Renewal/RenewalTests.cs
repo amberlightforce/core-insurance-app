@@ -43,20 +43,19 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         // Step 1 (REQ-POL-245, -246, -258, -263): "Renew now" 30 days before expiry; artefact pinned at the new term's start.
         var (created, create) = await _renewal.CreateAsync();
         created.StatusCode.ShouldBe(HttpStatusCode.Created, create?.ToJsonString());
-        create.Text("job.state").ShouldBe("DRAFT");
-        create.Text("job.jobType").ShouldBe("RENEWAL");
-        create.Text("job.productVersion").ShouldBe("1.1");
-        create.Text("job.expiringTermId").ShouldBe(_renewal.TermId);
-        create.Text("job.policyId").ShouldBe(_renewal.PolicyId);
-        created.Headers.Location!.ToString().ShouldBe($"/api/pol/v1/jobs/{create.Text("job.jobId")}");
+        create.Text("state").ShouldBe("DRAFT");
+        create.Text("renewalProductVersion").ShouldBe("1.1");
+        create.Text("expiringTermId").ShouldBe(_renewal.TermId);
+        created.Headers.Location!.ToString().ShouldBe($"/api/pol/v1/jobs/{create.Text("jobId")}");
+        (await _renewal.ScalarAsync<string>($"SELECT job_type FROM pol.job WHERE job_id = '{_renewal.JobId}'")).ShouldBe("RENEWAL");
         var expiry = await _renewal.ScalarAsync<DateTime>($"SELECT valid_to FROM pol.policy_term WHERE term_id = '{_renewal.TermId}' AND recorded_to IS NULL");
-        DateTime.Parse(create.Text("job.effectiveAt"), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal).ShouldBe(expiry);
+        (await _renewal.ScalarAsync<DateTime>($"SELECT effective_at FROM pol.job WHERE job_id = '{_renewal.JobId}'")).ShouldBe(expiry);
         var head = await _renewal.ScalarAsync<Guid>($"SELECT head_transaction_id FROM pol.policy_term WHERE term_id = '{_renewal.TermId}' AND recorded_to IS NULL");
-        create.Text("job.baseTransactionId").ShouldBe(head.ToString());
+        (await _renewal.ScalarAsync<Guid>($"SELECT base_transaction_id FROM pol.job WHERE job_id = '{_renewal.JobId}'")).ShouldBe(head);
         (await _renewal.CountEventsAsync("RenewalCreated")).ShouldBe(1);
 
         // The risk tree was copied with its static locators (REQ-POL-246).
-        var jobId = create.Text("job.jobId");
+        var jobId = _renewal.JobId;
         var copied = await _renewal.ScalarAsync<string>($"SELECT risk_tree->'vehicles'->0->>'locator' FROM pol.quote_version WHERE job_id = '{jobId}' AND version_no = 1");
         var original = await _renewal.ScalarAsync<string>(
             $"SELECT snapshot->'vehicles'->0->>'locator' FROM pol.segment WHERE term_id = '{_renewal.TermId}' AND recorded_to IS NULL");
@@ -65,11 +64,12 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         // Steps 3-5 (REQ-POL-249, -250, -201): RENEWAL rating, UW at PRE_BIND, Quoted.Offered with RenewalOffered.
         var (offered, offer) = await _renewal.OfferAsync();
         offered.StatusCode.ShouldBe(HttpStatusCode.OK, offer?.ToJsonString());
-        offer.Text("job.state").ShouldBe("QUOTED");
-        offer.Text("job.subState").ShouldBe("OFFERED");
-        offer.Text("job.referred").ShouldBe("false");
-        var premium = decimal.Parse(offer.Text("job.premium"), CultureInfo.InvariantCulture);
-        var total = decimal.Parse(offer.Text("job.total"), CultureInfo.InvariantCulture);
+        offer.Text("state").ShouldBe("QUOTED");
+        (await _renewal.SubStateAsync()).ShouldBe("OFFERED");
+        (await _renewal.ReferredAsync()).ShouldBeFalse();
+        offer.Text("acceptanceMode").ShouldBe("EXPLICIT");
+        var premium = decimal.Parse(offer.Text("premiumSummary.premium.amount"), CultureInfo.InvariantCulture);
+        var total = decimal.Parse(offer.Text("premiumSummary.total.amount"), CultureInfo.InvariantCulture);
         premium.ShouldBe(432.36m);
         total.ShouldBe(479.21m);
         (await _renewal.CountEventsAsync("RenewalOffered")).ShouldBe(1);
@@ -83,15 +83,12 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         // Steps 6-7 (REQ-POL-253, -257, -005, -033, -263): explicit acceptance (channel STAFF), bind of term 2 in one command.
         var (accepted, accept) = await _renewal.AcceptAsync(user: "uw-anna");
         accepted.StatusCode.ShouldBe(HttpStatusCode.OK, accept?.ToJsonString());
-        accept.Text("job.state").ShouldBe("BOUND");
-        accept.Text("job.result.accepted").ShouldBe("true");
-        accept.Text("job.acceptance.channel").ShouldBe("STAFF");
-        accept.Text("job.acceptance.acceptedBy").ShouldBe("USER:uw-anna");
-        accept.Text("job.result.policyNumber").ShouldBe(_renewal.PolicyNumber);
-        accept.Text("job.result.termNumber").ShouldBe("2");
-        accept.Text("job.result.termState").ShouldBe("SCHEDULED");
-        var term2 = accept.Text("job.result.termId");
-        var transaction = accept.Text("job.result.transactionId");
+        accept.Text("state").ShouldBe("BOUND");
+        accept.Text("newTermNumber").ShouldBe("2");
+        accept.Text("termState").ShouldBe("SCHEDULED");
+        accept.Text("predecessorTermId").ShouldBe(_renewal.TermId);
+        var term2 = accept.Text("newTermId");
+        var transaction = accept.Text("transactionId");
         var recordedAt = await _renewal.ScalarAsync<DateTime>($"SELECT recorded_at FROM pol.policy_transaction WHERE transaction_id = '{transaction}'");
 
         // Term 2 is contiguous with term 1 (no gap, no overlap) and follows it (predecessor_term_id); the pins are the resolved 1.1.
@@ -198,7 +195,7 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         first.StatusCode.ShouldBe(HttpStatusCode.OK, firstBody?.ToJsonString());
         var (replay, replayBody) = await _renewal.AcceptAsync(key: key);
         replay.StatusCode.ShouldBe(HttpStatusCode.OK, replayBody?.ToJsonString());
-        replayBody.Text("job.result.termId").ShouldBe(firstBody.Text("job.result.termId"));
+        replayBody.Text("newTermId").ShouldBe(firstBody.Text("newTermId"));
 
         var (again, againBody) = await _renewal.AcceptAsync();
         RenewalHarness.ShouldFailWith(again, againBody, HttpStatusCode.Conflict, "POL-ERR-ILLEGAL-TRANSITION");
@@ -216,36 +213,31 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         _renewal.Slice.Raise(BlockingPoint.PreBind);
         var (referred, referral) = await _renewal.OfferAsync();
         referred.StatusCode.ShouldBe(HttpStatusCode.OK, referral?.ToJsonString());
-        referral.Text("job.state").ShouldBe("QUOTED");
-        referral.Text("job.referred").ShouldBe("true");
-        referral.Text("job.subState").ShouldBe("null");
-        referral.Text("job.result.offered").ShouldBe("false");
+        referral.Text("state").ShouldBe("QUOTED");
+        (await _renewal.ReferredAsync()).ShouldBeTrue();
+        (await _renewal.SubStateAsync()).ShouldBe("NONE");
         (await _renewal.CountEventsAsync("RenewalOffered")).ShouldBe(0);
 
         // Accepting is refused by the bind gate, as for new business: nothing is bound.
         var (gated, gate) = await _renewal.AcceptAsync();
-        gated.StatusCode.ShouldBe(HttpStatusCode.OK, gate?.ToJsonString());
-        gate.Text("job.state").ShouldBe("QUOTED");
-        gate.Text("job.result.accepted").ShouldBe("false");
-        gate.Text("job.result.gateResults.0.gate").ShouldBe("UW_ISSUES");
-        gate.Text("job.result.gateResults.0.passed").ShouldBe("false");
+        RenewalHarness.ShouldFailWith(gated, gate, HttpStatusCode.UnprocessableEntity, "POL-ERR-GATE-FAILED");
         (await _renewal.TermVersionsAsync()).ShouldBe(1);
 
         // The decision flows back: UW no longer blocks; offering again offers; accepting binds.
         _renewal.Slice.AcceptAll();
         var (reoffered, reoffer) = await _renewal.OfferAsync();
         reoffered.StatusCode.ShouldBe(HttpStatusCode.OK, reoffer?.ToJsonString());
-        reoffer.Text("job.subState").ShouldBe("OFFERED");
+        (await _renewal.SubStateAsync()).ShouldBe("OFFERED");
+        (await _renewal.ReferredAsync()).ShouldBeFalse();
         (await _renewal.CountEventsAsync("RenewalOffered")).ShouldBe(1);
 
         // A referral raised after the offer fails the gate at acceptance too.
         _renewal.Slice.Raise(BlockingPoint.PreBind);
         var (lateGate, lateBody) = await _renewal.AcceptAsync();
-        lateBody.Text("job.result.accepted").ShouldBe("false");
-        lateGate.StatusCode.ShouldBe(HttpStatusCode.OK);
+        RenewalHarness.ShouldFailWith(lateGate, lateBody, HttpStatusCode.UnprocessableEntity, "POL-ERR-GATE-FAILED");
         _renewal.Slice.AcceptAll();
         (await _renewal.OfferAsync()).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await _renewal.AcceptAsync()).Body.Text("job.state").ShouldBe("BOUND");
+        (await _renewal.AcceptAsync()).Body.Text("state").ShouldBe("BOUND");
     }
 
     [Fact]
@@ -266,8 +258,8 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
     public async Task Editing_an_offered_renewal_keeps_the_prior_offer_and_offering_again_offers_the_new_version()
     {
         await _renewal.GoToAsync(30);
-        var (_, create) = await _renewal.CreateAsync();
-        var jobId = create.Text("job.jobId");
+        await _renewal.CreateAsync();
+        var jobId = _renewal.JobId;
         (await _renewal.OfferAsync()).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         // pol.Job.updateDraft takes the offered (Quoted) job back to Draft on a new version; the first version is kept as Superseded.
@@ -279,8 +271,8 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
 
         var (reoffered, reoffer) = await _renewal.OfferAsync();
         reoffered.StatusCode.ShouldBe(HttpStatusCode.OK, reoffer?.ToJsonString());
-        reoffer.Text("job.subState").ShouldBe("OFFERED");
-        reoffer.Text("job.versionNo").ShouldBe("2");
+        (await _renewal.SubStateAsync()).ShouldBe("OFFERED");
+        reoffer.Text("offerVersion").ShouldBe("2");
         (await _renewal.ScalarAsync<string>($"SELECT string_agg(state, ',' ORDER BY version_no) FROM pol.quote_version WHERE job_id = '{jobId}'")).ShouldBe("SUPERSEDED,QUOTED");
         (await _renewal.CountEventsAsync("RenewalOffered")).ShouldBe(2);
     }
@@ -333,7 +325,7 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         (await _renewal.CreateAsync()).Response.StatusCode.ShouldBe(HttpStatusCode.Created);
         (await _renewal.OfferAsync()).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var (payment, paymentBody) = await _renewal.AcceptAsync(evidence: new { channel = "PAYMENT" });
+        var (payment, paymentBody) = await _renewal.AcceptAsync(channel: "PAYMENT");
         payment.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, paymentBody?.ToJsonString());
         paymentBody.Text("errors.0.code").ShouldBe("CHANNEL_NOT_SUPPORTED");
 
@@ -357,10 +349,10 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
         (await _renewal.OfferAsync()).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var (acceptDry, acceptBody) = await _renewal.AcceptAsync(dryRun: true);
         acceptDry.StatusCode.ShouldBe(HttpStatusCode.OK, acceptBody?.ToJsonString());
-        acceptBody.Text("job.state").ShouldBe("BOUND");
+        acceptBody.Text("state").ShouldBe("BOUND");
         (await _renewal.TermVersionsAsync()).ShouldBe(1);
         (await _renewal.CountEventsAsync("RenewalBound")).ShouldBe(0);
-        (await _renewal.ScalarAsync<string>($"SELECT state FROM pol.job WHERE job_type = 'RENEWAL' AND policy_id = '{_renewal.PolicyId}'")).ShouldBe("QUOTED");
+        (await _renewal.JobStateAsync()).ShouldBe("QUOTED");
     }
 
     private async Task<string> SnapshotContentAsync(DateTimeOffset validAt)

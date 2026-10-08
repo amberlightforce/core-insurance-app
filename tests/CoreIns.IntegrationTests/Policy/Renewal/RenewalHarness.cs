@@ -67,14 +67,34 @@ internal sealed class RenewalHarness(PolicySlice slice, string superuserConnecti
         Clock.Advance(target - Clock.Now.ToDateTimeOffset());
     }
 
-    public Task<(HttpResponseMessage Response, JsonNode? Body)> CreateAsync(string? termId = null, bool dryRun = false, Guid? key = null, string roles = Underwriter, string? user = null) =>
-        PostAsync("/api/pol/v1/renewals" + (dryRun ? "?dryRun=true" : string.Empty), new { termId = termId ?? TermId }, key, roles, user);
+    public string JobId { get; private set; } = string.Empty;
+
+    public async Task<(HttpResponseMessage Response, JsonNode? Body)> CreateAsync(string? termId = null, bool dryRun = false, Guid? key = null, string roles = Underwriter, string? user = null)
+    {
+        var result = await PostAsync("/api/pol/v1/renewals" + (dryRun ? "?dryRun=true" : string.Empty), new { termId = termId ?? TermId }, key, roles, user);
+        if (!dryRun && result.Response.IsSuccessStatusCode)
+        {
+            JobId = result.Body.Text("jobId");
+        }
+
+        return result;
+    }
 
     public Task<(HttpResponseMessage Response, JsonNode? Body)> OfferAsync(string? termId = null, string roles = Underwriter, string? user = null) =>
-        PostAsync("/api/pol/v1/renewals/offer", new { termId = termId ?? TermId }, null, roles, user);
+        PostAsync("/api/pol/v1/renewals/offer", new { jobId = JobId, termId = termId ?? TermId }, null, roles, user);
 
-    public Task<(HttpResponseMessage Response, JsonNode? Body)> AcceptAsync(string? termId = null, bool dryRun = false, Guid? key = null, string roles = Underwriter, string? user = null, object? evidence = null) =>
-        PostAsync("/api/pol/v1/renewals/accept" + (dryRun ? "?dryRun=true" : string.Empty), new { termId = termId ?? TermId, acceptanceEvidence = evidence }, key, roles, user);
+    public Task<(HttpResponseMessage Response, JsonNode? Body)> AcceptAsync(
+        string? termId = null, bool dryRun = false, Guid? key = null, string roles = Underwriter, string? user = null, string channel = "STAFF") =>
+        PostAsync(
+            "/api/pol/v1/renewals/accept" + (dryRun ? "?dryRun=true" : string.Empty),
+            new { jobId = JobId, termId = termId ?? TermId, channel, acceptedAt = Clock.Now.ToDateTimeOffset().UtcDateTime.ToString("O", System.Globalization.CultureInfo.InvariantCulture) },
+            key, roles, user);
+
+    public Task<string> JobStateAsync() => ScalarAsync<string>($"SELECT state FROM pol.job WHERE job_id = '{JobId}'");
+
+    public Task<string> SubStateAsync() => ScalarAsync<string>($"SELECT coalesce(sub_state, 'NONE') FROM pol.job WHERE job_id = '{JobId}'");
+
+    public Task<bool> ReferredAsync() => ScalarAsync<bool>($"SELECT referred FROM pol.job WHERE job_id = '{JobId}'");
 
     public async Task<(HttpResponseMessage Response, JsonNode? Body)> PostAsync(string path, object body, Guid? key = null, string roles = Underwriter, string? user = null)
     {
