@@ -151,11 +151,25 @@
   padding-inline-start: var(--space-4);
 }
 
+/* v3 mockup `.wl header`: title left, the count large at the end of the same line. */
+.card[data-variant='work-left'] .titleBlock {
+  display: flex;
+  flex: 1;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card[data-variant='work-left'] .meta {
+  flex: none;
+  line-height: 1;
+}
+
 .dot {
   --_dot: var(--color-status-neutral-solid);
 
   position: absolute;
-  inset-block-start: calc(var(--space-inset-card) + var(--space-2));
+  inset-block-start: calc(var(--space-inset-card) + var(--space-2) + var(--space-px));
   inset-inline-start: var(--space-inset-card);
   inline-size: 8px;
   block-size: 8px;

@@ -4,6 +4,9 @@ export interface ShellUser {
   roles: readonly string[];
 }
 
+/** The legal entity until the PLT user profile and the MKT registry provide it (synthetic). */
+export const sampleEntityName = 'Παράδειγμα Ασφαλιστική Α.Ε.';
+
 /** Synthetic dev users carry a «(synthetic)» marker; the shell shows the person's name only. */
 export function displayName(name: string): string {
   return name.replace(/\s*\([^)]*\)\s*$/u, '').trim() || name;

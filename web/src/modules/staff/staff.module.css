@@ -1,31 +1,125 @@
-/* Layout helpers for the staff screens: spacing, type and colours come from tokens only. */
+/*
+ * Staff screen layout (v3 mockup, D-USR-11). Spacing, type and colours come from tokens only.
+ *
+ * A page is one of two compositions:
+ * - record (default): one rounded opaque sheet (`.page`) whose header strip bleeds to its edges, then a card body
+ *   (sections as bordered cards, two columns where the content allows) — mockup «Φάκελος ζημίας».
+ * - landing: when the page header is the landing canopy, the page itself is transparent and the canopy and
+ *   section cards sit directly on the ambient canvas — mockup «Πύλη διαμεσολαβητή».
+ */
 .page {
+  --_pad-x: var(--space-5);
+  --_pad-y: var(--space-4);
+
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
-  max-inline-size: 1200px;
+  gap: var(--space-4);
+  inline-size: 100%;
+  max-inline-size: var(--size-page-max);
+  min-block-size: 100%;
   margin-inline: auto;
-  padding: var(--space-4);
+  padding: var(--_pad-y) var(--_pad-x) var(--space-6);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--material-chrome-hairline);
 }
 
+/* Landing pages: transparent, cards on the canvas. */
+.page:has(> [data-variant='landing']) {
+  padding: var(--space-0) var(--space-0) var(--space-4);
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* ---------- Record header strip (mockup `.chead`) ---------- */
 .header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: calc(var(--_pad-y, var(--space-0)) * -1) calc(var(--_pad-x, var(--space-0)) * -1)
+    var(--space-0);
+  padding: calc(var(--space-3) + var(--space-0_5)) var(--_pad-x, var(--space-0))
+    calc(var(--space-2) + var(--space-0_5));
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.headerRow {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-3) var(--space-4);
 }
 
 .headerText {
   display: flex;
+  flex: 1 1 320px;
   flex-direction: column;
   gap: var(--space-1);
   min-inline-size: 0;
 }
 
+.overline {
+  margin: var(--space-0);
+  color: var(--color-text-tertiary);
+  font: var(--type-overline);
+  letter-spacing: var(--type-overline-tracking);
+  text-transform: uppercase;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1_5) var(--space-3);
+  min-inline-size: 0;
+}
+
 .title {
-  margin: 0;
+  margin: var(--space-0);
   color: var(--color-text-primary);
+  font: var(--type-heading-2);
+  letter-spacing: var(--type-heading-2-tracking);
+}
+
+.recordId {
+  color: var(--color-text-secondary);
+  font: var(--type-mono-sm);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+  margin: var(--space-1) var(--space-0) var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-body-compact);
+}
+
+.fact {
+  display: inline-flex;
+  gap: var(--space-1_5);
+  align-items: baseline;
+}
+
+.fact dd {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.headerExtra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+/* An «as of» date field in the header strip. */
+.asOf {
+  inline-size: min(100%, 360px);
 }
 
 .actions {
@@ -35,10 +129,229 @@
   gap: var(--space-2);
 }
 
-.stack {
+/* ---------- Landing canopy (mockup `.canopy`) ---------- */
+.canopy {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4) var(--space-6);
+  align-items: end;
+  padding: var(--space-6) calc(var(--space-6) + var(--space-1)) var(--space-6);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.canopyImagery {
+  position: absolute;
+  inset: 0;
+  z-index: calc(var(--z-raised) * -1);
+}
+
+.canopyImagery i {
+  position: absolute;
+  border-radius: var(--radius-full);
+  filter: blur(var(--blur-canopy));
+  animation: canopy-drift var(--motion-duration-drift-1) var(--motion-ease-standard) infinite
+    alternate;
+}
+
+.canopyImagery i:nth-child(1) {
+  inset-block-start: -60%;
+  inset-inline-start: -15%;
+  inline-size: 70%;
+  block-size: 140%;
+  background-color: var(--color-ambient-sea-1);
+}
+
+.canopyImagery i:nth-child(2) {
+  inset-block-start: -50%;
+  inset-inline-start: 40%;
+  inline-size: 50%;
+  block-size: 120%;
+  background-color: var(--color-ambient-sea-2);
+  animation-duration: var(--motion-duration-drift-2);
+  animation-delay: var(--motion-delay-drift-2);
+}
+
+.canopyImagery i:nth-child(3) {
+  inset-block-end: -40%;
+  inset-inline-end: -10%;
+  inline-size: 40%;
+  block-size: 90%;
+  background-color: var(--color-ambient-sea-3);
+  animation-duration: var(--motion-duration-drift-3);
+  animation-delay: var(--motion-delay-drift-3);
+}
+
+.canopyImagery::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-canopy-scrim);
+}
+
+@keyframes canopy-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(6%, 4%, 0) scale(1.1);
+  }
+
+  100% {
+    transform: translate3d(-4%, 7%, 0) scale(0.95);
+  }
+}
+
+:global(:root[data-reduce-motion='true']) .canopyImagery i {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(:root:not([data-reduce-motion='false'])) .canopyImagery i {
+    animation: none;
+  }
+}
+
+.canopyText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+.landingTitle {
+  margin: var(--space-1) var(--space-0) var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-display);
+  letter-spacing: var(--type-display-tracking);
+  text-wrap: balance;
+}
+
+.lead {
+  max-inline-size: 70ch;
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.canopyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.canopyExtra {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Sections: bordered cards (mockup `.card`, `.wl`) ---------- */
+.section {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  min-inline-size: 0;
+  padding: var(--space-inset-card);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+}
+
+.sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-block-size: var(--size-control-md);
+}
+
+.sectionHeading {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.sectionTitle {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+}
+
+.sectionMeta {
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+}
+
+.sectionCount {
+  color: var(--color-text-primary);
+  font: var(--type-heading-2);
+  letter-spacing: var(--type-heading-2-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Family dot with an 18 % halo and a soft glow (v2 mockup `.wl::before`). */
+.dot {
+  --_dot: var(--color-status-neutral-solid);
+
+  flex: none;
+  inline-size: var(--size-status-dot);
+  block-size: var(--size-status-dot);
+  margin-inline: var(--space-1) var(--space-0_5);
+  border-radius: var(--radius-full);
+  background-color: var(--_dot);
+  box-shadow:
+    0 0 0 var(--shadow-dot-halo-spread) color-mix(in srgb, var(--_dot) 18%, transparent),
+    0 0 var(--shadow-dot-glow-blur) color-mix(in srgb, var(--_dot) 60%, transparent);
+}
+
+.dot[data-family='success'] {
+  --_dot: var(--color-status-success-solid);
+}
+
+.dot[data-family='warning'] {
+  --_dot: var(--color-status-warning-solid);
+}
+
+.dot[data-family='danger'] {
+  --_dot: var(--color-status-danger-solid);
+}
+
+.dot[data-family='info'] {
+  --_dot: var(--color-status-info-solid);
+}
+
+.dot[data-family='brand'] {
+  --_dot: var(--color-status-brand-solid);
+}
+
+.dot[data-family='teal'] {
+  --_dot: var(--color-status-teal-solid);
+}
+
+.dot[data-family='plum'] {
+  --_dot: var(--color-status-plum-solid);
+}
+
+.dot[data-family='ai'] {
+  --_dot: var(--color-status-ai-solid);
+}
+
+.dot[data-family='ochre'] {
+  --_dot: var(--color-status-ochre-solid);
+}
+
+/* ---------- Layout helpers ---------- */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
 .row {
@@ -48,28 +361,31 @@
   gap: var(--space-3);
 }
 
+/* Record body: two columns where they fit (mockup `.cbody` 1.35fr / 1fr). */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: var(--space-4);
+  align-items: start;
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
+/* Wide main column + narrower side column. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* Card rows on landing pages (mockup `.worklist`, `.kpis`). */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
   gap: var(--space-3);
-  padding: var(--space-4);
-  border: var(--border-width-hairline) solid var(--color-border-subtle);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface-sheet);
-}
-
-.sectionTitle {
-  margin: 0;
-  color: var(--color-text-primary);
 }
 
 .muted {
+  margin: var(--space-0);
   color: var(--color-text-secondary);
   font: var(--type-body-compact);
 }
@@ -103,8 +419,13 @@
 }
 
 .table th {
+  border-block-end-color: var(--color-border-default);
   color: var(--color-text-secondary);
   font: var(--type-label);
+}
+
+.table tbody tr:hover td {
+  background-color: var(--color-state-row-hover);
 }
 
 .table tfoot th,
@@ -137,4 +458,61 @@
 
 .unbalanced {
   color: var(--color-text-adverse);
+}
+
+/* Record list of links (recently opened, related records). */
+.linkList {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.linkList > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-block-size: var(--size-row-table);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.linkList > li:last-child {
+  border-block-end: 0;
+}
+
+/* Below bp.lg the side column stacks; below bp.md the header and canopy tighten (mockup ≤ 760 px). */
+@media (width < 1240px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (width < 905px) {
+  .page {
+    --_pad-x: var(--space-4);
+    --_pad-y: var(--space-3);
+  }
+
+  .canopy {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .canopyActions {
+    justify-content: flex-start;
+  }
+
+  .landingTitle {
+    font: var(--type-heading-1);
+    letter-spacing: var(--type-heading-1-tracking);
+  }
+}
+
+@media (forced-colors: active) {
+  .dot {
+    background-color: CanvasText;
+    box-shadow: none;
+    forced-color-adjust: none;
+  }
 }

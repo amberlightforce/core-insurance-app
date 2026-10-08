@@ -172,6 +172,8 @@
 .logo {
   display: grid;
   place-items: center;
+  position: relative;
+  z-index: var(--z-raised);
   flex: none;
   inline-size: var(--size-logo);
   block-size: var(--size-logo);
@@ -309,12 +311,9 @@
   min-inline-size: 0;
   overflow: hidden;
   color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
-.crumbs {
   font: var(--type-label-lg);
   letter-spacing: var(--type-label-lg-tracking);
+  white-space: nowrap;
 }
 
 /* v3 mockup `.crumb .entity`: a quiet chip on the sheet colour. */

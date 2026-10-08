@@ -12,7 +12,8 @@
     "policyNumber": "Policy number",
     "help": "The number shown on the policy.",
     "invalid": "Enter a valid policy number.",
-    "open": "Show entries"
+    "open": "Show entries",
+    "lead": "Journal entries are read per policy: journals, debit and credit lines and their balance."
   },
   "journal": {
     "title": "Entry {number}",

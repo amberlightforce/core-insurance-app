@@ -104,7 +104,10 @@ export const routes: RouteObject[] = [
     path: '/',
     element: <AppLayout />,
     children: [
-      { index: true, element: <ModulePlaceholder /> },
+      {
+        index: true,
+        lazy: async () => ({ Component: (await import('./modules/home/HomePage')).HomePage }),
+      },
       ...[...defaultNavItems.slice(1), adminNavItem]
         .filter((item) => !implemented.has(item.to))
         .map((item) => ({

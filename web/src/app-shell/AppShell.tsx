@@ -187,12 +187,7 @@ export function AppShell({
               {workViews}
             </nav>
           ) : null}
-          <main
-            id="main-content"
-            className={styles.main}
-            tabIndex={-1}
-            data-shell-region="main"
-          >
+          <main id="main-content" className={styles.main} tabIndex={-1} data-shell-region="main">
             {children}
           </main>
           {contextPanel ? (

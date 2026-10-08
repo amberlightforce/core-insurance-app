@@ -127,8 +127,12 @@
     "reasons": {
       "pfc": {
         "question": {
-          "usage": { "business": "Business use of the vehicle" },
-          "hire": { "out_of_scope": "Hire or reward carriage of passengers" }
+          "usage": {
+            "business": "Business use of the vehicle"
+          },
+          "hire": {
+            "out_of_scope": "Hire or reward carriage of passengers"
+          }
         }
       }
     }
@@ -226,5 +230,7 @@
     "total": "Total amount",
     "notCalculated": "Not calculated",
     "decision": "Underwriting"
-  }
+  },
+  "overline": "Policies · New quote",
+  "stepOf": "Step {step} of {total}"
 }

@@ -51,7 +51,8 @@ export function TopBar({
             {entityCount > 1 ? <Icon icon={ChevronDown} size={12} /> : null}
           </span>
         ) : null}
-        {breadcrumb ?? (pageTitle ? <span className={cx(styles.pageCrumb)}>{pageTitle}</span> : null)}
+        {breadcrumb ??
+          (pageTitle ? <span className={cx(styles.pageCrumb)}>{pageTitle}</span> : null)}
       </div>
       <AriaButton
         className={cx(styles.paletteTrigger)}

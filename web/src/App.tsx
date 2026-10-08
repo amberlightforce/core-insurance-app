@@ -16,6 +16,7 @@ import { ShortcutOverlay, type ShortcutGroup } from './design-system/components/
 import { EmptyState } from './design-system/components/States';
 import { Toaster } from './design-system/components/Toast';
 import { moduleIcons } from './design-system/icons';
+import { sampleEntityName } from './app-shell/user';
 import { useDevSession } from './dev-auth/devAuth';
 
 /**
@@ -23,7 +24,6 @@ import { useDevSession } from './dev-auth/devAuth';
  * packages land; the palette, help overlay, notifications and avatar menu are live. The signed-in user is the
  * dev session today; identity (MSAL React, D-FE-03) and the PLT user profile replace it and the sample entity.
  */
-const sampleEntity = 'Παράδειγμα Ασφαλιστική Α.Ε.';
 
 function useCurrentNavItem(): NavItem {
   const { pathname } = useLocation();
@@ -89,7 +89,7 @@ export function AppLayout() {
       <AppShell
         pageTitle={t(`shell:nav.${current.id}`)}
         navItems={navItems}
-        entityName={sampleEntity}
+        entityName={sampleEntityName}
         onOpenPalette={openPalette}
         onOpenHelp={openHelp}
         notifications={
