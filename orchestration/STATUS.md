@@ -12,7 +12,7 @@ Re-read STATUS.md, PLAN.md and DECISIONS.md at the start of every wave.
 2. ~~Docker Desktop~~: works now (Docker 29.3.1, reachable from WSL). Testcontainers are used (D-USR-08).
 3. ~~Windows App Control / missing SDK~~: resolved. Native Windows build and tests verified (D-ARC-30); WSL retired.
 
-4. **GitHub Actions billing (user action needed, 2026-10-08):** since 08:04Z every CI and CodeQL job is refused before start: "recent account payments have failed or your spending limit needs to be increased" (Billing & plans). No CI has run on any claims-slice merge (d0ccaed onwards); the local merge gate (D-PRG-17/18) is the only verification until it is fixed. Re-run CI on main once billing is restored.
+4. **GitHub Actions billing (user action needed, 2026-10-08):** since 08:04Z every CI and CodeQL job is refused before start: "recent account payments have failed or your spending limit needs to be increased" (Billing & plans). No CI has run on any claims-slice merge (d0ccaed onwards); the local merge gate (D-PRG-17/18) is the only verification until it is fixed. Re-run CI on main once billing is restored. **User chose to skip CI and gate locally (D-USR-12).**
 
 ## Pending user requests
 - None open. Handover delivered (`HANDOVER.md`). Pause lifted by the user (D-USR-08).
