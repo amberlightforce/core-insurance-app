@@ -34,4 +34,9 @@ public sealed record PolicyGetResponse
     /// <summary>Charge lines of the term as known at knownAt</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("charges")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.ChargeLine> Charges { get; init; }
+
+    /// <summary>The transaction-time instant the answer was resolved at: min(requested knownAt or now, the policy's record-time watermark). Always set; the UI shows it next to the as-of date (D-SL3-03).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveKnownAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? EffectiveKnownAt { get; init; }
 }

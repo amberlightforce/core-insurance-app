@@ -4,39 +4,23 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Term.timeline result. PRD outputs: "policy, term, segment, risk tree"</summary>
+/// <summary>pol.Term.timeline result (REQ-POL-002, REQ-POL-085): the term and its transactions in sequence order, as known at effectiveKnownAt.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TermTimelineResponse
 {
-    /// <summary>PRD: "policy"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'policy'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policy")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Policy { get; init; }
+    public required global::CoreIns.Modules.Policy.Contracts.Api.PolicyView Policy { get; init; }
 
-    /// <summary>PRD: "term"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'term'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("term")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Term { get; init; }
+    public required global::CoreIns.Modules.Policy.Contracts.Api.TermView Term { get; init; }
 
-    /// <summary>PRD: "segment"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("segment")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Segment { get; init; }
+    /// <summary>Ordered by sequence ascending</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("transactions")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.TimelineTransaction> Transactions { get; init; }
 
-    /// <summary>PRD: "risk tree"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("riskTree")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RiskTree { get; init; }
+    /// <summary>min(requested knownAt or now, the policy's record-time watermark); always set (D-SL3-03)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveKnownAt")]
+    public required global::CoreIns.SharedKernel.Instant EffectiveKnownAt { get; init; }
 }

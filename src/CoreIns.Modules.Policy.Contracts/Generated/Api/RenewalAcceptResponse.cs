@@ -4,15 +4,47 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Renewal.accept result. PRD outputs: "job"</summary>
+/// <summary>pol.Renewal.accept result. PRD outputs: "job". The new term is bound; mirrors the RenewalBound event.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RenewalAcceptResponse
 {
-    /// <summary>PRD: "job"</summary>
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>Contract member 'newTermId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("newTermId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyTermId NewTermId { get; init; }
+
+    /// <summary>Contract member 'newTermNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("newTermNumber")]
+    public required int NewTermNumber { get; init; }
+
+    /// <summary>The expiring term</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'predecessorTermId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("job")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("predecessorTermId")]
+    public required global::System.Guid PredecessorTermId { get; init; }
+
+    /// <summary>Contract member 'transactionId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("transactionId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyTransactionId TransactionId { get; init; }
+
+    /// <summary>SCHEDULED until the term start</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termState")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.TermStateCode TermState { get; init; }
+
+    /// <summary>Contract member 'recordedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedAt")]
+    public required global::CoreIns.SharedKernel.Instant RecordedAt { get; init; }
+
+    /// <summary>Contract member 'chargeDeltas'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("chargeDeltas")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Job { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.ChargeLine>? ChargeDeltas { get; init; }
 }

@@ -4,28 +4,34 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Refund.decide request. PRD inputs: "refund id, decision, comment"</summary>
+/// <summary>bil.Refund.decide request (REQ-BIL-188, REQ-BIL-189). PRD inputs: "refund id, decision, comment". The requester, an editor or the maker can never decide (PLT-ERR-SOD); the BIL.Refund authority is checked on the refund total (D-SL3-14).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RefundDecideRequest
 {
-    /// <summary>PRD: "refund id"</summary>
+    /// <summary>Contract member 'refundId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("refundId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.RefundId? RefundId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.RefundId RefundId { get; init; }
 
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'decision'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    public required DecisionValue Decision { get; init; }
 
-    /// <summary>PRD: "comment"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Required for REJECT</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Comment { get; init; }
+    public string? Comment { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DecisionValue
+    {
+        /// <summary><c>APPROVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVE")]
+        Approve,
+
+        /// <summary><c>REJECT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECT")]
+        Reject,
+    }
 }
