@@ -61,6 +61,26 @@ public sealed record ProductArtefact
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? DayCount { get; init; }
 
+    /// <summary>True when the day-count convention is a recommendation awaiting confirmation, not an approved value (REQ-PFC-135, D-SL3-04). Absent means not provisional.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dayCountProvisional")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? DayCountProvisional { get; init; }
+
+    /// <summary>Why the day count is provisional and who must confirm it.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dayCountNote")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? DayCountNote { get; init; }
+
+    /// <summary>Refund method per cancellation source (REQ-PFC-134, subset). A source with no entry has no refund method, so POL refuses a cancellation from it (fail closed).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("refundMethods")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.RefundMethodDef>? RefundMethods { get; init; }
+
+    /// <summary>Contract member 'changePermissions'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("changePermissions")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Product.Contracts.Api.ChangePermissions? ChangePermissions { get; init; }
+
     /// <summary>Contract member 'windows'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("windows")]
     public required global::CoreIns.Modules.Product.Contracts.Api.ProductWindows Windows { get; init; }
