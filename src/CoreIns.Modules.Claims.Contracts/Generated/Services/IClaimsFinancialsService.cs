@@ -26,8 +26,9 @@ public interface IClaimsFinancialsService
     /// <remarks>
     /// <para>Operation clm.Financials.get (query; HTTP GET /api/clm/v1/financials/get).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W7.</para>
+    /// <para>Status: full; fully typed from REQ-CLM-095, REQ-CLM-096, REQ-CLM-101 (SL2-CLM-MONEY; knownAt = asOf). Wave W7.</para>
     /// <para>Exposure: ui; consumers: RI.</para>
+    /// <para>Errors: CLM-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
     /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>

@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>Typed from REQ-CLM-108, REQ-CLM-109. PRD outputs: "set with preview, checks, approval request"</summary>
+/// <summary>Typed from REQ-CLM-108, REQ-CLM-109. PRD outputs: "set with preview, checks, approval request". All checks ALLOW: the set is APPROVED at once (no four-eyes); any REFER: PENDING_APPROVAL with a PLT approval request (decided in the PLT inbox; CLM applies the decision from ApprovalDecided); any DENY: CLM-ERR-AUTHORITY.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TransactionSetSubmitResponse
 {
@@ -29,6 +29,16 @@ public sealed record TransactionSetSubmitResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<AuthorityCheckItem>? AuthorityChecks { get; init; }
 
+    /// <summary>Contract member 'set'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("set")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Claims.Contracts.Api.TransactionSetView? Set { get; init; }
+
+    /// <summary>Payments of the set (Submitted to BIL when the set is approved within authority)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payments")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.ClaimPaymentView>? Payments { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record AuthorityCheckItem
@@ -45,6 +55,24 @@ public sealed record TransactionSetSubmitResponse
         [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public DecisionValue? Decision { get; init; }
+
+        /// <summary>Contract member 'txnId'.</summary>
+        /// <remarks>
+        /// <para>Untyped id: no SharedKernel id type is mapped for 'txnId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+        /// </remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("txnId")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::System.Guid? TxnId { get; init; }
+
+        /// <summary>Authority type (CLM.RESERVE, CLM.PAYMENT)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("type")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Type { get; init; }
+
+        /// <summary>Contract member 'referralRole'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("referralRole")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? ReferralRole { get; init; }
 
         /// <summary>plt.Authority.check</summary>
         [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]

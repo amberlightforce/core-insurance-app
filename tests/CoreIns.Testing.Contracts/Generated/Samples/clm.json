@@ -189,7 +189,75 @@
       "totalsByCurrencyAndCostType": "unspecified"
     },
     "clm.Financials.get": {
-      "balancesByLine": "unspecified"
+      "claimId": "01923740-6943-7df0-80b7-a44d89f73b0b",
+      "knownAt": "2026-10-07T09:00:00Z",
+      "balancesByLine": [
+        {
+          "reserveLineId": "01923fb7-a72f-78fe-82e3-3c111135d8a6",
+          "exposureId": "01922878-489b-7edd-8a58-48edf5a03ddd",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "final": true,
+          "reserved": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "incurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "exposures": [
+        {
+          "exposureId": "0192317e-6ae8-7c25-8401-68ac9850bc55",
+          "reserved": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "incurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paymentPending": true
+        }
+      ],
+      "totals": {
+        "exposureId": "0192976d-9670-74df-8435-b7fead5b78d4",
+        "reserved": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paid": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "incurred": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paymentPending": true
+      }
     },
     "clm.Fnol.saveDraft": {
       "claim": "unspecified",
@@ -490,6 +558,38 @@
     },
     "ClaimMergeResponse": {
       "claim": "unspecified"
+    },
+    "ClaimPayeeAccountView": {
+      "payeeAccountId": "01928029-e420-7ec0-8ddd-16df04efba73",
+      "partyId": "0192b465-d57a-7410-81ac-7e6f3ea46c3b",
+      "claimId": "0192f463-3de2-7d69-83a0-a1613c770bc5",
+      "maskedIban": "sample",
+      "verificationStatus": "SAMPLE_CODE",
+      "coolingOffUntil": "2026-10-07",
+      "change": true,
+      "capturedAt": "2026-10-07T09:00:00Z"
+    },
+    "ClaimPaymentView": {
+      "claimPaymentId": "01920ce9-43e9-7745-8cfd-067ba9746fa6",
+      "setId": "01927773-6ffb-7172-89b3-7c1c8f946b7b",
+      "exposureId": "01929200-759d-793b-8762-68cc50841f6d",
+      "payeePartyId": "01924c5a-00f2-7b6d-8049-0e13ae8b7a10",
+      "payeeAccountId": "0192e368-58ea-7154-84e9-1e0f658c259c",
+      "maskedAccount": "sample",
+      "method": "SAMPLE_CODE",
+      "paymentType": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "status": "PENDING",
+      "holdReason": "SAMPLE_CODE",
+      "disbursementId": "01920fb6-8c1a-7154-8c79-6f2707d30412",
+      "approvalEvidenceRef": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "submittedAt": "2026-10-07T09:00:00Z",
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "clearedAt": "2026-10-07T09:00:00Z"
     },
     "ClaimReopenRequest": {
       "ids": [
@@ -887,11 +987,149 @@
       "duplicateReason": "SAMPLE_CODE",
       "createdAt": "2026-10-07T09:00:00Z"
     },
+    "FinancialBalance": {
+      "exposureId": "019263ea-3c60-7a67-8400-e727e84a146a",
+      "reserved": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paid": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "openReserve": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "incurred": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paymentPending": true
+    },
+    "FinancialLineBalance": {
+      "reserveLineId": "01921565-92d6-7a50-8307-0f093d624cc2",
+      "exposureId": "01929c4c-9055-7673-8efa-a2898de85056",
+      "costType": "SAMPLE_CODE",
+      "costCategory": "SAMPLE_CODE",
+      "final": true,
+      "reserved": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paid": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "openReserve": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "incurred": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "FinancialTransactionView": {
+      "txnId": "01925540-8973-7e74-8601-f2100407e00f",
+      "txnNumber": "sample",
+      "kind": "RESERVE",
+      "exposureId": "01928f1b-6537-7627-8bf0-5f3fe7939c42",
+      "reserveLineId": "01925d4d-0ae0-7cf2-8b9b-a69997cfa9cb",
+      "costType": "SAMPLE_CODE",
+      "costCategory": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "functionalAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "groupAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "eroding": true,
+      "paymentType": "SAMPLE_CODE",
+      "claimPaymentId": "0192432b-0c31-7b0f-839f-e91f988a199f",
+      "reasonCode": "SAMPLE_CODE",
+      "proposed": true,
+      "status": "SAMPLE_CODE"
+    },
     "FinancialsDailyTotalsResponse": {
       "totalsByCurrencyAndCostType": "unspecified"
     },
     "FinancialsGetResponse": {
-      "balancesByLine": "unspecified"
+      "claimId": "0192a5ad-0117-7de8-891b-f233e41e9c8c",
+      "knownAt": "2026-10-07T09:00:00Z",
+      "balancesByLine": [
+        {
+          "reserveLineId": "0192bd78-ec5a-7353-87cc-ed853ac6c776",
+          "exposureId": "0192d0f6-63cb-7e36-8134-2cb9c4b678c4",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "final": true,
+          "reserved": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "incurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "exposures": [
+        {
+          "exposureId": "0192bf2b-faa8-7bb9-8fd2-e4f68e628212",
+          "reserved": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "incurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paymentPending": true
+        }
+      ],
+      "totals": {
+        "exposureId": "0192b002-b426-7820-8635-ba0248475bd1",
+        "reserved": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paid": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "incurred": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paymentPending": true
+      }
     },
     "FnolExposureInput": {
       "kind": "OWN_DAMAGE",
@@ -1236,6 +1474,69 @@
         "SAMPLE_CODE"
       ]
     },
+    "PayeeAccountCaptureRequest": {
+      "claimId": "01921353-5b1c-7845-8efb-23a17657e01d",
+      "partyId": "01926212-4473-7107-8ffa-d01b57ba3695",
+      "iban": "sample",
+      "holderName": "sample",
+      "evidenceRef": "sample"
+    },
+    "PayeeAccountCaptureResponse": {
+      "payeeAccount": {
+        "payeeAccountId": "01925709-c44c-7bf7-87e6-90629f6d0e4f",
+        "partyId": "01923cc6-4f6f-7adf-8723-f426b95d1147",
+        "claimId": "019269b4-476f-72d5-8e6e-988b37c89794",
+        "maskedIban": "sample",
+        "verificationStatus": "SAMPLE_CODE",
+        "coolingOffUntil": "2026-10-07",
+        "change": true,
+        "capturedAt": "2026-10-07T09:00:00Z"
+      }
+    },
+    "PayeeAccountListPage": {
+      "items": [
+        {
+          "payeeAccountId": "0192b899-3843-7098-8972-34972bcb1172",
+          "partyId": "01929957-cb51-7f44-832f-87b7fbd743a9",
+          "claimId": "0192fe96-8f7a-7ca7-8f07-a3caf43ec43f",
+          "maskedIban": "sample",
+          "verificationStatus": "SAMPLE_CODE",
+          "coolingOffUntil": "2026-10-07",
+          "change": true,
+          "capturedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PaymentListPage": {
+      "items": [
+        {
+          "claimPaymentId": "0192cd3a-950e-7c55-8a19-76c8712d74e9",
+          "setId": "01925d89-dfbc-768c-8e4d-4adedc46509b",
+          "exposureId": "0192e809-1eb3-7860-8433-14a863742bce",
+          "payeePartyId": "01922cd0-728c-7a97-868e-79b0337b5b84",
+          "payeeAccountId": "0192be2c-c202-72c8-88e2-8a840ea8b392",
+          "maskedAccount": "sample",
+          "method": "SAMPLE_CODE",
+          "paymentType": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "status": "PENDING",
+          "holdReason": "SAMPLE_CODE",
+          "disbursementId": "0192b296-123b-7739-88cd-74748efa4bf0",
+          "approvalEvidenceRef": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "submittedAt": "2026-10-07T09:00:00Z",
+          "issuedAt": "2026-10-07T09:00:00Z",
+          "clearedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
     "PaymentReissueRequest": {
       "paymentId": "01924969-2990-7552-8fb3-8a6ca684f396",
       "reason": "SAMPLE_CODE",
@@ -1352,7 +1653,8 @@
           },
           "payeePartyId": "0192ed9e-f497-71b7-853d-e0ecf615bacd",
           "payeeAccountId": "019286b6-1878-7643-8a52-2cbb34ed529a",
-          "reason": "SAMPLE_CODE"
+          "reason": "SAMPLE_CODE",
+          "paymentType": "PARTIAL"
         }
       ]
     },
@@ -1372,12 +1674,108 @@
           "after": {
             "amount": "120.50",
             "currency": "EUR"
+          },
+          "paidBefore": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paidAfter": {
+            "amount": "120.50",
+            "currency": "EUR"
           }
         }
       ],
       "checks": [
         "unspecified"
-      ]
+      ],
+      "set": {
+        "setId": "0192b468-7445-7fef-87a2-2d4c1da20a94",
+        "claimId": "019295ae-23a3-7c77-8663-9994d7396575",
+        "status": "DRAFT",
+        "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "maker": "sample",
+        "approvalRequestId": "0192e408-7c4b-706c-84f2-e78e8b59fffd",
+        "approvalPayloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "fourEyes": true,
+        "rejectionReason": "SAMPLE_CODE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "transactions": [
+          {
+            "txnId": "0192a9f0-5b3a-7d53-8bb7-91c003234cd9",
+            "txnNumber": "sample",
+            "kind": "RESERVE",
+            "exposureId": "0192b276-814c-73d5-8b4b-9231b25ce527",
+            "reserveLineId": "019275a1-448a-7fc5-8d10-2f6e82eee5e3",
+            "costType": "SAMPLE_CODE",
+            "costCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "functionalAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "groupAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "eroding": true,
+            "paymentType": "SAMPLE_CODE",
+            "claimPaymentId": "01929d24-e413-7864-85d7-6d50d9784d2a",
+            "reasonCode": "SAMPLE_CODE",
+            "proposed": true,
+            "status": "SAMPLE_CODE"
+          }
+        ]
+      }
+    },
+    "TransactionSetGetResponse": {
+      "set": {
+        "setId": "0192f7c3-ba1a-754d-871e-e35fc4118874",
+        "claimId": "0192528f-3795-7bdc-80a4-22a01df23dce",
+        "status": "DRAFT",
+        "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "maker": "sample",
+        "approvalRequestId": "01928937-2b87-7ffd-84f7-7e299ba808b6",
+        "approvalPayloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "fourEyes": true,
+        "rejectionReason": "SAMPLE_CODE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "transactions": [
+          {
+            "txnId": "0192ef1b-3262-7cd2-8cf7-3fc3a0ce7454",
+            "txnNumber": "sample",
+            "kind": "RESERVE",
+            "exposureId": "0192f868-b9db-7995-8f54-57407a5a6b14",
+            "reserveLineId": "019237b0-c8cb-739c-87f5-e96717bc56ce",
+            "costType": "SAMPLE_CODE",
+            "costCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "functionalAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "groupAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "eroding": true,
+            "paymentType": "SAMPLE_CODE",
+            "claimPaymentId": "019234b4-be57-710c-82e7-13459e340a16",
+            "reasonCode": "SAMPLE_CODE",
+            "proposed": true,
+            "status": "SAMPLE_CODE"
+          }
+        ]
+      }
     },
     "TransactionSetRejectRequest": {
       "setId": "0192cc23-d706-75c7-80bb-8cfb10d57560",
@@ -1407,7 +1805,120 @@
       "authorityChecks": [
         {
           "checkId": "0192aa32-db49-7430-833a-8fe4aa2a2be4",
-          "decision": "ALLOW"
+          "decision": "ALLOW",
+          "txnId": "0192b520-728d-7842-8611-341c6dd617dd",
+          "type": "sample",
+          "referralRole": "sample"
+        }
+      ],
+      "set": {
+        "setId": "01926c75-053e-7cdb-8e71-1e1258bdd30d",
+        "claimId": "0192c739-8381-7e6b-8dcf-18c14440a6ab",
+        "status": "DRAFT",
+        "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "maker": "sample",
+        "approvalRequestId": "01928803-2e12-791d-8c6d-1d6ec1ca0dd5",
+        "approvalPayloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "fourEyes": true,
+        "rejectionReason": "SAMPLE_CODE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "transactions": [
+          {
+            "txnId": "0192b4b0-0021-70ac-86e1-97dc1b6bc357",
+            "txnNumber": "sample",
+            "kind": "RESERVE",
+            "exposureId": "01924ede-c435-7d9d-8a0f-4dfae5e0d58b",
+            "reserveLineId": "01923eff-a5fa-7bc5-8ef9-571245530da1",
+            "costType": "SAMPLE_CODE",
+            "costCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "functionalAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "groupAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "eroding": true,
+            "paymentType": "SAMPLE_CODE",
+            "claimPaymentId": "0192c365-39e2-7824-8faa-1f26bc361ffe",
+            "reasonCode": "SAMPLE_CODE",
+            "proposed": true,
+            "status": "SAMPLE_CODE"
+          }
+        ]
+      },
+      "payments": [
+        {
+          "claimPaymentId": "0192f4ba-6e51-7230-8e19-0aa77ba7267b",
+          "setId": "01928c04-1014-752a-8a92-2fe90f780e5b",
+          "exposureId": "01920844-8796-73c2-88a7-2dbc6e2f6145",
+          "payeePartyId": "0192bd5a-25bf-705b-8ab0-be8d5563c8b9",
+          "payeeAccountId": "0192c645-4f9e-74b7-8572-793c58f26281",
+          "maskedAccount": "sample",
+          "method": "SAMPLE_CODE",
+          "paymentType": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "status": "PENDING",
+          "holdReason": "SAMPLE_CODE",
+          "disbursementId": "0192b428-a62f-79b9-8ab6-d60908da018b",
+          "approvalEvidenceRef": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "submittedAt": "2026-10-07T09:00:00Z",
+          "issuedAt": "2026-10-07T09:00:00Z",
+          "clearedAt": "2026-10-07T09:00:00Z"
+        }
+      ]
+    },
+    "TransactionSetView": {
+      "setId": "0192db38-2a16-7f51-8a40-6d49d54fcd60",
+      "claimId": "01927a25-3bc9-7199-888b-ff5a5e557dd4",
+      "status": "DRAFT",
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "maker": "sample",
+      "approvalRequestId": "0192ec09-46b6-7d6b-832a-7e46872beea5",
+      "approvalPayloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "fourEyes": true,
+      "rejectionReason": "SAMPLE_CODE",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "submittedAt": "2026-10-07T09:00:00Z",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "transactions": [
+        {
+          "txnId": "0192a3e8-2747-788f-8688-041f960d6083",
+          "txnNumber": "sample",
+          "kind": "RESERVE",
+          "exposureId": "01929055-9b83-773c-8c8a-7657de74c18a",
+          "reserveLineId": "0192e888-2db9-7866-8eb5-1e5e70ec4e8a",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "functionalAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "groupAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "eroding": true,
+          "paymentType": "SAMPLE_CODE",
+          "claimPaymentId": "0192d7d6-5c58-7d10-8967-d6d6faaf0780",
+          "reasonCode": "SAMPLE_CODE",
+          "proposed": true,
+          "status": "SAMPLE_CODE"
         }
       ]
     },

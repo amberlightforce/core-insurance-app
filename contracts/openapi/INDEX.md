@@ -14,7 +14,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
 | [POL](#pol) | 52 | 48 | 4 | 37 | 15 | 8 | 10 | 0 |
 | [BIL](#bil) | 87 | 87 | 0 | 55 | 32 | 6 | 5 | 1 |
-| [CLM](#clm) | 54 | 54 | 0 | 43 | 11 | 10 | 9 | 5 |
+| [CLM](#clm) | 58 | 58 | 0 | 44 | 14 | 10 | 9 | 5 |
 | [RI](#ri) | 116 | 110 | 6 | 82 | 34 | 9 | 0 | 0 |
 | [FIN](#fin) | 88 | 80 | 8 | 55 | 33 | 10 | 0 | 3 |
 | [DOC](#doc) | 44 | 42 | 2 | 27 | 17 | 4 | 12 | 0 |
@@ -25,7 +25,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 20 | 20 | 0 | 12 | 8 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 32 | 16 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1114 | 896 | 218 | 728 | 386 | 127 | 69 | 65 |
+| **Total** | 1119 | 901 | 218 | 729 | 390 | 128 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -506,6 +506,9 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `clm.Import.convertCurrency` | POST `/api/clm/v1/import/convert-currency` | C | yes | internal |  | W9 | full | REQ-CLM-010, REQ-CLM-237, REQ-CLM-266 |
 | `clm.Import.financialHistory` | POST `/api/clm/v1/import/financial-history` | C | yes | internal | MIG | W9 | full | REQ-CLM-010, REQ-CLM-237, REQ-CLM-266 |
 | `clm.Import.reverse` | POST `/api/clm/v1/import/reverse` | C | yes | internal |  | W9 | full | REQ-CLM-010, REQ-CLM-237, REQ-CLM-266 |
+| `clm.PayeeAccount.capture` | POST `/api/clm/v1/payee-accounts/capture` | C |  | ui |  | W7 | full | REQ-CLM-123, REQ-CLM-131 |
+| `clm.PayeeAccount.list` | GET `/api/clm/v1/claims/{id}/payee-accounts` | Q |  | ui |  | W7 | full | REQ-CLM-123 |
+| `clm.Payment.list` | GET `/api/clm/v1/claims/{id}/payments` | Q |  | ui |  | W7 | full | REQ-CLM-004, REQ-CLM-119, REQ-CLM-123 … |
 | `clm.Payment.reissue` | POST `/api/clm/v1/payments/reissue` | C | yes | ui |  | W7 | full | REQ-CLM-004, REQ-CLM-125..REQ-CLM-127, REQ-CLM-136 |
 | `clm.Payment.stop` | POST `/api/clm/v1/payments/stop` | C | yes | ui |  | W7 | full | REQ-CLM-004, REQ-CLM-125..REQ-CLM-127, REQ-CLM-136 |
 | `clm.Payment.void` | POST `/api/clm/v1/payments/void` | C | yes | ui |  | W7 | full | REQ-CLM-004, REQ-CLM-125..REQ-CLM-127, REQ-CLM-136 |
@@ -518,6 +521,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `clm.StatutoryOffer.recordRepairAgreement` | POST `/api/clm/v1/statutory-offers/record-repair-agreement` | C | yes | ui |  | W7 | full | REQ-CLM-007, REQ-CLM-166, REQ-CLM-167 … |
 | `clm.TransactionSet.approve` | POST `/api/clm/v1/transaction-sets/approve` | C | yes | ui | WRK | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
 | `clm.TransactionSet.build` | POST `/api/clm/v1/transaction-sets/build` | C | yes | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
+| `clm.TransactionSet.get` | GET `/api/clm/v1/transaction-sets/{id}` | Q |  | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-107..REQ-CLM-113 |
 | `clm.TransactionSet.reject` | POST `/api/clm/v1/transaction-sets/reject` | C | yes | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
 | `clm.TransactionSet.return` | POST `/api/clm/v1/transaction-sets/return` | C | yes | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
 | `clm.TransactionSet.submit` | POST `/api/clm/v1/transaction-sets/submit` | C | yes | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
@@ -1458,8 +1462,8 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-BIL-012 | `bil.Import.*` |  |
 | REQ-CLM-001 | `chn.PartnerClaim.report`, `clm.Fnol.get`, `clm.Fnol.saveDraft`, `clm.Fnol.submit` (+1) |  |
 | REQ-CLM-002 | `clm.Coverage.decide`, `clm.Coverage.reverify` | mapped by builder |
-| REQ-CLM-003 | `clm.TransactionSet.approve`, `clm.TransactionSet.build`, `clm.TransactionSet.reject`, `clm.TransactionSet.return` (+1) |  |
-| REQ-CLM-004 | `clm.Payment.reissue`, `clm.Payment.stop`, `clm.Payment.void`, `clm.TransactionSet.approve` (+4) | mapped by builder |
+| REQ-CLM-003 | `clm.TransactionSet.approve`, `clm.TransactionSet.build`, `clm.TransactionSet.get`, `clm.TransactionSet.reject` (+2) |  |
+| REQ-CLM-004 | `clm.Payment.list`, `clm.Payment.reissue`, `clm.Payment.stop`, `clm.Payment.void` (+5) | mapped by builder |
 | REQ-CLM-005 | — | event contract (claim financial events in contracts/events/clm); secondary: clm.Financials.dailyTotals for FIN reconciliation |
 | REQ-CLM-006 | `clm.CatEvent.*` |  |
 | REQ-CLM-007 | `clm.StatutoryOffer.issue`, `clm.StatutoryOffer.recordAcceptance`, `clm.StatutoryOffer.recordRepairAgreement` | mapped by builder |

@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions"</summary>
+/// <summary>Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions". Builds a Draft set: reserve lines are created on first use (REQ-CLM-093), an eroding payment above the open reserve adds a reserve increase to the same set (REQ-CLM-097, auto-adjust on by default) and a FINAL payment proposes the release of the remainder (REQ-CLM-099). With dryRun nothing is stored (preview only).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TransactionSetBuildRequest
 {
@@ -16,7 +16,7 @@ public sealed record TransactionSetBuildRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("transactions")]
     public required global::System.Collections.Generic.IReadOnlyList<TransactionItem> Transactions { get; init; }
 
-    /// <summary>Claim financial transaction on a reserve line (exposure × cost type × cost category)</summary>
+    /// <summary>Claim financial transaction on a reserve line (exposure × cost type × cost category). SL2-CLM-MONEY: kinds RESERVE and PAYMENT, EUR only (D-SL2-06), at most one payment per set; cost types and categories from the illustrative motor list (D-SL2-04: INDEMNITY → VEHICLE_REPAIR, TOTAL_LOSS; EXPENSE_ALLOCATED → ASSESSOR_FEE)</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record TransactionItem
     {
@@ -45,7 +45,7 @@ public sealed record TransactionSetBuildRequest
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::CoreIns.SharedKernel.Identifiers.PartyId? PayeePartyId { get; init; }
 
-        /// <summary>BIL payee account (REQ-BIL-343)</summary>
+        /// <summary>BIL payee account (REQ-BIL-343), captured with clm.PayeeAccount.capture</summary>
         /// <remarks>
         /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
         /// </remarks>
@@ -53,10 +53,15 @@ public sealed record TransactionSetBuildRequest
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::System.Guid? PayeeAccountId { get; init; }
 
-        /// <summary>Contract member 'reason'.</summary>
+        /// <summary>Reason code; required for every manual reserve change (REQ-CLM-098, CLM-ERR-RESERVE-REASON)</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public string? Reason { get; init; }
+
+        /// <summary>Payment transactions (REQ-CLM-119; default PARTIAL). A FINAL payment proposes the release of the line's remaining open reserve in the same set (REQ-CLM-099)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("paymentType")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public PaymentTypeValue? PaymentType { get; init; }
 
         /// <summary>Claim financial transaction kind (REQ-CLM-003)</summary>
         [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
@@ -78,6 +83,20 @@ public sealed record TransactionSetBuildRequest
             /// <summary><c>RECOVERY</c></summary>
             [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RECOVERY")]
             Recovery,
+        }
+
+        /// <summary>Payment transactions (REQ-CLM-119; default PARTIAL). A FINAL payment proposes the release of the line's remaining open reserve in the same set (REQ-CLM-099)</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<PaymentTypeValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum PaymentTypeValue
+        {
+            /// <summary><c>PARTIAL</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PARTIAL")]
+            Partial,
+
+            /// <summary><c>FINAL</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FINAL")]
+            Final,
         }
     }
 }
