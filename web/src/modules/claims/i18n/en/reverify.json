@@ -1,0 +1,67 @@
+{
+  "reverify": {
+    "banner": {
+      "title": "The policy changed after this claim was verified",
+      "body": "The policy snapshot this claim was verified against has been superseded.",
+      "raisedAt": "Flagged {at}.",
+      "keepsOld": "The claim keeps its current coverage basis until you decide to keep it or adopt the new one.",
+      "review": "Compare and decide"
+    },
+    "dialog": {
+      "title": "Re-verify the coverage basis"
+    },
+    "compare": {
+      "current": "Current basis (on the claim)",
+      "new": "New policy snapshot",
+      "knownAt": "Known since",
+      "vehicle": "Vehicle",
+      "vehicleValue": "Vehicle value",
+      "productVersion": "Product version",
+      "coverages": "Selected coverages",
+      "noCoverages": "No coverage is selected.",
+      "onlyHere": "only in this version",
+      "notInForce": "The policy is not in force in this version."
+    },
+    "decision": {
+      "title": "Re-verification decision",
+      "intro": "Nothing changes on the claim until you decide. The decision and your reason are recorded.",
+      "label": "Decision",
+      "KEEP": {
+        "label": "Keep the current basis",
+        "help": "The claim stays verified against the snapshot it has today."
+      },
+      "ADOPT": {
+        "label": "Adopt the new snapshot",
+        "help": "The claim is verified against the new snapshot. Exposures that lose cover are flagged and new payments on them are blocked."
+      },
+      "submit": "Record decision"
+    },
+    "reason": {
+      "label": "Reason",
+      "illustrative": "Illustrative code list.",
+      "codes": {
+        "LOSS_BEFORE_CHANGE": "The loss happened before the change",
+        "CHANGE_NOT_MATERIAL": "The change does not affect this claim",
+        "HANDLER_JUDGEMENT": "Handler's judgement",
+        "CHANGE_APPLIES": "The change applies to this loss",
+        "POLICY_CORRECTED": "The policy was corrected"
+      }
+    },
+    "comment": {
+      "label": "Comment (optional)"
+    },
+    "errors": {
+      "decision": "Choose to keep or to adopt.",
+      "reason": "Choose a reason."
+    },
+    "done": {
+      "KEEP": "The current coverage basis was kept.",
+      "ADOPT": "The new policy snapshot was adopted."
+    },
+    "failed": "The decision could not be recorded",
+    "noPermission": {
+      "title": "You cannot take this decision",
+      "body": "Taking a coverage decision needs the claims handler authority. Ask a claims handler to review it."
+    }
+  }
+}
