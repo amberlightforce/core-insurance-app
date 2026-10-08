@@ -18,4 +18,12 @@ public sealed record ApprovalVerifyForExecutionRequest
     /// <summary>PRD: "hash"</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
     public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
+
+    /// <summary>Approval type the executing module expects (SL2-PLT review D1)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("type")]
+    public required string Type { get; init; }
+
+    /// <summary>Subject the executing module is about to execute (SL2-PLT review D1)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("objectRef")]
+    public required global::CoreIns.SharedKernel.Identifiers.ObjectRef ObjectRef { get; init; }
 }

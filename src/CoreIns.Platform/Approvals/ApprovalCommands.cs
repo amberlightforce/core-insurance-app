@@ -26,6 +26,7 @@ internal static class ApprovalErrors
     public const string CheckerMustBeHuman = "CHECKER-MUST-BE-HUMAN";
     public const string Stale = "APPROVAL-STALE";
     public const string HashMismatch = "APPROVAL-HASH-MISMATCH";
+    public const string SubjectMismatch = "APPROVAL-SUBJECT-MISMATCH";
 
     public static DomainError Of(string name, string detail) => DomainError.Of(ModuleCode.PLT, name, detail);
 }
@@ -145,7 +146,7 @@ internal sealed class RequestApprovalHandler(
 
             ApprovalEvents.PublishDecided(events, existing, ApprovalStore.Withdrawn, null, now);
             editors.AddRange(existing.Editors);
-            editors.Add(ApprovalStore.ActorKey(existing.Maker));
+            editors.AddRange(existing.MakerKeys);
         }
 
         var row = new ApprovalRow
@@ -157,6 +158,7 @@ internal sealed class RequestApprovalHandler(
             PayloadHash = request.PayloadHash,
             Status = ApprovalStatus.PendingApproval,
             Maker = maker,
+            MakerOnBehalfOf = context.OnBehalfOf,
             Editors = [.. editors.Where(e => e != ApprovalStore.ActorKey(maker)).Distinct(StringComparer.Ordinal)],
             AuthorityType = authorityType.Value,
             AuthorityAmount = request.Authority.Amount,
@@ -168,6 +170,9 @@ internal sealed class RequestApprovalHandler(
             RequestedAt = now,
             Version = 1,
         };
+        // A STALE result here (lost race for the subject) can leave the withdrawal of the earlier request and its
+        // ApprovalDecided event staged in the caller's transaction: an in-process caller that gets PLT-ERR-APPROVAL-STALE
+        // must roll its transaction back (or call RequestAsync inside a savepoint it rolls back to), never commit.
         if (!await ApprovalStore.TryInsertAsync(connection, transaction, row, cancellationToken).ConfigureAwait(false))
         {
             return ApprovalErrors.Of(ApprovalErrors.Stale, "Another approval request for the subject was created meanwhile; retry.");
@@ -250,12 +255,17 @@ internal sealed class DecideApprovalHandler(
             return ApprovalErrors.Of(ApprovalErrors.Stale, "The content changed after you reviewed it; reload the request and review the new content.");
         }
 
-        if (row.Maker == checker || (context.OnBehalfOf is { } principal && principal == row.Maker))
+        // The checker, or the person the checker acts for, must be neither the maker nor the maker's principal (an AI
+        // agent's or service's delegating person): four eyes across delegation (REQ-PLT-115, SL2-PLT review D2).
+        var checkerKeys = context.OnBehalfOf is { } checkerPrincipal
+            ? new[] { ApprovalStore.ActorKey(checker), ApprovalStore.ActorKey(checkerPrincipal) }
+            : [ApprovalStore.ActorKey(checker)];
+        if (checkerKeys.Any(k => row.MakerKeys.Contains(k, StringComparer.Ordinal)))
         {
             return ApprovalErrors.Of(ApprovalErrors.SelfApproval, "The maker cannot decide their own request (REQ-PLT-115).");
         }
 
-        if (row.Editors.Contains(ApprovalStore.ActorKey(checker), StringComparer.Ordinal))
+        if (checkerKeys.Any(k => row.Editors.Contains(k, StringComparer.Ordinal)))
         {
             return ApprovalErrors.Of(ApprovalErrors.EditorCannotApprove, "An editor of the content cannot decide it (REQ-PLT-115).");
         }
@@ -393,12 +403,19 @@ internal sealed class ApprovalQueries(DbSession session, RequestContext context)
         ArgumentNullException.ThrowIfNull(request);
         var row = await FindAsync(request.RequestId, cancellationToken).ConfigureAwait(false)
             ?? throw new DomainException(DomainError.Of(ModuleCode.PLT, PlatformErrors.NotFound, "The approval request does not exist."));
+        if (!string.Equals(row.ApprovalType, request.Type, StringComparison.Ordinal) || row.ObjectRef != request.ObjectRef)
+        {
+            throw new DomainException(ApprovalErrors.Of(
+                ApprovalErrors.SubjectMismatch, "The approval request is of another approval type or for another subject than the one to execute."));
+        }
+
         if (row.PayloadHash != request.Hash)
         {
             throw new DomainException(ApprovalErrors.Of(ApprovalErrors.HashMismatch, "The approved content hash differs from the content to execute (REQ-PLT-117)."));
         }
 
-        return new ApprovalVerifyForExecutionResponse { Ok = row.Status == ApprovalStatus.Approved, Status = row.Status };
+        // The executing module also compares Authority (type, amount, codes) with the dimensions it computes itself.
+        return new ApprovalVerifyForExecutionResponse { Ok = row.Status == ApprovalStatus.Approved, Status = row.Status, Authority = row.ToView().Authority };
     }
 
     private string LegalEntity => context.LegalEntity?.Value ?? throw new InvalidOperationException("The request context has no legal entity.");

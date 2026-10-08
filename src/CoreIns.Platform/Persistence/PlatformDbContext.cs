@@ -248,6 +248,10 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
                 table.HasCheckConstraint("ck_approval_request_hash", "payload_hash ~ '^[0-9a-f]{64}$'");
                 table.HasCheckConstraint("ck_approval_request_maker_kind", "maker_kind IN ('USER', 'SERVICE', 'AI_AGENT')");
                 table.HasCheckConstraint("ck_approval_request_checker_kind", "checker_kind IS NULL OR checker_kind = 'USER'");
+                table.HasCheckConstraint(
+                    "ck_approval_request_maker_principal",
+                    "(maker_on_behalf_of_kind IS NULL) = (maker_on_behalf_of_id IS NULL) "
+                    + "AND (maker_on_behalf_of_kind IS NULL OR maker_on_behalf_of_kind IN ('USER', 'SERVICE', 'AI_AGENT'))");
                 table.HasCheckConstraint("ck_approval_request_amount", "(authority_amount IS NULL) = (authority_currency IS NULL)");
                 table.HasCheckConstraint("ck_approval_request_currency", "authority_currency IS NULL OR authority_currency ~ '^[A-Z]{3}$'");
                 table.HasCheckConstraint("ck_approval_request_codes", "jsonb_typeof(authority_codes) = 'object'");
@@ -272,6 +276,8 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
             entity.Property(e => e.Status).HasColumnName("status").IsRequired();
             entity.Property(e => e.MakerKind).HasColumnName("maker_kind").IsRequired();
             entity.Property(e => e.MakerId).HasColumnName("maker_id").IsRequired();
+            entity.Property(e => e.MakerOnBehalfOfKind).HasColumnName("maker_on_behalf_of_kind");
+            entity.Property(e => e.MakerOnBehalfOfId).HasColumnName("maker_on_behalf_of_id");
             entity.Property(e => e.Editors).HasColumnName("editors").HasColumnType("text[]").IsRequired();
             entity.Property(e => e.AuthorityType).HasColumnName("authority_type").IsRequired();
             entity.Property(e => e.AuthorityAmount).HasColumnName("authority_amount").HasColumnType("numeric");
@@ -658,6 +664,10 @@ internal sealed class ApprovalRequestRow
     public string MakerKind { get; set; } = string.Empty;
 
     public string MakerId { get; set; } = string.Empty;
+
+    public string? MakerOnBehalfOfKind { get; set; }
+
+    public string? MakerOnBehalfOfId { get; set; }
 
     public string[] Editors { get; set; } = [];
 

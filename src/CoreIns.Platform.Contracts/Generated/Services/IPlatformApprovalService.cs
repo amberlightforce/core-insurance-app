@@ -38,7 +38,7 @@ public interface IPlatformApprovalService
     /// <para>Operation plt.Approval.request (command; HTTP POST /api/plt/v1/approval/request).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full; fully typed from REQ-PLT-004, REQ-PLT-114, REQ-PLT-116, REQ-PLT-117 (SL2-PLT). Wave W1.</para>
-    /// <para>Exposure: ui; consumers: BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT, UW.</para>
+    /// <para>Exposure: internal; consumers: BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT, UW.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: PLT-ERR-SELF-APPROVAL (403), PLT-ERR-EDITOR-CANNOT-APPROVE (403), PLT-ERR-CHECKER-MUST-BE-HUMAN (422), PLT-ERR-VALIDATION (400), PLT-ERR-UNKNOWN-TYPE (400), PLT-ERR-APPROVAL-STALE (409), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
@@ -50,7 +50,7 @@ public interface IPlatformApprovalService
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full; fully typed from REQ-PLT-117 (SL2-PLT). Wave W1.</para>
     /// <para>Exposure: internal; consumers: BIL, CLM, MIG, MKT, PFC, PTY.</para>
-    /// <para>Errors: PLT-ERR-APPROVAL-HASH-MISMATCH (422), PLT-ERR-NOT-FOUND (404).</para>
+    /// <para>Errors: PLT-ERR-APPROVAL-HASH-MISMATCH (422), PLT-ERR-APPROVAL-SUBJECT-MISMATCH (422), PLT-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalVerifyForExecutionResponse> VerifyForExecutionAsync(global::CoreIns.Platform.Contracts.Api.ApprovalVerifyForExecutionRequest request, global::System.Threading.CancellationToken cancellationToken = default);
 }

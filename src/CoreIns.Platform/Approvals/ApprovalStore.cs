@@ -26,6 +26,14 @@ internal sealed record ApprovalRow
 
     public required ActorRef Maker { get; init; }
 
+    /// <summary>The person the maker acted for (an AI agent's or service's principal), if any (REQ-PLT-115, -121).</summary>
+    public ActorRef? MakerOnBehalfOf { get; init; }
+
+    /// <summary>The maker and the maker's principal as <c>KIND:id</c>: none of them may decide (REQ-PLT-115).</summary>
+    public IEnumerable<string> MakerKeys => MakerOnBehalfOf is { } principal
+        ? [ApprovalStore.ActorKey(Maker), ApprovalStore.ActorKey(principal)]
+        : [ApprovalStore.ActorKey(Maker)];
+
     /// <summary>Makers of earlier content versions of the same subject (REQ-PLT-115 editors), as <c>KIND:id</c>.</summary>
     public required IReadOnlyList<string> Editors { get; init; }
 
@@ -108,7 +116,7 @@ internal static class ApprovalStore
     private const string Columns =
         "request_id, legal_entity, approval_type, object_module, object_type, object_id, payload_hash, status, maker_kind, maker_id, editors, "
         + "authority_type, authority_amount, authority_currency, authority_codes::text, referral_role, reason, diff::text, supersedes, requested_at, "
-        + "decision, checker_kind, checker_id, decision_comment, authority_check_id, decided_at, version";
+        + "decision, checker_kind, checker_id, decision_comment, authority_check_id, decided_at, version, maker_on_behalf_of_kind, maker_on_behalf_of_id";
 
     public static string StatusCode(ApprovalStatus status) => status switch
     {
@@ -169,9 +177,10 @@ internal static class ApprovalStore
     {
         await using var command = new NpgsqlCommand(
             "INSERT INTO plt.approval_request (request_id, legal_entity, approval_type, object_module, object_type, object_id, payload_hash, status, "
-            + "maker_kind, maker_id, editors, authority_type, authority_amount, authority_currency, authority_codes, referral_role, reason, diff, "
-            + "supersedes, requested_at, version) VALUES (@id, @le, @type, @module, @otype, @oid, @hash, 'PendingApproval', @mkind, @mid, @editors, "
-            + "@atype, @amount, @currency, @codes::jsonb, @role, @reason, @diff::jsonb, @supersedes, @at, 1) "
+            + "maker_kind, maker_id, maker_on_behalf_of_kind, maker_on_behalf_of_id, editors, authority_type, authority_amount, authority_currency, "
+            + "authority_codes, referral_role, reason, diff, supersedes, requested_at, version) VALUES (@id, @le, @type, @module, @otype, @oid, @hash, "
+            + "'PendingApproval', @mkind, @mid, @okind, @oid2, @editors, @atype, @amount, @currency, @codes::jsonb, @role, @reason, @diff::jsonb, "
+            + "@supersedes, @at, 1) "
             + "ON CONFLICT (legal_entity, approval_type, object_module, object_type, object_id) WHERE status = 'PendingApproval' DO NOTHING",
             connection,
             transaction);
@@ -184,6 +193,8 @@ internal static class ApprovalStore
         command.Parameters.AddWithValue("hash", row.PayloadHash.Value);
         command.Parameters.AddWithValue("mkind", row.Maker.KindCode);
         command.Parameters.AddWithValue("mid", row.Maker.Id);
+        command.Parameters.Add(new NpgsqlParameter("okind", NpgsqlDbType.Text) { Value = (object?)row.MakerOnBehalfOf?.KindCode ?? DBNull.Value });
+        command.Parameters.Add(new NpgsqlParameter("oid2", NpgsqlDbType.Text) { Value = (object?)row.MakerOnBehalfOf?.Id ?? DBNull.Value });
         command.Parameters.Add(new NpgsqlParameter("editors", NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = row.Editors.ToArray() });
         command.Parameters.AddWithValue("atype", row.AuthorityType);
         command.Parameters.Add(new NpgsqlParameter("amount", NpgsqlDbType.Numeric) { Value = (object?)row.AuthorityAmount?.Amount ?? DBNull.Value });
@@ -265,7 +276,9 @@ internal static class ApprovalStore
     {
         await using var command = new NpgsqlCommand(
             $"SELECT {Columns} FROM plt.approval_request WHERE legal_entity = @le AND status = @status AND referral_role = ANY(@roles) "
-            + "AND NOT (maker_kind = @ckind AND maker_id = @cid) AND NOT (@ckey = ANY(editors)) "
+            + "AND NOT (maker_kind = @ckind AND maker_id = @cid) "
+            + "AND NOT (maker_on_behalf_of_kind IS NOT DISTINCT FROM @ckind AND maker_on_behalf_of_id IS NOT DISTINCT FROM @cid) "
+            + "AND NOT (@ckey = ANY(editors)) "
             + "ORDER BY requested_at, request_id OFFSET @offset LIMIT @limit",
             connection,
             transaction);
@@ -317,6 +330,7 @@ internal static class ApprovalStore
                 AuthorityCheckId = reader.IsDBNull(24) ? null : reader.GetGuid(24),
                 DecidedAt = reader.IsDBNull(25) ? null : Instant.FromUtcDateTime(reader.GetFieldValue<DateTime>(25)),
                 Version = reader.GetInt32(26),
+                MakerOnBehalfOf = reader.IsDBNull(27) ? null : new ActorRef(ActorRef.ParseKind(reader.GetString(27)), reader.GetString(28)),
             });
         }
 

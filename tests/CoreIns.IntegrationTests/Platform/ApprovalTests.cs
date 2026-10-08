@@ -43,16 +43,38 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
 
     private static string NewHash() => Sha256Hash.ComputeUtf8(Guid.NewGuid().ToString()).Value;
 
-    private static object RequestBody(string subjectId, string hash, string amount, string referralRole = Manager, string authorityType = "CLM.PAYMENT") => new
+    private static ObjectRef Subject(string id) => new(ModuleCode.CLM, "TransactionSet", id);
+
+    private static ApprovalRequestRequest RequestBody(string subjectId, string hash, string amount, string referralRole = Manager, string authorityType = "CLM.PAYMENT") => new()
     {
-        type = "CLM.TRANSACTION_SET",
-        objectRef = new { module = "CLM", type = "TransactionSet", id = subjectId },
-        payloadHash = hash,
-        authority = new { type = authorityType, amount = new { amount, currency = "EUR" }, codes = new { costType = "INDEMNITY" } },
-        referralRole,
-        reason = "Payment above the handler's limit",
-        diff = new { amount = new { after = amount } },
+        Type = "CLM.TRANSACTION_SET",
+        ObjectRef = Subject(subjectId),
+        PayloadHash = Sha256Hash.Parse(hash),
+        Authority = new ApprovalAuthority
+        {
+            Type = authorityType,
+            Amount = Money.Of(decimal.Parse(amount, System.Globalization.CultureInfo.InvariantCulture), "EUR"),
+            Codes = new Dictionary<string, string> { ["costType"] = "INDEMNITY" },
+        },
+        ReferralRole = referralRole,
+        Reason = "Payment above the handler's limit",
+        Diff = JsonSerializer.SerializeToElement(new { amount = new { after = amount } }),
     };
+
+    /// <summary>The owning module (CLM) creates the request in process, in its own committed transaction (review D1: no HTTP).</summary>
+    private async Task<ApprovalView> RequestInProcessAsync(string maker, ApprovalRequestRequest body, ActorRef? onBehalfOf = null, ActorRef? makerActor = null)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var scope = Scope(maker, Handler, out var services);
+        var context = services.GetRequiredService<RequestContext>();
+        context.Actor = makerActor ?? context.Actor;
+        context.OnBehalfOf = onBehalfOf;
+        var session = services.GetRequiredService<DbSession>();
+        var transaction = await session.BeginTransactionAsync(ct);
+        var response = await services.GetRequiredService<IPlatformApprovalService>().RequestAsync(body, CommandOptions.New(), ct);
+        await transaction.CommitAsync(ct);
+        return response.Request;
+    }
 
     private async Task<(HttpResponseMessage Response, JsonNode? Body)> SendAsync(HttpMethod method, string path, string user, string roles, object? body = null)
     {
@@ -75,12 +97,8 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
         return (response, text.Length == 0 ? null : JsonNode.Parse(text));
     }
 
-    private async Task<string> CreateAsync(string maker, string subjectId, string hash, string amount)
-    {
-        var (response, body) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/request", maker, Handler, RequestBody(subjectId, hash, amount));
-        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
-        return body!["request"]!["requestId"]!.GetValue<string>();
-    }
+    private async Task<string> CreateAsync(string maker, string subjectId, string hash, string amount) =>
+        (await RequestInProcessAsync(maker, RequestBody(subjectId, hash, amount))).RequestId.ToString();
 
     private Task<(HttpResponseMessage Response, JsonNode? Body)> DecideAsync(string checker, string roles, string requestId, string hash, string decision = "Approve", string? comment = null) =>
         SendAsync(HttpMethod.Post, "/api/plt/v1/approval/decide", checker, roles, new { requestId, decision, payloadHash = hash, comment });
@@ -188,10 +206,9 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
         // The subject changes (another user edits it): the owning module requests again with the new hash; the old
         // request is withdrawn (ApprovalDecided WITHDRAWN) and deciding it with the old hash is stale.
         var second = NewHash();
-        var (resubmitted, resubmittedBody) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/request", "manager-2", $"{Handler},{Manager}", RequestBody(subject, second, "6500.00"));
-        resubmitted.StatusCode.ShouldBe(HttpStatusCode.OK, resubmittedBody?.ToJsonString());
-        var newId = resubmittedBody!["request"]!["requestId"]!.GetValue<string>();
-        resubmittedBody["request"]!["supersedes"]!.GetValue<string>().ShouldBe(requestId);
+        var resubmitted = await RequestInProcessAsync("manager-2", RequestBody(subject, second, "6500.00"));
+        var newId = resubmitted.RequestId.ToString();
+        resubmitted.Supersedes.ToString().ShouldBe(requestId);
         (await ScalarAsync<string>($"SELECT status FROM plt.approval_request WHERE request_id = '{requestId}'")).ShouldBe("Withdrawn");
         (await ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE aggregate_id = '{requestId}' AND payload->>'decision' = 'WITHDRAWN'")).ShouldBe(1);
 
@@ -208,9 +225,7 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
         editorBody!["code"]!.GetValue<string>().ShouldBe("PLT-ERR-EDITOR-CANNOT-APPROVE");
 
         // Re-submitting identical content keeps the pending request.
-        var (same, sameBody) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/request", "manager-2", Handler, RequestBody(subject, second, "6500.00"));
-        same.StatusCode.ShouldBe(HttpStatusCode.OK);
-        sameBody!["request"]!["requestId"]!.GetValue<string>().ShouldBe(newId);
+        (await RequestInProcessAsync("manager-2", RequestBody(subject, second, "6500.00"))).RequestId.ToString().ShouldBe(newId);
 
         var (rejectWithoutComment, rejectBody) = await DecideAsync("manager-1", Manager, newId, second, "Reject");
         rejectWithoutComment.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -302,11 +317,20 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
         {
             var approvals = services.GetRequiredService<IPlatformApprovalService>();
             (await approvals.GetAsync(requestId.ToString(), ct)).Decision!.Checker.Id.ShouldBe("clm-manager");
-            var ok = await approvals.VerifyForExecutionAsync(new ApprovalVerifyForExecutionRequest { RequestId = requestId, Hash = hash }, ct);
+            var verify = new ApprovalVerifyForExecutionRequest { RequestId = requestId, Hash = hash, Type = "CLM.TRANSACTION_SET", ObjectRef = subject };
+            var ok = await approvals.VerifyForExecutionAsync(verify, ct);
             ok.Ok.ShouldBeTrue();
-            var mismatch = await Should.ThrowAsync<DomainException>(() =>
-                approvals.VerifyForExecutionAsync(new ApprovalVerifyForExecutionRequest { RequestId = requestId, Hash = Sha256Hash.ComputeUtf8("other") }, ct));
+            ok.Authority.Type.ShouldBe("CLM.RESERVE");
+            ok.Authority.Amount.ShouldBe(Money.Of(5000.01m, "EUR"));
+            var mismatch = await Should.ThrowAsync<DomainException>(() => approvals.VerifyForExecutionAsync(verify with { Hash = Sha256Hash.ComputeUtf8("other") }, ct));
             mismatch.Error.Code.Value.ShouldBe("PLT-ERR-APPROVAL-HASH-MISMATCH");
+
+            // Review D1: an approval of another subject or another approval type is never valid evidence.
+            var otherSubject = await Should.ThrowAsync<DomainException>(() =>
+                approvals.VerifyForExecutionAsync(verify with { ObjectRef = new ObjectRef(ModuleCode.CLM, "TransactionSet", Guid.NewGuid().ToString()) }, ct));
+            otherSubject.Error.Code.Value.ShouldBe("PLT-ERR-APPROVAL-SUBJECT-MISMATCH");
+            var otherType = await Should.ThrowAsync<DomainException>(() => approvals.VerifyForExecutionAsync(verify with { Type = "BIL.REFUND" }, ct));
+            otherType.Error.Code.Value.ShouldBe("PLT-ERR-APPROVAL-SUBJECT-MISMATCH");
         }
     }
 
@@ -373,6 +397,81 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
             $"UPDATE plt.approval_request SET status = 'Rejected', decision = 'Rejected', decision_comment = 'x', version = version + 1 WHERE request_id = '{requestId}'");
         var error = await Should.ThrowAsync<PostgresException>(() => update.ExecuteNonQueryAsync(ct));
         error.MessageText.ShouldContain("cannot change");
+    }
+
+    [Fact]
+    public async Task Review_D1_a_maker_cannot_create_or_supersede_a_request_over_HTTP()
+    {
+        var subject = Guid.NewGuid().ToString();
+        var hash = NewHash();
+        var requestId = await CreateAsync("clm-module-maker", subject, hash, "40000.00");
+        var body = new
+        {
+            type = "CLM.TRANSACTION_SET",
+            objectRef = new { module = "CLM", type = "TransactionSet", id = subject },
+            payloadHash = NewHash(),
+            authority = new { type = "CLM.PAYMENT", amount = new { amount = "1.00", currency = "EUR" } },
+            referralRole = Handler,
+        };
+
+        var (response, _) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/request", "handler-attacker", $"{Handler},{Manager},Platform.Admin", body);
+
+        response.StatusCode.ShouldBeOneOf(HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed);
+        (await ScalarAsync<string>($"SELECT status FROM plt.approval_request WHERE request_id = '{requestId}'")).ShouldBe("PendingApproval");
+        (await ScalarAsync<long>($"SELECT count(*) FROM plt.approval_request WHERE object_id = '{subject}'")).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Review_D2_the_principal_of_an_AI_maker_cannot_decide_the_agents_request_and_does_not_see_it()
+    {
+        var hash = NewHash();
+        var subject = Guid.NewGuid().ToString();
+        var request = await RequestInProcessAsync(
+            "agent-7", RequestBody(subject, hash, "100.00"), onBehalfOf: ActorRef.User("principal-p"), makerActor: new ActorRef(ActorKind.AiAgent, "agent-7"));
+        var requestId = request.RequestId.ToString();
+
+        var (inbox, inboxBody) = await SendAsync(HttpMethod.Get, "/api/plt/v1/approval?limit=200", "principal-p", Manager);
+        inbox.StatusCode.ShouldBe(HttpStatusCode.OK);
+        inboxBody!["items"]!.AsArray().Select(i => i!["request"]!["requestId"]!.GetValue<string>()).ShouldNotContain(requestId);
+
+        var (self, selfBody) = await DecideAsync("principal-p", Manager, requestId, hash);
+        self.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        selfBody!["code"]!.GetValue<string>().ShouldBe("PLT-ERR-SELF-APPROVAL");
+
+        // When the content changes, the agent and its principal become editors of the new version: still refused.
+        var second = NewHash();
+        var newRequest = await RequestInProcessAsync("handler-q", RequestBody(subject, second, "100.00"));
+        var (editor, editorBody) = await DecideAsync("principal-p", Manager, newRequest.RequestId.ToString(), second);
+        editor.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        editorBody!["code"]!.GetValue<string>().ShouldBe("PLT-ERR-EDITOR-CANNOT-APPROVE");
+
+        // Another person decides.
+        (await DecideAsync("manager-other", Manager, newRequest.RequestId.ToString(), second)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await ScalarAsync<string>($"SELECT maker_on_behalf_of_id FROM plt.approval_request WHERE request_id = '{requestId}'")).ShouldBe("principal-p");
+    }
+
+    [Fact]
+    public async Task Review_m1_the_trigger_freezes_every_non_decision_column_and_pending_to_pending_updates()
+    {
+        var hash = NewHash();
+        var requestId = await CreateAsync("handler-freeze", Guid.NewGuid().ToString(), hash, "10.00");
+        await using var dataSource = NpgsqlDataSource.Create(database.AppConnectionString);
+        var ct = TestContext.Current.CancellationToken;
+
+        foreach (var sql in new[]
+                 {
+                     $"UPDATE plt.approval_request SET reason = 'changed', version = version + 1 WHERE request_id = '{requestId}'",
+                     $"UPDATE plt.approval_request SET diff = '{{}}'::jsonb, version = version + 1 WHERE request_id = '{requestId}'",
+                     $"UPDATE plt.approval_request SET supersedes = gen_random_uuid(), status = 'Withdrawn', decided_at = now(), version = version + 1 WHERE request_id = '{requestId}'",
+                     $"UPDATE plt.approval_request SET maker_on_behalf_of_kind = 'USER', maker_on_behalf_of_id = 'x', status = 'Withdrawn', decided_at = now(), version = version + 1 WHERE request_id = '{requestId}'",
+                 })
+        {
+            await using var update = dataSource.CreateCommand(sql);
+            var error = await Should.ThrowAsync<PostgresException>(() => update.ExecuteNonQueryAsync(ct));
+            error.MessageText.ShouldContain("SECURITY:", Case.Sensitive, sql);
+        }
+
+        (await ScalarAsync<string>($"SELECT status FROM plt.approval_request WHERE request_id = '{requestId}'")).ShouldBe("PendingApproval");
     }
 
     private AsyncServiceScope Scope(string user, string roles, out IServiceProvider services)

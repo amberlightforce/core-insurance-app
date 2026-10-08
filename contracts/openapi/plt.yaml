@@ -1713,8 +1713,10 @@ paths:
       x-idempotency: required
       x-dry-run: false
       x-dry-run-note: 'PRD dry-run: No; PRD idempotency: Yes'
+      x-in-process: true
+      x-in-process-note: SL2-PLT security review D1 - only the owning module creates requests (it fixes the authority, referral role and supersession); no HTTP exposure
       x-exposure:
-      - ui
+      - internal
       x-consumers:
       - BIL
       - CHN
@@ -2119,6 +2121,9 @@ paths:
       x-permission: plt.Approval.verifyForExecution
       x-error-codes:
       - code: PLT-ERR-APPROVAL-HASH-MISMATCH
+        status: 422
+      - code: PLT-ERR-APPROVAL-SUBJECT-MISMATCH
+        note: the request is of another approval type or for another subject than the one to execute
         status: 422
       - code: PLT-ERR-NOT-FOUND
         status: 404
@@ -7613,9 +7618,17 @@ components:
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
           description: 'PRD: "hash"'
+        type:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Approval type the executing module expects (SL2-PLT review D1)
+        objectRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: Subject the executing module is about to execute (SL2-PLT review D1)
       required:
       - requestId
       - hash
+      - type
+      - objectRef
     ApprovalVerifyForExecutionResponse:
       type: object
       description: 'plt.Approval.verifyForExecution result. PRD outputs: "ok". ok is true only for an Approved request whose
@@ -7626,9 +7639,14 @@ components:
           description: 'PRD: "ok"'
         status:
           $ref: '#/components/schemas/ApprovalStatus'
+        authority:
+          $ref: '#/components/schemas/ApprovalAuthority'
+          description: The authority (type and dimensions) the approval was decided under; the executing module compares it
+            with the dimensions it computes for what it executes
       required:
       - ok
       - status
+      - authority
     AuditAppendRequest:
       type: object
       description: 'plt.Audit.append request. PRD inputs: "AuditEvent"'

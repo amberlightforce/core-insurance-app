@@ -137,7 +137,9 @@ public static class PlatformModule
             ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.Stale, 409, "Το αίτημα έγκρισης άλλαξε στο μεταξύ", "The approval request changed meanwhile")
                 .Describe("Το αίτημα αποφασίστηκε ή αντικαταστάθηκε, ή το περιεχόμενο άλλαξε μετά τον έλεγχό σας. Φορτώστε το ξανά.", "The request was decided or superseded, or its content changed after you reviewed it. Reload it."),
             ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.HashMismatch, 422, "Το περιεχόμενο διαφέρει από αυτό που εγκρίθηκε", "The content differs from what was approved")
-                .Describe("Η εκτέλεση επιτρέπεται μόνο για το περιεχόμενο που εγκρίθηκε (ίδιο αποτύπωμα SHA-256).", "Execution is allowed only for the approved content (same SHA-256 hash)."));
+                .Describe("Η εκτέλεση επιτρέπεται μόνο για το περιεχόμενο που εγκρίθηκε (ίδιο αποτύπωμα SHA-256).", "Execution is allowed only for the approved content (same SHA-256 hash)."),
+            ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.SubjectMismatch, 422, "Η έγκριση αφορά άλλο αντικείμενο", "The approval is for another subject")
+                .Describe("Το αίτημα έγκρισης είναι άλλου τύπου ή αφορά άλλο αντικείμενο από αυτό που εκτελείται.", "The approval request is of another type or for another subject than the one being executed."));
         return services;
     }
 

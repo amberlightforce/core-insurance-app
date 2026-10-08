@@ -12,27 +12,20 @@ namespace CoreIns.Platform.Approvals;
 /// <summary>Permission names of the maker-checker operations (<c>x-permission</c>), granted in <c>Platform:Permissions</c>.</summary>
 internal static class ApprovalPermissions
 {
-    public const string Request = "plt.Approval.request";
     public const string Decide = "plt.Approval.decide";
     public const string Get = "plt.Approval.get";
     public const string List = "plt.Approval.list";
 }
 
 /// <summary>
-/// REST facade of <c>plt.Approval.*</c> (contracts/openapi/plt.yaml): request, decide, get and the approvals inbox
-/// (<c>list</c>). The maker and the checker are the signed-in actor; the Idempotency-Key is enforced by the platform.
+/// REST facade of <c>plt.Approval.*</c> (contracts/openapi/plt.yaml): decide, get and the approvals inbox (<c>list</c>).
+/// <c>plt.Approval.request</c> is in-process only (SL2-PLT review D1): the owning module fixes the subject, the required
+/// authority, the referral role and supersession, never a maker over HTTP. The checker is the signed-in actor.
 /// </summary>
 [ApiController]
 [Route("api/plt/v1/approval")]
 internal sealed class ApprovalsController : ControllerBase
 {
-    /// <summary>plt.Approval.request.</summary>
-    [HttpPost("request")]
-    [Authorize(Policy = ApprovalPermissions.Request)]
-    public async Task<IResult> RequestAsync(
-        [FromBody] ApprovalRequestRequest body, [FromServices] ICommandHandler<RequestApproval, ApprovalRequestResponse> handler, CancellationToken cancellationToken) =>
-        (await handler.HandleAsync(new RequestApproval(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
-
     /// <summary>plt.Approval.decide: approve or reject the content hash the checker reviewed.</summary>
     [HttpPost("decide")]
     [Authorize(Policy = ApprovalPermissions.Decide)]

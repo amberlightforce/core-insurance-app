@@ -15,4 +15,8 @@ public sealed record ApprovalVerifyForExecutionResponse
     /// <summary>Contract member 'status'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
     public required global::CoreIns.Platform.Contracts.Api.ApprovalStatus Status { get; init; }
+
+    /// <summary>The authority (type and dimensions) the approval was decided under; the executing module compares it with the dimensions it computes for what it executes</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("authority")]
+    public required global::CoreIns.Platform.Contracts.Api.ApprovalAuthority Authority { get; init; }
 }

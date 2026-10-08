@@ -26,6 +26,8 @@ namespace CoreIns.Platform.Persistence.Migrations
                     status = table.Column<string>(type: "text", nullable: false),
                     maker_kind = table.Column<string>(type: "text", nullable: false),
                     maker_id = table.Column<string>(type: "text", nullable: false),
+                    maker_on_behalf_of_kind = table.Column<string>(type: "text", nullable: true),
+                    maker_on_behalf_of_id = table.Column<string>(type: "text", nullable: true),
                     editors = table.Column<string[]>(type: "text[]", nullable: false),
                     authority_type = table.Column<string>(type: "text", nullable: false),
                     authority_amount = table.Column<decimal>(type: "numeric", nullable: true),
@@ -55,6 +57,7 @@ namespace CoreIns.Platform.Persistence.Migrations
                     table.CheckConstraint("ck_approval_request_diff", "diff IS NULL OR jsonb_typeof(diff) = 'object'");
                     table.CheckConstraint("ck_approval_request_hash", "payload_hash ~ '^[0-9a-f]{64}$'");
                     table.CheckConstraint("ck_approval_request_maker_kind", "maker_kind IN ('USER', 'SERVICE', 'AI_AGENT')");
+                    table.CheckConstraint("ck_approval_request_maker_principal", "(maker_on_behalf_of_kind IS NULL) = (maker_on_behalf_of_id IS NULL) AND (maker_on_behalf_of_kind IS NULL OR maker_on_behalf_of_kind IN ('USER', 'SERVICE', 'AI_AGENT'))");
                     table.CheckConstraint("ck_approval_request_reject_comment", "decision IS DISTINCT FROM 'Rejected' OR decision_comment IS NOT NULL");
                     table.CheckConstraint("ck_approval_request_status", "status IN ('PendingApproval', 'Approved', 'Rejected', 'Withdrawn')");
                     table.CheckConstraint("ck_approval_request_version", "version >= 1");
@@ -80,25 +83,25 @@ namespace CoreIns.Platform.Persistence.Migrations
                 unique: true,
                 filter: "status = 'PendingApproval'");
 
-            // Hand-written (SL2-PLT): a request is decided once. Only a pending row may change, and only into a decided or
-            // withdrawn state; the subject, content hash, maker and authority never change (REQ-PLT-114, REQ-PLT-117).
+            // Hand-written (SL2-PLT; review m1): a request is decided once. Only a pending row may change, only into a
+            // decided or withdrawn state, and only the decision columns may change with it; every other column (subject,
+            // content hash, maker and principal, editors, authority, referral role, reason, diff, supersedes, …) is frozen.
+            // Rows are never deleted.
             migrationBuilder.Sql("""
                 CREATE FUNCTION plt.approval_request_guard() RETURNS trigger
                   LANGUAGE plpgsql SET search_path = pg_catalog, plt AS $$
+                DECLARE
+                  decision_columns text[] := ARRAY['status', 'decision', 'checker_kind', 'checker_id', 'decision_comment',
+                                                   'authority_check_id', 'decided_at', 'version'];
                 BEGIN
                   IF TG_OP = 'DELETE' THEN
                     RAISE EXCEPTION 'SECURITY: plt.approval_request rows are never deleted' USING ERRCODE = 'insufficient_privilege';
                   END IF;
-                  IF OLD.status <> 'PendingApproval' THEN
-                    RAISE EXCEPTION 'SECURITY: approval request % is % and cannot change', OLD.request_id, OLD.status USING ERRCODE = 'insufficient_privilege';
+                  IF OLD.status <> 'PendingApproval' OR NEW.status = 'PendingApproval' THEN
+                    RAISE EXCEPTION 'SECURITY: approval request % is % and cannot change to %', OLD.request_id, OLD.status, NEW.status
+                      USING ERRCODE = 'insufficient_privilege';
                   END IF;
-                  IF NEW.request_id <> OLD.request_id OR NEW.legal_entity <> OLD.legal_entity OR NEW.approval_type <> OLD.approval_type
-                     OR NEW.object_module <> OLD.object_module OR NEW.object_type <> OLD.object_type OR NEW.object_id <> OLD.object_id
-                     OR NEW.payload_hash <> OLD.payload_hash OR NEW.maker_kind <> OLD.maker_kind OR NEW.maker_id <> OLD.maker_id
-                     OR NEW.editors <> OLD.editors OR NEW.authority_type <> OLD.authority_type
-                     OR NEW.authority_amount IS DISTINCT FROM OLD.authority_amount OR NEW.authority_currency IS DISTINCT FROM OLD.authority_currency
-                     OR NEW.authority_codes <> OLD.authority_codes OR NEW.referral_role <> OLD.referral_role
-                     OR NEW.requested_at <> OLD.requested_at OR NEW.version <> OLD.version + 1 THEN
+                  IF (to_jsonb(NEW) - decision_columns) IS DISTINCT FROM (to_jsonb(OLD) - decision_columns) OR NEW.version <> OLD.version + 1 THEN
                     RAISE EXCEPTION 'SECURITY: approval request % content is immutable', OLD.request_id USING ERRCODE = 'insufficient_privilege';
                   END IF;
                   RETURN NEW;

@@ -155,7 +155,17 @@
     },
     "plt.Approval.verifyForExecution": {
       "ok": true,
-      "status": "PendingApproval"
+      "status": "PendingApproval",
+      "authority": {
+        "type": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "codes": {
+          "sample": "SAMPLE_CODE"
+        }
+      }
     },
     "plt.ApprovalType.register": {
       "request": "unspecified",
@@ -737,11 +747,27 @@
     },
     "ApprovalVerifyForExecutionRequest": {
       "requestId": "0192c8a5-da82-7d56-8126-04409a89bc8f",
-      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "type": "SAMPLE_CODE",
+      "objectRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "01920667-cb99-76b1-8ed6-57c20e96de19"
+      }
     },
     "ApprovalVerifyForExecutionResponse": {
       "ok": true,
-      "status": "PendingApproval"
+      "status": "PendingApproval",
+      "authority": {
+        "type": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "codes": {
+          "sample": "SAMPLE_CODE"
+        }
+      }
     },
     "ApprovalView": {
       "requestId": "01924384-292e-7cf9-8e4b-550776f52e2d",

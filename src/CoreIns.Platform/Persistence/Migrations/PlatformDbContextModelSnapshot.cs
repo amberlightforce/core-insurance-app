@@ -124,6 +124,14 @@ namespace CoreIns.Platform.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("maker_kind");
 
+                    b.Property<string>("MakerOnBehalfOfId")
+                        .HasColumnType("text")
+                        .HasColumnName("maker_on_behalf_of_id");
+
+                    b.Property<string>("MakerOnBehalfOfKind")
+                        .HasColumnType("text")
+                        .HasColumnName("maker_on_behalf_of_kind");
+
                     b.Property<string>("ObjectId")
                         .IsRequired()
                         .HasColumnType("text")
@@ -201,6 +209,8 @@ namespace CoreIns.Platform.Persistence.Migrations
                             t.HasCheckConstraint("ck_approval_request_hash", "payload_hash ~ '^[0-9a-f]{64}$'");
 
                             t.HasCheckConstraint("ck_approval_request_maker_kind", "maker_kind IN ('USER', 'SERVICE', 'AI_AGENT')");
+
+                            t.HasCheckConstraint("ck_approval_request_maker_principal", "(maker_on_behalf_of_kind IS NULL) = (maker_on_behalf_of_id IS NULL) AND (maker_on_behalf_of_kind IS NULL OR maker_on_behalf_of_kind IN ('USER', 'SERVICE', 'AI_AGENT'))");
 
                             t.HasCheckConstraint("ck_approval_request_reject_comment", "decision IS DISTINCT FROM 'Rejected' OR decision_comment IS NOT NULL");
 
