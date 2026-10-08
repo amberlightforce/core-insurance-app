@@ -49,6 +49,8 @@ public static class PolicyModule
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line TO {appRole}",
+                // The policy row is frozen (trigger); the one thing a command changes is the record-time watermark (D-SL3-03).
+                $"GRANT UPDATE (last_recorded_at, record_version) ON {Schema}.policy TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
     ];
@@ -134,6 +136,8 @@ public static class PolicyModule
             .Describe("Ένας έλεγχος πριν από τη σύναψη δεν ολοκληρώθηκε.", "A check before binding could not be completed."),
         ErrorDefinition.For(ModuleCode.POL, "DEPENDENCY-UNAVAILABLE", 503, "Μια απαραίτητη υπηρεσία δεν είναι διαθέσιμη", "A required service is not available", retryable: true)
             .Describe("Η λειτουργία χρειάζεται υπηρεσία άλλης ενότητας που δεν έχει ακόμη συνδεθεί.", "The operation needs another module's service that is not wired yet."),
+        ErrorDefinition.For(ModuleCode.POL, PolicyErrorNames.OutOfSequence, 422, "Η ενέργεια προηγείται της τελευταίας δεσμευμένης συναλλαγής του όρου", "The effective time is earlier than the term's latest bound transaction")
+            with { },
         ErrorDefinition.For(ModuleCode.POL, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

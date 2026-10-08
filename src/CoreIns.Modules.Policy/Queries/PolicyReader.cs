@@ -20,8 +20,46 @@ internal sealed partial class PolicyReader(DbSession session)
     private const string Known = "recorded_from <= @knownAt AND (recorded_to IS NULL OR recorded_to > @knownAt)";
     private const string Valid = "valid_from <= @validAt AND valid_to > @validAt";
 
-    /// <summary>pol.Policy.get; null when the policy did not exist (in this legal entity) as known at <paramref name="knownAt"/>.</summary>
-    public async Task<PolicyGetResponse?> GetPolicyAsync(LegalEntityId legalEntity, string legalEntityCode, Guid policyId, Instant validAt, Instant knownAt, CancellationToken cancellationToken)
+    /// <summary>
+    /// The effective knownAt (D-SL3-03 a): the requested instant, but never later than the policy's committed record-time
+    /// watermark. Every row recorded after the watermark is stamped above it, so an answer given at the effective knownAt can
+    /// never change when a concurrent writer commits, whatever the clock skew between replicas.
+    /// </summary>
+    public static Instant EffectiveKnownAt(Instant requested, Instant watermark) => Instant.Min(PolicyWriteLock.Truncate(requested), watermark);
+
+    /// <summary>The policy (by id or number, in the caller's legal entity) and its committed watermark; null when it does not exist.</summary>
+    public async Task<(Guid PolicyId, Instant Watermark)?> ResolvePolicyAsync(
+        LegalEntityId legalEntity, Guid? policyId, string? policyNumber, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var row = await connection.QuerySingleOrDefaultAsync<WatermarkRecord>(new CommandDefinition(
+            """
+            SELECT policy_id AS PolicyId, last_recorded_at AS Watermark FROM pol.policy
+             WHERE legal_entity_id = @le AND (@id::uuid IS NULL OR policy_id = @id) AND (@number::text IS NULL OR policy_number = @number)
+            """,
+            new { le = legalEntity.Value, id = policyId, number = policyNumber }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        return row is null ? null : (row.PolicyId, JobReader.Time(row.Watermark));
+    }
+
+    /// <summary>pol.Policy.get; null when the policy did not exist (in this legal entity) as known at the effective knownAt.</summary>
+    public async Task<PolicyGetResponse?> GetPolicyAsync(LegalEntityId legalEntity, string legalEntityCode, Guid policyId, Instant validAt, Instant knownAt, CancellationToken cancellationToken) =>
+        (await GetPolicyEffectiveAsync(legalEntity, legalEntityCode, policyId, validAt, knownAt, cancellationToken).ConfigureAwait(false))?.Response;
+
+    /// <summary>pol.Policy.get with the effective knownAt it was answered at.</summary>
+    public async Task<(PolicyGetResponse Response, Instant EffectiveKnownAt)?> GetPolicyEffectiveAsync(
+        LegalEntityId legalEntity, string legalEntityCode, Guid policyId, Instant validAt, Instant requestedKnownAt, CancellationToken cancellationToken)
+    {
+        if (await ResolvePolicyAsync(legalEntity, policyId, null, cancellationToken).ConfigureAwait(false) is not var (_, watermark))
+        {
+            return null;
+        }
+
+        var knownAt = EffectiveKnownAt(requestedKnownAt, watermark);
+        var response = await ReadPolicyAsync(legalEntity, legalEntityCode, policyId, validAt, knownAt, cancellationToken).ConfigureAwait(false);
+        return response is null ? null : (response, knownAt);
+    }
+
+    private async Task<PolicyGetResponse?> ReadPolicyAsync(LegalEntityId legalEntity, string legalEntityCode, Guid policyId, Instant validAt, Instant knownAt, CancellationToken cancellationToken)
     {
         var args = Args(legalEntity, validAt, knownAt);
         args.Add("policyId", policyId);
@@ -54,8 +92,29 @@ internal sealed partial class PolicyReader(DbSession session)
         };
     }
 
-    /// <summary>pol.Term.get; null when the term (or its policy) was not known at <paramref name="knownAt"/>.</summary>
-    public async Task<TermGetResponse?> GetTermAsync(LegalEntityId legalEntity, string legalEntityCode, Guid termId, Instant validAt, Instant knownAt, CancellationToken cancellationToken)
+    /// <summary>pol.Term.get; null when the term (or its policy) was not known at the effective knownAt.</summary>
+    public async Task<TermGetResponse?> GetTermAsync(LegalEntityId legalEntity, string legalEntityCode, Guid termId, Instant validAt, Instant knownAt, CancellationToken cancellationToken) =>
+        (await GetTermEffectiveAsync(legalEntity, legalEntityCode, termId, validAt, knownAt, cancellationToken).ConfigureAwait(false))?.Response;
+
+    /// <summary>pol.Term.get with the effective knownAt it was answered at.</summary>
+    public async Task<(TermGetResponse Response, Instant EffectiveKnownAt)?> GetTermEffectiveAsync(
+        LegalEntityId legalEntity, string legalEntityCode, Guid termId, Instant validAt, Instant requestedKnownAt, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var owner = await connection.QueryFirstOrDefaultAsync<Guid?>(new CommandDefinition(
+            "SELECT policy_id FROM pol.policy_term WHERE term_id = @termId AND legal_entity_id = @le LIMIT 1",
+            new { termId, le = legalEntity.Value }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        if (owner is not { } policyId || await ResolvePolicyAsync(legalEntity, policyId, null, cancellationToken).ConfigureAwait(false) is not var (_, watermark))
+        {
+            return null;
+        }
+
+        var knownAt = EffectiveKnownAt(requestedKnownAt, watermark);
+        var response = await ReadTermAsync(legalEntity, legalEntityCode, termId, validAt, knownAt, cancellationToken).ConfigureAwait(false);
+        return response is null ? null : (response, knownAt);
+    }
+
+    private async Task<TermGetResponse?> ReadTermAsync(LegalEntityId legalEntity, string legalEntityCode, Guid termId, Instant validAt, Instant knownAt, CancellationToken cancellationToken)
     {
         var args = Args(legalEntity, validAt, knownAt);
         args.Add("termId", termId);
@@ -245,6 +304,13 @@ internal sealed partial class PolicyReader(DbSession session)
         WrittenDate = BusinessDate.Parse(term.WrittenDate),
         RecordedAt = JobReader.Time(term.RecordedFrom),
     };
+
+    private sealed class WatermarkRecord
+    {
+        public Guid PolicyId { get; set; }
+
+        public DateTime Watermark { get; set; }
+    }
 
     private sealed class PolicyRecord
     {
