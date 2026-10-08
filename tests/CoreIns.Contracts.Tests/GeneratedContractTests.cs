@@ -8,6 +8,7 @@ using CoreIns.Platform.Events;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Json;
 using CoreIns.Testing.Contracts;
+using YamlDotNet.RepresentationModel;
 
 namespace CoreIns.Contracts.Tests;
 
@@ -175,7 +176,51 @@ public sealed partial class GeneratedContractTests
             fake.Calls.Select(c => c.OperationId).ShouldBeUnique();
         }
 
-        operations.ShouldBe(429, "every operation with x-in-process or x-consumers");
+        operations.ShouldBe(InProcessOperationsInContracts(), "every operation with x-in-process or x-consumers in contracts/openapi/*.yaml (D-PRG-21: derived, not hard-coded)");
+    }
+
+    /// <summary>
+    /// Counts the operations of contracts/openapi/*.yaml that are in-process (<c>x-in-process: true</c>) or have consumers
+    /// (<c>x-consumers</c> non-empty): the same rule ContractGen applies, so adding an operation never needs a test edit.
+    /// </summary>
+    private static int InProcessOperationsInContracts()
+    {
+        var count = 0;
+        foreach (var file in Directory.GetFiles(Path.Combine(Repo.Root, "contracts", "openapi"), "*.yaml"))
+        {
+            var yaml = new YamlStream();
+            using (var reader = new StreamReader(file))
+            {
+                yaml.Load(reader);
+            }
+
+            if (yaml.Documents[0].RootNode is not YamlMappingNode root
+                || !root.Children.TryGetValue(new YamlScalarNode("paths"), out var paths)
+                || paths is not YamlMappingNode pathMap)
+            {
+                continue;
+            }
+
+            foreach (var item in pathMap.Children.Values.OfType<YamlMappingNode>())
+            {
+                foreach (var (method, op) in item.Children)
+                {
+                    if (((YamlScalarNode)method).Value is "get" or "post" or "put" or "patch" or "delete" && op is YamlMappingNode opMap)
+                    {
+                        var inProcess = opMap.Children.TryGetValue(new YamlScalarNode("x-in-process"), out var flag)
+                                        && flag is YamlScalarNode { Value: "true" };
+                        var consumers = opMap.Children.TryGetValue(new YamlScalarNode("x-consumers"), out var list)
+                                        && list is YamlSequenceNode { Children.Count: > 0 };
+                        if (inProcess || consumers)
+                        {
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return count;
     }
 
     [Fact]

@@ -9,7 +9,7 @@ using static CoreIns.IntegrationTests.Claims.ClaimsMoney;
 namespace CoreIns.IntegrationTests.Claims;
 
 /// <summary>
-/// The Development-only all-roles user (<c>superuser</c> in appsettings.Development.json): one person holding every staff
+/// The Development-only all-roles user (<c>superuser</c> in dev-users.Development.json): one person holding every staff
 /// role can drive every module, the best authority grant among the roles applies, and four-eyes still holds per user.
 /// The roles are read from the real configuration file so the test follows the dev user list.
 /// </summary>
@@ -23,7 +23,7 @@ public sealed class SuperUserTests(PostgresFixture database) : IClassFixture<Pos
 
     public async ValueTask InitializeAsync()
     {
-        var file = Path.Combine(RepositoryPaths.Root, "src", "CoreIns.Host", "appsettings.Development.json");
+        var file = Path.Combine(RepositoryPaths.Root, "src", "CoreIns.Host", "dev-users.Development.json");
         var users = System.Text.Json.Nodes.JsonNode.Parse(
             await File.ReadAllTextAsync(file, TestContext.Current.CancellationToken),
             documentOptions: new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip })!["DevAuthentication"]!["Users"]!.AsArray();

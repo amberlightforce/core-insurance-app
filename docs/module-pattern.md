@@ -114,7 +114,14 @@ unmasking needs a permission and a purpose and is audited. P2+ data is never a p
 
 Internal `[ApiController]` per resource, route `api/<mod>/v<major>/…` as in the OpenAPI document, one
 `[Authorize(Policy = "<mod>.<Resource>.<verb>")]` per action (the operation's `x-permission`). Permissions map to roles
-in `Platform:Permissions:Grants` (Host `appsettings.json`). Bind the generated DTO, call the command handler (or the
+in `Platform:Permissions:Grants`, which is **not** in `appsettings.json` any more (D-PRG-21): each module owns one file,
+`src/CoreIns.Host/permissions/<module>.json` (`pty`, `mkt`, `pfc`, `rat`, `uw`, `pol`, `bil`, `cmp`, `fin`, `clm`, `plt`, ...).
+A new module adds its own file, shaped `{ "Platform": { "Permissions": { "Grants": { "<mod>.<Resource>.<verb>": [ "Role", ... ] } } } }`,
+and, if it has authority grants, a `"Authority": { "Grants": [ ... ] }` sibling (illustrative ones carry `"Illustrative": true` and are
+dropped in Production). The Host merges all files in `permissions/` at start-up (`Hosting/ModuleSettings.cs`; no registration needed,
+the csproj copies `permissions/**/*.json` to build, publish and the container image); the same operation key or grant id in two
+files stops the Host with an error naming both files. Never add permissions to another module's file or to `appsettings.json`.
+Development sign-in users live in `src/CoreIns.Host/dev-users.Development.json`, loaded only in Development. Bind the generated DTO, call the command handler (or the
 query), return `Results.Created/Ok` or `ProblemDetailsMapper` Problem Details. The platform middleware enforces
 `Idempotency-Key` on POST/PUT/PATCH/DELETE; mark a query sent as POST with `[SkipIdempotency]`.
 

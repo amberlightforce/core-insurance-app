@@ -1,0 +1,17 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "pol.Submission.create": [ "Staff.Underwriter" ],
+        "pol.Job.updateDraft": [ "Staff.Underwriter" ],
+        "pol.Job.quote": [ "Staff.Underwriter" ],
+        "pol.Job.bind": [ "Staff.Underwriter" ],
+        "pol.Job.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pol.Policy.get": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "pol.Term.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pol.Snapshot.get": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "pol.Policy.search": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ]
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "plt.Approval.decide": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "plt.Approval.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "plt.Approval.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+      }
+    }
+  }
+}

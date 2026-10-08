@@ -9,6 +9,10 @@
   -->
 
   <ItemGroup>
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoreIns.Testing.Contracts\CoreIns.Testing.Contracts.csproj" />
     <ProjectReference Include="..\..\src\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
     <ProjectReference Include="..\..\src\CoreIns.Modules.Billing.Contracts\CoreIns.Modules.Billing.Contracts.csproj" />

@@ -1,0 +1,45 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "clm.Fnol.submit": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Fnol.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Fnol.validate": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Claim.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Claim.search": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Claim.close": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Exposure.create": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.TransactionSet.build": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.TransactionSet.submit": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.TransactionSet.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Financials.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Payment.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.PayeeAccount.capture": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.PayeeAccount.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+      }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (D-SL2-03; PRD-07 §16.5 item 3 is open): claims authority per financial transaction, EUR.
+      // Never presented as approved limits; "Illustrative": true grants are ignored in Production (fail closed: DENY).
+      // The exact limit is allowed; one cent above refers to the next role (four eyes); above the manager's limit, DENY.
+      "Grants": [
+        {
+          "Id": "clm-handler-reserve-illustrative", "Role": "Staff.ClaimsHandler", "Type": "CLM.RESERVE", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "clm-handler-payment-illustrative", "Role": "Staff.ClaimsHandler", "Type": "CLM.PAYMENT", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "clm-manager-reserve-illustrative", "Role": "Staff.ClaimsManager", "Type": "CLM.RESERVE", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "50000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "clm-manager-payment-illustrative", "Role": "Staff.ClaimsManager", "Type": "CLM.PAYMENT", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "50000.00", "Currency": "EUR" } ]
+        }
+      ]
+    }
+  }
+}

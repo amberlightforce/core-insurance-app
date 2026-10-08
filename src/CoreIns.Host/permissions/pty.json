@@ -1,0 +1,17 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "pty.Party.create": [ "Staff.Underwriter", "Staff.Billing" ],
+        "pty.Party.get": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "pty.Party.search": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "pty.Screening.screen": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "pty.Party.revealP2": [ "Staff.Underwriter" ],
+        "pty.Intermediary.create": [ "Staff.Underwriter", "Platform.Admin" ],
+        "pty.Intermediary.update": [ "Staff.Underwriter", "Platform.Admin" ],
+        "pty.ProducerCode.validate": [ "Staff.Underwriter", "Staff.Billing" ],
+        "pty.ProducerCode.search": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ]
+      }
+    }
+  }
+}

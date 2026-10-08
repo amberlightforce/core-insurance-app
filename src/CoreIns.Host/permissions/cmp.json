@@ -1,0 +1,10 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "cmp.FiscalDocument.request": [ "Platform.Admin" ],
+        "cmp.FiscalDocument.get": [ "Staff.Billing", "Platform.Admin" ]
+      }
+    }
+  }
+}
