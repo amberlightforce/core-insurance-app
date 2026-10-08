@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import {
   StatusPill,
+  type EntityState,
   identifierColumn,
   moneyColumn,
   statusColumn,
@@ -13,30 +14,24 @@ import { SimpleTable } from '../../staff/SimpleTable';
 import styles from '../../staff/staff.module.css';
 import type { RefundBreakdownLine, RefundNettingLine, RefundState } from './api';
 
-type Semantic = 'info' | 'success' | 'error' | 'warning' | 'pending-approval';
+type DisbursementState = EntityState<'disbursement'>;
 
-const stateSemantic: Record<RefundState, Semantic> = {
-  PROPOSED: 'info',
-  PENDING_APPROVAL: 'pending-approval',
-  APPROVED: 'success',
-  HELD: 'warning',
-  DISBURSING: 'info',
-  AWAITING_PROOF: 'info',
-  PAID: 'success',
-  REJECTED: 'error',
-  RETURNED: 'warning',
+/** A refund is paid out as a disbursement, so its lifecycle reads through the disbursement entry of the status map. */
+const stateMap: Record<RefundState, DisbursementState> = {
+  PROPOSED: 'requested',
+  PENDING_APPROVAL: 'pendingApproval',
+  APPROVED: 'approved',
+  HELD: 'stopped',
+  DISBURSING: 'released',
+  AWAITING_PROOF: 'issued',
+  PAID: 'cleared',
+  REJECTED: 'rejected',
+  RETURNED: 'returned',
 };
 
-/** Refund lifecycle state through the single status map (semantic family plus the localised label). */
+/** Refund lifecycle state through the single status map. */
 export function RefundStatePill({ state }: { state: RefundState }) {
-  const { t } = useTranslation('billing');
-  return (
-    <StatusPill
-      semantic={stateSemantic[state]}
-      subLabel={t(`refunds.state.${state}`, { defaultValue: state })}
-      announceChanges={false}
-    />
-  );
+  return <StatusPill entity="disbursement" state={stateMap[state]} announceChanges={false} />;
 }
 
 /** Per charge type breakdown of a refund (REQ-BIL-184): tax and levy lines carry the rule that decided them. */
@@ -120,8 +115,11 @@ export function NettingTable({
   const { t } = useTranslation('billing');
   const columns = useMemo<DataColumn<RefundNettingLine>[]>(
     () => [
-      textColumn<RefundNettingLine>('kind', t('refunds.netting.columns.kind'), (l) =>
-        t(`refunds.netting.kind.${l.kind}`),
+      textColumn<RefundNettingLine>(
+        'kind',
+        t('refunds.netting.columns.kind'),
+        (l) => t(`refunds.netting.kind.${l.kind}`),
+        { size: 300 },
       ),
       identifierColumn<RefundNettingLine>(
         'invoice',

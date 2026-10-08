@@ -22,17 +22,6 @@
       "requestedAt": "Proposed",
       "account": "Billing account"
     },
-    "state": {
-      "PROPOSED": "Proposed",
-      "PENDING_APPROVAL": "Awaiting approval",
-      "APPROVED": "Approved",
-      "HELD": "On hold",
-      "DISBURSING": "Being paid out",
-      "AWAITING_PROOF": "Awaiting proof",
-      "PAID": "Paid",
-      "REJECTED": "Rejected",
-      "RETURNED": "Returned by the bank"
-    },
     "approval": {
       "NOT_REQUIRED": "Not required",
       "PENDING": "Pending",

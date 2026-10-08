@@ -188,6 +188,8 @@ function ResubmitForm({ refund, onDone }: { refund: RefundView; onDone: () => vo
   );
 }
 
+const decisionIds = ['decidedBy', 'decidedAt', 'comment', 'disbursement'];
+
 function RefundDetails({ refund }: { refund: RefundView }) {
   const { t } = useTranslation('billing');
   const fmt = useFormat();
@@ -201,6 +203,7 @@ function RefundDetails({ refund }: { refund: RefundView }) {
   // The outcome stays on screen after the refetch moves the refund out of its pending state.
   const [outcome, setOutcome] = useState<RefundDecideResponse | null>(null);
   const [resubmitted, setResubmitted] = useState(false);
+  const decided = refund.decidedAt !== undefined || refund.disbursementId !== undefined;
   const nettedTotal = refund.netting.reduce((sum, l) => sum + Number(l.amount.amount), 0);
 
   return (
@@ -239,8 +242,9 @@ function RefundDetails({ refund }: { refund: RefundView }) {
               {
                 id: 'reason',
                 label: t('refunds.detail.reason'),
-                value: refund.reasonCode ?? null,
-                kind: 'mono',
+                value: refund.reasonCode
+                  ? t(`refunds.propose.reasons.${refund.reasonCode}`, { defaultValue: refund.reasonCode })
+                  : null,
               },
               {
                 id: 'method',
@@ -279,7 +283,7 @@ function RefundDetails({ refund }: { refund: RefundView }) {
                 value: refund.disbursementId ?? null,
                 kind: 'mono',
               },
-            ]}
+            ].filter((item) => decided || !decisionIds.includes(item.id))}
           />
         </Section>
         <Section title={t('refunds.detail.payee')}>

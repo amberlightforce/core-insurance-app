@@ -22,17 +22,6 @@
       "requestedAt": "Πρόταση",
       "account": "Λογαριασμός χρεώσεων"
     },
-    "state": {
-      "PROPOSED": "Προτάθηκε",
-      "PENDING_APPROVAL": "Αναμένει έγκριση",
-      "APPROVED": "Εγκρίθηκε",
-      "HELD": "Σε αναμονή",
-      "DISBURSING": "Σε πληρωμή",
-      "AWAITING_PROOF": "Αναμένει αποδεικτικό",
-      "PAID": "Πληρώθηκε",
-      "REJECTED": "Απορρίφθηκε",
-      "RETURNED": "Επεστράφη από την τράπεζα"
-    },
     "approval": {
       "NOT_REQUIRED": "Δεν απαιτείται",
       "PENDING": "Σε εκκρεμότητα",
