@@ -1,4 +1,5 @@
 using CoreIns.Modules.Policy.Commands;
+using CoreIns.Modules.Policy.Commands.Cancellation;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain;
@@ -98,6 +99,12 @@ public static class PolicyModule
 
         // UW decides declines; POL marks the job (REQ-POL-156).
         services.AddEventHandler<DeclineIssuedV1, DeclineIssuedHandler>(EventDescriptor.From(DeclineIssuedV1.Descriptor), DeclineIssuedHandler.Name, ModuleCode.POL);
+
+        // SL3-POL-CANCEL: policyholder cancellation now / flat (pol.Cancellation.create; dry run = the refund preview).
+        services.AddScoped<ICancellationRefundMethods, IllustrativeRefundMethods>();
+        services.AddScoped<IValidator<CancelPolicy>, CancelPolicyValidator>();
+        services.AddCommandAuditor<CancelPolicy, CancellationResponse, CancelPolicyAuditor>();
+        services.AddCommand<CancelPolicy, CancellationResponse, CancelPolicyHandler>(CommandDescriptor.For("pol.Cancellation.create") with { SupportsDryRun = true });
 
         services.AddErrorDefinitions(Errors);
         return services;
