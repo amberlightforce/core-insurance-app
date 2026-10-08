@@ -68,6 +68,7 @@
     "back": "Policies",
     "open": "Waiting for a decision",
     "table": "Referrals waiting for a decision",
+    "openHint": "Open a referral (double-click, or Enter on the row) to approve or reject it.",
     "emptyTitle": "No referrals waiting",
     "emptyBody": "When a bind is stopped by an underwriting referral, it appears here.",
     "quote": "Quote",

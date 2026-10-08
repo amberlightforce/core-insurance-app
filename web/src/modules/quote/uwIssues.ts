@@ -66,10 +66,12 @@ export function useRefreshIssues() {
 export function useIssueText() {
   const { t, i18n } = useTranslation('uw');
   return useCallback(
-    (issue: Pick<UwIssueItem, 'issueType' | 'ruleId' | 'status' | 'severity'> & {
-      messageEn?: string;
-      messageEl?: string;
-    }) => {
+    (
+      issue: Pick<UwIssueItem, 'issueType' | 'ruleId' | 'status' | 'severity'> & {
+        messageEn?: string;
+        messageEl?: string;
+      },
+    ) => {
       const known = (key: string) => i18n.exists(`uw:${key}`);
       const server = i18n.language === 'en' ? issue.messageEn : issue.messageEl;
       const why = known(`reasons.${issue.ruleId}.why`)

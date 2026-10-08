@@ -269,6 +269,74 @@ describe('QuoteWizardPage', () => {
     expect(screen.queryByText(/Δεσμεύτηκε το ασφαλιστήριο/)).not.toBeInTheDocument();
   });
 
+  it('explains a bind stopped by an underwriting referral: what, why, status and the next step', async () => {
+    const referred: JobBindResponse = fx.bound({
+      state: 'QUOTED',
+      gateResults: [
+        { gate: 'EFFECTIVE_DATE', passed: true, severity: 'BLOCK' },
+        { gate: 'UW_ISSUES', passed: false, severity: 'BLOCK', reason: 'UW_ISSUES_OPEN' },
+      ],
+    });
+    const issue = {
+      id: '0192f0c4-0000-7000-8000-0000000000aa',
+      jobRef: fx.jobId,
+      issueType: 'VEHICLE_AGE_REFERRAL',
+      issueKey: 'VEHICLE_AGE_REFERRAL:veh-1',
+      ruleId: 'REFER-OLD-VEHICLE',
+      severity: 'REFER',
+      blockingPoint: 'PRE_BIND',
+      lane: 'ASSISTED',
+      status: 'Open',
+      recordVersion: 1,
+      messageEn: 'The vehicle is older than 20 years.',
+      messageEl: 'Το όχημα είναι παλαιότερο των 20 ετών.',
+      raisedAt: '2026-10-08T10:00:00Z',
+      raisedBy: 'USER:dev:underwriter',
+      decision: null,
+      closeReason: null,
+    };
+    const api = mockApi([
+      ...routes({ bind: () => ({ body: referred }) }),
+      {
+        method: 'GET',
+        path: '/api/uw/v1/issues',
+        respond: () => ({ body: { items: [issue], nextCursor: null, limit: 200 } }),
+      },
+    ]);
+    const { user, container } = renderScreen(<QuoteWizardPage />, {
+      path: '/policies/quotes/new',
+      url,
+    });
+    await walkToPremium(user);
+    await user.click(screen.getByRole('button', { name: 'Υπολογισμός ασφαλίστρου' }));
+    await screen.findAllByText('Αποδοχή');
+    await next(user);
+    await user.click(await screen.findByRole('button', { name: 'Δέσμευση' }));
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('checkbox'));
+    await user.click(within(dialog).getByRole('button', { name: 'Δέσμευση ασφαλιστηρίου' }));
+
+    const grid = await screen.findByRole('grid', { name: 'Ζητήματα ανάληψης της προσφοράς' });
+    expect(within(grid).getByText('Παλαιό όχημα')).toBeInTheDocument();
+    expect(
+      within(grid).getByText('Το όχημα είναι παλαιότερο των 20 ετών (από το έτος πρώτης άδειας).'),
+    ).toBeInTheDocument();
+    expect(within(grid).getByText('Αναμένει απόφαση')).toBeInTheDocument();
+    expect(within(grid).getByText(/Ζητήστε έγκριση από ανώτερο ανάδοχο/)).toBeInTheDocument();
+    expect(within(grid).getByText(/Ελέγξτε το έτος πρώτης άδειας/)).toBeInTheDocument();
+    expect(screen.queryByText(/VEHICLE_AGE_REFERRAL:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\(UW_ISSUES_OPEN\)/)).not.toBeInTheDocument();
+    expect(api.callsTo('GET', '/api/uw/v1/issues')[0]?.url.searchParams.get('jobRef')).toBe(
+      fx.jobId,
+    );
+    // The bind can be tried again once a senior underwriter has approved.
+    expect(screen.getByRole('button', { name: 'Δέσμευση' })).not.toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+    await expectNoA11yViolations(container);
+  });
+
   it('explains a stale quote (POL-ERR-QUOTE-STALE) as a Problem Details error', async () => {
     mockApi(routes({ bind: () => problem(409, 'POL-ERR-QUOTE-STALE', 'Η προσφορά έχει λήξει') }));
     const { user } = renderScreen(<QuoteWizardPage />, { path: '/policies/quotes/new', url });

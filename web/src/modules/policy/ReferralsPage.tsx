@@ -102,9 +102,7 @@ function DecisionForm({ issue, onDone }: { issue: UwIssueItem; onDone: (d: Decis
           helperText={t('referrals.reasonHelp')}
           value={reason}
           onChange={setReason}
-          errorMessage={
-            tried && reason.trim() === '' ? t('referrals.reasonRequired') : undefined
-          }
+          errorMessage={tried && reason.trim() === '' ? t('referrals.reasonRequired') : undefined}
         />
         <p className={styles.muted}>{t('referrals.selfNote')}</p>
         {mutation.isError ? (
@@ -180,6 +178,7 @@ export function ReferralsPage() {
         />
       ) : null}
       <Section title={t('referrals.open')}>
+        <p className={styles.muted}>{t('referrals.openHint')}</p>
         <QueryView query={query}>
           {(page) => (
             <SimpleTable<UwIssueItem>
