@@ -64,7 +64,6 @@
     "charges": {
       "element": "Στοιχείο",
       "type": "Χρέωση",
-      "category": "Κατηγορία",
       "legalStatus": "Νομικό καθεστώς",
       "provisional": "Προσωρινό",
       "amount": "Ποσό"

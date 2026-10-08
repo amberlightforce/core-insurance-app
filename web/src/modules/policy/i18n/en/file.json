@@ -64,7 +64,6 @@
     "charges": {
       "element": "Element",
       "type": "Charge",
-      "category": "Category",
       "legalStatus": "Legal status",
       "provisional": "Provisional",
       "amount": "Amount"

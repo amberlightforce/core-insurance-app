@@ -76,7 +76,7 @@ function policyAt(validAt: string, state1 = 'IN_FORCE'): PolicyFileResponse {
   };
 }
 
-const baseTerm = fx.policy().term as NonNullable<PolicyFileResponse['term']>;
+const baseTerm = fx.policy().term as unknown as NonNullable<PolicyFileResponse['term']>;
 const timelines: Record<string, TermTimelineResponse> = {
   [term1Id]: {
     policy: fx.policy().policy,
@@ -111,7 +111,7 @@ const timelines: Record<string, TermTimelineResponse> = {
         reversed: false,
       },
     ],
-  } as TermTimelineResponse,
+  },
   [term2Id]: {
     policy: fx.policy().policy,
     term: baseTerm,
@@ -127,7 +127,7 @@ const timelines: Record<string, TermTimelineResponse> = {
         reversed: false,
       },
     ],
-  } as TermTimelineResponse,
+  },
 };
 
 interface Setup {
@@ -177,6 +177,12 @@ function routes(setup: Setup = {}): MockRoute[] {
   ];
 }
 
+function nth<T>(items: readonly T[], index: number): T {
+  const item = items.at(index);
+  if (item === undefined) throw new Error(`no item at ${String(index)}`);
+  return item;
+}
+
 const view = () =>
   renderScreen(<PolicyViewPage />, {
     path: '/policies/:policyId',
@@ -215,8 +221,8 @@ describe('Policy file (SL3-UI-POL-FILE)', () => {
     const term1List = await within(groups).findByRole('list', { name: 'Συναλλαγές όρου 1' });
     const rows = within(term1List).getAllByRole('listitem');
     expect(rows.map((r) => /#(\d)/.exec(r.textContent)?.[1])).toEqual(['3', '2', '1']);
-    expect(within(rows[0] as HTMLElement).getByText('Αλλαγή')).toBeInTheDocument();
-    expect(within(rows[2] as HTMLElement).getByText('Νέα παραγωγή')).toBeInTheDocument();
+    expect(within(nth(rows, 0)).getByText('Αλλαγή')).toBeInTheDocument();
+    expect(within(nth(rows, 2)).getByText('Νέα παραγωγή')).toBeInTheDocument();
     const term2List = within(groups).getByRole('list', { name: 'Συναλλαγές όρου 2' });
     expect(within(term2List).getByText('Ανανέωση')).toBeInTheDocument();
 
@@ -235,7 +241,7 @@ describe('Policy file (SL3-UI-POL-FILE)', () => {
     mockApi(routes());
     const { user } = view();
     const term1List = await screen.findByRole('list', { name: 'Συναλλαγές όρου 1' });
-    const first = within(term1List).getAllByRole('listitem').at(-1) as HTMLElement;
+    const first = nth(within(term1List).getAllByRole('listitem'), -1);
     const toggle = within(first).getByRole('button', { name: /Χρεώσεις \(3\)/ });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await user.click(toggle);

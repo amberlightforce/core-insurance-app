@@ -44,9 +44,11 @@ function ChargesTable({ charges, label }: { charges: ChargeLineModel[]; label: s
         (c) => `${c.elementLocator} · ${c.coverageCode}`,
       ),
       identifierColumn<ChargeLineModel>('chargeType', t('file.charges.type'), (c) => c.chargeType, {
-        size: 160,
+        size: 130,
       }),
-      textColumn<ChargeLineModel>('category', t('file.charges.category'), (c) => c.chargeCategory),
+      moneyColumn<ChargeLineModel>('amount', t('file.charges.amount'), (c) => c.amount.amount, {
+        currency: 'EUR',
+      }),
       statusColumn<ChargeLineModel>(
         'legal',
         t('file.charges.legalStatus'),
@@ -61,11 +63,8 @@ function ChargesTable({ charges, label }: { charges: ChargeLineModel[]; label: s
           ) : c.legalStatus ? (
             <span>{c.legalStatus}</span>
           ) : null,
-        { size: 240 },
+        { size: 200 },
       ),
-      moneyColumn<ChargeLineModel>('amount', t('file.charges.amount'), (c) => c.amount.amount, {
-        currency: 'EUR',
-      }),
     ],
     [t],
   );
