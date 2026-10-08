@@ -406,6 +406,12 @@ paths:
         description: 'Policy business key (line dimension, REQ-FIN-075): journals with at least one line for this policy. PRD: "dimensions". SL-FIN typed the PRD inputs as the filters the slice needs (D-API-06a).'
         schema:
           $ref: ../events/common.schema.json#/$defs/BusinessNumber
+      - name: claimId
+        in: query
+        required: false
+        description: 'Claim (line dimension, REQ-FIN-075): journals with at least one line for this claim, from CLM ReserveChanged/PaymentIssued and the BIL disbursement entries of its payments (SL2-FIN-CLM). PRD: "dimensions"'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       - name: sourceEventType
         in: query
         required: false
@@ -6307,6 +6313,41 @@ components:
           - $ref: ../events/common.schema.json#/$defs/Uuid
           - type: 'null'
         receiptId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        claimId:
+          description: Claim (CLM postings and the BIL disbursement entries of claim payments)
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        exposureId:
+          description: Exposure of the reserve line
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        reserveLineId:
+          description: CLM reserve line
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        costType:
+          description: Reserve line key cost type
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        costCategory:
+          description: Reserve line key cost category
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        claimPaymentId:
+          description: CLM claim payment (PaymentIssued paymentId; the BIL disbursement's source id). GL-2510 nets to zero per claim payment (REQ-FIN-037)
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        disbursementId:
+          description: BIL disbursement that pays the claim payment
           oneOf:
           - $ref: ../events/common.schema.json#/$defs/Uuid
           - type: 'null'

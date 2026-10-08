@@ -519,7 +519,14 @@
               "chargeId": "01920261-2d09-7ecf-8e8c-db7010a19f31",
               "billingAccountId": "019221d8-a8c1-714d-80b1-b154f55fc4cd",
               "invoiceId": "0192e342-feaf-760b-8d05-196b72579662",
-              "receiptId": "01923bf8-0106-775d-8da3-483a2678c9ad"
+              "receiptId": "01923bf8-0106-775d-8da3-483a2678c9ad",
+              "claimId": "01925f0c-90e3-7116-8e0b-e64d1182356e",
+              "exposureId": "0192c367-f6c9-7eea-8d52-0a31ab1286f1",
+              "reserveLineId": "01921ebd-743d-7088-852c-4869a5a5a9f3",
+              "costType": "SAMPLE_CODE",
+              "costCategory": "SAMPLE_CODE",
+              "claimPaymentId": "0192f841-229a-77a0-8418-c8a9dd2f4fac",
+              "disbursementId": "019221d8-2306-7b1a-8dfd-d59ac9957717"
             }
           }
         ]
@@ -539,7 +546,14 @@
       "chargeId": "01920b3c-29f7-7d54-8e0e-84ae2307255c",
       "billingAccountId": "019275b1-d0c9-7ea6-8d74-331e7ae21ea8",
       "invoiceId": "01929089-787a-7a0b-87e5-558aaacef474",
-      "receiptId": "0192390d-3cd3-76e6-89e7-652401393116"
+      "receiptId": "0192390d-3cd3-76e6-89e7-652401393116",
+      "claimId": "019236f0-7a94-721d-8c48-14f958f9587e",
+      "exposureId": "0192602e-807f-733f-808b-df02f4cafa34",
+      "reserveLineId": "01928984-05c8-77cd-8aa2-2c30a83085be",
+      "costType": "SAMPLE_CODE",
+      "costCategory": "SAMPLE_CODE",
+      "claimPaymentId": "019211ac-1bf8-758b-8d22-69c6956ac3e5",
+      "disbursementId": "0192c89a-ea8e-7158-83e7-d4a88466fa00"
     },
     "JournalLineView": {
       "lineNo": 1,
@@ -573,7 +587,14 @@
         "chargeId": "01925e99-f7a3-7ae0-85ef-f9892ebec1e2",
         "billingAccountId": "0192226a-427d-7c85-8af1-1fbfc0cb9dd7",
         "invoiceId": "0192d75e-9535-7ed4-81a6-75d99a77ee7e",
-        "receiptId": "01927893-f689-7f04-8555-0fb90c60c640"
+        "receiptId": "01927893-f689-7f04-8555-0fb90c60c640",
+        "claimId": "01922255-bdca-7b3c-8752-e43daebed0d7",
+        "exposureId": "01925358-b0cb-7b59-8eb7-c42dffa34ae0",
+        "reserveLineId": "01921efa-8254-760f-8916-26f41cd981ab",
+        "costType": "SAMPLE_CODE",
+        "costCategory": "SAMPLE_CODE",
+        "claimPaymentId": "0192042b-3054-7b67-8f29-06e37efbfe87",
+        "disbursementId": "01928459-02b1-7c7c-832c-1e7b5f3b476a"
       }
     },
     "JournalQueryItem": {
@@ -640,7 +661,14 @@
               "chargeId": "0192deda-3189-7b23-8531-9d371200a41e",
               "billingAccountId": "0192e75f-569b-71b6-89a5-47eeb154688c",
               "invoiceId": "01922f8b-b2de-7ba1-8103-ca4bf0455f42",
-              "receiptId": "019291ff-eaf7-7b39-86d5-a40d882f4a6d"
+              "receiptId": "019291ff-eaf7-7b39-86d5-a40d882f4a6d",
+              "claimId": "01927526-88eb-7893-8529-e720f14fb16b",
+              "exposureId": "01927c1a-5164-7fb8-831a-76ae067d2708",
+              "reserveLineId": "0192d3f7-e589-7124-83ff-142ffd85e913",
+              "costType": "SAMPLE_CODE",
+              "costCategory": "SAMPLE_CODE",
+              "claimPaymentId": "01923389-0d52-7cd2-838b-b1ff81910c1a",
+              "disbursementId": "01928ce0-949f-79bc-8ade-c6c981e17c7c"
             }
           }
         ]
@@ -712,7 +740,14 @@
                   "chargeId": "0192130b-3ffc-7430-814c-8118766b7e17",
                   "billingAccountId": "01921b00-f876-7edd-8dbd-9f365ba61b9e",
                   "invoiceId": "0192ccd0-6e37-746f-8b10-bc5a62ef97d5",
-                  "receiptId": "019246a3-fc78-7176-81f4-07f34c47a6bb"
+                  "receiptId": "019246a3-fc78-7176-81f4-07f34c47a6bb",
+                  "claimId": "01925ee7-977c-7b2c-8d0a-4adc33349a84",
+                  "exposureId": "0192a48c-133f-7370-8ec2-094f0c0cae2e",
+                  "reserveLineId": "01926dc4-3818-7ee7-8a44-d21743e6ba80",
+                  "costType": "SAMPLE_CODE",
+                  "costCategory": "SAMPLE_CODE",
+                  "claimPaymentId": "0192d7d5-0e84-7e67-88ba-518f84ed814c",
+                  "disbursementId": "0192a5f8-8853-7191-894c-c88ea3532e93"
                 }
               }
             ]
@@ -793,7 +828,14 @@
             "chargeId": "0192a6e2-540b-78d1-8ece-c9e51ebb8ebf",
             "billingAccountId": "019262f7-a018-789a-88ef-325ab56c9e7a",
             "invoiceId": "0192fde3-7b1c-77eb-8e05-1d9fcfb4f325",
-            "receiptId": "0192ab86-1757-7f0d-8b9e-76511e50919f"
+            "receiptId": "0192ab86-1757-7f0d-8b9e-76511e50919f",
+            "claimId": "01923c16-60b4-7bad-804e-98a6b64466c3",
+            "exposureId": "01923551-eb9d-7cda-8cb2-8d67d1c0139a",
+            "reserveLineId": "01926036-20df-79b2-8b9d-3881344d216a",
+            "costType": "SAMPLE_CODE",
+            "costCategory": "SAMPLE_CODE",
+            "claimPaymentId": "0192f7e0-5c51-7edd-853d-5d34e1a2ee2c",
+            "disbursementId": "0192b925-20dd-74ec-8f44-166b116d33cf"
           }
         }
       ]

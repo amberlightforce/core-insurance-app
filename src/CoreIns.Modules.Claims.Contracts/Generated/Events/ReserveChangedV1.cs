@@ -46,9 +46,20 @@ public sealed record ReserveChangedV1 : global::CoreIns.Platform.Contracts.Event
     /// <inheritdoc />
     global::CoreIns.Platform.Contracts.Events.EventContract global::CoreIns.Platform.Contracts.Events.IEventPayload.Contract => Descriptor;
 
+    /// <summary>Claim (the aggregate id, repeated so FIN and RI post from payload fields only, REQ-CLM-005); CLM always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
     /// <summary>Contract member 'exposureId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("exposureId")]
     public required global::CoreIns.SharedKernel.Identifiers.ExposureId ExposureId { get; init; }
+
+    /// <summary>Reserve line changed (PRD-07 §7.1 ReserveLine; key = reserveLine cost type + category); CLM always sets it</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'reserveLineId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reserveLineId")]
+    public global::System.Guid? ReserveLineId { get; init; }
 
     /// <summary>Contract member 'reserveLine'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reserveLine")]
@@ -100,6 +111,10 @@ public sealed record ReserveChangedV1 : global::CoreIns.Platform.Contracts.Event
     /// <summary>Contract member 'handlingSegment'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("handlingSegment")]
     public required string HandlingSegment { get; init; }
+
+    /// <summary>Accounting date of the claim financial transaction (PRD-07 §7.1 ClaimFinancialTransaction.accounting_date); FIN derives it from occurredAt in the entity zone when absent</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accountingDate")]
+    public global::CoreIns.SharedKernel.BusinessDate? AccountingDate { get; init; }
 
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]

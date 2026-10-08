@@ -1014,6 +1014,79 @@
         "amount"
       ]
     },
+    "ClaimPaymentLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One line of a claim payment (PRD-07 §8 PaymentIssued 'lines'): the amount one approved payment transaction pays from one reserve line. A superset of LineAmount (lineKey + amount), so v1.0 instances stay valid; CLM fills every member (SL2-FIN-CLM). No personal data.",
+      "properties": {
+        "lineKey": {
+          "$ref": "#/$defs/Text",
+          "description": "The CLM financial transaction id of this line (text form; one of the payload's transactionIds)"
+        },
+        "amount": {
+          "$ref": "#/$defs/MoneyByCurrency3"
+        },
+        "reserveLineId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Reserve line paid from (PRD-07 §7.1 ReserveLine)"
+        },
+        "exposureId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Exposure of the reserve line"
+        },
+        "costType": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Reserve line key: cost type (e.g. INDEMNITY, EXPENSE_ALLOCATED)"
+        },
+        "costCategory": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Reserve line key: cost category (e.g. VEHICLE_REPAIR)"
+        },
+        "eroding": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "True when the payment erodes the reserve line (PRD-07 §7.1 ClaimFinancialTransaction.eroding)"
+        }
+      },
+      "required": [
+        "lineKey",
+        "amount"
+      ]
+    },
     "Participant": {
       "type": "object",
       "additionalProperties": false,

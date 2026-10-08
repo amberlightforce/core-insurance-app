@@ -75,6 +75,18 @@
         "exGratia"
       ],
       "properties": {
+        "claimId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Claim (the aggregate id, repeated so FIN and RI post from payload fields only, REQ-CLM-005); CLM always sets it",
+          "x-classification": "P0"
+        },
         "paymentId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
           "x-classification": "P0"
@@ -89,8 +101,9 @@
         "lines": {
           "type": "array",
           "items": {
-            "$ref": "../common.schema.json#/$defs/LineAmount"
+            "$ref": "../common.schema.json#/$defs/ClaimPaymentLine"
           },
+          "description": "Per reserve line paid: transaction id, reserve line, exposure, cost type and category, amount in three currencies, eroding flag",
           "x-classification": "P0"
         },
         "amount": {
@@ -124,6 +137,18 @@
             }
           ],
           "description": "Redress payments (REQ-CLM-265)",
+          "x-classification": "P0"
+        },
+        "accountingDate": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/LocalDate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Accounting date of the payment transactions (PRD-07 §7.1 ClaimFinancialTransaction.accounting_date); FIN derives it from occurredAt in the entity zone when absent",
           "x-classification": "P0"
         }
       }

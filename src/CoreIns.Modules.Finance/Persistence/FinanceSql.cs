@@ -172,6 +172,23 @@ internal static class FinanceSeed
     /// <summary>The seed the first migration applies.</summary>
     public const string GrTestV1 = "gr-test.finance.v1";
 
+    /// <summary>The seed of migration ClaimsPostings: v1 plus the claims chart, catalogue and rule set v2 (SL2-FIN-CLM, D-SL2-08).</summary>
+    public const string GrTestV2 = "gr-test.finance.v2";
+
+    /// <summary>Rule set v2 replaces v1 (same effective date, REQ-FIN-052): v1 becomes Superseded; its rows stay (append-only).</summary>
+    public const string SupersedeV1 = """
+        UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 1 AND status = 'ACTIVE';
+        """;
+
+    /// <summary>Migration Down of ClaimsPostings: v1 active again and v2 superseded (rule rows are append-only, so v2 stays as history).</summary>
+    public const string ReactivateV1 = """
+        UPDATE fin.posting_rule_set SET status = 'ACTIVE'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 1;
+        UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 2;
+        """;
+
     /// <summary>The raw JSON of a seed.</summary>
     public static string Json(string name)
     {

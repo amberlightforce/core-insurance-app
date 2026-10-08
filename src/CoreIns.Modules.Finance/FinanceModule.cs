@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CoreIns.Modules.Billing.Contracts.Events;
+using CoreIns.Modules.Claims.Contracts.Events;
 using CoreIns.Modules.Finance.Persistence;
 using CoreIns.Modules.Finance.Posting;
 using CoreIns.Modules.Finance.Queries;
@@ -19,7 +20,9 @@ namespace CoreIns.Modules.Finance;
 /// Composition entry point of the Finance module (PRD-09 Finance sub-ledger). The Host calls <see cref="AddFinanceModule"/>;
 /// the migrate job applies <see cref="Databases"/>. SL-FIN slice: event intake in the worker (BIL BillingEntryPosted is
 /// the posting source, POL and other BIL events are context, D-SLC-12), data-driven posting rules, balanced append-only
-/// journals, a minimal GR-TEST chart, and the journal and posting-rule read APIs.
+/// journals, a minimal GR-TEST chart, and the journal and posting-rule read APIs. SL2-FIN-CLM adds the claims postings
+/// (D-SL2-08): CLM ReserveChanged and PaymentIssued plus BIL's disbursement entries, claim dimensions on journal lines,
+/// and journals listed by claim.
 /// </summary>
 public static class FinanceModule
 {
@@ -59,6 +62,29 @@ public static class FinanceModule
         services.AddEventHandler<JsonElement, ContextEventHandler>(Descriptor(InvoiceIssuedV1.Descriptor), "FIN.Intake.InvoiceIssued", ModuleCode.FIN);
         services.AddEventHandler<JsonElement, ContextEventHandler>(Descriptor(PaymentReceivedV1.Descriptor), "FIN.Intake.PaymentReceived", ModuleCode.FIN);
         services.AddEventHandler<JsonElement, ContextEventHandler>(Descriptor(CashAllocatedV1.Descriptor), "FIN.Intake.CashAllocated", ModuleCode.FIN);
+
+        // Claims (D-SL2-08): CLM ReserveChanged and PaymentIssued post; the cash side comes from BIL's disbursement
+        // entries (BillingEntryPosted above); BIL Disbursement* and the other CLM events are context only.
+        services.AddEventHandler<JsonElement, ClaimFactHandler>(Descriptor(ReserveChangedV1.Descriptor), "FIN.Intake.ReserveChanged", ModuleCode.FIN);
+        services.AddEventHandler<JsonElement, ClaimFactHandler>(Descriptor(PaymentIssuedV1.Descriptor), "FIN.Intake.PaymentIssued", ModuleCode.FIN);
+        foreach (var (contract, name) in new (EventContract, string)[]
+                 {
+                     (ClaimReportedV1.Descriptor, "ClaimReported"),
+                     (ExposureCreatedV1.Descriptor, "ExposureCreated"),
+                     (TransactionSetApprovedV1.Descriptor, "TransactionSetApproved"),
+                     (ClaimClosedV1.Descriptor, "ClaimClosed"),
+                     (DisbursementIssuedV1.Descriptor, "DisbursementIssued"),
+                     (DisbursementClearedV1.Descriptor, "DisbursementCleared"),
+                     (DisbursementRejectedV1.Descriptor, "DisbursementRejected"),
+                     (DisbursementStoppedV1.Descriptor, "DisbursementStopped"),
+                     (DisbursementVoidedV1.Descriptor, "DisbursementVoided"),
+                     (DisbursementReturnedV1.Descriptor, "DisbursementReturned"),
+                 })
+        {
+            services.AddEventHandler<JsonElement, ContextEventHandler>(Descriptor(contract), "FIN.Intake." + name, ModuleCode.FIN);
+        }
+
+        services.AddOptions<FinanceOptions>().Bind(configuration.GetSection(FinanceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddErrorDefinitions(Errors);
         return services;

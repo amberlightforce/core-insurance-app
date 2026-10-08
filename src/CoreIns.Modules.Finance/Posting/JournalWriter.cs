@@ -108,6 +108,13 @@ internal sealed class JournalWriter(
                 BillingAccountId = line.Dimensions.BillingAccountId,
                 InvoiceId = line.Dimensions.InvoiceId,
                 ReceiptId = line.Dimensions.ReceiptId,
+                ClaimId = line.Dimensions.ClaimId,
+                ExposureId = line.Dimensions.ExposureId,
+                ReserveLineId = line.Dimensions.ReserveLineId,
+                CostType = line.Dimensions.CostType,
+                CostCategory = line.Dimensions.CostCategory,
+                ClaimPaymentId = line.Dimensions.ClaimPaymentId,
+                DisbursementId = line.Dimensions.DisbursementId,
             });
         }
 
@@ -167,6 +174,8 @@ internal static class JournalRows
                 ProductCode = l.ProductCode, ProductVersion = l.ProductVersion, CoverageCode = l.CoverageCode, ChargeType = l.ChargeType,
                 ChargeCategory = l.ChargeCategory, GlKey = l.GlKey, PolicyId = l.PolicyId, PolicyNumber = l.PolicyNumber, PolicyTermId = l.PolicyTermId,
                 PolicyTransactionId = l.PolicyTransactionId, ChargeId = l.ChargeId, BillingAccountId = l.BillingAccountId, InvoiceId = l.InvoiceId, ReceiptId = l.ReceiptId,
+                ClaimId = l.ClaimId, ExposureId = l.ExposureId, ReserveLineId = l.ReserveLineId, CostType = l.CostType, CostCategory = l.CostCategory,
+                ClaimPaymentId = l.ClaimPaymentId, DisbursementId = l.DisbursementId,
             }))]);
     }
 }

@@ -373,4 +373,18 @@ internal sealed class JournalLineRow
     public Guid? InvoiceId { get; set; }
 
     public Guid? ReceiptId { get; set; }
+
+    public Guid? ClaimId { get; set; }
+
+    public Guid? ExposureId { get; set; }
+
+    public Guid? ReserveLineId { get; set; }
+
+    public string? CostType { get; set; }
+
+    public string? CostCategory { get; set; }
+
+    public Guid? ClaimPaymentId { get; set; }
+
+    public Guid? DisbursementId { get; set; }
 }

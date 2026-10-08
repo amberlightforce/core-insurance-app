@@ -24,7 +24,27 @@ internal sealed class BillingEntryPostedHandler(Intake intake) : IEventHandler<J
     }
 }
 
-/// <summary>Context-only events (POL ChargeDeltaEmitted; BIL InvoiceIssued, PaymentReceived, CashAllocated): recorded, never journalised.</summary>
+/// <summary>
+/// CLM ReserveChanged and PaymentIssued: FIN's posting sources for claims (PRD-09 events table, REQ-FIN-037, D-SL2-08).
+/// Idempotent on the source event id; each fact posts on its own, so PaymentIssued and BIL's DISBURSEMENT_RELEASED
+/// net GL-2510 to zero per payment in either arrival order (D-ARC-26).
+/// </summary>
+internal sealed class ClaimFactHandler(Intake intake) : IEventHandler<JsonElement>
+{
+    public async Task HandleAsync(EventEnvelope envelope, JsonElement payload, CancellationToken cancellationToken)
+    {
+        var row = await intake.ReceiveAsync(envelope, cancellationToken).ConfigureAwait(false);
+        if (row is { Status: BusinessEventStatus.Received })
+        {
+            await intake.PostAsync(row, cancellationToken).ConfigureAwait(false);
+        }
+    }
+}
+
+/// <summary>
+/// Context-only events (POL ChargeDeltaEmitted; BIL InvoiceIssued, PaymentReceived, CashAllocated, Disbursement*; CLM
+/// ClaimReported, ExposureCreated, TransactionSetApproved, ClaimClosed): recorded, never journalised.
+/// </summary>
 internal sealed class ContextEventHandler(Intake intake) : IEventHandler<JsonElement>
 {
     public async Task HandleAsync(EventEnvelope envelope, JsonElement payload, CancellationToken cancellationToken)
