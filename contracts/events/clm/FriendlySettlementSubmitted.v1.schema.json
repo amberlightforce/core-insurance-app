@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.coreinsurance.example/events/clm/FriendlySettlementSubmitted.v1.schema.json",
   "title": "FriendlySettlementSubmitted v1",
-  "description": "FS case submitted to clearing",
+  "description": "FS case submitted to clearing (D-SL4-02, D-SL4-03). The SPI result fields are always set by CLM.",
   "x-event-type": "FriendlySettlementSubmitted",
   "x-registry-name": "clm.FriendlySettlementSubmitted",
   "x-producer": "CLM",
@@ -74,11 +74,95 @@
         },
         "counterparty": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "description": "Counterparty insurer code",
+          "description": "Counterparty insurer code (company code from the pack member list, not a person)",
           "x-classification": "P0"
         },
         "clearingValue": {
           "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "claimId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Claim (the aggregate id); CLM always sets it",
+          "x-classification": "P0"
+        },
+        "clearingReference": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Clearing reference returned by IFriendlySettlementClearing.SubmitAsync; always set",
+          "x-classification": "P0"
+        },
+        "clearingValueBasis": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Clearing value basis (ACTUAL or AVERAGE); ACTUAL in slice 4 (D-SL4-03). Always set",
+          "x-classification": "P0"
+        },
+        "ruleId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Eligibility rule id that admitted the case; always set",
+          "x-classification": "P0"
+        },
+        "ruleVersion": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Eligibility rule version; always set",
+          "x-classification": "P0"
+        },
+        "legalStatus": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Legal status of the values used (UNVERIFIED for the stub, D-SL4-03); always set",
+          "x-classification": "P0"
+        },
+        "provisional": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "True while the legal status is not Settled; always set",
           "x-classification": "P0"
         }
       }

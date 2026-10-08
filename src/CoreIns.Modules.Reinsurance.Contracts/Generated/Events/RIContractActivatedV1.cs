@@ -69,11 +69,11 @@ public sealed record RIContractActivatedV1 : global::CoreIns.Platform.Contracts.
     [global::System.Text.Json.Serialization.JsonPropertyName("version")]
     public required int Version { get; init; }
 
-    /// <summary>Contract member 'contractType'.</summary>
+    /// <summary>Contract type (open Code). Slice 4 activates XOL_PER_RISK only (D-SL4-04); the PRD values QUOTA_SHARE, SURPLUS, FAC_PROPORTIONAL, FAC_XOL, AUTO_FAC, XOL_PER_EVENT, CAT_XOL, AGGREGATE_XOL and STOP_LOSS are refused with RI-ERR-VALIDATION.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("contractType")]
     public required string ContractType { get; init; }
 
-    /// <summary>Contract member 'period'.</summary>
+    /// <summary>Half-open period [from, to) in Europe/Athens dates; the contract activates at the period start</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("period")]
     public required global::CoreIns.SharedKernel.DateRange Period { get; init; }
 
@@ -91,4 +91,36 @@ public sealed record RIContractActivatedV1 : global::CoreIns.Platform.Contracts.
     /// <summary>Contract member 'participants'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("participants")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.Participant> Participants { get; init; }
+
+    /// <summary>Layers of the contract (attachment, limit, AAD, AAL). RI always sets them for XOL_PER_RISK; sectionsAndLayers stays an OpenObject for later contract types.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layers")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.RiLayer>? Layers { get; init; }
+
+    /// <summary>Placed percentage of the contract (the signed lines of the participants sum to it); RI always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("placedPct")]
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+    public decimal? PlacedPct { get; init; }
+
+    /// <summary>Clause: how recoveries reduce ultimate net loss (REALISED_ONLY in slice 4, D-SL4-05); RI always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoveriesInure")]
+    public string? RecoveriesInure { get; init; }
+
+    /// <summary>Clause: ALAE is part of ultimate net loss; RI always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("alaeIncluded")]
+    public bool? AlaeIncluded { get; init; }
+
+    /// <summary>Clause: statutory interest is part of ultimate net loss; RI always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statutoryInterestIncluded")]
+    public bool? StatutoryInterestIncluded { get; init; }
+
+    /// <summary>Scope: product codes the contract covers (RI always sets them)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCodes")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<string>? ProductCodes { get; init; }
+
+    /// <summary>Scope: coverage codes the contract covers (RI always sets them)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coverageCodes")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<string>? CoverageCodes { get; init; }
 }

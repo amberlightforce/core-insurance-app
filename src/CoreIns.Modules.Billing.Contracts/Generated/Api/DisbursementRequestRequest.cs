@@ -11,7 +11,7 @@ namespace CoreIns.Modules.Billing.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DisbursementRequestRequest
 {
-    /// <summary>Open code (D-CON-24), registered in the source register (REQ-BIL-354)</summary>
+    /// <summary>Open code (D-CON-24), registered in the source register (REQ-BIL-354). Served: CLM_CLAIM_PAYMENT (SEPA_CT) and FS_CLEARING (method CLEARING only, D-SL4-02); others are refused with BIL-ERR-SOURCE</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("sourceType")]
     public required string SourceType { get; init; }
 
@@ -44,7 +44,7 @@ public sealed record DisbursementRequestRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
     public required global::CoreIns.SharedKernel.Money Amount { get; init; }
 
-    /// <summary>REQ-BIL-209; defaults from the source</summary>
+    /// <summary>REQ-BIL-209; defaults from the source. CLEARING is valid only for source FS_CLEARING (BIL-ERR-SOURCE otherwise) and is the only method for it</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("method")]
     public required string Method { get; init; }
 
@@ -94,7 +94,7 @@ public sealed record DisbursementRequestRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? PurposeText { get; init; }
 
-    /// <summary>Contract member 'statementReference'.</summary>
+    /// <summary>Statement reference. Required for FS_CLEARING (the FS statement reference shared with CLM); also carried on its ledger entries and events</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("statementReference")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? StatementReference { get; init; }
@@ -103,4 +103,9 @@ public sealed record DisbursementRequestRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("returnReference")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? ReturnReference { get; init; }
+
+    /// <summary>FS_CLEARING only: claim-level lines [claim id, fs case id, amount] that must sum to amount (BIL-ERR-LINES-MISMATCH). Lines are the audit trail of the net; no per-claimant VoP is made (D-SL4-12)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.FsClearingLine>? Lines { get; init; }
 }

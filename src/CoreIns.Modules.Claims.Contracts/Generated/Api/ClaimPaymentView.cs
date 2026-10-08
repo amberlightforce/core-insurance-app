@@ -42,7 +42,7 @@ public sealed record ClaimPaymentView
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? MaskedAccount { get; init; }
 
-    /// <summary>Contract member 'method'.</summary>
+    /// <summary>Payment method (open Code): SEPA_CT, SEPA_INST, VENDOR, OFFSET or CLEARING (Friendly Settlement at-fault leg: no disbursement, settled through its statement, D-SL4-02)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("method")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? Method { get; init; }
@@ -95,6 +95,24 @@ public sealed record ClaimPaymentView
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Instant? ClearedAt { get; init; }
 
+    /// <summary>The payment this one reissues (REQ-CLM-127); always set on a reissued payment, null otherwise</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'reissueOf' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reissueOf")]
+    public global::System.Guid? ReissueOf { get; init; }
+
+    /// <summary>MARK of the fiscal settlement receipt, stored from FiscalDocRegistered (D-SL4-11); null until registered, always null for CLEARING</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fiscalMark")]
+    public string? FiscalMark { get; init; }
+
+    /// <summary>FS statement of a CLEARING payment; always set for method CLEARING</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'fsStatementId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fsStatementId")]
+    public global::System.Guid? FsStatementId { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
@@ -127,5 +145,17 @@ public sealed record ClaimPaymentView
         /// <summary><c>REJECTED</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECTED")]
         Rejected,
+
+        /// <summary><c>VOIDED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("VOIDED")]
+        Voided,
+
+        /// <summary><c>STOPPED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("STOPPED")]
+        Stopped,
+
+        /// <summary><c>RETURNED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RETURNED")]
+        Returned,
     }
 }

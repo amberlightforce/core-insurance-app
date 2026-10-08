@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Events;
 
-/// <summary>Payload of clm.FriendlySettlementSubmitted v1.0: FS case submitted to clearing.</summary>
+/// <summary>Payload of clm.FriendlySettlementSubmitted v1.0: FS case submitted to clearing (D-SL4-02, D-SL4-03). The SPI result fields are always set by CLM..</summary>
 /// <remarks>
 /// <para>Schema contracts/events/clm/FriendlySettlementSubmitted.v1.schema.json; aggregate Claim (ordering key claim_id); trigger: FS case submitted to clearing.</para>
 /// <para>Payload status full.</para>
@@ -50,11 +50,39 @@ public sealed record FriendlySettlementSubmittedV1 : global::CoreIns.Platform.Co
     [global::System.Text.Json.Serialization.JsonPropertyName("fsCaseId")]
     public required global::CoreIns.SharedKernel.Identifiers.FsCaseId FsCaseId { get; init; }
 
-    /// <summary>Counterparty insurer code</summary>
+    /// <summary>Counterparty insurer code (company code from the pack member list, not a person)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("counterparty")]
     public required string Counterparty { get; init; }
 
     /// <summary>Contract member 'clearingValue'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("clearingValue")]
     public required global::CoreIns.SharedKernel.Money ClearingValue { get; init; }
+
+    /// <summary>Claim (the aggregate id); CLM always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>Clearing reference returned by IFriendlySettlementClearing.SubmitAsync; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("clearingReference")]
+    public string? ClearingReference { get; init; }
+
+    /// <summary>Clearing value basis (ACTUAL or AVERAGE); ACTUAL in slice 4 (D-SL4-03). Always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("clearingValueBasis")]
+    public string? ClearingValueBasis { get; init; }
+
+    /// <summary>Eligibility rule id that admitted the case; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleId")]
+    public string? RuleId { get; init; }
+
+    /// <summary>Eligibility rule version; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleVersion")]
+    public string? RuleVersion { get; init; }
+
+    /// <summary>Legal status of the values used (UNVERIFIED for the stub, D-SL4-03); always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    public string? LegalStatus { get; init; }
+
+    /// <summary>True while the legal status is not Settled; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+    public bool? Provisional { get; init; }
 }
