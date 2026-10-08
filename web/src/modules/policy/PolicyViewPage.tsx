@@ -106,6 +106,7 @@ function PolicyDetails({
           ) : c.legalStatus ? (
             <span>{c.legalStatus}</span>
           ) : null,
+        { size: 240 },
       ),
       moneyColumn<ChargeLine>('amount', t('charges.columns.amount'), (c) => c.amount.amount, {
         currency: 'EUR',

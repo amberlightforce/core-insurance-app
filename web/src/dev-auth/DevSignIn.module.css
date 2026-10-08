@@ -1,0 +1,130 @@
+/* Dev sign-in: a centred, opaque card floating on the ambient canvas (radius.xl, elevation.3). */
+.auth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-block-size: 100%;
+  padding: var(--space-8) var(--space-4);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  inline-size: min(100%, var(--size-auth-card));
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface-sheet);
+  box-shadow: var(--elevation-3);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Same filled mark as the rail logo. */
+.logo {
+  display: grid;
+  place-items: center;
+  inline-size: var(--size-control-lg);
+  block-size: var(--size-control-lg);
+  border-radius: var(--radius-lg);
+  background: var(--gradient-logo);
+  box-shadow: var(--shadow-logo);
+  color: var(--color-logo-fg);
+  font: var(--type-heading-3);
+}
+
+.product {
+  color: var(--color-text-secondary);
+  font: var(--type-overline);
+  letter-spacing: var(--type-overline-tracking);
+  text-transform: uppercase;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-heading-1);
+  letter-spacing: var(--type-heading-1-tracking);
+  text-wrap: balance;
+}
+
+.intro {
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.card > :global(button) {
+  inline-size: 100%;
+  justify-content: center;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sunken);
+}
+
+.status {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.continue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1_5);
+  color: var(--color-text-link);
+  font: var(--type-label-lg);
+  text-decoration: none;
+  outline: none;
+}
+
+.continue[data-hovered] {
+  text-decoration: underline;
+}
+
+.continue[data-focus-visible] {
+  border-radius: var(--radius-xs);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.note {
+  max-inline-size: var(--size-auth-card);
+  margin: var(--space-0);
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+  text-align: center;
+}
+
+@media (width < 905px) {
+  .card {
+    padding: var(--space-6) var(--space-5);
+  }
+}

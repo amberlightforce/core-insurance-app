@@ -100,7 +100,7 @@ export function HomePage() {
   const now = useMemo(() => new Date(), []);
 
   const summary = useMemo(
-    () => (invoices.data ? summariseInvoices(invoices.data.items ?? [], today) : null),
+    () => (invoices.data ? summariseInvoices(invoices.data.items, today) : null),
     [invoices.data, today],
   );
   const pending = useMemo(

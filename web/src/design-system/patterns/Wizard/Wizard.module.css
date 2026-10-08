@@ -36,6 +36,15 @@
   min-inline-size: 0;
 }
 
+/* Side stepper as the v3 mockup's work-views panel (`.views`): sunken, rounded, hairline. */
+.wizard[data-wide] .stepper {
+  align-self: start;
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sunken);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--material-chrome-hairline);
+}
+
 .main {
   grid-area: main;
   min-inline-size: 0;

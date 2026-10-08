@@ -59,6 +59,7 @@ function InvoiceDetails({ data }: { data: InvoiceGetResponse }) {
           ) : i.legalStatus ? (
             <span>{i.legalStatus}</span>
           ) : null,
+        { size: 240 },
       ),
       dateColumn<Item>('from', t('lines.columns.from'), (i) => i.validPeriod.from),
       moneyColumn<Item>('amount', t('lines.columns.amount'), (i) => i.amount.amount, {

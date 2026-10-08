@@ -1,4 +1,5 @@
 import { CircleHelp, LogIn, LogOut, UserRound } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button as AriaButton } from 'react-aria-components';
 
@@ -42,13 +43,20 @@ export function UserMenu({ user, onOpenHelp, onAccount }: UserMenuProps) {
   const { preferences, setPreference } = usePreferences();
   const name = user ? displayName(user.name) : null;
   const roles = (user?.roles ?? []).map((role) => (isKnownRole(role) ? t(roleKeys[role]) : role));
+  const [open, setOpen] = useState(false);
+  // Help and the account action leave the menu: close it first so only one dialog is open at a time.
+  const leave = (action: () => void) => () => {
+    setOpen(false);
+    action();
+  };
 
   return (
     <Popover
+      isOpen={open}
+      onOpenChange={setOpen}
       placement="bottom end"
       size="md"
       aria-label={t('userMenu.label')}
-      className={cx(styles.userPopover)}
       trigger={
         <AriaButton
           className={cx(styles.avatarTrigger)}
@@ -107,10 +115,10 @@ export function UserMenu({ user, onOpenHelp, onAccount }: UserMenuProps) {
           <LanguageSwitch />
         </div>
         <div className={cx(styles.userActions)}>
-          <Button variant="ghost" icon={CircleHelp} shortcut="?" onPress={onOpenHelp}>
+          <Button variant="ghost" icon={CircleHelp} shortcut="?" onPress={leave(onOpenHelp)}>
             {t('topBar.help')}
           </Button>
-          <Button variant="ghost" icon={user ? LogOut : LogIn} onPress={onAccount}>
+          <Button variant="ghost" icon={user ? LogOut : LogIn} onPress={leave(onAccount)}>
             {user ? t('userMenu.switch') : t('userMenu.signIn')}
           </Button>
         </div>

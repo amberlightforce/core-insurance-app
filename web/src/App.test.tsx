@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -8,7 +9,12 @@ import { renderWithDs } from './test/render';
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
-  return renderWithDs(<RouterProvider router={router} />);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
+  return renderWithDs(
+    <QueryClientProvider client={client}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  );
 }
 
 function signInAs(roles: string[]) {
@@ -27,11 +33,9 @@ afterEach(() => {
 });
 
 describe('App', () => {
-  it('renders the shell with the home placeholder in Greek', () => {
+  it('renders the shell with the signed-out home in Greek', () => {
     renderAt('/');
-    expect(screen.getByRole('main')).toHaveTextContent(
-      'Η ενότητα «Αρχική» δεν είναι ακόμη διαθέσιμη',
-    );
+    expect(screen.getByRole('main')).toHaveTextContent('Συνδεθείτε για να ξεκινήσετε');
     expect(document.title).toBe('Αρχική · Core Insurance');
   });
 
@@ -75,9 +79,10 @@ describe('App', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Ανάληψη κινδύνου');
   });
 
-  it('opens the shortcut help with the «?» button', async () => {
+  it('opens the shortcut help from the avatar menu', async () => {
     const { user } = renderAt('/');
-    await user.click(screen.getByRole('button', { name: 'Βοήθεια και συντομεύσεις' }));
+    await user.click(screen.getByRole('button', { name: 'Δεν έχετε συνδεθεί' }));
+    await user.click(await screen.findByRole('button', { name: /Βοήθεια και συντομεύσεις/ }));
     expect(await screen.findByRole('dialog')).toHaveTextContent('Αναζήτηση ή εντολή');
   });
 

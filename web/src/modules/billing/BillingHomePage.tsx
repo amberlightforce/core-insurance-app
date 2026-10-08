@@ -47,6 +47,7 @@ export function BillingHomePage() {
           {invoices.length + accounts.length === 0 ? (
             <EmptyState
               kind="first-use"
+              illustration={<></>}
               headingLevel={3}
               headline={t('home.emptyTitle')}
               description={t('home.emptyBody')}
