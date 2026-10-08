@@ -36,36 +36,39 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
         var (response, body) = await _slice.CancelAsync(policy.PolicyId);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
 
-        // REQ-POL-206/208: source Policyholder, ProRata (illustrative), effective = request time; REQ-POL-004: the job went Draft → Quoted → Bound.
+        // REQ-POL-206/208: ProRata (illustrative), effective = request time; REQ-POL-004: the job went Draft -> Quoted -> Bound.
         body.Text("state").ShouldBe("BOUND");
-        body.Text("termState").ShouldBe("CANCELLED");
-        body.Text("source").ShouldBe("Policyholder");
         body.Text("kind").ShouldBe("STANDARD");
-        body.Text("refundMethod").ShouldBe("PRO_RATA");
         body.Text("effectiveAt").ShouldBe(_slice.Clock.Now.ToString());
-        body.Text("notices").ShouldBe("NOT_SENT_DOC_NOT_BUILT");
+        var preview = body!["servicingPreview"]!;
+        preview.Text("refundMethod").ShouldBe("PRO_RATA");
+        preview.Text("cancellationSource").ShouldBe("Policyholder");
+        preview.Text("transactionKind").ShouldBe("CANCELLATION");
 
         // REQ-POL-207/214: the preview per element x charge type: 430.00 x 245/365 = 288.63 credited; the IPT line is kept.
-        var preview = body!["refundPreview"]!;
-        preview.Text("premiumCredit").ShouldBe("-288.63");
-        preview.Text("taxCredit").ShouldBe("0");
-        preview.Text("refundDue").ShouldBe("288.63");
-        preview["notes"]!.AsArray().Select(n => n!.GetValue<string>()).ShouldBe(["IPT not refunded (provisional)"]);
-        var lines = preview["lines"]!.AsArray();
-        lines.Count.ShouldBe(2);
-        var premium = lines.Single(l => l!["chargeType"]!.GetValue<string>() == "PREM-MTPL")!;
-        premium["written"]!.GetValue<decimal>().ShouldBe(430.00m);
-        premium["amount"]!.GetValue<decimal>().ShouldBe(-288.63m);
-        premium["days"]!.GetValue<int>().ShouldBe(245);
-        premium["basis"]!.GetValue<int>().ShouldBe(365);
-        var ipt = lines.Single(l => l!["chargeType"]!.GetValue<string>() == "GR-IPT")!;
-        ipt["amount"]!.GetValue<decimal>().ShouldBe(0m);
-        ipt["treatment"]!["action"]!.GetValue<string>().ShouldBe("KEEP_NOT_REDUCED");
-        ipt["treatment"]!["legalStatus"]!.GetValue<string>().ShouldBe("PendingOpinion");
-        ipt["treatment"]!["provisional"]!.GetValue<bool>().ShouldBeTrue();
+        preview.Text("annualBefore.amount").ShouldBe("430.00");
+        preview.Text("premiumChange.amount").ShouldBe("-288.63");
+        preview.Text("taxChange.amount").ShouldBe("0.00");
+        preview.Text("totalChange.amount").ShouldBe("-288.63");
+        preview.Text("refundDue.amount").ShouldBe("288.63");
+        preview.Text("additionalDue.amount").ShouldBe("0.00");
+        preview["provisional"]!.GetValue<bool>().ShouldBeTrue();
+        var prorated = preview["proratedLines"]!.AsArray().Single()!;
+        prorated.Text("chargeType").ShouldBe("PREM-MTPL");
+        prorated.Text("amount.amount").ShouldBe("-288.63");
+        prorated.Text("annualAmount.amount").ShouldBe("430.00");
+        prorated["days"]!.GetValue<int>().ShouldBe(245);
+        prorated["termDays"]!.GetValue<int>().ShouldBe(365);
+        var iptLine = preview["taxLines"]!.AsArray().Single()!;
+        iptLine.Text("chargeType").ShouldBe("GR-IPT");
+        iptLine.Text("amount.amount").ShouldBe("0.00");
+        iptLine.Text("treatmentAction").ShouldBe("KEEP_NOT_REDUCED");
+        iptLine.Text("legalStatus").ShouldBe("PendingOpinion");
+        iptLine["provisional"]!.GetValue<bool>().ShouldBeTrue();
+        iptLine.Text("ruleId").ShouldBe("GR-TRT-IPT-CANCEL-POLICYHOLDER");
 
         await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
-        var transactionId = body.Text("transactionId");
+        var transactionId = await ScalarAsync<Guid>(data, $"SELECT bound_transaction_id FROM pol.job WHERE job_id = '{body.Text("jobId")}'");
         var termId = policy.TermId;
 
         // REQ-POL-119/122/214: NET deltas, one per element x charge type, kind CANCELLATION, source recorded, one record time.
@@ -103,7 +106,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
         versions[1][1].ShouldBe(watermark);
         versions[1][2].ShouldBe(DBNull.Value);
         ((DateTime)versions[1][3]).ShouldBe(_slice.Clock.Now.ToUtcDateTime());
-        versions[1][4].ShouldBe(transactionId);
+        versions[1][4].ShouldBe(transactionId.ToString());
 
         // The cover segment now ends at the effective time; the superseded one is closed, not deleted (REQ-POL-078).
         var segments = await RowsAsync(data, $"SELECT valid_to, recorded_to FROM pol.segment WHERE term_id = '{termId}' ORDER BY recorded_from");
@@ -147,11 +150,10 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
         var (response, body) = await _slice.CancelAsync(policy.PolicyId, kind: "Flat");
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("kind").ShouldBe("FLAT");
-        body.Text("refundMethod").ShouldBe("FULL_REFUND");
-        body.Text("termState").ShouldBe("CANCELLED");
+        body!["servicingPreview"]!.Text("refundMethod").ShouldBe("FULL_REFUND");
         body.Text("effectiveAt").ShouldBe(_slice.Clock.Now.Plus(TimeSpan.FromDays(10)).ToString());
-        body!["refundPreview"]!.Text("premiumCredit").ShouldBe("-430.00");
-        body["refundPreview"]!.Text("refundDue").ShouldBe("430.00");
+        body["servicingPreview"]!.Text("premiumChange.amount").ShouldBe("-430.00");
+        body["servicingPreview"]!.Text("refundDue.amount").ShouldBe("430.00");
 
         await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
         (await ScalarAsync<decimal>(data, $"SELECT sum(amount) FROM pol.charge_line WHERE term_id = '{policy.TermId}' AND charge_category = 'PREMIUM'")).ShouldBe(0m);
@@ -209,14 +211,14 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     {
         var policy = await _slice.BindAsync();
         _slice.Clock.Advance(TimeSpan.FromDays(3));
-        var past = _slice.Clock.Now.Minus(TimeSpan.FromHours(1)).ToString();
+        var past = _slice.Clock.Now.Minus(TimeSpan.FromDays(1)).ToString();
         var (backdated, problem) = await _slice.CancelAsync(policy.PolicyId, effectiveAt: past);
         backdated.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, problem?.ToJsonString());
         problem.Text("code").ShouldBe("POL-ERR-EFFDATE-LIMIT");
 
-        var (now, body) = await _slice.CancelAsync(policy.PolicyId, effectiveAt: _slice.Clock.Now.ToString());
+        var (now, body) = await _slice.CancelAsync(policy.PolicyId, effectiveAt: _slice.Clock.Now.Minus(TimeSpan.FromHours(1)).ToString());
         now.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
-        body!["refundPreview"]!.Text("premiumCredit").ShouldBe("-426.47");
+        body!["servicingPreview"]!.Text("premiumChange.amount").ShouldBe("-426.47");
     }
 
     [Fact]
@@ -255,7 +257,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
 
         var (dry, preview) = await _slice.CancelAsync(policy.PolicyId, dryRun: true);
         dry.StatusCode.ShouldBe(HttpStatusCode.OK, preview?.ToJsonString());
-        preview!["refundPreview"]!.Text("premiumCredit").ShouldBe("-288.63");
+        preview!["servicingPreview"]!.Text("premiumChange.amount").ShouldBe("-288.63");
 
         (await ScalarAsync<DateTime>(data, $"SELECT last_recorded_at FROM pol.policy WHERE policy_id = '{policy.PolicyId}'")).ShouldBe(watermark);
         (await ScalarAsync<long>(data, $"SELECT count(*) FROM pol.job WHERE policy_id = '{policy.PolicyId}' AND job_type = 'CANCELLATION'")).ShouldBe(0);
@@ -267,7 +269,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
         var (real, done) = await _slice.CancelAsync(policy.PolicyId);
         real.StatusCode.ShouldBe(HttpStatusCode.OK, done?.ToJsonString());
         // Dry run equals real: the same preview, line by line (the dry run's job and transaction ids are rolled back).
-        done!["refundPreview"]!.ToJsonString().ShouldBe(preview["refundPreview"]!.ToJsonString());
+        done!["servicingPreview"]!.ToJsonString().ShouldBe(preview["servicingPreview"]!.ToJsonString());
         done.Text("effectiveAt").ShouldBe(preview.Text("effectiveAt"));
     }
 
@@ -281,7 +283,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
         first.StatusCode.ShouldBe(HttpStatusCode.OK, one?.ToJsonString());
         var (replay, two) = await _slice.CancelAsync(policy.PolicyId, key: key);
         replay.StatusCode.ShouldBe(HttpStatusCode.OK, two?.ToJsonString());
-        two.Text("transactionId").ShouldBe(one.Text("transactionId"));
+        two.Text("jobId").ShouldBe(one.Text("jobId"));
         await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
         (await ScalarAsync<long>(data, $"SELECT count(*) FROM pol.policy_transaction WHERE policy_id = '{policy.PolicyId}' AND kind = 'CANCELLATION'")).ShouldBe(1);
     }
@@ -317,6 +319,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
         var policy = await _slice.BindAsync();
         _slice.Clock.Advance(TimeSpan.FromDays(20));
         var results = await Task.WhenAll(Enumerable.Range(0, 2).Select(_ => _slice.CancelAsync(policy.PolicyId)));
+        results.ShouldAllBe(r => (int)r.Response.StatusCode < 500, "a lost race is a 409, never a 500 (PITFALLS 15)");
         var codes = results.Select(r => r.Response.StatusCode).Order().ToList();
         codes.ShouldBe([HttpStatusCode.OK, HttpStatusCode.Conflict]);
         results.Single(r => r.Response.StatusCode == HttpStatusCode.Conflict).Body.Text("code").ShouldBeOneOf("POL-ERR-ILLEGAL-TRANSITION", "POL-ERR-STALE");

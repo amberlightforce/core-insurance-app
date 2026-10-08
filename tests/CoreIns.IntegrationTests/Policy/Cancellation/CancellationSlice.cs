@@ -146,11 +146,13 @@ internal sealed class CancellationSlice : IAsyncDisposable
         return new BoundPolicy(policyId, bind.Text("termId"), bind.Text("transactionId"), bind.Text("termState"));
     }
 
+    /// <summary>POSTs pol.Cancellation.create; <paramref name="effectiveAt"/> defaults to the clock's now, <paramref name="kind"/> to STANDARD.</summary>
     public Task<(HttpResponseMessage Response, JsonNode? Body)> CancelAsync(
         string policyId, string source = "Policyholder", string? kind = null, string? effectiveAt = null, bool dryRun = false, Guid? key = null, string roles = Underwriter) =>
         SendAsync(
             Client, HttpMethod.Post, "/api/pol/v1/cancellations" + (dryRun ? "?dryRun=true" : string.Empty),
-            new { policyId, source, reasonCode = "CUSTOMER_REQUEST", effectiveAt, kind }, roles: roles, key: key);
+            new { policyId, source, reasonCode = "CUSTOMER_REQUEST", effectiveAt = effectiveAt ?? Clock.Now.ToString(), kind = (kind ?? "STANDARD").ToUpperInvariant() },
+            roles: roles, key: key);
 
     public async ValueTask DisposeAsync()
     {

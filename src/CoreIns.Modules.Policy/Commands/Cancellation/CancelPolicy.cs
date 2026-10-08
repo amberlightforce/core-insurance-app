@@ -485,6 +485,11 @@ internal sealed class CancelPolicyHandler(
         PolicyTermRow term, ServicingTerm servicingTerm, ServicingState before, IReadOnlyList<ServicingDelta> premiumDeltas,
         IReadOnlyList<TreatedTaxLine> tax, bool includeTax, string source, RefundMethod method, Currency currency)
     {
+        static Money M(decimal amount, Currency c)
+        {
+            var trimmed = JobSupport.Exact(amount);
+            return new Money(trimmed.Scale < 2 ? decimal.Round(trimmed, 2) + 0.00m : trimmed, c);
+        }
         var prorated = new List<ServicingProratedLine>();
         foreach (var delta in premiumDeltas)
         {
@@ -495,14 +500,14 @@ internal sealed class CancelPolicyHandler(
                 ChargeCategory = delta.ChargeCategory, Period = new DateRange(new BusinessDate(delta.DateFrom), new BusinessDate(delta.DateTo)),
                 Days = delta.Days, TermDays = servicingTerm.Days,
                 Fraction = ExactDecimal.Divide(delta.FractionNumerator, delta.FractionDenominator, 10, MidpointRounding.ToZero),
-                AnnualAmount = new Money(written, currency), Amount = new Money(delta.Amount, currency),
+                AnnualAmount = M(written, currency), Amount = M(delta.Amount, currency),
             });
         }
 
         var taxLines = tax.Select(line => new ServicingTaxLine
         {
             ElementLocator = line.Key.ElementLocator, ChargeType = line.Key.ChargeType, ChargeCategory = line.ChargeCategory.ToUpperInvariant(),
-            Amount = new Money(includeTax ? line.Amount : 0m, currency), TreatmentAction = TreatmentActionCode.KeepNotReduced,
+            Amount = M(includeTax ? line.Amount : 0m, currency), TreatmentAction = TreatmentActionCode.KeepNotReduced,
             RuleId = line.Treatment.RuleId, RuleVersion = line.Treatment.RuleVersion, LegalStatus = line.Treatment.LegalStatus,
             Provisional = line.Treatment.Provisional, LegalSourceRef = line.Treatment.LegalSourceRef,
         }).ToList();
@@ -513,15 +518,15 @@ internal sealed class CancelPolicyHandler(
         var annualBefore = before.Segments.GroupBy(s => s.Key).Sum(g => g.OrderBy(s => s.From).Last().Rate.AnnualRate);
         return new ServicingPreview
         {
-            AnnualBefore = new Money(annualBefore, currency).RoundToMinorUnits(MidpointRounding.AwayFromZero),
-            AnnualAfter = Money.Zero(currency),
+            AnnualBefore = M(annualBefore, currency).RoundToMinorUnits(MidpointRounding.AwayFromZero),
+            AnnualAfter = M(0m, currency),
             ProratedLines = prorated,
             TaxLines = taxLines,
-            PremiumChange = new Money(premiumChange, currency),
-            TaxChange = new Money(taxChange, currency),
-            TotalChange = new Money(total, currency),
-            RefundDue = new Money(total < 0m ? -total : 0m, currency),
-            AdditionalDue = Money.Zero(currency),
+            PremiumChange = M(premiumChange, currency),
+            TaxChange = M(taxChange, currency),
+            TotalChange = M(total, currency),
+            RefundDue = M(total < 0m ? -total : 0m, currency),
+            AdditionalDue = M(0m, currency),
             TransactionKind = TransactionKindCode.Cancellation,
             CancellationSource = source,
             RefundMethod = CancellationText.Code(method),
