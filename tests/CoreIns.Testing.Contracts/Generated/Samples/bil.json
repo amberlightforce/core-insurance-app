@@ -91,6 +91,49 @@
     "bil.Delinquency.get": {
       "process": "unspecified"
     },
+    "bil.Disbursement.approveRelease": {
+      "disbursement": {
+        "disbursementId": "01929223-c728-7831-8fc0-9e441356ac9d",
+        "status": "Requested",
+        "sourceType": "BIL",
+        "sourceId": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "method": "SAMPLE_CODE",
+        "requestedValueDate": "2026-10-07",
+        "maskedPayeeAccount": "sample",
+        "disbursementNumber": "SAMPLE-000001",
+        "sourceModule": "PTY",
+        "payeePartyId": "0192e77a-1a15-7e5d-8b2b-3656d8b10ac4",
+        "payeeAccountId": "0192553f-8b40-7dbc-8d0b-2c5f1ea08dbf",
+        "claimId": "0192d6b7-14af-747c-8578-978fb61a88ba",
+        "valueDate": "2026-10-07",
+        "approvalEvidenceRef": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "releasedAt": "2026-10-07T09:00:00Z",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "clearedAt": "2026-10-07T09:00:00Z",
+        "statementReference": "sample",
+        "releaseApproval": {
+          "required": true,
+          "approvalRequestId": "0192ca5b-525f-725b-8b79-1d2df7e6091f",
+          "requestedBy": "sample"
+        },
+        "lines": [
+          {
+            "claimId": "019288ca-56d7-7ce0-8975-d9ad23b0c77d",
+            "fsCaseId": "01926f68-d4ea-7b86-823e-6b758a3a6a17",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ]
+      },
+      "decision": "APPROVE"
+    },
     "bil.Disbursement.get": {
       "disbursement": {
         "disbursementId": "0192bf98-a13c-746c-846b-a6ada3336ea1",
@@ -114,7 +157,23 @@
         "requestedAt": "2026-10-07T09:00:00Z",
         "releasedAt": "2026-10-07T09:00:00Z",
         "issuedAt": "2026-10-07T09:00:00Z",
-        "clearedAt": "2026-10-07T09:00:00Z"
+        "clearedAt": "2026-10-07T09:00:00Z",
+        "statementReference": "sample",
+        "releaseApproval": {
+          "required": true,
+          "approvalRequestId": "0192e73e-86e0-79f1-85af-4b44890e2f68",
+          "requestedBy": "sample"
+        },
+        "lines": [
+          {
+            "claimId": "0192a711-5b08-7c57-8308-cd9b86e651e6",
+            "fsCaseId": "01920802-f237-740b-888e-454302af67d1",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ]
       }
     },
     "bil.Disbursement.list": {
@@ -148,7 +207,23 @@
       "requestedAt": "2026-10-07T09:00:00Z",
       "releasedAt": "2026-10-07T09:00:00Z",
       "issuedAt": "2026-10-07T09:00:00Z",
-      "clearedAt": "2026-10-07T09:00:00Z"
+      "clearedAt": "2026-10-07T09:00:00Z",
+      "statementReference": "sample",
+      "releaseApproval": {
+        "required": true,
+        "approvalRequestId": "0192bdb7-396d-76ca-8527-602a85ec476b",
+        "requestedBy": "sample"
+      },
+      "lines": [
+        {
+          "claimId": "01928ce9-dc11-74ab-8e9f-415185796822",
+          "fsCaseId": "01927b79-77b9-7f11-8c76-74399146baba",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "bil.Disbursement.stop": {
       "disbursement": {
@@ -481,7 +556,20 @@
           "recordedAt": "2026-10-07T09:00:00Z"
         }
       ],
-      "allocationOutcome": "ALLOCATED"
+      "allocationOutcome": "ALLOCATED",
+      "receivableAllocation": {
+        "receivableId": "0192209e-aa82-7f56-8eee-4098c44815d1",
+        "allocationId": "01926280-77c4-717e-849f-393d487640ac",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openAmountAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "OPEN"
+      }
     },
     "bil.PaymentPlan.change": {
       "planInstance": "unspecified",
@@ -566,9 +654,90 @@
         }
       ]
     },
+    "bil.Receivable.get": {
+      "receivable": {
+        "receivableId": "01923422-5c42-7273-8868-9bcbee93b10f",
+        "sourceType": "CLM_CLAIM_PAYMENT",
+        "sourceId": "sample",
+        "counterpartyPartyId": "01920d6a-6006-77db-8895-c9a4ceee4e7d",
+        "claimId": "01921c9f-a21c-79dc-8805-f1e0067f2584",
+        "recoveryId": "0192c6c3-a157-7eb3-8010-226a673e77a3",
+        "statementRef": "Sample text",
+        "purpose": "SALVAGE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "OPEN",
+        "dueDate": "2026-10-07",
+        "billingAccountId": "0192b978-5952-7e83-8962-d7a43f61bde7",
+        "paymentReference": "sample",
+        "registeredAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "bil.Receivable.list": {
+      "items": [
+        {
+          "receivableId": "0192336d-07a1-7a02-882b-224224962db6",
+          "sourceType": "CLM_CLAIM_PAYMENT",
+          "sourceId": "sample",
+          "counterpartyPartyId": "01929fa3-5d88-7c0b-8feb-9a183307b787",
+          "claimId": "01921423-20a6-7f97-81ac-2c0390a2657f",
+          "recoveryId": "0192bb70-156d-7d87-8e18-69515e30c742",
+          "statementRef": "Sample text",
+          "purpose": "SALVAGE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "status": "OPEN",
+          "dueDate": "2026-10-07",
+          "billingAccountId": "01928955-f7b1-70c7-8a1b-61bc4e9fb2c8",
+          "paymentReference": "sample",
+          "registeredAt": "2026-10-07T09:00:00Z",
+          "recordVersion": 1
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
     "bil.Receivable.register": {
       "receivableId": "0192116f-7bd7-7332-858b-c8592b07491f",
-      "paymentReference": "unspecified"
+      "billingAccountId": "01925c64-5d95-7858-83c7-b32f5b0aef2f",
+      "paymentReference": "sample",
+      "receivable": {
+        "receivableId": "01923b37-6025-7f79-89e4-3b0b6169ca2c",
+        "sourceType": "CLM_CLAIM_PAYMENT",
+        "sourceId": "sample",
+        "counterpartyPartyId": "01921dfb-cebf-7a11-8753-b0a028f53819",
+        "claimId": "0192cd14-7d68-79d3-8d8c-94882d420724",
+        "recoveryId": "01929606-1d22-773c-8316-235a663def51",
+        "statementRef": "Sample text",
+        "purpose": "SALVAGE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "OPEN",
+        "dueDate": "2026-10-07",
+        "billingAccountId": "01924b19-b976-768e-8882-2747ed15e789",
+        "paymentReference": "sample",
+        "registeredAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
     },
     "bil.Reconciliation.fin": {
       "controlTotalsPerAccountAndEvent": "unspecified",
@@ -1189,6 +1358,54 @@
     "DelinquencyReleaseHoldResponse": {
       "process": "unspecified"
     },
+    "DisbursementApproveReleaseRequest": {
+      "disbursementId": "019223a6-7f7d-76ff-8d8a-e9c6ddad65c6",
+      "decision": "APPROVE",
+      "reason": "Sample text"
+    },
+    "DisbursementApproveReleaseResponse": {
+      "disbursement": {
+        "disbursementId": "01926de6-bd96-7046-87d7-2545b8711e2b",
+        "status": "Requested",
+        "sourceType": "BIL",
+        "sourceId": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "method": "SAMPLE_CODE",
+        "requestedValueDate": "2026-10-07",
+        "maskedPayeeAccount": "sample",
+        "disbursementNumber": "SAMPLE-000001",
+        "sourceModule": "PTY",
+        "payeePartyId": "0192e42d-9da3-7f86-8630-869cfd66987b",
+        "payeeAccountId": "0192e42f-5db4-7dc7-8cf6-07804bf9cb67",
+        "claimId": "019235d0-13c6-7437-8d0e-825d552e56fe",
+        "valueDate": "2026-10-07",
+        "approvalEvidenceRef": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "releasedAt": "2026-10-07T09:00:00Z",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "clearedAt": "2026-10-07T09:00:00Z",
+        "statementReference": "sample",
+        "releaseApproval": {
+          "required": true,
+          "approvalRequestId": "0192e3d3-8df6-78fe-8188-5b0c727ca401",
+          "requestedBy": "sample"
+        },
+        "lines": [
+          {
+            "claimId": "01927e13-44af-71fb-8136-8efade0e98c5",
+            "fsCaseId": "01925221-9196-7d22-83bb-763605c51d90",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ]
+      },
+      "decision": "APPROVE"
+    },
     "DisbursementBatchApproveReleaseRequest": {
       "bankAccount": "unspecified",
       "valueDate": "2026-10-07"
@@ -1236,7 +1453,23 @@
         "requestedAt": "2026-10-07T09:00:00Z",
         "releasedAt": "2026-10-07T09:00:00Z",
         "issuedAt": "2026-10-07T09:00:00Z",
-        "clearedAt": "2026-10-07T09:00:00Z"
+        "clearedAt": "2026-10-07T09:00:00Z",
+        "statementReference": "sample",
+        "releaseApproval": {
+          "required": true,
+          "approvalRequestId": "01925ffd-f5c4-7d02-8f8b-d42fb3e665f0",
+          "requestedBy": "sample"
+        },
+        "lines": [
+          {
+            "claimId": "0192420e-8026-75c5-88ce-94dd5f822591",
+            "fsCaseId": "01927fca-facc-7382-86f2-60e3679e2b25",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ]
       }
     },
     "DisbursementListItem": {
@@ -1274,7 +1507,17 @@
       "claimId": "0192e549-607d-7be7-83ae-c8b7ff0ce1a0",
       "purposeText": "sample",
       "statementReference": "sample",
-      "returnReference": "sample"
+      "returnReference": "sample",
+      "lines": [
+        {
+          "claimId": "019277ba-20a7-7136-82bc-157faaf3e752",
+          "fsCaseId": "0192ddbb-ebf4-7130-8b15-3153b81e219c",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "DisbursementRequestResponse": {
       "disbursementId": "0192b5f1-23f6-72a8-8d48-40cb663b2461",
@@ -1298,7 +1541,23 @@
       "requestedAt": "2026-10-07T09:00:00Z",
       "releasedAt": "2026-10-07T09:00:00Z",
       "issuedAt": "2026-10-07T09:00:00Z",
-      "clearedAt": "2026-10-07T09:00:00Z"
+      "clearedAt": "2026-10-07T09:00:00Z",
+      "statementReference": "sample",
+      "releaseApproval": {
+        "required": true,
+        "approvalRequestId": "01922109-699e-773c-80e2-80565c74b070",
+        "requestedBy": "sample"
+      },
+      "lines": [
+        {
+          "claimId": "0192920d-886a-7cc1-8f83-faa921e04023",
+          "fsCaseId": "019242c1-fdea-74ba-885e-a6e4a047eb1b",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "DisbursementStopRequest": {
       "disbursementId": "0192f765-e9a1-753a-83d6-fbc4acf42d3d",
@@ -1395,6 +1654,14 @@
     },
     "DsarRestrictResponse": {
       "restrictionOutcomePerObjectReason": "unspecified"
+    },
+    "FsClearingLine": {
+      "claimId": "01927c56-f4b0-7a37-84aa-ee1d31aaa966",
+      "fsCaseId": "01921341-1e40-7df4-85db-8dbb74fac243",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
     },
     "ImportConvertCurrencyRequest": {
       "planId": "0192d346-ba78-752d-830e-777ae4046aeb"
@@ -1939,7 +2206,9 @@
       "valueDate": "2026-10-07",
       "invoiceId": "0192c5c0-0307-7cff-83a3-44b0f86138f4",
       "bankReference": "sample",
-      "autoAllocate": true
+      "autoAllocate": true,
+      "paymentReference": "sample",
+      "receivableId": "019216ae-7b6d-7914-8296-dfc220380c58"
     },
     "PaymentTakeResponse": {
       "receipt": {
@@ -1982,7 +2251,20 @@
           "recordedAt": "2026-10-07T09:00:00Z"
         }
       ],
-      "allocationOutcome": "ALLOCATED"
+      "allocationOutcome": "ALLOCATED",
+      "receivableAllocation": {
+        "receivableId": "01923a00-cbe0-7f7e-815f-f8021001aa60",
+        "allocationId": "01925d8f-53ee-723c-881e-935fb035cf19",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openAmountAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "OPEN"
+      }
     },
     "ReceiptGetResponse": {
       "receipt": {
@@ -2072,10 +2354,70 @@
       "suspenseReason": "SAMPLE_CODE",
       "recordedAt": "2026-10-07T09:00:00Z"
     },
+    "ReceivableGetResponse": {
+      "receivable": {
+        "receivableId": "0192ae52-46d0-7771-8597-0349e5e96fcb",
+        "sourceType": "CLM_CLAIM_PAYMENT",
+        "sourceId": "sample",
+        "counterpartyPartyId": "0192a346-3af1-7905-8454-62bebd9395fd",
+        "claimId": "01921387-47d0-7da2-84a4-3d219fbce727",
+        "recoveryId": "01920e48-7c0d-73cd-8714-fcadb54169cc",
+        "statementRef": "Sample text",
+        "purpose": "SALVAGE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "OPEN",
+        "dueDate": "2026-10-07",
+        "billingAccountId": "01921912-1930-7d0c-8465-7f3d7fabaaca",
+        "paymentReference": "sample",
+        "registeredAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "ReceivableListPage": {
+      "items": [
+        {
+          "receivableId": "01925210-ee21-760f-8335-cd1a610c1760",
+          "sourceType": "CLM_CLAIM_PAYMENT",
+          "sourceId": "sample",
+          "counterpartyPartyId": "01924f81-af95-7b1d-8ced-a73e6abc7477",
+          "claimId": "0192695f-3c32-7e2d-89b9-9de7ba9de641",
+          "recoveryId": "019253c4-9954-7c27-8437-2fcea3a7c3fb",
+          "statementRef": "Sample text",
+          "purpose": "SALVAGE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "status": "OPEN",
+          "dueDate": "2026-10-07",
+          "billingAccountId": "0192ebcf-ad80-7c04-84f3-773d77962029",
+          "paymentReference": "sample",
+          "registeredAt": "2026-10-07T09:00:00Z",
+          "recordVersion": 1
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
     "ReceivableRegisterRequest": {
-      "source": "unspecified",
-      "counterparty": "unspecified",
-      "references": "unspecified",
+      "sourceType": "CLM_CLAIM_PAYMENT",
+      "sourceId": "sample",
+      "counterpartyPartyId": "01927ef1-a1fd-7d2a-8dc1-94b24da47fb3",
+      "claimId": "01927e98-9a54-787b-8637-df10c79dddda",
+      "recoveryId": "0192a43f-a033-7468-80f6-4ca6a04d4de6",
+      "statementRef": "Sample text",
+      "purpose": "SALVAGE",
       "amount": {
         "amount": "120.50",
         "currency": "EUR"
@@ -2085,7 +2427,56 @@
     },
     "ReceivableRegisterResponse": {
       "receivableId": "01929abb-78af-787b-859e-3ef69bf78df6",
-      "paymentReference": "unspecified"
+      "billingAccountId": "01922f92-7a51-77c5-8be9-6df4e7d12013",
+      "paymentReference": "sample",
+      "receivable": {
+        "receivableId": "01924329-d263-7c9e-8a0a-0f271ceea81e",
+        "sourceType": "CLM_CLAIM_PAYMENT",
+        "sourceId": "sample",
+        "counterpartyPartyId": "0192c34f-66fd-72af-877d-672f57e22d5b",
+        "claimId": "0192eeb0-2f70-78e7-878d-bbee3ed04c8d",
+        "recoveryId": "01929e87-f0be-7554-8e6f-6fba3990ae9e",
+        "statementRef": "Sample text",
+        "purpose": "SALVAGE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "OPEN",
+        "dueDate": "2026-10-07",
+        "billingAccountId": "019204cd-1516-77d4-8810-dc0c65e7bc69",
+        "paymentReference": "sample",
+        "registeredAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "ReceivableView": {
+      "receivableId": "0192fb2b-e3c2-7a91-88b6-f02d50bc4315",
+      "sourceType": "CLM_CLAIM_PAYMENT",
+      "sourceId": "sample",
+      "counterpartyPartyId": "0192ac02-3227-7c82-8565-8fef6dacf525",
+      "claimId": "019254f8-c877-7181-8a21-471460d0a574",
+      "recoveryId": "019262fb-27d9-772c-8dcf-2fec782ca75a",
+      "statementRef": "Sample text",
+      "purpose": "SALVAGE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "openAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "status": "OPEN",
+      "dueDate": "2026-10-07",
+      "billingAccountId": "0192e168-c087-7b38-82b2-80356a962046",
+      "paymentReference": "sample",
+      "registeredAt": "2026-10-07T09:00:00Z",
+      "recordVersion": 1
     },
     "ReconciliationBankRequest": {
       "account": "unspecified",

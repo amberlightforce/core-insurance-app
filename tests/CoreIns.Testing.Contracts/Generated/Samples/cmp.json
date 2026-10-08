@@ -865,7 +865,8 @@
       ],
       "counterpartyPartyId": "0192417c-44ed-7603-837c-353148f7a8b1",
       "issueDate": "2026-10-07",
-      "correlatedDocumentId": "01921246-1de2-7ff1-8895-73d30b921e20"
+      "correlatedDocumentId": "01921246-1de2-7ff1-8895-73d30b921e20",
+      "documentCategory": "SAMPLE_CODE"
     },
     "FiscalDocumentRequestResponse": {
       "fiscalDocumentId": "01921f4e-04a0-7f60-82de-4ee96f841e24",

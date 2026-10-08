@@ -118,7 +118,8 @@
             "RESERVE",
             "RECOVERY_RESERVE"
           ],
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "RESERVE = claim cost reserve; RECOVERY_RESERVE = expected recovery (salvage, subrogation, Friendly Settlement), which carries recoveryId"
         },
         "delta": {
           "$ref": "../common.schema.json#/$defs/MoneyByCurrency3",
@@ -184,6 +185,18 @@
             }
           ],
           "description": "Accounting date of the claim financial transaction (PRD-07 §7.1 ClaimFinancialTransaction.accounting_date); FIN derives it from occurredAt in the entity zone when absent",
+          "x-classification": "P0"
+        },
+        "recoveryId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Recovery whose reserve changed. Always set when kind is RECOVERY_RESERVE (D-SL4-07), null for kind RESERVE",
           "x-classification": "P0"
         }
       }

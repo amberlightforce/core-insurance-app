@@ -9,10 +9,11 @@ namespace CoreIns.Modules.Claims.Contracts.Api;
 public sealed record ClaimUpdateResponse
 {
     /// <summary>PRD: "claim"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("claim")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Claim { get; init; }
+    public global::CoreIns.Modules.Claims.Contracts.Api.ClaimSummary? Claim { get; init; }
+
+    /// <summary>Stored facts after the change; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("liabilityFacts")]
+    public global::CoreIns.Modules.Claims.Contracts.Api.LiabilityFacts? LiabilityFacts { get; init; }
 }

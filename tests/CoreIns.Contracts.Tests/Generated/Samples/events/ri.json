@@ -1269,6 +1269,37 @@
           "reinsurerPartyId": "01924034-6d95-7b97-8930-de41777b8460",
           "signedLine": "12.50"
         }
+      ],
+      "layers": [
+        {
+          "layerNo": 1,
+          "attachment": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "limit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aad": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aal": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "placedPct": "12.50",
+      "recoveriesInure": "SAMPLE_CODE",
+      "alaeIncluded": true,
+      "statutoryInterestIncluded": true,
+      "productCodes": [
+        "SAMPLE_CODE"
+      ],
+      "coverageCodes": [
+        "SAMPLE_CODE"
       ]
     }
   },
@@ -1319,7 +1350,11 @@
           "reinsurerPartyId": "0192c256-23d4-7c60-8257-6587222cd48e",
           "signedLine": "12.50"
         }
-      ]
+      ],
+      "placedPct": null,
+      "recoveriesInure": null,
+      "alaeIncluded": null,
+      "statutoryInterestIncluded": null
     }
   },
   {
@@ -1710,7 +1745,18 @@
       "siiLob": "SAMPLE_CODE",
       "ifrs17Refs": [
         "Sample text"
-      ]
+      ],
+      "contractYear": 1,
+      "contractType": "SAMPLE_CODE",
+      "posting": {
+        "item": "RECOVERY",
+        "contractType": "SAMPLE_CODE",
+        "direction": "CEDED",
+        "line": "SAMPLE_CODE",
+        "participantType": "SAMPLE_CODE"
+      },
+      "ifrs17GroupRef": "Sample text",
+      "sourceCorrelationKey": "Sample text"
     }
   },
   {
@@ -1835,7 +1881,12 @@
       "siiLob": "SAMPLE_CODE",
       "ifrs17Refs": [
         "Sample text"
-      ]
+      ],
+      "contractYear": null,
+      "contractType": null,
+      "posting": null,
+      "ifrs17GroupRef": null,
+      "sourceCorrelationKey": null
     }
   },
   {

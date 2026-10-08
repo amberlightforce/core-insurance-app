@@ -15,8 +15,9 @@ public interface IReinsuranceRecoveryService
     /// <remarks>
     /// <para>Operation ri.Recovery.listByClaim (query; HTTP GET /api/ri/v1/recoveries/list-by-claim).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full; fully typed from REQ-RI-136. Wave W7.</para>
+    /// <para>Status: full; fully typed from SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05). Wave W7.</para>
     /// <para>Exposure: ui; consumers: CLM.</para>
+    /// <para>Errors: RI-ERR-VALIDATION (422).</para>
     /// </remarks>
     /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
     /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>

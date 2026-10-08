@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.coreinsurance.example/events/clm/RecoveryRecorded.v1.schema.json",
   "title": "RecoveryRecorded v1",
-  "description": "recovery received and approved",
+  "description": "recovery received and approved. Slice 4 (D-SL4-06): published when CLM records received cash for a salvage, subrogation or Friendly Settlement recovery from an evidence-backed system set (BIL allocation). Fields marked always-set are always set by CLM.",
   "x-event-type": "RecoveryRecorded",
   "x-registry-name": "clm.RecoveryRecorded",
   "x-producer": "CLM",
@@ -76,7 +76,8 @@
         },
         "recoveryType": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Recovery type (open Code): SALVAGE, SUBROGATION or FRIENDLY_SETTLEMENT in slice 4"
         },
         "counterpartyPartyId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
@@ -90,8 +91,69 @@
         "allocationByLine": {
           "type": "array",
           "items": {
-            "$ref": "../common.schema.json#/$defs/LineAmount"
+            "$ref": "../common.schema.json#/$defs/ClaimPaymentLine"
           },
+          "x-classification": "P0",
+          "description": "Recovery received per reserve line (ClaimPaymentLine is a superset of LineAmount, so v1.0 instances stay valid): lineKey = the CLM financial transaction id, amount in three currencies, reserveLineId, exposureId, costType, costCategory. CLM always fills every member (SL4-CONTRACTS, PITFALLS 12)."
+        },
+        "claimId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Claim (the aggregate id, repeated so FIN and RI post from payload fields only); CLM always sets it",
+          "x-classification": "P0"
+        },
+        "accountingDate": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/LocalDate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Accounting date of the recovery transaction (ClaimFinancialTransaction.accounting_date); CLM always sets it",
+          "x-classification": "P0"
+        },
+        "receivableId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "BIL receivable the cash settled (D-SL4-06). Always set for SALVAGE and SUBROGATION, null otherwise",
+          "x-classification": "P0"
+        },
+        "fsStatementId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "CLM Friendly Settlement statement the recovery belongs to. Always set for FRIENDLY_SETTLEMENT, null otherwise",
+          "x-classification": "P0"
+        },
+        "evidenceRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Evidence of the system-recorded set: the BIL allocation id, or the FS statement line reference. Always set (client amounts are never accepted, PITFALLS 7)",
           "x-classification": "P0"
         }
       }
