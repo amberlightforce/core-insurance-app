@@ -27,7 +27,7 @@ internal sealed record OfferRenewal(RenewalOfferRequest Request) : ICommand<Rene
 
 internal sealed class OfferRenewalValidator : AbstractValidator<OfferRenewal>
 {
-    public OfferRenewalValidator() => RuleFor(c => c.Request.TermId).NotNull().WithErrorCode("TERM_REQUIRED");
+    public OfferRenewalValidator() => RuleFor(c => c.Request.TermId.Value).NotEmpty().WithErrorCode("TERM_REQUIRED");
 }
 
 /// <summary>
@@ -57,9 +57,10 @@ internal sealed class OfferRenewalHandler(
 {
     public async Task<Result<RenewalOfferResponse>> HandleAsync(OfferRenewal command, CancellationToken cancellationToken)
     {
-        if (command.Request.TermId is not { } termId)
+        var termId = command.Request.TermId;
+        if (command.Request.AcceptanceMode is { } mode && mode != RenewalSupport.AcceptanceModeExplicit)
         {
-            return RenewalSupport.TermRequired();
+            return RenewalSupport.Validation("acceptanceMode", "ACCEPTANCE_MODE_NOT_SUPPORTED", "Only explicit acceptance (EXPLICIT) is supported.");
         }
 
         var legalEntity = JobSupport.LegalEntity(context, legalEntities);
@@ -77,10 +78,10 @@ internal sealed class OfferRenewalHandler(
         }
 
         var now = locked.Value;
-        var job = await RenewalSupport.OpenJobAsync(db, legalEntity, termId, cancellationToken).ConfigureAwait(false);
+        var job = await RenewalSupport.RenewalJobAsync(db, legalEntity, command.Request.JobId, termId, cancellationToken).ConfigureAwait(false);
         if (job is null)
         {
-            return JobSupport.NotFound("open renewal of the term");
+            return JobSupport.NotFound("renewal job of the term");
         }
 
         var term = await RenewalSupport.CurrentTermAsync(db, legalEntity, termId, cancellationToken).ConfigureAwait(false);
@@ -102,6 +103,11 @@ internal sealed class OfferRenewalHandler(
         var version = await RenewalSupport.CurrentVersionAsync(db, job, cancellationToken).ConfigureAwait(false);
         var state = Codes.Parse<JobState>(job.State);
         var currency = Currency.FromCode(job.Currency);
+        if (state is not (JobState.Draft or JobState.Quoted))
+        {
+            return DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION", $"A {state} renewal cannot be offered.");
+        }
+
         var tree = JobSupport.Tree(version);
         var view = await ratingInput.BuildAsync(tree, job.EffectiveAt, cancellationToken).ConfigureAwait(false);
         if (view.IsFailure)
@@ -189,6 +195,8 @@ internal sealed class OfferRenewalHandler(
                     PremiumSummary = new PremiumSummary { Premium = premium, Taxes = taxes, Total = total },
                     AcceptanceMode = RenewalSupport.AcceptanceModeExplicit,
                     Deadline = term.ValidTo,
+                    PredecessorTermId = termId.Value,
+                    NewTermNumber = term.TermNumber + 1,
                 },
                 BusinessKeys.Empty.With("policyId", policyId.Value.ToString()).With("jobId", job.JobId.Value.ToString())
                     .With("quoteId", version.QuoteId.Value.ToString()))
@@ -206,7 +214,16 @@ internal sealed class OfferRenewalHandler(
             return JobSupport.Stale();
         }
 
-        return new RenewalOfferResponse { Job = RenewalSupport.JobJson(job, version, new { offered = !blocked, issues }) };
+        var (offerPremium, offerTaxes, offerTotal) = Charges.Totals(charges, currency);
+        return new RenewalOfferResponse
+        {
+            JobId = job.JobId,
+            State = Codes.Api(Codes.Parse<JobState>(job.State)),
+            OfferVersion = version.VersionNo,
+            PremiumSummary = new PremiumSummary { Premium = offerPremium, Taxes = offerTaxes, Total = offerTotal },
+            AcceptanceMode = RenewalSupport.AcceptanceModeExplicit,
+            Deadline = term.ValidTo,
+        };
     }
 }
 
@@ -215,18 +232,17 @@ internal sealed class OfferRenewalAuditor : ICommandAuditor<OfferRenewal, Renewa
 {
     public CommandAuditFacts Describe(OfferRenewal command, Result<RenewalOfferResponse>? result)
     {
-        if (result is not { IsSuccess: true } success || success.Value.Job is not { } job)
+        if (result is not { IsSuccess: true } success)
         {
-            return new CommandAuditFacts();
+            return new CommandAuditFacts { ObjectRef = ObjectRef.For(ModuleCode.POL, "Job", command.Request.JobId) };
         }
 
-        var jobId = new JobId(Guid.Parse(job.GetProperty("jobId").GetString()!));
+        var response = success.Value;
         return new CommandAuditFacts
         {
-            ObjectRef = ObjectRef.For(ModuleCode.POL, "Job", jobId),
-            ObjectNumber = job.GetProperty("jobNumber").GetString(),
-            BusinessKeys = BusinessKeys.Empty.With("jobId", jobId.Value.ToString()).With("expiringTermId", command.Request.TermId?.Value.ToString() ?? string.Empty),
-            Changes = AuditDiff.Compute(null, new { state = job.GetProperty("state").GetString(), subState = job.GetProperty("subState").ToString(), referred = job.GetProperty("referred").GetBoolean() }),
+            ObjectRef = ObjectRef.For(ModuleCode.POL, "Job", response.JobId),
+            BusinessKeys = BusinessKeys.Empty.With("jobId", response.JobId.Value.ToString()).With("expiringTermId", command.Request.TermId.Value.ToString()),
+            Changes = AuditDiff.Compute(null, new { state = response.State.ToString(), offerVersion = response.OfferVersion }),
         };
     }
 }

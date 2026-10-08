@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using System.Text.Json;
 using CoreIns.Modules.Market.Contracts;
 using CoreIns.Modules.Market.Contracts.Api;
@@ -61,8 +60,6 @@ internal static class RenewalSupport
     /// <summary>The producer of record sentinel for a term written without a producer code (the event field is always set, PITFALLS 12).</summary>
     public const string DirectProducer = "DIRECT";
 
-    private static readonly string[] OpenStates = [Codes.Of(JobState.Draft), Codes.Of(JobState.Quoted), Codes.Of(JobState.Scheduled)];
-
     /// <summary>The policy of a term in the caller's legal entity (read before the lock; null when unknown).</summary>
     public static async Task<PolicyId?> PolicyOfAsync(PolicyDbContext db, LegalEntityId legalEntity, PolicyTermId termId, CancellationToken cancellationToken)
     {
@@ -75,18 +72,10 @@ internal static class RenewalSupport
     public static Task<PolicyTermRow?> CurrentTermAsync(PolicyDbContext db, LegalEntityId legalEntity, PolicyTermId termId, CancellationToken cancellationToken) =>
         db.Terms.SingleOrDefaultAsync(t => t.TermId == termId && t.LegalEntityId == legalEntity && t.RecordedTo == null, cancellationToken);
 
-    /// <summary>The open (Draft, Quoted or Scheduled) renewal job of a term, tracked.</summary>
-    public static Task<JobRow?> OpenJobAsync(PolicyDbContext db, LegalEntityId legalEntity, PolicyTermId termId, CancellationToken cancellationToken) =>
+    /// <summary>The renewal job <paramref name="jobId"/> of the expiring term <paramref name="termId"/>, tracked; null when it is not one of this term's.</summary>
+    public static Task<JobRow?> RenewalJobAsync(PolicyDbContext db, LegalEntityId legalEntity, JobId jobId, PolicyTermId termId, CancellationToken cancellationToken) =>
         db.Jobs.SingleOrDefaultAsync(
-            j => j.ExpiringTermId == termId && j.LegalEntityId == legalEntity && j.JobType == Codes.Of(JobType.Renewal) && OpenStates.Contains(j.State), cancellationToken);
-
-    /// <summary>The most recent renewal job of a term in any state, tracked (to tell "already bound" from "none").</summary>
-    public static async Task<JobRow?> LatestJobAsync(PolicyDbContext db, LegalEntityId legalEntity, PolicyTermId termId, CancellationToken cancellationToken)
-    {
-        var jobs = await db.Jobs.Where(j => j.ExpiringTermId == termId && j.LegalEntityId == legalEntity && j.JobType == Codes.Of(JobType.Renewal))
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-        return jobs.OrderByDescending(j => j.CreatedAt).ThenByDescending(j => j.JobId.Value).FirstOrDefault();
-    }
+            j => j.JobId == jobId && j.LegalEntityId == legalEntity && j.JobType == Codes.Of(JobType.Renewal) && j.ExpiringTermId == termId, cancellationToken);
 
     /// <summary>The quote version a renewal job currently points to, tracked.</summary>
     public static Task<QuoteVersionRow> CurrentVersionAsync(PolicyDbContext db, JobRow job, CancellationToken cancellationToken) =>
@@ -104,37 +93,7 @@ internal static class RenewalSupport
     public static DomainError Validation(string field, string code, string message) =>
         new(ErrorCode.For(ModuleCode.POL, PolicyErrorNames.Validation), message) { FieldErrors = [new FieldError(field, code, "pol." + code.ToLowerInvariant())] };
 
-    public static DomainError TermRequired() => Validation("termId", "TERM_REQUIRED", "termId is required.");
-
-    /// <summary>The job as the renewal commands return it (contract member <c>job</c>).</summary>
-    public static JsonElement JobJson(JobRow job, QuoteVersionRow? version, object? extra = null) =>
-        JsonSerializer.SerializeToElement(
-            new
-            {
-                jobId = job.JobId,
-                jobNumber = job.JobNumber,
-                jobType = job.JobType,
-                state = job.State,
-                subState = job.SubState,
-                referred = job.Referred,
-                policyId = job.PolicyId,
-                expiringTermId = job.ExpiringTermId,
-                baseTransactionId = job.BaseTransactionId,
-                productCode = job.ProductCode,
-                productVersion = job.ProductVersion,
-                effectiveAt = job.EffectiveAt,
-                expirationAt = job.ExpirationAt,
-                currency = job.Currency,
-                versionNo = job.CurrentVersionNo,
-                premium = version?.Premium is { } premium ? JobSupport.Exact(premium).ToString(CultureInfo.InvariantCulture) : null,
-                taxes = version?.Taxes is { } taxes ? JobSupport.Exact(taxes).ToString(CultureInfo.InvariantCulture) : null,
-                total = version?.Total is { } total ? JobSupport.Exact(total).ToString(CultureInfo.InvariantCulture) : null,
-                validUntil = version?.ValidUntil,
-                acceptance = job.AcceptedAt is null ? null : new { channel = job.AcceptanceChannel, acceptedBy = job.AcceptedBy, acceptedAt = job.AcceptedAt },
-                result = extra,
-            },
-            SharedKernelJson.Options);
-}
+    }
 
 /// <summary>
 /// Validation and rating of a renewal's risk tree (the renewal analogue of <c>pol.Job.quote</c>, REQ-POL-249): local

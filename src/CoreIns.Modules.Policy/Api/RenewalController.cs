@@ -30,7 +30,7 @@ internal sealed class RenewalController : ControllerBase
     {
         var result = await handler.HandleAsync(new CreateRenewal(request), cancellationToken).ConfigureAwait(false);
         return result.IsSuccess
-            ? Results.Created($"/api/pol/v1/jobs/{result.Value.Job!.Value.GetProperty("jobId").GetString()}", result.Value)
+            ? Results.Created($"/api/pol/v1/jobs/{result.Value.JobId.Value}", result.Value)
             : HttpResults.Problem(result.Error!, HttpContext);
     }
 

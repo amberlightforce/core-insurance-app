@@ -31,7 +31,7 @@ internal sealed record CreateRenewal(RenewalCreateRequest Request) : ICommand<Re
 
 internal sealed class CreateRenewalValidator : AbstractValidator<CreateRenewal>
 {
-    public CreateRenewalValidator() => RuleFor(c => c.Request.TermId).NotNull().WithErrorCode("TERM_REQUIRED");
+    public CreateRenewalValidator() => RuleFor(c => c.Request.TermId.Value).NotEmpty().WithErrorCode("TERM_REQUIRED");
 }
 
 /// <summary>
@@ -60,11 +60,7 @@ internal sealed class CreateRenewalHandler(
 {
     public async Task<Result<RenewalCreateResponse>> HandleAsync(CreateRenewal command, CancellationToken cancellationToken)
     {
-        if (command.Request.TermId is not { } termId)
-        {
-            return RenewalSupport.TermRequired();
-        }
-
+        var termId = command.Request.TermId;
         var legalEntity = JobSupport.LegalEntity(context, legalEntities);
         var zone = options.Value.Zone;
         if (await RenewalSupport.PolicyOfAsync(db, legalEntity, termId, cancellationToken).ConfigureAwait(false) is not { } policyId)
@@ -195,6 +191,8 @@ internal sealed class CreateRenewalHandler(
                 RenewalProductVersion = resolution.Version,
                 ConversionOutcomeSummary = JsonSerializer.SerializeToElement(
                     new { conversion = "VERSION_RESOLUTION_ONLY", fromVersion = term.ProductVersion, toVersion = job.ProductVersion }),
+                PredecessorTermId = termId.Value,
+                NewTermNumber = term.TermNumber + 1,
             },
             BusinessKeys.Empty.With("policyId", policyId.Value.ToString()).With("jobId", jobId.Value.ToString()).With("expiringTermId", termId.Value.ToString()))
         {
@@ -211,8 +209,14 @@ internal sealed class CreateRenewalHandler(
             return DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION", "The term already has an open renewal.");
         }
 
-        var version = await RenewalSupport.CurrentVersionAsync(db, job, cancellationToken).ConfigureAwait(false);
-        return new RenewalCreateResponse { Job = RenewalSupport.JobJson(job, version) };
+        return new RenewalCreateResponse
+        {
+            JobId = jobId,
+            State = Codes.Api(JobState.Draft),
+            ExpiringTermId = termId,
+            RenewalProductCode = job.ProductCode,
+            RenewalProductVersion = resolution.Version,
+        };
     }
 
     private async Task<Result<ProductVersionResolveResponse>> ResolveAsync(PolicyRow policy, PolicyTermRow term, Instant start, CancellationToken cancellationToken)
@@ -243,18 +247,17 @@ internal sealed class CreateRenewalAuditor : ICommandAuditor<CreateRenewal, Rene
 {
     public CommandAuditFacts Describe(CreateRenewal command, Result<RenewalCreateResponse>? result)
     {
-        if (result is not { IsSuccess: true } success || success.Value.Job is not { } job)
+        if (result is not { IsSuccess: true } success)
         {
             return new CommandAuditFacts();
         }
 
-        var jobId = new JobId(Guid.Parse(job.GetProperty("jobId").GetString()!));
+        var response = success.Value;
         return new CommandAuditFacts
         {
-            ObjectRef = ObjectRef.For(ModuleCode.POL, "Job", jobId),
-            ObjectNumber = job.GetProperty("jobNumber").GetString(),
-            BusinessKeys = BusinessKeys.Empty.With("jobId", jobId.Value.ToString()).With("expiringTermId", command.Request.TermId?.Value.ToString() ?? string.Empty),
-            Changes = AuditDiff.Compute(null, new { state = job.GetProperty("state").GetString(), productVersion = job.GetProperty("productVersion").GetString() }),
+            ObjectRef = ObjectRef.For(ModuleCode.POL, "Job", response.JobId),
+            BusinessKeys = BusinessKeys.Empty.With("jobId", response.JobId.Value.ToString()).With("expiringTermId", response.ExpiringTermId.Value.ToString()),
+            Changes = AuditDiff.Compute(null, new { state = response.State.ToString(), productVersion = response.RenewalProductVersion?.ToString() }),
         };
     }
 }

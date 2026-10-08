@@ -33,7 +33,7 @@ internal sealed record AcceptRenewal(RenewalAcceptRequest Request) : ICommand<Re
 
 internal sealed class AcceptRenewalValidator : AbstractValidator<AcceptRenewal>
 {
-    public AcceptRenewalValidator() => RuleFor(c => c.Request.TermId).NotNull().WithErrorCode("TERM_REQUIRED");
+    public AcceptRenewalValidator() => RuleFor(c => c.Request.TermId.Value).NotEmpty().WithErrorCode("TERM_REQUIRED");
 }
 
 /// <summary>
@@ -70,15 +70,10 @@ internal sealed class AcceptRenewalHandler(
     public async Task<Result<RenewalAcceptResponse>> HandleAsync(AcceptRenewal command, CancellationToken cancellationToken)
     {
         var request = command.Request;
-        if (request.TermId is not { } termId)
+        var termId = request.TermId;
+        if (request.Channel != RenewalSupport.ChannelStaff)
         {
-            return RenewalSupport.TermRequired();
-        }
-
-        var channel = Channel(request.AcceptanceEvidence);
-        if (channel is null)
-        {
-            return RenewalSupport.Validation("acceptanceEvidence.channel", "CHANNEL_NOT_SUPPORTED", "Only explicit acceptance by staff (channel STAFF) is supported.");
+            return RenewalSupport.Validation("channel", "CHANNEL_NOT_SUPPORTED", "Only explicit acceptance by staff (channel STAFF) is supported.");
         }
 
         var legalEntity = JobSupport.LegalEntity(context, legalEntities);
@@ -96,10 +91,15 @@ internal sealed class AcceptRenewalHandler(
         }
 
         var now = locked.Value;
-        var job = await RenewalSupport.LatestJobAsync(db, legalEntity, termId, cancellationToken).ConfigureAwait(false);
+        if (request.AcceptedAt > now)
+        {
+            return RenewalSupport.Validation("acceptedAt", "ACCEPTED_IN_FUTURE", "The acceptance cannot be dated after the time it is recorded.");
+        }
+
+        var job = await RenewalSupport.RenewalJobAsync(db, legalEntity, request.JobId, termId, cancellationToken).ConfigureAwait(false);
         if (job is null)
         {
-            return JobSupport.NotFound("renewal of the term");
+            return JobSupport.NotFound("renewal job of the term");
         }
 
         var state = Codes.Parse<JobState>(job.State);
@@ -168,28 +168,20 @@ internal sealed class AcceptRenewalHandler(
         var (evaluation, issues) = uw.Value;
         var blocked = evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline || issues.Any(i => UwOutcome.Blocks(i, BlockingPoint.PreBind));
         version.Issues = JobSupport.Json(issues);
-        job.Referred = blocked;
+        job.Referred = false;
         job.RecordVersion++;
         job.UpdatedAt = now;
         if (blocked)
         {
-            job.SubState = null;
-            var kept = await SaveAsync(true, cancellationToken).ConfigureAwait(false);
-            if (kept.IsFailure)
+            // Fails the bind gate exactly as pol.Job.bind does: nothing is bound; the open issue (raised at the offer) is for UW to decide.
+            return new DomainError(
+                ErrorCode.For(ModuleCode.POL, "GATE-FAILED"), "An open underwriting referral blocks the acceptance; have it decided, then offer the renewal again.")
             {
-                return kept.Error!;
-            }
-
-            return new RenewalAcceptResponse
-            {
-                Job = RenewalSupport.JobJson(job, version, new
+                Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
                 {
-                    accepted = false,
-                    gateResults = new[]
-                    {
-                        new { gate = "UW_ISSUES", passed = false, severity = Block, reason = evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline ? "UW_DECLINE" : "UW_ISSUES_OPEN" },
-                    },
-                }),
+                    ["gate"] = "UW_ISSUES",
+                    ["reason"] = evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline ? "UW_DECLINE" : "UW_ISSUES_OPEN",
+                },
             };
         }
 
@@ -255,7 +247,6 @@ internal sealed class AcceptRenewalHandler(
         var termState = PolicyTermStateModel.Machine.Start(job.EffectiveAt > now ? PolicyTermState.Scheduled : PolicyTermState.InForce).Value;
         var actor = context.Actor.ToString();
         var snapshot = JobSupport.Json(tree);
-        var policy = await db.Policies.AsNoTracking().SingleAsync(p => p.PolicyId == policyId, cancellationToken).ConfigureAwait(false);
         var sequence = (await db.Transactions.Where(t => t.PolicyId == policyId).MaxAsync(t => (int?)t.Sequence, cancellationToken).ConfigureAwait(false) ?? 0) + 1;
 
         db.Terms.Add(new PolicyTermRow
@@ -314,6 +305,7 @@ internal sealed class AcceptRenewalHandler(
                     ChargeType = line.ChargeType, ChargeCategory = line.ChargeCategory, DeltaKind = DeltaKinds.Net, NetAmount = emittedLine.Amount,
                     ValidPeriod = period, BookingDate = today, TransactionId = transactionId, CorrelationKey = transactionId.Value.ToString(),
                     LegalStatus = line.LegalStatus, Provisional = line.Provisional,
+                    TransactionKind = ChargeDeltaEmittedV1.TransactionKindValue.NewBusiness,
                 },
                 BusinessKeys.Empty.With("policyId", policyId.Value.ToString()).With("chargeId", chargeId.Value.ToString())
                     .With("policyTermId", newTermId.Value.ToString()).With("transactionId", transactionId.Value.ToString()))
@@ -330,6 +322,7 @@ internal sealed class AcceptRenewalHandler(
                 NewTermId = newTermId, NewTermNumber = term.TermNumber + 1, TransactionId = transactionId, ProductCode = job.ProductCode,
                 ProductVersion = ProductVersionNumber.Parse(job.ProductVersion), ArtefactHash = Sha256Hash.Parse(job.ArtefactHash),
                 ProducerOfRecord = job.ProducerCode ?? RenewalSupport.DirectProducer,
+                PredecessorTermId = termId.Value,
             },
             BusinessKeys.Empty.With("policyId", policyId.Value.ToString()).With("newTermId", newTermId.Value.ToString())
                 .With("transactionId", transactionId.Value.ToString()).With("jobId", job.JobId.Value.ToString()).With("expiringTermId", termId.Value.ToString()))
@@ -339,8 +332,8 @@ internal sealed class AcceptRenewalHandler(
 
         job.State = Codes.Of(bound.Value);
         job.SubState = Codes.Of(JobSubState.Accepted);
-        job.AcceptanceChannel = channel;
-        job.AcceptedAt = now;
+        job.AcceptanceChannel = request.Channel;
+        job.AcceptedAt = request.AcceptedAt;
         job.AcceptedBy = actor;
         job.BoundTransactionId = transactionId;
         var saved = await SaveAsync(true, cancellationToken).ConfigureAwait(false);
@@ -351,17 +344,15 @@ internal sealed class AcceptRenewalHandler(
 
         return new RenewalAcceptResponse
         {
-            Job = RenewalSupport.JobJson(job, version, new
-            {
-                accepted = true,
-                policyNumber = policy.PolicyNumber,
-                termId = newTermId,
-                termNumber = term.TermNumber + 1,
-                termState = Codes.Api(termState).ToString().ToUpperInvariant(),
-                transactionId,
-                recordedAt = now,
-                chargeDeltas = emitted,
-            }),
+            JobId = job.JobId,
+            State = Codes.Api(bound.Value),
+            NewTermId = newTermId,
+            NewTermNumber = term.TermNumber + 1,
+            PredecessorTermId = termId.Value,
+            TransactionId = transactionId,
+            TermState = Codes.Api(termState),
+            RecordedAt = now,
+            ChargeDeltas = emitted,
         };
     }
 
@@ -376,16 +367,6 @@ internal sealed class AcceptRenewalHandler(
         }
 
         throw new InvalidOperationException($"No offered premium line has annual rate {annualRate}.");
-    }
-
-    private static string? Channel(JsonElement? evidence)
-    {
-        if (evidence is not { ValueKind: JsonValueKind.Object } value || !value.TryGetProperty("channel", out var channel))
-        {
-            return RenewalSupport.ChannelStaff;
-        }
-
-        return channel.ValueKind == JsonValueKind.String && channel.GetString() == RenewalSupport.ChannelStaff ? RenewalSupport.ChannelStaff : null;
     }
 
     /// <summary>The day-count convention the artefact declares; unknown or missing conventions fail closed (PITFALLS 10).</summary>
@@ -437,25 +418,18 @@ internal sealed class AcceptRenewalAuditor : ICommandAuditor<AcceptRenewal, Rene
 {
     public CommandAuditFacts Describe(AcceptRenewal command, Result<RenewalAcceptResponse>? result)
     {
-        if (result is not { IsSuccess: true } success || success.Value.Job is not { } job)
+        if (result is not { IsSuccess: true } success)
         {
-            return new CommandAuditFacts();
+            return new CommandAuditFacts { ObjectRef = ObjectRef.For(ModuleCode.POL, "Job", command.Request.JobId) };
         }
 
-        var jobId = new JobId(Guid.Parse(job.GetProperty("jobId").GetString()!));
-        var keys = BusinessKeys.Empty.With("jobId", jobId.Value.ToString()).With("expiringTermId", command.Request.TermId?.Value.ToString() ?? string.Empty);
-        var accepted = job.TryGetProperty("result", out var detail) && detail.ValueKind == JsonValueKind.Object && detail.TryGetProperty("accepted", out var flag) && flag.GetBoolean();
-        if (accepted)
-        {
-            keys = keys.With("policyTermId", detail.GetProperty("termId").GetString()!).With("transactionId", detail.GetProperty("transactionId").GetString()!);
-        }
-
+        var response = success.Value;
         return new CommandAuditFacts
         {
-            ObjectRef = ObjectRef.For(ModuleCode.POL, "Job", jobId),
-            ObjectNumber = job.GetProperty("jobNumber").GetString(),
-            BusinessKeys = keys,
-            Changes = AuditDiff.Compute(null, new { state = job.GetProperty("state").GetString(), accepted }),
+            ObjectRef = ObjectRef.For(ModuleCode.POL, "Job", response.JobId),
+            BusinessKeys = BusinessKeys.Empty.With("jobId", response.JobId.Value.ToString()).With("expiringTermId", command.Request.TermId.Value.ToString())
+                .With("policyTermId", response.NewTermId.Value.ToString()).With("transactionId", response.TransactionId.Value.ToString()),
+            Changes = AuditDiff.Compute(null, new { state = response.State.ToString(), channel = command.Request.Channel, newTermNumber = response.NewTermNumber }),
         };
     }
 }
