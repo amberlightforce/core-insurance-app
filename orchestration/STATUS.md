@@ -12,6 +12,8 @@ Re-read STATUS.md, PLAN.md and DECISIONS.md at the start of every wave.
 2. ~~Docker Desktop~~: works now (Docker 29.3.1, reachable from WSL). Testcontainers are used (D-USR-08).
 3. ~~Windows App Control / missing SDK~~: resolved. Native Windows build and tests verified (D-ARC-30); WSL retired.
 
+4. **GitHub Actions billing (user action needed, 2026-10-08):** since 08:04Z every CI and CodeQL job is refused before start: "recent account payments have failed or your spending limit needs to be increased" (Billing & plans). No CI has run on any claims-slice merge (d0ccaed onwards); the local merge gate (D-PRG-17/18) is the only verification until it is fixed. Re-run CI on main once billing is restored.
+
 ## Pending user requests
 - None open. Handover delivered (`HANDOVER.md`). Pause lifted by the user (D-USR-08).
 
@@ -44,7 +46,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | SL2-CLM-MONEY | **merged** (f556712) | opus | deep review FAIL (D1 split reserves escaped DENY, D2 no cumulative payment check, D3 mixed set checked one authority) → fixed per D-SL2-13, orchestrator re-check; gate green: integration 406, all 10 suites |
 | SL2-FIN-CLM | **merged** (601189c) | opus | deep review PASS first round; gate green: integration 391, all 10 suites; fail-closed follow-ups D-SL2-12 |
 | SL2-UI-CLM | round 1 **merged** (031dc50); round 2 building | sonnet | round 1 light review + live browser check PASS; web 1241 |
-| SL2-E2E | not started | sonnet | S2 |
+| SL2-E2E | phase A **merged** (f47e5d6); phase B (UI spec) after UI round 2 | sonnet | E2E-02a API passes on fresh stack; amounts reconcile to the cent; CI job e2e02 added (not yet run: Actions billing) |
 
 ## Module status (feature waves)
 All 116 feature WPs: **not started** (W1 starts after Phase 1 passes). See backlog/BACKLOG.md.
