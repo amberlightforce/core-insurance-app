@@ -93,3 +93,23 @@ All 116 feature WPs: **not started** (W1 starts after Phase 1 passes). See backl
 ## Agent-session notes
 - Reviewers and builders are resumed with SendMessage so they keep context. Worktrees are under `.claude/worktrees/` (git-ignored).
 - Branches: F-1a `worktree-agent-a602a1c6b1ab3deea` (merged); events `worktree-agent-a2cb28e17172c7600` (merged); OpenAPI `worktree-agent-a74cec1b448cd4c93`; rule engine `worktree-agent-aae82a473ab0a3abd`; spike `worktree-agent-a7e75bab225abc6b5` (merged); design system `worktree-agent-ad02cb192ca091af7`; F-1b new worktree.
+
+## Phase 6 — slice 5 (planned)
+
+Plan: `SLICE-PLAN-5.md`. Decisions: D-SL5-01..14. Briefs: `briefs/sl5/` (waves 1 and 2). Every builder and reviewer
+runs on Sonnet 5.5 (D-USR-16). The UW workbench WIP branch `worktree-agent-ac9c66400c2402b05` is salvaged by
+SL5-UW-WB-API.
+
+| WP | Wave | Module | Depends on | Review | Est. | Parallel with sl3/sl4 | Status |
+|---|---|---|---|---|---|---|---|
+| SL5-UW-WB-API | 1 | UW (+ WIP salvage) | — | deep (security) | 3.5 h | yes | planned |
+| SL5-UI-UW-WB | 1 | web underwriting | contracts (UW-WB-API first commit) | light + visual | 4 h | yes | planned |
+| SL5-CONTRACTS-PACKS | 1 | contracts mkt/pfc/pol(new paths)/events | — | light | 2 h | yes (quiet window) | planned |
+| SL5-PFC-FALLBACK | 1 | PFC | contracts | deep (config + security) | 3 h | yes | planned |
+| SL5-PLT-ROLES | 1 | PLT dev users/roles | merged SL3-PLT-SUPPORT | light (batched) | 1 h | gated | planned |
+| SL5-MKT-STATE | 2 | MKT + GR/CY pack data | merged SL3-MKT-TREATMENT | deep (config/temporal) | 4.5 h | gated | planned |
+| SL5-RAT-FALLBACK | 2 | RAT | merged SL3-RAT-PRORATE; contracts | light | 1.5 h | gated | planned |
+| SL5-UI-PACKS | 2 | web market/packs, policy/packRollback | contracts (live walk later) | light + visual | 3 h | yes | planned |
+| SL5-MKT-ROLLBACK | 3 | MKT | merged MKT-STATE, PLT-ROLES | deep (config + security) | 4 h | gated | planned |
+| SL5-POL-ROLLBACK | 3 | POL | merged slice-3 POL S1; contracts | deep (config/temporal) | 3.5 h | gated | planned |
+| SL5-E2E | 4 | tests/e2e, ci.yml (e2e12) | all slice-5 merged; merged SL3-E2E | light (integration) | 4.5 h | gated | planned |
