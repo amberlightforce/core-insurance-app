@@ -103,3 +103,9 @@ found by a review or by CI in slices 1–2; the decision id says where.
     tests. A silent reference fallback becomes wrong money once neighbours are wired (SL3-POL-CHANGE D1).
 44. **Re-check permission and limits at every command that commits**, not only at create or preview: routed commands
     (e.g. a change bound through `pol.Job.bind`) must enforce their own permission and role-based limits at bind time.
+45. **Verify the push landed**: when the local branch name differs from the remote one, a plain `git push` may update
+    nothing. Push explicitly (`git push origin HEAD:<remote-branch>`) and confirm with
+    `git rev-parse HEAD` == `git ls-remote origin <remote-branch>` before reporting a PR as updated.
+46. **Guard the posted account, not the source label**: a ledger check that inspects a line's source account or
+    category can be bypassed when the posted account is derived elsewhere (charge type → GL key). Check the resolved
+    target account, and treat any debit of a tax/levy payable as forbidden unless a named rule allows it (SL3-FIN-RULES D1/D2).

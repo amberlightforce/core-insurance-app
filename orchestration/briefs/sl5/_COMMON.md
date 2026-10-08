@@ -82,3 +82,5 @@ deep review keeps its depth: adversarial, with probe tests in a scratch copy (D-
   - the pitfalls that applied and how you handled them;
   - deviations, assumptions and open questions, including any decision the orchestrator should record;
   - contract changes.
+
+- **Push check (PITFALLS 45):** push with `git push origin HEAD:<remote-branch>` and confirm `git ls-remote` shows your HEAD.

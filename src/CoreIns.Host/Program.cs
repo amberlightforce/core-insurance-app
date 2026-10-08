@@ -6,6 +6,7 @@ using CoreIns.Modules.Party.Services;
 using CoreIns.Platform;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Http;
+using CoreIns.Platform.Time;
 using Hangfire;
 using Serilog;
 
@@ -16,6 +17,10 @@ var role = AppRoles.Parse(builder.Configuration[AppRoles.ConfigurationKey]);
 
 // D-SLC-03: the Development-only local sign-in; the Host refuses to start if the flag is set in any other environment.
 var devSignIn = DevelopmentAuthentication.Guard(builder.Configuration, builder.Environment);
+
+// D-SL3-12: a Shiftable clock stops the Host in Production; the dev clock (advance endpoint, shared offset table reader)
+// exists only in Development with Platform:Time:Mode=Shiftable.
+var devClock = DevClockRegistration.Guard(builder.Configuration, builder.Environment);
 
 builder.AddCoreInsObservability(role);
 builder.Services.AddCoreInsModules(builder.Configuration);
@@ -42,6 +47,11 @@ if (role == AppRole.Migrate)
 
 var connectionString = builder.Configuration.GetRequiredCoreConnectionString();
 builder.Services.AddCoreInsDataSource(connectionString);
+if (devClock)
+{
+    builder.Services.AddDevClock(api: role == AppRole.Api);
+}
+
 builder.Services.AddCoreInsHealthChecks();
 builder.Services.AddCoreInsJobs(connectionString, role);
 builder.Services.AddCountryPacks(builder.Configuration, builder.Environment);
@@ -86,6 +96,11 @@ if (role == AppRole.Api)
     app.MapCoreInsHealth();
     app.MapCoreInsProblemPages();
     app.MapControllers();
+    if (devClock)
+    {
+        app.MapDevClock();
+    }
+
     if (devSignIn)
     {
         app.MapDevelopmentSignIn();
