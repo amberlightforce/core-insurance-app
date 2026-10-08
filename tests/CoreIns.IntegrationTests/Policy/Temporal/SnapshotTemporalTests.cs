@@ -124,7 +124,7 @@ public sealed class SnapshotTemporalTests(PostgresFixture database) : TemporalTe
         var p = await BindAsync();
         var inside = p.Start.AddDays(30);
         var watermark = await WatermarkAsync(p.PolicyId);
-        var clock = new FakeClock(Instant.FromUtcDateTime(watermark.ToUtcDateTime().AddHours(1)));
+        var clock = new FakeClock(Instant.FromUtcDateTime(DateTime.UtcNow));
         var writerHasLock = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var readDone = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
