@@ -8,5 +8,7 @@
   "signInError": "Sign-in failed. Try again.",
   "loadError": "The development users could not be loaded. Check that the API is running.",
   "unavailableTitle": "Local sign-in is not available",
-  "unavailableBody": "The API is not running in Development with local sign-in enabled."
+  "unavailableBody": "The API is not running in Development with local sign-in enabled.",
+  "expiredTitle": "Your session ended",
+  "expiredBody": "The api was restarted or the token expired. Sign in again."
 }

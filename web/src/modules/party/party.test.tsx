@@ -9,6 +9,7 @@ import * as fx from '../../test/fixtures';
 import realSearch from '../../test/realPartySearch.json';
 import { mockApi, problem, renderScreen } from '../../test/mockApi';
 import { PartyCreatePage } from './PartyCreatePage';
+import { PartySearchPanel } from './PartySearchPanel';
 import { PartySearchPage } from './PartySearchPage';
 import { PartyViewPage } from './PartyViewPage';
 
@@ -58,6 +59,25 @@ describe('PartySearchPage', () => {
     release();
     expect(await screen.findByText('Νικόλαος Νικολάου')).toBeInTheDocument();
     expect(screen.getByText('P000000001')).toBeInTheDocument();
+  });
+
+  it('chooses a result with one click when the panel is a picker, and only on double click otherwise', async () => {
+    const onOpen = vi.fn();
+    mockApi([search(() => ({ body: realSearch }))]);
+    const picker = renderScreen(<PartySearchPanel pickOnClick onOpen={onOpen} />, {
+      path: '/x',
+      url: '/x',
+    });
+    await picker.user.type(screen.getByRole('searchbox'), 'nikolaou{Enter}');
+    await picker.user.click(await screen.findByText('Νικόλαος Νικολάου'));
+    expect(onOpen).toHaveBeenCalledOnce();
+    picker.unmount();
+
+    const plain = vi.fn();
+    const { user } = renderScreen(<PartySearchPanel onOpen={plain} />, { path: '/x', url: '/x' });
+    await user.type(screen.getByRole('searchbox'), 'nikolaou{Enter}');
+    await user.click(await screen.findByText('Νικόλαος Νικολάου'));
+    expect(plain).not.toHaveBeenCalled();
   });
 
   it('starts with a first-use hint, posts the single search box in the body and lists masked results', async () => {

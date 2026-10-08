@@ -29,6 +29,20 @@ describe('DevSignIn', () => {
     vi.unstubAllGlobals();
   });
 
+  it('explains a stale token when the api sent the user here (401)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(json(users))),
+    );
+    window.history.pushState({}, '', '/dev/sign-in?expired=1');
+    try {
+      renderWithDs(<DevSignIn />);
+      expect(await screen.findByText('Η σύνδεση έληξε')).toBeInTheDocument();
+    } finally {
+      window.history.pushState({}, '', '/');
+    }
+  });
+
   it('signs in a configured user and keeps the token for API calls', async () => {
     const fetchMock = vi.fn((url: string, init?: RequestInit) => {
       if (url.endsWith('/dev/users')) return Promise.resolve(json(users));

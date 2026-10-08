@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { Download } from 'lucide-react';
+import { Profiler, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 // jsdom is slow with React Aria overlays and axe on a full grid.
@@ -598,6 +599,48 @@ describe('DataTable', () => {
       globalThis.ResizeObserver = original;
     }
   });
+
+  it.each([
+    ['unpaged', undefined],
+    ['paged', { pageSize: 10 }],
+  ])(
+    'does not loop when its parent hands it a new array on every render (%s)',
+    (_name, pagination) => {
+      // `query.data?.items ?? []` and `.map(...)` build a new array on every render. The table must treat the same
+      // rows as unchanged instead of resetting its state, re-rendering and receiving yet another array, forever.
+      let commits = 0;
+      function Parent() {
+        const [, setTick] = useState(0);
+        return (
+          <Profiler
+            id="table"
+            onRender={() => {
+              commits += 1;
+            }}
+          >
+            <button
+              onClick={() => {
+                setTick((n) => n + 1);
+              }}
+            >
+              tick
+            </button>
+            <DataTable<Policy>
+              aria-label="Ασφαλιστήρια"
+              columns={[textColumn<Policy>('holder', 'Λήπτης', (p) => p.holder)]}
+              data={[...policies]}
+              getRowId={(p) => p.id}
+              {...(pagination ? { pagination } : {})}
+            />
+          </Profiler>
+        );
+      }
+      renderWithDs(<Parent />);
+      expect(commits).toBeLessThan(15);
+      fireEvent.click(screen.getByRole('button', { name: 'tick' }));
+      expect(commits).toBeLessThan(25);
+    },
+  );
 
   it('renders in English', async () => {
     await i18n.changeLanguage('en');

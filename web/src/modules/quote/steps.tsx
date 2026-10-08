@@ -125,6 +125,7 @@ export function PolicyholderStep({
           </p>
         ) : (
           <PartySearchPanel
+            pickOnClick
             label={t('policyholder.search')}
             onOpen={(item) => {
               setDraft((d) => ({
@@ -345,6 +346,7 @@ export function DriverStep({ draft, setDraft }: { draft: Draft; setDraft: SetDra
           </div>
         ) : (
           <PartySearchPanel
+            pickOnClick
             label={t('driver.search')}
             onOpen={(item) => {
               const party: PartyRef = {
