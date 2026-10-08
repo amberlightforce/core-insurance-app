@@ -113,6 +113,12 @@ internal sealed class BuildTransactionSetHandler(
 
             if (kind == TransactionKind.Payment)
             {
+                // REQ-CLM-058 / D-SL3-03 d: cover removed (or never established) and no coverage decision yet → no new payment.
+                if (CoverageGuard.IsInQuestion(claim, exposure))
+                {
+                    return DomainError.Of(ModuleCode.CLM, "COVERAGE-IN-QUESTION", $"The cover of exposure {exposure.ExposureNumber} is in question; no payment until a coverage decision.");
+                }
+
                 var reasons = new List<string>();
                 if (claim.PolicyTermId is null || !claim.PolicyInForceAtLoss)
                 {
