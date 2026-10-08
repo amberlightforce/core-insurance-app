@@ -42,6 +42,7 @@ public interface IPolicyPolicyService
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN, CLM, CMP, PFC.</para>
+    /// <para>Errors: POL-ERR-VALIDATION (422).</para>
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>

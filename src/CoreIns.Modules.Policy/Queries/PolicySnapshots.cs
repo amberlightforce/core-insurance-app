@@ -38,6 +38,11 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
             return Invalid("Give exactly one of policyId, policyNumber or snapshotRef.");
         }
 
+        if (query.PolicyNumber is not null && !PolicyNumber.TryParse(query.PolicyNumber, out _))
+        {
+            return Invalid("The policy number is malformed.");
+        }
+
         Guid? policyId = query.PolicyId;
         Guid? expectedSegment = null;
         Instant validAt;
@@ -61,10 +66,12 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
             var now = Truncate(clock.Now);
             validAt = query.ValidAt is { } valid ? Truncate(valid) : now;
             knownAt = query.KnownAt is { } known ? Truncate(known) : now;
-            if (knownAt > now)
-            {
-                return Invalid("knownAt cannot be in the future: a snapshot must stay the same when it is read again.");
-            }
+        }
+
+        // Also for a (possibly forged) reference: a future knownAt could answer differently once later changes are recorded.
+        if (knownAt > Truncate(clock.Now))
+        {
+            return Invalid("knownAt cannot be in the future: a snapshot must stay the same when it is read again.");
         }
 
         var legalEntity = JobSupport.LegalEntity(context, legalEntities);

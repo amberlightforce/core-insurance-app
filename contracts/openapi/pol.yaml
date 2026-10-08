@@ -2866,7 +2866,9 @@ paths:
       x-partner-routes:
       - CHN facade GET /api/chn/v1/book/changes?cursor=
       x-permission: pol.Policy.search
-      x-error-codes: []
+      x-error-codes:
+      - code: POL-ERR-VALIDATION
+        status: 422
       x-source:
       - PRD-05 §9.1 l.1796
       parameters:
@@ -2893,6 +2895,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '429':
           $ref: common.yaml#/components/responses/TooManyRequests
         '500':

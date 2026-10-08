@@ -6,6 +6,7 @@ using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts;
+using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using Microsoft.Extensions.DependencyInjection;
@@ -173,6 +174,20 @@ public sealed class PolicySnapshotTests(PostgresFixture database) : IClassFixtur
         var good = (await SnapshotAsync($"policyId={p.PolicyId}&validAt={Q(Iso(p.Start))}")).Text("snapshotRef");
         (await SnapshotAsync($"snapshotRef={Q(good)}&validAt={Q(Iso(p.Start))}", HttpStatusCode.UnprocessableContent)).Text("code").ShouldBe("POL-ERR-VALIDATION");
         (await SnapshotAsync($"policyId={p.PolicyId}&validAt=not-a-date", HttpStatusCode.UnprocessableContent)).Text("code").ShouldBe("POL-ERR-VALIDATION");
+        (await SnapshotAsync("policyNumber=bad%20number", HttpStatusCode.UnprocessableContent)).Text("code").ShouldBe("POL-ERR-VALIDATION");
+
+        // A forged reference with a knownAt in the future is refused (it could answer differently after later changes).
+        var parts = good.Split('.');
+        parts[4] = ((DateTimeOffset.UtcNow.AddYears(5).ToUnixTimeMilliseconds()) * 1000).ToString(CultureInfo.InvariantCulture);
+        var forged = string.Join('.', parts);
+        (await SnapshotAsync($"snapshotRef={Q(forged)}", HttpStatusCode.UnprocessableContent)).Text("code").ShouldBe("POL-ERR-VALIDATION");
+        await using var scope = _slice.Factory.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<RequestContext>();
+        context.LegalEntity = LegalEntityCode.Parse("GR-TEST");
+        context.Jurisdiction = Jurisdiction.Parse("GR");
+        var forgedError = await Should.ThrowAsync<DomainException>(() =>
+            scope.ServiceProvider.GetRequiredService<IPolicySnapshotService>().GetAsync(snapshotRef: forged, cancellationToken: Ct));
+        forgedError.Error.Code.ToString().ShouldBe("POL-ERR-VALIDATION");
 
         // Permission: the operation is granted to Staff.Underwriter (and admin), not to billing.
         (await RawAsync($"/api/pol/v1/snapshots/get?policyId={p.PolicyId}", Billing)).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);

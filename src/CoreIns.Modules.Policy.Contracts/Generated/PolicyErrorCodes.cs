@@ -172,7 +172,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.Policy.searchByCriteria, pol.Snapshot.get, pol.Submission.create.</para>
+    /// <para>Declared by 6 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.Policy.search, pol.Policy.searchByCriteria, pol.Snapshot.get, pol.Submission.create.</para>
     /// </remarks>
     public const string Validation = "POL-ERR-VALIDATION";
 
