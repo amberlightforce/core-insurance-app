@@ -7,6 +7,7 @@ using CoreIns.Modules.Underwriting.Contracts.Api;
 using CoreIns.Modules.Underwriting.Services;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts;
+using CoreIns.SharedKernel.Identifiers;
 using Microsoft.Extensions.DependencyInjection;
 using static CoreIns.IntegrationTests.Party.PartyApi;
 using static CoreIns.IntegrationTests.Rating.RatingTestSupport;
@@ -221,8 +222,7 @@ public sealed class ReferralDecidabilityTests(PostgresFixture database) : IClass
         result.IsSuccess.ShouldBeTrue();
         var decidability = result.Value.Referral.Decidability;
         decidability.CanDecide.ShouldBeFalse();
-        decidability.Reasons.ShouldContain(DecidabilityReason.NotHuman);
-        decidability.Reasons.ShouldContain(DecidabilityReason.NoAuthority);
+        decidability.Reasons.ShouldBe([DecidabilityReason.NotHuman]);
     }
 
     [Fact]
@@ -313,13 +313,21 @@ public sealed class ReferralDecidabilityTests(PostgresFixture database) : IClass
               FROM (SELECT * FROM uw.issue WHERE status = 'Open' LIMIT 1) i, generate_series(1, 501) n
             """, Ct);
 
-        var (response, body, _) = await AsAsync(HttpMethod.Get, "/api/uw/v1/referrals?queue=MINE", Outsider);
+        try
+        {
+            var (response, body, _) = await AsAsync(HttpMethod.Get, "/api/uw/v1/referrals?queue=MINE", Outsider);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        body.Text("code").ShouldBe("UW-ERR-VALIDATION");
-        var open = await QueueAsync("OPEN", Outsider);
-        open["counts"]!["open"]!.GetValue<int>().ShouldBeGreaterThan(500);
-        open["counts"]!["mine"].ShouldBeNull();
+            response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+            body.Text("code").ShouldBe("UW-ERR-VALIDATION");
+            var open = await QueueAsync("OPEN", Outsider);
+            open["counts"]!["open"]!.GetValue<int>().ShouldBeGreaterThan(500);
+            open["counts"]!["mine"].ShouldBeNull();
+        }
+        finally
+        {
+            // The database is shared by the tests of this class.
+            await database.ExecuteAsSuperuserAsync("DELETE FROM uw.issue WHERE issue_key LIKE 'cap-%'", Ct);
+        }
     }
 
     [Fact]

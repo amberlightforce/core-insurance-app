@@ -156,7 +156,7 @@ public sealed class ReferralWorkbenchTests(PostgresFixture database) : IClassFix
         referral["facts"]!["driver"]!["claimsLast5Years"]!.GetValue<int>().ShouldBe(0);
         var issues = referral["issues"]!.AsArray();
         issues.Count.ShouldBe(3);
-        issues.ShouldAllBe(i => i!["status"]!.GetValue<string>() == "Open");
+        issues.ShouldAllBe(i => i!["issue"]!["status"]!.GetValue<string>() == "Open");
 
         // No P2: the birth date and identifiers never leave PTY; the plate (P1, not needed to decide) is not shown either.
         text.ShouldNotContain(YoungBirthDate);
@@ -174,7 +174,7 @@ public sealed class ReferralWorkbenchTests(PostgresFixture database) : IClassFix
         var (jobId, _) = await ReferredJobAsync();
         var (_, detail, _) = await AsAsync(HttpMethod.Get, $"/api/uw/v1/referrals/{jobId}");
         var issues = detail!["referral"]!["issues"]!.AsArray();
-        string IdOf(string type) => issues.Single(i => i!["issueType"]!.GetValue<string>() == type)!["id"]!.GetValue<string>();
+        string IdOf(string type) => issues.Single(i => i!["issue"]!["issueType"]!.GetValue<string>() == type)!["issue"]!["id"]!.GetValue<string>();
 
         var (approved, approvedBody, _) = await AsAsync(HttpMethod.Post, "/api/uw/v1/issues/decide", body: new
         {
@@ -204,7 +204,7 @@ public sealed class ReferralWorkbenchTests(PostgresFixture database) : IClassFix
         counts["decidedByMeToday"]!.GetValue<int>().ShouldBeGreaterThanOrEqualTo(1);
 
         var (_, after, _) = await AsAsync(HttpMethod.Get, $"/api/uw/v1/referrals/{jobId}");
-        after!["referral"]!["issues"]!.AsArray().Where(i => i!["decision"] is not null).Select(i => i!["decision"]!["reason"]!.GetValue<string>())
+        after!["referral"]!["issues"]!.AsArray().Where(i => i!["issue"]!["decision"] is not null).Select(i => i!["issue"]!["decision"]!["reason"]!.GetValue<string>())
             .ShouldContain("Too old for the appetite.");
     }
 
