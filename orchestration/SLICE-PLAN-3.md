@@ -291,7 +291,7 @@ owner* may add an EF migration in that batch.
 | `appsettings*.json` | Untouched after D-PRG-21; module settings go in module files |
 | `Program.cs` | Owned by SL3-PLT-SUPPORT |
 | `ci.yml` | Owned by SL3-E2E-HARNESS, then SL3-E2E (`e2e03` block only) |
-| `routes.tsx`, `PolicyModule.cs`, per-module permission files | Append-only; on conflict keep both sides |
+| `routes.tsx`, `PolicyModule.cs`, per-module permission files | Append-only; on conflict keep both sides. One exception: SL3-UI-POL-FILE adds the three servicing routes with placeholder pages, and SL3-UI-POL-JOBS later swaps only those three element lines |
 | `DECISIONS.md`, `STATUS.md`, `HANDOVER.md`, `PITFALLS.md` | Orchestrator only; builders put decisions and open questions in their PR body |
 | `seed-demo.py` | SL3-E2E only |
 
