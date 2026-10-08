@@ -1055,7 +1055,7 @@ describe('Transaction builder', () => {
     expect(submit?.body).toEqual({ setId });
     expect(submit?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
     expect(
-      JSON.parse(localStorage.getItem(`coreins.recent.claimset.${claimId}`) ?? '[]'),
+      JSON.parse(localStorage.getItem(`coreins.recent.v2.claimset.${claimId}`) ?? '[]'),
     ).toHaveLength(1);
   });
 

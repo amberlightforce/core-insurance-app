@@ -9,6 +9,7 @@ import { useInvoices } from './api';
 import { InvoiceTable } from './InvoiceTable';
 import { PageHeader, Section } from '../staff/PageHeader';
 import { readRecent } from '../staff/recent';
+import { useRecentLabels } from '../staff/useRecentLabels';
 import styles from '../staff/staff.module.css';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -23,8 +24,8 @@ export function BillingHomePage() {
   const [kind, setKind] = useState('invoices');
   const [id, setId] = useState('');
   const [tried, setTried] = useState(false);
-  const invoices = readRecent('invoice');
-  const accounts = readRecent('account');
+  const invoices = useRecentLabels('invoice', readRecent('invoice'));
+  const accounts = useRecentLabels('account', readRecent('account'));
   const valid = uuid.test(id.trim());
   // bil.Invoice.list without a filter: the latest invoices of every account the user may see.
   const all = useInvoices({});

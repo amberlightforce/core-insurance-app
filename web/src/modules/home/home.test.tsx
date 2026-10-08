@@ -92,9 +92,14 @@ describe('HomePage', () => {
 
   it('shows an underwriter the real invoice figures, quick actions and recent records', async () => {
     signInAs('Dev Underwriter (synthetic)', ['Staff.Underwriter']);
-    rememberRecent('policy', { id: fx.policyId, label: 'POL000000007' });
+    rememberRecent('policy', fx.policyId);
     const api = mockApi([
       { method: 'GET', path: '/api/bil/v1/invoices', respond: () => ({ body: invoices }) },
+      {
+        method: 'GET',
+        path: `/api/pol/v1/policies/${fx.policyId}`,
+        respond: () => ({ body: fx.policy('IN_FORCE') }),
+      },
     ]);
     const { container } = renderScreen(<HomePage />, { path: '/', url: '/' });
 
@@ -109,7 +114,9 @@ describe('HomePage', () => {
       'INV-C',
     );
     expect(screen.getAllByText('140,10 €').length).toBeGreaterThan(0);
-    expect(screen.getByRole('link', { name: 'POL000000007' })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'POL000000007' })).toBeInTheDocument();
+    // Only the opaque id is kept in the browser, never the policy number.
+    expect(JSON.stringify(Object.entries(localStorage))).not.toContain('POL000000007');
     // The unfiltered list only: no ids or personal data in the query.
     expect(api.callsTo('GET', '/api/bil/v1/invoices')[0]?.url.searchParams.get('policyId')).toBe(
       null,

@@ -48,8 +48,8 @@ function PolicyDetails({
   const invoices = useInvoices({ policyId: policy.policyId });
 
   useEffect(() => {
-    rememberRecent('policy', { id: policy.policyId, label: policy.policyNumber });
-  }, [policy.policyId, policy.policyNumber]);
+    rememberRecent('policy', policy.policyId);
+  }, [policy.policyId]);
 
   const sequenceOf = useMemo(
     () => new Map(data.transactions.map((x) => [x.transactionId, x] as const)),
