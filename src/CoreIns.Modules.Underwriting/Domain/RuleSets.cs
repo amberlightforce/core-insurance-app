@@ -66,6 +66,39 @@ internal sealed record UwRisk(
         return Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(canonical)));
     }
 
+    /// <summary>
+    /// The facts the rules read at <paramref name="effectiveDate"/> in a form without personal data, stored with POL's evaluation
+    /// for the referral workbench (D-USR-13): the vehicle facts as read, the vehicle age and the youngest driver's age band the
+    /// rules compute (the birth date is P2 and is never stored by UW).
+    /// </summary>
+    public UwFactsRecord Derived(DateOnly effectiveDate) => new(
+        effectiveDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+        FirstRegistrationDate.Year,
+        WholeYears(FirstRegistrationDate, effectiveDate),
+        VehicleValue > 0m ? decimal.Round(VehicleValue, 2).ToString("0.00", CultureInfo.InvariantCulture) : null,
+        EngineCc,
+        Usage,
+        DriverBirthDates.Count == 0 ? null : AgeBand(WholeYears(DriverBirthDates.Max(), effectiveDate)),
+        ClaimsLast5Years);
+
+    /// <summary>Age bands of the workbench (ReferralDriverAgeBand); the bounds follow the rule thresholds (18, 21).</summary>
+    public static string AgeBand(int age) => age switch
+    {
+        < 18 => "UNDER_18",
+        <= 20 => "FROM_18_TO_20",
+        <= 24 => "FROM_21_TO_24",
+        <= 29 => "FROM_25_TO_29",
+        <= 69 => "FROM_30_TO_69",
+        _ => "FROM_70",
+    };
+
+    /// <summary>Whole years from <paramref name="from"/> to <paramref name="to"/> (the rule engine's ageAt / yearsBetween).</summary>
+    public static int WholeYears(DateOnly from, DateOnly to)
+    {
+        var years = to.Year - from.Year;
+        return to < from.AddYears(years) ? years - 1 : years;
+    }
+
     private static decimal ReadDecimal(JsonElement element)
     {
         if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty("amount", out var amount))
@@ -105,6 +138,17 @@ internal sealed record UwRisk(
         return fraction.Length >= 1 && fraction.All(char.IsAsciiDigit) && (fraction.Length <= 2 || fraction[2..].All(c => c == '0'));
     }
 }
+
+/// <summary>The stored form of <see cref="UwRisk.Derived"/> (uw.evaluation.facts, camelCase JSON). No personal data.</summary>
+internal sealed record UwFactsRecord(
+    string EffectiveDate,
+    int FirstRegistrationYear,
+    int VehicleAgeYears,
+    string? VehicleValue,
+    int EngineCc,
+    string Usage,
+    string? YoungestDriverAgeBand,
+    int ClaimsLast5Years);
 
 internal sealed record RuleVariableDto(string Name, string Type, string Expression);
 
