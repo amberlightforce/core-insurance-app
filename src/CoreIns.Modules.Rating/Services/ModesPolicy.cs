@@ -4,10 +4,10 @@ using CoreIns.Modules.Rating.Domain;
 using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Results;
+using Mode = CoreIns.Modules.Rating.Contracts.Api.RateRateRequest.EnvelopeDetail.ModeValue;
 
 namespace CoreIns.Modules.Rating.Services;
 
-using Mode = RateRateRequest.EnvelopeDetail.ModeValue;
 
 /// <summary>
 /// The rating modes of <c>rat.Rate.rate</c> and what each one changes (REQ-RAT-038..041, REQ-POL-093, REQ-POL-249 subset):
