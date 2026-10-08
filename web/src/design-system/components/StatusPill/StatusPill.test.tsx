@@ -109,6 +109,15 @@ describe('StatusPill', () => {
     expect(screen.getByText('· 6 ημέρες')).toHaveClass('ds-visually-hidden');
   });
 
+  it('`text` replaces the status word and keeps the status family', () => {
+    renderWithDs(<StatusPill semantic="success" text="Νέα παραγωγή" />);
+    expect(screen.getByText('Νέα παραγωγή').closest('[data-family]')).toHaveAttribute(
+      'data-family',
+      'success',
+    );
+    expect(screen.queryByText('Επιτυχία')).not.toBeInTheDocument();
+  });
+
   it('dot variant keeps the label in the accessible name and a tooltip', async () => {
     const { user } = renderWithDs(<StatusPill entity="job" state="referred" variant="dot" />);
     const dot = screen.getByRole('img', { name: 'Κατάσταση: Σε παραπομπή' });
