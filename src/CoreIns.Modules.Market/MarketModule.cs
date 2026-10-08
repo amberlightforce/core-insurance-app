@@ -61,6 +61,10 @@ public static class MarketModule
         services.AddScoped<MarketRoundingService>();
         services.AddScoped<IMarketRoundingService>(sp => sp.GetRequiredService<MarketRoundingService>());
 
+        // SPI 4 treatment (SL3-MKT-TREATMENT): rows are pack data in the catalogue, the calculator holds no default.
+        services.TryAddSingleton<MarketTaxCalculator>();
+        services.TryAddSingleton<ITaxCalculator>(sp => sp.GetRequiredService<MarketTaxCalculator>());
+
         services.AddErrorDefinitions(Errors);
         return services;
     }
@@ -82,6 +86,10 @@ public static class MarketModule
             .Describe("Το hash ρυθμίσεων δεν είναι γνωστό σε αυτό το stamp.", "The configuration hash is not known to this stamp."),
         ErrorDefinition.For(ModuleCode.MKT, "CFG-RULE-MISSING", 422, "Λείπει κανόνας", "A rule is missing")
             .Describe("Δεν υπάρχει κανόνας· η λειτουργία αποτυγχάνει κλειστά.", "No rule exists; the operation fails closed."),
+        ErrorDefinition.For(ModuleCode.MKT, "SPI-VALIDATION", 422, "Μη έγκυρο αίτημα SPI", "The SPI request is invalid")
+            .Describe("Ελέγξτε τον τύπο συναλλαγής και την πηγή ακύρωσης.", "Check the transaction kind and the cancellation source."),
+        ErrorDefinition.For(ModuleCode.MKT, "SPI-RULE-MISSING", 422, "Λείπει κανόνας SPI", "An SPI rule is missing")
+            .Describe("Δεν υπάρχει κανόνας μεταχείρισης φόρου· η λειτουργία αποτυγχάνει κλειστά.", "No tax treatment rule exists; the operation fails closed."),
         ErrorDefinition.For(ModuleCode.MKT, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];
