@@ -289,7 +289,8 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
     reserved: financials.data ? amountOf(financials.data.totals.reserved) : null,
     payments: payments.data ? ((payments.data.items ?? []) as ClaimPaymentView[]) : null,
   });
-  const cause = t(`codes.lossCause.${summary.lossCause}`);
+  // Codes outside the illustrative list (e.g. seeded data) show as the code, never as a translation key.
+  const cause = t(`codes.lossCause.${summary.lossCause}`, { defaultValue: summary.lossCause });
 
   return (
     <div className={styles.stack}>

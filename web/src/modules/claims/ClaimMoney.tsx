@@ -34,7 +34,7 @@ export function ClaimMoney({ claim, onNewPayment, onRelease }: ClaimMoneyProps) 
   const totals = financials.data?.totals;
 
   return (
-    <section className={cx(styles.money)} aria-label={t('file.money.title')}>
+    <div className={cx(styles.money)}>
       {financials.isError ? (
         <p className={cx(styles.muted)}>{t('file.money.unavailable')}</p>
       ) : totals ? (
@@ -94,7 +94,7 @@ export function ClaimMoney({ claim, onNewPayment, onRelease }: ClaimMoneyProps) 
           ) : null}
         </div>
       ) : null}
-    </section>
+    </div>
   );
 }
 
@@ -164,7 +164,11 @@ export function ClaimHistory({ claim }: { claim: ClaimView }) {
           },
         ]
       : []),
-  ].sort((a, b) => b.at.localeCompare(a.at));
+  ]
+    // Newest first; events at the same instant keep their causal order reversed (closed above paid above created).
+    .map((event, index) => ({ event, index }))
+    .sort((a, b) => b.event.at.localeCompare(a.event.at) || b.index - a.index)
+    .map(({ event }) => event);
 
   return (
     <ol className={cx(styles.timeline)}>
