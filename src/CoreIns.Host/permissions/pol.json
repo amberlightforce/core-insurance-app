@@ -10,7 +10,9 @@
         "pol.Policy.get": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "pol.Term.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pol.Snapshot.get": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
-        "pol.Policy.search": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ]
+        "pol.Policy.search": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "pol.PolicyChange.create": [ "Staff.Underwriter" ],
+        "pol.change": [ "Staff.Underwriter" ]
       }
     }
   }
