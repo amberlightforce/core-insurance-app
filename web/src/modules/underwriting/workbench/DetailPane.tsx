@@ -218,7 +218,7 @@ export function DetailPane({ jobRef }: DetailPaneProps) {
   if (jobRef === null) {
     return (
       <div className={styles.sheet}>
-        <h1 className={styles.srOnly}>{t('title')}</h1>
+        <h1 className="ds-visually-hidden">{t('title')}</h1>
         <div className={styles.centre}>
           <EmptyState
             kind="first-use"
@@ -233,7 +233,7 @@ export function DetailPane({ jobRef }: DetailPaneProps) {
   if (query.isPending) {
     return (
       <div className={styles.sheet}>
-        <h1 className={styles.srOnly}>{t('title')}</h1>
+        <h1 className="ds-visually-hidden">{t('title')}</h1>
         <div className={styles.centre}>
           <LoadingState immediate>{t('detail.loading')}</LoadingState>
         </div>
@@ -244,7 +244,7 @@ export function DetailPane({ jobRef }: DetailPaneProps) {
     const problem = problemOf(query.error);
     return (
       <div className={styles.sheet}>
-        <h1 className={styles.srOnly}>{t('title')}</h1>
+        <h1 className="ds-visually-hidden">{t('title')}</h1>
         <div className={styles.centre}>
           <ErrorState
             message={
@@ -269,7 +269,7 @@ export function DetailPane({ jobRef }: DetailPaneProps) {
   const reasonsByIssue = new Map(summary.reasons.map((reason) => [reason.issueId, reason]));
 
   return (
-    <div className={styles.sheet}>
+    <div className={`${styles.sheet} ${styles.detail}`}>
       <div className={styles.detailHead}>
         <PageHeader
           overline={t('detail.overline', {

@@ -2,15 +2,24 @@
  * Referral workbench «Ανάληψη κινδύνου» (v3 mockup screen B, D-USR-11/13): views rail | queue sheet | detail sheet.
  * Tokens only (rule 1); the panes are opaque sheets on the canvas (C-01). The detail answers to its own width.
  */
-.screen {
+
+/* The container of the narrow-width rules (a container query cannot restyle its own container). */
+.root {
   container-type: inline-size;
   container-name: uw;
+  min-inline-size: 0;
+}
+
+.screen {
   display: grid;
   grid-template-columns: var(--size-work-views) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: var(--space-2);
   align-items: stretch;
-  block-size: 100%;
-  min-block-size: 560px;
+
+  /* The shell's top bar, status bar and insets take about 7 rem; the panes scroll inside. */
+  block-size: calc(100dvh - var(--space-20) - var(--space-8));
+  min-block-size: 480px;
 }
 
 .main {
@@ -302,6 +311,9 @@
 
 /* ---------- decision bar ---------- */
 .decision {
+  flex: none;
+  max-block-size: 60%;
+  overflow: auto;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -416,28 +428,16 @@
   cursor: pointer;
 }
 
-.srOnly {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  margin: -1px;
-  padding: var(--space-0);
-  border: var(--space-0);
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 /* ---------- narrow: the rail becomes a row of views; the detail stacks its columns ---------- */
-@container uw (max-width: 940px) {
+@container uw (max-width: 1300px) {
   .screen {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr);
+    block-size: calc(100dvh - var(--space-20) - var(--space-16));
   }
 
   .rail {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-flow: row wrap;
     align-items: center;
     padding: var(--space-2);
   }
@@ -450,6 +450,13 @@
 
   .view {
     gap: var(--space-3);
+  }
+}
+
+/* SplitView stacks below ~1080 px and puts its «Πίσω» row above the detail sheet. */
+@container uw (max-width: 1080px) {
+  .detail {
+    block-size: calc(100% - var(--space-12));
   }
 }
 

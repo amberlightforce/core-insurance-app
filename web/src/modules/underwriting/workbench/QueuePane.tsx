@@ -21,7 +21,6 @@ import styles from './Workbench.module.css';
 
 export interface QueuePaneProps {
   queue: ReferralQueue;
-  selectedJob: string | null;
   onOpen: (jobRef: string) => void;
   /** The list query of the queue (owned by the page: the rail shows its counts). */
   list: ReturnType<typeof useReferralList>;
@@ -32,7 +31,7 @@ export interface QueuePaneProps {
  * reason, waiting since, premium) and the entry count. A row opens with one click or Enter (D-SLC-21 (c)); ↑/↓ move
  * the cursor. The checkbox column of the mockup is not built (no bulk actions in this slice).
  */
-export function QueuePane({ queue, selectedJob, onOpen, list }: QueuePaneProps) {
+export function QueuePane({ queue, onOpen, list }: QueuePaneProps) {
   const { t } = useTranslation('underwriting');
   const region = useRegionFormat();
   const typeLabel = useIssueTypeLabel();
@@ -48,7 +47,7 @@ export function QueuePane({ queue, selectedJob, onOpen, list }: QueuePaneProps) 
           ...(row.jobNumber ? { id: row.jobNumber } : {}),
           ...(row.productCode ? { fact: row.productCode } : {}),
         }),
-        { size: 260, enableSorting: false },
+        { size: 180, enableSorting: false },
       ),
       textColumn<ReferralListItem>(
         'reason',
@@ -61,19 +60,19 @@ export function QueuePane({ queue, selectedJob, onOpen, list }: QueuePaneProps) 
             ? `${label} ${t('queue.extraReasons', { count: row.reasons.length - 1 })}`
             : label;
         },
-        { size: 180, enableSorting: false },
+        { size: 120, enableSorting: false },
       ),
       textColumn<ReferralListItem>(
         'waiting',
         t('queue.columns.waiting'),
         (row) => formatRelative(row.raisedAt, { region }),
-        { size: 130, enableSorting: false },
+        { size: 110, enableSorting: false },
       ),
       moneyColumn<ReferralListItem>(
         'premium',
         t('queue.columns.premium'),
         (row) => row.premiumTotal?.amount ?? null,
-        { currency: 'EUR', size: 110, enableSorting: false },
+        { currency: 'EUR', size: 90, enableSorting: false },
       ),
     ],
     [t, region, typeLabel],
@@ -81,7 +80,6 @@ export function QueuePane({ queue, selectedJob, onOpen, list }: QueuePaneProps) 
 
   const getRowId = useMemo(() => (row: ReferralListItem) => row.jobRef, []);
   const getRowLabel = useMemo(() => (row: ReferralListItem) => row.jobNumber ?? row.jobRef, []);
-  const selectedIds = useMemo(() => (selectedJob ? [selectedJob] : []), [selectedJob]);
   const openRow = useMemo(
     () => (row: ReferralListItem) => {
       onOpen(row.jobRef);
@@ -140,11 +138,9 @@ export function QueuePane({ queue, selectedJob, onOpen, list }: QueuePaneProps) 
           getRowId={getRowId}
           getRowLabel={getRowLabel}
           rowVariant="queue"
-          selectable
-          selectedIds={selectedIds}
-          initialColumnVisibility={{ select: false }}
           onOpen={openRow}
           openOnClick
+          cardBreakpoint={320}
           searchable={false}
           showDensityToggle={false}
           showColumnSettings={false}
@@ -168,21 +164,19 @@ export function QueuePane({ queue, selectedJob, onOpen, list }: QueuePaneProps) 
         <h2 className={styles.qtitle}>{t(`views.${queue}`)}</h2>
       </div>
       {body}
-      {!query.isPending && !(query.isError && items.length === 0) ? (
+      {query.hasNextPage ? (
         <div className={styles.qfoot}>
           <span className={styles.caption}>{t('queue.footer', { count: items.length })}</span>
-          {query.hasNextPage ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              isLoading={query.isFetchingNextPage}
-              onPress={() => {
-                void query.fetchNextPage();
-              }}
-            >
-              {t('queue.loadMore')}
-            </Button>
-          ) : null}
+          <Button
+            variant="ghost"
+            size="sm"
+            isLoading={query.isFetchingNextPage}
+            onPress={() => {
+              void query.fetchNextPage();
+            }}
+          >
+            {t('queue.loadMore')}
+          </Button>
         </div>
       ) : null}
     </div>

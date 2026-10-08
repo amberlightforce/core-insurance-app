@@ -49,18 +49,21 @@ function Workbench() {
   }, [queue, setParams]);
 
   return (
-    <div className={styles.screen}>
-      <ViewsRail active={queue} counts={counts} onSelect={selectQueue} />
-      <div className={styles.main}>
-        <SplitView
-          listLabel={t('queue.label')}
-          detailLabel={t('detail.label')}
-          isDetailOpen={job !== null}
-          onCloseDetail={closeJob}
-          storageKey="coreins.uw.listWidth"
-          list={<QueuePane queue={queue} selectedJob={job} onOpen={openJob} list={list} />}
-          detail={<DetailPane jobRef={job} />}
-        />
+    <div className={styles.root}>
+      <div className={styles.screen}>
+        <ViewsRail active={queue} counts={counts} onSelect={selectQueue} />
+        <div className={styles.main}>
+          <SplitView
+            listLabel={t('queue.label')}
+            detailLabel={t('detail.label')}
+            isDetailOpen={job !== null}
+            onCloseDetail={closeJob}
+            defaultListWidth={520}
+            storageKey="coreins.uw.listWidth"
+            list={<QueuePane queue={queue} onOpen={openJob} list={list} />}
+            detail={<DetailPane jobRef={job} />}
+          />
+        </div>
       </div>
     </div>
   );
