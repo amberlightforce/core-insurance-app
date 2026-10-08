@@ -4,23 +4,74 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Issue.list result. PRD outputs: "issues, explanation"</summary>
+/// <summary>One UW issue (REQ-UW-075).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IssueListItem
 {
-    /// <summary>PRD: "issues"</summary>
+    /// <summary>Contract member 'id'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'id' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Issues { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("id")]
+    public required global::System.Guid Id { get; init; }
 
-    /// <summary>PRD: "explanation"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("explanation")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Explanation { get; init; }
+    /// <summary>POL job id</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobRef { get; init; }
+
+    /// <summary>Contract member 'issueType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issueType")]
+    public required string IssueType { get; init; }
+
+    /// <summary>Issue key, e.g. `VEHICLE_AGE_REFERRAL:&lt;elementId&gt;` (REQ-UW-001)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issueKey")]
+    public required string IssueKey { get; init; }
+
+    /// <summary>Raising rule of the rule set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleId")]
+    public required string RuleId { get; init; }
+
+    /// <summary>Contract member 'severity'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("severity")]
+    public required string Severity { get; init; }
+
+    /// <summary>Contract member 'blockingPoint'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("blockingPoint")]
+    public required global::CoreIns.Platform.Contracts.Common.BlockingPoint BlockingPoint { get; init; }
+
+    /// <summary>Contract member 'lane'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lane")]
+    public required string Lane { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.IssueStatusCode Status { get; init; }
+
+    /// <summary>Optimistic concurrency version (pass it to uw.Issue.decide)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
+
+    /// <summary>Contract member 'messageEn'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("messageEn")]
+    public required string MessageEn { get; init; }
+
+    /// <summary>Contract member 'messageEl'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("messageEl")]
+    public required string MessageEl { get; init; }
+
+    /// <summary>Contract member 'raisedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("raisedAt")]
+    public required global::CoreIns.SharedKernel.Instant RaisedAt { get; init; }
+
+    /// <summary>Actor of the evaluation that raised the issue</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("raisedBy")]
+    public required string RaisedBy { get; init; }
+
+    /// <summary>Contract member 'decision'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    public global::CoreIns.Modules.Underwriting.Contracts.Api.IssueDecisionView? Decision { get; init; }
+
+    /// <summary>RULE_NO_LONGER_HITS, VALUE_CHANGED (approval invalidated) or another closing reason</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("closeReason")]
+    public string? CloseReason { get; init; }
 }

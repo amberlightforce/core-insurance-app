@@ -42,6 +42,30 @@ internal sealed record UwRisk(
         }
     }
 
+    /// <summary>
+    /// The approval fingerprint (REQ-UW-091, PRD-04 §7.3): SHA-256 (lower-case hex) of every fact the rules read, in a fixed
+    /// canonical form, at <paramref name="effectiveDate"/> (the ages the rules compute depend on it). An approval holds while
+    /// the fingerprint is unchanged; tolerances per input are later work (every input is EXACT here). The rule set (code,
+    /// version, content hash) and the raising rule are part of it, so a new rule-set version invalidates older approvals. The
+    /// element id is part of the issue key, not of the facts, and is left out.
+    /// </summary>
+    public string Fingerprint(DateOnly effectiveDate, string ruleSet, string ruleId)
+    {
+        var canonical = string.Join(
+            '\n',
+            "v2",
+            "ruleSet=" + ruleSet,
+            "rule=" + ruleId,
+            "effectiveDate=" + effectiveDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            "vehicleFirstRegistration=" + FirstRegistrationDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            "vehicleValue=" + decimal.Round(VehicleValue, 2).ToString("0.00", CultureInfo.InvariantCulture),
+            "engineCc=" + EngineCc.ToString(CultureInfo.InvariantCulture),
+            "usage=" + Usage,
+            "driverBirthDates=" + string.Join(',', DriverBirthDates.Order().Select(d => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))),
+            "claimsLast5Years=" + ClaimsLast5Years.ToString(CultureInfo.InvariantCulture));
+        return Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(canonical)));
+    }
+
     private static decimal ReadDecimal(JsonElement element)
     {
         if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty("amount", out var amount))
@@ -50,13 +74,35 @@ internal sealed record UwRisk(
         }
 
         var text = element.ValueKind == JsonValueKind.String ? element.GetString() : element.ValueKind == JsonValueKind.Number ? element.GetRawText() : null;
-        if (text is null || !System.Text.RegularExpressions.Regex.IsMatch(text, @"^[0-9]{1,9}(\.[0-9]{1,2}0*)?$", System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromMilliseconds(50))
+        if (text is null || !IsPlainAmount(text)
             || !decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value))
         {
             throw new FormatException("the vehicle value must be an amount with at most two decimals");
         }
 
         return value;
+    }
+
+    /// <summary>
+    /// Plain decimal text: 1–9 digits, optionally a point and 1–2 decimals followed only by zeros (same language as
+    /// <c>^[0-9]{1,9}(\.[0-9]{1,2}0*)?$</c>). Hand-written so that no regex timeout can turn a valid request into a 500 under load.
+    /// </summary>
+    private static bool IsPlainAmount(string text)
+    {
+        var point = text.IndexOf('.', StringComparison.Ordinal);
+        var whole = point < 0 ? text : text[..point];
+        if (whole.Length is < 1 or > 9 || !whole.All(char.IsAsciiDigit))
+        {
+            return false;
+        }
+
+        if (point < 0)
+        {
+            return true;
+        }
+
+        var fraction = text[(point + 1)..];
+        return fraction.Length >= 1 && fraction.All(char.IsAsciiDigit) && (fraction.Length <= 2 || fraction[2..].All(c => c == '0'));
     }
 }
 

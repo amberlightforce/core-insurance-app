@@ -67,24 +67,46 @@ describe('QuoteResult', () => {
 
     const issue = {
       issueId: 'i-1',
-      issueType: 'REFERRAL',
+      issueType: 'VEHICLE_AGE_REFERRAL',
       blockingPoint: 'PRE_BIND' as const,
-      issueKey: 'UW-BUSINESS-USE',
+      issueKey: 'VEHICLE_AGE_REFERRAL:veh-1',
       explanationKeys: ['pfc.question.usage.business'],
-      approvalStatus: 'OPEN',
+      approvalStatus: 'Open',
+    };
+    const ruleIssue = {
+      issueId: 'i-2',
+      issueType: 'DRIVER_AGE_REFERRAL',
+      blockingPoint: 'PRE_BIND' as const,
+      issueKey: 'DRIVER_AGE_REFERRAL:veh-1',
+      explanationKeys: ['REFER-YOUNG-DRIVER'],
+      approvalStatus: 'Approved',
     };
     rerender(
       <QuoteResult
-        quote={fx.quote({ decision: 'REFER', referred: true, bindable: false, issues: [issue] })}
+        quote={fx.quote({
+          decision: 'REFER',
+          referred: true,
+          bindable: false,
+          issues: [issue, ruleIssue],
+        })}
         coverNames={names}
         productIsIllustrative={false}
       />,
     );
     expect(screen.getByText('Παραπομπή')).toBeInTheDocument();
     const grid = screen.getByRole('grid', { name: 'Ζητήματα ανάληψης κινδύνου' });
-    expect(within(grid).getByText('UW-BUSINESS-USE')).toBeInTheDocument();
+    // The issue type's label, never the raw issue key.
+    expect(within(grid).getByText('Παλαιό όχημα')).toBeInTheDocument();
+    expect(within(grid).queryByText('VEHICLE_AGE_REFERRAL:veh-1')).not.toBeInTheDocument();
     expect(within(grid).getByText('Επαγγελματική χρήση του οχήματος')).toBeInTheDocument();
-    expect(within(grid).getByText('Πριν τη δέσμευση')).toBeInTheDocument();
+    expect(within(grid).getAllByText('Πριν τη δέσμευση').length).toBe(2);
+    expect(within(grid).getByText('Αναμένει απόφαση')).toBeInTheDocument();
+    // A UW rule id reads as plain text from the uw namespace.
+    expect(within(grid).getByText('Νέος οδηγός')).toBeInTheDocument();
+    expect(
+      within(grid).getByText('Ο νεότερος οδηγός είναι κάτω των 21 ετών κατά την έναρξη.'),
+    ).toBeInTheDocument();
+    expect(within(grid).getByText('Εγκρίθηκε')).toBeInTheDocument();
 
     rerender(
       <QuoteResult

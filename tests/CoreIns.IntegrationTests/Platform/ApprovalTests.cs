@@ -149,6 +149,27 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
     }
 
     [Fact]
+    public async Task REQ_PLT_115_the_all_roles_dev_super_user_cannot_approve_their_own_claims_request_but_can_approve_another_makers()
+    {
+        string[] all = ["Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.Finance", Handler, Manager, "Platform.Admin"];
+        var superRoles = string.Join(',', all);
+        var hash = NewHash();
+        var own = await CreateAsync("dev:superuser", Guid.NewGuid().ToString(), hash, "100.00");
+
+        // Holding every role and every authority grant does not lift four-eyes: the maker is still the maker.
+        var (refused, refusedBody) = await DecideAsync("dev:superuser", superRoles, own, hash);
+        refused.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        refusedBody!["code"]!.GetValue<string>().ShouldBe("PLT-ERR-SELF-APPROVAL");
+        (await ScalarAsync<string>($"SELECT status FROM plt.approval_request WHERE request_id = '{own}'")).ShouldBe("PendingApproval");
+
+        // Another maker's request is decided by the super user (a different person), under the highest grant among the roles.
+        var otherHash = NewHash();
+        var other = await CreateAsync("handler-anna", Guid.NewGuid().ToString(), otherHash, "5300.00");
+        var (approved, _) = await DecideAsync("dev:superuser", superRoles, other, otherHash);
+        approved.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
     public async Task REQ_PLT_115_the_maker_cannot_decide_their_own_request()
     {
         var hash = NewHash();

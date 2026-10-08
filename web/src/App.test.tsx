@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { defaultNavItems, visibleNavItems } from './app-shell/navigation';
 import { routes } from './routes';
 import { expectNoA11yViolations } from './test/axe';
 import { renderWithDs } from './test/render';
@@ -69,6 +70,28 @@ describe('App', () => {
       ).toBeInTheDocument();
     },
   );
+
+  it('shows every navigation entry to the all-roles dev super user', () => {
+    const superRoles = [
+      'Staff.Underwriter',
+      'Staff.UnderwritingManager',
+      'Staff.Billing',
+      'Staff.Finance',
+      'Staff.ClaimsHandler',
+      'Staff.ClaimsManager',
+      'Platform.Admin',
+    ];
+    expect(visibleNavItems(defaultNavItems, superRoles).map((item) => item.id)).toEqual(
+      defaultNavItems.map((item) => item.id),
+    );
+    signInAs(superRoles);
+    renderAt('/');
+    expect(
+      within(screen.getByRole('navigation', { name: 'Κύρια πλοήγηση' })).getByRole('link', {
+        name: 'Ζημίες',
+      }),
+    ).toBeInTheDocument();
+  });
 
   it('opens the command palette from the top bar and navigates', async () => {
     const { user } = renderAt('/');

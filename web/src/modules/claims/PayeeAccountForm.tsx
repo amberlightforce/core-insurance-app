@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { newIdempotencyKey } from '../../api/idempotency';
-import type { PayeeAccountCreateResponse } from '../../api/types';
+import type { ClaimPayeeAccountView } from '../../api/types';
 import {
   Banner,
   Button,
@@ -15,13 +15,15 @@ import { normalizeIban, validateIban } from '../../format';
 import { ProblemBanner } from '../staff/ProblemBanner';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
-import { createPayeeAccount } from './api';
+import { capturePayeeAccount } from './api';
+import { verificationKey } from './codes';
 
 export interface PayeeAccountFormProps {
+  claimId: string;
   /** PTY party of the payee: the claim's insured. */
   partyId: string;
-  /** Called with the saved account (masked IBAN only) so the claim view can offer it later. */
-  onSaved?: (account: PayeeAccountCreateResponse) => void;
+  /** Called with the saved account (masked IBAN only) so the claim view can offer it. */
+  onSaved?: (account: ClaimPayeeAccountView) => void;
 }
 
 /** A cheap, non-reversible fingerprint (FNV-1a) so the Idempotency-Key is reused only for the same input. */
@@ -40,7 +42,7 @@ function fingerprint(text: string): string {
  * input, and is cleared as soon as the account is saved; afterwards only the masked form (last four characters)
  * is shown. The mutation is called directly so react-query's mutation cache never holds the IBAN.
  */
-export function PayeeAccountForm({ partyId, onSaved }: PayeeAccountFormProps) {
+export function PayeeAccountForm({ claimId, partyId, onSaved }: PayeeAccountFormProps) {
   const { t } = useTranslation('claims');
   const fmt = useFormat();
   const [holder, setHolder] = useState('');
@@ -48,7 +50,7 @@ export function PayeeAccountForm({ partyId, onSaved }: PayeeAccountFormProps) {
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<unknown>(null);
-  const [saved, setSaved] = useState<PayeeAccountCreateResponse | null>(null);
+  const [saved, setSaved] = useState<ClaimPayeeAccountView | null>(null);
   const key = useRef<{ print: string; value: string } | null>(null);
 
   const ibanIssue = iban === '' ? 'required' : validateIban(normalizeIban(iban)) ? 'invalid' : null;
@@ -60,19 +62,13 @@ export function PayeeAccountForm({ partyId, onSaved }: PayeeAccountFormProps) {
     setSaved(null);
     if (invalid) return;
     const normalized = normalizeIban(iban);
-    const print = fingerprint(`${partyId}|${holder.trim()}|${normalized}`);
+    const print = fingerprint(`${claimId}|${partyId}|${holder.trim()}|${normalized}`);
     if (key.current?.print !== print) key.current = { print, value: newIdempotencyKey() };
     setBusy(true);
     setFailure(null);
     try {
-      const account = await createPayeeAccount(
-        {
-          partyId,
-          purpose: 'CLAIM_PAYMENT',
-          iban: normalized,
-          holderName: holder.trim(),
-          source: 'STAFF',
-        },
+      const { payeeAccount: account } = await capturePayeeAccount(
+        { claimId, partyId, iban: normalized, holderName: holder.trim() },
         key.current.value,
       );
       // Clear the secret as soon as it is saved; only the masked IBAN comes back.
@@ -145,7 +141,9 @@ export function PayeeAccountForm({ partyId, onSaved }: PayeeAccountFormProps) {
               {
                 id: 'verification',
                 label: t('payee.verification'),
-                value: t(`payee.verificationStatus.${saved.verificationStatus}`),
+                value: t(`payee.verificationStatus.${verificationKey(saved.verificationStatus)}`, {
+                  defaultValue: saved.verificationStatus,
+                }),
               },
               {
                 id: 'cooling',

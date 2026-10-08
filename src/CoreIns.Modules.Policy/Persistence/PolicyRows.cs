@@ -71,6 +71,9 @@ internal sealed class JobRow
 
     public string CreatedBy { get; set; } = string.Empty;
 
+    /// <summary>Every actor who created, edited, quoted or bound the job (SOD-UW-02 / BR-UW-013: they may not decide its UW issues).</summary>
+    public List<string> Participants { get; set; } = [];
+
     public Instant UpdatedAt { get; set; }
 }
 

@@ -30,6 +30,13 @@ internal static class UwEvaluation
         CancellationToken cancellationToken)
     {
         RulesEvaluateResponse evaluation;
+        // The quoter or binder is a participant too; UW refuses decisions by anyone who worked on the job (SOD-UW-02).
+        JobSupport.AddParticipant(job, context.Actor);
+        if (!job.Participants.Contains(job.CreatedBy, StringComparer.Ordinal))
+        {
+            job.Participants = [job.CreatedBy, .. job.Participants];
+        }
+
         try
         {
             evaluation = await underwriting.EvaluateAsync(
@@ -42,6 +49,8 @@ internal static class UwEvaluation
                     ProductCode = job.ProductCode,
                     EffectiveDate = job.EffectiveAt.ToBusinessDate(zone),
                     RiskSnapshot = view.Input,
+                    JobParticipants = [.. job.Participants],
+                    ProducerCode = job.ProducerCode,
                 },
                 new CommandOptions(JobSupport.Derived(context.IdempotencyKey, "uw.Rules.evaluate:" + checkpoint)) { DryRun = context.DryRun },
                 cancellationToken).ConfigureAwait(false);

@@ -9,26 +9,38 @@ namespace CoreIns.Modules.Underwriting.Contracts.Api;
 public sealed record IssueDecideResponse
 {
     /// <summary>PRD: "decisions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("decisions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decisions { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<DecisionItem> Decisions { get; init; }
 
     /// <summary>PRD: "check ids"</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'checkId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("checkIds")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? CheckIds { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::System.Guid> CheckIds { get; init; }
 
-    /// <summary>PRD: "pending second approval"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>PRD: "pending second approval" (always false until the four-eyes thresholds of BR-UW-012 apply)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("pendingSecondApproval")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PendingSecondApproval { get; init; }
+    public required bool PendingSecondApproval { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record DecisionItem
+    {
+        /// <summary>Contract member 'issueId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("issueId")]
+        public required global::CoreIns.SharedKernel.Identifiers.UwIssueId IssueId { get; init; }
+
+        /// <summary>Contract member 'status'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+        public required global::CoreIns.Modules.Underwriting.Contracts.Api.IssueStatusCode Status { get; init; }
+
+        /// <summary>Contract member 'recordVersion'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+        public required int RecordVersion { get; init; }
+
+        /// <summary>Contract member 'authorityCheckId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("authorityCheckId")]
+        public required global::CoreIns.SharedKernel.Identifiers.AuthorityCheckId AuthorityCheckId { get; init; }
+    }
 }

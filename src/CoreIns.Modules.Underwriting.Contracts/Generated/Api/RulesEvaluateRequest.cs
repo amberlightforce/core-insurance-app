@@ -51,6 +51,15 @@ public sealed record RulesEvaluateRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? RiskSnapshot { get; init; }
 
+    /// <summary>POL in-process only - actors who created, edited, quoted or bound the job (BR-UW-013 / SOD-UW-02); stored with the evaluation, they may not decide the job's issues</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobParticipants")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<string>? JobParticipants { get; init; }
+
+    /// <summary>POL in-process only - producer code on the job (SOD-UW-02), stored with the evaluation</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("producerCode")]
+    public string? ProducerCode { get; init; }
+
     /// <summary>REQ-UW-001</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CheckpointValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

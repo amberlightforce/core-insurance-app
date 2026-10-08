@@ -58,6 +58,8 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
     private async Task<(HttpResponseMessage Response, JsonNode? Body)> EvaluateAsync(object body, Guid? key = null) =>
         await SendAsync(_client, HttpMethod.Post, "/api/uw/v1/rules/evaluate", body, key: key);
 
+    private Task<JsonNode> InProcessAsync(object body) => UwTestSupport.EvaluateInProcessAsync(_factory.Services, body);
+
     private async Task<bool> BlockedAsync(Guid job, string point)
     {
         var (response, body) = await SendAsync(_client, HttpMethod.Get, $"/api/uw/v1/issues/blocking-status?jobRef={job}&blockingPoint={point}");
@@ -95,9 +97,8 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
     {
         var job = Guid.CreateVersion7();
 
-        var (response, body) = await EvaluateAsync(EvaluateBody(job, RiskTree(birthDate: "2007-06-15")));
+        var body = await InProcessAsync(EvaluateBody(job, RiskTree(birthDate: "2007-06-15")));
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("outcome").ShouldBe("REFER");
         body.Text("lane").ShouldBe("ASSISTED");
         body.Text("issues.0.issueType").ShouldBe("DRIVER_AGE_REFERRAL");
@@ -113,18 +114,41 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
         (await ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'UWIssueRaised' AND business_keys->>'jobId' = '{job}'")).ShouldBe(1);
     }
 
+    // D-UW-01: over HTTP the evaluation is recorded but the job's issues are read only (only POL's in-process call changes them).
+    [Fact]
+    public async Task An_http_evaluation_records_the_decision_but_never_raises_or_closes_job_issues()
+    {
+        var job = Guid.CreateVersion7();
+
+        var (response, body) = await EvaluateAsync(EvaluateBody(job, RiskTree(birthDate: "2007-06-15")));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body.Text("outcome").ShouldBe("REFER");
+        body.Text("issues.0.approvalStatus").ShouldBe("Open");
+        body!["warnings"]!.AsArray().Select(w => w!.GetValue<string>()).ShouldContain("UW-WARN-ISSUES-NOT-RECORDED");
+        (await ScalarAsync<long>($"SELECT count(*) FROM uw.evaluation WHERE job_id = '{job}'")).ShouldBe(1);
+        (await ScalarAsync<long>($"SELECT count(*) FROM uw.issue WHERE job_id = '{job}'")).ShouldBe(0);
+        (await BlockedAsync(job, "PRE_BIND")).ShouldBeFalse();
+
+        var raised = await InProcessAsync(EvaluateBody(job, RiskTree(birthDate: "2007-06-15")));
+        var (_, clean) = await EvaluateAsync(EvaluateBody(job, RiskTree(birthDate: "1985-06-15")));
+        clean.Text("outcome").ShouldBe("ACCEPT");
+        (await ScalarAsync<string>($"SELECT status FROM uw.issue WHERE issue_id = '{raised.Text("issues.0.issueId")}'")).ShouldBe("Open");
+        (await BlockedAsync(job, "PRE_BIND")).ShouldBeTrue();
+    }
+
     [Fact]
     public async Task REQ_UW_059_re_evaluating_the_same_hit_keeps_the_issue_and_a_cleared_hit_closes_it()
     {
         var job = Guid.CreateVersion7();
-        var (_, first) = await EvaluateAsync(EvaluateBody(job, RiskTree(birthDate: "2007-06-15")));
-        var (_, again) = await EvaluateAsync(EvaluateBody(job, RiskTree(birthDate: "2007-06-15")));
+        var first = await InProcessAsync(EvaluateBody(job, RiskTree(birthDate: "2007-06-15")));
+        var again = await InProcessAsync(EvaluateBody(job, RiskTree(birthDate: "2007-06-15")));
 
         again.Text("issues.0.issueId").ShouldBe(first.Text("issues.0.issueId"));
         (await ScalarAsync<long>($"SELECT count(*) FROM uw.issue WHERE job_id = '{job}'")).ShouldBe(1);
         (await ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'UWIssueRaised' AND business_keys->>'jobId' = '{job}'")).ShouldBe(1);
 
-        var (_, fixedRisk) = await EvaluateAsync(EvaluateBody(job, RiskTree(birthDate: "1985-06-15")));
+        var fixedRisk = await InProcessAsync(EvaluateBody(job, RiskTree(birthDate: "1985-06-15")));
 
         fixedRisk.Text("outcome").ShouldBe("ACCEPT");
         (await ScalarAsync<string>($"SELECT status FROM uw.issue WHERE job_id = '{job}'")).ShouldBe("Closed");
@@ -139,9 +163,8 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
     {
         var job = Guid.CreateVersion7();
 
-        var (response, body) = await EvaluateAsync(EvaluateBody(job, RiskTree(usage: "BUSINESS", birthDate: "2007-06-15")));
+        var body = await InProcessAsync(EvaluateBody(job, RiskTree(usage: "BUSINESS", birthDate: "2007-06-15")));
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("outcome").ShouldBe("DECLINE");
         body.Text("lane").ShouldBe("EXPERT");
         body!["reasons"]!.AsArray().Select(r => r!["ruleId"]!.GetValue<string>()).ShouldBe(["DECLINE-USAGE", "REFER-YOUNG-DRIVER"], ignoreOrder: true);
@@ -308,8 +331,8 @@ public sealed class UnderwritingTests(PostgresFixture database) : IClassFixture<
     {
         var job = Guid.CreateVersion7();
         var young = RiskTree(birthDate: "2007-06-15");
-        var (_, atBind) = await EvaluateAsync(EvaluateBody(job, young, "PRE_BIND"));
-        var (_, atQuote) = await EvaluateAsync(EvaluateBody(job, young, "PRE_QUOTE"));
+        var atBind = await InProcessAsync(EvaluateBody(job, young, "PRE_BIND"));
+        var atQuote = await InProcessAsync(EvaluateBody(job, young, "PRE_QUOTE"));
 
         atBind.Text("outcome").ShouldBe("REFER");
         atBind.Text("ruleSetCode").ShouldBe("UW-MOTOR-GR-B");
