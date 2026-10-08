@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>Typed from REQ-CLM-001. PRD outputs: "claim, exposures, checklist, assignment"</summary>
+/// <summary>Typed from REQ-CLM-001 (SL2-CLM-CORE). PRD outputs: "claim, exposures, checklist, assignment". Holds no free text (stored by the idempotency store).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FnolSubmitResponse
 {
@@ -16,22 +16,25 @@ public sealed record FnolSubmitResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("claimNumber")]
     public required global::CoreIns.SharedKernel.Identifiers.ClaimNumber ClaimNumber { get; init; }
 
+    /// <summary>Contract member 'claim'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claim")]
+    public required global::CoreIns.Modules.Claims.Contracts.Api.ClaimSummary Claim { get; init; }
+
     /// <summary>Contract member 'exposures'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("exposures")]
-    public required global::System.Collections.Generic.IReadOnlyList<ExposureItem> Exposures { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.ExposureView> Exposures { get; init; }
 
     /// <summary>Contract member 'coverageIndications'.</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("coverageIndications")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? CoverageIndications { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.CoverageIndication> CoverageIndications { get; init; }
+
+    /// <summary>Contract member 'duplicateCandidates'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("duplicateCandidates")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.DuplicateCandidate> DuplicateCandidates { get; init; }
 
     /// <summary>Contract member 'handlingSegment'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("handlingSegment")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public string? HandlingSegment { get; init; }
+    public required string HandlingSegment { get; init; }
 
     /// <summary>Contract member 'assignment'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("assignment")]
@@ -42,20 +45,6 @@ public sealed record FnolSubmitResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("requiredDocuments")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<string>? RequiredDocuments { get; init; }
-
-    /// <summary>Generated contract member.</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
-    public sealed record ExposureItem
-    {
-        /// <summary>Contract member 'exposureId'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("exposureId")]
-        public required global::CoreIns.SharedKernel.Identifiers.ExposureId ExposureId { get; init; }
-
-        /// <summary>Contract member 'exposureType'.</summary>
-        [global::System.Text.Json.Serialization.JsonPropertyName("exposureType")]
-        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        public string? ExposureType { get; init; }
-    }
 
     /// <summary>Generated contract member.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

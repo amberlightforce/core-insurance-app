@@ -4,31 +4,45 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Claim.close request. PRD inputs: "ids, changes, reason"</summary>
+/// <summary>clm.Claim.close request (REQ-CLM-071..073, SL2-CLM-CORE). Open exposures close with the claim when each passes the close guard (REQ-CLM-072).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClaimCloseRequest
 {
-    /// <summary>PRD: "ids"</summary>
-    /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'id' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("ids")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? Ids { get; init; }
+    /// <summary>Contract member 'claimId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimId ClaimId { get; init; }
 
-    /// <summary>PRD: "changes"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("changes")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Changes { get; init; }
+    /// <summary>The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    /// <summary>Closure outcome; Denied needs an approved NotCovered decision and a delivered denial letter (later work package)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
+
+    /// <summary>Contract member 'reasonCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public string? ReasonCode { get; init; }
+
+    /// <summary>Closure outcome; Denied needs an approved NotCovered decision and a delivered denial letter (later work package)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>COMPLETED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COMPLETED")]
+        Completed,
+
+        /// <summary><c>WITHDRAWN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WITHDRAWN")]
+        Withdrawn,
+
+        /// <summary><c>DUPLICATE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DUPLICATE")]
+        Duplicate,
+
+        /// <summary><c>NO_PAYMENT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NO_PAYMENT")]
+        NoPayment,
+    }
 }

@@ -4,41 +4,61 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>Typed from REQ-CLM-001. PRD inputs: "FNOL payload"</summary>
-/// <remarks>
-/// <para>Exactly one of: policyId | policyNumber.</para>
-/// </remarks>
+/// <summary>Mandatory: lineOfBusiness, policyId, lossAt, lossCause, lossLocation, description, channel; they are not schema-required so that a missing one is CLM-ERR-FNOL-001 naming the field (REQ-CLM-030), not a parse error. Typed from REQ-CLM-001, REQ-CLM-030, REQ-CLM-036, REQ-CLM-041, REQ-CLM-065 (SL2-CLM-CORE). PRD inputs: "FNOL payload". A missing required field is CLM-ERR-FNOL-001 naming the field.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FnolSubmitRequest
 {
-    /// <summary>Contract member 'lineOfBusiness'.</summary>
+    /// <summary>Line of business (the slice accepts MOTOR, D-SL2-01)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("lineOfBusiness")]
-    public required string LineOfBusiness { get; init; }
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LineOfBusiness { get; init; }
 
-    /// <summary>Contract member 'policyId'.</summary>
+    /// <summary>Policy chosen in the FNOL policy lookup (pol.Policy.search, REQ-CLM-047); cover is verified on its snapshot at lossAt (REQ-CLM-002)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.PolicyId? PolicyId { get; init; }
 
-    /// <summary>Contract member 'policyNumber'.</summary>
+    /// <summary>Optional cross-check; when given it must equal the policy number on the snapshot</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policyNumber")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.PolicyNumber? PolicyNumber { get; init; }
 
-    /// <summary>Loss date and time (business fact, not a time-travel input)</summary>
+    /// <summary>Loss date and time (business fact, not a time-travel input); never in the future, never after noticeOn (REQ-CLM-030)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("lossAt")]
-    public required global::CoreIns.SharedKernel.Instant LossAt { get; init; }
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? LossAt { get; init; }
 
-    /// <summary>Line-specific loss data</summary>
+    /// <summary>Notice date; defaults to today in Europe/Athens from the PLT time service (REQ-CLM-030)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("noticeOn")]
+    public global::CoreIns.SharedKernel.BusinessDate? NoticeOn { get; init; }
+
+    /// <summary>Loss cause from the line's code list (REQ-CLM-030)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lossCause")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LossCause { get; init; }
+
+    /// <summary>Loss location as free description (REQ-CLM-030). May hold personal data; encrypted at rest, never in lists, events or URLs</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lossLocation")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LossLocation { get; init; }
+
+    /// <summary>Free-text description (REQ-CLM-030, ≤ 4,000). May hold personal data; encrypted at rest, never in lists, events or URLs</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("description")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Description { get; init; }
+
+    /// <summary>Line-specific loss data; kept only inside the encrypted FNOL snapshot (REQ-CLM-044)</summary>
     /// <remarks>
     /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("lossData")]
-    public required global::System.Text.Json.JsonElement LossData { get; init; }
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Text.Json.JsonElement? LossData { get; init; }
 
     /// <summary>Contract member 'reporter'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reporter")]
-    public required ReporterDetail Reporter { get; init; }
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public ReporterDetail? Reporter { get; init; }
 
     /// <summary>Contract member 'involvedParties'.</summary>
     /// <remarks>
@@ -49,12 +69,18 @@ public sealed record FnolSubmitRequest
     public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? InvolvedParties { get; init; }
 
     /// <summary>Contract member 'incidents'.</summary>
-    /// <remarks>
-    /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("incidents")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Incidents { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.FnolIncidentInput>? Incidents { get; init; }
+
+    /// <summary>Exposure proposals confirmed by the user (REQ-CLM-065); in the slice own-damage style exposures for the insured</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("exposures")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.FnolExposureInput>? Exposures { get; init; }
+
+    /// <summary>Contract member 'duplicateDecision'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("duplicateDecision")]
+    public global::CoreIns.Modules.Claims.Contracts.Api.DuplicateDecision? DuplicateDecision { get; init; }
 
     /// <summary>Contract member 'attachmentRefs'.</summary>
     /// <remarks>
@@ -64,9 +90,14 @@ public sealed record FnolSubmitRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? AttachmentRefs { get; init; }
 
-    /// <summary>Contract member 'channel'.</summary>
+    /// <summary>Shared channel code list (R-84, REQ-CLM-036)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
-    public required string Channel { get; init; }
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Channel { get; init; }
+
+    /// <summary>TELEPHONE, EMAIL, LETTER, FAX, SMS, IN_PERSON, ELECTRONIC (REQ-CLM-036)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receiptMedium")]
+    public string? ReceiptMedium { get; init; }
 
     /// <summary>Contract member 'channelMetadata'.</summary>
     /// <remarks>
@@ -84,6 +115,11 @@ public sealed record FnolSubmitRequest
         [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::CoreIns.SharedKernel.Identifiers.PartyId? PartyId { get; init; }
+
+        /// <summary>Relationship to the insured (default INSURED)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("relationship")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Relationship { get; init; }
 
         /// <summary>Contract member 'adHoc'.</summary>
         /// <remarks>

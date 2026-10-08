@@ -7,12 +7,152 @@
       "certificate": "unspecified"
     },
     "clm.Claim.get": {
-      "claim": "unspecified"
+      "claim": {
+        "summary": {
+          "claimId": "019236f8-e64e-757e-8c22-61e2b87bf97c",
+          "claimNumber": "SAMPLE-000001",
+          "policyId": "01922693-30c4-7d38-8b71-cd7770d8e27c",
+          "policyNumber": "SAMPLE-000001",
+          "insuredPartyId": "0192215c-3a9c-7fa5-8353-ab1d77a32288",
+          "snapshotRef": "sample",
+          "snapshotKnownAt": "2026-10-07T09:00:00Z",
+          "snapshotStatus": "PENDING",
+          "policyInForceAtLoss": true,
+          "policyStatusAtLoss": "SAMPLE_CODE",
+          "productCode": "SAMPLE_CODE",
+          "productVersion": "sample",
+          "lineOfBusiness": "SAMPLE_CODE",
+          "lossAt": "2026-10-07T09:00:00Z",
+          "lossDate": "2026-10-07",
+          "noticeOn": "2026-10-07",
+          "lossCause": "SAMPLE_CODE",
+          "channel": "SAMPLE_CODE",
+          "handlingSegment": "SAMPLE_CODE",
+          "status": "DRAFT",
+          "subStatus": "NEW",
+          "outcome": "COMPLETED",
+          "coverageInQuestion": true,
+          "duplicateOfClaimId": "019253c1-6b5f-7d1f-863b-933ebbcfaeae",
+          "handler": "sample",
+          "openDays": 1,
+          "recordVersion": 1,
+          "createdAt": "2026-10-07T09:00:00Z",
+          "closedAt": "2026-10-07T09:00:00Z"
+        },
+        "legalEntity": "sample",
+        "jurisdiction": "GR",
+        "lossLocation": "sample",
+        "description": "sample",
+        "exposures": [
+          {
+            "exposureId": "019253ef-20ce-7c69-878b-3274bb08eb9b",
+            "exposureNumber": "SAMPLE-000001",
+            "kind": "OWN_DAMAGE",
+            "coverageCode": "SAMPLE_CODE",
+            "claimantId": "0192a1e0-a3d6-7ea8-88d5-616148be6966",
+            "claimantPartyId": "0192bf22-5e34-7ee1-814c-ef5608a49b32",
+            "incidentId": "01920d6f-4435-7ed3-8ad8-22d43cc5b831",
+            "status": "OPEN",
+            "outcome": "sample",
+            "coverageIndication": "COVERED",
+            "coverageDecision": "PENDING",
+            "duplicateReason": "SAMPLE_CODE",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "claimants": [
+          {
+            "claimantId": "01923e6d-494d-7481-82f5-8ecfd803874b",
+            "partyId": "01927905-d643-74ea-860c-e4a64270601b",
+            "claimantType": "INSURED"
+          }
+        ],
+        "incidents": [
+          {
+            "incidentId": "0192ea7f-b3a9-7191-8ba7-9066122851b4",
+            "incidentType": "VEHICLE",
+            "vehicleRef": "sample",
+            "drivable": true,
+            "damageAreas": [
+              "SAMPLE_CODE"
+            ]
+          }
+        ]
+      }
     },
     "clm.Claim.search": {
       "items": [
         {
-          "pageClaims": "unspecified"
+          "claim": {
+            "claimId": "0192c1e9-d28f-70c2-8891-88388366359b",
+            "claimNumber": "SAMPLE-000001",
+            "policyId": "0192aa7a-2152-7c58-840d-438530df7623",
+            "policyNumber": "SAMPLE-000001",
+            "insuredPartyId": "0192abdf-f637-7280-80d2-b0b8f9bca141",
+            "snapshotRef": "sample",
+            "snapshotKnownAt": "2026-10-07T09:00:00Z",
+            "snapshotStatus": "PENDING",
+            "policyInForceAtLoss": true,
+            "policyStatusAtLoss": "SAMPLE_CODE",
+            "productCode": "SAMPLE_CODE",
+            "productVersion": "sample",
+            "lineOfBusiness": "SAMPLE_CODE",
+            "lossAt": "2026-10-07T09:00:00Z",
+            "lossDate": "2026-10-07",
+            "noticeOn": "2026-10-07",
+            "lossCause": "SAMPLE_CODE",
+            "channel": "SAMPLE_CODE",
+            "handlingSegment": "SAMPLE_CODE",
+            "status": "DRAFT",
+            "subStatus": "NEW",
+            "outcome": "COMPLETED",
+            "coverageInQuestion": true,
+            "duplicateOfClaimId": "019201f2-a7c6-79e6-8016-e0e3db138d36",
+            "handler": "sample",
+            "openDays": 1,
+            "recordVersion": 1,
+            "createdAt": "2026-10-07T09:00:00Z",
+            "closedAt": "2026-10-07T09:00:00Z"
+          }
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "clm.Claim.searchByCriteria": {
+      "items": [
+        {
+          "claim": {
+            "claimId": "019242b0-6b2b-7fae-8791-2423d348cb12",
+            "claimNumber": "SAMPLE-000001",
+            "policyId": "0192e88a-ffa3-775f-824a-4098e6325f48",
+            "policyNumber": "SAMPLE-000001",
+            "insuredPartyId": "0192c867-9832-7d15-8d68-485746597dad",
+            "snapshotRef": "sample",
+            "snapshotKnownAt": "2026-10-07T09:00:00Z",
+            "snapshotStatus": "PENDING",
+            "policyInForceAtLoss": true,
+            "policyStatusAtLoss": "SAMPLE_CODE",
+            "productCode": "SAMPLE_CODE",
+            "productVersion": "sample",
+            "lineOfBusiness": "SAMPLE_CODE",
+            "lossAt": "2026-10-07T09:00:00Z",
+            "lossDate": "2026-10-07",
+            "noticeOn": "2026-10-07",
+            "lossCause": "SAMPLE_CODE",
+            "channel": "SAMPLE_CODE",
+            "handlingSegment": "SAMPLE_CODE",
+            "status": "DRAFT",
+            "subStatus": "NEW",
+            "outcome": "COMPLETED",
+            "coverageInQuestion": true,
+            "duplicateOfClaimId": "019279b5-2c2e-7563-8fa0-b8e3313101dd",
+            "handler": "sample",
+            "openDays": 1,
+            "recordVersion": 1,
+            "createdAt": "2026-10-07T09:00:00Z",
+            "closedAt": "2026-10-07T09:00:00Z"
+          }
         }
       ],
       "nextCursor": "sample",
@@ -60,14 +200,68 @@
     "clm.Fnol.submit": {
       "claimId": "0192f99f-55f6-7e78-85c2-d6c99b61b809",
       "claimNumber": "SAMPLE-000001",
+      "claim": {
+        "claimId": "01921a7f-958c-766d-8d6b-0b80bdfa3c9b",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "01922f49-96e6-7290-8e55-044a3775c082",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "0192072f-822a-7d75-8498-8f1cfb09e4a4",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "0192e90b-2888-7dcb-87ed-35c2a5a2411d",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      },
       "exposures": [
         {
           "exposureId": "01924ece-05d6-7ab2-819f-a478e11e337d",
-          "exposureType": "SAMPLE_CODE"
+          "exposureNumber": "SAMPLE-000001",
+          "kind": "OWN_DAMAGE",
+          "coverageCode": "SAMPLE_CODE",
+          "claimantId": "0192432c-347f-7849-8cd3-e54cda0498e0",
+          "claimantPartyId": "019265ee-b2a7-735e-863e-34ef8f14bed7",
+          "incidentId": "0192b339-ddc5-779f-8772-ca8c70a4ef6e",
+          "status": "OPEN",
+          "outcome": "sample",
+          "coverageIndication": "COVERED",
+          "coverageDecision": "PENDING",
+          "duplicateReason": "SAMPLE_CODE",
+          "createdAt": "2026-10-07T09:00:00Z"
         }
       ],
       "coverageIndications": [
-        "unspecified"
+        {
+          "coverageCode": "SAMPLE_CODE",
+          "indication": "COVERED"
+        }
+      ],
+      "duplicateCandidates": [
+        {
+          "claimId": "0192f22b-33d1-7e31-83a0-d73e7762612b",
+          "claimNumber": "SAMPLE-000001",
+          "reasons": [
+            "SAMPLE_CODE"
+          ]
+        }
       ],
       "handlingSegment": "SAMPLE_CODE",
       "assignment": {
@@ -79,10 +273,32 @@
       ]
     },
     "clm.Fnol.validate": {
-      "claim": "unspecified",
-      "exposures": "unspecified",
-      "checklist": "unspecified",
-      "assignment": "unspecified"
+      "valid": true,
+      "issues": [
+        {
+          "code": "sample",
+          "field": "sample",
+          "message": "sample"
+        }
+      ],
+      "policyNumber": "SAMPLE-000001",
+      "policyInForce": true,
+      "policyStatusAtLoss": "SAMPLE_CODE",
+      "coverageIndications": [
+        {
+          "coverageCode": "SAMPLE_CODE",
+          "indication": "COVERED"
+        }
+      ],
+      "duplicateCandidates": [
+        {
+          "claimId": "0192dbda-18e5-7627-8a78-8158447b2c43",
+          "claimNumber": "SAMPLE-000001",
+          "reasons": [
+            "SAMPLE_CODE"
+          ]
+        }
+      ]
     },
     "clm.Fraud.score": {
       "indicators": "unspecified",
@@ -153,17 +369,117 @@
       "certificate": "unspecified"
     },
     "ClaimCloseRequest": {
-      "ids": [
-        "019268ae-4dce-74df-8653-17ece4fb4f45"
-      ],
-      "changes": "unspecified",
-      "reason": "unspecified"
+      "claimId": "0192a71c-b6a6-7852-8689-68d724bea0be",
+      "expectedRecordVersion": 1,
+      "outcome": "COMPLETED",
+      "reasonCode": "SAMPLE_CODE"
     },
     "ClaimCloseResponse": {
-      "claim": "unspecified"
+      "claim": {
+        "claimId": "01926837-addd-7407-83ad-40ffbc33fd2b",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "01924919-8176-7393-89b1-39c77de76a10",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "01920314-9cf6-7492-8c8b-53cabf411384",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "0192c72e-1c50-7ac0-8dd8-87136d499f55",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ClaimGetResponse": {
-      "claim": "unspecified"
+      "claim": {
+        "summary": {
+          "claimId": "0192dc78-a71a-735e-877e-730897e3c2c8",
+          "claimNumber": "SAMPLE-000001",
+          "policyId": "01924c89-7949-7702-86db-ad8452eceb86",
+          "policyNumber": "SAMPLE-000001",
+          "insuredPartyId": "01920f44-4f3d-7735-8acb-d9d69648942b",
+          "snapshotRef": "sample",
+          "snapshotKnownAt": "2026-10-07T09:00:00Z",
+          "snapshotStatus": "PENDING",
+          "policyInForceAtLoss": true,
+          "policyStatusAtLoss": "SAMPLE_CODE",
+          "productCode": "SAMPLE_CODE",
+          "productVersion": "sample",
+          "lineOfBusiness": "SAMPLE_CODE",
+          "lossAt": "2026-10-07T09:00:00Z",
+          "lossDate": "2026-10-07",
+          "noticeOn": "2026-10-07",
+          "lossCause": "SAMPLE_CODE",
+          "channel": "SAMPLE_CODE",
+          "handlingSegment": "SAMPLE_CODE",
+          "status": "DRAFT",
+          "subStatus": "NEW",
+          "outcome": "COMPLETED",
+          "coverageInQuestion": true,
+          "duplicateOfClaimId": "0192a390-98d6-744c-8bf5-cdf09902237d",
+          "handler": "sample",
+          "openDays": 1,
+          "recordVersion": 1,
+          "createdAt": "2026-10-07T09:00:00Z",
+          "closedAt": "2026-10-07T09:00:00Z"
+        },
+        "legalEntity": "sample",
+        "jurisdiction": "GR",
+        "lossLocation": "sample",
+        "description": "sample",
+        "exposures": [
+          {
+            "exposureId": "0192ab78-6ff7-7591-83a9-a83e7bfece48",
+            "exposureNumber": "SAMPLE-000001",
+            "kind": "OWN_DAMAGE",
+            "coverageCode": "SAMPLE_CODE",
+            "claimantId": "01928619-352c-77e3-896d-e1cb05c8795f",
+            "claimantPartyId": "019240ca-8b09-79ca-8a1f-9b74fb2d8a07",
+            "incidentId": "0192b4ac-074c-7ef7-88b7-a35e5a7953dc",
+            "status": "OPEN",
+            "outcome": "sample",
+            "coverageIndication": "COVERED",
+            "coverageDecision": "PENDING",
+            "duplicateReason": "SAMPLE_CODE",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "claimants": [
+          {
+            "claimantId": "0192c6ac-1ca6-73f7-80ca-cdaa6957017b",
+            "partyId": "0192640c-53fe-7c77-8e3b-ce50f930196d",
+            "claimantType": "INSURED"
+          }
+        ],
+        "incidents": [
+          {
+            "incidentId": "0192cb1c-f5de-7b4f-817a-d5a9a7bf2eaf",
+            "incidentType": "VEHICLE",
+            "vehicleRef": "sample",
+            "drivable": true,
+            "damageAreas": [
+              "SAMPLE_CODE"
+            ]
+          }
+        ]
+      }
     },
     "ClaimMergeRequest": {
       "ids": [
@@ -185,17 +501,113 @@
     "ClaimReopenResponse": {
       "claim": "unspecified"
     },
+    "ClaimSearchCriteria": {
+      "claimNumber": "sample",
+      "policyNumber": "sample",
+      "insuredPartyId": "01928353-ca4e-7f6c-87c7-09d7caf52597"
+    },
     "ClaimSearchItem": {
-      "pageClaims": "unspecified"
+      "claim": {
+        "claimId": "01929eb6-2d9c-799f-8e77-c29740c68840",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "01926ffd-608e-7fd7-8e3f-9aa67c80b5fd",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "01927364-2941-7562-8bc1-a4f6d266e052",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "0192e350-0f64-7410-8b22-c7a2e303675a",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ClaimSearchPage": {
       "items": [
         {
-          "pageClaims": "unspecified"
+          "claim": {
+            "claimId": "01923a0c-ee73-7705-80fb-7d3c5f5a73bd",
+            "claimNumber": "SAMPLE-000001",
+            "policyId": "0192e5e2-6cb8-7b0e-89af-97bc5f2dc526",
+            "policyNumber": "SAMPLE-000001",
+            "insuredPartyId": "0192e291-cfd5-7ebb-8220-59727b91a1e9",
+            "snapshotRef": "sample",
+            "snapshotKnownAt": "2026-10-07T09:00:00Z",
+            "snapshotStatus": "PENDING",
+            "policyInForceAtLoss": true,
+            "policyStatusAtLoss": "SAMPLE_CODE",
+            "productCode": "SAMPLE_CODE",
+            "productVersion": "sample",
+            "lineOfBusiness": "SAMPLE_CODE",
+            "lossAt": "2026-10-07T09:00:00Z",
+            "lossDate": "2026-10-07",
+            "noticeOn": "2026-10-07",
+            "lossCause": "SAMPLE_CODE",
+            "channel": "SAMPLE_CODE",
+            "handlingSegment": "SAMPLE_CODE",
+            "status": "DRAFT",
+            "subStatus": "NEW",
+            "outcome": "COMPLETED",
+            "coverageInQuestion": true,
+            "duplicateOfClaimId": "0192ad88-870b-7ece-8c56-e0efc41002fc",
+            "handler": "sample",
+            "openDays": 1,
+            "recordVersion": 1,
+            "createdAt": "2026-10-07T09:00:00Z",
+            "closedAt": "2026-10-07T09:00:00Z"
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "ClaimSummary": {
+      "claimId": "0192b34f-8680-7f6c-814e-a72eee50f248",
+      "claimNumber": "SAMPLE-000001",
+      "policyId": "0192649a-7cea-79f2-81e4-a457f29b69c5",
+      "policyNumber": "SAMPLE-000001",
+      "insuredPartyId": "01925a46-a859-7133-8f9b-dd0d2f9de104",
+      "snapshotRef": "sample",
+      "snapshotKnownAt": "2026-10-07T09:00:00Z",
+      "snapshotStatus": "PENDING",
+      "policyInForceAtLoss": true,
+      "policyStatusAtLoss": "SAMPLE_CODE",
+      "productCode": "SAMPLE_CODE",
+      "productVersion": "sample",
+      "lineOfBusiness": "SAMPLE_CODE",
+      "lossAt": "2026-10-07T09:00:00Z",
+      "lossDate": "2026-10-07",
+      "noticeOn": "2026-10-07",
+      "lossCause": "SAMPLE_CODE",
+      "channel": "SAMPLE_CODE",
+      "handlingSegment": "SAMPLE_CODE",
+      "status": "DRAFT",
+      "subStatus": "NEW",
+      "outcome": "COMPLETED",
+      "coverageInQuestion": true,
+      "duplicateOfClaimId": "0192f29b-f0a9-79fa-8bf1-faa7828c4348",
+      "handler": "sample",
+      "openDays": 1,
+      "recordVersion": 1,
+      "createdAt": "2026-10-07T09:00:00Z",
+      "closedAt": "2026-10-07T09:00:00Z"
     },
     "ClaimTrackingGetResponse": {
       "trackingView": "unspecified"
@@ -221,6 +633,83 @@
     },
     "ClaimUpdateResponse": {
       "claim": "unspecified"
+    },
+    "ClaimView": {
+      "summary": {
+        "claimId": "0192e9a8-0ffc-72eb-818a-29ffb99c0079",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "01923c9f-fa5c-7cdf-811d-f16aec92be4d",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "01921638-e069-7a99-885f-4c1b6e1315ab",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "019202ee-78fc-780a-81aa-87cf4d67d7a4",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      },
+      "legalEntity": "sample",
+      "jurisdiction": "GR",
+      "lossLocation": "sample",
+      "description": "sample",
+      "exposures": [
+        {
+          "exposureId": "0192bc27-b13c-79ec-8403-a62b4b4ade24",
+          "exposureNumber": "SAMPLE-000001",
+          "kind": "OWN_DAMAGE",
+          "coverageCode": "SAMPLE_CODE",
+          "claimantId": "019291ed-29bf-7512-8581-b47f41921e83",
+          "claimantPartyId": "0192b6fd-d425-7434-8dc3-2e1367b6c327",
+          "incidentId": "0192e0d4-85f5-7441-831a-2fde9ab601d1",
+          "status": "OPEN",
+          "outcome": "sample",
+          "coverageIndication": "COVERED",
+          "coverageDecision": "PENDING",
+          "duplicateReason": "SAMPLE_CODE",
+          "createdAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "claimants": [
+        {
+          "claimantId": "01926381-2f15-79cd-8068-09b7e4f67a97",
+          "partyId": "0192daf8-b0d6-7406-87da-ea57fbea1eef",
+          "claimantType": "INSURED"
+        }
+      ],
+      "incidents": [
+        {
+          "incidentId": "0192b604-556e-78ed-8987-9c8eb2117020",
+          "incidentType": "VEHICLE",
+          "vehicleRef": "sample",
+          "drivable": true,
+          "damageAreas": [
+            "SAMPLE_CODE"
+          ]
+        }
+      ]
+    },
+    "ClaimantView": {
+      "claimantId": "01925390-d02e-7031-8101-7be8a1631c21",
+      "partyId": "0192166a-d366-71d7-87ab-bef7ecec915f",
+      "claimantType": "INSURED"
     },
     "ConversationListItem": {
       "messageStatus": "unspecified"
@@ -258,6 +747,10 @@
     "CoverageDecideResponse": {
       "decisionRecord": "unspecified"
     },
+    "CoverageIndication": {
+      "coverageCode": "SAMPLE_CODE",
+      "indication": "COVERED"
+    },
     "CoverageReverifyRequest": {
       "decision": "unspecified",
       "reasons": "unspecified",
@@ -292,6 +785,18 @@
     "DsarRestrictResponse": {
       "result": "unspecified"
     },
+    "DuplicateCandidate": {
+      "claimId": "01926732-5540-702d-83d5-6a0802739324",
+      "claimNumber": "SAMPLE-000001",
+      "reasons": [
+        "SAMPLE_CODE"
+      ]
+    },
+    "DuplicateDecision": {
+      "action": "LINK",
+      "linkedClaimId": "0192bc91-81f1-7c0c-8fd1-5abd6aa6ffab",
+      "reasonCode": "SAMPLE_CODE"
+    },
     "ExposureCloseRequest": {
       "exposureData": "unspecified"
     },
@@ -299,10 +804,61 @@
       "exposure": "unspecified"
     },
     "ExposureCreateRequest": {
-      "exposureData": "unspecified"
+      "claimId": "019220c8-6492-7f70-82eb-253558d32665",
+      "expectedRecordVersion": 1,
+      "kind": "OWN_DAMAGE",
+      "coverageCode": "SAMPLE_CODE",
+      "claimantPartyId": "01928ae4-890f-75c0-8294-a51cb9eaf311",
+      "incidentId": "0192f35a-3631-7666-870a-b7696cefa03c",
+      "duplicateReason": "SAMPLE_CODE"
     },
     "ExposureCreateResponse": {
-      "exposure": "unspecified"
+      "exposure": {
+        "exposureId": "01925626-a11a-70cf-8e85-f5f77f26e96f",
+        "exposureNumber": "SAMPLE-000001",
+        "kind": "OWN_DAMAGE",
+        "coverageCode": "SAMPLE_CODE",
+        "claimantId": "0192fa2f-5293-7c82-8325-ffd8f05c9dd9",
+        "claimantPartyId": "01929786-9f0f-7fcf-87a8-f429e2ea5d24",
+        "incidentId": "019252d1-45d9-7c1e-8a28-59d87c3d0da1",
+        "status": "OPEN",
+        "outcome": "sample",
+        "coverageIndication": "COVERED",
+        "coverageDecision": "PENDING",
+        "duplicateReason": "SAMPLE_CODE",
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "claim": {
+        "claimId": "0192b8ce-4d24-72c7-8730-159b2d38e645",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "01922bad-9e6a-70cb-800d-001eb241f5a7",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "0192b7b4-5fdd-7e81-884f-741e897dc9a4",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "0192bfc4-a4dc-7b1a-87fc-c47562a05c7b",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ExposureReopenRequest": {
       "exposureData": "unspecified"
@@ -316,17 +872,106 @@
     "ExposureUpdateResponse": {
       "exposure": "unspecified"
     },
+    "ExposureView": {
+      "exposureId": "019204c7-f802-7a20-867c-7e1be954db2f",
+      "exposureNumber": "SAMPLE-000001",
+      "kind": "OWN_DAMAGE",
+      "coverageCode": "SAMPLE_CODE",
+      "claimantId": "0192a54a-30a4-7a97-8d46-9d62085ec22e",
+      "claimantPartyId": "0192ccc8-d505-7d44-8c7a-044b38b72bc8",
+      "incidentId": "01928049-dc95-7ce7-8393-fbb9ac9d955a",
+      "status": "OPEN",
+      "outcome": "sample",
+      "coverageIndication": "COVERED",
+      "coverageDecision": "PENDING",
+      "duplicateReason": "SAMPLE_CODE",
+      "createdAt": "2026-10-07T09:00:00Z"
+    },
     "FinancialsDailyTotalsResponse": {
       "totalsByCurrencyAndCostType": "unspecified"
     },
     "FinancialsGetResponse": {
       "balancesByLine": "unspecified"
     },
+    "FnolExposureInput": {
+      "kind": "OWN_DAMAGE",
+      "coverageCode": "SAMPLE_CODE"
+    },
     "FnolGetResponse": {
-      "claim": "unspecified",
-      "exposures": "unspecified",
-      "checklist": "unspecified",
-      "assignment": "unspecified"
+      "fnolId": "01925c3e-fdba-716d-8df5-56a4fe03db68",
+      "claimId": "0192a6dd-bccf-7c48-801b-e5429e213db3",
+      "claimNumber": "SAMPLE-000001",
+      "channel": "SAMPLE_CODE",
+      "reporterPartyId": "01922687-ce30-7703-8518-dbb177e8a6bf",
+      "submittedAt": "2026-10-07T09:00:00Z",
+      "submittedBy": "sample",
+      "payload": {
+        "lineOfBusiness": "SAMPLE_CODE",
+        "policyId": "0192d91e-9005-78fd-8c02-3ca60703211d",
+        "policyNumber": "SAMPLE-000001",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "lossLocation": "sample",
+        "description": "sample",
+        "lossData": {
+          "note": "sample"
+        },
+        "reporter": {
+          "partyId": "01928488-211c-7250-8ecb-b92b2c975a61",
+          "relationship": "SAMPLE_CODE",
+          "adHoc": {
+            "note": "sample"
+          }
+        },
+        "involvedParties": [
+          {
+            "note": "sample"
+          }
+        ],
+        "incidents": [
+          {
+            "incidentType": "VEHICLE",
+            "vehicleRef": "sample",
+            "drivable": true,
+            "damageAreas": [
+              "SAMPLE_CODE"
+            ]
+          }
+        ],
+        "exposures": [
+          {
+            "kind": "OWN_DAMAGE",
+            "coverageCode": "SAMPLE_CODE"
+          }
+        ],
+        "duplicateDecision": {
+          "action": "LINK",
+          "linkedClaimId": "0192810d-01f2-7870-8831-058055e403e9",
+          "reasonCode": "SAMPLE_CODE"
+        },
+        "attachmentRefs": [
+          "019284ec-46cb-7d7f-828c-8f888170fc80"
+        ],
+        "channel": "SAMPLE_CODE",
+        "receiptMedium": "SAMPLE_CODE",
+        "channelMetadata": {
+          "note": "sample"
+        }
+      }
+    },
+    "FnolIncidentInput": {
+      "incidentType": "VEHICLE",
+      "vehicleRef": "sample",
+      "drivable": true,
+      "damageAreas": [
+        "SAMPLE_CODE"
+      ]
+    },
+    "FnolIssue": {
+      "code": "sample",
+      "field": "sample",
+      "message": "sample"
     },
     "FnolSaveDraftRequest": {
       "fnolPayload": "unspecified"
@@ -340,12 +985,18 @@
     "FnolSubmitRequest": {
       "lineOfBusiness": "SAMPLE_CODE",
       "policyId": "0192a551-d0c1-7fea-8fa7-92f18ef85762",
+      "policyNumber": "SAMPLE-000001",
       "lossAt": "2026-10-07T09:00:00Z",
+      "noticeOn": "2026-10-07",
+      "lossCause": "SAMPLE_CODE",
+      "lossLocation": "sample",
+      "description": "sample",
       "lossData": {
         "note": "sample"
       },
       "reporter": {
         "partyId": "01924f3e-904f-73d9-82b4-be8f45670bb7",
+        "relationship": "SAMPLE_CODE",
         "adHoc": {
           "note": "sample"
         }
@@ -357,13 +1008,30 @@
       ],
       "incidents": [
         {
-          "note": "sample"
+          "incidentType": "VEHICLE",
+          "vehicleRef": "sample",
+          "drivable": true,
+          "damageAreas": [
+            "SAMPLE_CODE"
+          ]
         }
       ],
+      "exposures": [
+        {
+          "kind": "OWN_DAMAGE",
+          "coverageCode": "SAMPLE_CODE"
+        }
+      ],
+      "duplicateDecision": {
+        "action": "LINK",
+        "linkedClaimId": "0192d88c-bfad-780e-89a3-fda7447a1163",
+        "reasonCode": "SAMPLE_CODE"
+      },
       "attachmentRefs": [
         "0192cf74-c299-72fb-8fa8-9287f9218611"
       ],
       "channel": "SAMPLE_CODE",
+      "receiptMedium": "SAMPLE_CODE",
       "channelMetadata": {
         "note": "sample"
       }
@@ -371,14 +1039,68 @@
     "FnolSubmitResponse": {
       "claimId": "0192a90d-a9c4-7dfc-89f6-0c3a50a153e8",
       "claimNumber": "SAMPLE-000001",
+      "claim": {
+        "claimId": "01925ae3-1a81-77b1-8657-9cf441b173eb",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "019214c8-373d-7728-8fff-3895e397fca0",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "0192a7f8-a302-7e13-8e1a-a5569ec99081",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "0192f8ac-1c6d-7176-8713-1d6cd09cc2b4",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      },
       "exposures": [
         {
           "exposureId": "0192fe30-b2d4-7f48-8157-7bceebf50668",
-          "exposureType": "SAMPLE_CODE"
+          "exposureNumber": "SAMPLE-000001",
+          "kind": "OWN_DAMAGE",
+          "coverageCode": "SAMPLE_CODE",
+          "claimantId": "0192f058-0dfc-7455-827e-b872da258cd9",
+          "claimantPartyId": "0192f2ba-ebfd-748f-85c2-5d66b1688ab0",
+          "incidentId": "0192a399-294d-78c0-860e-236ab1f977c8",
+          "status": "OPEN",
+          "outcome": "sample",
+          "coverageIndication": "COVERED",
+          "coverageDecision": "PENDING",
+          "duplicateReason": "SAMPLE_CODE",
+          "createdAt": "2026-10-07T09:00:00Z"
         }
       ],
       "coverageIndications": [
-        "unspecified"
+        {
+          "coverageCode": "SAMPLE_CODE",
+          "indication": "COVERED"
+        }
+      ],
+      "duplicateCandidates": [
+        {
+          "claimId": "019263ef-df67-78e3-807a-46637b0096ea",
+          "claimNumber": "SAMPLE-000001",
+          "reasons": [
+            "SAMPLE_CODE"
+          ]
+        }
       ],
       "handlingSegment": "SAMPLE_CODE",
       "assignment": {
@@ -390,13 +1112,88 @@
       ]
     },
     "FnolValidateRequest": {
-      "fnolPayload": "unspecified"
+      "fnol": {
+        "lineOfBusiness": "SAMPLE_CODE",
+        "policyId": "01927d55-04c3-70ba-84b3-b1866eab688b",
+        "policyNumber": "SAMPLE-000001",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "lossLocation": "sample",
+        "description": "sample",
+        "lossData": {
+          "note": "sample"
+        },
+        "reporter": {
+          "partyId": "0192d1a2-9537-79e4-8514-4b08b94a765d",
+          "relationship": "SAMPLE_CODE",
+          "adHoc": {
+            "note": "sample"
+          }
+        },
+        "involvedParties": [
+          {
+            "note": "sample"
+          }
+        ],
+        "incidents": [
+          {
+            "incidentType": "VEHICLE",
+            "vehicleRef": "sample",
+            "drivable": true,
+            "damageAreas": [
+              "SAMPLE_CODE"
+            ]
+          }
+        ],
+        "exposures": [
+          {
+            "kind": "OWN_DAMAGE",
+            "coverageCode": "SAMPLE_CODE"
+          }
+        ],
+        "duplicateDecision": {
+          "action": "LINK",
+          "linkedClaimId": "01926c50-9e1c-7717-804e-6bf1bb7f48ae",
+          "reasonCode": "SAMPLE_CODE"
+        },
+        "attachmentRefs": [
+          "01923d57-71c9-767f-8fb9-f072df4f8a7e"
+        ],
+        "channel": "SAMPLE_CODE",
+        "receiptMedium": "SAMPLE_CODE",
+        "channelMetadata": {
+          "note": "sample"
+        }
+      }
     },
     "FnolValidateResponse": {
-      "claim": "unspecified",
-      "exposures": "unspecified",
-      "checklist": "unspecified",
-      "assignment": "unspecified"
+      "valid": true,
+      "issues": [
+        {
+          "code": "sample",
+          "field": "sample",
+          "message": "sample"
+        }
+      ],
+      "policyNumber": "SAMPLE-000001",
+      "policyInForce": true,
+      "policyStatusAtLoss": "SAMPLE_CODE",
+      "coverageIndications": [
+        {
+          "coverageCode": "SAMPLE_CODE",
+          "indication": "COVERED"
+        }
+      ],
+      "duplicateCandidates": [
+        {
+          "claimId": "01924bc0-39d6-7b2e-8d27-4ddb8a8790ba",
+          "claimNumber": "SAMPLE-000001",
+          "reasons": [
+            "SAMPLE_CODE"
+          ]
+        }
+      ]
     },
     "FraudScoreRequest": {
       "claim": "unspecified"
@@ -429,6 +1226,15 @@
     },
     "ImportReverseResponse": {
       "reversalResult": "unspecified"
+    },
+    "IncidentView": {
+      "incidentId": "0192d705-979d-7987-8f1d-17286741a705",
+      "incidentType": "VEHICLE",
+      "vehicleRef": "sample",
+      "drivable": true,
+      "damageAreas": [
+        "SAMPLE_CODE"
+      ]
     },
     "PaymentReissueRequest": {
       "paymentId": "01924969-2990-7552-8fb3-8a6ca684f396",

@@ -29,7 +29,7 @@ public interface IClaimsFnolService
     /// <para>Status: full; fully typed from REQ-CLM-001. Wave W7.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: CLM-ERR-FNOL-001 (422), CLM-ERR-FNOL-CONSENT (422), CLM-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CLM-ERR-FNOL-001 (422), CLM-ERR-FNOL-CONSENT (422), CLM-ERR-IDEMPOTENCY-MISMATCH (409), CLM-ERR-LOSS-DATE (422), CLM-ERR-POLICY-UNVERIFIED (422), CLM-ERR-DUPLICATE-CANDIDATES (409), CLM-ERR-DEPENDENCY-UNAVAILABLE (503).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.FnolSubmitResponse> SubmitAsync(global::CoreIns.Modules.Claims.Contracts.Api.FnolSubmitRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -39,7 +39,7 @@ public interface IClaimsFnolService
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W7.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
-    /// <para>Errors: CLM-ERR-FNOL-001 (422), CLM-ERR-FNOL-CONSENT (422), CLM-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CLM-ERR-FNOL-001 (422), CLM-ERR-FNOL-CONSENT (422), CLM-ERR-IDEMPOTENCY-MISMATCH (409), CLM-ERR-DEPENDENCY-UNAVAILABLE (503).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.FnolValidateResponse> ValidateAsync(global::CoreIns.Modules.Claims.Contracts.Api.FnolValidateRequest request, global::System.Threading.CancellationToken cancellationToken = default);
 }

@@ -17,7 +17,7 @@ public interface IClaimsClaimService
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W7.</para>
     /// <para>Exposure: ui; consumers: RI.</para>
-    /// <para>Errors: CLM-ERR-ILLEGAL-TRANSITION (422), CLM-ERR-CLOSE-GUARD (422).</para>
+    /// <para>Errors: CLM-ERR-ILLEGAL-TRANSITION (422), CLM-ERR-CLOSE-GUARD (422), CLM-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     /// <param name="id">Identifier of the Claim (PRD input: "ids")</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);
@@ -32,6 +32,18 @@ public interface IClaimsClaimService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    /// <param name="criteria">PRD: "criteria"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchPage> SearchAsync(string? cursor = null, int? limit = null, string? criteria = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="claimNumber">Claim number (P0). Every other criterion, personal or not, goes in the body of the POST form (D-SLC-05)</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchPage> SearchAsync(string? cursor = null, int? limit = null, string? claimNumber = null, global::System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>Claim search (POST form, criteria in the body)</summary>
+    /// <remarks>
+    /// <para>Operation clm.Claim.searchByCriteria (query; HTTP POST /api/clm/v1/claims/search).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full. Wave W7.</para>
+    /// <para>Exposure: ui; consumers: CMP, WRK.</para>
+    /// <para>Errors: CLM-ERR-SEARCH-CRITERIA (422).</para>
+    /// </remarks>
+    /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
+    /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchPage> SearchByCriteriaAsync(global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchCriteria request, string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
 }
