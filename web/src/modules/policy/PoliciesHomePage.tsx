@@ -9,6 +9,7 @@ import { underwritingManagerRole } from '../quote/uwIssues';
 import { LinkButton } from '../staff/LinkButton';
 import { PageHeader, Section } from '../staff/PageHeader';
 import { readRecent } from '../staff/recent';
+import { useRecentLabels } from '../staff/useRecentLabels';
 import styles from '../staff/staff.module.css';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -22,7 +23,7 @@ export function PoliciesHomePage() {
   const navigate = useNavigate();
   const [id, setId] = useState('');
   const [tried, setTried] = useState(false);
-  const recent = readRecent('policy');
+  const recent = useRecentLabels('policy', readRecent('policy'));
   // Senior underwriters decide referrals (the API enforces uw.Issue.decide; the link only follows the role).
   const canDecideReferrals = (readSession()?.user.roles ?? []).includes(underwritingManagerRole);
   const valid = uuid.test(id.trim());

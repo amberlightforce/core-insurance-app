@@ -136,7 +136,7 @@ export function TransactionBuilder({
       setPreview(null);
       setAmount(null);
       setReason(null);
-      rememberRecent(`claimset.${claimId}`, { id: response.setId, label: response.status });
+      rememberRecent(`claimset.${claimId}`, response.setId);
       onSubmitted?.(response.setId);
       announce(t(`builder.result.${response.status === 'APPROVED' ? 'approved' : 'pending'}`));
       void refresh();

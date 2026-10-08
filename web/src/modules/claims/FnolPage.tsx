@@ -291,7 +291,7 @@ export function FnolPage() {
       const response = await submit.mutateAsync({ request, key: keyFor(request) });
       release();
       setCreated(response);
-      rememberRecent('claim', { id: response.claimId, label: response.claimNumber });
+      rememberRecent('claim', response.claimId);
       announce(t('fnol.created', { number: response.claimNumber }));
     } catch (error) {
       applyProblem(error);

@@ -237,10 +237,12 @@ describe('BillingHomePage', () => {
     });
   });
 
-  it('lists recently opened invoices', () => {
-    mockApi([listRoute]);
-    rememberRecent('invoice', { id: fx.invoiceId, label: 'INV000000003' });
+  it('lists recently opened invoices', async () => {
+    mockApi([listRoute, ...invoiceRoutes()]);
+    rememberRecent('invoice', fx.invoiceId);
     renderScreen(<BillingHomePage />, { path: '/billing', url: '/billing' });
-    expect(screen.getByRole('button', { name: 'Τιμολόγιο INV000000003' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: 'Τιμολόγιο INV000000003' }),
+    ).toBeInTheDocument();
   });
 });

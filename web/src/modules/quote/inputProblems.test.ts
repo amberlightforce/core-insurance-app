@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { explainInputProblem } from './inputProblems';
+import { explainInputProblem, focusFieldByLabel } from './inputProblems';
 import { coversNeedingVehicleValue, invalidAnswers, vehicleValueIssue } from './state';
 import * as fx from '../../test/fixtures';
 import type { Question } from '../../api/types';
@@ -122,5 +122,17 @@ describe('vehicle value rules', () => {
     expect(invalidAnswers([q], { 'Q-CLAIMS-5Y': '2' })).toEqual({});
     expect(invalidAnswers([q], { 'Q-CLAIMS-5Y': 'two' })).toEqual({ 'Q-CLAIMS-5Y': 'integer' });
     expect(invalidAnswers([q], { 'Q-CLAIMS-5Y': '51' })).toEqual({ 'Q-CLAIMS-5Y': 'range' });
+  });
+});
+
+describe('focusFieldByLabel', () => {
+  it('ignores every required-marker asterisk in the label text, not only the first', () => {
+    document.body.innerHTML =
+      '<label for="plate">Plate * number *</label><input id="plate" />' +
+      '<label for="other">Other</label><input id="other" />';
+    expect(focusFieldByLabel('Plate number')).toBe(true);
+    expect(document.activeElement?.id).toBe('plate');
+    expect(focusFieldByLabel('**Plate ** number')).toBe(true);
+    document.body.innerHTML = '';
   });
 });

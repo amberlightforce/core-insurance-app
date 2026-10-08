@@ -76,14 +76,30 @@ describe('ProblemBanner 403', () => {
 
 describe('recent records', () => {
   it('keeps the last records, newest first, without duplicates, and survives unavailable storage', () => {
-    rememberRecent('policy', { id: '1', label: 'POL1' });
-    rememberRecent('policy', { id: '2', label: 'POL2' });
-    rememberRecent('policy', { id: '1', label: 'POL1' });
-    expect(readRecent('policy').map((r) => r.id)).toEqual(['1', '2']);
+    rememberRecent('policy', '1');
+    rememberRecent('policy', '2');
+    rememberRecent('policy', '1');
+    expect(readRecent('policy')).toEqual(['1', '2']);
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('blocked');
     });
     expect(readRecent('policy')).toEqual([]);
     vi.restoreAllMocks();
+  });
+
+  it('stores opaque ids only and drops entries left by the earlier id + number format', () => {
+    localStorage.setItem(
+      'coreins.recent.policy',
+      JSON.stringify([{ id: '9', label: 'POL000000009' }]),
+    );
+    expect(readRecent('policy')).toEqual([]);
+    rememberRecent('policy', 'abc');
+    expect(localStorage.getItem('coreins.recent.policy')).toBeNull();
+    expect(localStorage.getItem('coreins.recent.v2.policy')).toBe('["abc"]');
+    localStorage.setItem('coreins.recent.v2.claim', '{"not":"a list"}');
+    expect(readRecent('claim')).toEqual([]);
+    localStorage.setItem('coreins.recent.v2.claim', '[1,"ok",null]');
+    expect(readRecent('claim')).toEqual(['ok']);
+    localStorage.clear();
   });
 });

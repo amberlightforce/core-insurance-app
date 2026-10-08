@@ -29,8 +29,8 @@ function AccountDetails({ data }: { data: BillingAccountGetResponse }) {
   const invoices = useInvoices({ billingAccountId: account.billingAccountId });
 
   useEffect(() => {
-    rememberRecent('account', { id: account.billingAccountId, label: account.accountNumber });
-  }, [account.billingAccountId, account.accountNumber]);
+    rememberRecent('account', account.billingAccountId);
+  }, [account.billingAccountId]);
 
   const termColumns = useMemo<DataColumn<Term>[]>(
     () => [
