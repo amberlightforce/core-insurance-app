@@ -41,9 +41,9 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | SL2-POL-SNAP | **merged** (597f2fe) | sonnet | deep review FAIL (D1 forged future knownAt ref) → fixed, orchestrator re-check; gate green: integration 303, all 10 suites |
 | SL2-BIL-DISB | **merged** | opus | deep review FAIL (D1 duplicate key never fired) → fixed + M1/M3/M4/M6, orchestrator re-check; gate green: integration 325, all 10 suites |
 | SL2-CLM-CORE | **merged** (98ccd8c) | opus | deep review FAIL (D1 did not compile against merged POL) → fixed + hardening, orchestrator re-check; gate green: integration 379, all 10 suites |
-| SL2-CLM-MONEY | building | opus | S1 |
+| SL2-CLM-MONEY | **merged** (f556712) | opus | deep review FAIL (D1 split reserves escaped DENY, D2 no cumulative payment check, D3 mixed set checked one authority) → fixed per D-SL2-13, orchestrator re-check; gate green: integration 406, all 10 suites |
 | SL2-FIN-CLM | **merged** (601189c) | opus | deep review PASS first round; gate green: integration 391, all 10 suites; fail-closed follow-ups D-SL2-12 |
-| SL2-UI-CLM | building | sonnet | round 1: FNOL, claim view, approvals inbox, payee; round 2 money screens after CLM-MONEY |
+| SL2-UI-CLM | round 1 **merged** (031dc50); round 2 building | sonnet | round 1 light review + live browser check PASS; web 1241 |
 | SL2-E2E | not started | sonnet | S2 |
 
 ## Module status (feature waves)
