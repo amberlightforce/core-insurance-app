@@ -63,6 +63,9 @@ internal static class ConfigKeys
         new(RoundingDefault, ConfigValueType.Json, TimeBases.EffectiveDate, "Currency default rounding rule (REQ-MKT-191, BR-MKT-027)"),
         new(RoundingPrefix, ConfigValueType.Json, TimeBases.EffectiveDate, "Rounding rule per purpose, cur.rounding.<purpose> (REQ-MKT-192), and per tax class, cur.rounding.tax.<class> (REQ-MKT-193)", IsPrefix: true),
         new(OrderOfOperations, ConfigValueType.Json, TimeBases.EffectiveDate, "Order of operations for money calculations (REQ-MKT-194)"),
+        new(TaxTreatmentRules.KeyPrefix, ConfigValueType.Json, TimeBases.TaxPointDate, "Tax treatment rule row per charge category, transaction kind and cancellation source (REQ-MKT-330/331); pack data, no core default", IsPrefix: true),
+        new(TaxTreatmentRules.WithdrawalVoidRouting, ConfigValueType.Text, TimeBases.TaxPointDate, "Withdrawal/void routing, REVERSE_AS_VOID or INSURER_BEARS (REQ-MKT-331); registered, not used by the slice"),
+        new(CancellationSources.CodeList, ConfigValueType.Json, TimeBases.EffectiveDate, "Shared cancellation-source code list (REQ-POL-205, R-84)"),
     ];
 
     /// <summary>The descriptor for <paramref name="key"/>, or null when it is not registered.</summary>
