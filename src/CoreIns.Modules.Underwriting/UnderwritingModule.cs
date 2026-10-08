@@ -53,6 +53,8 @@ public static class UnderwritingModule
         services.AddCommandAuditor<DecideIssues, IssueDecideResponse, DecideIssuesAuditor>();
         services.AddCommand<DecideIssues, IssueDecideResponse, DecideIssuesHandler>(CommandDescriptor.For("uw.Issue.decide") with { SupportsDryRun = true });
         services.AddScoped<UnderwritingIssueQueries>();
+        services.AddScoped<ReferralReads>();
+        services.AddScoped<ReferralQueries>();
 
         services.AddScoped<IUnderwritingRulesService, UnderwritingRulesService>();
         services.AddScoped<IUnderwritingIssueService, UnderwritingIssueService>();
