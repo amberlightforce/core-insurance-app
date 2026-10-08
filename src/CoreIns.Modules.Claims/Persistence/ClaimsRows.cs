@@ -38,6 +38,9 @@ internal sealed class ClaimRow : ClaimsRow
 
     public Guid? SnapshotSegmentId { get; set; }
 
+    /// <summary>The policy term of the snapshot (null when not in force at the loss date); a key of the claim financial events.</summary>
+    public PolicyTermId? PolicyTermId { get; set; }
+
     public Instant SnapshotValidAt { get; set; }
 
     public Instant SnapshotKnownAt { get; set; }
@@ -99,6 +102,9 @@ internal sealed class ClaimRow : ClaimsRow
 
     /// <summary>Last exposure sequence issued for this claim (exposure numbers = claim number + sequence, REQ-CLM-043).</summary>
     public int LastExposureSequence { get; set; }
+
+    /// <summary>Last claim financial transaction sequence issued (transaction numbers per claim, D-SL2-07).</summary>
+    public int LastTransactionSequence { get; set; }
 
     public Instant? ClosedAt { get; set; }
 

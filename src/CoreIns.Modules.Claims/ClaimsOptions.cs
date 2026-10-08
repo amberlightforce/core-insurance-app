@@ -33,9 +33,42 @@ internal sealed class ClaimsOptions
     [Range(0, 30)]
     public int DuplicateWindowDays { get; set; }
 
+    /// <summary>Claim financials (SL2-CLM-MONEY): illustrative cost categories and the reserve auto-adjust switch.</summary>
+    public ClaimFinancialsOptions Financials { get; set; } = new();
+
     /// <summary>The configured zone.</summary>
     public TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
 
     /// <summary>The business date of an instant in the legal entity's zone.</summary>
     public BusinessDate DateOf(Instant instant) => instant.ToBusinessDate(Zone);
+}
+
+/// <summary>
+/// Configuration section <c>Claims:Financials</c>. The cost categories are ILLUSTRATIVE TEST DATA (D-SL2-04; PRD-07 §16.5
+/// item 1 is open): cost type → allowed categories. <see cref="AutoAdjustReserve"/> is the REQ-CLM-097 per-line switch
+/// (one value for every line in the slice): on, an eroding payment above the open reserve adds the difference as a reserve
+/// increase to the same set; off, the set is refused with CLM-ERR-PAYMENT-EXCEEDS-RESERVE.
+/// </summary>
+internal sealed class ClaimFinancialsOptions
+{
+    /// <summary>Marks the category list as illustrative (never presented as approved values).</summary>
+    public bool Illustrative { get; set; } = true;
+
+    /// <summary>The D-SL2-04 list used when the section configures none.</summary>
+    public static IReadOnlyDictionary<string, string[]> DefaultCostCategories { get; } = new Dictionary<string, string[]>(StringComparer.Ordinal)
+    {
+        ["INDEMNITY"] = ["VEHICLE_REPAIR", "TOTAL_LOSS"],
+        ["EXPENSE_ALLOCATED"] = ["ASSESSOR_FEE"],
+    };
+
+    /// <summary>Cost type code → category codes (empty = <see cref="DefaultCostCategories"/>).</summary>
+    public Dictionary<string, string[]> CostCategories { get; set; } = new(StringComparer.Ordinal);
+
+    /// <summary>REQ-CLM-097: add a reserve increase when a payment exceeds the open reserve (default on).</summary>
+    public bool AutoAdjustReserve { get; set; } = true;
+
+    /// <summary>True when <paramref name="category"/> is configured for <paramref name="costType"/>.</summary>
+    public bool Allows(string costType, string category) =>
+        (CostCategories.Count > 0 ? CostCategories : DefaultCostCategories).TryGetValue(costType, out var categories)
+        && categories.Contains(category, StringComparer.Ordinal);
 }

@@ -79,7 +79,8 @@ internal sealed partial class PolicySnapshotAdapter(IServiceProvider services, I
             content?.ProductVersion.ToString(),
             response.Policy.InsuredPartyId,
             content?.Segment.SegmentId.Value,
-            [.. (content?.Coverages ?? []).Where(c => c.Selected).Select(c => c.CoverageCode).Distinct(StringComparer.Ordinal)]));
+            [.. (content?.Coverages ?? []).Where(c => c.Selected).Select(c => c.CoverageCode).Distinct(StringComparer.Ordinal)],
+            content?.Term.TermId.Value));
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "pol.Snapshot.get failed with {Code}")]

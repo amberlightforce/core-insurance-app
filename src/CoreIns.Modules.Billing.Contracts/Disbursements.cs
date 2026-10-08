@@ -51,3 +51,35 @@ public static class DisbursementContent
         return CanonicalJson.Hash(node);
     }
 }
+
+/// <summary>
+/// The PLT approval BIL verifies for a referred claim payment (D-SL2-10 d, REQ-PLT-117): when a CLM_CLAIM_PAYMENT request
+/// names a PLT approval request as evidence (<c>PLT/ApprovalRequest/{id}</c>), BIL calls
+/// <c>plt.Approval.verifyForExecution</c> with type <see cref="ClaimPaymentType"/>, subject <c>CLM/ClaimPayment/{sourceId}</c> and
+/// the hash it recomputes with <see cref="DisbursementContent.Hash"/>; anything but an Approved request covering exactly that
+/// content is refused (BIL-ERR-APPROVAL-MISMATCH). A payment approved within the maker's authority names its approved set
+/// (<c>CLM/TransactionSet/{id}</c>) and carries no PLT request.
+/// </summary>
+public static class DisbursementApproval
+{
+    /// <summary>The approval type CLM requests for a set that carries a referred claim payment.</summary>
+    public const string ClaimPaymentType = "CLM.CLAIM_PAYMENT";
+
+    /// <summary>The subject type of that approval.</summary>
+    public const string ClaimPaymentSubjectType = "ClaimPayment";
+
+    private const string EvidencePrefix = "PLT/ApprovalRequest/";
+
+    /// <summary>The approval subject of a claim payment (its source id is the CLM claim payment id).</summary>
+    public static ObjectRef ClaimPaymentSubject(string sourceId) => new(ModuleCode.CLM, ClaimPaymentSubjectType, sourceId);
+
+    /// <summary>The PLT approval request named by an evidence reference, if it names one.</summary>
+    public static bool TryParseApprovalRequest(string? evidenceRef, out Guid requestId)
+    {
+        requestId = Guid.Empty;
+        return evidenceRef is not null
+               && evidenceRef.StartsWith(EvidencePrefix, StringComparison.Ordinal)
+               && Guid.TryParseExact(evidenceRef[EvidencePrefix.Length..], "D", out requestId)
+               && requestId != Guid.Empty;
+    }
+}

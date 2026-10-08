@@ -11,6 +11,7 @@ using CoreIns.Platform.Audit;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts;
+using CoreIns.Platform.Contracts.Api;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
 using CoreIns.Platform.Numbering;
@@ -121,6 +122,16 @@ internal sealed partial class RequestDisbursementHandler(
         if (request.ApprovalContentHash != expected)
         {
             return DomainError.Of(ModuleCode.BIL, "APPROVAL-MISMATCH", "The request does not match the approved content hash; nothing is paid that was not approved.");
+        }
+
+        // 2b. A PLT approval named as evidence must be Approved for exactly this payment and content (D-SL2-10 d, REQ-PLT-117).
+        if (DisbursementApproval.TryParseApprovalRequest(request.ApprovalEvidenceRef, out var approvalRequestId))
+        {
+            var verified = await VerifyApprovalAsync(approvalRequestId, request.SourceId, expected, cancellationToken).ConfigureAwait(false);
+            if (verified is not null)
+            {
+                return verified;
+            }
         }
 
         var legalEntity = ledger.LegalEntityId;
@@ -294,6 +305,42 @@ internal sealed partial class RequestDisbursementHandler(
             },
             keys) { OccurredAt = now });
     }
+
+    /// <summary>
+    /// <c>plt.Approval.verifyForExecution</c> on the named request: type CLM.CLAIM_PAYMENT, subject CLM/ClaimPayment/{sourceId},
+    /// the recomputed content hash. Null when the approval covers this payment; otherwise BIL-ERR-APPROVAL-MISMATCH (fail closed).
+    /// </summary>
+    private async Task<DomainError?> VerifyApprovalAsync(Guid requestId, string sourceId, Sha256Hash hash, CancellationToken cancellationToken)
+    {
+        if (services.GetService<IPlatformApprovalService>() is not { } approvals)
+        {
+            return DomainError.Of(ModuleCode.BIL, "APPROVAL-MISMATCH", "The approval service is not available; the approval cannot be verified.");
+        }
+
+        try
+        {
+            var verified = await approvals.VerifyForExecutionAsync(
+                new ApprovalVerifyForExecutionRequest
+                {
+                    RequestId = requestId,
+                    Hash = hash,
+                    Type = DisbursementApproval.ClaimPaymentType,
+                    ObjectRef = DisbursementApproval.ClaimPaymentSubject(sourceId),
+                },
+                cancellationToken).ConfigureAwait(false);
+            return verified.Ok
+                ? null
+                : DomainError.Of(ModuleCode.BIL, "APPROVAL-MISMATCH", $"The approval request is {verified.Status}, not Approved; nothing is paid that was not approved.");
+        }
+        catch (DomainException ex) when (ex.Error.Code.Module == ModuleCode.PLT)
+        {
+            LogApprovalRefused(logger, ex.Error.Code.Value);
+            return DomainError.Of(ModuleCode.BIL, "APPROVAL-MISMATCH", $"The approval does not cover this payment ({ex.Error.Code}).");
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "SECURITY: disbursement approval verification refused ({Code}).")]
+    private static partial void LogApprovalRefused(ILogger logger, string code);
 
     /// <summary>Screens the payee; the list versions on Clear, else the fail-closed error.</summary>
     private async Task<Result<string>> ScreenAsync(PartyId payee, DisbursementId disbursementId, CancellationToken cancellationToken)

@@ -135,6 +135,7 @@ internal sealed class SubmitFnolHandler(
             InsuredPartyId = new PartyId(snapshot.InsuredPartyId),
             SnapshotRef = snapshot.SnapshotRef,
             SnapshotSegmentId = snapshot.SegmentId,
+            PolicyTermId = snapshot.TermId is { } termId ? new PolicyTermId(termId) : null,
             SnapshotValidAt = snapshot.ValidAt,
             SnapshotKnownAt = snapshot.KnownAt,
             SnapshotStatus = Codes.Of(SnapshotStatus.Verified),

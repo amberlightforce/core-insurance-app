@@ -20,6 +20,7 @@ namespace CoreIns.Modules.Claims.Domain;
 /// <param name="InsuredPartyId">PTY party of the insured.</param>
 /// <param name="SegmentId">Segment of the snapshot, when in force.</param>
 /// <param name="CoverageCodes">Selected coverage codes of the segment (empty when not in force).</param>
+/// <param name="TermId">Policy term of the snapshot, when in force (key of the claim financial events).</param>
 internal sealed record PolicySnapshotFacts(
     string SnapshotRef,
     Instant ValidAt,
@@ -33,7 +34,8 @@ internal sealed record PolicySnapshotFacts(
     string? ProductVersion,
     Guid InsuredPartyId,
     Guid? SegmentId,
-    IReadOnlyList<string> CoverageCodes);
+    IReadOnlyList<string> CoverageCodes,
+    Guid? TermId = null);
 
 /// <summary>Outcome of a snapshot read.</summary>
 internal enum SnapshotReadOutcome

@@ -63,3 +63,30 @@ internal sealed class ClaimsClaimService(RequestContext context, ClaimProtection
     public async Task<ClaimSearchPage> SearchByCriteriaAsync(ClaimSearchCriteria request, string? cursor = null, int? limit = null, CancellationToken cancellationToken = default) =>
         InProcess.Unwrap(await ClaimSearch.RunAsync(reader, protection.Current(context), request, limit, cursor, cancellationToken).ConfigureAwait(false));
 }
+
+/// <summary>The in-process contract <see cref="IClaimsFinancialsService"/>: derived balances as of a record time (REQ-CLM-101); dailyTotals is later.</summary>
+internal sealed class ClaimsFinancialsService(RequestContext context, ClaimProtection protection, FinancialsReader reader, CoreIns.Platform.Time.IClock clock) : IClaimsFinancialsService
+{
+    public async Task<FinancialsGetResponse> GetAsync(ValidAt? validAt = null, CoreIns.SharedKernel.Instant? knownAt = null, string? claim = null, CancellationToken cancellationToken = default)
+    {
+        if (!Guid.TryParse(claim, out var id) || !await reader.ClaimExistsAsync(protection.Current(context), new ClaimId(id), cancellationToken).ConfigureAwait(false))
+        {
+            throw new DomainException(ClaimSupport.NotFound("claim"));
+        }
+
+        return await reader.GetAsync(new ClaimId(id), knownAt ?? clock.Now, cancellationToken).ConfigureAwait(false);
+    }
+
+    public Task<FinancialsDailyTotalsResponse> DailyTotalsAsync(string? legalEntity = null, CoreIns.SharedKernel.BusinessDate? accountingDate = null, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("clm.Financials.dailyTotals");
+}
+
+/// <summary>
+/// The in-process contract <see cref="IClaimsTransactionSetService"/>: <c>approve</c> is CLM-ERR-NOT-AVAILABLE by design;
+/// a referred set is decided in the PLT inbox (<c>plt.Approval.decide</c>) and CLM applies <c>ApprovalDecided</c> (one path).
+/// </summary>
+internal sealed class ClaimsTransactionSetService : IClaimsTransactionSetService
+{
+    public Task<TransactionSetApproveResponse> ApproveAsync(TransactionSetApproveRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("clm.TransactionSet.approve (decide through plt.Approval.decide)");
+}
