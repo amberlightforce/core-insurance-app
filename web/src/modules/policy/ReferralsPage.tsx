@@ -10,7 +10,6 @@ import {
   EmptyState,
   KeyValueList,
   TextField,
-  announce,
   dateColumn,
   identifierColumn,
   textColumn,
@@ -51,7 +50,7 @@ function DecisionForm({ issue, onDone }: { issue: UwIssueItem; onDone: (d: Decis
       decideIssues(body, key),
     onSuccess: (_, { body }) => {
       release();
-      announce(body.decision === 'APPROVE' ? t('referrals.approved') : t('referrals.rejected'));
+      // The outcome banner of the page is a live region: it announces the decision.
       onDone(body.decision);
       void refresh();
     },
