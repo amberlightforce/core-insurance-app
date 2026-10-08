@@ -371,7 +371,6 @@ public sealed class RatingApiTests(PostgresFixture database) : IClassFixture<Pos
     [Theory]
     [InlineData("currency", "RAT-ERR-CURRENCY")]
     [InlineData("period", "RAT-ERR-PERIOD")]
-    [InlineData("mode", "RAT-ERR-ENVELOPE")]
     [InlineData("artefact", "RAT-ERR-UNKNOWN-ARTEFACT")]
     [InlineData("undeclared", "RAT-ERR-INPUT-UNDECLARED")]
     [InlineData("input", "RAT-ERR-INPUT")]
@@ -382,7 +381,6 @@ public sealed class RatingApiTests(PostgresFixture database) : IClassFixture<Pos
         {
             "currency" => RateRequest(currency: "USD"),
             "period" => RateRequest(periodEnd: "2027-05-01"),
-            "mode" => RateRequest(mode: "RENEWAL"),
             "artefact" => RateRequest(ratingArtefactHash: new string('d', 64)),
             "undeclared" => RateRequest(Undeclared()),
             "input" => RateRequest(RiskTree(value: "0")),

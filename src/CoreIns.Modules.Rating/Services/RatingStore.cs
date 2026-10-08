@@ -42,6 +42,9 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
     private static readonly ConcurrentDictionary<string, CompiledArtefact> Cache = new(StringComparer.Ordinal);
     private static readonly ConcurrentDictionary<string, SeedBundle> Seeds = new(StringComparer.Ordinal);
 
+    /// <summary>Product versions the illustrative tariff is published for, with the date each activates (SL3: MOTOR-GR 1.1 carries the same tariff, referenced by the same tables, from 2026-10-01; 1.0 is untouched).</summary>
+    private static readonly (string Version, DateOnly From)[] SeedVersions = [(BuiltInArtefacts.DefaultProductVersion, new DateOnly(2026, 1, 1)), ("1.1", new DateOnly(2026, 10, 1))];
+
     private sealed record SeedBundle(ArtefactDefinition Definition, string Hash, IReadOnlyList<(string Hash, TableDto Dto)> Tables);
 
     /// <summary>Publishes the built-in illustrative artefact and its activation when they are not stored yet (idempotent).</summary>
@@ -49,52 +52,55 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
     {
         foreach (var productCode in options.Value.SeedProductCodes)
         {
-            var seed = Seeds.GetOrAdd(productCode, Build);
-            var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-            var exists = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                "SELECT EXISTS (SELECT 1 FROM rat.rating_artifact WHERE artefact_hash = @hash)", new { hash = seed.Hash }, session.Transaction,
-                cancellationToken: cancellationToken)).ConfigureAwait(false);
-            if (exists)
+            foreach (var (seedVersion, seedFrom) in SeedVersions)
             {
-                continue;
-            }
+                var seed = Seeds.GetOrAdd(productCode + "|" + seedVersion, _ => Build(productCode, seedVersion));
+                var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+                var exists = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+                    "SELECT EXISTS (SELECT 1 FROM rat.rating_artifact WHERE artefact_hash = @hash)", new { hash = seed.Hash }, session.Transaction,
+                    cancellationToken: cancellationToken)).ConfigureAwait(false);
+                if (exists)
+                {
+                    continue;
+                }
 
-            var now = clock.Now.ToUtcDateTime();
-            var actor = context.Actor.ToString();
-            foreach (var (hash, dto) in seed.Tables)
-            {
+                var now = clock.Now.ToUtcDateTime();
+                var actor = context.Actor.ToString();
+                foreach (var (hash, dto) in seed.Tables)
+                {
+                    await connection.ExecuteAsync(new CommandDefinition(
+                        """
+                        INSERT INTO rat.rate_table_version (table_hash, table_code, version_no, hit_policy, data_status, definition, created_at, created_by)
+                        VALUES (@hash, @code, @version, @hitPolicy, @status, @definition::jsonb, @now, @actor) ON CONFLICT DO NOTHING
+                        """,
+                        new { hash, code = dto.Code, version = dto.Version, hitPolicy = dto.HitPolicy, status = dto.DataStatus, definition = ArtefactJson.Serialize(dto), now, actor },
+                        session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+                }
+
+                var def = seed.Definition;
                 await connection.ExecuteAsync(new CommandDefinition(
                     """
-                    INSERT INTO rat.rate_table_version (table_hash, table_code, version_no, hit_policy, data_status, definition, created_at, created_by)
-                    VALUES (@hash, @code, @version, @hitPolicy, @status, @definition::jsonb, @now, @actor) ON CONFLICT DO NOTHING
+                    INSERT INTO rat.rating_artifact (artefact_hash, artefact_code, label, product_code, product_version, engine_version, data_status, definition, created_at, created_by)
+                    VALUES (@hash, @code, @label, @product, @version, @engine, @status, @definition::jsonb, @now, @actor) ON CONFLICT DO NOTHING
                     """,
-                    new { hash, code = dto.Code, version = dto.Version, hitPolicy = dto.HitPolicy, status = dto.DataStatus, definition = ArtefactJson.Serialize(dto), now, actor },
+                    new
+                    {
+                        hash = seed.Hash, code = def.Code, label = def.Label, product = def.ProductCode, version = def.ProductVersion,
+                        engine = def.EngineVersion, status = def.Metadata.DataStatus, definition = ArtefactJson.Serialize(def), now, actor,
+                    },
                     session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
-            }
-
-            var def = seed.Definition;
-            await connection.ExecuteAsync(new CommandDefinition(
-                """
-                INSERT INTO rat.rating_artifact (artefact_hash, artefact_code, label, product_code, product_version, engine_version, data_status, definition, created_at, created_by)
-                VALUES (@hash, @code, @label, @product, @version, @engine, @status, @definition::jsonb, @now, @actor) ON CONFLICT DO NOTHING
-                """,
-                new
+                var activation = new DynamicParameters(new
                 {
-                    hash = seed.Hash, code = def.Code, label = def.Label, product = def.ProductCode, version = def.ProductVersion,
-                    engine = def.EngineVersion, status = def.Metadata.DataStatus, definition = ArtefactJson.Serialize(def), now, actor,
-                },
-                session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
-            var activation = new DynamicParameters(new
-            {
-                id = Guid.CreateVersion7(), hash = seed.Hash, product = def.ProductCode, version = def.ProductVersion, now, actor,
-            });
-            activation.Add("fromDate", new DateOnly(2026, 1, 1), DbType.Date);
-            await connection.ExecuteAsync(new CommandDefinition(
-                """
-                INSERT INTO rat.rate_activation (activation_id, artefact_hash, product_code, product_version, effective_from, effective_to, status, created_at, created_by)
-                VALUES (@id, @hash, @product, @version, @fromDate, NULL, 'Active', @now, @actor) ON CONFLICT DO NOTHING
-                """,
-                activation, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+                    id = Guid.CreateVersion7(), hash = seed.Hash, product = def.ProductCode, version = def.ProductVersion, now, actor,
+                });
+                activation.Add("fromDate", seedFrom, DbType.Date);
+                await connection.ExecuteAsync(new CommandDefinition(
+                    """
+                    INSERT INTO rat.rate_activation (activation_id, artefact_hash, product_code, product_version, effective_from, effective_to, status, created_at, created_by)
+                    VALUES (@id, @hash, @product, @version, @fromDate, NULL, 'Active', @now, @actor) ON CONFLICT DO NOTHING
+                    """,
+                    activation, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+            }
         }
     }
 
@@ -198,11 +204,11 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
             new { worksheetId, legalEntity }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 
-    private static SeedBundle Build(string productCode)
+    private static SeedBundle Build(string productCode, string productVersion)
     {
         var tables = BuiltInArtefacts.Tables().Select(t => CompiledArtefact.CompileTable(t)).ToList();
         var definition = BuiltInArtefacts.Definition(
-            productCode, BuiltInArtefacts.DefaultProductVersion, tables.ToDictionary(t => t.Dto.Code, t => t.Hash, StringComparer.Ordinal));
+            productCode, productVersion, tables.ToDictionary(t => t.Dto.Code, t => t.Hash, StringComparer.Ordinal));
         return new SeedBundle(definition, ArtefactJson.HashOf(definition).Value, [.. tables.Select(t => (t.Hash, t.Dto))]);
     }
 }
