@@ -1,0 +1,366 @@
+{
+  "overline": "Claims",
+  "home": {
+    "title": "Claims",
+    "newFnol": "New first notice of loss",
+    "approvals": "Approvals",
+    "recent": "Recently opened claims",
+    "emptyTitle": "No recent claims",
+    "emptyBody": "Search for a claim by its number or register a new first notice of loss.",
+    "recentClaim": "Claim {number}"
+  },
+  "search": {
+    "title": "Find a claim",
+    "claimNumber": "Claim number",
+    "policyNumber": "Policy number",
+    "needCriterion": "Enter a claim number or a policy number.",
+    "submit": "Search",
+    "failed": "The search failed",
+    "results": "Claim search results",
+    "noResultsTitle": "No claims found",
+    "noResultsBody": "Check the criteria or register a new first notice of loss."
+  },
+  "columns": {
+    "claimNumber": "Claim number",
+    "status": "Status",
+    "policy": "Policy",
+    "lossDate": "Loss date",
+    "noticeOn": "Notice date"
+  },
+  "subStatus": {
+    "NEW": "New",
+    "IN_PROGRESS": "In progress",
+    "UNDER_INVESTIGATION": "Under investigation",
+    "SETTLED": "Settled"
+  },
+  "indication": {
+    "COVERED": "Covered (indication)",
+    "NOT_COVERED": "Not covered (indication)",
+    "IN_QUESTION": "In question"
+  },
+  "decision": {
+    "PENDING": "Pending",
+    "COVERED": "Covered",
+    "COVERED_WITH_RESERVATION": "Covered with reservation",
+    "PARTIALLY_COVERED": "Partially covered",
+    "NOT_COVERED": "Not covered"
+  },
+  "duplicate": {
+    "reason": {
+      "SAME_POLICY": "Same policy",
+      "SAME_LOSS_DATE": "Same loss date",
+      "SAME_LOSS_CAUSE": "Same loss cause"
+    }
+  },
+  "codes": {
+    "lossCause": {
+      "COLLISION": "Collision",
+      "THEFT": "Theft",
+      "FIRE": "Fire",
+      "GLASS": "Glass breakage",
+      "VANDALISM": "Vandalism",
+      "WEATHER": "Weather"
+    },
+    "medium": {
+      "TELEPHONE": "Telephone",
+      "EMAIL": "Email",
+      "LETTER": "Letter",
+      "FAX": "Fax",
+      "SMS": "SMS",
+      "IN_PERSON": "In person",
+      "ELECTRONIC": "Electronic"
+    },
+    "duplicateReason": {
+      "SAME_LOSS": "Same loss",
+      "DIFFERENT_LOSS": "Different loss",
+      "ADDITIONAL_PARTY_SAME_LOSS": "Additional party in the same loss",
+      "CUSTOMER_CONFIRMED": "Confirmed by the customer"
+    },
+    "exposureDuplicateReason": {
+      "ADDITIONAL_DAMAGE": "Additional damage",
+      "SEPARATE_INCIDENT": "Separate incident"
+    },
+    "outcome": {
+      "COMPLETED": "Completed",
+      "DENIED": "Denied",
+      "WITHDRAWN": "Withdrawn",
+      "DUPLICATE": "Duplicate",
+      "NO_PAYMENT": "No payment"
+    }
+  },
+  "fnol": {
+    "title": "First notice of loss",
+    "subtitle": "Entered by staff",
+    "validate": "Check",
+    "submit": "Register notice",
+    "submitFailed": "The notice was not registered",
+    "created": "Claim {number} created",
+    "createdBody": "Handling segment: {segment}.",
+    "openClaim": "Open claim",
+    "another": "New notice",
+    "policy": {
+      "title": "Policy",
+      "number": "Policy number",
+      "find": "Find",
+      "failed": "The policy search failed",
+      "notFoundTitle": "No policy found",
+      "notFoundBody": "Check the number. The search uses the full policy number.",
+      "summary": "Policy summary",
+      "product": "Product",
+      "status": "Status",
+      "term": "Policy period",
+      "open": "open-ended",
+      "view": "Policy",
+      "openPolicy": "Open policy"
+    },
+    "loss": {
+      "title": "The loss",
+      "date": "Loss date",
+      "time": "Loss time",
+      "timeHelp": "Greek time, e.g. 14:30",
+      "noticeOn": "Notice date",
+      "cause": "Loss cause",
+      "causeIllustrative": "Illustrative code list until the final codes are defined.",
+      "medium": "Receipt medium",
+      "location": "Loss location",
+      "description": "Description",
+      "descriptionHelp": "Free text. Do not record third parties' personal data unless needed.",
+      "ownDamage": "Create an own-damage exposure for the insured"
+    },
+    "errors": {
+      "policy": "Find and select the policy.",
+      "lossDate": "Enter the loss date.",
+      "lossTime": "Enter the loss time as HH:mm.",
+      "lossFuture": "The loss cannot be in the future.",
+      "noticeOn": "Enter the notice date.",
+      "noticeFuture": "The notice cannot be in the future.",
+      "noticeBeforeLoss": "The notice cannot be earlier than the loss.",
+      "lossCause": "Choose a loss cause.",
+      "location": "Enter the loss location.",
+      "description": "Enter the description.",
+      "decision": "Choose what to do about the probable duplicate and give a reason."
+    },
+    "validation": {
+      "ok": "The check passed",
+      "okBody": "The notice can be registered.",
+      "failed": "The check found problems",
+      "error": "The check did not complete"
+    },
+    "coverageInQuestion": {
+      "title": "Coverage is in question",
+      "body": "The policy was not in force at the loss date. No coverage decision has been made.",
+      "beforeSubmit": "The policy was not in force at the loss date. The claim will open with coverage in question."
+    },
+    "indications": {
+      "title": "Coverage indications",
+      "none": "There are no coverage indications."
+    },
+    "duplicate": {
+      "title": "Probable duplicate",
+      "banner": "Claims similar to this one exist",
+      "body": "Link the new notice to an existing claim, or continue as a separate claim and give a reason.",
+      "candidates": "Probable duplicate claims",
+      "choice": "Decision",
+      "link": "Link to the existing claim",
+      "override": "Continue as a separate claim",
+      "linkTo": "Link to claim",
+      "reason": "Reason",
+      "reasonIllustrative": "Illustrative code list."
+    }
+  },
+  "view": {
+    "title": "Claim {number}",
+    "notFound": "The claim was not found",
+    "openPolicy": "Policy",
+    "openInsured": "Insured",
+    "snapshot": {
+      "notVerifiedTitle": "Coverage is not fully verified",
+      "status": {
+        "PENDING": "Coverage verification is pending.",
+        "VERIFIED": "Verified.",
+        "REVERIFICATION_REQUIRED": "Coverage must be verified again."
+      }
+    },
+    "header": {
+      "title": "Claim details",
+      "policy": "Policy",
+      "product": "Product",
+      "lossDate": "Loss",
+      "noticeOn": "Notice",
+      "cause": "Cause",
+      "segment": "Handling segment",
+      "handler": "Handler",
+      "openDays": "Days since notice"
+    },
+    "coverage": {
+      "title": "Coverage",
+      "inForce": "In force at the loss",
+      "yes": "Yes",
+      "no": "No",
+      "statusAtLoss": "Status at the loss",
+      "indication": "Coverage indication",
+      "perSnapshot": "Per the policy snapshot",
+      "snapshotRef": "Policy snapshot",
+      "snapshotKnownAt": "Known since"
+    },
+    "loss": {
+      "title": "Loss description",
+      "location": "Location",
+      "description": "Description"
+    }
+  },
+  "exposure": {
+    "title": "Exposures",
+    "new": "New exposure",
+    "intro": "Own-damage exposure for the insured.",
+    "kind": "Exposure kind",
+    "coverage": "Coverage",
+    "coverageIllustrative": "Illustrative coverage code.",
+    "create": "Create exposure",
+    "created": "Exposure {number} created",
+    "failed": "The exposure was not created",
+    "duplicateReason": "Reason for a second exposure",
+    "duplicateReasonHelp": "An open exposure already exists for this coverage. Give a reason to add another.",
+    "emptyTitle": "No exposures",
+    "emptyBody": "Create an exposure to continue handling.",
+    "columns": {
+      "number": "Number",
+      "kind": "Kind",
+      "coverage": "Coverage",
+      "status": "Status",
+      "indication": "Coverage indication",
+      "decision": "Coverage decision"
+    },
+    "coverages": {
+      "OD": "OD · Own damage"
+    },
+    "kinds": {
+      "OWN_DAMAGE": "Own damage",
+      "MTPL_PD": "Third-party property damage",
+      "MTPL_BI": "Third-party bodily injury",
+      "THEFT": "Theft",
+      "GLASS": "Glass",
+      "ASSISTANCE": "Roadside assistance",
+      "LEGAL_PROTECTION": "Legal protection",
+      "PROPERTY_BUILDING": "Building",
+      "CONTENTS": "Contents",
+      "ALTERNATIVE_ACCOMMODATION": "Alternative accommodation",
+      "LIABILITY_PROPERTY": "Liability (property)",
+      "LIABILITY_INJURY": "Liability (injury)",
+      "FS_OWN_SETTLEMENT": "Friendly settlement"
+    }
+  },
+  "close": {
+    "title": "Close claim",
+    "intro": "Open exposures close with the claim when they have no open reserve and no pending payment.",
+    "outcome": "Outcome",
+    "submit": "Close claim",
+    "closed": "The claim was closed",
+    "failed": "The claim was not closed",
+    "alreadyClosed": "The claim is closed",
+    "closedAt": "Closed on {date}.",
+    "errors": {
+      "outcome": "Choose an outcome."
+    },
+    "guard": {
+      "title": "The claim cannot close yet",
+      "body": "Resolve the following and try again.",
+      "reason": {
+        "OPEN_RESERVE": "an open reserve must be released",
+        "PAYMENT_PENDING": "a payment is pending"
+      }
+    }
+  },
+  "payee": {
+    "title": "Payee bank account",
+    "intro": "Record the account the claim payment will go to. The IBAN is not shown in full again.",
+    "holder": "Payee (account holder name)",
+    "holderHelp": "As the bank holds it.",
+    "iban": "IBAN",
+    "ibanHelp": "With or without spaces.",
+    "fixed": "Account purpose",
+    "purpose": "Purpose",
+    "purposeClaimPayment": "Claim payment",
+    "submit": "Save account",
+    "failed": "The account was not saved",
+    "saved": "The account was saved",
+    "savedSummary": "Saved account",
+    "maskedIban": "IBAN",
+    "verification": "Verification",
+    "coolingOffUntil": "Cooling-off until",
+    "changeNote": "The account replaced an earlier account of the payee and a cooling-off period applies.",
+    "errors": {
+      "holder": "Enter the payee name.",
+      "ibanRequired": "Enter the IBAN.",
+      "ibanInvalid": "The IBAN is not valid."
+    },
+    "verificationStatus": {
+      "Unverified": "Unverified",
+      "VoPMatched": "Verified (match)",
+      "VoPCloseMatch": "Verified (close match)",
+      "VoPNoMatch": "No match",
+      "VoPNotAvailable": "Verification was not available",
+      "Confirmed": "Confirmed"
+    }
+  },
+  "approvals": {
+    "title": "Approvals",
+    "subtitle": "Requests waiting for a decision",
+    "pending": "Pending approvals",
+    "backToClaims": "Claims",
+    "backToInbox": "Approvals",
+    "emptyTitle": "No pending approvals",
+    "emptyBody": "A request that exceeds an authority limit will appear here.",
+    "columns": {
+      "type": "Type",
+      "subject": "Subject",
+      "amount": "Amount",
+      "maker": "Requested by",
+      "requestedAt": "Requested",
+      "reason": "Reason"
+    },
+    "type": {
+      "CLM_RESERVE": "Reserve change",
+      "CLM_PAYMENT": "Claim payment",
+      "CLM_TRANSACTION_SET": "Claim transaction set"
+    },
+    "status": {
+      "PendingApproval": "Pending approval",
+      "Approved": "Approved",
+      "Rejected": "Rejected",
+      "Withdrawn": "Withdrawn"
+    },
+    "detailTitle": "Approval: {type}",
+    "summary": "Request details",
+    "subjectId": "Subject id",
+    "referralRole": "Approving role",
+    "payloadHash": "Content hash (SHA-256)",
+    "diff": {
+      "title": "Changes to approve",
+      "none": "The request carries no detailed changes.",
+      "change": "{from} → {to}",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "decision": "Decision",
+    "decisionRecorded": "Recorded decision",
+    "checker": "Checker",
+    "decidedAt": "Decided on",
+    "comment": "Comment",
+    "commentHelp": "Required when you reject the request.",
+    "commentRequired": "Write a comment for the rejection.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approved": "The request was approved",
+    "rejected": "The request was rejected",
+    "decidedBody": "The decision was recorded.",
+    "failed": "The decision was not recorded",
+    "notFound": "The request was not found",
+    "stale": {
+      "title": "The request changed",
+      "body": "The content or state of the request changed. The details were refreshed: review them again and decide."
+    },
+    "notPending": "The request is no longer waiting for a decision",
+    "notPendingBody": "It has already been decided or replaced by a newer request."
+  }
+}

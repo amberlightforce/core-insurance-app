@@ -1,6 +1,8 @@
 import type { components as Bil } from './generated/bil';
+import type { components as Clm } from './generated/clm';
 import type { components as Fin } from './generated/fin';
 import type { components as Pfc } from './generated/pfc';
+import type { components as Plt } from './generated/plt';
 import type { components as Pol } from './generated/pol';
 import type { components as Pty } from './generated/pty';
 
@@ -51,3 +53,41 @@ export type PaymentTakeResponse = Bil['schemas']['PaymentTakeResponse'];
 // Finance (fin.yaml)
 export type JournalQueryPage = Fin['schemas']['JournalQueryPage'];
 export type JournalView = Fin['schemas']['JournalView'];
+
+// Policy search (pol.yaml)
+export type PolicySearchCriteria = Pol['schemas']['PolicySearchCriteria'];
+export type PolicySearchPage = Pol['schemas']['PolicySearchPage'];
+export type PolicySearchItem = Pol['schemas']['PolicySearchItem'];
+
+// Payee accounts (bil.yaml)
+export type PayeeAccountCreateRequest = Bil['schemas']['PayeeAccountCreateRequest'];
+export type PayeeAccountCreateResponse = Bil['schemas']['PayeeAccountCreateResponse'];
+
+// Claims (clm.yaml)
+export type FnolSubmitRequest = Clm['schemas']['FnolSubmitRequest'];
+export type FnolSubmitResponse = Clm['schemas']['FnolSubmitResponse'];
+export type FnolValidateRequest = Clm['schemas']['FnolValidateRequest'];
+export type FnolValidateResponse = Clm['schemas']['FnolValidateResponse'];
+export type FnolIssue = Clm['schemas']['FnolIssue'];
+export type DuplicateCandidate = Clm['schemas']['DuplicateCandidate'];
+export type DuplicateDecision = Clm['schemas']['DuplicateDecision'];
+export type CoverageIndication = Clm['schemas']['CoverageIndication'];
+export type ClaimSummary = Clm['schemas']['ClaimSummary'];
+export type ClaimView = Clm['schemas']['ClaimView'];
+export type ClaimGetResponse = Clm['schemas']['ClaimGetResponse'];
+export type ClaimSearchCriteria = Clm['schemas']['ClaimSearchCriteria'];
+export type ClaimSearchPage = Clm['schemas']['ClaimSearchPage'];
+export type ClaimCloseRequest = Clm['schemas']['ClaimCloseRequest'];
+export type ClaimCloseResponse = Clm['schemas']['ClaimCloseResponse'];
+export type ExposureView = Clm['schemas']['ExposureView'];
+export type ExposureKind = Clm['schemas']['ExposureKind'];
+export type ExposureCreateRequest = Clm['schemas']['ExposureCreateRequest'];
+export type ExposureCreateResponse = Clm['schemas']['ExposureCreateResponse'];
+
+// Approvals (plt.yaml)
+export type ApprovalView = Plt['schemas']['ApprovalView'];
+export type ApprovalDecisionView = Plt['schemas']['ApprovalDecisionView'];
+export type ApprovalGetResponse = Plt['schemas']['ApprovalGetResponse'];
+export type ApprovalListPage = Plt['schemas']['ApprovalListPage'];
+export type ApprovalDecideRequest = Plt['schemas']['ApprovalDecideRequest'];
+export type ApprovalDecideResponse = Plt['schemas']['ApprovalDecideResponse'];

@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/pol/v1/submissions": {
+    "/api/clm/v1/fnol/submit": {
         parameters: {
             query?: never;
             header?: never;
@@ -14,20 +14,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Start a submission
-         * @description Start a submission
+         * FNOL for all channels
+         * @description FNOL for all channels
          *
-         *     PRD inputs: accountId, product, producerCode, channel, effectiveAt, quoteType
-         *     PRD outputs: jobId, describe model, version, manifest
+         *     PRD inputs: FNOL payload
+         *     PRD outputs: claim, exposures, checklist, assignment
          */
-        post: operations["pol.Submission.create"];
+        post: operations["clm.Fnol.submit"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/jobs/update-draft": {
+    "/api/clm/v1/fnol/save-draft": {
         parameters: {
             query?: never;
             header?: never;
@@ -37,296 +37,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Apply intent edits to a draft
-         * @description Apply intent edits to a draft
+         * FNOL for all channels
+         * @description FNOL for all channels
          *
-         *     PRD inputs: jobId, versionNo, instructions[], expectedDraftVersion
-         *     PRD outputs: draft state, validation, premium preview
+         *     PRD inputs: FNOL payload
+         *     PRD outputs: claim, exposures, checklist, assignment
          */
-        post: operations["pol.Job.updateDraft"];
+        post: operations["clm.Fnol.saveDraft"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/jobs/quote": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Price and evaluate UW
-         * @description Price and evaluate UW
-         *
-         *     PRD inputs: jobId, versionNo
-         *     PRD outputs: quote version, premium, issues, validity
-         */
-        post: operations["pol.Job.quote"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/requote": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Price and evaluate UW
-         * @description Price and evaluate UW
-         *
-         *     PRD inputs: jobId, versionNo
-         *     PRD outputs: quote version, premium, issues, validity
-         */
-        post: operations["pol.Job.requote"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/new-version": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Versions
-         * @description Versions
-         *
-         *     PRD inputs: jobId, sourceVersion
-         *     PRD outputs: new version; comparison
-         */
-        post: operations["pol.Job.newVersion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/copy-version": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Versions
-         * @description Versions
-         *
-         *     PRD inputs: jobId, sourceVersion
-         *     PRD outputs: new version; comparison
-         */
-        post: operations["pol.Job.copyVersion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/compare-versions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Versions
-         * @description Versions
-         *
-         *     PRD inputs: jobId, sourceVersion
-         *     PRD outputs: new version; comparison
-         */
-        post: operations["pol.Job.compareVersions"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/bind": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Bind with gates (any job type; canonical name, R-87)
-         * @description Bind with gates (any job type; canonical name, R-87)
-         *
-         *     PRD inputs: jobId, versionNo, paymentPlanOption, holdIssuance, confirmation, disclosureEvidence (CHN presentation receipt, optional)
-         *     PRD outputs: transaction, term, deltas, gate results, cover note ref
-         */
-        post: operations["pol.Job.bind"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/withdraw": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Close job
-         * @description Close job
-         *
-         *     PRD inputs: jobId, reasonCode, text
-         *     PRD outputs: job
-         */
-        post: operations["pol.Job.withdraw"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/not-taken": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Close job
-         * @description Close job
-         *
-         *     PRD inputs: jobId, reasonCode, text
-         *     PRD outputs: job
-         */
-        post: operations["pol.Job.notTaken"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/rebase": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Handle preemption
-         * @description Handle preemption
-         *
-         *     PRD inputs: jobId
-         *     PRD outputs: rebased draft, conflicts
-         */
-        post: operations["pol.Job.rebase"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/resolve-conflicts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Resolve conflicts
-         * @description Resolve conflicts
-         *
-         *     PRD inputs: jobId, resolutions[]
-         *     PRD outputs: conflicts state
-         */
-        post: operations["pol.Job.resolveConflicts"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/lease": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Edit lease
-         * @description Edit lease
-         *
-         *     PRD inputs: jobId
-         *     PRD outputs: lease
-         */
-        post: operations["pol.Job.lease"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs/release-lease": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Edit lease
-         * @description Edit lease
-         *
-         *     PRD inputs: jobId
-         *     PRD outputs: lease
-         */
-        post: operations["pol.Job.releaseLease"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/jobs": {
+    "/api/clm/v1/fnol/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -334,13 +58,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Job queries
-         * @description Job queries
+         * FNOL for all channels
+         * @description FNOL for all channels
          *
-         *     PRD inputs: account, policy, participant, state
-         *     PRD outputs: jobs
+         *     PRD inputs: FNOL payload
+         *     PRD outputs: claim, exposures, checklist, assignment
          */
-        get: operations["pol.Job.list"];
+        get: operations["clm.Fnol.get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -349,7 +73,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/jobs/{id}": {
+    "/api/clm/v1/fnol/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * FNOL for all channels
+         * @description FNOL for all channels
+         *
+         *     PRD inputs: FNOL payload
+         *     PRD outputs: claim, exposures, checklist, assignment
+         */
+        post: operations["clm.Fnol.validate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/claims/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -357,13 +104,488 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Job queries
-         * @description Job queries
+         * Claim lifecycle
+         * @description Claim lifecycle
          *
-         *     PRD inputs: account, policy, participant, state
-         *     PRD outputs: jobs
+         *     PRD inputs: ids, changes, reason
+         *     PRD outputs: claim
          */
-        get: operations["pol.Job.get"];
+        get: operations["clm.Claim.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Claim lifecycle
+         * @description Claim lifecycle
+         *
+         *     PRD inputs: ids, changes, reason
+         *     PRD outputs: claim
+         */
+        patch: operations["clm.Claim.update"];
+        trace?: never;
+    };
+    "/api/clm/v1/claims/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim lifecycle
+         * @description Claim lifecycle
+         *
+         *     PRD inputs: ids, changes, reason
+         *     PRD outputs: claim
+         */
+        post: operations["clm.Claim.close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/claims/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim lifecycle
+         * @description Claim lifecycle
+         *
+         *     PRD inputs: ids, changes, reason
+         *     PRD outputs: claim
+         */
+        post: operations["clm.Claim.reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/claims/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim lifecycle
+         * @description Claim lifecycle
+         *
+         *     PRD inputs: ids, changes, reason
+         *     PRD outputs: claim
+         */
+        post: operations["clm.Claim.merge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/claims/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Claim search (R-07)
+         * @description Claim search (R-07)
+         *
+         *     PRD inputs: criteria
+         *     PRD outputs: page of claims
+         */
+        get: operations["clm.Claim.search"];
+        put?: never;
+        /**
+         * Claim search (POST form, criteria in the body)
+         * @description POST form of clm.Claim.search (D-SLC-05): policy number and party ids travel in the body, never in a URL. A read;
+         *     no Idempotency-Key. Results never show free text and never count claims the caller may not see (REQ-CLM-011).
+         *
+         *     PRD inputs: criteria
+         *     PRD outputs: page of claims
+         */
+        post: operations["clm.Claim.searchByCriteria"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/exposures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exposures
+         * @description Exposures
+         *
+         *     PRD inputs: exposure data
+         *     PRD outputs: exposure
+         */
+        post: operations["clm.Exposure.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/exposures/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Exposures
+         * @description Exposures
+         *
+         *     PRD inputs: exposure data
+         *     PRD outputs: exposure
+         */
+        patch: operations["clm.Exposure.update"];
+        trace?: never;
+    };
+    "/api/clm/v1/exposures/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exposures
+         * @description Exposures
+         *
+         *     PRD inputs: exposure data
+         *     PRD outputs: exposure
+         */
+        post: operations["clm.Exposure.close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/exposures/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exposures
+         * @description Exposures
+         *
+         *     PRD inputs: exposure data
+         *     PRD outputs: exposure
+         */
+        post: operations["clm.Exposure.reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/coverage/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Coverage decision and re-verification
+         * @description Coverage decision and re-verification
+         *
+         *     PRD inputs: decision, reasons; adopt or keep
+         *     PRD outputs: decision record
+         */
+        post: operations["clm.Coverage.decide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/coverage/reverify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Coverage decision and re-verification
+         * @description Coverage decision and re-verification
+         *
+         *     PRD inputs: decision, reasons; adopt or keep
+         *     PRD outputs: decision record
+         */
+        post: operations["clm.Coverage.reverify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/transaction-sets/build": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Financial sets
+         * @description Financial sets
+         *
+         *     PRD inputs: transactions
+         *     PRD outputs: set with preview, checks, approval request
+         */
+        post: operations["clm.TransactionSet.build"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/transaction-sets/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Financial sets
+         * @description Financial sets
+         *
+         *     PRD inputs: transactions
+         *     PRD outputs: set with preview, checks, approval request
+         */
+        post: operations["clm.TransactionSet.submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/transaction-sets/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Financial sets
+         * @description Financial sets
+         *
+         *     PRD inputs: transactions
+         *     PRD outputs: set with preview, checks, approval request
+         */
+        post: operations["clm.TransactionSet.approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/transaction-sets/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Financial sets
+         * @description Financial sets
+         *
+         *     PRD inputs: transactions
+         *     PRD outputs: set with preview, checks, approval request
+         */
+        post: operations["clm.TransactionSet.reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/transaction-sets/return": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Financial sets
+         * @description Financial sets
+         *
+         *     PRD inputs: transactions
+         *     PRD outputs: set with preview, checks, approval request
+         */
+        post: operations["clm.TransactionSet.return"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/payments/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Payment corrections (stop executed by bil.Disbursement.stop under BIL's authority type)
+         * @description Payment corrections (stop executed by `bil.Disbursement.stop` under BIL's authority type)
+         *
+         *     PRD inputs: payment id, reason
+         *     PRD outputs: updated payment
+         */
+        post: operations["clm.Payment.void"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/payments/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Payment corrections (stop executed by bil.Disbursement.stop under BIL's authority type)
+         * @description Payment corrections (stop executed by `bil.Disbursement.stop` under BIL's authority type)
+         *
+         *     PRD inputs: payment id, reason
+         *     PRD outputs: updated payment
+         */
+        post: operations["clm.Payment.stop"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/payments/reissue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Payment corrections (stop executed by bil.Disbursement.stop under BIL's authority type)
+         * @description Payment corrections (stop executed by `bil.Disbursement.stop` under BIL's authority type)
+         *
+         *     PRD inputs: payment id, reason
+         *     PRD outputs: updated payment
+         */
+        post: operations["clm.Payment.reissue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/redresses/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim-related complaint redress from CMP paid as ex-gratia
+         * @description Claim-related complaint redress from CMP paid as ex-gratia
+         *
+         *     PRD inputs: complaint id, claim id, payee, amount, reason
+         *     PRD outputs: set id, status
+         */
+        post: operations["clm.Redress.request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/financials/get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Balances as of record time
+         * @description Balances as of record time
+         *
+         *     PRD inputs: claim, asOf
+         *     PRD outputs: balances by line
+         */
+        get: operations["clm.Financials.get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -372,421 +594,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/policy-changes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Start change
-         * @description Start change
-         *
-         *     PRD inputs: policyId, effectiveAt, description
-         *     PRD outputs: jobId
-         */
-        post: operations["pol.PolicyChange.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/cancellations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Cancellation
-         * @description Cancellation
-         *
-         *     PRD inputs: policyId, source, reason, effectiveAt, evidenceRefs, requestRef
-         *     PRD outputs: jobId, refund preview
-         */
-        post: operations["pol.Cancellation.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/cancellations/schedule": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Cancellation
-         * @description Cancellation
-         *
-         *     PRD inputs: policyId, source, reason, effectiveAt, evidenceRefs, requestRef
-         *     PRD outputs: jobId, refund preview
-         */
-        post: operations["pol.Cancellation.schedule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/cancellations/rescind": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Cancellation
-         * @description Cancellation
-         *
-         *     PRD inputs: policyId, source, reason, effectiveAt, evidenceRefs, requestRef
-         *     PRD outputs: jobId, refund preview
-         */
-        post: operations["pol.Cancellation.rescind"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/withdrawals/submit": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Statutory withdrawal or objection from CHN or staff
-         * @description Statutory withdrawal or objection from CHN or staff
-         *
-         *     PRD inputs: policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef
-         *     PRD outputs: void job, refund preview
-         */
-        post: operations["pol.Withdrawal.submit"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/reinstatements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Reinstatement
-         * @description Reinstatement
-         *
-         *     PRD inputs: termId, type, effectiveAt, reason
-         *     PRD outputs: jobId
-         */
-        post: operations["pol.Reinstatement.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/rewrites": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Rewrite
-         * @description Rewrite
-         *
-         *     PRD inputs: termId, rewriteType, effectiveAt, targetAccountId
-         *     PRD outputs: jobId
-         */
-        post: operations["pol.Rewrite.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/suspensions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Suspend or reactivate vehicle cover
-         * @description Suspend or reactivate vehicle cover
-         *
-         *     PRD inputs: termId, elementLocator, effectiveAt, reason, evidence
-         *     PRD outputs: jobId
-         */
-        post: operations["pol.Suspension.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/reactivations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Suspend or reactivate vehicle cover
-         * @description Suspend or reactivate vehicle cover
-         *
-         *     PRD inputs: termId, elementLocator, effectiveAt, reason, evidence
-         *     PRD outputs: jobId
-         */
-        post: operations["pol.Reactivation.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/renewals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Renewal
-         * @description Renewal
-         *
-         *     PRD inputs: termId; offer; acceptance evidence; reason
-         *     PRD outputs: job
-         */
-        post: operations["pol.Renewal.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/renewals/offer": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Renewal
-         * @description Renewal
-         *
-         *     PRD inputs: termId; offer; acceptance evidence; reason
-         *     PRD outputs: job
-         */
-        post: operations["pol.Renewal.offer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/renewals/accept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Renewal
-         * @description Renewal
-         *
-         *     PRD inputs: termId; offer; acceptance evidence; reason
-         *     PRD outputs: job
-         */
-        post: operations["pol.Renewal.accept"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/renewals/decline": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Renewal
-         * @description Renewal
-         *
-         *     PRD inputs: termId; offer; acceptance evidence; reason
-         *     PRD outputs: job
-         */
-        post: operations["pol.Renewal.decline"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/renewals/non-renew": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Renewal
-         * @description Renewal
-         *
-         *     PRD inputs: termId; offer; acceptance evidence; reason
-         *     PRD outputs: job
-         */
-        post: operations["pol.Renewal.nonRenew"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/renewal-runs/start": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Batch
-         * @description Batch
-         *
-         *     PRD inputs: entity, product, window
-         *     PRD outputs: run
-         */
-        post: operations["pol.RenewalRun.start"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/renewal-runs/retry-item": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Batch
-         * @description Batch
-         *
-         *     PRD inputs: entity, product, window
-         *     PRD outputs: run
-         */
-        post: operations["pol.RenewalRun.retryItem"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/renewal-runs/pause": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Batch
-         * @description Batch
-         *
-         *     PRD inputs: entity, product, window
-         *     PRD outputs: run
-         */
-        post: operations["pol.RenewalRun.pause"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/policy-moves/execute": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Move between accounts (PTY-initiated)
-         * @description Move between accounts (PTY-initiated)
-         *
-         *     PRD inputs: policyIds, targetAccountId, requestRef
-         *     PRD outputs: re-point map
-         */
-        post: operations["pol.PolicyMove.execute"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/policies/{id}": {
+    "/api/clm/v1/financials/daily-totals": {
         parameters: {
             query?: never;
             header?: never;
@@ -794,13 +602,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Policy as of validAt/knownAt
-         * @description Policy as of validAt/knownAt
+         * Daily claim financial totals for FIN reconciliation (XMR-F-120)
+         * @description Daily claim financial totals for FIN reconciliation (XMR-F-120)
          *
-         *     PRD inputs: ids, validAt, knownAt
-         *     PRD outputs: policy, term, segment, risk tree
+         *     PRD inputs: legal entity, accounting date
+         *     PRD outputs: totals by currency and cost type with transaction ids
          */
-        get: operations["pol.Policy.get"];
+        get: operations["clm.Financials.dailyTotals"];
         put?: never;
         post?: never;
         delete?: never;
@@ -809,7 +617,145 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/terms/{id}": {
+    "/api/clm/v1/statutory-offers/issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reasoned offer or reply; acceptance; repair-in-kind agreement
+         * @description Reasoned offer or reply; acceptance; repair-in-kind agreement
+         *
+         *     PRD inputs: exposure, content
+         *     PRD outputs: offer record, document request; agreement → clock start
+         */
+        post: operations["clm.StatutoryOffer.issue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/statutory-offers/record-acceptance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reasoned offer or reply; acceptance; repair-in-kind agreement
+         * @description Reasoned offer or reply; acceptance; repair-in-kind agreement
+         *
+         *     PRD inputs: exposure, content
+         *     PRD outputs: offer record, document request; agreement → clock start
+         */
+        post: operations["clm.StatutoryOffer.recordAcceptance"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/statutory-offers/record-repair-agreement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reasoned offer or reply; acceptance; repair-in-kind agreement
+         * @description Reasoned offer or reply; acceptance; repair-in-kind agreement
+         *
+         *     PRD inputs: exposure, content
+         *     PRD outputs: offer record, document request; agreement → clock start
+         */
+        post: operations["clm.StatutoryOffer.recordRepairAgreement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/certificates/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claims-history certificate
+         * @description Claims-history certificate
+         *
+         *     PRD inputs: requester, policies, period
+         *     PRD outputs: certificate
+         */
+        post: operations["clm.Certificate.request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/certificates/assemble": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claims-history certificate
+         * @description Claims-history certificate
+         *
+         *     PRD inputs: requester, policies, period
+         *     PRD outputs: certificate
+         */
+        post: operations["clm.Certificate.assemble"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/certificates/issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claims-history certificate
+         * @description Claims-history certificate
+         *
+         *     PRD inputs: requester, policies, period
+         *     PRD outputs: certificate
+         */
+        post: operations["clm.Certificate.issue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/claim-trackings/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -817,13 +763,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Policy as of validAt/knownAt
-         * @description Policy as of validAt/knownAt
+         * Status for channels, PTY, POL, WRK
+         * @description Status for channels, PTY, POL, WRK
          *
-         *     PRD inputs: ids, validAt, knownAt
-         *     PRD outputs: policy, term, segment, risk tree
+         *     PRD inputs: claim, party or policy
+         *     PRD outputs: tracking view
          */
-        get: operations["pol.Term.get"];
+        get: operations["clm.ClaimTracking.get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -832,7 +778,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/terms/timeline": {
+    "/api/clm/v1/claim-trackings": {
         parameters: {
             query?: never;
             header?: never;
@@ -840,13 +786,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Policy as of validAt/knownAt
-         * @description Policy as of validAt/knownAt
+         * Status for channels, PTY, POL, WRK
+         * @description Status for channels, PTY, POL, WRK
          *
-         *     PRD inputs: ids, validAt, knownAt
-         *     PRD outputs: policy, term, segment, risk tree
+         *     PRD inputs: claim, party or policy
+         *     PRD outputs: tracking view
          */
-        get: operations["pol.Term.timeline"];
+        get: operations["clm.ClaimTracking.list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -855,7 +801,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/snapshots/get": {
+    "/api/clm/v1/cat-events/aggregate": {
         parameters: {
             query?: never;
             header?: never;
@@ -863,18 +809,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Claims snapshot
-         * @description Claims snapshot
+         * Event aggregates for RI and DAT
+         * @description Event aggregates for RI and DAT
          *
-         *     The immutable view of the policy, term and segment in force at validAt (the loss date) as known at knownAt
-         *     (default now; never in the future). A date-form validAt is the end of that business day in Europe/Athens
-         *     (D-SLC-13). When no term covers the instant (or the term is not in force) the result is a success with
-         *     inForce=false and no content. The snapshotRef re-reads the same view byte-identically (POL P5).
-         *
-         *     PRD inputs: policyId or snapshotRef, lossAt, knownAt
-         *     PRD outputs: snapshot ref + content
+         *     PRD inputs: cat code, asOf
+         *     PRD outputs: totals by line
          */
-        get: operations["pol.Snapshot.get"];
+        get: operations["clm.CatEvent.aggregate"];
         put?: never;
         post?: never;
         delete?: never;
@@ -883,7 +824,191 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/policies/get-many": {
+    "/api/clm/v1/services/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vendor services and invoices (partner API through CHN)
+         * @description Vendor services and invoices (partner API through CHN)
+         *
+         *     PRD inputs: service data; invoice
+         *     PRD outputs: status
+         */
+        post: operations["clm.Service.request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/services/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Vendor services and invoices (partner API through CHN)
+         * @description Vendor services and invoices (partner API through CHN)
+         *
+         *     PRD inputs: service data; invoice
+         *     PRD outputs: status
+         */
+        patch: operations["clm.Service.update"];
+        trace?: never;
+    };
+    "/api/clm/v1/services/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vendor services and invoices (partner API through CHN)
+         * @description Vendor services and invoices (partner API through CHN)
+         *
+         *     PRD inputs: service data; invoice
+         *     PRD outputs: status
+         */
+        post: operations["clm.Service.cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/vendor-invoices/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vendor services and invoices (partner API through CHN)
+         * @description Vendor services and invoices (partner API through CHN)
+         *
+         *     PRD inputs: service data; invoice
+         *     PRD outputs: status
+         */
+        post: operations["clm.VendorInvoice.submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/vendor-invoices/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vendor services and invoices (partner API through CHN)
+         * @description Vendor services and invoices (partner API through CHN)
+         *
+         *     PRD inputs: service data; invoice
+         *     PRD outputs: status
+         */
+        post: operations["clm.VendorInvoice.decide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/fraud/score": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fraud scoring and SIU
+         * @description Fraud scoring and SIU
+         *
+         *     PRD inputs: claim
+         *     PRD outputs: indicators, band; case data
+         */
+        post: operations["clm.Fraud.score"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/conversations/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim messaging
+         * @description Claim messaging
+         *
+         *     PRD inputs: party, text, channel
+         *     PRD outputs: message status
+         */
+        post: operations["clm.Conversation.send"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/conversations/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim messaging
+         * @description Claim messaging
+         *
+         *     PRD inputs: party, text, channel
+         *     PRD outputs: message status
+         */
+        post: operations["clm.Conversation.schedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/conversations": {
         parameters: {
             query?: never;
             header?: never;
@@ -891,13 +1016,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Batch policy query as of validAt/knownAt
-         * @description Batch policy query as of validAt/knownAt
+         * Claim messaging
+         * @description Claim messaging
          *
-         *     PRD inputs: ids (≤ 200), validAt, knownAt
-         *     PRD outputs: policies
+         *     PRD inputs: party, text, channel
+         *     PRD outputs: message status
          */
-        get: operations["pol.Policy.getMany"];
+        get: operations["clm.Conversation.list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -906,38 +1031,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/policies/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Policy search
-         * @description Policy search
-         *
-         *     PRD inputs: criteria, cursor
-         *     PRD outputs: results
-         */
-        get: operations["pol.Policy.search"];
-        put?: never;
-        /**
-         * Policy search (POST form, criteria in the body)
-         * @description POST form of pol.Policy.search (D-SLC-05): policy number and insured party id travel in the body, never in a URL.
-         *     A read; no Idempotency-Key.
-         *
-         *     PRD inputs: criteria, cursor
-         *     PRD outputs: results
-         */
-        post: operations["pol.Policy.searchByCriteria"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/earning/compute": {
+    "/api/clm/v1/import/claim": {
         parameters: {
             query?: never;
             header?: never;
@@ -947,20 +1041,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Earned/unearned
-         * @description Earned/unearned
+         * Migration with the same validation as live (R-77); currency changeover for later markets; reversal of …
+         * @description Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
          *
-         *     PRD inputs: termId, asOf, knownAt
-         *     PRD outputs: per element × charge type
+         *     PRD inputs: legacy claim
+         *     PRD outputs: claim
          */
-        post: operations["pol.Earning.compute"];
+        post: operations["clm.Import.claim"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/charges/reconcile": {
+    "/api/clm/v1/import/financial-history": {
         parameters: {
             query?: never;
             header?: never;
@@ -970,89 +1064,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Charge reconciliation (written charges and written premium)
-         * @description Charge reconciliation (written charges and written premium)
+         * Migration with the same validation as live (R-77); currency changeover for later markets; reversal of …
+         * @description Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
          *
-         *     PRD inputs: termId or period, counterpart totals
-         *     PRD outputs: differences
+         *     PRD inputs: legacy claim
+         *     PRD outputs: claim
          */
-        post: operations["pol.Charges.reconcile"];
+        post: operations["clm.Import.financialHistory"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/segments/changes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Segment feed
-         * @description Segment feed
-         *
-         *     PRD inputs: cursor
-         *     PRD outputs: segment versions
-         */
-        get: operations["pol.Segment.changes"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/status-model/get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Transition table
-         * @description Transition table
-         *
-         *     PRD inputs: —
-         *     PRD outputs: table
-         */
-        get: operations["pol.StatusModel.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/effective-date/limits": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Allowed range for a job
-         * @description Allowed range for a job
-         *
-         *     PRD inputs: policyId, txnType, role, channel
-         *     PRD outputs: earliest, latest, override available
-         */
-        get: operations["pol.EffectiveDate.limits"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pol/v1/import/policy": {
+    "/api/clm/v1/import/convert-currency": {
         parameters: {
             query?: never;
             header?: never;
@@ -1062,21 +1087,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Migration (same validation as live)
-         * @description Migration (same validation as live)
+         * Migration with the same validation as live (R-77); currency changeover for later markets; reversal of …
+         * @description Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
          *
-         *     PRD inputs: legacy payload, sourceKey
-         *     PRD outputs: outcome
-         *     PRD error notes: validation errors
+         *     PRD inputs: plan
+         *     PRD outputs: conversion result
          */
-        post: operations["pol.Import.policy"];
+        post: operations["clm.Import.convertCurrency"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/import/term": {
+    "/api/clm/v1/import/reverse": {
         parameters: {
             query?: never;
             header?: never;
@@ -1086,21 +1110,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Migration (same validation as live)
-         * @description Migration (same validation as live)
+         * Migration with the same validation as live (R-77); currency changeover for later markets; reversal of …
+         * @description Migration with the same validation as live (R-77); currency changeover for later markets; reversal of `origin=MIGRATION` objects for rollback
          *
-         *     PRD inputs: legacy payload, sourceKey
-         *     PRD outputs: outcome
-         *     PRD error notes: validation errors
+         *     PRD inputs: batch id or source key
+         *     PRD outputs: reversal result
          */
-        post: operations["pol.Import.term"];
+        post: operations["clm.Import.reverse"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/import/reverse": {
+    "/api/clm/v1/dsar/export": {
         parameters: {
             query?: never;
             header?: never;
@@ -1110,20 +1133,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Named reversal of origin=MIGRATION objects (XMR-D-260)
-         * @description Named reversal of `origin=MIGRATION` objects (XMR-D-260)
+         * DSAR access export for CMP fan-out (REQ-CMP-005)
+         * @description DSAR access export for CMP fan-out (`REQ-CMP-005`)
          *
-         *     PRD inputs: importBatchId or sourceKeys
-         *     PRD outputs: per-object outcome (reversed, refused with reason)
+         *     PRD inputs: party
+         *     PRD outputs: claim data package
          */
-        post: operations["pol.Import.reverse"];
+        post: operations["clm.Dsar.export"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/import/convert-currency": {
+    "/api/clm/v1/dsar/rectify": {
         parameters: {
             query?: never;
             header?: never;
@@ -1133,21 +1156,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Later-market currency changeover (Could)
-         * @description Later-market currency changeover (Could)
+         * DSAR rectification of claim data of a party
+         * @description DSAR rectification of claim data of a party
          *
-         *     PRD inputs: planId
-         *     PRD outputs: conversion report
-         *     PRD error notes: plan errors
+         *     PRD inputs: party, corrections
+         *     PRD outputs: result
          */
-        post: operations["pol.Import.convertCurrency"];
+        post: operations["clm.Dsar.rectify"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/dsar/export": {
+    "/api/clm/v1/dsar/restrict": {
         parameters: {
             query?: never;
             header?: never;
@@ -1157,20 +1179,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Data-subject access: export of POL-held personal data per party (CMP DSAR fan-out, REQ-CMP-005)
-         * @description Data-subject access: export of POL-held personal data per party (CMP DSAR fan-out, `REQ-CMP-005`)
+         * DSAR restriction of processing for a party's claim data
+         * @description DSAR restriction of processing for a party's claim data
          *
-         *     PRD inputs: partyId, dsarTaskId
-         *     PRD outputs: export package
+         *     PRD inputs: party, scope
+         *     PRD outputs: result
          */
-        post: operations["pol.Dsar.export"];
+        post: operations["clm.Dsar.restrict"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/pol/v1/dsar/restrict": {
+    "/api/clm/v1/dsar/purge": {
         parameters: {
             query?: never;
             header?: never;
@@ -1180,13 +1202,13 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Data-subject restriction and erasure-conflict recording per party (CMP DSAR fan-out, REQ-CMP-005)
-         * @description Data-subject restriction and erasure-conflict recording per party (CMP DSAR fan-out, `REQ-CMP-005`)
+         * Erasure or anonymisation of a party's claim data where retention allows (legal holds and open recoveries …
+         * @description Erasure or anonymisation of a party's claim data where retention allows (legal holds and open recoveries respected)
          *
-         *     PRD inputs: partyId, dsarTaskId, restrict / lift
-         *     PRD outputs: restriction status, retention conflicts
+         *     PRD inputs: party or scope
+         *     PRD outputs: result
          */
-        post: operations["pol.Dsar.restrict"];
+        post: operations["clm.Dsar.purge"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1197,1056 +1219,880 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description Typed from REQ-POL-001, REQ-POL-145. PRD inputs: "accountId, product, producerCode, channel, effectiveAt, quoteType". SL-POL: the term is annual (REQ-POL-040 subset). */
-        SubmissionCreateRequest: {
-            /** @description PTY account. Optional until pty.Account is built (SL-POL); the policyholder party is then the reference */
-            accountId?: components["schemas"]["Uuid"];
-            /** @description PTY party of the policyholder (PrimaryNamedInsured, REQ-POL-288); checked through pty.Party.get */
-            policyholderPartyId: components["schemas"]["Uuid"];
-            product: components["schemas"]["Code"];
-            /** @description Producer of record; checked through pty.ProducerCode.validate (REQ-POL-174). Absent for direct business */
-            producerCode?: components["schemas"]["Code"];
-            /** @description R-84 channel code (e.g. STAFF, WEB_DIRECT, BROKER_PORTAL, PARTNER_API, AI_AGENT) */
-            channel: components["schemas"]["Code"];
-            /** @description Requested term start; never before now for new business (REQ-POL-137) */
-            effectiveAt: components["schemas"]["Instant"];
-            /**
-             * @description Quick or full quote (REQ-POL-011)
-             * @enum {string}
-             */
-            quoteType: "QUICK" | "FULL";
-            /** @description Term currency; defaults to the stamp's configured currency */
-            currency?: components["schemas"]["CurrencyCode"];
-        };
-        /** @description Typed from REQ-POL-001, REQ-POL-145. PRD outputs: "jobId, describe model, version, manifest" */
-        SubmissionCreateResponse: {
-            jobId: components["schemas"]["Uuid"];
-            /** @description Job (quote) number from PLT numbering (REQ-POL-047) */
-            jobNumber: components["schemas"]["BusinessNumber"];
-            /** @description Policy id reserved for the submission (event ordering key); the policy exists once bound */
-            policyId: components["schemas"]["Uuid"];
-            state: components["schemas"]["JobStateCode"];
-            productVersion: components["schemas"]["ProductVersionNumber"];
-            /** @description Term end (exclusive) */
-            expirationAt: components["schemas"]["Instant"];
-            /** @description pfc.Product.describe model */
-            describeModel?: components["schemas"]["OpenObject"];
-            /** @description Quote version number */
-            versionNo: number;
-            /** @description Resolution manifest (REQ-PFC-221) */
-            manifest: {
-                artefactHash: components["schemas"]["Sha256"];
-                /** @description Floating at resolution, pinned for the term (REQ-PFC-221) */
-                ratingArtefactHash?: components["schemas"]["Sha256"];
-                /** @description Rule-set version per checkpoint */
-                uwRuleSetVersions?: {
-                    [key: string]: components["schemas"]["Code"];
-                };
-                formPatternEditions?: components["schemas"]["Code"][];
-                referenceTableVersions?: components["schemas"]["Code"][];
-                paymentPlanVersions?: components["schemas"]["Code"][];
+        /** @description Mandatory: lineOfBusiness, policyId, lossAt, lossCause, lossLocation, description, channel; they are not schema-required so that a missing one is CLM-ERR-FNOL-001 naming the field (REQ-CLM-030), not a parse error. Typed from REQ-CLM-001, REQ-CLM-030, REQ-CLM-036, REQ-CLM-041, REQ-CLM-065 (SL2-CLM-CORE). PRD inputs: "FNOL payload". A missing required field is CLM-ERR-FNOL-001 naming the field. */
+        FnolSubmitRequest: {
+            /** @description Line of business (the slice accepts MOTOR, D-SL2-01) */
+            lineOfBusiness?: components["schemas"]["Code"];
+            /** @description Policy chosen in the FNOL policy lookup (pol.Policy.search, REQ-CLM-047); cover is verified on its snapshot at lossAt (REQ-CLM-002) */
+            policyId?: components["schemas"]["Uuid"];
+            /** @description Optional cross-check; when given it must equal the policy number on the snapshot */
+            policyNumber?: components["schemas"]["BusinessNumber"];
+            /** @description Loss date and time (business fact, not a time-travel input); never in the future, never after noticeOn (REQ-CLM-030) */
+            lossAt?: components["schemas"]["Instant"];
+            /** @description Notice date; defaults to today in Europe/Athens from the PLT time service (REQ-CLM-030) */
+            noticeOn?: components["schemas"]["LocalDate"] | null;
+            /** @description Loss cause from the line's code list (REQ-CLM-030) */
+            lossCause?: components["schemas"]["Code"];
+            /** @description Loss location as free description (REQ-CLM-030). May hold personal data; encrypted at rest, never in lists, events or URLs */
+            lossLocation?: string;
+            /** @description Free-text description (REQ-CLM-030, ≤ 4,000). May hold personal data; encrypted at rest, never in lists, events or URLs */
+            description?: string;
+            /** @description Line-specific loss data; kept only inside the encrypted FNOL snapshot (REQ-CLM-044) */
+            lossData?: components["schemas"]["OpenObject"];
+            reporter?: {
+                partyId?: components["schemas"]["Uuid"];
+                /** @description Relationship to the insured (default INSURED) */
+                relationship?: components["schemas"]["Code"];
+                adHoc?: components["schemas"]["OpenObject"];
             };
+            involvedParties?: components["schemas"]["OpenObject"][];
+            incidents?: components["schemas"]["FnolIncidentInput"][];
+            /** @description Exposure proposals confirmed by the user (REQ-CLM-065); in the slice own-damage style exposures for the insured */
+            exposures?: components["schemas"]["FnolExposureInput"][];
+            duplicateDecision?: components["schemas"]["DuplicateDecision"] | null;
+            attachmentRefs?: components["schemas"]["Uuid"][];
+            /** @description Shared channel code list (R-84, REQ-CLM-036) */
+            channel?: components["schemas"]["Code"];
+            /** @description TELEPHONE, EMAIL, LETTER, FAX, SMS, IN_PERSON, ELECTRONIC (REQ-CLM-036) */
+            receiptMedium?: components["schemas"]["Code"] | null;
+            channelMetadata?: components["schemas"]["OpenObject"];
+        };
+        /** @description An incident of the loss (REQ-CLM-064). The slice records vehicle incidents only; no injury (P3) fields. */
+        FnolIncidentInput: {
+            /** @enum {string} */
+            incidentType: "VEHICLE";
+            /** @description Insured vehicle reference from the snapshot (vehicle id or plate) */
+            vehicleRef?: string | null;
+            drivable?: boolean | null;
+            damageAreas?: components["schemas"]["Code"][];
+        };
+        /** @description A confirmed exposure proposal (REQ-CLM-062, REQ-CLM-065); the claimant is the insured. */
+        FnolExposureInput: {
+            kind: components["schemas"]["ExposureKind"];
+            coverageCode: components["schemas"]["Code"];
+        };
+        /** @description The user's choice for probable duplicates (REQ-CLM-041); merge is a later work package. */
+        DuplicateDecision: {
+            /** @enum {string} */
+            action: "LINK" | "OVERRIDE";
+            /** @description The existing claim (required for LINK) */
+            linkedClaimId?: components["schemas"]["Uuid"] | null;
+            reasonCode: components["schemas"]["Code"];
         };
         /**
-         * @description Job state (contract §3.2.4, D-CON-08b)
+         * @description Exposure kind (REQ-CLM-062)
          * @enum {string}
          */
-        JobStateCode: "DRAFT" | "QUOTED" | "BOUND" | "SCHEDULED" | "RESCINDED" | "WITHDRAWN" | "DECLINED" | "NOT_TAKEN" | "EXPIRED";
-        /** @description Vehicle element of the risk tree (REQ-POL-277) */
-        Vehicle: {
-            /** @description Static locator (UUIDv7, REQ-POL-036); assigned by POL when absent */
-            locator?: components["schemas"]["Text"];
-            /** @description Registration plate as entered */
-            plate: components["schemas"]["Text"];
-            /** @description Plate normalised by IdValidator VEHICLE_PLATE (REQ-POL-279); output only */
-            plateNormalised?: components["schemas"]["Text"];
-            vin?: components["schemas"]["Text"];
-            make?: components["schemas"]["Text"];
-            model?: components["schemas"]["Text"];
-            firstRegistrationYear?: number;
-            /** @description Engine capacity (PFC vehicle field; a rating input) */
-            engineCapacityCc?: number;
-            /** @description Vehicle use code from the PFC vehicle element */
-            use?: components["schemas"]["Code"];
-            value?: components["schemas"]["Money"];
-            /** @description Further PFC vehicle element fields (REQ-POL-277, REQ-POL-299) */
-            fields?: components["schemas"]["OpenObject"];
-        };
-        /** @description PolicyDriver element of the risk tree (REQ-POL-280) */
-        Driver: {
-            /** @description Static locator (UUIDv7, REQ-POL-036); assigned by POL when absent */
-            locator?: components["schemas"]["Text"];
-            /** @description PTY person of the driver (REQ-POL-280) */
-            partyId: components["schemas"]["Uuid"];
-            /**
-             * @description Excluded drivers are named persons not covered (REQ-POL-283)
-             * @enum {string}
-             */
-            driverType: "MAIN" | "OCCASIONAL" | "EXCLUDED";
-            yearFirstLicensed?: number;
-            /** @description Vehicle the driver is assigned to (REQ-POL-282) */
-            vehicleLocator?: components["schemas"]["Text"];
-            usagePercent?: number;
-            /** @description At-fault claims in the last five years (PFC driver field, question Q-CLAIMS-5Y) */
-            claimsLast5Years?: number;
-            /** @description Further PFC driver element fields (REQ-POL-299); gender is never captured */
-            fields?: components["schemas"]["OpenObject"];
-        };
-        /** @description A coverage selection (REQ-POL-292) */
-        CoverageSelection: {
+        ExposureKind: "OWN_DAMAGE" | "MTPL_PD" | "MTPL_BI" | "THEFT" | "GLASS" | "ASSISTANCE" | "LEGAL_PROTECTION" | "PROPERTY_BUILDING" | "CONTENTS" | "ALTERNATIVE_ACCOMMODATION" | "LIABILITY_PROPERTY" | "LIABILITY_INJURY" | "FS_OWN_SETTLEMENT";
+        /** @description Coverage indication from the snapshot (REQ-CLM-048), an indication until a coverage decision is recorded. */
+        CoverageIndication: {
             coverageCode: components["schemas"]["Code"];
-            /** @description Element the coverage attaches to (a vehicle locator); absent for policy-level coverages */
-            elementLocator?: components["schemas"]["Text"];
-            selected: boolean;
-            /** @description Coverage terms and options from the PFC catalogue (REQ-POL-292) */
-            options?: components["schemas"]["OpenObject"];
-        };
-        /** @description Answered question set stored on the quote version (REQ-POL-149) */
-        QuestionAnswers: {
-            questionSetCode: components["schemas"]["Code"];
-            questionSetVersion?: components["schemas"]["Text"];
-            answers: components["schemas"]["OpenObject"];
-        };
-        /** @description Draft risk tree of a quote version (REQ-POL-010); frozen into the segment snapshot at bind */
-        RiskTree: {
-            vehicles: components["schemas"]["Vehicle"][];
-            drivers: components["schemas"]["Driver"][];
-            coverages: components["schemas"]["CoverageSelection"][];
-            questionSets: components["schemas"]["QuestionAnswers"][];
-        };
-        /** @description One intent edit of the draft risk tree */
-        DraftInstruction: {
             /**
-             * @description SET_* adds the element or replaces the one with the same locator; SET_COVERAGES replaces all selections
+             * @description COVERED = the code is a selected coverage of the in-force snapshot; NOT_COVERED = not on the snapshot; IN_QUESTION = the policy was not in force at the loss date (REQ-CLM-049)
              * @enum {string}
              */
-            op: "SET_VEHICLE" | "REMOVE_VEHICLE" | "SET_DRIVER" | "REMOVE_DRIVER" | "SET_COVERAGES" | "SET_ANSWERS";
-            vehicle?: components["schemas"]["Vehicle"];
-            driver?: components["schemas"]["Driver"];
-            /** @description Element to remove (REMOVE_*) */
-            locator?: components["schemas"]["Text"];
-            coverages?: components["schemas"]["CoverageSelection"][];
-            questionSet?: components["schemas"]["QuestionAnswers"];
+            indication: "COVERED" | "NOT_COVERED" | "IN_QUESTION";
         };
-        /** @description A charge line of a quote or bound transaction (REQ-POL-115, REQ-POL-126) */
-        ChargeLine: {
-            /** @description Present once frozen on a transaction */
-            chargeId?: components["schemas"]["Uuid"];
-            transactionId?: components["schemas"]["Uuid"];
-            elementLocator: components["schemas"]["Text"];
-            coverageCode: components["schemas"]["Code"];
-            chargeType: components["schemas"]["Code"];
-            /** @description PREMIUM, TAX or LEVY (from RAT) */
-            chargeCategory: components["schemas"]["Code"];
-            /** @description Annual rate from the RAT worksheet */
-            annualRate: components["schemas"]["Decimal"];
-            /** @description Term amount, rounded through mkt.Rounding.apply (REQ-POL-123) */
-            amount: components["schemas"]["Money"];
-            /** @description Legal status of the configured tax or levy value RAT used (D-REG; tax and levy lines only) */
-            legalStatus?: components["schemas"]["Code"];
-            /** @description True when the tax or levy value is not Settled (refused in production, D-REG-02) */
-            provisional?: boolean;
+        /** @description A probable duplicate (REQ-CLM-041) with its match reasons. */
+        DuplicateCandidate: {
+            claimId: components["schemas"]["Uuid"];
+            claimNumber: components["schemas"]["BusinessNumber"];
+            reasons: components["schemas"]["Code"][];
         };
-        /** @description UW issue as returned by evaluate (REQ-UW-001) */
-        UwIssue: {
-            issueId: components["schemas"]["Uuid"];
-            /** @description Issue type code */
-            issueType: components["schemas"]["Code"];
-            severity?: components["schemas"]["Code"];
-            blockingPoint: components["schemas"]["BlockingPoint"];
-            /** @description Issue key, e.g. `driver:<driverRef>` (REQ-UW-001) */
-            issueKey: string;
-            lane?: components["schemas"]["Code"];
-            explanationKeys?: string[];
-            /** @description Issue state (PRD-04 §7.3) */
-            approvalStatus: components["schemas"]["Code"];
+        /** @description A finding of clm.Fnol.validate. */
+        FnolIssue: {
+            /** @description Error code the submit would return (e.g. CLM-ERR-FNOL-001) */
+            code: string;
+            field?: string | null;
+            message: string;
         };
-        /** @description pol.Job.updateDraft request. PRD inputs: "jobId, versionNo, instructions[], expectedDraftVersion". Editing a Quoted job returns it to Draft on a new quote version (REQ-POL-153, D-CON-08c). */
-        JobUpdateDraftRequest: {
-            jobId: components["schemas"]["Uuid"];
-            /** @description Quote version being edited */
-            versionNo: number;
-            /** @description Draft version the caller edited (optimistic concurrency, POL-ERR-STALE) */
-            expectedDraftVersion: number;
-            instructions: components["schemas"]["DraftInstruction"][];
-        };
-        /** @description pol.Job.updateDraft result. PRD outputs: "draft state, validation, premium preview" */
-        JobUpdateDraftResponse: {
-            jobId: components["schemas"]["Uuid"];
-            /** @description Quote version now in Draft (a new one when a Quoted job was edited) */
-            versionNo: number;
-            draftVersion: number;
-            state: components["schemas"]["JobStateCode"];
-            riskTree: components["schemas"]["RiskTree"];
-            /** @description Findings that block quoting but not saving the draft */
-            validation: {
-                field: string;
-                code: components["schemas"]["Code"];
-                message?: string;
-            }[];
-            /** @description PRD: "premium preview" (background pricing, REQ-POL-163; not in SL-POL) */
-            premiumPreview?: components["schemas"]["Money"];
-        };
-        /** @description Typed from REQ-POL-011, REQ-POL-157. PRD inputs: "jobId, versionNo" */
-        JobQuoteRequest: {
-            jobId: components["schemas"]["Uuid"];
-            /** @description Quote version */
-            versionNo: number;
-        };
-        /** @description Typed from REQ-POL-011, REQ-POL-157. PRD outputs: "quote version, premium, issues, validity" */
-        JobQuoteResponse: {
-            jobId: components["schemas"]["Uuid"];
-            quoteId: components["schemas"]["Uuid"];
-            /** @description Quote version */
-            versionNo: number;
-            state: components["schemas"]["JobStateCode"];
-            /**
-             * @description UW outcome at PRE_QUOTE. REFER with state DRAFT = blocked at PRE_QUOTE; with QUOTED = bind blocked until approval. DECLINE keeps the job in Draft (not quoted); the job becomes Declined when UW issues the decline record (uw.DeclineIssued, REQ-POL-156)
-             * @enum {string}
-             */
-            decision: "ACCEPT" | "REFER" | "DECLINE";
-            /** @description Referred flag (blocking UW issues open) */
-            referred: boolean;
-            /** @description False for quick quotes and when RAT says so (REQ-POL-148) */
-            bindable: boolean;
-            premium: components["schemas"]["Money"];
-            /** @description Taxes and levies */
-            taxes: components["schemas"]["Money"];
-            total: components["schemas"]["Money"];
-            charges: components["schemas"]["ChargeLine"][];
-            /** @description RAT worksheet (D-API-12) */
-            worksheetId: components["schemas"]["Sha256"];
-            /** @description UW issues by blocking point */
-            issues: components["schemas"]["UwIssue"][];
-            /** @description Quote validity */
-            validUntil?: components["schemas"]["Instant"];
-            /** @description Non-blocking warnings of the quote (additive; none when the quote is clean) */
-            warnings?: {
-                /** @description RAT-WARN-* from rating or UW-WARN-* from underwriting, passed through (e.g. RAT-WARN-ILLUSTRATIVE-TARIFF, RAT-WARN-PROVISIONAL-TAX, UW-WARN-ILLUSTRATIVE-RULES) */
-                code: components["schemas"]["Code"];
-                /** @description Text in the request language */
-                message: components["schemas"]["Text"];
-            }[];
-        };
-        /** @description pol.Job.requote request. PRD inputs: "jobId, versionNo" */
-        JobRequoteRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "versionNo" */
-            versionNo?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.requote result. PRD outputs: "quote version, premium, issues, validity" */
-        JobRequoteResponse: {
-            /** @description PRD: "quote version" */
-            quoteVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "premium" */
-            premium?: components["schemas"]["Money"];
-            /** @description PRD: "issues" */
-            issues?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "validity" */
-            validity?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.newVersion request. PRD inputs: "jobId, sourceVersion" */
-        JobNewVersionRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "sourceVersion" */
-            sourceVersion?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.newVersion result. PRD outputs: "new version; comparison" */
-        JobNewVersionResponse: {
-            /** @description PRD: "new version" */
-            newVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "comparison" */
-            comparison?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.copyVersion request. PRD inputs: "jobId, sourceVersion" */
-        JobCopyVersionRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "sourceVersion" */
-            sourceVersion?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.copyVersion result. PRD outputs: "new version; comparison" */
-        JobCopyVersionResponse: {
-            /** @description PRD: "new version" */
-            newVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "comparison" */
-            comparison?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.compareVersions request. PRD inputs: "jobId, sourceVersion" */
-        JobCompareVersionsRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "sourceVersion" */
-            sourceVersion?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.compareVersions result. PRD outputs: "new version; comparison" */
-        JobCompareVersionsResponse: {
-            /** @description PRD: "new version" */
-            newVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "comparison" */
-            comparison?: components["schemas"]["Unspecified"];
-        };
-        /** @description Typed from REQ-POL-001, REQ-POL-003, REQ-POL-170. PRD inputs: "jobId, versionNo, paymentPlanOption, holdIssuance, confirmation, disclosureEvidence (CHN presentation receipt, optional)" */
-        JobBindRequest: {
-            jobId: components["schemas"]["Uuid"];
-            /** @description Quote version */
-            versionNo: number;
-            /** @description BIL plan code (bil.PaymentPlan.select); carried to BIL in PolicyBound.paymentPlanRef */
-            paymentPlanOption: components["schemas"]["Code"];
-            /** @description Optional payment method; carried to BIL in PolicyBound.paymentMethod */
-            paymentMethod?: components["schemas"]["Code"];
-            /** @description Hold issuance */
-            holdIssuance?: boolean;
-            /** @description Human confirmation (POL-ERR-HUMAN-CONFIRMATION-REQUIRED, REQ-POL-181) */
-            confirmation?: boolean;
-            /** @description Optional */
-            disclosureEvidence?: {
-                /** @description CHN presentation receipt */
-                presentationReceiptId?: components["schemas"]["Uuid"];
-            };
-        };
-        /** @description On a failed gate the job stays Quoted, no transaction exists and gateResults explain why (REQ-POL-003) Typed from REQ-POL-001, REQ-POL-003, REQ-POL-170. PRD outputs: "transaction, term, deltas, gate results, cover note ref" */
-        JobBindResponse: {
-            jobId: components["schemas"]["Uuid"];
-            state: components["schemas"]["JobStateCode"];
-            transactionId?: components["schemas"]["Uuid"];
-            termId?: components["schemas"]["Uuid"];
-            termNumber?: number;
-            termState?: components["schemas"]["TermStateCode"];
-            policyId?: components["schemas"]["Uuid"];
-            /** @description Gapless policy number from PLT numbering, allocated in the bind transaction */
-            policyNumber?: components["schemas"]["BusinessNumber"];
-            /** @description Transaction time (knownAt) of the bind */
-            recordedAt?: components["schemas"]["Instant"];
-            /** @description Charge lines frozen on the issuance transaction and emitted as ChargeDeltaEmitted */
-            chargeDeltas?: components["schemas"]["ChargeLine"][];
-            gateResults: {
-                /** @description e.g. DOWN_PAYMENT */
-                gate: components["schemas"]["Code"];
-                /** @description Gate passed */
-                passed: boolean;
+        /** @description Typed from REQ-CLM-001 (SL2-CLM-CORE). PRD outputs: "claim, exposures, checklist, assignment". Holds no free text (stored by the idempotency store). */
+        FnolSubmitResponse: {
+            claimId: components["schemas"]["Uuid"];
+            claimNumber: components["schemas"]["BusinessNumber"];
+            claim: components["schemas"]["ClaimSummary"];
+            exposures: components["schemas"]["ExposureView"][];
+            coverageIndications: components["schemas"]["CoverageIndication"][];
+            duplicateCandidates: components["schemas"]["DuplicateCandidate"][];
+            handlingSegment: components["schemas"]["Code"];
+            assignment?: {
                 /**
-                 * @description REQ-POL-170
+                 * @description WRK assignee kind
                  * @enum {string}
                  */
-                severity: "BLOCK" | "WARN";
-                reason?: components["schemas"]["Code"];
-                evidenceRef?: string;
-            }[];
-            /** @description doc.ProofOfCover.issue result */
-            coverNoteDocumentId?: components["schemas"]["Uuid"];
+                assigneeType?: "USER" | "GROUP" | "QUEUE";
+                assigneeId?: string;
+            };
+            requiredDocuments?: components["schemas"]["Code"][];
+        };
+        /** @description clm.Fnol.saveDraft request. PRD inputs: "FNOL payload" */
+        FnolSaveDraftRequest: {
+            /** @description PRD: "FNOL payload" */
+            fnolPayload?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Fnol.saveDraft result. PRD outputs: "claim, exposures, checklist, assignment" */
+        FnolSaveDraftResponse: {
+            /** @description PRD: "claim" */
+            claim?: components["schemas"]["Unspecified"];
+            /** @description PRD: "exposures" */
+            exposures?: components["schemas"]["Unspecified"];
+            /** @description PRD: "checklist" */
+            checklist?: components["schemas"]["Unspecified"];
+            /** @description PRD: "assignment" */
+            assignment?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Fnol.get result: the immutable FNOL snapshot as submitted (REQ-CLM-044). Typed by SL2-CLM-CORE. */
+        FnolGetResponse: {
+            fnolId: components["schemas"]["Uuid"];
+            claimId: components["schemas"]["Uuid"];
+            claimNumber: components["schemas"]["BusinessNumber"];
+            channel: components["schemas"]["Code"];
+            reporterPartyId?: components["schemas"]["Uuid"] | null;
+            submittedAt: components["schemas"]["Instant"];
+            submittedBy: string;
+            payload: components["schemas"]["FnolSubmitRequest"];
+        };
+        /** @description clm.Fnol.validate request: the FNOL payload a submit would send (no claim, number or event is created). */
+        FnolValidateRequest: {
+            fnol: components["schemas"]["FnolSubmitRequest"];
+        };
+        /** @description clm.Fnol.validate result (SL2-CLM-CORE): the findings a submit would raise, coverage indications and duplicate candidates. */
+        FnolValidateResponse: {
+            valid: boolean;
+            issues: components["schemas"]["FnolIssue"][];
+            policyNumber?: components["schemas"]["BusinessNumber"] | null;
+            policyInForce?: boolean | null;
+            policyStatusAtLoss?: components["schemas"]["Code"] | null;
+            coverageIndications: components["schemas"]["CoverageIndication"][];
+            duplicateCandidates: components["schemas"]["DuplicateCandidate"][];
+        };
+        /** @description The claim header without free text (lists, command results, idempotency store). */
+        ClaimSummary: {
+            claimId: components["schemas"]["Uuid"];
+            claimNumber: components["schemas"]["BusinessNumber"];
+            policyId: components["schemas"]["Uuid"];
+            policyNumber: components["schemas"]["BusinessNumber"];
+            insuredPartyId: components["schemas"]["Uuid"];
+            snapshotRef: string;
+            snapshotKnownAt: components["schemas"]["Instant"];
+            /** @enum {string} */
+            snapshotStatus: "PENDING" | "VERIFIED" | "REVERIFICATION_REQUIRED";
+            policyInForceAtLoss: boolean;
+            policyStatusAtLoss?: components["schemas"]["Code"] | null;
+            productCode: components["schemas"]["Code"];
+            productVersion?: string | null;
+            lineOfBusiness: components["schemas"]["Code"];
+            lossAt: components["schemas"]["Instant"];
+            lossDate: components["schemas"]["LocalDate"];
+            noticeOn: components["schemas"]["LocalDate"];
+            lossCause: components["schemas"]["Code"];
+            channel: components["schemas"]["Code"];
+            handlingSegment: components["schemas"]["Code"];
+            /** @enum {string} */
+            status: "DRAFT" | "OPEN" | "CLOSED";
+            subStatus?: components["schemas"]["ClaimSubStatus"] | null;
+            outcome?: components["schemas"]["ClaimOutcome"] | null;
+            coverageInQuestion: boolean;
+            duplicateOfClaimId?: components["schemas"]["Uuid"] | null;
+            handler?: string | null;
+            /** @description Days since notice (REQ-CLM-075); frozen at closure */
+            openDays: number;
+            recordVersion: number;
+            createdAt: components["schemas"]["Instant"];
+            closedAt?: components["schemas"]["Instant"] | null;
         };
         /**
-         * @description PolicyTerm state (contract §3.2.4, D-CON-02); Scheduled → InForce is derived on read (REQ-POL-131)
+         * @description Open sub-state (REQ-CLM-071)
          * @enum {string}
          */
-        TermStateCode: "SCHEDULED" | "IN_FORCE" | "PENDING_CANCELLATION" | "CANCELLED" | "EXPIRED" | "VOIDED" | "REWRITTEN";
-        QuoteVersionView: {
-            quoteId: components["schemas"]["Uuid"];
-            versionNo: number;
-            /** @enum {string} */
-            state: "DRAFT" | "QUOTED" | "SUPERSEDED" | "EXPIRED";
-            draftVersion: number;
-            riskTree: components["schemas"]["RiskTree"];
-            premium?: components["schemas"]["Money"];
-            taxes?: components["schemas"]["Money"];
-            total?: components["schemas"]["Money"];
-            charges: components["schemas"]["ChargeLine"][];
-            issues: components["schemas"]["UwIssue"][];
-            worksheetId?: components["schemas"]["Sha256"];
-            quotedAt?: components["schemas"]["Instant"];
-            validUntil?: components["schemas"]["Instant"];
+        ClaimSubStatus: "NEW" | "IN_PROGRESS" | "UNDER_INVESTIGATION" | "SETTLED";
+        /**
+         * @description Closure outcome (REQ-CLM-071)
+         * @enum {string}
+         */
+        ClaimOutcome: "COMPLETED" | "DENIED" | "WITHDRAWN" | "DUPLICATE" | "NO_PAYMENT";
+        /** @description The claim (REQ-CLM-061) with exposures, claimants and incidents. Free text (description, lossLocation) is shown to holders of clm.Claim.get only here, never in lists. */
+        ClaimView: {
+            summary: components["schemas"]["ClaimSummary"];
+            legalEntity: string;
+            jurisdiction: components["schemas"]["CountryCode"];
+            lossLocation: string;
+            description: string;
+            exposures: components["schemas"]["ExposureView"][];
+            claimants: components["schemas"]["ClaimantView"][];
+            incidents: components["schemas"]["IncidentView"][];
         };
-        /** @description A job with its quote versions (REQ-POL-331) */
-        JobView: {
-            jobId: components["schemas"]["Uuid"];
-            jobNumber: components["schemas"]["BusinessNumber"];
-            jobType: components["schemas"]["Code"];
-            state: components["schemas"]["JobStateCode"];
-            referred: boolean;
-            policyId: components["schemas"]["Uuid"];
-            policyNumber?: components["schemas"]["BusinessNumber"];
-            policyholderPartyId: components["schemas"]["Uuid"];
-            accountId?: components["schemas"]["Uuid"];
-            productCode: components["schemas"]["Code"];
-            productVersion: components["schemas"]["ProductVersionNumber"];
-            channel: components["schemas"]["Code"];
-            producerCode?: components["schemas"]["Code"];
+        /** @description An exposure (REQ-CLM-062) = one coverage × one claimant. */
+        ExposureView: {
+            exposureId: components["schemas"]["Uuid"];
+            exposureNumber: components["schemas"]["BusinessNumber"];
+            kind: components["schemas"]["ExposureKind"];
+            coverageCode: components["schemas"]["Code"];
+            claimantId: components["schemas"]["Uuid"];
+            claimantPartyId: components["schemas"]["Uuid"];
+            incidentId?: components["schemas"]["Uuid"] | null;
             /** @enum {string} */
-            quoteType: "QUICK" | "FULL";
-            effectiveAt: components["schemas"]["Instant"];
-            expirationAt: components["schemas"]["Instant"];
-            currency: components["schemas"]["CurrencyCode"];
-            currentVersionNo: number;
-            /** @description Bound transaction */
-            transactionId?: components["schemas"]["Uuid"];
-            versions: components["schemas"]["QuoteVersionView"][];
+            status: "OPEN" | "CLOSED";
+            outcome?: string | null;
+            /** @enum {string} */
+            coverageIndication: "COVERED" | "NOT_COVERED" | "IN_QUESTION";
+            /** @enum {string} */
+            coverageDecision: "PENDING" | "COVERED" | "COVERED_WITH_RESERVATION" | "PARTIALLY_COVERED" | "NOT_COVERED";
+            duplicateReason?: components["schemas"]["Code"] | null;
             createdAt: components["schemas"]["Instant"];
         };
-        /** @description pol.Job.get result. PRD outputs: "jobs" */
-        JobGetResponse: {
-            job: components["schemas"]["JobView"];
+        /** @description A claimant (REQ-CLM-066 subset) referring to a PTY party. */
+        ClaimantView: {
+            claimantId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            claimantType: "INSURED" | "THIRD_PARTY";
         };
-        PolicyView: {
-            policyId: components["schemas"]["Uuid"];
-            policyNumber: components["schemas"]["BusinessNumber"];
-            productCode: components["schemas"]["Code"];
-            policyholderPartyId: components["schemas"]["Uuid"];
-            accountId?: components["schemas"]["Uuid"];
-            legalEntity: components["schemas"]["Code"];
-            jurisdiction: components["schemas"]["CountryCode"];
-            /** @description Display status derived from the term valid at validAt (REQ-POL-132) */
-            status?: components["schemas"]["TermStateCode"];
-            recordedAt: components["schemas"]["Instant"];
+        /** @description An incident (REQ-CLM-064 subset, vehicle only in the slice). */
+        IncidentView: {
+            incidentId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            incidentType: "VEHICLE";
+            vehicleRef?: string | null;
+            drivable?: boolean | null;
+            damageAreas: components["schemas"]["Code"][];
         };
-        TermView: {
-            termId: components["schemas"]["Uuid"];
-            termNumber: number;
-            /** @description Valid time of the term, half-open (REQ-POL-041) */
-            period: components["schemas"]["TimeWindow"];
-            state: components["schemas"]["TermStateCode"];
-            productVersion: components["schemas"]["ProductVersionNumber"];
-            artefactHash: components["schemas"]["Sha256"];
-            ratingArtefactHash?: components["schemas"]["Sha256"];
-            resolutionHash: components["schemas"]["Sha256"];
-            configurationHash: components["schemas"]["Sha256"];
-            currency: components["schemas"]["CurrencyCode"];
-            producerCode?: components["schemas"]["Code"];
-            paymentPlanRef: components["schemas"]["Text"];
-            writtenDate: components["schemas"]["LocalDate"];
-            /** @description Transaction time the term became known */
-            recordedAt: components["schemas"]["Instant"];
+        /** @description clm.Claim.get result. PRD outputs: "claim" */
+        ClaimGetResponse: {
+            claim: components["schemas"]["ClaimView"];
         };
-        SegmentView: {
-            segmentId: components["schemas"]["Uuid"];
-            transactionId: components["schemas"]["Uuid"];
-            validPeriod: components["schemas"]["TimeWindow"];
-            recordedPeriod: components["schemas"]["TimeWindow"];
-            /** @description SHA-256 of the RFC 8785 canonical snapshot (REQ-POL-080) */
-            snapshotHash: components["schemas"]["Sha256"];
-        };
-        TransactionView: {
-            transactionId: components["schemas"]["Uuid"];
-            kind: components["schemas"]["Code"];
-            sequence: number;
-            jobId?: components["schemas"]["Uuid"];
-            /** @description Valid time (validAt) of the transaction */
-            effectiveAt: components["schemas"]["Instant"];
-            /** @description Transaction time (knownAt) of the transaction */
-            recordedAt: components["schemas"]["Instant"];
-            premium: components["schemas"]["Money"];
-            taxes: components["schemas"]["Money"];
-            total: components["schemas"]["Money"];
-        };
-        /** @description pol.Policy.get result as of validAt / knownAt. PRD outputs: "policy, term, segment, risk tree". Term, segment and risk tree are absent when nothing is valid at validAt as known at knownAt. */
-        PolicyGetResponse: {
-            policy: components["schemas"]["PolicyView"];
-            term?: components["schemas"]["TermView"];
-            segment?: components["schemas"]["SegmentView"];
-            riskTree?: components["schemas"]["RiskTree"];
-            /** @description Transactions of the term as known at knownAt */
-            transactions: components["schemas"]["TransactionView"][];
-            /** @description Charge lines of the term as known at knownAt */
-            charges: components["schemas"]["ChargeLine"][];
-        };
-        /** @description pol.Term.get result as of validAt / knownAt. PRD outputs: "policy, term, segment, risk tree" */
-        TermGetResponse: {
-            policy: components["schemas"]["PolicyView"];
-            term: components["schemas"]["TermView"];
-            segment?: components["schemas"]["SegmentView"];
-            riskTree?: components["schemas"]["RiskTree"];
-            transactions: components["schemas"]["TransactionView"][];
-            charges: components["schemas"]["ChargeLine"][];
-        };
-        /** @description pol.Job.withdraw request. PRD inputs: "jobId, reasonCode, text" */
-        JobWithdrawRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "reasonCode" */
-            reasonCode?: components["schemas"]["Unspecified"];
-            /** @description PRD: "text" */
-            text?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.withdraw result. PRD outputs: "job" */
-        JobWithdrawResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.notTaken request. PRD inputs: "jobId, reasonCode, text" */
-        JobNotTakenRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "reasonCode" */
-            reasonCode?: components["schemas"]["Unspecified"];
-            /** @description PRD: "text" */
-            text?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.notTaken result. PRD outputs: "job" */
-        JobNotTakenResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.rebase request. PRD inputs: "jobId" */
-        JobRebaseRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-        };
-        /** @description pol.Job.rebase result. PRD outputs: "rebased draft, conflicts" */
-        JobRebaseResponse: {
-            /** @description PRD: "rebased draft" */
-            rebasedDraft?: components["schemas"]["Unspecified"];
-            /** @description PRD: "conflicts" */
-            conflicts?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.resolveConflicts request. PRD inputs: "jobId, resolutions[]" */
-        JobResolveConflictsRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "resolutions[]" */
-            resolutions?: components["schemas"]["Unspecified"][];
-        };
-        /** @description pol.Job.resolveConflicts result. PRD outputs: "conflicts state" */
-        JobResolveConflictsResponse: {
-            /** @description PRD: "conflicts state" */
-            conflictsState?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.lease request. PRD inputs: "jobId" */
-        JobLeaseRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-        };
-        /** @description pol.Job.lease result. PRD outputs: "lease" */
-        JobLeaseResponse: {
-            /** @description PRD: "lease" */
-            lease?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.releaseLease request. PRD inputs: "jobId" */
-        JobReleaseLeaseRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-        };
-        /** @description pol.Job.releaseLease result. PRD outputs: "lease" */
-        JobReleaseLeaseResponse: {
-            /** @description PRD: "lease" */
-            lease?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Job.list result. PRD outputs: "jobs" */
-        JobListItem: {
-            /** @description PRD: "jobs" */
-            jobs?: components["schemas"]["Unspecified"];
-        };
-        /** @description Page of pol.Job.list results (cursor pagination, contract §3.5.5) */
-        JobListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["JobListItem"][];
-        };
-        /** @description pol.PolicyChange.create request. PRD inputs: "policyId, effectiveAt, description" */
-        PolicyChangeCreateRequest: {
-            /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "description" */
-            description?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.PolicyChange.create result. PRD outputs: "jobId" */
-        PolicyChangeCreateResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-        };
-        /** @description pol.Cancellation.create request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef" */
-        CancellationCreateRequest: {
-            /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "evidenceRefs" */
-            evidenceRefs?: components["schemas"]["Unspecified"];
-            /** @description PRD: "requestRef" */
-            requestRef?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Cancellation.create result. PRD outputs: "jobId, refund preview" */
-        CancellationCreateResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "refund preview" */
-            refundPreview?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Cancellation.schedule request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef" */
-        CancellationScheduleRequest: {
-            /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "evidenceRefs" */
-            evidenceRefs?: components["schemas"]["Unspecified"];
-            /** @description PRD: "requestRef" */
-            requestRef?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Cancellation.schedule result. PRD outputs: "jobId, refund preview" */
-        CancellationScheduleResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "refund preview" */
-            refundPreview?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Cancellation.rescind request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef" */
-        CancellationRescindRequest: {
-            /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "evidenceRefs" */
-            evidenceRefs?: components["schemas"]["Unspecified"];
-            /** @description PRD: "requestRef" */
-            requestRef?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Cancellation.rescind result. PRD outputs: "jobId, refund preview" */
-        CancellationRescindResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "refund preview" */
-            refundPreview?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Withdrawal.submit request. PRD inputs: "policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef" */
-        WithdrawalSubmitRequest: {
-            /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "right (WITHDRAWAL, OBJECTION)" */
-            right?: components["schemas"]["Unspecified"];
-            /** @description PRD: "receivedAt" */
-            receivedAt?: components["schemas"]["Instant"];
-            /** @description PRD: "channelRef" */
-            channelRef?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Withdrawal.submit result. PRD outputs: "void job, refund preview" */
-        WithdrawalSubmitResponse: {
-            /** @description PRD: "void job" */
-            voidJob?: components["schemas"]["Unspecified"];
-            /** @description PRD: "refund preview" */
-            refundPreview?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Reinstatement.create request. PRD inputs: "termId, type, effectiveAt, reason" */
-        ReinstatementCreateRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
+        /** @description clm.Claim.update request. PRD inputs: "ids, changes, reason" */
+        ClaimUpdateRequest: {
+            /** @description PRD: "ids" */
+            ids?: components["schemas"]["Uuid"][];
+            /** @description PRD: "changes" */
+            changes?: components["schemas"]["Unspecified"];
             /** @description PRD: "reason" */
             reason?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Reinstatement.create result. PRD outputs: "jobId" */
-        ReinstatementCreateResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
+        /** @description clm.Claim.update result. PRD outputs: "claim" */
+        ClaimUpdateResponse: {
+            /** @description PRD: "claim" */
+            claim?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Rewrite.create request. PRD inputs: "termId, rewriteType, effectiveAt, targetAccountId" */
-        RewriteCreateRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "rewriteType" */
-            rewriteType?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "targetAccountId" */
-            targetAccountId?: components["schemas"]["Uuid"];
-        };
-        /** @description pol.Rewrite.create result. PRD outputs: "jobId" */
-        RewriteCreateResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-        };
-        /** @description pol.Suspension.create request. PRD inputs: "termId, elementLocator, effectiveAt, reason, evidence" */
-        SuspensionCreateRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "elementLocator" */
-            elementLocator?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Suspension.create result. PRD outputs: "jobId" */
-        SuspensionCreateResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-        };
-        /** @description pol.Reactivation.create request. PRD inputs: "termId, elementLocator, effectiveAt, reason, evidence" */
-        ReactivationCreateRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "elementLocator" */
-            elementLocator?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Reactivation.create result. PRD outputs: "jobId" */
-        ReactivationCreateResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-        };
-        /** @description pol.Renewal.create request. PRD inputs: "termId; offer; acceptance evidence; reason" */
-        RenewalCreateRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Renewal.create result. PRD outputs: "job" */
-        RenewalCreateResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Renewal.offer request. PRD inputs: "termId; offer; acceptance evidence; reason" */
-        RenewalOfferRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Renewal.offer result. PRD outputs: "job" */
-        RenewalOfferResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Renewal.accept request. PRD inputs: "termId; offer; acceptance evidence; reason" */
-        RenewalAcceptRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Renewal.accept result. PRD outputs: "job" */
-        RenewalAcceptResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Renewal.decline request. PRD inputs: "termId; offer; acceptance evidence; reason" */
-        RenewalDeclineRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Renewal.decline result. PRD outputs: "job" */
-        RenewalDeclineResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Renewal.nonRenew request. PRD inputs: "termId; offer; acceptance evidence; reason" */
-        RenewalNonRenewRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Renewal.nonRenew result. PRD outputs: "job" */
-        RenewalNonRenewResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.RenewalRun.start request. PRD inputs: "entity, product, window" */
-        RenewalRunStartRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "window" */
-            window?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.RenewalRun.start result. PRD outputs: "run" */
-        RenewalRunStartResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.RenewalRun.retryItem request. PRD inputs: "entity, product, window" */
-        RenewalRunRetryItemRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "window" */
-            window?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.RenewalRun.retryItem result. PRD outputs: "run" */
-        RenewalRunRetryItemResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.RenewalRun.pause request. PRD inputs: "entity, product, window" */
-        RenewalRunPauseRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "window" */
-            window?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.RenewalRun.pause result. PRD outputs: "run" */
-        RenewalRunPauseResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.PolicyMove.execute request. PRD inputs: "policyIds, targetAccountId, requestRef" */
-        PolicyMoveExecuteRequest: {
-            /** @description PRD: "policyIds" */
-            policyIds?: components["schemas"]["Uuid"][];
-            /** @description PRD: "targetAccountId" */
-            targetAccountId?: components["schemas"]["Uuid"];
-            /** @description PRD: "requestRef" */
-            requestRef?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.PolicyMove.execute result. PRD outputs: "re-point map" */
-        PolicyMoveExecuteResponse: {
-            /** @description PRD: "re-point map" */
-            rePointMap?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Term.timeline result. PRD outputs: "policy, term, segment, risk tree" */
-        TermTimelineResponse: {
-            /** @description PRD: "policy" */
-            policy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "term" */
-            term?: components["schemas"]["Unspecified"];
-            /** @description PRD: "segment" */
-            segment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "risk tree" */
-            riskTree?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Snapshot.get result (REQ-POL-007): snapshot ref + content. content is absent when the policy is not in force at validAt. */
-        SnapshotGetResponse: {
-            /** @description Opaque, immutable reference (policy, segment, validAt, knownAt). Passing it back returns the same snapshot byte for byte. */
-            snapshotRef: string;
-            /** @description The resolved valid-time instant (a date-form input is resolved to the end of that Athens business day) */
-            validAt: components["schemas"]["Instant"];
-            /** @description The resolved transaction-time instant */
-            knownAt: components["schemas"]["Instant"];
-            /** @description True when a term in state IN_FORCE or PENDING_CANCELLATION covers validAt */
-            inForce: boolean;
-            /** @description Policy status at validAt (REQ-POL-132); absent when the policy had no term known at knownAt */
-            status?: components["schemas"]["TermStateCode"];
+        /** @description clm.Claim.close request (REQ-CLM-071..073, SL2-CLM-CORE). Open exposures close with the claim when each passes the close guard (REQ-CLM-072). */
+        ClaimCloseRequest: {
+            claimId: components["schemas"]["Uuid"];
+            /** @description The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE */
+            expectedRecordVersion: number;
             /**
-             * @description Why inForce is false. NO_TERM_AT_INSTANT = no term covers validAt (before the first term, after the last, or in a gap); TERM_NOT_IN_FORCE = a term covers it but is cancelled, voided or rewritten.
+             * @description Closure outcome; Denied needs an approved NotCovered decision and a delivered denial letter (later work package)
              * @enum {string}
              */
-            notInForceReason?: "NO_TERM_AT_INSTANT" | "TERM_NOT_IN_FORCE";
-            policy: components["schemas"]["SnapshotPolicy"];
-            content?: components["schemas"]["SnapshotContent"];
+            outcome: "COMPLETED" | "WITHDRAWN" | "DUPLICATE" | "NO_PAYMENT";
+            reasonCode?: components["schemas"]["Code"] | null;
         };
-        SnapshotPolicy: {
-            policyId: components["schemas"]["Uuid"];
-            policyNumber: components["schemas"]["BusinessNumber"];
-            productCode: components["schemas"]["Code"];
-            /** @description The policyholder (PTY party) as known at knownAt */
-            insuredPartyId: components["schemas"]["Uuid"];
-            legalEntity: components["schemas"]["Code"];
-            jurisdiction: components["schemas"]["CountryCode"];
+        /** @description clm.Claim.close result. PRD outputs: "claim" */
+        ClaimCloseResponse: {
+            claim: components["schemas"]["ClaimSummary"];
         };
-        /** @description The segment content valid at validAt as known at knownAt; coverages with their options (limits, deductibles) exactly as stored. */
-        SnapshotContent: {
-            term: components["schemas"]["TermView"];
-            productVersion: components["schemas"]["ProductVersionNumber"];
-            segment: components["schemas"]["SegmentView"];
-            vehicles: components["schemas"]["Vehicle"][];
-            drivers: components["schemas"]["Driver"][];
-            coverages: components["schemas"]["CoverageSelection"][];
+        /** @description clm.Claim.reopen request. PRD inputs: "ids, changes, reason" */
+        ClaimReopenRequest: {
+            /** @description PRD: "ids" */
+            ids?: components["schemas"]["Uuid"][];
+            /** @description PRD: "changes" */
+            changes?: components["schemas"]["Unspecified"];
+            /** @description PRD: "reason" */
+            reason?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Policy.getMany result. PRD outputs: "policies" */
-        PolicyGetManyResponse: {
+        /** @description clm.Claim.reopen result. PRD outputs: "claim" */
+        ClaimReopenResponse: {
+            /** @description PRD: "claim" */
+            claim?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Claim.merge request. PRD inputs: "ids, changes, reason" */
+        ClaimMergeRequest: {
+            /** @description PRD: "ids" */
+            ids?: components["schemas"]["Uuid"][];
+            /** @description PRD: "changes" */
+            changes?: components["schemas"]["Unspecified"];
+            /** @description PRD: "reason" */
+            reason?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Claim.merge result. PRD outputs: "claim" */
+        ClaimMergeResponse: {
+            /** @description PRD: "claim" */
+            claim?: components["schemas"]["Unspecified"];
+        };
+        /** @description Body of clm.Claim.searchByCriteria (D-SLC-05, REQ-CLM-011 subset). At least one criterion; criteria combine with AND. */
+        ClaimSearchCriteria: {
+            claimNumber?: string | null;
+            policyNumber?: string | null;
+            /** @description PTY party id of the insured (P1; body only, never a URL) */
+            insuredPartyId?: components["schemas"]["Uuid"] | null;
+        };
+        /** @description clm.Claim.search result item: the claim header without free text (masked in lists). */
+        ClaimSearchItem: {
+            claim: components["schemas"]["ClaimSummary"];
+        };
+        /** @description Page of clm.Claim.search results (cursor pagination, contract §3.5.5) */
+        ClaimSearchPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ClaimSearchItem"][];
+        };
+        /** @description clm.Exposure.create request (REQ-CLM-062, REQ-CLM-063, SL2-CLM-CORE). A handler action: a New claim moves to InProgress. */
+        ExposureCreateRequest: {
+            claimId: components["schemas"]["Uuid"];
+            /** @description The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE */
+            expectedRecordVersion: number;
+            kind: components["schemas"]["ExposureKind"];
+            coverageCode: components["schemas"]["Code"];
+            /** @description PTY party of the claimant; default the insured */
+            claimantPartyId?: components["schemas"]["Uuid"] | null;
+            incidentId?: components["schemas"]["Uuid"] | null;
+            /** @description Reason to allow a second open exposure on the same coverage, claimant and incident (REQ-CLM-063) */
+            duplicateReason?: components["schemas"]["Code"] | null;
+        };
+        /** @description clm.Exposure.create result. PRD outputs: "exposure" */
+        ExposureCreateResponse: {
+            exposure: components["schemas"]["ExposureView"];
+            claim: components["schemas"]["ClaimSummary"];
+        };
+        /** @description clm.Exposure.update request. PRD inputs: "exposure data" */
+        ExposureUpdateRequest: {
+            /** @description PRD: "exposure data" */
+            exposureData?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Exposure.update result. PRD outputs: "exposure" */
+        ExposureUpdateResponse: {
+            /** @description PRD: "exposure" */
+            exposure?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Exposure.close request. PRD inputs: "exposure data" */
+        ExposureCloseRequest: {
+            /** @description PRD: "exposure data" */
+            exposureData?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Exposure.close result. PRD outputs: "exposure" */
+        ExposureCloseResponse: {
+            /** @description PRD: "exposure" */
+            exposure?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Exposure.reopen request. PRD inputs: "exposure data" */
+        ExposureReopenRequest: {
+            /** @description PRD: "exposure data" */
+            exposureData?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Exposure.reopen result. PRD outputs: "exposure" */
+        ExposureReopenResponse: {
+            /** @description PRD: "exposure" */
+            exposure?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Coverage.decide request. PRD inputs: "decision, reasons; adopt or keep" */
+        CoverageDecideRequest: {
+            /** @description PRD: "decision" */
+            decision?: components["schemas"]["Unspecified"];
+            /** @description PRD: "reasons" */
+            reasons?: components["schemas"]["Unspecified"];
+            /** @description PRD: "adopt or keep" (optional) */
+            adopt?: components["schemas"]["Unspecified"];
+            /** @description PRD: "adopt or keep" (optional) */
+            keep?: components["schemas"]["Unspecified"];
+        } & (unknown | unknown);
+        /** @description clm.Coverage.decide result. PRD outputs: "decision record" */
+        CoverageDecideResponse: {
+            /** @description PRD: "decision record" */
+            decisionRecord?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Coverage.reverify request. PRD inputs: "decision, reasons; adopt or keep" */
+        CoverageReverifyRequest: {
+            /** @description PRD: "decision" */
+            decision?: components["schemas"]["Unspecified"];
+            /** @description PRD: "reasons" */
+            reasons?: components["schemas"]["Unspecified"];
+            /** @description PRD: "adopt or keep" (optional) */
+            adopt?: components["schemas"]["Unspecified"];
+            /** @description PRD: "adopt or keep" (optional) */
+            keep?: components["schemas"]["Unspecified"];
+        } & (unknown | unknown);
+        /** @description clm.Coverage.reverify result. PRD outputs: "decision record" */
+        CoverageReverifyResponse: {
+            /** @description PRD: "decision record" */
+            decisionRecord?: components["schemas"]["Unspecified"];
+        };
+        /** @description Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions" */
+        TransactionSetBuildRequest: {
+            claimId: components["schemas"]["Uuid"];
+            transactions: {
+                /**
+                 * @description Claim financial transaction kind (REQ-CLM-003)
+                 * @enum {string}
+                 */
+                kind: "RESERVE" | "PAYMENT" | "RECOVERY_RESERVE" | "RECOVERY";
+                exposureId: components["schemas"]["Uuid"];
+                costType: components["schemas"]["Code"];
+                costCategory: components["schemas"]["Code"];
+                amount: components["schemas"]["Money"];
+                /** @description Payment transactions */
+                payeePartyId?: components["schemas"]["Uuid"];
+                /** @description BIL payee account (REQ-BIL-343) */
+                payeeAccountId?: components["schemas"]["Uuid"];
+                reason?: components["schemas"]["Code"];
+            }[];
+        };
+        /** @description Typed from REQ-CLM-003, REQ-CLM-107. PRD outputs: "set with preview, checks, approval request" */
+        TransactionSetBuildResponse: {
+            setId: components["schemas"]["Uuid"];
+            status: components["schemas"]["Code"];
+            contentHash?: components["schemas"]["Sha256"];
+            /** @description Balances before → after per line */
+            preview: {
+                exposureId?: components["schemas"]["Uuid"];
+                costType?: components["schemas"]["Code"];
+                costCategory?: components["schemas"]["Code"];
+                before?: components["schemas"]["Money"];
+                after?: components["schemas"]["Money"];
+            }[];
+            checks?: components["schemas"]["Unspecified"][];
+        };
+        /** @description Typed from REQ-CLM-108, REQ-CLM-109. PRD inputs: "transactions" */
+        TransactionSetSubmitRequest: {
+            setId: components["schemas"]["Uuid"];
+        };
+        /** @description Typed from REQ-CLM-108, REQ-CLM-109. PRD outputs: "set with preview, checks, approval request" */
+        TransactionSetSubmitResponse: {
+            setId: components["schemas"]["Uuid"];
+            status: components["schemas"]["Code"];
+            approvalRequestId?: components["schemas"]["Uuid"];
+            authorityChecks?: {
+                checkId?: components["schemas"]["Uuid"];
+                /**
+                 * @description plt.Authority.check
+                 * @enum {string}
+                 */
+                decision?: "ALLOW" | "REFER" | "DENY";
+            }[];
+        };
+        /** @description Typed from REQ-CLM-110..113, REQ-CLM-004. PRD inputs: "transactions" */
+        TransactionSetApproveRequest: {
+            setId: components["schemas"]["Uuid"];
+            /** @description Bound content hash */
+            contentHash: components["schemas"]["Sha256"];
+            comment?: string;
+        };
+        /** @description Typed from REQ-CLM-110..113, REQ-CLM-004. PRD outputs: "set with preview, checks, approval request" */
+        TransactionSetApproveResponse: {
+            setId: components["schemas"]["Uuid"];
+            status: components["schemas"]["Code"];
+            /** @description BIL disbursements requested for approved payments */
+            disbursementIds?: components["schemas"]["Uuid"][];
+        };
+        /** @description Typed from REQ-CLM-111. PRD inputs: "transactions" */
+        TransactionSetRejectRequest: {
+            setId: components["schemas"]["Uuid"];
+            reason: components["schemas"]["Code"];
+            comment?: string;
+        };
+        /** @description Typed from REQ-CLM-111. PRD outputs: "set with preview, checks, approval request" */
+        TransactionSetRejectResponse: {
+            setId: components["schemas"]["Uuid"];
+            status: components["schemas"]["Code"];
+            /** @description Copy returned to the maker */
+            copySetId?: components["schemas"]["Uuid"];
+        };
+        /** @description clm.TransactionSet.return request. PRD inputs: "transactions" */
+        TransactionSetReturnRequest: {
+            /** @description PRD: "transactions" */
+            transactions?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.TransactionSet.return result. PRD outputs: "set with preview, checks, approval request" */
+        TransactionSetReturnResponse: {
+            /** @description PRD: "set with preview" */
+            setPreview?: components["schemas"]["Unspecified"];
+            /** @description PRD: "checks" */
+            checks?: components["schemas"]["Unspecified"];
+            /** @description PRD: "approval request" */
+            approvalRequest?: components["schemas"]["Unspecified"];
+        };
+        /** @description Typed from REQ-CLM-125. PRD inputs: "payment id, reason" */
+        PaymentVoidRequest: {
+            paymentId: components["schemas"]["Uuid"];
+            reason: components["schemas"]["Code"];
+        };
+        /** @description Typed from REQ-CLM-125. PRD outputs: "updated payment" */
+        PaymentVoidResponse: {
+            paymentId: components["schemas"]["Uuid"];
+            status: components["schemas"]["Code"];
+            reversalTransactionId?: components["schemas"]["Uuid"];
+        };
+        /** @description Typed from REQ-CLM-126. PRD inputs: "payment id, reason" */
+        PaymentStopRequest: {
+            paymentId: components["schemas"]["Uuid"];
+            reason: components["schemas"]["Code"];
+        };
+        /** @description Typed from REQ-CLM-126. PRD outputs: "updated payment" */
+        PaymentStopResponse: {
+            paymentId: components["schemas"]["Uuid"];
+            status: components["schemas"]["Code"];
+            disbursementId?: components["schemas"]["Uuid"];
+        };
+        /** @description Typed from REQ-CLM-127. PRD inputs: "payment id, reason" */
+        PaymentReissueRequest: {
+            paymentId: components["schemas"]["Uuid"];
+            reason: components["schemas"]["Code"];
+            payeeAccountId?: components["schemas"]["Uuid"];
+        };
+        /** @description Typed from REQ-CLM-127. PRD outputs: "updated payment" */
+        PaymentReissueResponse: {
+            originalPaymentId: components["schemas"]["Uuid"];
+            newPaymentId: components["schemas"]["Uuid"];
+            setId?: components["schemas"]["Uuid"];
+        };
+        /** @description clm.Redress.request request. PRD inputs: "complaint id, claim id, payee, amount, reason" */
+        RedressRequestRequest: {
+            /** @description PRD: "complaint id" */
+            complaintId?: components["schemas"]["Uuid"];
+            /** @description PRD: "claim id" */
+            claimId?: components["schemas"]["Uuid"];
+            /** @description PRD: "payee" */
+            payee?: components["schemas"]["Unspecified"];
+            /** @description PRD: "amount" */
+            amount?: components["schemas"]["Money"];
+            /** @description PRD: "reason" */
+            reason?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Redress.request result. PRD outputs: "set id, status" */
+        RedressRequestResponse: {
+            /** @description PRD: "set id" */
+            setId?: components["schemas"]["Uuid"];
+            /** @description PRD: "status" */
+            status?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Financials.get result. PRD outputs: "balances by line" */
+        FinancialsGetResponse: {
+            /** @description PRD: "balances by line" */
+            balancesByLine?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Financials.dailyTotals result. PRD outputs: "totals by currency and cost type with transaction ids" */
+        FinancialsDailyTotalsResponse: {
+            /** @description PRD: "totals by currency and cost type with transaction ids" */
+            totalsByCurrencyAndCostType?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.StatutoryOffer.issue request. PRD inputs: "exposure, content" */
+        StatutoryOfferIssueRequest: {
+            /** @description PRD: "exposure" */
+            exposure?: components["schemas"]["Unspecified"];
+            /** @description PRD: "content" */
+            content?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.StatutoryOffer.issue result. PRD outputs: "offer record, document request; agreement → clock start" */
+        StatutoryOfferIssueResponse: {
+            /** @description PRD: "offer record" */
+            offerRecord?: components["schemas"]["Unspecified"];
+            /** @description PRD: "document request" */
+            documentRequest?: components["schemas"]["Unspecified"];
+            /** @description PRD: "agreement → clock start" */
+            agreementClockStart?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.StatutoryOffer.recordAcceptance request. PRD inputs: "exposure, content" */
+        StatutoryOfferRecordAcceptanceRequest: {
+            /** @description PRD: "exposure" */
+            exposure?: components["schemas"]["Unspecified"];
+            /** @description PRD: "content" */
+            content?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.StatutoryOffer.recordAcceptance result. PRD outputs: "offer record, document request; agreement → clock start" */
+        StatutoryOfferRecordAcceptanceResponse: {
+            /** @description PRD: "offer record" */
+            offerRecord?: components["schemas"]["Unspecified"];
+            /** @description PRD: "document request" */
+            documentRequest?: components["schemas"]["Unspecified"];
+            /** @description PRD: "agreement → clock start" */
+            agreementClockStart?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.StatutoryOffer.recordRepairAgreement request. PRD inputs: "exposure, content" */
+        StatutoryOfferRecordRepairAgreementRequest: {
+            /** @description PRD: "exposure" */
+            exposure?: components["schemas"]["Unspecified"];
+            /** @description PRD: "content" */
+            content?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.StatutoryOffer.recordRepairAgreement result. PRD outputs: "offer record, document request; agreement → clock start" */
+        StatutoryOfferRecordRepairAgreementResponse: {
+            /** @description PRD: "offer record" */
+            offerRecord?: components["schemas"]["Unspecified"];
+            /** @description PRD: "document request" */
+            documentRequest?: components["schemas"]["Unspecified"];
+            /** @description PRD: "agreement → clock start" */
+            agreementClockStart?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Certificate.request request. PRD inputs: "requester, policies, period" */
+        CertificateRequestRequest: {
+            /** @description PRD: "requester" */
+            requester?: components["schemas"]["Unspecified"];
             /** @description PRD: "policies" */
             policies?: components["schemas"]["Unspecified"];
-        };
-        /** @description pol.Policy.search result row (REQ-POL-014 subset: policy number and insured party) */
-        PolicySearchItem: {
-            policyId: components["schemas"]["Uuid"];
-            policyNumber: components["schemas"]["BusinessNumber"];
-            productCode: components["schemas"]["Code"];
-            insuredPartyId: components["schemas"]["Uuid"];
-            /** @description Status at validAt as known at knownAt (now); absent when no term is known */
-            status?: components["schemas"]["TermStateCode"];
-            /** @description Period of the term that determines the status */
-            termPeriod?: components["schemas"]["TimeWindow"];
-        };
-        /** @description Body of pol.Policy.searchByCriteria (D-SLC-05). At least one criterion; both are ANDed. */
-        PolicySearchCriteria: {
-            policyNumber?: components["schemas"]["BusinessNumber"];
-            /** @description PTY party id of the policyholder */
-            insuredPartyId?: components["schemas"]["Uuid"];
-        };
-        /** @description Page of pol.Policy.search results (cursor pagination, contract §3.5.5) */
-        PolicySearchPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["PolicySearchItem"][];
-        };
-        /** @description pol.Earning.compute request. PRD inputs: "termId, asOf, knownAt" */
-        EarningComputeRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-        };
-        /** @description pol.Earning.compute result. PRD outputs: "per element × charge type" */
-        EarningComputeResponse: Record<string, never>;
-        /** @description pol.Charges.reconcile request. PRD inputs: "termId or period, counterpart totals" */
-        ChargesReconcileRequest: {
-            /** @description PRD: "termId or period" (optional) */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "termId or period" (optional) */
+            /** @description PRD: "period" */
             period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "counterpart totals" */
-            counterpartTotals?: components["schemas"]["Unspecified"];
-        } & (unknown | unknown);
-        /** @description pol.Charges.reconcile result. PRD outputs: "differences" */
-        ChargesReconcileResponse: {
-            /** @description PRD: "differences" */
-            differences?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Segment.changes result. PRD outputs: "segment versions" */
-        SegmentChangesItem: {
-            /** @description PRD: "segment versions" */
-            segmentVersions?: components["schemas"]["Unspecified"];
+        /** @description clm.Certificate.request result. PRD outputs: "certificate" */
+        CertificateRequestResponse: {
+            /** @description PRD: "certificate" */
+            certificate?: components["schemas"]["Unspecified"];
         };
-        /** @description Page of pol.Segment.changes results (cursor pagination, contract §3.5.5) */
-        SegmentChangesPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["SegmentChangesItem"][];
+        /** @description clm.Certificate.assemble request. PRD inputs: "requester, policies, period" */
+        CertificateAssembleRequest: {
+            /** @description PRD: "requester" */
+            requester?: components["schemas"]["Unspecified"];
+            /** @description PRD: "policies" */
+            policies?: components["schemas"]["Unspecified"];
+            /** @description PRD: "period" */
+            period?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.StatusModel.get result. PRD outputs: "table" */
-        StatusModelGetResponse: {
-            /** @description PRD: "table" */
-            table?: components["schemas"]["Unspecified"];
+        /** @description clm.Certificate.assemble result. PRD outputs: "certificate" */
+        CertificateAssembleResponse: {
+            /** @description PRD: "certificate" */
+            certificate?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.EffectiveDate.limits result. PRD outputs: "earliest, latest, override available" */
-        EffectiveDateLimitsResponse: {
-            /** @description PRD: "earliest" */
-            earliest?: components["schemas"]["Unspecified"];
-            /** @description PRD: "latest" */
-            latest?: components["schemas"]["Unspecified"];
-            /** @description PRD: "override available" */
-            overrideAvailable?: components["schemas"]["Unspecified"];
+        /** @description clm.Certificate.issue request. PRD inputs: "requester, policies, period" */
+        CertificateIssueRequest: {
+            /** @description PRD: "requester" */
+            requester?: components["schemas"]["Unspecified"];
+            /** @description PRD: "policies" */
+            policies?: components["schemas"]["Unspecified"];
+            /** @description PRD: "period" */
+            period?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Import.policy request. PRD inputs: "legacy payload, sourceKey" */
-        ImportPolicyRequest: {
-            /** @description PRD: "legacy payload" */
-            legacyPayload?: components["schemas"]["Unspecified"];
-            /** @description PRD: "sourceKey" */
-            sourceKey?: components["schemas"]["Unspecified"];
+        /** @description clm.Certificate.issue result. PRD outputs: "certificate" */
+        CertificateIssueResponse: {
+            /** @description PRD: "certificate" */
+            certificate?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Import.policy result. PRD outputs: "outcome" */
-        ImportPolicyResponse: Record<string, never>;
-        /** @description pol.Import.term request. PRD inputs: "legacy payload, sourceKey" */
-        ImportTermRequest: {
-            /** @description PRD: "legacy payload" */
-            legacyPayload?: components["schemas"]["Unspecified"];
-            /** @description PRD: "sourceKey" */
-            sourceKey?: components["schemas"]["Unspecified"];
+        /** @description clm.ClaimTracking.get result. PRD outputs: "tracking view" */
+        ClaimTrackingGetResponse: {
+            /** @description PRD: "tracking view" */
+            trackingView?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Import.term result. PRD outputs: "outcome" */
-        ImportTermResponse: Record<string, never>;
-        /** @description pol.Import.reverse request. PRD inputs: "importBatchId or sourceKeys" */
-        ImportReverseRequest: {
-            /** @description PRD: "importBatchId or sourceKeys" (optional) */
-            importBatchId?: components["schemas"]["Uuid"];
-            /** @description PRD: "importBatchId or sourceKeys" (optional) */
-            sourceKeys?: components["schemas"]["Unspecified"];
-        } & (unknown | unknown);
-        /** @description pol.Import.reverse result. PRD outputs: "per-object outcome (reversed, refused with reason)" */
-        ImportReverseResponse: {
-            /** @description PRD: "per-object outcome (reversed, refused with reason)" */
-            perObjectOutcome?: components["schemas"]["Unspecified"];
+        /** @description clm.ClaimTracking.list result. PRD outputs: "tracking view" */
+        ClaimTrackingListItem: {
+            /** @description PRD: "tracking view" */
+            trackingView?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Import.convertCurrency request. PRD inputs: "planId" */
+        /** @description Page of clm.ClaimTracking.list results (cursor pagination, contract §3.5.5) */
+        ClaimTrackingListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ClaimTrackingListItem"][];
+        };
+        /** @description clm.CatEvent.aggregate result. PRD outputs: "totals by line" */
+        CatEventAggregateResponse: {
+            /** @description PRD: "totals by line" */
+            totalsByLine?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Service.request request. PRD inputs: "service data; invoice" */
+        ServiceRequestRequest: {
+            /** @description PRD: "service data" */
+            serviceData?: components["schemas"]["Unspecified"];
+            /** @description PRD: "invoice" */
+            invoice?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Service.request result. PRD outputs: "status" */
+        ServiceRequestResponse: {
+            /** @description PRD: "status" */
+            status?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Service.update request. PRD inputs: "service data; invoice" */
+        ServiceUpdateRequest: {
+            /** @description PRD: "service data" */
+            serviceData?: components["schemas"]["Unspecified"];
+            /** @description PRD: "invoice" */
+            invoice?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Service.update result. PRD outputs: "status" */
+        ServiceUpdateResponse: {
+            /** @description PRD: "status" */
+            status?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Service.cancel request. PRD inputs: "service data; invoice" */
+        ServiceCancelRequest: {
+            /** @description PRD: "service data" */
+            serviceData?: components["schemas"]["Unspecified"];
+            /** @description PRD: "invoice" */
+            invoice?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Service.cancel result. PRD outputs: "status" */
+        ServiceCancelResponse: {
+            /** @description PRD: "status" */
+            status?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.VendorInvoice.submit request. PRD inputs: "service data; invoice" */
+        VendorInvoiceSubmitRequest: {
+            /** @description PRD: "service data" */
+            serviceData?: components["schemas"]["Unspecified"];
+            /** @description PRD: "invoice" */
+            invoice?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.VendorInvoice.submit result. PRD outputs: "status" */
+        VendorInvoiceSubmitResponse: {
+            /** @description PRD: "status" */
+            status?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.VendorInvoice.decide request. PRD inputs: "service data; invoice" */
+        VendorInvoiceDecideRequest: {
+            /** @description PRD: "service data" */
+            serviceData?: components["schemas"]["Unspecified"];
+            /** @description PRD: "invoice" */
+            invoice?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.VendorInvoice.decide result. PRD outputs: "status" */
+        VendorInvoiceDecideResponse: {
+            /** @description PRD: "status" */
+            status?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Fraud.score request. PRD inputs: "claim" */
+        FraudScoreRequest: {
+            /** @description PRD: "claim" */
+            claim?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Fraud.score result. PRD outputs: "indicators, band; case data" */
+        FraudScoreResponse: {
+            /** @description PRD: "indicators" */
+            indicators?: components["schemas"]["Unspecified"];
+            /** @description PRD: "band" */
+            band?: components["schemas"]["Unspecified"];
+            /** @description PRD: "case data" */
+            caseData?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Conversation.send request. PRD inputs: "party, text, channel" */
+        ConversationSendRequest: {
+            /** @description PRD: "party" */
+            party?: components["schemas"]["Unspecified"];
+            /** @description PRD: "text" */
+            text?: components["schemas"]["Unspecified"];
+            /** @description PRD: "channel" */
+            channel?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Conversation.send result. PRD outputs: "message status" */
+        ConversationSendResponse: {
+            /** @description PRD: "message status" */
+            messageStatus?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Conversation.schedule request. PRD inputs: "party, text, channel" */
+        ConversationScheduleRequest: {
+            /** @description PRD: "party" */
+            party?: components["schemas"]["Unspecified"];
+            /** @description PRD: "text" */
+            text?: components["schemas"]["Unspecified"];
+            /** @description PRD: "channel" */
+            channel?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Conversation.schedule result. PRD outputs: "message status" */
+        ConversationScheduleResponse: {
+            /** @description PRD: "message status" */
+            messageStatus?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Conversation.list result. PRD outputs: "message status" */
+        ConversationListItem: {
+            /** @description PRD: "message status" */
+            messageStatus?: components["schemas"]["Unspecified"];
+        };
+        /** @description Page of clm.Conversation.list results (cursor pagination, contract §3.5.5) */
+        ConversationListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ConversationListItem"][];
+        };
+        /** @description clm.Import.claim request. PRD inputs: "legacy claim" */
+        ImportClaimRequest: {
+            /** @description PRD: "legacy claim" */
+            legacyClaim?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Import.claim result. PRD outputs: "claim" */
+        ImportClaimResponse: {
+            /** @description PRD: "claim" */
+            claim?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Import.financialHistory request. PRD inputs: "legacy claim" */
+        ImportFinancialHistoryRequest: {
+            /** @description PRD: "legacy claim" */
+            legacyClaim?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Import.financialHistory result. PRD outputs: "claim" */
+        ImportFinancialHistoryResponse: {
+            /** @description PRD: "claim" */
+            claim?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Import.convertCurrency request. PRD inputs: "plan" */
         ImportConvertCurrencyRequest: {
-            /** @description PRD: "planId" */
-            planId?: components["schemas"]["Uuid"];
+            /** @description PRD: "plan" */
+            plan?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Import.convertCurrency result. PRD outputs: "conversion report" */
+        /** @description clm.Import.convertCurrency result. PRD outputs: "conversion result" */
         ImportConvertCurrencyResponse: {
-            /** @description PRD: "conversion report" */
-            conversionReport?: components["schemas"]["Unspecified"];
+            /** @description PRD: "conversion result" */
+            conversionResult?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Dsar.export request. PRD inputs: "partyId, dsarTaskId" */
+        /** @description clm.Import.reverse request. PRD inputs: "batch id or source key" */
+        ImportReverseRequest: {
+            /** @description PRD: "batch id or source key" (optional) */
+            batchId?: components["schemas"]["Uuid"];
+            /** @description PRD: "batch id or source key" (optional) */
+            sourceKey?: components["schemas"]["Unspecified"];
+        } & (unknown | unknown);
+        /** @description clm.Import.reverse result. PRD outputs: "reversal result" */
+        ImportReverseResponse: {
+            /** @description PRD: "reversal result" */
+            reversalResult?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Dsar.export request. PRD inputs: "party" */
         DsarExportRequest: {
-            /** @description PRD: "partyId" */
-            partyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "dsarTaskId" */
-            dsarTaskId?: components["schemas"]["Uuid"];
+            /** @description PRD: "party" */
+            party?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Dsar.export result. PRD outputs: "export package" */
+        /** @description clm.Dsar.export result. PRD outputs: "claim data package" */
         DsarExportResponse: {
-            /** @description PRD: "export package" */
-            exportPackage?: components["schemas"]["Unspecified"];
+            /** @description PRD: "claim data package" */
+            claimDataPackage?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Dsar.restrict request. PRD inputs: "partyId, dsarTaskId, restrict / lift" */
+        /** @description clm.Dsar.rectify request. PRD inputs: "party, corrections" */
+        DsarRectifyRequest: {
+            /** @description PRD: "party" */
+            party?: components["schemas"]["Unspecified"];
+            /** @description PRD: "corrections" */
+            corrections?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Dsar.rectify result. PRD outputs: "result" */
+        DsarRectifyResponse: {
+            /** @description PRD: "result" */
+            result?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Dsar.restrict request. PRD inputs: "party, scope" */
         DsarRestrictRequest: {
-            /** @description PRD: "partyId" */
-            partyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "dsarTaskId" */
-            dsarTaskId?: components["schemas"]["Uuid"];
-            /** @description PRD: "restrict" */
-            restrict?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lift" */
-            lift?: components["schemas"]["Unspecified"];
+            /** @description PRD: "party" */
+            party?: components["schemas"]["Unspecified"];
+            /** @description PRD: "scope" */
+            scope?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Dsar.restrict result. PRD outputs: "restriction status, retention conflicts" */
+        /** @description clm.Dsar.restrict result. PRD outputs: "result" */
         DsarRestrictResponse: {
-            /** @description PRD: "restriction status" */
-            restrictionStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "retention conflicts" */
-            retentionConflicts?: components["schemas"]["Unspecified"];
+            /** @description PRD: "result" */
+            result?: components["schemas"]["Unspecified"];
+        };
+        /** @description clm.Dsar.purge request. PRD inputs: "party or scope" */
+        DsarPurgeRequest: {
+            /** @description PRD: "party or scope" (optional) */
+            party?: components["schemas"]["Unspecified"];
+            /** @description PRD: "party or scope" (optional) */
+            scope?: components["schemas"]["Unspecified"];
+        } & (unknown | unknown);
+        /** @description clm.Dsar.purge result. PRD outputs: "result" */
+        DsarPurgeResponse: {
+            /** @description PRD: "result" */
+            result?: components["schemas"]["Unspecified"];
         };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
         /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
         Code: string;
+        /** @description Business number issued through PLT numbering (NumberingScheme); format is configuration. */
+        BusinessNumber: string;
         /**
          * Format: date-time
          * @description RFC 3339 timestamp in UTC (suffix Z).
          */
         Instant: string;
-        /** @description ISO 4217 alphabetic code. */
-        CurrencyCode: string;
-        /** @description Business number issued through PLT numbering (NumberingScheme); format is configuration. */
-        BusinessNumber: string;
-        /** @description Product version `major.minor` (contract §3.2.3). */
-        ProductVersionNumber: string;
+        /** Format: date */
+        LocalDate: string;
         /** @description Value inside an open structure. JSON numbers are not allowed at any depth: amounts are Money objects or decimal strings, counts are integers only where a typed field says so. */
         OpenValue: string | boolean | null | components["schemas"]["OpenValue"][] | {
             [key: string]: components["schemas"]["OpenValue"];
@@ -2255,8 +2101,6 @@ export interface components {
         OpenObject: {
             [key: string]: components["schemas"]["OpenValue"];
         };
-        /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
-        Sha256: string;
         ProblemFieldError: {
             /** @description JSON pointer or dotted path of the field. */
             path: string;
@@ -2300,25 +2144,14 @@ export interface components {
             /** @description Field-level errors. */
             errors?: components["schemas"]["ProblemFieldError"][];
         };
-        Text: string;
-        /** @description Decimal number as a string (no binary floating point for money or rates). */
-        Decimal: string;
-        /** @description Amount as a decimal string plus ISO 4217 currency. */
-        Money: {
-            amount: components["schemas"]["Decimal"];
-            currency: components["schemas"]["CurrencyCode"];
-        };
-        /**
-         * @description Contract §3.3 blocking point.
-         * @enum {string}
-         */
-        BlockingPoint: "PRE_QUOTE" | "PRE_BIND" | "PRE_ISSUE" | "NON_BLOCKING";
         /**
          * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
          *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
          *     members until then.
          */
         Unspecified: unknown;
+        /** @description ISO 3166-1 alpha-2 code. */
+        CountryCode: string;
         /** @description Cursor page (contract §3.5.5). Lists are filtered by the caller's legal entity and ABAC scope. */
         PageEnvelope: {
             items: unknown[];
@@ -2326,15 +2159,17 @@ export interface components {
             nextCursor: string | null;
             limit?: number;
         };
-        /** Format: date */
-        LocalDate: string;
-        /** @description ISO 3166-1 alpha-2 code. */
-        CountryCode: string;
-        /** @description Time window [from, to); `to` is null when open-ended. */
-        TimeWindow: {
-            from: components["schemas"]["Instant"];
-            to: components["schemas"]["Instant"] | null;
+        /** @description Decimal number as a string (no binary floating point for money or rates). */
+        Decimal: string;
+        /** @description ISO 4217 alphabetic code. */
+        CurrencyCode: string;
+        /** @description Amount as a decimal string plus ISO 4217 currency. */
+        Money: {
+            amount: components["schemas"]["Decimal"];
+            currency: components["schemas"]["CurrencyCode"];
         };
+        /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
+        Sha256: string;
     };
     responses: {
         /** @description Malformed request or failed schema validation. */
@@ -2462,7 +2297,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    "pol.Submission.create": {
+    "clm.Fnol.submit": {
         parameters: {
             query?: {
                 /**
@@ -2492,17 +2327,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SubmissionCreateRequest"];
+                "application/json": components["schemas"]["FnolSubmitRequest"];
             };
         };
         responses: {
             /** @description Success */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SubmissionCreateResponse"];
+                    "application/json": components["schemas"]["FnolSubmitResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -2515,7 +2350,7 @@ export interface operations {
             503: components["responses"]["ServiceUnavailable"];
         };
     };
-    "pol.Job.updateDraft": {
+    "clm.Fnol.saveDraft": {
         parameters: {
             query?: {
                 /**
@@ -2545,7 +2380,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["JobUpdateDraftRequest"];
+                "application/json": components["schemas"]["FnolSaveDraftRequest"];
             };
         };
         responses: {
@@ -2555,7 +2390,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["JobUpdateDraftResponse"];
+                    "application/json": components["schemas"]["FnolSaveDraftResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -2567,119 +2402,10 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Job.quote": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JobQuoteRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobQuoteResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            429: components["responses"]["TooManyRequests"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Job.requote": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JobRequoteRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobRequoteResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Job.newVersion": {
+    "clm.Fnol.get": {
         parameters: {
             query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
                  *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
@@ -2688,14 +2414,13 @@ export interface operations {
                 /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
                 "Accept-Language"?: components["parameters"]["AcceptLanguage"];
             };
-            path?: never;
+            path: {
+                /** @description Identifier of the FNOL snapshot or of its claim (REQ-CLM-044) */
+                id: string;
+            };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JobNewVersionRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Success */
             200: {
@@ -2703,63 +2428,19 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["JobNewVersionResponse"];
+                    "application/json": components["schemas"]["FnolGetResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            429: components["responses"]["TooManyRequests"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Job.copyVersion": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JobCopyVersionRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobCopyVersionResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Job.compareVersions": {
+    "clm.Fnol.validate": {
         parameters: {
             query?: never;
             header?: {
@@ -2776,7 +2457,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["JobCompareVersionsRequest"];
+                "application/json": components["schemas"]["FnolValidateRequest"];
             };
         };
         responses: {
@@ -2786,56 +2467,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["JobCompareVersionsResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Job.bind": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JobBindRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobBindResponse"];
+                    "application/json": components["schemas"]["FnolValidateResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -2845,9 +2477,47 @@ export interface operations {
             422: components["responses"]["UnprocessableContent"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
-    "pol.Job.withdraw": {
+    "clm.Claim.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the Claim (PRD input: "ids") */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimGetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Claim.update": {
         parameters: {
             query?: never;
             header: {
@@ -2865,12 +2535,15 @@ export interface operations {
                 /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
                 "Accept-Language"?: components["parameters"]["AcceptLanguage"];
             };
-            path?: never;
+            path: {
+                /** @description Identifier of the Claim */
+                id: string;
+            };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["JobWithdrawRequest"];
+                "application/json": components["schemas"]["ClaimUpdateRequest"];
             };
         };
         responses: {
@@ -2880,62 +2553,19 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["JobWithdrawResponse"];
+                    "application/json": components["schemas"]["ClaimUpdateResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Job.notTaken": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JobNotTakenRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobNotTakenResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Job.rebase": {
+    "clm.Claim.close": {
         parameters: {
             query?: {
                 /**
@@ -2965,7 +2595,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["JobRebaseRequest"];
+                "application/json": components["schemas"]["ClaimCloseRequest"];
             };
         };
         responses: {
@@ -2975,7 +2605,59 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["JobRebaseResponse"];
+                    "application/json": components["schemas"]["ClaimCloseResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Claim.reopen": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimReopenRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimReopenResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -2986,7 +2668,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Job.resolveConflicts": {
+    "clm.Claim.merge": {
         parameters: {
             query?: never;
             header: {
@@ -3009,7 +2691,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["JobResolveConflictsRequest"];
+                "application/json": components["schemas"]["ClaimMergeRequest"];
             };
         };
         responses: {
@@ -3019,7 +2701,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["JobResolveConflictsResponse"];
+                    "application/json": components["schemas"]["ClaimMergeResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -3030,109 +2712,1256 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Job.lease": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JobLeaseRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobLeaseResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Job.releaseLease": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JobReleaseLeaseRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobReleaseLeaseResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Job.list": {
+    "clm.Claim.search": {
         parameters: {
             query?: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
-                /** @description PRD: "account" */
-                account?: string;
-                /** @description PRD: "policy" */
+                /** @description Claim number (P0). Every other criterion, personal or not, goes in the body of the POST form (D-SLC-05) */
+                claimNumber?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimSearchPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Claim.searchByCriteria": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimSearchCriteria"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimSearchPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Exposure.create": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExposureCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExposureCreateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Exposure.update": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the Exposure */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExposureUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExposureUpdateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Exposure.close": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExposureCloseRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExposureCloseResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Exposure.reopen": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExposureReopenRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExposureReopenResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Coverage.decide": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CoverageDecideRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverageDecideResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Coverage.reverify": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CoverageReverifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverageReverifyResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.TransactionSet.build": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionSetBuildRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionSetBuildResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.TransactionSet.submit": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionSetSubmitRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionSetSubmitResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.TransactionSet.approve": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionSetApproveRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionSetApproveResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.TransactionSet.reject": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionSetRejectRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionSetRejectResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.TransactionSet.return": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionSetReturnRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionSetReturnResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Payment.void": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentVoidRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentVoidResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Payment.stop": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentStopRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentStopResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Payment.reissue": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentReissueRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentReissueResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Redress.request": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RedressRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RedressRequestResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Financials.get": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+                /**
+                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
+                 */
+                knownAt?: components["parameters"]["KnownAt"];
+                /** @description PRD: "claim" */
+                claim?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinancialsGetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Financials.dailyTotals": {
+        parameters: {
+            query?: {
+                /** @description PRD: "legal entity" */
+                legalEntity?: string;
+                /** @description PRD: "accounting date" */
+                accountingDate?: components["schemas"]["LocalDate"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinancialsDailyTotalsResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.StatutoryOffer.issue": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatutoryOfferIssueRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatutoryOfferIssueResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.StatutoryOffer.recordAcceptance": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatutoryOfferRecordAcceptanceRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatutoryOfferRecordAcceptanceResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.StatutoryOffer.recordRepairAgreement": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatutoryOfferRecordRepairAgreementRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatutoryOfferRecordRepairAgreementResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Certificate.request": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CertificateRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CertificateRequestResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Certificate.assemble": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CertificateAssembleRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CertificateAssembleResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Certificate.issue": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CertificateIssueRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CertificateIssueResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.ClaimTracking.get": {
+        parameters: {
+            query?: {
+                /** @description PRD: "claim" */
+                claim?: string;
+                /** @description PRD: "party or policy" (optional) */
+                party?: string;
+                /** @description PRD: "party or policy" (optional) */
                 policy?: string;
-                /** @description PRD: "participant" */
-                participant?: string;
-                /** @description PRD: "state" */
-                state?: string;
             };
             header?: {
                 /**
@@ -3143,7 +3972,10 @@ export interface operations {
                 /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
                 "Accept-Language"?: components["parameters"]["AcceptLanguage"];
             };
-            path?: never;
+            path: {
+                /** @description Identifier of the ClaimTracking */
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -3154,28 +3986,170 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["JobListPage"];
+                    "application/json": components["schemas"]["ClaimTrackingGetResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Job.get": {
+    "clm.ClaimTracking.list": {
         parameters: {
             query?: {
-                /** @description PRD: "account" */
-                account?: string;
-                /** @description PRD: "policy" */
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description PRD: "claim" */
+                claim?: string;
+                /** @description PRD: "party or policy" (optional) */
+                party?: string;
+                /** @description PRD: "party or policy" (optional) */
                 policy?: string;
-                /** @description PRD: "participant" */
-                participant?: string;
-                /** @description PRD: "state" */
-                state?: string;
             };
             header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimTrackingListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.CatEvent.aggregate": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+                /** @description PRD: "cat code" */
+                catCode?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatEventAggregateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Service.request": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServiceRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceRequestResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Service.update": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
                  *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
@@ -3185,12 +4159,16 @@ export interface operations {
                 "Accept-Language"?: components["parameters"]["AcceptLanguage"];
             };
             path: {
-                /** @description Identifier of the Job */
+                /** @description Identifier of the Service */
                 id: string;
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServiceUpdateRequest"];
+            };
+        };
         responses: {
             /** @description Success */
             200: {
@@ -3198,17 +4176,20 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["JobGetResponse"];
+                    "application/json": components["schemas"]["ServiceUpdateResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.PolicyChange.create": {
+    "clm.Service.cancel": {
         parameters: {
             query?: {
                 /**
@@ -3238,17 +4219,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PolicyChangeCreateRequest"];
+                "application/json": components["schemas"]["ServiceCancelRequest"];
             };
         };
         responses: {
             /** @description Success */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PolicyChangeCreateResponse"];
+                    "application/json": components["schemas"]["ServiceCancelResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -3260,7 +4241,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Cancellation.create": {
+    "clm.VendorInvoice.submit": {
         parameters: {
             query?: {
                 /**
@@ -3290,17 +4271,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CancellationCreateRequest"];
+                "application/json": components["schemas"]["VendorInvoiceSubmitRequest"];
             };
         };
         responses: {
             /** @description Success */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CancellationCreateResponse"];
+                    "application/json": components["schemas"]["VendorInvoiceSubmitResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -3312,7 +4293,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Cancellation.schedule": {
+    "clm.VendorInvoice.decide": {
         parameters: {
             query?: {
                 /**
@@ -3342,7 +4323,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CancellationScheduleRequest"];
+                "application/json": components["schemas"]["VendorInvoiceDecideRequest"];
             };
         };
         responses: {
@@ -3352,7 +4333,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CancellationScheduleResponse"];
+                    "application/json": components["schemas"]["VendorInvoiceDecideResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -3360,571 +4341,11 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
+            429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Cancellation.rescind": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CancellationRescindRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CancellationRescindResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Withdrawal.submit": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WithdrawalSubmitRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithdrawalSubmitResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Reinstatement.create": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReinstatementCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReinstatementCreateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Rewrite.create": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RewriteCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RewriteCreateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Suspension.create": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SuspensionCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuspensionCreateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Reactivation.create": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReactivationCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReactivationCreateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Renewal.create": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RenewalCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RenewalCreateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Renewal.offer": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RenewalOfferRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RenewalOfferResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Renewal.accept": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RenewalAcceptRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RenewalAcceptResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Renewal.decline": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RenewalDeclineRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RenewalDeclineResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Renewal.nonRenew": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RenewalNonRenewRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RenewalNonRenewResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.RenewalRun.start": {
+    "clm.Fraud.score": {
         parameters: {
             query?: never;
             header: {
@@ -3947,7 +4368,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RenewalRunStartRequest"];
+                "application/json": components["schemas"]["FraudScoreRequest"];
             };
         };
         responses: {
@@ -3957,7 +4378,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RenewalRunStartResponse"];
+                    "application/json": components["schemas"]["FraudScoreResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -3968,7 +4389,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.RenewalRun.retryItem": {
+    "clm.Conversation.send": {
         parameters: {
             query?: never;
             header: {
@@ -3991,7 +4412,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RenewalRunRetryItemRequest"];
+                "application/json": components["schemas"]["ConversationSendRequest"];
             };
         };
         responses: {
@@ -4001,7 +4422,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RenewalRunRetryItemResponse"];
+                    "application/json": components["schemas"]["ConversationSendResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4012,7 +4433,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.RenewalRun.pause": {
+    "clm.Conversation.schedule": {
         parameters: {
             query?: never;
             header: {
@@ -4035,7 +4456,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RenewalRunPauseRequest"];
+                "application/json": components["schemas"]["ConversationScheduleRequest"];
             };
         };
         responses: {
@@ -4045,7 +4466,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RenewalRunPauseResponse"];
+                    "application/json": components["schemas"]["ConversationScheduleResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4056,472 +4477,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.PolicyMove.execute": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PolicyMoveExecuteRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PolicyMoveExecuteResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Policy.get": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
-                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
-                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
-                 */
-                validAt?: components["parameters"]["ValidAt"];
-                /**
-                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
-                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
-                 */
-                knownAt?: components["parameters"]["KnownAt"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the Policy (PRD input: "ids") */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PolicyGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            429: components["responses"]["TooManyRequests"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Term.get": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
-                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
-                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
-                 */
-                validAt?: components["parameters"]["ValidAt"];
-                /**
-                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
-                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
-                 */
-                knownAt?: components["parameters"]["KnownAt"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the Term (PRD input: "ids") */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TermGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Term.timeline": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
-                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
-                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
-                 */
-                validAt?: components["parameters"]["ValidAt"];
-                /**
-                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
-                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
-                 */
-                knownAt?: components["parameters"]["KnownAt"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TermTimelineResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Snapshot.get": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
-                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
-                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
-                 */
-                validAt?: components["parameters"]["ValidAt"];
-                /**
-                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
-                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
-                 */
-                knownAt?: components["parameters"]["KnownAt"];
-                /** @description PRD: "policyId or snapshotRef" (optional) */
-                policyId?: components["schemas"]["Uuid"];
-                /** @description PRD: "policyId or snapshotRef" (optional). Re-reads that snapshot byte-identically; validAt and knownAt are then encoded in the reference and must not be given. */
-                snapshotRef?: string;
-                /** @description Alternative to policyId (policy numbers are business keys, not personal data). Give exactly one of policyId, policyNumber, snapshotRef. */
-                policyNumber?: components["schemas"]["BusinessNumber"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SnapshotGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Policy.getMany": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
-                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
-                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
-                 */
-                validAt?: components["parameters"]["ValidAt"];
-                /**
-                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
-                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
-                 */
-                knownAt?: components["parameters"]["KnownAt"];
-                /** @description PRD: "ids (≤ 200)" */
-                ids?: string[];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PolicyGetManyResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Policy.search": {
-        parameters: {
-            query?: {
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-                /** @description Exact policy number (a business key, not personal data). Other criteria use the POST form (D-SLC-05). */
-                policyNumber?: components["schemas"]["BusinessNumber"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PolicySearchPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            422: components["responses"]["UnprocessableContent"];
-            429: components["responses"]["TooManyRequests"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Policy.searchByCriteria": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
-                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
-                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
-                 */
-                validAt?: components["parameters"]["ValidAt"];
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PolicySearchCriteria"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PolicySearchPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            422: components["responses"]["UnprocessableContent"];
-            429: components["responses"]["TooManyRequests"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Earning.compute": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
-                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
-                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
-                 */
-                validAt?: components["parameters"]["ValidAt"];
-                /**
-                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
-                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
-                 */
-                knownAt?: components["parameters"]["KnownAt"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EarningComputeRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EarningComputeResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Charges.reconcile": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChargesReconcileRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChargesReconcileResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Segment.changes": {
+    "clm.Conversation.list": {
         parameters: {
             query?: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
@@ -4549,90 +4505,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SegmentChangesPage"];
+                    "application/json": components["schemas"]["ConversationListPage"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            429: components["responses"]["TooManyRequests"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.StatusModel.get": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StatusModelGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.EffectiveDate.limits": {
-        parameters: {
-            query?: {
-                /** @description PRD: "policyId" */
-                policyId?: components["schemas"]["Uuid"];
-                /** @description PRD: "txnType" */
-                txnType?: string;
-                /** @description PRD: "role" */
-                role?: string;
-                /** @description PRD: "channel" */
-                channel?: string;
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EffectiveDateLimitsResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Import.policy": {
+    "clm.Import.claim": {
         parameters: {
             query?: {
                 /**
@@ -4662,7 +4545,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ImportPolicyRequest"];
+                "application/json": components["schemas"]["ImportClaimRequest"];
             };
         };
         responses: {
@@ -4672,7 +4555,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ImportPolicyResponse"];
+                    "application/json": components["schemas"]["ImportClaimResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4683,7 +4566,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Import.term": {
+    "clm.Import.financialHistory": {
         parameters: {
             query?: {
                 /**
@@ -4713,7 +4596,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ImportTermRequest"];
+                "application/json": components["schemas"]["ImportFinancialHistoryRequest"];
             };
         };
         responses: {
@@ -4723,7 +4606,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ImportTermResponse"];
+                    "application/json": components["schemas"]["ImportFinancialHistoryResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4734,58 +4617,7 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Import.reverse": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ImportReverseRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImportReverseResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pol.Import.convertCurrency": {
+    "clm.Import.convertCurrency": {
         parameters: {
             query?: {
                 /**
@@ -4836,7 +4668,58 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Dsar.export": {
+    "clm.Import.reverse": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportReverseRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReverseResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Dsar.export": {
         parameters: {
             query?: never;
             header: {
@@ -4880,9 +4763,67 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "pol.Dsar.restrict": {
+    "clm.Dsar.rectify": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DsarRectifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DsarRectifyResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Dsar.restrict": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -4914,6 +4855,57 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DsarRestrictResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Dsar.purge": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DsarPurgeRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DsarPurgeResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
