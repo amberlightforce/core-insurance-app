@@ -217,13 +217,14 @@ internal static class BillingDatabaseSql
     /// SL2-BIL-DISB: the billing-ledger rules of disbursement facts (REQ-BIL-211; key event type × charge category × bill
     /// mode × jurisdiction × qualifier, the qualifier naming the source type of the source register, REQ-BIL-354) and the
     /// database guards of the new documents: a disbursement's money, payee, source and number columns and a payee
-    /// account's IBAN, party and purpose are frozen once written (SQLSTATE BL004); neither can be deleted (BL002). The
+    /// account's IBAN, party, purpose and its control fields (cooling-off, change flag, superseded account, verification
+    /// and VoP result: the app role cannot lift a hold) are frozen once written (SQLSTATE BL004); neither can be deleted (BL002). The
     /// sub-ledger itself keeps the append-only, balance and seal triggers above (D-ARC-34), which cover these entries too.
     /// </summary>
     public const string Disbursements = """
         INSERT INTO bil.ledger_rule (rule_id, version, event_type, charge_category, bill_mode, jurisdiction, qualifier,
             debit_account, credit_account, amount_expression, valid_from, valid_to, source) VALUES
-            ('BLR-DISB-RELEASED-CLM', 1, 'DISBURSEMENT_RELEASED', '*', '*', '*', 'CLM_PAYMENT', 'LA-17', 'LA-13', 'AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-211 (on release: claim payments clearing to disbursements in transit)'),
+            ('BLR-DISB-RELEASED-CLM', 1, 'DISBURSEMENT_RELEASED', '*', '*', '*', 'CLM_CLAIM_PAYMENT', 'LA-17', 'LA-13', 'AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-211 (on release: claim payments clearing to disbursements in transit)'),
             ('BLR-DISB-CLEARED', 1, 'DISBURSEMENT_CLEARED', '*', '*', '*', '*', 'LA-13', 'LA-10', 'AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-211 (on clearing: disbursements in transit to cash at bank)');
 
         CREATE FUNCTION bil.freeze_disbursement() RETURNS trigger LANGUAGE plpgsql AS $fn$
@@ -245,9 +246,11 @@ internal static class BillingDatabaseSql
 
         CREATE FUNCTION bil.freeze_payee_account() RETURNS trigger LANGUAGE plpgsql AS $fn$
         BEGIN
-            IF (NEW.payee_account_id, NEW.legal_entity_id, NEW.party_id, NEW.purpose, NEW.iban_encrypted, NEW.iban_blind_index, NEW.iban_last4, NEW.valid_from, NEW.created_at)
+            IF (NEW.payee_account_id, NEW.legal_entity_id, NEW.party_id, NEW.purpose, NEW.iban_encrypted, NEW.iban_blind_index, NEW.iban_last4, NEW.valid_from, NEW.created_at,
+                NEW.cooling_off_until, NEW.is_change, NEW.supersedes_id, NEW.verification_status, NEW.vop_result, NEW.vop_suggested_name, NEW.vop_checked_at)
                IS DISTINCT FROM
-               (OLD.payee_account_id, OLD.legal_entity_id, OLD.party_id, OLD.purpose, OLD.iban_encrypted, OLD.iban_blind_index, OLD.iban_last4, OLD.valid_from, OLD.created_at) THEN
+               (OLD.payee_account_id, OLD.legal_entity_id, OLD.party_id, OLD.purpose, OLD.iban_encrypted, OLD.iban_blind_index, OLD.iban_last4, OLD.valid_from, OLD.created_at,
+                OLD.cooling_off_until, OLD.is_change, OLD.supersedes_id, OLD.verification_status, OLD.vop_result, OLD.vop_suggested_name, OLD.vop_checked_at) THEN
                 RAISE LOG 'SECURITY: change of frozen payee account % columns refused for role %', OLD.payee_account_id, current_user;
                 RAISE EXCEPTION 'bil.payee_account bank details are never overwritten: a change supersedes the account (REQ-BIL-343)' USING ERRCODE = 'BL004';
             END IF;

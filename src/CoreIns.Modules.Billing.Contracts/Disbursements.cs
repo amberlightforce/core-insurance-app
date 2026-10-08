@@ -13,9 +13,9 @@ namespace CoreIns.Modules.Billing.Contracts;
 public static class DisbursementCodes
 {
     /// <summary>Source type of a CLM claim payment (calling module CLM; evidence: the approved transaction set).</summary>
-    public const string ClaimPayment = "CLM_PAYMENT";
+    public const string ClaimPayment = "CLM_CLAIM_PAYMENT";
 
-    /// <summary>SEPA credit transfer (REQ-BIL-209), the default method of CLM_PAYMENT.</summary>
+    /// <summary>SEPA credit transfer (REQ-BIL-209), the default method of CLM_CLAIM_PAYMENT.</summary>
     public const string SepaCreditTransfer = "SEPA_CT";
 
     /// <summary>Payee account purpose used for claim payments (REQ-BIL-343).</summary>

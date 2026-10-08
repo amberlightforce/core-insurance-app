@@ -159,6 +159,12 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                 table: "ledger_entry",
                 column: "disbursement_id");
 
+            migrationBuilder.AddCheckConstraint(
+                name: "ck_ledger_entry_owner",
+                schema: "bil",
+                table: "ledger_entry",
+                sql: "(billing_account_id IS NULL) <> (disbursement_id IS NULL)");
+
             migrationBuilder.CreateIndex(
                 name: "ix_disbursement_claim",
                 schema: "bil",
@@ -175,9 +181,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                 name: "ux_disbursement_duplicate_key",
                 schema: "bil",
                 table: "disbursement",
-                columns: new[] { "legal_entity_id", "payee_account_id", "amount", "currency", "source_type", "source_id" },
+                columns: new[] { "legal_entity_id", "payee_account_id", "amount", "currency", "source_type", "claim_id" },
                 unique: true,
-                filter: "state NOT IN ('REJECTED', 'STOPPED', 'VOIDED', 'RETURNED')");
+                filter: "state NOT IN ('REJECTED', 'STOPPED', 'VOIDED', 'RETURNED') AND claim_id IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "ux_disbursement_number",
@@ -226,6 +232,11 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
             migrationBuilder.DropIndex(
                 name: "ix_ledger_entry_disbursement",
+                schema: "bil",
+                table: "ledger_entry");
+
+            migrationBuilder.DropCheckConstraint(
+                name: "ck_ledger_entry_owner",
                 schema: "bil",
                 table: "ledger_entry");
 

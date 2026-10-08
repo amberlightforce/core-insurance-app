@@ -3905,7 +3905,7 @@ paths:
       - W5-BIL-05
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-BIL-009, REQ-BIL-197, REQ-BIL-198, REQ-BIL-200, REQ-BIL-202, REQ-BIL-207, REQ-BIL-211 (SL2-BIL-DISB, CLM_PAYMENT through the stub bank channel)
+      x-typed: REQ-BIL-009, REQ-BIL-197, REQ-BIL-198, REQ-BIL-200, REQ-BIL-202, REQ-BIL-207, REQ-BIL-211 (SL2-BIL-DISB, CLM_CLAIM_PAYMENT through the stub bank channel)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -6980,7 +6980,8 @@ components:
           $ref: '#/components/schemas/PayeeVerificationStatus'
         coolingOffUntil:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: End of the cooling-off window of `bil.payee.cooling_off.<purpose>` (REQ-BIL-199, BR-BIL-062)
+          description: End of the cooling-off window of `bil.payee.cooling_off.<purpose>` for a changed account (REQ-BIL-199,
+            BR-BIL-062); equals the registration date for a first account, which is not held
         maskedIban:
           type: string
           description: IBAN masked except the last four characters (REQ-BIL-345)
@@ -7830,11 +7831,12 @@ components:
           description: 'Content hash the source approved (REQ-BIL-198): SHA-256 of the canonical JSON (RFC 8785) of
             {sourceType, sourceId, payeePartyId, payeeAccountId, amount}; computed with
             CoreIns.Modules.Billing.Contracts.DisbursementContent.Hash. A request whose content differs is refused with
-            BIL-ERR-APPROVAL-MISMATCH. Required for CLM_PAYMENT (SL2-BIL-DISB).'
+            BIL-ERR-APPROVAL-MISMATCH. Required for CLM_CLAIM_PAYMENT (SL2-BIL-DISB).'
         claimId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: CLM sources only - the claim the payment belongs to (ledger dimension for FIN, D-SL2-08; not part of the
-            content hash)
+          description: CLM sources only (required for CLM_CLAIM_PAYMENT) - the claim the payment belongs to; the source reference
+            of the duplicate key (payee account, amount, claim; REQ-BIL-202) and a ledger dimension for FIN (D-SL2-08); not part
+            of the content hash
         purposeText:
           type: string
         statementReference:
@@ -7852,7 +7854,7 @@ components:
       - required:
         - adHocPayee
       description: 'Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method,
-        approval evidence, statement or return reference". SL2-BIL-DISB serves source type CLM_PAYMENT (method SEPA_CT,
+        approval evidence, statement or return reference". SL2-BIL-DISB serves source type CLM_CLAIM_PAYMENT (method SEPA_CT,
         EUR, payeePartyId with payeeAccountId); other sources are refused with BIL-ERR-SOURCE.'
     DisbursementRequestResponse:
       type: object

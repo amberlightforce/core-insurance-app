@@ -19,7 +19,7 @@ public sealed record PayeeAccountCreateResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("verificationStatus")]
     public required global::CoreIns.Modules.Billing.Contracts.Api.PayeeVerificationStatus VerificationStatus { get; init; }
 
-    /// <summary>End of the cooling-off window of `bil.payee.cooling_off.&lt;purpose&gt;` (REQ-BIL-199, BR-BIL-062)</summary>
+    /// <summary>End of the cooling-off window of `bil.payee.cooling_off.&lt;purpose&gt;` for a changed account (REQ-BIL-199, BR-BIL-062); equals the registration date for a first account, which is not held</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("coolingOffUntil")]
     public required global::CoreIns.SharedKernel.BusinessDate CoolingOffUntil { get; init; }
 

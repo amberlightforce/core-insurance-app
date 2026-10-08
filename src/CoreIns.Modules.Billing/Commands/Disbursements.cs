@@ -26,7 +26,7 @@ using Npgsql;
 
 namespace CoreIns.Modules.Billing.Commands;
 
-/// <summary><c>bil.Disbursement.request</c>: the shared disbursement service, source CLM_PAYMENT in the slice (REQ-BIL-009).</summary>
+/// <summary><c>bil.Disbursement.request</c>: the shared disbursement service, source CLM_CLAIM_PAYMENT in the slice (REQ-BIL-009).</summary>
 internal sealed record RequestDisbursement(DisbursementRequestRequest Request) : ICommand<DisbursementRequestResponse>;
 
 /// <summary>Shape rules (BIL-ERR-VALIDATION). The register rules (source, method, currency) are typed errors in the handler.</summary>
@@ -47,6 +47,7 @@ internal sealed class RequestDisbursementValidator : AbstractValidator<RequestDi
             RuleFor(c => c.Request.PayeeAccountId).NotNull().WithErrorCode("PAYEE_ACCOUNT_REQUIRED");
             RuleFor(c => c.Request.ApprovalEvidenceRef).NotEmpty().WithErrorCode("APPROVAL_EVIDENCE_REQUIRED");
             RuleFor(c => c.Request.ApprovalContentHash).NotNull().WithErrorCode("APPROVAL_HASH_REQUIRED");
+            RuleFor(c => c.Request.ClaimId).NotNull().WithErrorCode("CLAIM_REQUIRED");
             RuleFor(c => c.Request.AdHocPayee).Null().WithErrorCode("AD_HOC_PAYEE_NOT_SUPPORTED");
             RuleFor(c => c.Request.CoPayees).Must(p => p is null || p.Count == 0).WithErrorCode("CO_PAYEES_NOT_SUPPORTED");
             RuleFor(c => c.Request.CardToken).Null().WithErrorCode("CARD_NOT_SUPPORTED");
@@ -58,13 +59,14 @@ internal sealed class RequestDisbursementValidator : AbstractValidator<RequestDi
 /// <summary>
 /// Requests, gates, releases and tracks one disbursement in a single transaction (REQ-BIL-009, -197..-211):
 /// <list type="number">
-/// <item>source register (REQ-BIL-197, -354): only CLM_PAYMENT from CLM, method SEPA_CT, EUR (D-SL2-06);</item>
+/// <item>source register (REQ-BIL-197, -354): only CLM_CLAIM_PAYMENT from CLM, method SEPA_CT, EUR (D-SL2-06);</item>
 /// <item>approval evidence (REQ-BIL-198): the request content must hash to the approved <c>approvalContentHash</c>
 /// (<see cref="DisbursementContent"/>), else BIL-ERR-APPROVAL-MISMATCH; BIL runs no approval of its own for CLM;</item>
 /// <item>payee account (REQ-BIL-343..345): the payee's Active CLAIM_PAYMENT account, VoP Match (REQ-BIL-204), and a
 /// changed account inside cooling-off is held (REQ-BIL-199; four-eyes release is not built, so it fails closed);</item>
-/// <item>duplicates (REQ-BIL-202): one live disbursement per source object and per (payee account, amount, source ref),
-/// enforced by unique indexes, so concurrent identical requests produce one disbursement;</item>
+/// <item>duplicates (REQ-BIL-202): one live disbursement per source object (claim payment id) and per duplicate key
+/// (payee account, amount, source reference = the claim), enforced by unique indexes, so concurrent identical requests
+/// and two payment ids paying the same claim the same amount to the same account produce one disbursement;</item>
 /// <item>sanctions (REQ-BIL-200, -214): <c>pty.Screening.screen</c> on the payee; anything but Clear without a payment
 /// block — or a screening failure — refuses the request (fail closed; holds and <c>SanctionsHitCleared</c> are later);</item>
 /// <item>Requested → PendingApproval → Approved, then, when a bank channel is bound, Released (DISBURSEMENT_RELEASED:
@@ -98,7 +100,7 @@ internal sealed partial class RequestDisbursementHandler(
         // 1. Source register (REQ-BIL-197, REQ-BIL-354) and method (REQ-BIL-209).
         if (request.SourceType != DisbursementCodes.ClaimPayment)
         {
-            return DomainError.Of(ModuleCode.BIL, "SOURCE", $"Source type {request.SourceType} is not in the source register of this release (CLM_PAYMENT only).");
+            return DomainError.Of(ModuleCode.BIL, "SOURCE", $"Source type {request.SourceType} is not in the source register of this release (CLM_CLAIM_PAYMENT only).");
         }
 
         if (request.Method != DisbursementCodes.SepaCreditTransfer)
@@ -150,7 +152,7 @@ internal sealed partial class RequestDisbursementHandler(
         }
 
         // 4. Duplicates (REQ-BIL-202): a live disbursement for the same source object or duplicate key.
-        var existing = await ExistingAsync(legalEntity, request, cancellationToken).ConfigureAwait(false);
+        var existing = await ExistingAsync(legalEntity, request, payeeAccountId, cancellationToken).ConfigureAwait(false);
         if (existing is not null)
         {
             return Duplicate(existing.Value);
@@ -206,7 +208,7 @@ internal sealed partial class RequestDisbursementHandler(
         {
             // A concurrent request for the same source won the race (it waited on the index until that one committed).
             db.Entry(row).State = EntityState.Detached;
-            var winner = await ExistingAsync(legalEntity, request, cancellationToken).ConfigureAwait(false);
+            var winner = await ExistingAsync(legalEntity, request, payeeAccountId, cancellationToken).ConfigureAwait(false);
             return Duplicate(winner ?? default);
         }
 
@@ -324,17 +326,24 @@ internal sealed partial class RequestDisbursementHandler(
     }
 
     /// <summary>
-    /// The live disbursement of the same source object. It covers the duplicate key (payee account, amount, source ref)
-    /// too, which the database enforces as its own unique index (REQ-BIL-202).
+    /// The live disbursement with the same source object (claim payment id) or the same duplicate key: payee account,
+    /// amount and source reference, the claim for CLM (REQ-BIL-202). The database enforces both as unique indexes.
     /// </summary>
-    private Task<DisbursementId?> ExistingAsync(LegalEntityId legalEntity, DisbursementRequestRequest request, CancellationToken cancellationToken) =>
-        db.Disbursements.AsNoTracking()
-            .Where(d => d.LegalEntityId == legalEntity && Live.Contains(d.State) && d.SourceType == request.SourceType && d.SourceId == request.SourceId)
+    private Task<DisbursementId?> ExistingAsync(LegalEntityId legalEntity, DisbursementRequestRequest request, Guid payeeAccountId, CancellationToken cancellationToken)
+    {
+        var amount = request.Amount.Amount;
+        var currency = request.Amount.Currency.Code;
+        var claim = request.ClaimId;
+        return db.Disbursements.AsNoTracking()
+            .Where(d => d.LegalEntityId == legalEntity && Live.Contains(d.State) && d.SourceType == request.SourceType
+                        && (d.SourceId == request.SourceId
+                            || (d.ClaimId == claim && d.PayeeAccountId == payeeAccountId && d.Amount == amount && d.Currency == currency)))
             .Select(d => (DisbursementId?)d.DisbursementId)
             .FirstOrDefaultAsync(cancellationToken);
+    }
 
     private static DomainError Duplicate(DisbursementId existing) =>
-        new(ErrorCode.For(ModuleCode.BIL, "DUPLICATE"), "A disbursement for this source (or with the same payee account, amount and source reference) already exists (REQ-BIL-202).")
+        new(ErrorCode.For(ModuleCode.BIL, "DUPLICATE"), "A disbursement for this claim payment, or for the same claim with the same payee account and amount, already exists (REQ-BIL-202).")
         {
             Metadata = new Dictionary<string, string>(StringComparer.Ordinal) { ["existingDisbursementId"] = existing.Value.ToString() },
         };

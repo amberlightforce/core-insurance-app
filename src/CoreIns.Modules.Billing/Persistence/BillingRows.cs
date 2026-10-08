@@ -435,7 +435,7 @@ internal sealed class LedgerLineRow
 
     public DisbursementId? DisbursementId { get; set; }
 
-    /// <summary>Disbursement source type (REQ-BIL-354), e.g. CLM_PAYMENT.</summary>
+    /// <summary>Disbursement source type (REQ-BIL-354), e.g. CLM_CLAIM_PAYMENT.</summary>
     public string? SourceType { get; set; }
 
     /// <summary>Id of the disbursement's source object (e.g. the CLM claim payment).</summary>

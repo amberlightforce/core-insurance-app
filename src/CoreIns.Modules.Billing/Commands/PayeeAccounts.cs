@@ -38,7 +38,7 @@ internal sealed class CreatePayeeAccountValidator : AbstractValidator<CreatePaye
 /// Validates the IBAN (ISO 13616 mod-97, BIL-ERR-IBAN-INVALID), stores it field-encrypted with a blind index and its last
 /// four characters for display (REQ-BIL-103, REQ-BIL-334), runs verification of payee through the bound adapter (the slice's
 /// stub answers Match; none bound = VoPNotAvailable, REQ-BIL-203/214) and sets <c>cooling_off_until</c> (REQ-BIL-199,
-/// BR-BIL-062). The same IBAN registered again for the party and purpose returns the existing account; a different IBAN
+/// BR-BIL-062): registration date + cooling-off days for a changed account, the registration date for a first one. The same IBAN registered again for the party and purpose returns the existing account; a different IBAN
 /// supersedes the Active one (valid_to = today, never an overwrite) and is marked as a change, which the disbursement
 /// service holds within cooling-off. The response, the audit record and the logs carry the masked IBAN only.
 /// </summary>
@@ -119,7 +119,8 @@ internal sealed partial class CreatePayeeAccountHandler(
             VopSuggestedName = vop.SuggestedName,
             VopCheckedAt = now,
             ValidFrom = today,
-            CoolingOffUntil = today.AddDays(options.Value.PayeeCoolingOffDays),
+            // Cooling-off applies only to a changed account (REQ-BIL-199); a first account reports no window it is not held by.
+            CoolingOffUntil = current is null ? today : today.AddDays(options.Value.PayeeCoolingOffDays),
             IsChange = current is not null,
             SupersedesId = current?.PayeeAccountId,
             Status = active,

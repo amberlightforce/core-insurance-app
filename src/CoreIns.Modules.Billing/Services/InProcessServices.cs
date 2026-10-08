@@ -103,7 +103,7 @@ internal sealed class PayeeAccountService(
 }
 
 /// <summary>
-/// <see cref="IBillingDisbursementService"/>: <c>request</c> (REQ-BIL-009, source CLM_PAYMENT) and <c>get</c>
+/// <see cref="IBillingDisbursementService"/>: <c>request</c> (REQ-BIL-009, source CLM_CLAIM_PAYMENT) and <c>get</c>
 /// (REQ-BIL-213); <c>list</c>, <c>stop</c> and <c>void</c> are later packages.
 /// </summary>
 internal sealed class DisbursementService(

@@ -486,10 +486,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasDatabaseName("ux_disbursement_source")
                         .HasFilter("state NOT IN ('REJECTED', 'STOPPED', 'VOIDED', 'RETURNED')");
 
-                    b.HasIndex("LegalEntityId", "PayeeAccountId", "Amount", "Currency", "SourceType", "SourceId")
+                    b.HasIndex("LegalEntityId", "PayeeAccountId", "Amount", "Currency", "SourceType", "ClaimId")
                         .IsUnique()
                         .HasDatabaseName("ux_disbursement_duplicate_key")
-                        .HasFilter("state NOT IN ('REJECTED', 'STOPPED', 'VOIDED', 'RETURNED')");
+                        .HasFilter("state NOT IN ('REJECTED', 'STOPPED', 'VOIDED', 'RETURNED') AND claim_id IS NOT NULL");
 
                     b.ToTable("disbursement", "bil", t =>
                         {
@@ -939,6 +939,8 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.ToTable("ledger_entry", "bil", t =>
                         {
                             t.HasCheckConstraint("ck_ledger_entry_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                            t.HasCheckConstraint("ck_ledger_entry_owner", "(billing_account_id IS NULL) <> (disbursement_id IS NULL)");
                         });
                 });
 

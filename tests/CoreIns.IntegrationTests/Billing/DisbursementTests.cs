@@ -61,8 +61,9 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
         var encryptor = _slice.Factory.Services.GetRequiredService<FieldEncryptor>();
         (await encryptor.DecryptAsync(envelope, PayeeProtection.IbanField, id.ToString("N"), Ct)).ShouldBe(iban);
         (await _slice.ScalarAsync<string>($"SELECT iban_last4 FROM bil.payee_account WHERE payee_account_id = '{id}'")).ShouldBe(iban[^4..]);
-        (await _slice.ScalarAsync<string>($"SELECT cooling_off_until::text FROM bil.payee_account WHERE payee_account_id = '{id}'"))
-            .ShouldBe(BusinessDate.Parse(await _slice.ScalarAsync<string>($"SELECT valid_from::text FROM bil.payee_account WHERE payee_account_id = '{id}'")).AddDays(30).ToString());
+        // A first account is not a change: no cooling-off window is reported because none is enforced (REQ-BIL-199).
+        (await _slice.ScalarAsync<bool>($"SELECT cooling_off_until = valid_from AND NOT is_change FROM bil.payee_account WHERE payee_account_id = '{id}'")).ShouldBeTrue();
+        account.Text("coolingOffUntil").ShouldBe(await _slice.ScalarAsync<string>($"SELECT valid_from::text FROM bil.payee_account WHERE payee_account_id = '{id}'"));
 
         // The same IBAN again (another format, another key) is the same account; a replay of the key too.
         var (again, same) = await _slice.PostAsync("/api/bil/v1/payee-accounts", new { partyId = party.Value, purpose = "CLAIM_PAYMENT", iban, holderName = "Ελένη Παπαδοπούλου" });
@@ -127,7 +128,7 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
         var paid = await _slice.RequestAsync(request);
         paid.Status.ShouldBe(DisbursementRequestResponse.StatusValue.Cleared);
         paid.SourceModule.ShouldBe(ModuleCode.CLM);
-        paid.SourceType.ShouldBe("CLM_PAYMENT");
+        paid.SourceType.ShouldBe("CLM_CLAIM_PAYMENT");
         paid.SourceId.ShouldBe(request.SourceId);
         paid.ClaimId.ShouldBe(claim);
         paid.Amount.ShouldBe(new Money(2400m, Currency.EUR));
@@ -163,7 +164,7 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
             FROM bil.ledger_entry e JOIN bil.ledger_line l ON l.entry_id = e.entry_id
             WHERE e.disbursement_id = '{id}' ORDER BY e.recorded_at, e.entry_type DESC, l.line_no
             """);
-        var tail = $":2400.00:CLM_PAYMENT:{request.SourceId}:{claim.Value}:{id}";
+        var tail = $":2400.00:CLM_CLAIM_PAYMENT:{request.SourceId}:{claim.Value}:{id}";
         lines.ShouldBe(
         [
             "DISBURSEMENT_RELEASED:DEBIT:LA-17" + tail,
@@ -191,7 +192,7 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
             .ShouldBe(2);
 
         var issued = await _slice.ScalarAsync<string>($"SELECT payload::text FROM plt.outbox_message WHERE aggregate_id = '{id}' AND event_type = 'DisbursementIssued'");
-        foreach (var expected in new[] { "\"sourceModule\": \"CLM\"", "\"sourceType\": \"CLM_PAYMENT\"", $"\"sourceId\": \"{request.SourceId}\"", "\"method\": \"SEPA_CT\"", "\"valueDate\"", "\"amount\"" })
+        foreach (var expected in new[] { "\"sourceModule\": \"CLM\"", "\"sourceType\": \"CLM_CLAIM_PAYMENT\"", $"\"sourceId\": \"{request.SourceId}\"", "\"method\": \"SEPA_CT\"", "\"valueDate\"", "\"amount\"" })
         {
             issued.ShouldContain(expected);
         }
@@ -209,7 +210,7 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
         var posted = await _slice.TextsAsync($"SELECT payload::text FROM plt.outbox_message WHERE aggregate_id = '{id}' AND event_type = 'BillingEntryPosted' ORDER BY aggregate_sequence");
         posted[0].ShouldContain("\"eventType\": \"DISBURSEMENT_RELEASED\"");
         posted[1].ShouldContain("\"eventType\": \"DISBURSEMENT_CLEARED\"");
-        foreach (var expected in new[] { $"\"disbursementId\": \"{id}\"", "\"sourceType\": \"CLM_PAYMENT\"", $"\"claimId\": \"{claim.Value}\"", $"\"sourceId\": \"{request.SourceId}\"" })
+        foreach (var expected in new[] { $"\"disbursementId\": \"{id}\"", "\"sourceType\": \"CLM_CLAIM_PAYMENT\"", $"\"claimId\": \"{claim.Value}\"", $"\"sourceId\": \"{request.SourceId}\"" })
         {
             posted.ShouldAllBe(p => p.Contains(expected, StringComparison.Ordinal));
         }
@@ -251,6 +252,46 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
         error.Error.Code.Value.ShouldBe("BIL-ERR-DUPLICATE");
         error.Error.Metadata!["existingDisbursementId"].ShouldBe(first.DisbursementId.Value.ToString());
         (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.disbursement WHERE source_id = '{request.SourceId}'")).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task REQ_BIL_202_two_payment_ids_on_one_claim_to_the_same_account_for_the_same_amount_are_a_duplicate()
+    {
+        var party = PartyId.New();
+        var claim = ClaimId.New();
+        var account = await _slice.CreateAccountAsync(party, DisbursementSlice.NewIban());
+        var first = await _slice.RequestAsync(DisbursementSlice.ClaimPayment(party, account.PayeeAccountId, 640m, claim: claim));
+
+        // Another claim payment id, same claim, payee account and amount: the duplicate key (source reference = claim).
+        var second = DisbursementSlice.ClaimPayment(party, account.PayeeAccountId, 640m, claim: claim);
+        var error = await Should.ThrowAsync<DomainException>(() => _slice.RequestAsync(second));
+        error.Error.Code.Value.ShouldBe("BIL-ERR-DUPLICATE");
+        error.Error.Metadata!["existingDisbursementId"].ShouldBe(first.DisbursementId.Value.ToString());
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.disbursement WHERE claim_id = '{claim.Value}'")).ShouldBe(1);
+
+        // The database refuses it too, past the handler's pre-check (unique index ux_disbursement_duplicate_key).
+        await using var admin = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        var index = await Should.ThrowAsync<PostgresException>(async () =>
+        {
+            await using var command = admin.CreateCommand(
+                $"""
+                INSERT INTO bil.disbursement (disbursement_id, legal_entity_id, jurisdiction, disbursement_number, source_module, source_type, source_id, claim_id,
+                    payee_party_id, payee_account_id, amount, currency, method, approval_evidence_ref, approval_content_hash, state, screening_result, screened_at,
+                    vop_result, requested_at, created_by, record_version)
+                SELECT '{Guid.CreateVersion7()}', legal_entity_id, jurisdiction, 'DSB-FORGED', source_module, source_type, 'another-payment', claim_id,
+                    payee_party_id, payee_account_id, amount, currency, method, approval_evidence_ref, approval_content_hash, 'APPROVED', screening_result, screened_at,
+                    vop_result, requested_at, created_by, 1
+                FROM bil.disbursement WHERE disbursement_id = '{first.DisbursementId.Value}'
+                """);
+            await command.ExecuteNonQueryAsync(Ct);
+        });
+        index.ConstraintName.ShouldBe("ux_disbursement_duplicate_key");
+
+        // A different amount, or a different claim, is another payment.
+        (await _slice.RequestAsync(DisbursementSlice.ClaimPayment(party, account.PayeeAccountId, 640.01m, claim: claim))).Status
+            .ShouldBe(DisbursementRequestResponse.StatusValue.Cleared);
+        (await _slice.RequestAsync(DisbursementSlice.ClaimPayment(party, account.PayeeAccountId, 640m, claim: ClaimId.New()))).Status
+            .ShouldBe(DisbursementRequestResponse.StatusValue.Cleared);
     }
 
     [Fact]
@@ -329,6 +370,7 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
         (await _slice.RefusedAsync(valid with { Amount = new Money(100m, Currency.USD) })).ShouldBe("BIL-ERR-CURRENCY");
         (await _slice.RefusedAsync(DisbursementSlice.ClaimPayment(party, account.PayeeAccountId, 100.01m, approvedAmount: 100m))).ShouldBe("BIL-ERR-APPROVAL-MISMATCH");
         (await _slice.RefusedAsync(valid with { ApprovalContentHash = null })).ShouldBe("BIL-ERR-VALIDATION");
+        (await _slice.RefusedAsync(valid with { ClaimId = null })).ShouldBe("BIL-ERR-VALIDATION");
         (await _slice.RefusedAsync(valid with { Amount = new Money(-5m, Currency.EUR) })).ShouldBe("BIL-ERR-VALIDATION");
         (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.disbursement WHERE payee_account_id = '{account.PayeeAccountId}'")).ShouldBe(0);
     }
@@ -348,6 +390,8 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
         // A changed account supersedes the first (never an overwrite) and is held within cooling-off (REQ-BIL-199).
         var changed = await _slice.CreateAccountAsync(party, DisbursementSlice.NewIban());
         changed.Change.ShouldBeTrue();
+        changed.CoolingOffUntil.ShouldBe(BusinessDate.Parse(await _slice.ScalarAsync<string>(
+            $"SELECT valid_from::text FROM bil.payee_account WHERE payee_account_id = '{changed.PayeeAccountId}'")).AddDays(30));
         changed.PayeeAccountId.ShouldNotBe(first.PayeeAccountId);
         (await _slice.ScalarAsync<string>($"SELECT status FROM bil.payee_account WHERE payee_account_id = '{first.PayeeAccountId}'")).ShouldBe("SUPERSEDED");
         (await _slice.RefusedAsync(DisbursementSlice.ClaimPayment(party, changed.PayeeAccountId, 10m))).ShouldBe("BIL-ERR-COOLING-OFF");
@@ -428,6 +472,16 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
                      ($"UPDATE bil.disbursement SET payee_account_id = '{Guid.CreateVersion7()}' WHERE disbursement_id = '{id}'", "BL004"),
                      ($"UPDATE bil.payee_account SET iban_last4 = '0000' WHERE payee_account_id = '{account.PayeeAccountId}'", "BL004"),
                      ($"UPDATE bil.payee_account SET iban_encrypted = '\\x00' WHERE payee_account_id = '{account.PayeeAccountId}'", "BL004"),
+
+                     // The app role cannot lift a hold by editing the account's control fields.
+                     ($"UPDATE bil.payee_account SET cooling_off_until = DATE '2000-01-01' WHERE payee_account_id = '{account.PayeeAccountId}'", "BL004"),
+                     ($"UPDATE bil.payee_account SET is_change = NOT is_change WHERE payee_account_id = '{account.PayeeAccountId}'", "BL004"),
+                     ($"UPDATE bil.payee_account SET supersedes_id = '{Guid.CreateVersion7()}' WHERE payee_account_id = '{account.PayeeAccountId}'", "BL004"),
+                     ($"UPDATE bil.payee_account SET verification_status = 'CONFIRMED' WHERE payee_account_id = '{account.PayeeAccountId}'", "BL004"),
+                     ($"UPDATE bil.payee_account SET vop_result = 'NO_MATCH' WHERE payee_account_id = '{account.PayeeAccountId}'", "BL004"),
+
+                     // A ledger entry belongs to exactly one aggregate (billing account xor disbursement).
+                     ($"INSERT INTO bil.ledger_entry (entry_id, legal_entity_id, jurisdiction, entry_type, accounting_date, business_date, recorded_at, cause_operation, correlation_id, lineage_keys) VALUES ('{Guid.CreateVersion7()}', '{ApiHostFactory.LegalEntityId}', 'GR', 'DISBURSEMENT_RELEASED', current_date, current_date, now(), 'test', 'x', '{{}}')", "23514"),
                      ($"DELETE FROM bil.disbursement WHERE disbursement_id = '{id}'", "42501"),
                  })
         {
@@ -468,12 +522,12 @@ public sealed class DisbursementTests(PostgresFixture database) : IClassFixture<
     {
         var party = new PartyId(Guid.Parse("0192f0c4-0000-7000-8000-0000000000a1"));
         var account = Guid.Parse("0192f0c4-0000-7000-8000-0000000000b2");
-        var hash = DisbursementContent.Hash("CLM_PAYMENT", "pay-1", party, account, new Money(2400m, Currency.EUR));
-        DisbursementContent.Hash("CLM_PAYMENT", "pay-1", party, account, new Money(2400.00m, Currency.EUR)).ShouldBe(hash);
-        DisbursementContent.Hash("CLM_PAYMENT", "pay-1", party, account, new Money(2400.01m, Currency.EUR)).ShouldNotBe(hash);
-        DisbursementContent.Hash("CLM_PAYMENT", "pay-2", party, account, new Money(2400m, Currency.EUR)).ShouldNotBe(hash);
-        DisbursementContent.Hash("CLM_PAYMENT", "pay-1", PartyId.New(), account, new Money(2400m, Currency.EUR)).ShouldNotBe(hash);
-        DisbursementContent.Hash("CLM_PAYMENT", "pay-1", party, Guid.CreateVersion7(), new Money(2400m, Currency.EUR)).ShouldNotBe(hash);
+        var hash = DisbursementContent.Hash("CLM_CLAIM_PAYMENT", "pay-1", party, account, new Money(2400m, Currency.EUR));
+        DisbursementContent.Hash("CLM_CLAIM_PAYMENT", "pay-1", party, account, new Money(2400.00m, Currency.EUR)).ShouldBe(hash);
+        DisbursementContent.Hash("CLM_CLAIM_PAYMENT", "pay-1", party, account, new Money(2400.01m, Currency.EUR)).ShouldNotBe(hash);
+        DisbursementContent.Hash("CLM_CLAIM_PAYMENT", "pay-2", party, account, new Money(2400m, Currency.EUR)).ShouldNotBe(hash);
+        DisbursementContent.Hash("CLM_CLAIM_PAYMENT", "pay-1", PartyId.New(), account, new Money(2400m, Currency.EUR)).ShouldNotBe(hash);
+        DisbursementContent.Hash("CLM_CLAIM_PAYMENT", "pay-1", party, Guid.CreateVersion7(), new Money(2400m, Currency.EUR)).ShouldNotBe(hash);
         hash.Value.Length.ShouldBe(64);
         string.Create(CultureInfo.InvariantCulture, $"{hash}").ShouldBe(hash.Value);
     }

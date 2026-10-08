@@ -349,7 +349,13 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
         modelBuilder.Entity<LedgerEntryRow>(entity =>
         {
-            entity.ToTable("ledger_entry", table => table.HasCheckConstraint("ck_ledger_entry_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'"));
+            entity.ToTable("ledger_entry", table =>
+            {
+                table.HasCheckConstraint("ck_ledger_entry_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                // An entry belongs to exactly one aggregate: a billing account or a disbursement (SL2-BIL-DISB).
+                table.HasCheckConstraint("ck_ledger_entry_owner", "(billing_account_id IS NULL) <> (disbursement_id IS NULL)");
+            });
             entity.HasKey(e => e.EntryId).HasName("pk_ledger_entry");
             entity.Property(e => e.EntryId).HasColumnName("entry_id");
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
@@ -479,7 +485,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
                 .HasFilter("status = 'ACTIVE'").HasDatabaseName("ux_payee_account_active");
         });
 
-    /// <summary>Disbursements (REQ-BIL-009): duplicate key (payee account, amount, source ref) and one live disbursement per source object.</summary>
+    /// <summary>Disbursements (REQ-BIL-009): duplicate key (payee account, amount, source reference = the claim) and one live disbursement per source object.</summary>
     private static void ConfigureDisbursements(ModelBuilder modelBuilder) =>
         modelBuilder.Entity<DisbursementRow>(entity =>
         {
@@ -529,11 +535,14 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.HasIndex(e => new { e.LegalEntityId, e.DisbursementNumber }).IsUnique().HasDatabaseName("ux_disbursement_number");
             entity.HasIndex(e => e.ClaimId).HasDatabaseName("ix_disbursement_claim");
 
-            // REQ-BIL-202: duplicate key (payee account, amount, source ref) and one live disbursement per source object.
-            // A Rejected, Stopped, Voided or Returned disbursement no longer blocks a new request.
+            // REQ-BIL-202, two independent keys; a Rejected, Stopped, Voided or Returned disbursement no longer blocks:
+            // - the duplicate key: payee account, amount and source reference, where the source reference of a CLM claim
+            //   payment is the claim (two payment ids on one claim to the same account for the same amount are a duplicate;
+            //   a legitimate equal repeat payment needs an override, not built yet);
+            // - one live disbursement per source object (the same claim payment id requested twice).
             const string live = "state NOT IN ('REJECTED', 'STOPPED', 'VOIDED', 'RETURNED')";
-            entity.HasIndex(e => new { e.LegalEntityId, e.PayeeAccountId, e.Amount, e.Currency, e.SourceType, e.SourceId }).IsUnique()
-                .HasFilter(live).HasDatabaseName("ux_disbursement_duplicate_key");
+            entity.HasIndex(e => new { e.LegalEntityId, e.PayeeAccountId, e.Amount, e.Currency, e.SourceType, e.ClaimId }).IsUnique()
+                .HasFilter(live + " AND claim_id IS NOT NULL").HasDatabaseName("ux_disbursement_duplicate_key");
             entity.HasIndex(e => new { e.LegalEntityId, e.SourceType, e.SourceId }).IsUnique()
                 .HasFilter(live).HasDatabaseName("ux_disbursement_source");
             entity.HasOne<PayeeAccountRow>().WithMany().HasForeignKey(e => e.PayeeAccountId)

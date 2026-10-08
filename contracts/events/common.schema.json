@@ -369,12 +369,13 @@
       "examples": [
         "BIL",
         "CLM",
+        "CLM_CLAIM_PAYMENT",
         "RI_SETTLEMENT",
         "FS_CLEARING",
         "CMP_REDRESS",
         "TAX_REMITTANCE"
       ],
-      "description": "Disbursement source (contract D1/D4, D-CON-21): refund (BIL), claim payment (CLM), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change."
+      "description": "Disbursement source (contract D1/D4, D-CON-21): refund (BIL), claim payment (CLM; CLM_CLAIM_PAYMENT in the PRD-06 source register, REQ-BIL-354), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change."
     },
     "Actor": {
       "type": "object",

@@ -38,7 +38,7 @@ public interface IBillingDisbursementService
     /// <remarks>
     /// <para>Operation bil.Disbursement.request (command; HTTP POST /api/bil/v1/disbursements/request).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full; fully typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198, REQ-BIL-200, REQ-BIL-202, REQ-BIL-207, REQ-BIL-211 (SL2-BIL-DISB, CLM_PAYMENT through the stub bank channel). Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198, REQ-BIL-200, REQ-BIL-202, REQ-BIL-207, REQ-BIL-211 (SL2-BIL-DISB, CLM_CLAIM_PAYMENT through the stub bank channel). Wave W5.</para>
     /// <para>Exposure: ui; consumers: CLM, CMP, FIN, RI, WRK.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
     /// <para>Errors: BIL-ERR-SOURCE (422), BIL-ERR-METHOD-NOT-ALLOWED (422), BIL-ERR-AMOUNT-MISMATCH (422), BIL-ERR-REDRESS-ROUTE (422), BIL-ERR-APPROVAL-MISMATCH (422), BIL-ERR-PAYEE-BLOCKED (409), BIL-ERR-DUPLICATE (409), BIL-ERR-NOT-STOPPABLE (422), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409), BIL-ERR-CURRENCY (422), BIL-ERR-NOT-FOUND (404), BIL-ERR-PAYEE-ACCOUNT (422), BIL-ERR-VOP-HOLD (409), BIL-ERR-COOLING-OFF (409), BIL-ERR-SCREENING-UNAVAILABLE (503).</para>
