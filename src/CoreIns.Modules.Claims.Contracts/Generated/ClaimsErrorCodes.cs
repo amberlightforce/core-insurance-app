@@ -32,6 +32,12 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string ContactProhibited = "CLM-ERR-CONTACT-PROHIBITED";
 
+    /// <summary>CLM-ERR-COVERAGE-IN-QUESTION (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.TransactionSet.build.</para>
+    /// </remarks>
+    public const string CoverageInQuestion = "CLM-ERR-COVERAGE-IN-QUESTION";
+
     /// <summary>CLM-ERR-DEPENDENCY-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
     /// <para>Declared by 2 operation(s): clm.Fnol.submit, clm.Fnol.validate.</para>
@@ -204,7 +210,7 @@ public static class ClaimsErrorCodes
     public const string Prefix = "CLM-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Authority, CertRequester, CloseGuard, ContactProhibited, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Authority, CertRequester, CloseGuard, ContactProhibited, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -213,6 +219,7 @@ public static class ClaimsErrorCodes
         [CertRequester] = 422,
         [CloseGuard] = 422,
         [ContactProhibited] = 422,
+        [CoverageInQuestion] = 422,
         [DependencyUnavailable] = 503,
         [DuplicateCandidates] = 409,
         [DuplicatePayment] = 409,
