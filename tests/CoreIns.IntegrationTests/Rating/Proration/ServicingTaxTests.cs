@@ -5,7 +5,6 @@ using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
@@ -146,13 +145,8 @@ public sealed class ServicingTaxTests
     }
 
     [Fact]
-    public async Task Fail_closed_cases_no_calculator_no_tax_class_missing_source_wrong_sign_unexpected_answer()
+    public async Task Fail_closed_cases_no_tax_class_missing_source_wrong_sign_unexpected_answer()
     {
-        // no TaxCalculator bound
-        var unbound = new RatingServicingTax(new ServiceCollection().BuildServiceProvider(), Context(), new Directory(), new Env("Development"));
-        (await Should.ThrowAsync<DomainException>(() => unbound.LinesAsync(Request(Delta("d", 1m, ServicingTransactionKind.EndorsementDebit)))))
-            .Error.Code.Value.ShouldBe("RAT-ERR-TAX");
-
         var service = Service(new ScriptedCalculator());
         (await Should.ThrowAsync<DomainException>(() => service.LinesAsync(Request(Delta("d", 1m, ServicingTransactionKind.EndorsementDebit, taxClass: "")))))
             .Error.Code.Value.ShouldBe("RAT-ERR-TAX");
@@ -195,7 +189,7 @@ public sealed class ServicingTaxTests
     private static RequestContext Context() => new() { LegalEntity = LegalEntityCode.Parse("GR-TEST") };
 
     private static RatingServicingTax Service(ScriptedCalculator calculator, string environment = "Development") =>
-        new(new ServiceCollection().AddSingleton<ITaxCalculator>(calculator).BuildServiceProvider(), Context(), new Directory(), new Env(environment));
+        new(calculator, Context(), new Directory(), new Env(environment));
 
     private sealed class Directory : ILegalEntityDirectory
     {

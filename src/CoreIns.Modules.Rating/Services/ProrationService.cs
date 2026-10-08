@@ -340,6 +340,11 @@ internal sealed class RatingProrationEngine(IMarketRoundingService rounding, IPr
             throw ProrationCalculator.Error("PERIOD", "The term and every period must have an end.");
         }
 
+        if (request.AnnualRates.Count == 0 || request.Periods.Count == 0)
+        {
+            throw ProrationCalculator.Error("INPUT", "Send at least one period and one annual rate.");
+        }
+
         var currencies = request.AnnualRates.Select(r => r.AnnualAmount.Currency).Distinct().ToList();
         if (currencies.Count != 1)
         {

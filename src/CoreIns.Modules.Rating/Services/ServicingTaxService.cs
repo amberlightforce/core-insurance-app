@@ -5,7 +5,6 @@ using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Results;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace CoreIns.Modules.Rating.Services;
@@ -22,7 +21,7 @@ namespace CoreIns.Modules.Rating.Services;
 /// is not Settled is <c>provisional</c> and is refused in Production (D-SLC-09).
 /// </summary>
 internal sealed class RatingServicingTax(
-    IServiceProvider services,
+    ITaxCalculator calculator,
     RequestContext context,
     ILegalEntityDirectory legalEntities,
     IHostEnvironment environment) : IRatingServicingTax
@@ -42,9 +41,6 @@ internal sealed class RatingServicingTax(
             throw Error("INPUT", "The risk jurisdiction and the product line are required.");
         }
 
-        // No default tax and no default treatment exist: an unbound calculator fails closed (REQ-MKT-087, D-REG-01).
-        var calculator = services.GetService<ITaxCalculator>()
-            ?? throw Error("TAX", "No TaxCalculator is bound for this legal entity; tax lines fail closed.");
         var legalEntityId = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.")).Value;
         var holder = request.PolicyholderIsBusiness ? PolicyholderType.Business : PolicyholderType.Consumer;
 
@@ -52,14 +48,14 @@ internal sealed class RatingServicingTax(
         foreach (var delta in request.Deltas)
         {
             Validate(delta);
-            lines.Add(await LineAsync(calculator, request, delta, legalEntityId, holder, cancellationToken).ConfigureAwait(false));
+            lines.Add(await LineAsync(request, delta, legalEntityId, holder, cancellationToken).ConfigureAwait(false));
         }
 
         return new ServicingTaxLinesResult(lines);
     }
 
     private async Task<ServicingTaxLine> LineAsync(
-        ITaxCalculator calculator, ServicingTaxLinesRequest request, ServicingDelta delta, Guid legalEntityId, PolicyholderType holder, CancellationToken cancellationToken)
+        ServicingTaxLinesRequest request, ServicingDelta delta, Guid legalEntityId, PolicyholderType holder, CancellationToken cancellationToken)
     {
         var category = ToSpi(delta.Category);
         TaxTreatmentResult treatment;
