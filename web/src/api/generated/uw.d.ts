@@ -19,6 +19,11 @@ export interface paths {
          *
          *     PRD inputs: job ref, checkpoint, snapshot ref, signals, dryRun
          *     PRD outputs: issues, lane, evaluation id
+         *
+         *     Only POL's in-process call (risk snapshot from the quote version) raises, keeps, invalidates or closes the
+         *     job's issues (D-UW-01). Over HTTP the evaluation is recorded but the job's issues are read only: the response
+         *     shows each hit with the status of the job's existing issue for its key and the warning
+         *     UW-WARN-ISSUES-NOT-RECORDED.
          */
         post: operations["uw.Rules.evaluate"];
         delete?: never;
@@ -1899,6 +1904,10 @@ export interface components {
             effectiveDate?: components["schemas"]["LocalDate"];
             /** @description SL-RAT-UW - the POL risk snapshot passed in-process; validated against the rule set's input schema (REQ-UW-055) */
             riskSnapshot?: components["schemas"]["OpenObject"];
+            /** @description POL in-process only - actors who created, edited, quoted or bound the job (BR-UW-013 / SOD-UW-02); stored with the evaluation, they may not decide the job's issues */
+            jobParticipants?: string[];
+            /** @description POL in-process only - producer code on the job (SOD-UW-02), stored with the evaluation */
+            producerCode?: string | null;
         };
         /** @description Typed from REQ-UW-001, REQ-UW-055..058. PRD outputs: "issues, lane, evaluation id" */
         RulesEvaluateResponse: {
