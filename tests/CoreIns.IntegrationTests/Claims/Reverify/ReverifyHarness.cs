@@ -117,21 +117,8 @@ internal sealed class ReverifyHarness : IAsyncDisposable
     public Task<long> RowsAsync(MoneyClaim claim, string? status = null) => Money.ScalarAsync<long>(
         $"SELECT count(*) FROM clm.reverification WHERE claim_id = '{claim.ClaimId}'" + (status is null ? string.Empty : $" AND status = '{status}'"));
 
-    private async Task<EventEnvelope> PublishAsync(EventContract contract, ScriptedPolicy policy, JsonObject payload, BusinessKeys keys)
-    {
-        await using var scope = Slice.Factory.Services.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<RequestContext>();
-        context.Actor = ActorRef.Service("pol-test-producer");
-        context.LegalEntity = LegalEntityCode.Parse("GR-TEST");
-        context.Jurisdiction = Jurisdiction.Parse("GR");
-        context.ConfigurationHash = ConfigurationHash.Parse(new string('c', 64));
-        var session = scope.ServiceProvider.GetRequiredService<DbSession>();
-        await using var transaction = await session.BeginTransactionAsync(Ct);
-        var envelope = scope.ServiceProvider.GetRequiredService<IEventPublisher>()
-            .Publish(new OutgoingEvent(EventDescriptor.From(contract), "Policy", policy.PolicyId.ToString(), payload, keys));
-        await transaction.CommitAsync(Ct);
-        return envelope;
-    }
+    private Task<EventEnvelope> PublishAsync(EventContract contract, ScriptedPolicy policy, JsonObject payload, BusinessKeys keys) =>
+        PolicyEventPublisher.PublishAsync(Slice.Factory.Services, contract, policy.PolicyId, payload, keys);
 
     private string Issue(Guid policyId, Instant validAt, int version)
     {
