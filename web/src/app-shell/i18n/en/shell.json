@@ -74,5 +74,20 @@
     "rail": "Expand or collapse navigation",
     "toasts": "Go to notifications"
   },
-  "title": "{page} · {product}"
+  "title": "{page} · {product}",
+  "userMenu": {
+    "label": "Account and appearance",
+    "signedOut": "Not signed in",
+    "signInHint": "Sign in to see your work",
+    "switch": "Switch user or sign out",
+    "signIn": "Sign in"
+  },
+  "roles": {
+    "underwriter": "Underwriting",
+    "billing": "Billing and collections",
+    "finance": "Finance",
+    "claimsHandler": "Claims handler",
+    "claimsManager": "Claims manager",
+    "admin": "Platform administration"
+  }
 }

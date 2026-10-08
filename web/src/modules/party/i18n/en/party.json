@@ -24,7 +24,8 @@
       "identifier": "Identifier",
       "locality": "Area",
       "status": "Status"
-    }
+    },
+    "lead": "Find people and organisations by name, tax number or customer number. Identifiers in the results are masked."
   },
   "create": {
     "title": "New person",

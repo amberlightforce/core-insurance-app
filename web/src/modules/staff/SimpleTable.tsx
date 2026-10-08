@@ -10,6 +10,7 @@ export type SimpleTableProps<Row> = Pick<
   | 'footerTotal'
   | 'emptyState'
   | 'onOpen'
+  | 'rowVariant'
 >;
 
 /** A short, fixed-shape DataTable (charge lines, invoice items, journal lines): no search, density or column chrome. */

@@ -13,7 +13,9 @@
     "kindAccount": "Billing account",
     "id": "Id (UUID)",
     "idInvalid": "Enter a valid UUID.",
-    "open": "Open"
+    "open": "Open",
+    "lead": "Invoices, billing accounts and collections. Open an invoice to record a payment.",
+    "invoices": "Invoices"
   },
   "invoice": {
     "columns": {

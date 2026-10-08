@@ -121,6 +121,54 @@
   --color-ambient-1: rgba(63, 99, 240, 0.16);
   --color-ambient-2: rgba(20, 152, 141, 0.14);
   --color-ambient-scrim: rgba(246, 247, 249, 0.66);
+
+  /* v3 mockup ambient canvas (.ambient) and home canopy (.canopy .imagery): four sea blooms, blurred, drifting. */
+  --color-ambient-sea-1: #9fc3f5;
+  --color-ambient-sea-2: #7fd8cc;
+  --color-ambient-sea-3: #f2e2c4;
+  --color-ambient-sea-4: #c9d6ff;
+  --color-canopy-scrim: rgba(246, 247, 249, 0.8);
+  --blur-ambient: 60px;
+  --blur-canopy: 40px;
+  --opacity-ambient-bloom: 0.9;
+  --opacity-ambient-bloom-soft: 0.55;
+  --opacity-ambient-bloom-faint: 0.5;
+  --motion-duration-drift-1: 28s;
+  --motion-duration-drift-2: 33s;
+  --motion-duration-drift-3: 24s;
+  --motion-duration-drift-4: 36s;
+  --motion-delay-drift-2: -7s;
+  --motion-delay-drift-3: -12s;
+  --motion-delay-drift-4: -3s;
+
+  /* v3 mockup rail logo (.logo): filled CTA blue with a brand shadow (D-USR-11: the mockup wins over D-FE-04). */
+  --gradient-logo: linear-gradient(180deg, #3557e0 0%, #2743bd 100%);
+  --shadow-logo: 0 1px 2px rgba(31, 53, 134, 0.35), 0 4px 12px rgba(46, 79, 214, 0.28);
+  --color-logo-fg: #ffffff;
+  --size-logo: 32px;
+
+  /* Work-left / section status dot with halo (v2 mockup .wl::before). */
+  --size-status-dot: 8px;
+  --size-status-dot-sm: 7px;
+  --shadow-dot-halo-spread: 4px;
+  --shadow-dot-glow-blur: 10px;
+
+  /* Home canopy and record sheet geometry (v3 mockup .canopy, .chead, .cbody). */
+  --size-canopy-min: 220px;
+  --size-canopy-aside: 380px;
+  --size-canopy-aside-min: 280px;
+  --size-hero-trend-w: 220px;
+  --size-hero-trend-h: 56px;
+  --size-auth-card: 440px;
+  --size-page-max: 1680px;
+
+  /*
+   * Focus (D-USR-13): fields draw one shape on the border box: a solid 2 px edge in border.focus plus a soft
+   * 3 px halo (v3 mockup .input:focus, crisper edge). Resolved per theme because the colours are root tokens.
+   */
+  --size-focus-halo: 3px;
+  --shadow-focus-field-solid:
+    inset 0 0 0 1px var(--color-border-focus), 0 0 0 3px var(--color-state-focus-halo);
 }
 
 [data-theme='dark'] {
@@ -143,6 +191,12 @@
   --color-ambient-1: rgba(46, 79, 214, 0.22);
   --color-ambient-2: rgba(14, 122, 114, 0.18);
   --color-ambient-scrim: rgba(14, 17, 22, 0.72);
+  --color-ambient-sea-1: #1c2e66;
+  --color-ambient-sea-2: #12413e;
+  --color-ambient-sea-3: #4f3410;
+  --color-ambient-sea-4: #261254;
+  --color-canopy-scrim: rgba(14, 17, 22, 0.82);
+  --gradient-logo: linear-gradient(180deg, #3f63f0 0%, #3557e0 100%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -166,6 +220,12 @@
     --color-ambient-1: rgba(46, 79, 214, 0.22);
     --color-ambient-2: rgba(14, 122, 114, 0.18);
     --color-ambient-scrim: rgba(14, 17, 22, 0.72);
+    --color-ambient-sea-1: #1c2e66;
+    --color-ambient-sea-2: #12413e;
+    --color-ambient-sea-3: #4f3410;
+    --color-ambient-sea-4: #261254;
+    --color-canopy-scrim: rgba(14, 17, 22, 0.82);
+    --gradient-logo: linear-gradient(180deg, #3f63f0 0%, #3557e0 100%);
   }
 }
 

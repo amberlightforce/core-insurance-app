@@ -106,7 +106,7 @@ function PartyDetails({
       <PageHeader
         overline={t('overline')}
         title={name}
-        subtitle={<span className="ds-mono">{party.partyNumber}</span>}
+        recordId={party.partyNumber}
         actions={
           <>
             {revealed ? (

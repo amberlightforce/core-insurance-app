@@ -38,6 +38,11 @@
   flex: 1;
 }
 
+/* A short fixed table (no search, density or column chrome) has nothing in its toolbar: no empty band. */
+.toolbar:not(:has(> :not(.toolbarSpacer))) {
+  display: none;
+}
+
 .search {
   display: inline-flex;
   gap: var(--space-1_5);
@@ -53,7 +58,7 @@
 
 .search:focus-within {
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 var(--space-0_5) var(--color-state-focus-halo);
+  box-shadow: var(--shadow-focus-field-solid);
 }
 
 .input {

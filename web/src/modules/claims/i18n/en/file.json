@@ -1,0 +1,48 @@
+{
+  "file": {
+    "stages": "Claim file stages",
+    "stage": {
+      "notice": "Notice",
+      "contact": "Contact",
+      "assessment": "Assessment",
+      "offer": "Offer",
+      "payment": "Payment",
+      "closing": "Closing"
+    },
+    "stageState": {
+      "done": "done",
+      "current": "current stage",
+      "todo": "next",
+      "untracked": "not recorded in the system yet"
+    },
+    "facts": {
+      "loss": "Loss",
+      "cause": "Cause",
+      "policy": "Policy",
+      "open": "Open",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "handler": "Handler"
+    },
+    "exposuresMeta": "coverage × claimant",
+    "money": {
+      "title": "Claim financials",
+      "incurred": "Incurred",
+      "split": "Paid {paid} + Reserve {reserve}",
+      "unavailable": "The financial figures are not available right now.",
+      "payment": "Payment · {type}",
+      "paymentGeneric": "indemnity",
+      "release": "{count, plural, one {Release payment} other {Release payments (#)}}",
+      "newPayment": "New payment"
+    },
+    "history": {
+      "title": "History",
+      "created": "Claim {number} recorded",
+      "exposure": "Exposure {number} opened ({coverage})",
+      "paymentCreated": "Payment of {amount} recorded",
+      "paymentIssued": "Payment of {amount} issued",
+      "paymentCleared": "Payment of {amount} cleared",
+      "closed": "The claim was closed",
+      "closedWith": "The claim was closed · {outcome}"
+    }
+  }
+}

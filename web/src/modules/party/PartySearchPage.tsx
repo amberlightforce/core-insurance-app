@@ -24,13 +24,21 @@ export function PartySearchPage() {
   );
   return (
     <div className={styles.page}>
-      <PageHeader title={t('search.title')} overline={t('overline')} actions={create} />
-      <PartySearchPanel
-        emptyAction={create}
-        onOpen={(party) => {
-          void navigate(`/parties/${party.partyId}`);
-        }}
+      <PageHeader
+        variant="landing"
+        title={t('search.title')}
+        overline={t('overline')}
+        description={t('search.lead')}
+        actions={create}
       />
+      <div className={styles.section}>
+        <PartySearchPanel
+          emptyAction={create}
+          onOpen={(party) => {
+            void navigate(`/parties/${party.partyId}`);
+          }}
+        />
+      </div>
     </div>
   );
 }

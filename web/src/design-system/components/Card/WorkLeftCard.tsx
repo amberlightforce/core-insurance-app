@@ -64,14 +64,19 @@ export function WorkLeftCard({
       headingLevel={headingLevel}
       onCanvas={onCanvas}
       state={state}
-      meta={
-        <>
-          <span className={styles.count} aria-hidden="true">
-            {formattedCount}
-          </span>
-          <span className="ds-visually-hidden">{t('card.count', { count })}</span>
-        </>
-      }
+      // The count shows only once the list is known: a loading or failed card never claims «0».
+      {...(state === 'ready'
+        ? {
+            meta: (
+              <>
+                <span className={styles.count} aria-hidden="true">
+                  {formattedCount}
+                </span>
+                <span className="ds-visually-hidden">{t('card.count', { count })}</span>
+              </>
+            ),
+          }
+        : {})}
       {...defined({ onRetry })}
     >
       {items.length > 0 ? (

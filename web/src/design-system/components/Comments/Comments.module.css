@@ -237,7 +237,7 @@
 .textarea:focus-visible,
 .textarea:focus {
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 var(--space-0_5) var(--color-state-focus-halo);
+  box-shadow: var(--shadow-focus-field-solid);
 }
 
 .textarea::placeholder {

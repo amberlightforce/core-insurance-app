@@ -29,8 +29,10 @@ export function PoliciesHomePage() {
   return (
     <div className={styles.page}>
       <PageHeader
+        variant="landing"
         title={t('home.title')}
         overline={t('overline')}
+        description={t('home.lead')}
         actions={
           <>
             {canDecideReferrals ? (
@@ -50,46 +52,51 @@ export function PoliciesHomePage() {
           </>
         }
       />
-      <Section title={t('home.recent')}>
-        {recent.length === 0 ? (
-          <EmptyState
-            kind="first-use"
-            headingLevel={3}
-            headline={t('home.emptyTitle')}
-            description={t('home.emptyBody')}
-          />
-        ) : (
-          <div className={styles.stack}>
-            {recent.map((r) => (
-              <LinkButton key={r.id} to={`/policies/${r.id}`}>
-                {t('home.recentPolicy', { number: r.label })}
-              </LinkButton>
-            ))}
-          </div>
-        )}
-      </Section>
-      <Section title={t('home.openById')}>
-        <form
-          noValidate
-          className={styles.row}
-          onSubmit={(event) => {
-            event.preventDefault();
-            setTried(true);
-            if (valid) void navigate(`/policies/${id.trim()}`);
-          }}
-        >
-          <TextField
-            label={t('home.id')}
-            mono
-            value={id}
-            onChange={setId}
-            errorMessage={tried && !valid ? t('home.idInvalid') : undefined}
-          />
-          <Button type="submit" variant="secondary">
-            {t('home.open')}
-          </Button>
-        </form>
-      </Section>
+      <div className={styles.grid}>
+        <Section title={t('home.recent')} family="brand" count={recent.length}>
+          {recent.length === 0 ? (
+            <EmptyState
+              kind="first-use"
+              illustration={<></>}
+              headingLevel={3}
+              headline={t('home.emptyTitle')}
+              description={t('home.emptyBody')}
+            />
+          ) : (
+            <ul className={styles.linkList}>
+              {recent.map((r) => (
+                <li key={r.id}>
+                  <LinkButton to={`/policies/${r.id}`}>
+                    {t('home.recentPolicy', { number: r.label })}
+                  </LinkButton>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+        <Section title={t('home.openById')}>
+          <form
+            noValidate
+            className={styles.row}
+            onSubmit={(event) => {
+              event.preventDefault();
+              setTried(true);
+              if (valid) void navigate(`/policies/${id.trim()}`);
+            }}
+          >
+            <TextField
+              label={t('home.id')}
+              mono
+              value={id}
+              onChange={setId}
+              errorMessage={tried && !valid ? t('home.idInvalid') : undefined}
+            />
+            <Button type="submit" variant="secondary">
+              {t('home.open')}
+            </Button>
+          </form>
+        </Section>
+      </div>
     </div>
   );
 }
