@@ -96,7 +96,7 @@ internal sealed class SampleGenerator(Documents docs)
         switch (kind)
         {
             case "string":
-                return JsonValue.Create(String(node, path));
+                return JsonValue.Create(Fit(node, path, String(node, path)));
             case "boolean":
                 return JsonValue.Create(true);
             case "integer":
@@ -218,8 +218,39 @@ internal sealed class SampleGenerator(Documents docs)
         return $"0192{hex[..4]}-{hex[4..8]}-7{hex[8..11]}-8{hex[11..14]}-{hex[14..26]}";
     }
 
+    /// <summary>Makes a string sample honour minLength/maxLength (pads with "x", truncates), whatever produced it.</summary>
+    private static string Fit(JsonObject node, string path, string value)
+    {
+        if (node["pattern"] is not null)
+        {
+            return value;
+        }
+
+        if (node["minLength"] is JsonValue min && value.Length < (int)min.GetValue<long>())
+        {
+            value = value.PadRight((int)min.GetValue<long>(), 'x');
+        }
+
+        if (node["maxLength"] is JsonValue max && value.Length > (int)max.GetValue<long>())
+        {
+            value = value[..(int)max.GetValue<long>()];
+        }
+
+        return value;
+    }
+
     private static string String(JsonObject node, string path)
     {
+        if (node["example"] is JsonValue ex && ex.TryGetValue<string>(out var example))
+        {
+            return example;
+        }
+
+        if (node["examples"] is JsonArray exs && exs.Count > 0 && exs[0] is JsonValue first && first.TryGetValue<string>(out var e0))
+        {
+            return e0;
+        }
+
         if (node["pattern"] is JsonValue p)
         {
             var pattern = p.GetValue<string>();
@@ -236,6 +267,11 @@ internal sealed class SampleGenerator(Documents docs)
             return Patterns.TryGetValue(pattern, out var value)
                 ? value
                 : throw new InvalidDataException($"{path}: no sample for string pattern {pattern}; add one to SampleGenerator.Patterns.");
+        }
+
+        if (path.EndsWith(".iban", StringComparison.OrdinalIgnoreCase) || path.EndsWith("Iban", StringComparison.Ordinal))
+        {
+            return "GR1601101250000000012300695";
         }
 
         return node["format"]?.GetValue<string>() switch

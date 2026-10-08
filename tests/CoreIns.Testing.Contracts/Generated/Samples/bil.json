@@ -95,7 +95,7 @@
       "disbursement": {
         "disbursementId": "0192bf98-a13c-746c-846b-a6ada3336ea1",
         "status": "Requested",
-        "sourceType": "sample",
+        "sourceType": "BIL",
         "sourceId": "sample",
         "amount": {
           "amount": "120.50",
@@ -129,7 +129,7 @@
     "bil.Disbursement.request": {
       "disbursementId": "01921317-c3c0-783f-8112-1fe12c3961f4",
       "status": "Requested",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "sample",
       "amount": {
         "amount": "120.50",
@@ -154,7 +154,7 @@
       "disbursement": {
         "disbursementId": "0192f509-2f32-7d35-8002-f5719f81dcd6",
         "status": "Requested",
-        "sourceType": "sample",
+        "sourceType": "BIL",
         "sourceId": "sample",
         "amount": {
           "amount": "120.50",
@@ -177,7 +177,7 @@
       "disbursement": {
         "disbursementId": "01929558-63f6-7c26-8f3f-be6c99cb55fc",
         "status": "Requested",
-        "sourceType": "sample",
+        "sourceType": "BIL",
         "sourceId": "sample",
         "amount": {
           "amount": "120.50",
@@ -407,14 +407,14 @@
       "payeeAccountId": "0192f68e-85ea-78d6-8deb-435e099d4138",
       "verificationStatus": "Unverified",
       "coolingOffUntil": "2026-10-07",
-      "maskedIban": "sample",
+      "maskedIban": "GR1601101250000000012300695",
       "change": true
     },
     "bil.PayeeAccount.get": {
       "payeeAccountId": "01928720-ec73-7594-8796-22c9225fc3c5",
       "partyId": "0192e547-4bcd-7a8c-89cc-725778b77638",
       "purpose": "SAMPLE_CODE",
-      "maskedIban": "sample",
+      "maskedIban": "GR1601101250000000012300695",
       "holderName": "sample",
       "source": "SAMPLE_CODE",
       "status": "Active",
@@ -1044,7 +1044,7 @@
       "disbursement": {
         "disbursementId": "0192af11-1b15-7b7a-8942-93faa824ab18",
         "status": "Requested",
-        "sourceType": "sample",
+        "sourceType": "BIL",
         "sourceId": "sample",
         "amount": {
           "amount": "120.50",
@@ -1079,7 +1079,7 @@
       "limit": 1
     },
     "DisbursementRequestRequest": {
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "sample",
       "payeePartyId": "0192cdfb-6a9f-7ff5-8518-16377b9655e7",
       "coPayees": [
@@ -1106,7 +1106,7 @@
     "DisbursementRequestResponse": {
       "disbursementId": "0192b5f1-23f6-72a8-8d48-40cb663b2461",
       "status": "Requested",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "sample",
       "amount": {
         "amount": "120.50",
@@ -1135,7 +1135,7 @@
       "disbursement": {
         "disbursementId": "01926b50-b345-733b-8b0f-fbbca0d3ea88",
         "status": "Requested",
-        "sourceType": "sample",
+        "sourceType": "BIL",
         "sourceId": "sample",
         "amount": {
           "amount": "120.50",
@@ -1162,7 +1162,7 @@
       "disbursement": {
         "disbursementId": "0192f053-d740-777e-8370-3508852021ec",
         "status": "Requested",
-        "sourceType": "sample",
+        "sourceType": "BIL",
         "sourceId": "sample",
         "amount": {
           "amount": "120.50",
@@ -1610,7 +1610,7 @@
     "PayeeAccountCreateRequest": {
       "partyId": "01928a36-8080-7ad1-860d-c0cc8094beb2",
       "purpose": "COLLECTION",
-      "iban": "sample",
+      "iban": "GR1601101250000000012300695",
       "holderName": "sample",
       "source": "STAFF",
       "evidenceRef": "sample"
@@ -1619,14 +1619,14 @@
       "payeeAccountId": "0192b074-eafb-79cf-8c4a-8318d7c968c0",
       "verificationStatus": "Unverified",
       "coolingOffUntil": "2026-10-07",
-      "maskedIban": "sample",
+      "maskedIban": "GR1601101250000000012300695",
       "change": true
     },
     "PayeeAccountGetResponse": {
       "payeeAccountId": "0192ff6c-d4ac-75b4-87b8-5cb6b79e096a",
       "partyId": "0192f17e-f9cc-7983-8fc1-e615c599bc8b",
       "purpose": "SAMPLE_CODE",
-      "maskedIban": "sample",
+      "maskedIban": "GR1601101250000000012300695",
       "holderName": "sample",
       "source": "SAMPLE_CODE",
       "status": "Active",

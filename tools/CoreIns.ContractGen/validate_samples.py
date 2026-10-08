@@ -12,7 +12,11 @@ Usage: python tools/CoreIns.ContractGen/validate_samples.py   (needs contracts/o
 """
 import json
 import sys
+from urllib.parse import urlparse
+from urllib.request import url2pathname
 from pathlib import Path
+
+import functools
 
 import yaml
 from jsonschema import Draft202012Validator
@@ -24,11 +28,19 @@ OPENAPI = REPO / "contracts" / "openapi"
 SAMPLES = REPO / "tests" / "CoreIns.Testing.Contracts" / "Generated" / "Samples"
 
 
-def load(uri: str):
-    path = Path(uri.removeprefix("file://"))
+_YAML = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
+
+@functools.lru_cache(maxsize=None)
+def _read(path_str: str):
+    path = Path(path_str)
     text = path.read_text(encoding="utf-8")
-    contents = yaml.safe_load(text) if path.suffix in (".yaml", ".yml") else json.loads(text)
-    return Resource.from_contents(contents, default_specification=DRAFT202012)
+    return yaml.load(text, Loader=_YAML) if path.suffix in (".yaml", ".yml") else json.loads(text)
+
+
+def load(uri: str):
+    path = Path(url2pathname(urlparse(uri).path))
+    return Resource.from_contents(_read(str(path)), default_specification=DRAFT202012)
 
 
 def main() -> int:
@@ -38,7 +50,7 @@ def main() -> int:
     for sample_file in sorted(SAMPLES.glob("*.json")):
         module = sample_file.stem
         doc_path = OPENAPI / f"{module}.yaml"
-        doc = yaml.safe_load(doc_path.read_text(encoding="utf-8"))
+        doc = _read(str(doc_path))
         base = doc_path.resolve().as_uri()
         samples = json.loads(sample_file.read_text(encoding="utf-8"))
 
