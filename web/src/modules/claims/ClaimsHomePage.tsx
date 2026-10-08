@@ -65,8 +65,10 @@ export function ClaimsHomePage() {
   return (
     <div className={styles.page}>
       <PageHeader
+        variant="landing"
         overline={t('overline')}
         title={t('home.title')}
+        description={t('home.lead')}
         actions={
           <>
             <Button
@@ -146,22 +148,25 @@ export function ClaimsHomePage() {
           />
         ) : null}
       </Section>
-      <Section title={t('home.recent')}>
+      <Section title={t('home.recent')} family="brand" count={recent.length}>
         {recent.length === 0 ? (
           <EmptyState
             kind="first-use"
+            illustration={<></>}
             headingLevel={3}
             headline={t('home.emptyTitle')}
             description={t('home.emptyBody')}
           />
         ) : (
-          <div className={styles.stack}>
+          <ul className={styles.linkList}>
             {recent.map((r) => (
-              <LinkButton key={r.id} to={`/claims/${r.id}`}>
-                {t('home.recentClaim', { number: r.label })}
-              </LinkButton>
+              <li key={r.id}>
+                <LinkButton to={`/claims/${r.id}`}>
+                  {t('home.recentClaim', { number: r.label })}
+                </LinkButton>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </Section>
     </div>

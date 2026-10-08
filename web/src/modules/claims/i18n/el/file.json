@@ -1,0 +1,48 @@
+{
+  "file": {
+    "stages": "Στάδια φακέλου",
+    "stage": {
+      "notice": "Αναγγελία",
+      "contact": "Επαφή",
+      "assessment": "Εκτίμηση",
+      "offer": "Προσφορά",
+      "payment": "Πληρωμή",
+      "closing": "Κλείσιμο"
+    },
+    "stageState": {
+      "done": "ολοκληρώθηκε",
+      "current": "τρέχον στάδιο",
+      "todo": "επόμενο",
+      "untracked": "δεν καταγράφεται ακόμη στο σύστημα"
+    },
+    "facts": {
+      "loss": "Ημ. ζημίας",
+      "cause": "Αιτία",
+      "policy": "Ασφαλιστήριο",
+      "open": "Ανοιχτή",
+      "days": "{count, plural, one {# ημέρα} other {# ημέρες}}",
+      "handler": "Χειριστής"
+    },
+    "exposuresMeta": "κάλυψη × δικαιούχος",
+    "money": {
+      "title": "Οικονομικά φακέλου",
+      "incurred": "Πραγματοποιηθείσες ζημίες",
+      "split": "Πληρωθέντα {paid} + Απόθεμα {reserve}",
+      "unavailable": "Τα οικονομικά στοιχεία δεν είναι διαθέσιμα αυτή τη στιγμή.",
+      "payment": "Πληρωμή · {type}",
+      "paymentGeneric": "αποζημίωση",
+      "release": "{count, plural, one {Αποδέσμευση πληρωμής} other {Αποδέσμευση πληρωμών (#)}}",
+      "newPayment": "Νέα πληρωμή"
+    },
+    "history": {
+      "title": "Ιστορικό",
+      "created": "Η ζημία {number} καταχωρίστηκε",
+      "exposure": "Άνοιξε η έκθεση {number} ({coverage})",
+      "paymentCreated": "Πληρωμή {amount} καταχωρίστηκε",
+      "paymentIssued": "Πληρωμή {amount} εκδόθηκε",
+      "paymentCleared": "Πληρωμή {amount} εξοφλήθηκε",
+      "closed": "Η ζημία έκλεισε",
+      "closedWith": "Η ζημία έκλεισε · {outcome}"
+    }
+  }
+}
