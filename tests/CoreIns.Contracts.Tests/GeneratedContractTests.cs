@@ -175,7 +175,7 @@ public sealed partial class GeneratedContractTests
             fake.Calls.Select(c => c.OperationId).ShouldBeUnique();
         }
 
-        operations.ShouldBe(429, "every operation with x-in-process or x-consumers");
+        operations.ShouldBe(430, "every operation with x-in-process or x-consumers");
     }
 
     [Fact]
