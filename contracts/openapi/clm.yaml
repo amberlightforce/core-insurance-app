@@ -1242,6 +1242,14 @@ paths:
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: no re-verification is pending on the claim
+        status: 422
+      - code: CLM-ERR-SNAPSHOT-MISMATCH
+        note: expectedNewSnapshotRef is no longer the successor of the claim snapshot
+        status: 409
       x-source:
       - PRD-07 §9.1 l.1470
       parameters:
@@ -1268,6 +1276,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -4695,6 +4705,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IncidentView'
+        pendingReverification:
+          type: object
+          description: Present while snapshotStatus is REVERIFICATION_REQUIRED (the ReverificationRequired payload)
+          properties:
+            oldSnapshotRef:
+              type: string
+            newSnapshotRef:
+              type: string
+            causeEventId:
+              $ref: ../events/common.schema.json#/$defs/Uuid
+            raisedAt:
+              $ref: ../events/common.schema.json#/$defs/Instant
+          required:
+          - oldSnapshotRef
+          - newSnapshotRef
+          - causeEventId
       required:
       - summary
       - legalEntity
@@ -5068,32 +5094,67 @@ components:
           description: 'PRD: "decision record"'
     CoverageReverifyRequest:
       type: object
-      description: 'clm.Coverage.reverify request. PRD inputs: "decision, reasons; adopt or keep"'
+      description: 'clm.Coverage.reverify request (REQ-CLM-058). A human decides after ReverificationRequired: KEEP the claim''s current snapshot ref, or
+        ADOPT the new one. Never automatic (REQ-CLM-002). PRD inputs: "decision, reasons; adopt or keep".'
       properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
-        reasons:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reasons"'
-        adopt:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adopt or keep" (optional)'
-        keep:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adopt or keep" (optional)'
-      oneOf:
-      - required:
-        - adopt
-      - required:
-        - keep
+          type: string
+          enum:
+          - KEEP
+          - ADOPT
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Reason from the configured list; PRD "reasons"
+        comment:
+          $ref: ../events/common.schema.json#/$defs/Text
+        expectedNewSnapshotRef:
+          type: string
+          description: The new snapshot ref the decision was taken against. Required for ADOPT and checked for KEEP when given; if POL superseded again meanwhile
+            the call fails with CLM-ERR-SNAPSHOT-MISMATCH.
+      required:
+      - claimId
+      - decision
+      - reasonCode
     CoverageReverifyResponse:
       type: object
       description: 'clm.Coverage.reverify result. PRD outputs: "decision record"'
       properties:
-        decisionRecord:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision record"'
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decisionRecordId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - KEEP
+          - ADOPT
+        snapshotStatus:
+          type: string
+          enum:
+          - PENDING
+          - VERIFIED
+          - REVERIFICATION_REQUIRED
+          description: VERIFIED after the decision (always set)
+        snapshotRef:
+          type: string
+          description: The claim's snapshot ref after the decision (the new ref for ADOPT, unchanged for KEEP)
+        previousSnapshotRef:
+          type: string
+        coverageInQuestion:
+          type: boolean
+          description: True when adoption removed the cover of an exposure; new payments on it are refused until cleared
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - claimId
+      - decisionRecordId
+      - decision
+      - snapshotStatus
+      - snapshotRef
+      - coverageInQuestion
+      - decidedAt
     TransactionSetBuildRequest:
       type: object
       properties:

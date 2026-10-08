@@ -43,6 +43,16 @@ public sealed record SnapshotGetResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.Modules.Policy.Contracts.Api.SnapshotContent? Content { get; init; }
 
+    /// <summary>min(requested knownAt or now, the policy's record-time watermark). Always set; equals knownAt, which is the effective value and is encoded in snapshotRef. Outside `content`.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveKnownAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? EffectiveKnownAt { get; init; }
+
+    /// <summary>Always set, outside `content` and its hash (D-SL3-03c)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("supersession")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Policy.Contracts.Api.SnapshotSupersession? Supersession { get; init; }
+
     /// <summary>Why inForce is false. NO_TERM_AT_INSTANT = no term covers validAt (before the first term, after the last, or in a gap); TERM_NOT_IN_FORCE = a term covers it but is cancelled, voided or rewritten.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<NotInForceReasonValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

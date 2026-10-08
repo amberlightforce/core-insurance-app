@@ -136,7 +136,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): bil.Allocation.allocate, bil.BillingAccount.get, bil.Disbursement.get, bil.Disbursement.request, bil.Invoice.get, bil.Payment.take, bil.Receipt.get.</para>
+    /// <para>Declared by 11 operation(s): bil.Allocation.allocate, bil.BillingAccount.get, bil.Disbursement.get, bil.Disbursement.request, bil.Invoice.get, bil.Payment.take, bil.Receipt.get, bil.Refund.decide, bil.Refund.get, bil.Refund.propose, bil.Refund.resubmit.</para>
     /// </remarks>
     public const string NotFound = "BIL-ERR-NOT-FOUND";
 
@@ -182,6 +182,12 @@ public static class BillingErrorCodes
     /// </remarks>
     public const string PayeeBlocked = "BIL-ERR-PAYEE-BLOCKED";
 
+    /// <summary>BIL-ERR-PAYEE-UNVERIFIED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): bil.Refund.propose, bil.Refund.resubmit.</para>
+    /// </remarks>
+    public const string PayeeUnverified = "BIL-ERR-PAYEE-UNVERIFIED";
+
     /// <summary>BIL-ERR-PAYER-ROLE (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 6 operation(s): bil.BillingAccount.close, bil.BillingAccount.create, bil.BillingAccount.get, bil.BillingAccount.reopen, bil.BillingAccount.search, bil.BillingAccount.update.</para>
@@ -199,6 +205,24 @@ public static class BillingErrorCodes
     /// <para>Declared by 5 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void.</para>
     /// </remarks>
     public const string RedressRoute = "BIL-ERR-REDRESS-ROUTE";
+
+    /// <summary>BIL-ERR-REFUND-BELOW-MINIMUM (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): bil.Refund.propose.</para>
+    /// </remarks>
+    public const string RefundBelowMinimum = "BIL-ERR-REFUND-BELOW-MINIMUM";
+
+    /// <summary>BIL-ERR-REFUND-OPEN (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): bil.Refund.propose.</para>
+    /// </remarks>
+    public const string RefundOpen = "BIL-ERR-REFUND-OPEN";
+
+    /// <summary>BIL-ERR-REFUND-STATE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): bil.Refund.decide, bil.Refund.resubmit.</para>
+    /// </remarks>
+    public const string RefundState = "BIL-ERR-REFUND-STATE";
 
     /// <summary>BIL-ERR-SCREENING-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
@@ -240,7 +264,7 @@ public static class BillingErrorCodes
     public const string Prefix = "BIL-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AmountMismatch, ApprovalMismatch, ApprovalRequired, BalanceNotZero, Charset, CoolingOff, Currency, DayNotClosed, Duplicate, Entity, HeldItems, IbanInvalid, IdempotencyMismatch, LegalHold, LiveActivity, MandateState, MethodNotAllowed, MethodUnavailable, NoCollectAuthority, NoCredit, NotEligible, NotFound, NotPermitted, NotStoppable, NoticeClockRunning, OpenObligation, OverAllocation, PayeeAccount, PayeeBlocked, PayerRole, Plan, RedressRoute, ScreeningUnavailable, Source, Stale, Validation, VopHold, VopUnavailable];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AmountMismatch, ApprovalMismatch, ApprovalRequired, BalanceNotZero, Charset, CoolingOff, Currency, DayNotClosed, Duplicate, Entity, HeldItems, IbanInvalid, IdempotencyMismatch, LegalHold, LiveActivity, MandateState, MethodNotAllowed, MethodUnavailable, NoCollectAuthority, NoCredit, NotEligible, NotFound, NotPermitted, NotStoppable, NoticeClockRunning, OpenObligation, OverAllocation, PayeeAccount, PayeeBlocked, PayeeUnverified, PayerRole, Plan, RedressRoute, RefundBelowMinimum, RefundOpen, RefundState, ScreeningUnavailable, Source, Stale, Validation, VopHold, VopUnavailable];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -274,9 +298,13 @@ public static class BillingErrorCodes
         [OverAllocation] = 422,
         [PayeeAccount] = 422,
         [PayeeBlocked] = 409,
+        [PayeeUnverified] = 422,
         [PayerRole] = 422,
         [Plan] = 422,
         [RedressRoute] = 422,
+        [RefundBelowMinimum] = 422,
+        [RefundOpen] = 409,
+        [RefundState] = 409,
         [ScreeningUnavailable] = 503,
         [Source] = 422,
         [Stale] = 409,

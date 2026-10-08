@@ -82,7 +82,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Exposure.create, clm.TransactionSet.build, clm.TransactionSet.submit.</para>
+    /// <para>Declared by 9 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.create, clm.TransactionSet.build, clm.TransactionSet.submit.</para>
     /// </remarks>
     public const string IllegalTransition = "CLM-ERR-ILLEGAL-TRANSITION";
 
@@ -112,7 +112,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 11 operation(s): clm.Claim.close, clm.Claim.get, clm.Exposure.create, clm.Financials.get, clm.Fnol.get, clm.PayeeAccount.capture, clm.PayeeAccount.list, clm.Payment.list, clm.TransactionSet.build, clm.TransactionSet.get, clm.TransactionSet.submit.</para>
+    /// <para>Declared by 12 operation(s): clm.Claim.close, clm.Claim.get, clm.Coverage.reverify, clm.Exposure.create, clm.Financials.get, clm.Fnol.get, clm.PayeeAccount.capture, clm.PayeeAccount.list, clm.Payment.list, clm.TransactionSet.build, clm.TransactionSet.get, clm.TransactionSet.submit.</para>
     /// </remarks>
     public const string NotFound = "CLM-ERR-NOT-FOUND";
 
@@ -182,6 +182,12 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string SiuAccess = "CLM-ERR-SIU-ACCESS";
 
+    /// <summary>CLM-ERR-SNAPSHOT-MISMATCH (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.Coverage.reverify.</para>
+    /// </remarks>
+    public const string SnapshotMismatch = "CLM-ERR-SNAPSHOT-MISMATCH";
+
     /// <summary>CLM-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
     /// <para>Declared by 5 operation(s): clm.TransactionSet.approve, clm.TransactionSet.build, clm.TransactionSet.reject, clm.TransactionSet.return, clm.TransactionSet.submit.</para>
@@ -198,7 +204,7 @@ public static class ClaimsErrorCodes
     public const string Prefix = "CLM-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Authority, CertRequester, CloseGuard, ContactProhibited, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, Sod, Stale];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Authority, CertRequester, CloseGuard, ContactProhibited, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -232,6 +238,7 @@ public static class ClaimsErrorCodes
         [SearchCriteria] = 422,
         [SetStale] = 409,
         [SiuAccess] = 403,
+        [SnapshotMismatch] = 409,
         [Sod] = 403,
         [Stale] = 409,
     };

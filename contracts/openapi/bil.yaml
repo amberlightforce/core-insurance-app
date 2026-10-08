@@ -3557,6 +3557,17 @@ paths:
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: BIL-ERR-REFUND-OPEN
+        note: one open refund per billing account (D-SL3-14)
+        status: 409
+      - code: BIL-ERR-REFUND-BELOW-MINIMUM
+        note: below bil.refund.minimum (5.00 default, illustrative)
+        status: 422
+      - code: BIL-ERR-PAYEE-UNVERIFIED
+        note: payee account missing or not verified for purpose REFUND
+        status: 422
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-06 §9.1 l.1800
       parameters:
@@ -3583,6 +3594,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -3630,6 +3643,8 @@ paths:
         status: 422
       - code: PLT-ERR-SOD
         status: 403
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-06 §9.1 l.1800
       - PRD-06 §9.1 l.1818
@@ -3707,6 +3722,21 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: billingAccountId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: policyId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: state
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/RefundState'
       responses:
         '200':
           description: Success
@@ -3775,6 +3805,11 @@ paths:
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-REFUND-STATE
+        note: the refund is not PENDING_APPROVAL
+        status: 409
       x-source:
       - PRD-06 §9.1 l.1800
       - PRD-06 §9.1 l.1819
@@ -3802,6 +3837,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -3852,6 +3889,13 @@ paths:
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-REFUND-STATE
+        note: only RETURNED or REJECTED refunds can be resubmitted
+        status: 409
+      - code: BIL-ERR-PAYEE-UNVERIFIED
+        status: 422
       x-source:
       - PRD-06 §9.1 l.1800
       parameters:
@@ -3878,6 +3922,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -6632,6 +6678,10 @@ components:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/CategoryTotal
+        originalInvoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: For kind CREDIT_NOTE, the invoice it corrects. Always set for a credit note, absent for an INVOICE. A credit note has its own gapless
+            series (technical prefix CN) and negative-direction semantics; total is the positive credited amount.
       required:
       - invoiceId
       - invoiceNumber
@@ -6690,6 +6740,15 @@ components:
           - SETTLED
           - CANCELLED
           - WRITTEN_OFF
+        transactionKind:
+          type: string
+          description: Transaction kind of the source POL charge (servicing items; always set there)
+        cancellationSource:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Cancellation source (items from a cancellation)
+        treatmentRuleId:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Treatment rule of a tax or levy item on a servicing transaction (always set there)
       required:
       - invoiceItemId
       - chargeId
@@ -7703,40 +7762,223 @@ components:
         process:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "process"'
+    RefundState:
+      type: string
+      enum:
+      - PROPOSED
+      - PENDING_APPROVAL
+      - APPROVED
+      - HELD
+      - DISBURSING
+      - AWAITING_PROOF
+      - PAID
+      - REJECTED
+      - RETURNED
+      description: 'Refund lifecycle (PRD-06 §6): Proposed or PendingApproval -> Rejected; Approved -> Held (refund-hold window) -> Approved; Disbursing ->
+        AwaitingProof (refund via an intermediary) -> Paid; Disbursing -> Returned -> Proposed. PAID is reached at the paid point (ISSUED in Greece, D-SL3-09).'
+    RefundApprovalState:
+      type: string
+      enum:
+      - NOT_REQUIRED
+      - PENDING
+      - APPROVED
+      - REJECTED
+      description: 'NOT_REQUIRED up to the auto-approval limit (500.00 default, illustrative, D-SL3-08); PENDING until the approver decides; four-eyes at the
+        maker-checker limit. The requester or an editor can never approve (SoD).'
+    RefundBreakdownLine:
+      type: object
+      description: 'The part of a refund that comes from one charge type of one policy transaction (REQ-BIL-187). Tax and levy lines carry the treatment
+        that decided them; a refund is never net of tax for a distance-withdrawal void.'
+      properties:
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyTermId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The POL transaction that produced the credit
+        creditNoteId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The credit note (bil invoice of kind CREDIT_NOTE) the amount came from
+        chargeType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+        transactionKind:
+          type: string
+          description: Transaction kind of the credit (CANCELLATION, ENDORSEMENT_CREDIT, ...)
+        cancellationSource:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Cancellation source when the credit comes from a cancellation
+        treatmentRuleId:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Treatment rule of a tax or levy line
+        legalStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+        provisional:
+          type: boolean
+          description: True when the line rests on a value that is not Settled (D-REG-02)
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Positive amount refunded for this line
+      required:
+      - policyId
+      - policyTermId
+      - transactionId
+      - chargeType
+      - chargeCategory
+      - amount
+    RefundNettingLine:
+      type: object
+      description: 'Netting against amounts the customer owes on the same account (REQ-BIL-187). A refund is the account credit left after netting.'
+      properties:
+        kind:
+          type: string
+          enum:
+          - OPEN_INVOICE
+          - OFFSET_CREDIT
+          description: OPEN_INVOICE = an unpaid invoice the credit was applied to; OFFSET_CREDIT = another credit on the account
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Positive amount netted
+      required:
+      - kind
+      - amount
+    RefundPayee:
+      type: object
+      description: 'The payee of a refund. The IBAN is P2 and is never returned; only the masked form is shown (REQ-BIL-345).'
+      properties:
+        payeePartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: A verified bil.PayeeAccount with purpose REFUND (D-SL3-14)
+        maskedIban:
+          type: string
+          description: IBAN masked except the last four characters
+        verificationStatus:
+          $ref: '#/components/schemas/PayeeVerificationStatus'
+      required:
+      - payeePartyId
+      - payeeAccountId
+      - maskedIban
+      - verificationStatus
+    RefundView:
+      type: object
+      description: 'A refund (PRD-06 §7, REQ-BIL-187..190). One open refund per billing account (D-SL3-14), so authority is checked on the total.'
+      properties:
+        refundId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          $ref: '#/components/schemas/RefundState'
+        approvalState:
+          $ref: '#/components/schemas/RefundApprovalState'
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Amount payable to the payee after netting; equals the sum of breakdown minus the sum of netting
+        breakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/RefundBreakdownLine'
+          description: Per charge type (always set)
+        netting:
+          type: array
+          items:
+            $ref: '#/components/schemas/RefundNettingLine'
+          description: Always set; empty when nothing was netted
+        payee:
+          $ref: '#/components/schemas/RefundPayee'
+        payoutMethod:
+          $ref: ../events/common.schema.json#/$defs/Code
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        sourcePolicyIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+        requestedBy:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: User who proposed the refund
+        decidedBy:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: User who approved or rejected; absent until decided
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        decisionComment:
+          $ref: ../events/common.schema.json#/$defs/Text
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Set once the refund is approved and a disbursement exists
+        proposedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - refundId
+      - billingAccountId
+      - state
+      - approvalState
+      - amount
+      - breakdown
+      - netting
+      - payee
+      - payoutMethod
+      - sourcePolicyIds
+      - requestedBy
+      - proposedAt
+      - recordVersion
     RefundProposeRequest:
       type: object
-      description: 'bil.Refund.propose request. PRD inputs: "account, credits / decision"'
+      description: 'bil.Refund.propose request (REQ-BIL-187). PRD inputs: "account, credits / decision". With dryRun it returns the refund that would be
+        proposed. Refused when the account has no credit left after netting (BIL-ERR-NO-CREDIT) or an open refund already exists.'
       properties:
-        account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PRD "account"
         credits:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "credits"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Credit notes (invoice ids of kind CREDIT_NOTE) to refund. Empty or absent = the whole credit left on the account.
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Verified payee account with purpose REFUND; defaults to the payer's verified account
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        comment:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - billingAccountId
+      - reasonCode
     RefundProposeResponse:
       type: object
       description: 'bil.Refund.propose result. PRD outputs: "refund"'
       properties:
         refund:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund"'
+          $ref: '#/components/schemas/RefundView'
+      required:
+      - refund
     RefundGetResponse:
       type: object
       description: 'bil.Refund.get result. PRD outputs: "refund"'
       properties:
         refund:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund"'
+          $ref: '#/components/schemas/RefundView'
+      required:
+      - refund
     RefundListItem:
       type: object
       description: 'bil.Refund.list result. PRD outputs: "refund"'
       properties:
         refund:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund"'
+          $ref: '#/components/schemas/RefundView'
+      required:
+      - refund
     RefundListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7749,47 +7991,54 @@ components:
       description: Page of bil.Refund.list results (cursor pagination, contract §3.5.5)
     RefundDecideRequest:
       type: object
-      description: 'bil.Refund.decide request. PRD inputs: "refund id, decision, comment"'
+      description: 'bil.Refund.decide request (REQ-BIL-188, REQ-BIL-189). PRD inputs: "refund id, decision, comment". The requester, an editor or the maker
+        can never decide (PLT-ERR-SOD); the BIL.Refund authority is checked on the refund total (D-SL3-14).'
       properties:
         refundId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "refund id"'
         decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
         comment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comment"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Required for REJECT
+      required:
+      - refundId
+      - decision
     RefundDecideResponse:
       type: object
-      description: 'bil.Refund.decide result. PRD outputs: "refund, disbursement id on approval"'
+      description: 'bil.Refund.decide result. PRD outputs: "refund, disbursement id on approval". APPROVE publishes RefundApproved; REJECT publishes RefundRejected.'
       properties:
         refund:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund"'
-        disbursementIdOnApproval:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "disbursement id on approval"'
+          $ref: '#/components/schemas/RefundView'
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Present on APPROVE (PRD "disbursement id on approval")
+      required:
+      - refund
     RefundResubmitRequest:
       type: object
-      description: 'bil.Refund.resubmit request. PRD inputs: "account, credits / decision"'
+      description: 'bil.Refund.resubmit request: puts a refund in state RETURNED (bank return) or REJECTED back to PROPOSED, optionally with a corrected payee.'
       properties:
-        account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
-        credits:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "credits"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+        refundId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: New verified payee account; absent keeps the payee
+        comment:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - refundId
     RefundResubmitResponse:
       type: object
       description: 'bil.Refund.resubmit result. PRD outputs: "refund"'
       properties:
         refund:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund"'
+          $ref: '#/components/schemas/RefundView'
+      required:
+      - refund
     DisbursementRequestRequest:
       type: object
       properties:

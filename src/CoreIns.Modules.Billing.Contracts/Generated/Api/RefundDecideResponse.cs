@@ -4,23 +4,16 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Refund.decide result. PRD outputs: "refund, disbursement id on approval"</summary>
+/// <summary>bil.Refund.decide result. PRD outputs: "refund, disbursement id on approval". APPROVE publishes RefundApproved; REJECT publishes RefundRejected.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RefundDecideResponse
 {
-    /// <summary>PRD: "refund"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'refund'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("refund")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Refund { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.RefundView Refund { get; init; }
 
-    /// <summary>PRD: "disbursement id on approval"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("disbursementIdOnApproval")]
+    /// <summary>Present on APPROVE (PRD "disbursement id on approval")</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("disbursementId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DisbursementIdOnApproval { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.DisbursementId? DisbursementId { get; init; }
 }

@@ -4,56 +4,40 @@
 
 namespace CoreIns.Modules.Rating.Contracts.Api;
 
-/// <summary>rat.Proration.prorate request. PRD inputs: "annual rates, periods, term, convention, configuration hash, order of operations, explain"</summary>
+/// <summary>rat.Proration.prorate request (REQ-RAT-004, REQ-RAT-155..165). Pure and deterministic. PRD inputs: "annual rates, periods, term, convention, configuration hash, order of operations, explain". Days are whole Europe/Athens calendar dates; periods are half-open (D-SL3-04).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProrationProrateRequest
 {
-    /// <summary>PRD: "annual rates"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Annual amounts per element x charge type x segment, as returned by rat.Rate.rate (the rate output carries the annual amount per line)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("annualRates")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? AnnualRates { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Rating.Contracts.Api.ProrationAnnualRate> AnnualRates { get; init; }
 
-    /// <summary>PRD: "periods"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("periods")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Periods { get; init; }
-
-    /// <summary>PRD: "term"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>The term period; its days are termDays (365 or 366). `to` must not be null.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("term")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Term { get; init; }
+    public required global::CoreIns.SharedKernel.DateRange Term { get; init; }
 
-    /// <summary>PRD: "convention"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>The periods to prorate per segment; contiguous periods of one segment sum exactly to the term under TERM_RATIO (REQ-RAT-158)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("periods")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Rating.Contracts.Api.ProrationPeriod> Periods { get; init; }
+
+    /// <summary>Contract member 'convention'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("convention")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Convention { get; init; }
+    public required global::CoreIns.Modules.Rating.Contracts.Api.DayCountConvention Convention { get; init; }
 
-    /// <summary>PRD: "configuration hash"</summary>
+    /// <summary>The product artefact whose declared conventions are checked; an undeclared convention is RAT-ERR-CONVENTION (REQ-RAT-165)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productArtefactHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ProductArtefactHash { get; init; }
+
+    /// <summary>MKT configuration hash that fixes the rounding rules; recorded in the result</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("configurationHash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.ConfigurationHash? ConfigurationHash { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.ConfigurationHash ConfigurationHash { get; init; }
 
-    /// <summary>PRD: "order of operations"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Value of cur.order_of_operations when the product overrides it (REQ-RAT-162); optional</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("orderOperations")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? OrderOperations { get; init; }
+    public string? OrderOperations { get; init; }
 
-    /// <summary>PRD: "explain"</summary>
+    /// <summary>Return the explanation</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("explain")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public bool? Explain { get; init; }

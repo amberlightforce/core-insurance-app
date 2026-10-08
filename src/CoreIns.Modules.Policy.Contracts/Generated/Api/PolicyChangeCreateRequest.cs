@@ -4,25 +4,20 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.PolicyChange.create request. PRD inputs: "policyId, effectiveAt, description"</summary>
+/// <summary>pol.PolicyChange.create request (REQ-POL-190). PRD inputs: "policyId, effectiveAt, description". Effective-date limits and the in-sequence guard apply (D-SL3-02).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PolicyChangeCreateRequest
 {
-    /// <summary>PRD: "policyId"</summary>
+    /// <summary>Contract member 'policyId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.PolicyId? PolicyId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyId PolicyId { get; init; }
 
-    /// <summary>PRD: "effectiveAt"</summary>
+    /// <summary>Effective time of the change (valid time)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("effectiveAt")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Instant? EffectiveAt { get; init; }
+    public required global::CoreIns.SharedKernel.Instant EffectiveAt { get; init; }
 
-    /// <summary>PRD: "description"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Free-text description of the change; no personal data</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("description")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Description { get; init; }
+    public string? Description { get; init; }
 }

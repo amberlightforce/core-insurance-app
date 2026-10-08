@@ -368,6 +368,7 @@
       "maxLength": 64,
       "examples": [
         "BIL",
+        "BIL_REFUND",
         "CLM",
         "CLM_CLAIM_PAYMENT",
         "RI_SETTLEMENT",
@@ -375,7 +376,7 @@
         "CMP_REDRESS",
         "TAX_REMITTANCE"
       ],
-      "description": "Disbursement source (contract D1/D4, D-CON-21): refund (BIL), claim payment (CLM; CLM_CLAIM_PAYMENT in the PRD-06 source register, REQ-BIL-354), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change."
+      "description": "Disbursement source (contract D1/D4, D-CON-21): refund (BIL; BIL_REFUND for policy refunds from slice 3, BIL for earlier refund sources), claim payment (CLM; CLM_CLAIM_PAYMENT in the PRD-06 source register, REQ-BIL-354), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change."
     },
     "Actor": {
       "type": "object",
@@ -930,6 +931,51 @@
             }
           ],
           "description": "Claim of a CLM disbursement (D-SL2-08)"
+        },
+        "transactionKind": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "NEW_BUSINESS",
+                "ENDORSEMENT_DEBIT",
+                "ENDORSEMENT_CREDIT",
+                "CANCELLATION",
+                "DISTANCE_WITHDRAWAL_VOID",
+                "VOID",
+                "RETURN_PREMIUM",
+                "REINSTATEMENT",
+                "FEE",
+                "REFUND"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Transaction kind of the POL transaction behind the line (the MKT TaxTransactionKind values). Always set on servicing entries, null otherwise."
+        },
+        "cancellationSource": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Cancellation source (shared code list). Always set on lines of cancellation-sourced entries, null otherwise."
+        },
+        "treatmentRuleId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Id of the MKT treatment rule that decided a tax or levy line. Always set on such lines of servicing entries, null otherwise."
         }
       },
       "required": [
