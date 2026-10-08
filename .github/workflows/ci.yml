@@ -175,7 +175,7 @@ jobs:
   e2e02:
     name: E2E-02a claims happy path on the Compose stack
     # Same shape as e2e01 but its own stack (project coreins-e2e02, image tag coreins-host:e2e02, ports 26500+), so the two jobs
-    # never share state. API level: the Playwright browser is not needed until the UI run joins it.
+    # never share state. API-level and staff-screens runs, then down -v.
     needs: [dotnet, web, image]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -188,9 +188,11 @@ jobs:
           cache: npm
           cache-dependency-path: tests/e2e/package-lock.json
 
-      - name: Install the E2E dependencies
+      - name: Install the Playwright browser (the UI run of E2E-02a)
         working-directory: tests/e2e
-        run: npm ci --no-audit
+        run: |
+          npm ci --no-audit
+          npx playwright install --with-deps chromium
 
-      - name: Run E2E-02a (API)
+      - name: Run E2E-02a (API and UI)
         run: tests/e2e/run-e2e02.sh
