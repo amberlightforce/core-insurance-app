@@ -4183,75 +4183,6 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
-x-operation-families:
-- family: clm.Recovery.*
-  summary: Recovery cases
-  inputs: case data, receipts
-  outputs: case
-  x-requirement:
-  - REQ-CLM-143..REQ-CLM-151
-  x-wave: W7
-  x-status: unexpanded
-  x-maturity: pre-release
-  note: PRD names the family only; members are named by the owning work package (no invented verbs)
-  x-source:
-  - PRD-07 §9.1 l.1477
-- family: clm.FriendlySettlement.*
-  summary: FS evaluation, submission, statements, disputes, net settlement approval and hand-over to BIL (`FS_CLEARING`)
-  inputs: claim
-  outputs: eligibility; statement → reconciliation; net → BIL request
-  x-requirement:
-  - REQ-CLM-155..REQ-CLM-160
-  - REQ-CLM-264
-  x-wave: W7
-  x-status: unexpanded
-  x-maturity: pre-release
-  note: PRD names the family only; members are named by the owning work package (no invented verbs)
-  x-source:
-  - PRD-07 §9.1 l.1478
-- family: clm.CatEvent.*
-  summary: Cat events
-  inputs: event data
-  outputs: event; re-tag preview
-  x-requirement:
-  - REQ-CLM-006
-  - REQ-CLM-210..REQ-CLM-215
-  x-wave: W7
-  x-status: unexpanded
-  x-maturity: pre-release
-  note: PRD names the family only; members are named by the owning work package (no invented verbs)
-  x-source:
-  - PRD-07 §9.1 l.1482
-- family: clm.Siu.*
-  summary: Fraud scoring and SIU
-  inputs: claim
-  outputs: indicators, band; case data
-  x-requirement:
-  - REQ-CLM-201..REQ-CLM-209
-  x-wave: W7
-  x-status: unexpanded
-  x-maturity: pre-release
-  note: PRD names the family only; members are named by the owning work package (no invented verbs)
-  x-source:
-  - PRD-07 §9.1 l.1485
-- family: clm.Litigation.*
-  summary: Matters
-  inputs: matter data
-  outputs: matter
-  x-requirement:
-  - REQ-CLM-218..REQ-CLM-223
-  x-wave: W7
-  x-status: unexpanded
-  x-maturity: pre-release
-  note: PRD names the family only; members are named by the owning work package (no invented verbs)
-  x-source:
-  - PRD-07 §9.1 l.1486
-x-excluded:
-- name: payee-account operations
-  requirement:
-  - REQ-CLM-123
-  - REQ-CLM-131
-  reason: 'PRD-07 §9.1: removed (R-38, R-82); callers use bil.PayeeAccount.*'
   /api/clm/v1/transaction-sets:
     get:
       operationId: clm.TransactionSet.list
@@ -5359,6 +5290,75 @@ x-excluded:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+x-operation-families:
+- family: clm.Recovery.*
+  summary: Recovery cases
+  inputs: case data, receipts
+  outputs: case
+  x-requirement:
+  - REQ-CLM-143..REQ-CLM-151
+  x-wave: W7
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1477
+- family: clm.FriendlySettlement.*
+  summary: FS evaluation, submission, statements, disputes, net settlement approval and hand-over to BIL (`FS_CLEARING`)
+  inputs: claim
+  outputs: eligibility; statement → reconciliation; net → BIL request
+  x-requirement:
+  - REQ-CLM-155..REQ-CLM-160
+  - REQ-CLM-264
+  x-wave: W7
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1478
+- family: clm.CatEvent.*
+  summary: Cat events
+  inputs: event data
+  outputs: event; re-tag preview
+  x-requirement:
+  - REQ-CLM-006
+  - REQ-CLM-210..REQ-CLM-215
+  x-wave: W7
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1482
+- family: clm.Siu.*
+  summary: Fraud scoring and SIU
+  inputs: claim
+  outputs: indicators, band; case data
+  x-requirement:
+  - REQ-CLM-201..REQ-CLM-209
+  x-wave: W7
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1485
+- family: clm.Litigation.*
+  summary: Matters
+  inputs: matter data
+  outputs: matter
+  x-requirement:
+  - REQ-CLM-218..REQ-CLM-223
+  x-wave: W7
+  x-status: unexpanded
+  x-maturity: pre-release
+  note: PRD names the family only; members are named by the owning work package (no invented verbs)
+  x-source:
+  - PRD-07 §9.1 l.1486
+x-excluded:
+- name: payee-account operations
+  requirement:
+  - REQ-CLM-123
+  - REQ-CLM-131
+  reason: 'PRD-07 §9.1: removed (R-38, R-82); callers use bil.PayeeAccount.*'
 components:
   securitySchemes:
     entra:

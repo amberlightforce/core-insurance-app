@@ -7837,31 +7837,6 @@ components:
       - reinsurerPartyId
       - signedLinePct
       - lead
-    RiContractFields:
-      type: object
-      description: The editable content of a Draft contract (shared by create and update).
-      properties:
-        period:
-          $ref: ../events/common.schema.json#/$defs/DatePeriod
-          description: Half-open period [from, to) of Europe/Athens dates; from and to are both set in slice 4
-        scope:
-          $ref: '#/components/schemas/RiContractScope'
-        clause:
-          $ref: '#/components/schemas/RiContractClause'
-        layers:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/RiLayer
-          minItems: 1
-          description: 'Layers (REQ-RI-038..REQ-RI-043): layerNo unique, attachment, limit, aad, aal?'
-        participations:
-          type: array
-          items:
-            $ref: '#/components/schemas/RiParticipationInput'
-          minItems: 1
-        placedPct:
-          $ref: ../events/common.schema.json#/$defs/Decimal
-          description: Placed percentage of the contract (e.g. 100 or 60); the signed lines sum to it
     RiParticipationView:
       type: object
       description: A participation of a contract.
@@ -7961,39 +7936,6 @@ components:
       - versionNo
       - recordVersion
       - createdAt
-    RiContractSummary:
-      type: object
-      description: Row of the contract registry.
-      properties:
-        contractId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-        contractNumber:
-          $ref: ../events/common.schema.json#/$defs/BusinessNumber
-        contractType:
-          $ref: '#/components/schemas/RiContractType'
-        contractYear:
-          type: integer
-          minimum: 0
-        currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-        period:
-          $ref: ../events/common.schema.json#/$defs/DatePeriod
-        placedPct:
-          $ref: ../events/common.schema.json#/$defs/Decimal
-        status:
-          $ref: '#/components/schemas/RiContractStatus'
-        recordVersion:
-          type: integer
-          minimum: 1
-      required:
-      - contractId
-      - contractType
-      - contractYear
-      - currency
-      - period
-      - placedPct
-      - status
-      - recordVersion
     ContractCreateResponse:
       type: object
       description: ri.Contract.create result
@@ -8215,8 +8157,38 @@ components:
       required:
       - contract
     ContractListItem:
-      $ref: '#/components/schemas/RiContractSummary'
-      description: ri.Contract.list item
+      type: object
+      description: 'ri.Contract.list item: row of the contract registry'
+      properties:
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        contractType:
+          $ref: '#/components/schemas/RiContractType'
+        contractYear:
+          type: integer
+          minimum: 0
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        placedPct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        status:
+          $ref: '#/components/schemas/RiContractStatus'
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - contractId
+      - contractType
+      - contractYear
+      - currency
+      - period
+      - placedPct
+      - status
+      - recordVersion
     ContractListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -8846,8 +8818,67 @@ components:
               $ref: '#/components/schemas/RecoveryListByClaimItem'
       description: Page of ri.Recovery.listByClaim results (cursor pagination, contract §3.5.5)
     RecoveryListByContractItem:
-      $ref: '#/components/schemas/RecoveryListByClaimItem'
+      type: object
       description: ri.Recovery.listByContract row (same shape as listByClaim; claimId is always set)
+      properties:
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        layerId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Layer id
+        participantId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Participant (reinsurer party) id
+        recoverableIncurred:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Recoverable incurred (REQ-RI-116)
+        recoverablePaid:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Recoverable on paid losses
+        recoverableOutstanding:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Incurred recoverable minus paid recoverable; zero for a closed claim (D-SL4-05)
+        claimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Claim; always set
+        contractYear:
+          oneOf:
+          - type: integer
+            minimum: 0
+          - type: 'null'
+          description: Contract year; always set
+        layerNo:
+          oneOf:
+          - type: integer
+            minimum: 1
+          - type: 'null'
+          description: Layer number; always set
+        recoveryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Recovery record id; always set
+        batchId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Batch that last calculated the row (use with ri.Recovery.trace); always set
+        state:
+          oneOf:
+          - type: string
+            enum:
+            - CALCULATED
+            - POSTED
+            - REVERSED
+          - type: 'null'
+          description: Recovery state (PRD-08 §7); always set
+      required:
+      - contractId
+      - recoverableIncurred
+      - recoverablePaid
+      - recoverableOutstanding
     RecoveryTraceStep:
       type: object
       description: One step of the calculation trace (REQ-RI-132). Engine and configuration hash are on the trace.

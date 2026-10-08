@@ -4,46 +4,51 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Receivable.register request. PRD inputs: "source, counterparty, references, amount, currency, due date"</summary>
+/// <summary>bil.Receivable.register request (REQ-BIL-346, -356). Typed by SL4-CONTRACTS. Missing source-specific members are BIL-ERR-VALIDATION; the counterparty account is created on first use. Idempotent on the Idempotency-Key and on (sourceType, sourceId).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReceivableRegisterRequest
 {
-    /// <summary>PRD: "source"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("source")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Source { get; init; }
+    /// <summary>Contract member 'sourceType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceType")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.ReceivableSourceType SourceType { get; init; }
 
-    /// <summary>PRD: "counterparty"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("counterparty")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Counterparty { get; init; }
+    /// <summary>Id of the source object; with sourceType it is the duplicate key (BIL-ERR-DUPLICATE)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceId")]
+    public required string SourceId { get; init; }
 
-    /// <summary>PRD: "references"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("references")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? References { get; init; }
+    /// <summary>PTY party that owes the money</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("counterpartyPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId CounterpartyPartyId { get; init; }
 
-    /// <summary>PRD: "amount"</summary>
+    /// <summary>Required for CLM_CLAIM_PAYMENT</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>Required for CLM_CLAIM_PAYMENT</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'recoveryId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoveryId")]
+    public global::System.Guid? RecoveryId { get; init; }
+
+    /// <summary>Required for FS_CLEARING</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statementRef")]
+    public string? StatementRef { get; init; }
+
+    /// <summary>Contract member 'purpose'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.ReceivablePurpose Purpose { get; init; }
+
+    /// <summary>Amount owed (positive, EUR in slice 4)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Money? Amount { get; init; }
+    public required global::CoreIns.SharedKernel.Money Amount { get; init; }
 
-    /// <summary>PRD: "currency"</summary>
+    /// <summary>Redundant with amount.currency; when sent it must equal it (kept from the PRD input list)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Currency? Currency { get; init; }
 
-    /// <summary>PRD: "due date"</summary>
+    /// <summary>Contract member 'dueDate'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("dueDate")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? DueDate { get; init; }
+    public required global::CoreIns.SharedKernel.BusinessDate DueDate { get; init; }
 }
