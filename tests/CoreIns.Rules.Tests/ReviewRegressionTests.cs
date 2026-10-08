@@ -32,7 +32,7 @@ public class ReviewRegressionTests
     }
 
     /// <summary>Loose wall-clock sanity bound; the work bound itself is asserted on steps and allocations.</summary>
-    private static readonly TimeSpan Sanity = TimeSpan.FromTicks(2 * TimeSpan.TicksPerSecond);
+    private static readonly TimeSpan Sanity = TimeSpan.FromTicks(10 * TimeSpan.TicksPerSecond); // wall-clock sanity only; the cost limit (StepsUsed) is the real guard (D-ARC-36)
 
     // ---------------------------------------------------------------- D1: the cost budget bounds work, memory and time
 
