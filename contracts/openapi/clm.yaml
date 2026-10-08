@@ -37,6 +37,8 @@ tags:
 - name: Import
 - name: Dsar
 - name: PayeeAccount
+- name: Recovery
+- name: FriendlySettlement
 paths:
   /api/clm/v1/fnol/submit:
     post:
@@ -456,6 +458,13 @@ paths:
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: CLM-ERR-STALE
+        status: 409
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-VALIDATION
+        note: fault outside 0..100, vehicle count below 1
+        status: 422
       x-source:
       - PRD-07 §9.1 l.1467
       parameters:
@@ -540,6 +549,9 @@ paths:
         note: the claim changed meanwhile (record version)
       - code: CLM-ERR-NOT-FOUND
         status: 404
+      x-close-guard-errors:
+        schema: CloseGuardError
+        note: CLM-ERR-CLOSE-GUARD carries errors[] items { code, exposureIds[] } (D-SL4-14)
       x-source:
       - PRD-07 §9.1 l.1467
       parameters:
@@ -879,13 +891,17 @@ paths:
         note: contract §3.5.3 (replay with a different payload)
         status: 409
       - code: CLM-ERR-ILLEGAL-TRANSITION
-        status: 422
         note: claim not Open (REQ-CLM-071)
+        status: 422
       - code: CLM-ERR-STALE
-        status: 409
         note: the claim changed meanwhile (record version)
+        status: 409
       - code: CLM-ERR-NOT-FOUND
         status: 404
+      - code: CLM-ERR-MTPL-CLOCKS-REQUIRED
+        note: Production refuses MTPL_PD/MTPL_BI third-party exposures until the CMP clock WP lands (D-SL4-09); outside Production they are created
+          with statutoryClocks NOT_TRACKED
+        status: 422
       x-source:
       - PRD-07 §9.1 l.1469
       parameters:
@@ -1028,6 +1044,9 @@ paths:
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      x-close-guard-errors:
+        schema: CloseGuardError
+        note: CLM-ERR-CLOSE-GUARD carries errors[] items { code, exposureIds[] } (D-SL4-14)
       x-source:
       - PRD-07 §9.1 l.1469
       parameters:
@@ -1310,7 +1329,7 @@ paths:
       - W7-CLM-03
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-CLM-003, REQ-CLM-093, REQ-CLM-097, REQ-CLM-098, REQ-CLM-099, REQ-CLM-107, REQ-CLM-119, REQ-CLM-129, REQ-CLM-130 (SL2-CLM-MONEY)
+      x-typed: SL2-CLM-MONEY; SL4-CONTRACTS adds RECOVERY_RESERVE/recoveryId and authorityPreview (D-SL4-07, D-SL4-14)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1333,16 +1352,22 @@ paths:
       - code: CLM-ERR-SOD
         status: 403
       - code: CLM-ERR-PAYMENT-EXCEEDS-RESERVE
-        status: 422
         note: auto-adjust off for the line (REQ-CLM-097)
-      - code: CLM-ERR-ILLEGAL-TRANSITION
         status: 422
+      - code: CLM-ERR-ILLEGAL-TRANSITION
         note: claim or exposure not Open
+        status: 422
       - code: CLM-ERR-NOT-FOUND
         status: 404
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: CLM-ERR-RECOVERY-STATE
+        note: a RECOVERY_RESERVE or RECOVERY line names a recovery that is closed, written off or not found
+        status: 422
+      - code: CLM-ERR-ALLOCATION
+        note: a recovery line does not name a reserve line of the claim
+        status: 422
       x-source:
       - PRD-07 §9.1 l.1471
       parameters:
@@ -1369,6 +1394,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -1997,6 +2024,11 @@ paths:
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: the payment is not Issued, or is already Cleared
+        status: 422
       x-source:
       - PRD-07 §9.1 l.1472
       parameters:
@@ -2023,6 +2055,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -2067,6 +2101,8 @@ paths:
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-07 §9.1 l.1472
       parameters:
@@ -2093,6 +2129,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -2137,6 +2175,14 @@ paths:
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: only a voided, stopped, returned or rejected payment is reissued
+        status: 422
+      - code: CLM-ERR-AUTHORITY
+        note: every check is re-run on the new payment
+        status: 403
       x-source:
       - PRD-07 §9.1 l.1472
       parameters:
@@ -2163,6 +2209,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -4138,6 +4186,1113 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/transaction-sets:
+    get:
+      operationId: clm.TransactionSet.list
+      summary: Financial sets of a claim
+      description: 'The claim''s transaction sets, newest first, with their status (D-SL4-14).
+    
+    
+        PRD inputs: claim
+    
+        PRD outputs: sets'
+      tags:
+      - TransactionSet
+      x-requirement:
+      - REQ-CLM-003
+      - REQ-CLM-107..REQ-CLM-113
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-02
+      - SL4-CLM-MONEY2
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL4-CONTRACTS (D-SL4-14)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.TransactionSet.list
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-07 §9.1 l.1471
+      - SLICE-PLAN-4 §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: claimId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - PENDING_APPROVAL
+          - APPROVED
+          - REJECTED
+          - POSTED
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSetListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/recoveries:
+    post:
+      operationId: clm.Recovery.create
+      summary: Create a recovery case
+      description: 'Create a subrogation or salvage recovery case (REQ-CLM-143).
+    
+    
+        PRD inputs: claim, type, counterparty, expected amount
+    
+        PRD outputs: recovery'
+      tags:
+      - Recovery
+      x-requirement:
+      - REQ-CLM-143..REQ-CLM-151
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      - SL4-CLM-RECOVERY-OPS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-143..REQ-CLM-151 (D-SL4-06, D-SL4-07)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'SL4: dry-run supported'
+      x-exposure:
+      - ui
+      x-permission: clm.Recovery.create
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-VALIDATION
+        note: unsupported type, salvage fields missing or on a subrogation case
+        status: 422
+      - code: CLM-ERR-AUTHORITY
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1478
+      - SLICE-PLAN-4 §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoveryCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    get:
+      operationId: clm.Recovery.list
+      summary: Recoveries of a claim
+      description: 'List recovery cases.
+    
+    
+        PRD inputs: claim
+    
+        PRD outputs: recoveries'
+      tags:
+      - Recovery
+      x-requirement:
+      - REQ-CLM-143..REQ-CLM-151
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      - SL4-CLM-RECOVERY-OPS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-143..REQ-CLM-151 (D-SL4-06, D-SL4-07)'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.Recovery.list
+      x-error-codes: []
+      x-source:
+      - PRD-07 §9.1 l.1478
+      - SLICE-PLAN-4 §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: claimId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: state
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/RecoveryState'
+      - name: type
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/RecoveryType'
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/recoveries/{id}:
+    get:
+      operationId: clm.Recovery.get
+      summary: Recovery case
+      description: 'One recovery case with milestones and BIL references.
+    
+    
+        PRD inputs: recovery id
+    
+        PRD outputs: recovery'
+      tags:
+      - Recovery
+      x-requirement:
+      - REQ-CLM-143..REQ-CLM-151
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      - SL4-CLM-RECOVERY-OPS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-143..REQ-CLM-151 (D-SL4-06, D-SL4-07)'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.Recovery.get
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-07 §9.1 l.1478
+      - SLICE-PLAN-4 §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/recoveries/record-milestone:
+    post:
+      operationId: clm.Recovery.recordMilestone
+      summary: Record a recovery milestone
+      description: 'REQ-CLM-147.
+    
+    
+        PRD inputs: recovery, milestone
+    
+        PRD outputs: recovery'
+      tags:
+      - Recovery
+      x-requirement:
+      - REQ-CLM-143..REQ-CLM-151
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      - SL4-CLM-RECOVERY-OPS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-143..REQ-CLM-151 (D-SL4-06, D-SL4-07)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.Recovery.recordMilestone
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-VALIDATION
+        note: unsupported type, salvage fields missing or on a subrogation case
+        status: 422
+      - code: CLM-ERR-RECOVERY-STATE
+        note: the move is not allowed from the current recovery state (PRD-07 §7.3.4)
+        status: 422
+      - code: CLM-ERR-STALE
+        note: expectedRecordVersion differs
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1478
+      - SLICE-PLAN-4 §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoveryRecordMilestoneRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryRecordMilestoneResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/recoveries/demand:
+    post:
+      operationId: clm.Recovery.demand
+      summary: Demand a recovery through a BIL receivable
+      description: 'Registers the BIL receivable for the case (D-SL4-06).
+    
+    
+        PRD inputs: recovery, amount, due date
+    
+        PRD outputs: recovery, receivable'
+      tags:
+      - Recovery
+      x-requirement:
+      - REQ-CLM-143..REQ-CLM-151
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      - SL4-CLM-RECOVERY-OPS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-143..REQ-CLM-151 (D-SL4-06, D-SL4-07)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'SL4: dry-run supported'
+      x-exposure:
+      - ui
+      x-permission: clm.Recovery.demand
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-VALIDATION
+        note: unsupported type, salvage fields missing or on a subrogation case
+        status: 422
+      - code: CLM-ERR-RECOVERY-STATE
+        note: the move is not allowed from the current recovery state (PRD-07 §7.3.4)
+        status: 422
+      - code: CLM-ERR-STALE
+        note: expectedRecordVersion differs
+        status: 409
+      - code: CLM-ERR-ALLOCATION
+        note: a specified allocation does not sum to the amount or names a line not on the claim
+        status: 422
+      - code: CLM-ERR-DEPENDENCY-UNAVAILABLE
+        note: BIL receivable registration failed (BIL-ERR-SOURCE, BIL-ERR-DUPLICATE, BIL-ERR-FISCAL-TREATMENT-OPEN in Production)
+        status: 503
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1478
+      - PRD-06 §9.1 (bil.Receivable.register)
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoveryDemandRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryDemandResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/recoveries/write-off:
+    post:
+      operationId: clm.Recovery.writeOff
+      summary: Write off a recovery
+      description: 'Releases the open recovery reserve under CLM.RECOVERY_WRITEOFF.
+    
+    
+        PRD inputs: recovery, amount, reason
+    
+        PRD outputs: recovery'
+      tags:
+      - Recovery
+      x-requirement:
+      - REQ-CLM-143..REQ-CLM-151
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-04
+      - SL4-CLM-RECOVERY-OPS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-143..REQ-CLM-151 (D-SL4-06, D-SL4-07)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'SL4: dry-run supported'
+      x-exposure:
+      - ui
+      x-permission: clm.Recovery.writeOff
+      x-authority-types:
+      - CLM.RECOVERY_WRITEOFF
+      x-authority-source:
+      - PRD-07 §12
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-VALIDATION
+        note: unsupported type, salvage fields missing or on a subrogation case
+        status: 422
+      - code: CLM-ERR-RECOVERY-STATE
+        note: the move is not allowed from the current recovery state (PRD-07 §7.3.4)
+        status: 422
+      - code: CLM-ERR-STALE
+        note: expectedRecordVersion differs
+        status: 409
+      - code: CLM-ERR-AUTHORITY
+        status: 403
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1478
+      - SLICE-PLAN-4 §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoveryWriteOffRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryWriteOffResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/friendly-settlements:
+    get:
+      operationId: clm.FriendlySettlement.list
+      summary: Friendly Settlement cases
+      description: 'Cases of a claim or of a state.
+    
+    
+        PRD inputs: claim, state
+    
+        PRD outputs: cases'
+      tags:
+      - FriendlySettlement
+      x-requirement:
+      - REQ-CLM-155..REQ-CLM-160
+      - REQ-CLM-264
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      - SL4-CLM-FS-CASE
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 (D-SL4-02, D-SL4-03, D-SL4-12)'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.FriendlySettlement.list
+      x-error-codes: []
+      x-source:
+      - PRD-07 §9.1 l.1479
+      - SLICE-PLAN-4 §4, §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: claimId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: state
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/FsCaseState'
+      - name: role
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/FsCaseRole'
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FsListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/friendly-settlements/{id}:
+    get:
+      operationId: clm.FriendlySettlement.get
+      summary: Friendly Settlement case
+      description: 'One case with its stored eligibility.
+    
+    
+        PRD inputs: case id
+    
+        PRD outputs: case'
+      tags:
+      - FriendlySettlement
+      x-requirement:
+      - REQ-CLM-155..REQ-CLM-160
+      - REQ-CLM-264
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      - SL4-CLM-FS-CASE
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 (D-SL4-02, D-SL4-03, D-SL4-12)'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.FriendlySettlement.get
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-07 §9.1 l.1479
+      - SLICE-PLAN-4 §4, §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FsGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/friendly-settlements/evaluate:
+    post:
+      operationId: clm.FriendlySettlement.evaluate
+      summary: Evaluate Friendly Settlement eligibility
+      description: 'Calls the SPI and stores the result (REQ-CLM-155, -156).
+    
+    
+        PRD inputs: claim
+    
+        PRD outputs: eligibility'
+      tags:
+      - FriendlySettlement
+      x-requirement:
+      - REQ-CLM-155..REQ-CLM-160
+      - REQ-CLM-264
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      - SL4-CLM-FS-CASE
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 (D-SL4-02, D-SL4-03, D-SL4-12)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.FriendlySettlement.evaluate
+      x-error-codes:
+      - code: CLM-ERR-FS-DISABLED
+        note: cap.clm.friendly_settlement is off for the jurisdiction, or the SPI is unbound (always so in Production, D-SL4-03)
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-VALIDATION
+        note: liability facts are incomplete
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1479
+      - SLICE-PLAN-4 §4, §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FsEvaluateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FsEvaluateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/friendly-settlements/open-own-settlement:
+    post:
+      operationId: clm.FriendlySettlement.openOwnSettlement
+      summary: Open the own-settlement exposure
+      description: 'Creates the FS_OWN_SETTLEMENT exposure and the FRIENDLY_SETTLEMENT recovery (REQ-CLM-157).
+    
+    
+        PRD inputs: case
+    
+        PRD outputs: exposure, recovery'
+      tags:
+      - FriendlySettlement
+      x-requirement:
+      - REQ-CLM-155..REQ-CLM-160
+      - REQ-CLM-264
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      - SL4-CLM-FS-CASE
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 (D-SL4-02, D-SL4-03, D-SL4-12)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'SL4: dry-run supported'
+      x-exposure:
+      - ui
+      x-permission: clm.FriendlySettlement.openOwnSettlement
+      x-error-codes:
+      - code: CLM-ERR-FS-DISABLED
+        note: cap.clm.friendly_settlement is off for the jurisdiction, or the SPI is unbound (always so in Production, D-SL4-03)
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: the case is not ELIGIBLE
+        status: 422
+      - code: CLM-ERR-STALE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1479
+      - SLICE-PLAN-4 §4, §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FsOpenOwnSettlementRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FsOpenOwnSettlementResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/friendly-settlements/submit:
+    post:
+      operationId: clm.FriendlySettlement.submit
+      summary: Submit a case to clearing
+      description: 'REQ-CLM-159 (submit part): one SPI call, FriendlySettlementSubmitted once.
+    
+    
+        PRD inputs: case
+    
+        PRD outputs: clearing reference'
+      tags:
+      - FriendlySettlement
+      x-requirement:
+      - REQ-CLM-155..REQ-CLM-160
+      - REQ-CLM-264
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      - SL4-CLM-FS-CASE
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 (D-SL4-02, D-SL4-03, D-SL4-12)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.FriendlySettlement.submit
+      x-error-codes:
+      - code: CLM-ERR-FS-DISABLED
+        note: cap.clm.friendly_settlement is off for the jurisdiction, or the SPI is unbound (always so in Production, D-SL4-03)
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: the case is not ELIGIBLE with an own-settlement exposure
+        status: 422
+      - code: CLM-ERR-STALE
+        status: 409
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1479
+      - SLICE-PLAN-4 §4, §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FsSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FsSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/friendly-settlements/import-statement:
+    post:
+      operationId: clm.FriendlySettlement.importStatement
+      summary: Import a clearing statement
+      description: 'REQ-CLM-160.
+    
+    
+        PRD inputs: period, counterparty
+    
+        PRD outputs: statement'
+      tags:
+      - FriendlySettlement
+      x-requirement:
+      - REQ-CLM-155..REQ-CLM-160
+      - REQ-CLM-264
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      - SL4-CLM-FS-CASE
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 (D-SL4-02, D-SL4-03, D-SL4-12)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.FriendlySettlement.importStatement
+      x-error-codes:
+      - code: CLM-ERR-FS-DISABLED
+        note: cap.clm.friendly_settlement is off for the jurisdiction, or the SPI is unbound (always so in Production, D-SL4-03)
+        status: 422
+      - code: CLM-ERR-VALIDATION
+        note: period is not a calendar month
+        status: 422
+      - code: CLM-ERR-ALLOCATION
+        note: a statement line names a case or claim that does not exist
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1479
+      - SLICE-PLAN-4 §4, §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FsImportStatementRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FsImportStatementResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/friendly-settlements/statements/{id}:
+    get:
+      operationId: clm.FriendlySettlement.getStatement
+      summary: Friendly Settlement statement
+      description: 'A statement with its lines, exceptions and nets.
+    
+    
+        PRD inputs: statement id
+    
+        PRD outputs: statement'
+      tags:
+      - FriendlySettlement
+      x-requirement:
+      - REQ-CLM-155..REQ-CLM-160
+      - REQ-CLM-264
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      - SL4-CLM-FS-CASE
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 (D-SL4-02, D-SL4-03, D-SL4-12)'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.FriendlySettlement.getStatement
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-07 §9.1 l.1479
+      - SLICE-PLAN-4 §4, §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FsGetStatementResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/friendly-settlements/approve-net:
+    post:
+      operationId: clm.FriendlySettlement.approveNet
+      summary: Approve and hand over a net
+      description: 'CLM.FS_NET_SETTLEMENT, then BIL (REQ-CLM-160, -264, D-SL4-12).
+    
+    
+        PRD inputs: statement, counterparty, net
+    
+        PRD outputs: net'
+      tags:
+      - FriendlySettlement
+      x-requirement:
+      - REQ-CLM-155..REQ-CLM-160
+      - REQ-CLM-264
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      - SL4-CLM-FS-CASE
+      x-status: full
+      x-maturity: pre-release
+      x-typed: 'SL4-CONTRACTS: REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 (D-SL4-02, D-SL4-03, D-SL4-12)'
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'SL4: dry-run supported'
+      x-exposure:
+      - ui
+      x-permission: clm.FriendlySettlement.approveNet
+      x-authority-types:
+      - CLM.FS_NET_SETTLEMENT
+      x-authority-source:
+      - PRD-07 §12
+      - SLICE-PLAN-4 D-SL4-12
+      x-error-codes:
+      - code: CLM-ERR-FS-DISABLED
+        note: cap.clm.friendly_settlement is off for the jurisdiction, or the SPI is unbound (always so in Production, D-SL4-03)
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-STALE
+        note: the computed net differs from expectedNet
+        status: 409
+      - code: CLM-ERR-AUTHORITY
+        status: 403
+      - code: CLM-ERR-SOD
+        status: 403
+      - code: CLM-ERR-ALLOCATION
+        note: unmatched or differing lines remain for the counterparty, or the lines do not sum to the net
+        status: 422
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: the net is not PENDING
+        status: 422
+      - code: CLM-ERR-DEPENDENCY-UNAVAILABLE
+        note: BIL hand-over failed (BIL-ERR-SOURCE, BIL-ERR-LINES-MISMATCH, BIL-ERR-DUPLICATE)
+        status: 503
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §9.1 l.1479
+      - SLICE-PLAN-4 §4, §6
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FsApproveNetRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FsApproveNetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 x-operation-families:
 - family: clm.Recovery.*
   summary: Recovery cases
@@ -4291,7 +5446,12 @@ components:
           description: TELEPHONE, EMAIL, LETTER, FAX, SMS, IN_PERSON, ELECTRONIC (REQ-CLM-036)
         channelMetadata:
           $ref: ../events/common.schema.json#/$defs/OpenObject
-      description: 'Mandatory: lineOfBusiness, policyId, lossAt, lossCause, lossLocation, description, channel; they are not schema-required so that a missing one is CLM-ERR-FNOL-001 naming the field (REQ-CLM-030), not a parse error. Typed from REQ-CLM-001, REQ-CLM-030, REQ-CLM-036, REQ-CLM-041, REQ-CLM-065 (SL2-CLM-CORE). PRD inputs: "FNOL payload". A missing required field is CLM-ERR-FNOL-001 naming the field.'
+        liabilityFacts:
+          $ref: '#/components/schemas/LiabilityFacts'
+          description: Optional liability facts captured at FNOL (D-SL4-17)
+      description: 'Mandatory: lineOfBusiness, policyId, lossAt, lossCause, lossLocation, description, channel; they are not schema-required so that
+        a missing one is CLM-ERR-FNOL-001 naming the field (REQ-CLM-030), not a parse error. Typed from REQ-CLM-001, REQ-CLM-030, REQ-CLM-036, REQ-CLM-041,
+        REQ-CLM-065 (SL2-CLM-CORE). PRD inputs: "FNOL payload". A missing required field is CLM-ERR-FNOL-001 naming the field.'
     FnolIncidentInput:
       type: object
       description: An incident of the loss (REQ-CLM-064). The slice records vehicle incidents only; no injury (P3) fields.
@@ -4665,6 +5825,33 @@ components:
       - openDays
       - recordVersion
       - createdAt
+    LiabilityFacts:
+      type: object
+      description: Liability facts of a motor claim (REQ-CLM-076 subset, REQ-CLM-144, REQ-CLM-155; D-SL4-17). Set at FNOL or by clm.Claim.update and
+        audited; every member may be absent until known.
+      properties:
+        insuredFaultPct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Insured driver fault, 0 to 100 (decimal string, no more than 2 decimals). Subrogation is proposed when below 100 (REQ-CLM-144);
+            Friendly Settlement needs 0 or 100 (D-SL4-03)
+        faultSource:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Where the fault figure comes from (open Code; e.g. INSURED_STATEMENT, JOINT_REPORT, POLICE_REPORT, COUNTERPARTY_INSURER, HANDLER)
+        counterpartyInsurerPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: PTY organisation party of the counterparty insurer; no other vehicle plate or driver is stored (D-SL4-17)
+        jointReportFlag:
+          type: boolean
+          description: A joint accident report (amicable statement) exists; WRK classification of the document is out of slice 4
+        vehicleCount:
+          type: integer
+          minimum: 1
+          description: Number of vehicles involved
+        accidentInGreece:
+          type: boolean
+          description: The accident happened in Greece
     ClaimSubStatus:
       type: string
       description: Open sub-state (REQ-CLM-071)
@@ -4684,7 +5871,8 @@ components:
       - NO_PAYMENT
     ClaimView:
       type: object
-      description: 'The claim (REQ-CLM-061) with exposures, claimants and incidents. Free text (description, lossLocation) is shown to holders of clm.Claim.get only here, never in lists.'
+      description: The claim (REQ-CLM-061) with exposures, claimants and incidents. Free text (description, lossLocation) is shown to holders of clm.Claim.get
+        only here, never in lists.
       properties:
         summary:
           $ref: '#/components/schemas/ClaimSummary'
@@ -4724,6 +5912,11 @@ components:
           - oldSnapshotRef
           - newSnapshotRef
           - causeEventId
+        liabilityFacts:
+          oneOf:
+          - $ref: '#/components/schemas/LiabilityFacts'
+          - type: 'null'
+          description: Liability facts; null until set (D-SL4-17)
       required:
       - summary
       - legalEntity
@@ -4846,26 +6039,41 @@ components:
       - claim
     ClaimUpdateRequest:
       type: object
-      description: 'clm.Claim.update request. PRD inputs: "ids, changes, reason"'
+      description: 'clm.Claim.update request. PRD inputs: "ids, changes, reason". SL4-CONTRACTS types liability facts (D-SL4-17).'
       properties:
         ids:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "ids"'
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The claim recordVersion the user saw; a different current version is CLM-ERR-STALE
         changes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "changes"'
+          type: object
+          description: Typed changes. Slice 4 types the liability facts; other changes are defined by later work packages.
+          properties:
+            liabilityFacts:
+              $ref: '#/components/schemas/LiabilityFacts'
+              description: Members present replace the stored facts; absent members are unchanged (D-SL4-17)
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Reason code (audit)
     ClaimUpdateResponse:
       type: object
       description: 'clm.Claim.update result. PRD outputs: "claim"'
       properties:
         claim:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/ClaimSummary'
           description: 'PRD: "claim"'
+        liabilityFacts:
+          oneOf:
+          - $ref: '#/components/schemas/LiabilityFacts'
+          - type: 'null'
+          description: Stored facts after the change; always set
     ClaimCloseRequest:
       type: object
       description: 'clm.Claim.close request (REQ-CLM-071..073, SL2-CLM-CORE). Open exposures close with the claim when each passes the close guard (REQ-CLM-072).'
@@ -4900,6 +6108,21 @@ components:
           $ref: '#/components/schemas/ClaimSummary'
       required:
       - claim
+    CloseGuardError:
+      type: object
+      description: Item of the errors[] member of the Problem Details of CLM-ERR-CLOSE-GUARD (D-SL4-14).
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: 'Guard that failed (REQ-CLM-072/073): OPEN_RESERVE, PAYMENT_PENDING, CLOCK_NOT_FINAL, LITIGATION_OPEN, SIU_CASE_OPEN, OPEN_EXPOSURE'
+        exposureIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Exposures that fail the guard; empty for a claim-level guard. Always set
+      required:
+      - code
+      - exposureIds
     ClaimReopenRequest:
       type: object
       description: 'clm.Claim.reopen request. PRD inputs: "ids, changes, reason"'
@@ -5198,25 +6421,29 @@ components:
                 enum:
                 - PARTIAL
                 - FINAL
-                description: Payment transactions (REQ-CLM-119; default PARTIAL). A FINAL payment proposes the release of the
-                  line's remaining open reserve in the same set (REQ-CLM-099)
+                description: Payment transactions (REQ-CLM-119; default PARTIAL). A FINAL payment proposes the release of the line's remaining open
+                  reserve in the same set (REQ-CLM-099)
+              recoveryId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+                description: Recovery case of the line; required for kinds RECOVERY_RESERVE and RECOVERY (a recovery-reserve increase is checked under
+                  CLM.RESERVE on the exposure total of open recovery reserve, D-SL4-07). Kind RECOVERY is accepted only from evidence-backed system
+                  sets, never from a client (PITFALLS 7)
             required:
             - kind
             - exposureId
             - costType
             - costCategory
             - amount
-            description: 'Claim financial transaction on a reserve line (exposure × cost type × cost category). SL2-CLM-MONEY:
-              kinds RESERVE and PAYMENT, EUR only (D-SL2-06), at most one payment per set; cost types and categories from the
-              illustrative motor list (D-SL2-04: INDEMNITY → VEHICLE_REPAIR, TOTAL_LOSS; EXPENSE_ALLOCATED → ASSESSOR_FEE)'
+            description: 'Claim financial transaction on a reserve line (exposure × cost type × cost category). SL2-CLM-MONEY: kinds RESERVE and PAYMENT,
+              EUR only (D-SL2-06), at most one payment per set; cost types and categories from the illustrative motor list (D-SL2-04: INDEMNITY →
+              VEHICLE_REPAIR, TOTAL_LOSS; EXPENSE_ALLOCATED → ASSESSOR_FEE)'
           minItems: 1
       required:
       - claimId
       - transactions
-      description: 'Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions". Builds a Draft set: reserve lines are
-        created on first use (REQ-CLM-093), an eroding payment above the open reserve adds a reserve increase to the same set
-        (REQ-CLM-097, auto-adjust on by default) and a FINAL payment proposes the release of the remainder (REQ-CLM-099).
-        With dryRun nothing is stored (preview only).'
+      description: 'Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions". Builds a Draft set: reserve lines are created on first use (REQ-CLM-093),
+        an eroding payment above the open reserve adds a reserve increase to the same set (REQ-CLM-097, auto-adjust on by default) and a FINAL payment
+        proposes the release of the remainder (REQ-CLM-099). With dryRun nothing is stored (preview only).'
     TransactionSetBuildResponse:
       type: object
       properties:
@@ -5254,11 +6481,55 @@ components:
             $ref: common.yaml#/components/schemas/Unspecified
         set:
           $ref: '#/components/schemas/TransactionSetView'
+        authorityPreview:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorityPreviewItem'
+          description: 'Dry-run only: what submitting the set would do under authority (type, cost type, aggregate amount, WITHIN/REFER/DENY, role).
+            Always set on a dry run, absent otherwise'
       required:
       - setId
       - status
       - preview
       description: 'Typed from REQ-CLM-003, REQ-CLM-107. PRD outputs: "set with preview, checks, approval request"'
+    AuthorityPreviewItem:
+      type: object
+      description: One authority preview line of a dry-run build (D-SL4-14).
+      properties:
+        type:
+          type: string
+          description: Authority type (CLM.RESERVE, CLM.PAYMENT, CLM.RECOVERY_WRITEOFF)
+        costType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: The aggregate the authority is checked on (never per line, PITFALLS 1)
+        basis:
+          type: string
+          enum:
+          - EXPOSURE_TOTAL_RESERVE
+          - EXPOSURE_TOTAL_RECOVERY_RESERVE
+          - RESERVE_DECREASE
+          - PAYMENT
+          - CLAIM_CUMULATIVE_PAID
+        outcome:
+          type: string
+          enum:
+          - WITHIN
+          - REFER
+          - DENY
+          description: WITHIN = ALLOW; REFER = needs the referral role; DENY = CLM-ERR-AUTHORITY on submit
+        role:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: Referral role when outcome is REFER (e.g. Staff.ClaimsManager); null otherwise
+      required:
+      - type
+      - costType
+      - amount
+      - basis
+      - outcome
     TransactionSetView:
       type: object
       description: A claim transaction set (PRD-07 §7.1 TransactionSet, §7.3.2) with its transactions and derived states
@@ -5307,6 +6578,20 @@ components:
           items:
             $ref: '#/components/schemas/SetApprovalView'
           description: One PLT approval request per referred (authority type, cost type) (D-SL2-13); the set executes when all are approved
+        approvalDiff:
+          oneOf:
+          - $ref: '#/components/schemas/ApprovalDiff'
+          - type: 'null'
+          description: Before/after per line; always set while the set is PENDING_APPROVAL, null otherwise
+        systemRecorded:
+          type: boolean
+          description: True for an evidence-backed set recorded by the system (maker = system principal); such sets never take amounts from a client
+            (PITFALLS 7)
+        evidenceRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: Evidence reference of a system-recorded set (BIL allocation id, FS notification or statement line); always set when systemRecorded
       required:
       - setId
       - claimId
@@ -5343,6 +6628,67 @@ components:
       - costType
       - amount
       - status
+    ApprovalDiffLine:
+      type: object
+      description: Before/after of one line of a set (REQ-CLM-107, IB-07 approve-the-diff).
+      properties:
+        kind:
+          type: string
+          enum:
+          - RESERVE
+          - PAYMENT
+          - RECOVERY_RESERVE
+          - RECOVERY
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        costType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        costCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+        recoveryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        before:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Open amount of the reserve line (or open recovery reserve) before the set
+        after:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Open amount after the set
+        paidBefore:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+        paidAfter:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+        delta:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: The set amount on this line
+      required:
+      - kind
+      - exposureId
+      - costType
+      - costCategory
+      - before
+      - after
+      - delta
+    ApprovalDiff:
+      type: object
+      description: Typed approval diff sent with the PLT approval request and shown in the approval inbox (D-SL4-14). Approvers decide on this diff;
+        they cannot edit amounts (REQ-CLM-116).
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalDiffLine'
+        contentHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: The content hash the approval is bound to
+      required:
+      - lines
+      - contentHash
     FinancialTransactionView:
       type: object
       description: An immutable claim financial transaction (PRD-07 §7.1); status is derived from its set and payment
@@ -5357,6 +6703,8 @@ components:
           enum:
           - RESERVE
           - PAYMENT
+          - RECOVERY_RESERVE
+          - RECOVERY
         exposureId:
           $ref: ../events/common.schema.json#/$defs/Uuid
         reserveLineId:
@@ -5384,6 +6732,16 @@ components:
           description: Added by the system (reserve top-up REQ-CLM-097, final release REQ-CLM-099)
         status:
           $ref: ../events/common.schema.json#/$defs/Code
+        recoveryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Recovery case. Always set for kinds RECOVERY_RESERVE and RECOVERY, null otherwise
+        evidenceRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: Evidence of a system-recorded transaction (BIL allocation id, FS statement line reference); null for user-built transactions
       required:
       - txnId
       - txnNumber
@@ -5401,10 +6759,68 @@ components:
           $ref: '#/components/schemas/TransactionSetView'
       required:
       - set
+    TransactionSetListItem:
+      type: object
+      description: Row of the claim's transaction-set list (D-SL4-14). The set detail is clm.TransactionSet.get.
+      properties:
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - PENDING_APPROVAL
+          - APPROVED
+          - REJECTED
+          - POSTED
+        contentHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        maker:
+          type: string
+        fourEyes:
+          type: boolean
+        transactionCount:
+          type: integer
+          minimum: 0
+        hasPayment:
+          type: boolean
+        systemRecorded:
+          type: boolean
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        submittedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        decidedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+      required:
+      - setId
+      - claimId
+      - status
+      - contentHash
+      - maker
+      - transactionCount
+      - hasPayment
+      - createdAt
+    TransactionSetListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/TransactionSetListItem'
+      description: Page of clm.TransactionSet.list results (cursor pagination, contract §3.5.5)
     ClaimPaymentView:
       type: object
-      description: 'A claim payment (PRD-07 §7.1 ClaimPayment, §7.3.3). No IBAN: the BIL payee account id and the masked
-        account only (R-38)'
+      description: 'A claim payment (PRD-07 §7.1 ClaimPayment, §7.3.3). No IBAN: the BIL payee account id and the masked account only (R-38)'
       properties:
         claimPaymentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
@@ -5420,6 +6836,8 @@ components:
           type: string
         method:
           $ref: ../events/common.schema.json#/$defs/Code
+          description: 'Payment method (open Code): SEPA_CT, SEPA_INST, VENDOR, OFFSET or CLEARING (Friendly Settlement at-fault leg: no disbursement,
+            settled through its statement, D-SL4-02)'
         paymentType:
           $ref: ../events/common.schema.json#/$defs/Code
         amount:
@@ -5434,6 +6852,9 @@ components:
           - ISSUED
           - CLEARED
           - REJECTED
+          - VOIDED
+          - STOPPED
+          - RETURNED
         holdReason:
           $ref: ../events/common.schema.json#/$defs/Code
         disbursementId:
@@ -5448,6 +6869,21 @@ components:
           $ref: ../events/common.schema.json#/$defs/Instant
         clearedAt:
           $ref: ../events/common.schema.json#/$defs/Instant
+        reissueOf:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The payment this one reissues (REQ-CLM-127); always set on a reissued payment, null otherwise
+        fiscalMark:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: MARK of the fiscal settlement receipt, stored from FiscalDocRegistered (D-SL4-11); null until registered, always null for CLEARING
+        fsStatementId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: FS statement of a CLEARING payment; always set for method CLEARING
       required:
       - claimPaymentId
       - setId
@@ -5456,6 +6892,473 @@ components:
       - payeeAccountId
       - amount
       - status
+    RecoveryType:
+      type: string
+      enum:
+      - SUBROGATION
+      - SALVAGE
+      - DEDUCTIBLE
+      - FRIENDLY_SETTLEMENT
+      - GUARANTEE_FUND
+      - GREEN_CARD
+      - CONTRIBUTION
+      - OTHER
+      description: Recovery type (PRD-07 §7.1). Slice 4 builds SUBROGATION and SALVAGE (clm.Recovery.create) and FRIENDLY_SETTLEMENT (created by clm.FriendlySettlement.openOwnSettlement);
+        the others are refused with CLM-ERR-VALIDATION.
+    RecoveryState:
+      type: string
+      enum:
+      - OPEN
+      - DEMANDED
+      - DISPUTED
+      - AGREED
+      - IN_ARBITRATION
+      - IN_LITIGATION
+      - CLOSED
+      - WRITTEN_OFF
+      description: 'Recovery lifecycle (PRD-07 §7.3.4): Open -> Demanded -> Agreed -> Closed; Demanded -> Disputed -> InArbitration | InLitigation
+        | Agreed | WrittenOff; any open -> WrittenOff (CLM.RECOVERY_WRITEOFF); Closed -> Open on new information. Illegal moves are CLM-ERR-RECOVERY-STATE.'
+    SalvageDetails:
+      type: object
+      description: 'Salvage fields of a SALVAGE recovery (REQ-CLM-145): estimate, buyer party, sale price.'
+      properties:
+        estimate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Estimated salvage value (the recovery reserve is raised to it)
+        buyerPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: PTY party of the salvage buyer (id only)
+        salePrice:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Sale price once sold; the recovery is recorded at the sale price when BIL allocates the cash (REQ-CLM-145)
+        soldOn:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Sale date
+    RecoveryAllocationLine:
+      type: object
+      description: User-specified allocation of a recovery to a reserve line (REQ-CLM-151). The allocation must sum to the recovered amount and name
+        lines of the claim (CLM-ERR-ALLOCATION).
+      properties:
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        costType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        costCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - exposureId
+      - costType
+      - costCategory
+      - amount
+    RecoveryMilestoneView:
+      type: object
+      description: A recorded milestone of a recovery case (REQ-CLM-147).
+      properties:
+        milestone:
+          $ref: ../events/common.schema.json#/$defs/Code
+        occurredOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordedBy:
+          type: string
+        note:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+      required:
+      - milestone
+      - occurredOn
+      - recordedAt
+    RecoveryView:
+      type: object
+      description: A recovery case (PRD-07 §7.1 Recovery). Cash is only ever recorded from BIL evidence (D-SL4-06).
+      properties:
+        recoveryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        exposureId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Exposure the recovery relates to; null for a claim-level recovery
+        type:
+          $ref: '#/components/schemas/RecoveryType'
+        state:
+          $ref: '#/components/schemas/RecoveryState'
+        counterpartyPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PTY party of the counterparty (insurer, salvage buyer, clearing counterparty)
+        expectedAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Expected recovery (REQ-CLM-144)
+        recoveryReserve:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Open recovery reserve of the case; always set (Σ recovery reserves − Σ recoveries, never below zero)
+        recoveredAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ recoveries recorded for the case; always set
+        allocationRule:
+          type: string
+          enum:
+          - PRO_RATA_PAID
+          - SPECIFIED
+          description: 'REQ-CLM-151 / BR-CLM-039: default pro rata to paid; SPECIFIED = the allocation of the demand'
+        salvage:
+          oneOf:
+          - $ref: '#/components/schemas/SalvageDetails'
+          - type: 'null'
+          description: Always set for SALVAGE, null otherwise
+        milestones:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryMilestoneView'
+        receivableId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: BIL receivable registered by the demand (D-SL4-06); null before the demand. Always set from DEMANDED on
+        paymentReference:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: BIL payment reference the payer quotes; set with receivableId
+        fsCaseId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: FS case for type FRIENDLY_SETTLEMENT
+        fsStatementId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: FS statement that settled the recovery, once matched
+        demandedOn:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - recoveryId
+      - claimId
+      - type
+      - state
+      - counterpartyPartyId
+      - expectedAmount
+      - recoveryReserve
+      - recoveredAmount
+      - allocationRule
+      - milestones
+      - createdAt
+      - recordVersion
+    FsCaseRole:
+      type: string
+      enum:
+      - OWN_INSURER
+      - AT_FAULT_INSURER
+      description: 'Role of the legal entity in the case (PRD-07 §7.1 FsCase): OWN_INSURER pays its own insured and recovers from the at-fault insurer;
+        AT_FAULT_INSURER receives a clearing notification and owes through the statement.'
+    FsCaseState:
+      type: string
+      enum:
+      - ELIGIBILITY_PENDING
+      - ELIGIBLE
+      - NOT_ELIGIBLE
+      - SUBMITTED
+      - ACCEPTED
+      - DISPUTED
+      - REJECTED
+      - SETTLED
+      - RECONCILED
+      description: FsCase lifecycle (PRD-07 §7.3.5). Slice 4 reaches SUBMITTED, SETTLED and RECONCILED; ACCEPTED, DISPUTED and REJECTED need the unbuilt
+        dispute path (D-SL4-01).
+    FsEligibility:
+      type: object
+      description: Stored result of IFriendlySettlementClearing.EvaluateEligibilityAsync (REQ-CLM-155, REQ-MKT-313).
+      properties:
+        result:
+          type: string
+          enum:
+          - ELIGIBLE
+          - NOT_ELIGIBLE
+          - NOT_APPLICABLE
+          description: NOT_APPLICABLE when the pack has no Friendly Settlement (Cyprus stub); the SPI is not called when the capability is off
+        reasons:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Reason codes (e.g. COUNTERPARTY_NOT_MEMBER, AMOUNT_ABOVE_LIMIT, VEHICLE_COUNT, NOT_IN_GREECE, LIABILITY_NOT_CLEAR); always
+            set, empty when eligible
+        ruleId:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Eligibility rule id; always set
+        ruleVersion:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Rule version; always set
+        legalStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Legal status of the values used (UNVERIFIED for the stub, D-SL4-03); always set
+        provisional:
+          type: boolean
+          description: True while legalStatus is not Settled; refused in Production (PITFALLS 36); always set
+        clearingValue:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Clearing value of the claim; set when eligible
+        clearingValueBasis:
+          oneOf:
+          - type: string
+            enum:
+            - ACTUAL
+            - AVERAGE
+          - type: 'null'
+          description: ACTUAL in slice 4 (averages unknown, D-SL4-03); set when eligible
+      required:
+      - result
+      - reasons
+      - ruleId
+      - ruleVersion
+      - legalStatus
+      - provisional
+    FsCaseView:
+      type: object
+      description: A Friendly Settlement case (PRD-07 §7.1 FsCase).
+      properties:
+        fsCaseId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        role:
+          $ref: '#/components/schemas/FsCaseRole'
+        state:
+          $ref: '#/components/schemas/FsCaseState'
+        counterpartyCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Counterparty insurer code (company code from the pack member list)
+        counterpartyPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: PTY organisation party of the counterparty insurer
+        eligibility:
+          oneOf:
+          - $ref: '#/components/schemas/FsEligibility'
+          - type: 'null'
+          description: Latest stored evaluation; null before the first evaluation
+        clearingValue:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Clearing value of the case
+        clearingReference:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: Reference returned by submit (OWN_INSURER) or received in the notification (AT_FAULT_INSURER)
+        ownSettlementExposureId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: FS_OWN_SETTLEMENT exposure (OWN_INSURER), set by openOwnSettlement
+        recoveryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Recovery case of type FRIENDLY_SETTLEMENT holding the FS receivable (OWN_INSURER)
+        atFaultPaymentId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: CLEARING payment (AT_FAULT_INSURER)
+        fsStatementId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Statement that matched the case
+        statementLineRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: Statement line that matched the case
+        expectedGainLoss:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Clearing value minus paid amount; 0.00 for basis ACTUAL
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - fsCaseId
+      - claimId
+      - role
+      - state
+      - counterpartyCode
+      - createdAt
+      - recordVersion
+    FsStatementLine:
+      type: object
+      description: A statement line (REQ-CLM-160).
+      properties:
+        lineRef:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Statement line reference
+        clearingReference:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        direction:
+          type: string
+          enum:
+          - RECEIVABLE
+          - PAYABLE
+          description: RECEIVABLE = the counterparty owes us (own-insurer case); PAYABLE = we owe (at-fault case)
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        counterpartyCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        matchStatus:
+          type: string
+          enum:
+          - MATCHED
+          - UNMATCHED
+          - DIFFERENCE
+          description: UNMATCHED and DIFFERENCE lines are exceptions and block the net of their counterparty
+        fsCaseId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Matched case; always set when MATCHED or DIFFERENCE
+        claimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        difference:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Statement amount minus case clearing value, when DIFFERENCE
+      required:
+      - lineRef
+      - direction
+      - amount
+      - counterpartyCode
+      - matchStatus
+    FsNetStatus:
+      type: string
+      enum:
+      - PENDING
+      - APPROVAL_REQUESTED
+      - REQUESTED
+      - SETTLED
+      - REJECTED
+      description: 'Net settlement status. PRD-07 §7.1: Pending, Requested, Settled, Rejected; slice 4 adds APPROVAL_REQUESTED between Pending and
+        Requested (CLM.FS_NET_SETTLEMENT four-eyes). A rejected or stopped net returns to PENDING (REQ-CLM-264).'
+    FsNetView:
+      type: object
+      description: Net of one counterparty on a statement.
+      properties:
+        counterpartyCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        counterpartyPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        direction:
+          type: string
+          enum:
+          - PAYABLE
+          - RECEIVABLE
+          description: PAYABLE = we pay the clearing office through a BIL FS_CLEARING disbursement; RECEIVABLE = BIL receivable with source FS_CLEARING
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: 'Net per counterparty and statement: Σ receivable lines − Σ payable lines (absolute value, direction separate)'
+        status:
+          $ref: '#/components/schemas/FsNetStatus'
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: PLT approval request (CLM.FS_NET_SETTLEMENT)
+        statementRef:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Statement reference shared with BIL (the FS_CLEARING statementReference / receivable statement ref); always set
+        bilReferenceType:
+          oneOf:
+          - type: string
+            enum:
+            - DISBURSEMENT
+            - RECEIVABLE
+          - type: 'null'
+          description: Set from REQUESTED on
+        bilReferenceId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: BIL disbursement or receivable id; set from REQUESTED on
+      required:
+      - counterpartyCode
+      - direction
+      - amount
+      - status
+      - statementRef
+    FsStatementView:
+      type: object
+      description: A Friendly Settlement statement (PRD-07 §7.1 FsStatement); one per period per legal entity.
+      properties:
+        fsStatementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        reconciliation:
+          type: string
+          enum:
+          - EXCEPTIONS_OPEN
+          - MATCHED
+          description: MATCHED when every line is matched; a net can only be approved then (CLM-ERR-ALLOCATION otherwise)
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/FsStatementLine'
+        nets:
+          type: array
+          items:
+            $ref: '#/components/schemas/FsNetView'
+        exceptionCount:
+          type: integer
+          minimum: 0
+        importedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - fsStatementId
+      - period
+      - reconciliation
+      - lines
+      - nets
+      - exceptionCount
+      - importedAt
+      - recordVersion
     PaymentListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5829,6 +7732,18 @@ components:
         paymentPending:
           type: boolean
           description: A payment is pending approval, approved, on hold or submitted (not yet issued)
+        recoveryReserve:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ approved recovery-reserve transactions (REQ-CLM-096); always set
+        recoveries:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ approved recovery transactions (realised); always set
+        openRecoveryReserve:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ recovery reserves − Σ recoveries, never below zero; always set
+        netIncurred:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: incurred − recoveries − open recovery reserve (REQ-CLM-096); always set
       required:
       - reserved
       - paid
@@ -5857,6 +7772,15 @@ components:
           $ref: ../events/common.schema.json#/$defs/Money
         incurred:
           $ref: ../events/common.schema.json#/$defs/Money
+        recoveryReserve:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ approved recovery-reserve transactions (REQ-CLM-096); always set
+        recoveries:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ approved recovery transactions (realised); always set
+        openRecoveryReserve:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ recovery reserves − Σ recoveries, never below zero; always set
       required:
       - reserveLineId
       - exposureId
@@ -6332,3 +8256,367 @@ components:
         result:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "result"'
+
+    RecoveryCreateRequest:
+      type: object
+      description: clm.Recovery.create request (REQ-CLM-143, -144, -145). Creates the case Open; the recovery reserve is raised through a transaction
+        set with a RECOVERY_RESERVE line carrying recoveryId.
+      properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        exposureId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Optional exposure
+        type:
+          type: string
+          enum:
+          - SUBROGATION
+          - SALVAGE
+          description: SUBROGATION or SALVAGE only in slice 4
+        counterpartyPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PTY party: the at-fault insurer (subrogation) or the buyer (salvage)'
+        expectedAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        salvage:
+          $ref: '#/components/schemas/SalvageDetails'
+          description: Required for SALVAGE, refused for SUBROGATION
+        allocationRule:
+          type: string
+          enum:
+          - PRO_RATA_PAID
+          - SPECIFIED
+          description: Default PRO_RATA_PAID
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Reason code (REQ-CLM-102 for the recovery reserve raised later)
+      required:
+      - claimId
+      - type
+      - counterpartyPartyId
+      - expectedAmount
+      - reason
+    RecoveryCreateResponse:
+      type: object
+      description: clm.Recovery.create result
+      properties:
+        recovery:
+          $ref: '#/components/schemas/RecoveryView'
+      required:
+      - recovery
+    RecoveryGetResponse:
+      type: object
+      description: clm.Recovery.get result
+      properties:
+        recovery:
+          $ref: '#/components/schemas/RecoveryView'
+      required:
+      - recovery
+    RecoveryListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/RecoveryView'
+      description: Page of clm.Recovery.list results (cursor pagination, contract §3.5.5)
+    RecoveryRecordMilestoneRequest:
+      type: object
+      description: clm.Recovery.recordMilestone request (REQ-CLM-147). Some milestones move the state (e.g. SETTLEMENT_AGREED -> Agreed).
+      properties:
+        recoveryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        milestone:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Milestone code (open Code; e.g. COUNTERPARTY_ACKNOWLEDGED, LIABILITY_ACCEPTED, SETTLEMENT_AGREED, SALVAGE_SOLD)
+        occurredOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        note:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        salvage:
+          $ref: '#/components/schemas/SalvageDetails'
+          description: SALVAGE_SOLD requires buyerPartyId and salePrice; the case becomes Agreed
+      required:
+      - recoveryId
+      - expectedRecordVersion
+      - milestone
+      - occurredOn
+    RecoveryRecordMilestoneResponse:
+      type: object
+      description: clm.Recovery.recordMilestone result
+      properties:
+        recovery:
+          $ref: '#/components/schemas/RecoveryView'
+      required:
+      - recovery
+    RecoveryDemandRequest:
+      type: object
+      description: clm.Recovery.demand request (REQ-CLM-147, REQ-BIL-346). Registers a BIL receivable (source CLM_CLAIM_PAYMENT, purpose SALVAGE or
+        SUBROGATION); the case becomes Demanded. No cash moves in CLM.
+      properties:
+        recoveryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Amount demanded; at most the expected amount
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Due date of the BIL receivable
+        allocationRule:
+          type: string
+          enum:
+          - PRO_RATA_PAID
+          - SPECIFIED
+        allocation:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryAllocationLine'
+          description: Required when allocationRule is SPECIFIED; must sum to the amount (CLM-ERR-ALLOCATION)
+      required:
+      - recoveryId
+      - expectedRecordVersion
+      - amount
+      - dueDate
+    RecoveryDemandResponse:
+      type: object
+      description: clm.Recovery.demand result
+      properties:
+        recovery:
+          $ref: '#/components/schemas/RecoveryView'
+        receivableId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: BIL receivable
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Counterparty billing account of type CLAIM_RECOVERY
+        paymentReference:
+          type: string
+          description: Reference the payer quotes; staff record the receipt with bil.Payment.take
+      required:
+      - recovery
+      - receivableId
+      - billingAccountId
+      - paymentReference
+    RecoveryWriteOffRequest:
+      type: object
+      description: clm.Recovery.writeOff request (REQ-CLM-149 subset, CLM.RECOVERY_WRITEOFF, D-SL4-07). Checked on the aggregate; above the handler's
+        authority the set is referred.
+      properties:
+        recoveryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Amount written off (at most the open recovery reserve plus the unreceived expected amount)
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - recoveryId
+      - expectedRecordVersion
+      - amount
+      - reason
+    RecoveryWriteOffResponse:
+      type: object
+      description: clm.Recovery.writeOff result
+      properties:
+        recovery:
+          $ref: '#/components/schemas/RecoveryView'
+        outcome:
+          type: string
+          enum:
+          - WRITTEN_OFF
+          - PENDING_APPROVAL
+        setId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The transaction set that releases the recovery reserve
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: PLT approval request when referred
+      required:
+      - recovery
+      - outcome
+    FsEvaluateRequest:
+      type: object
+      description: 'clm.FriendlySettlement.evaluate request: the claim facts come from the claim and its liability facts (D-SL4-17), never from the
+        client.'
+      properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - claimId
+    FsEvaluateResponse:
+      type: object
+      description: clm.FriendlySettlement.evaluate result
+      properties:
+        fsCase:
+          $ref: '#/components/schemas/FsCaseView'
+        eligibility:
+          $ref: '#/components/schemas/FsEligibility'
+      required:
+      - fsCase
+      - eligibility
+    FsOpenOwnSettlementRequest:
+      type: object
+      description: clm.FriendlySettlement.openOwnSettlement request (REQ-CLM-157). The FS value is the stored clearing value; the client sends no
+        amount.
+      properties:
+        fsCaseId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        claimantPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Claimant (default the insured)
+      required:
+      - fsCaseId
+      - expectedRecordVersion
+    FsOpenOwnSettlementResponse:
+      type: object
+      description: clm.FriendlySettlement.openOwnSettlement result
+      properties:
+        fsCase:
+          $ref: '#/components/schemas/FsCaseView'
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The FS_OWN_SETTLEMENT exposure
+        recoveryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The FRIENDLY_SETTLEMENT recovery; raise its recovery reserve at the clearing value with a RECOVERY_RESERVE line
+      required:
+      - fsCase
+      - exposureId
+      - recoveryId
+    FsSubmitRequest:
+      type: object
+      description: 'clm.FriendlySettlement.submit request (REQ-CLM-159, submit part): calls IFriendlySettlementClearing.SubmitAsync once and publishes
+        FriendlySettlementSubmitted once.'
+      properties:
+        fsCaseId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - fsCaseId
+      - expectedRecordVersion
+    FsSubmitResponse:
+      type: object
+      description: clm.FriendlySettlement.submit result
+      properties:
+        fsCase:
+          $ref: '#/components/schemas/FsCaseView'
+        clearingReference:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - fsCase
+      - clearingReference
+    FsGetResponse:
+      type: object
+      description: clm.FriendlySettlement.get result
+      properties:
+        fsCase:
+          $ref: '#/components/schemas/FsCaseView'
+      required:
+      - fsCase
+    FsListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/FsCaseView'
+      description: Page of clm.FriendlySettlement.list results (cursor pagination, contract §3.5.5)
+    FsImportStatementRequest:
+      type: object
+      description: 'clm.FriendlySettlement.importStatement request (REQ-CLM-160): CLM asks the SPI for the statement (SettlementStatementAsync); in
+        slice 4 the stub builds it from its own store in a documented JSON test format.'
+      properties:
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+          description: Statement period (a calendar month, half-open [from, to) Athens dates)
+        counterpartyCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Optional counterparty filter
+      required:
+      - period
+    FsImportStatementResponse:
+      type: object
+      description: 'clm.FriendlySettlement.importStatement result: lines are matched to cases at once; matched lines record FS recoveries and settle
+        CLEARING payables in evidence-backed system sets.'
+      properties:
+        statement:
+          $ref: '#/components/schemas/FsStatementView'
+      required:
+      - statement
+    FsGetStatementResponse:
+      type: object
+      description: clm.FriendlySettlement.getStatement result
+      properties:
+        statement:
+          $ref: '#/components/schemas/FsStatementView'
+      required:
+      - statement
+    FsApproveNetRequest:
+      type: object
+      description: 'clm.FriendlySettlement.approveNet request (REQ-CLM-160, -264): approves the net of one counterparty under CLM.FS_NET_SETTLEMENT
+        (four-eyes above the threshold) and hands it to BIL (bil.Disbursement.request source FS_CLEARING method CLEARING, or bil.Receivable.register
+        source FS_CLEARING).'
+      properties:
+        fsStatementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        counterpartyCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        expectedNet:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: The net the approver saw; a different computed net is CLM-ERR-STALE. The net is never taken from the client.
+      required:
+      - fsStatementId
+      - counterpartyCode
+      - expectedRecordVersion
+      - expectedNet
+    FsApproveNetResponse:
+      type: object
+      description: clm.FriendlySettlement.approveNet result
+      properties:
+        statement:
+          $ref: '#/components/schemas/FsStatementView'
+        net:
+          $ref: '#/components/schemas/FsNetView'
+        outcome:
+          type: string
+          enum:
+          - REQUESTED
+          - PENDING_APPROVAL
+          description: PENDING_APPROVAL when the amount is above the maker's authority (PLT approval opened)
+      required:
+      - statement
+      - net
+      - outcome

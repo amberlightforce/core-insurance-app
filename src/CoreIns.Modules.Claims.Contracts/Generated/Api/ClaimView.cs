@@ -45,6 +45,10 @@ public sealed record ClaimView
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public PendingReverificationDetail? PendingReverification { get; init; }
 
+    /// <summary>Liability facts; null until set (D-SL4-17)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("liabilityFacts")]
+    public global::CoreIns.Modules.Claims.Contracts.Api.LiabilityFacts? LiabilityFacts { get; init; }
+
     /// <summary>Present while snapshotStatus is REVERIFICATION_REQUIRED (the ReverificationRequired payload)</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record PendingReverificationDetail

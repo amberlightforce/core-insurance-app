@@ -40,6 +40,7 @@ internal sealed class FiscalDocumentReader(ComplianceDbContext db)
                 Total = new Money(row.Total, currency),
                 Lines = [.. lines.Select(l => new FiscalDocumentView.LineItem { FiscalCategoryKey = l.FiscalCategoryKey, Amount = l.Amount, ChargeId = l.ChargeId })],
                 RejectionCodes = row.RejectionCodes.Length == 0 ? null : row.RejectionCodes,
+                CorrelatedDocumentId = row.CorrelatedDocumentId,
             },
             Identifiers = new FiscalDocumentIdentifiers
             {

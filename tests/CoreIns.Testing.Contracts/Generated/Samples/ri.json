@@ -35,15 +35,156 @@
       "nextCursor": "sample",
       "limit": 1
     },
+    "ri.Contract.applicable": {
+      "contracts": [
+        {
+          "contractId": "0192e2d3-06dc-7f28-80c7-359e2af7e2bd",
+          "contractNumber": "SAMPLE-000001",
+          "stableTreatyId": "Sample text",
+          "legalEntity": "SAMPLE_CODE",
+          "contractType": "XOL_PER_RISK",
+          "contractYear": 1900,
+          "currency": "EUR",
+          "period": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "scope": {
+            "productCodes": [
+              "SAMPLE_CODE"
+            ],
+            "coverageCodes": [
+              "SAMPLE_CODE"
+            ]
+          },
+          "clause": {
+            "alaeIncluded": true,
+            "statutoryInterestIncluded": true,
+            "recoveriesInure": "REALISED_ONLY"
+          },
+          "layers": [
+            {
+              "layerNo": 1,
+              "attachment": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "limit": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "aad": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "aal": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "participations": [
+            {
+              "reinsurerPartyId": "019219bd-87ad-7da6-8e91-5a3e9560ff1e",
+              "brokerPartyId": "01929b9f-2a10-7d4a-8f69-fcc8f489213e",
+              "signedLinePct": "12.50",
+              "lead": true
+            }
+          ],
+          "placedPct": "12.50",
+          "status": "DRAFT",
+          "versionNo": 1,
+          "validFrom": "2026-10-07T09:00:00Z",
+          "recordVersion": 1,
+          "maker": "sample",
+          "approvalRequestId": "01929ff6-e8d9-78e7-83cc-80aa50d45a25",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "activatedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "validAt": "2026-10-07T09:00:00Z"
+    },
     "ri.Contract.get": {
-      "contracts": "unspecified",
-      "versions": "unspecified"
+      "contract": {
+        "contractId": "0192cdb1-5e42-7ed9-8d8d-1ec7fce38827",
+        "contractNumber": "SAMPLE-000001",
+        "stableTreatyId": "Sample text",
+        "legalEntity": "SAMPLE_CODE",
+        "contractType": "XOL_PER_RISK",
+        "contractYear": 1900,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "scope": {
+          "productCodes": [
+            "SAMPLE_CODE"
+          ],
+          "coverageCodes": [
+            "SAMPLE_CODE"
+          ]
+        },
+        "clause": {
+          "alaeIncluded": true,
+          "statutoryInterestIncluded": true,
+          "recoveriesInure": "REALISED_ONLY"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aad": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aal": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "participations": [
+          {
+            "reinsurerPartyId": "01920484-0afd-760e-87dd-e36d8f4d4912",
+            "brokerPartyId": "01925add-cd3f-7d27-85bf-452f997c0f3d",
+            "signedLinePct": "12.50",
+            "lead": true
+          }
+        ],
+        "placedPct": "12.50",
+        "status": "DRAFT",
+        "versionNo": 1,
+        "validFrom": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "maker": "sample",
+        "approvalRequestId": "0192dbcd-0525-75f7-82e9-7d5364197d0d",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "activatedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ri.Contract.list": {
       "items": [
         {
-          "contracts": "unspecified",
-          "versions": "unspecified"
+          "contractId": "01925ef9-0d19-7453-8478-345da46b2508",
+          "contractNumber": "SAMPLE-000001",
+          "contractType": "XOL_PER_RISK",
+          "contractYear": 1,
+          "currency": "EUR",
+          "period": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "placedPct": "12.50",
+          "status": "DRAFT",
+          "recordVersion": 1
         }
       ],
       "nextCursor": "sample",
@@ -99,7 +240,13 @@
           "recoverableOutstanding": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "claimId": "019237fa-5f11-727f-8993-813522e60e9b",
+          "contractYear": 1,
+          "layerNo": 1,
+          "recoveryId": "01925ae7-e16d-7655-88d3-5f0f11e87b35",
+          "batchId": "0192840e-cf22-7687-82db-362b5ebfe8f5",
+          "state": "CALCULATED"
         }
       ],
       "nextCursor": "sample",
@@ -483,18 +630,146 @@
       "limit": 1
     },
     "ContractApplicableResponse": {
-      "contracts": "unspecified",
-      "versions": "unspecified"
+      "contracts": [
+        {
+          "contractId": "01924502-de34-7367-8755-ba2ba32d40c9",
+          "contractNumber": "SAMPLE-000001",
+          "stableTreatyId": "Sample text",
+          "legalEntity": "SAMPLE_CODE",
+          "contractType": "XOL_PER_RISK",
+          "contractYear": 1900,
+          "currency": "EUR",
+          "period": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "scope": {
+            "productCodes": [
+              "SAMPLE_CODE"
+            ],
+            "coverageCodes": [
+              "SAMPLE_CODE"
+            ]
+          },
+          "clause": {
+            "alaeIncluded": true,
+            "statutoryInterestIncluded": true,
+            "recoveriesInure": "REALISED_ONLY"
+          },
+          "layers": [
+            {
+              "layerNo": 1,
+              "attachment": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "limit": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "aad": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "aal": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "participations": [
+            {
+              "reinsurerPartyId": "0192a0ef-22fd-7c31-8cf6-622faa6efbec",
+              "brokerPartyId": "01924f2a-1564-7a54-8e56-fe7be6e024cb",
+              "signedLinePct": "12.50",
+              "lead": true
+            }
+          ],
+          "placedPct": "12.50",
+          "status": "DRAFT",
+          "versionNo": 1,
+          "validFrom": "2026-10-07T09:00:00Z",
+          "recordVersion": 1,
+          "maker": "sample",
+          "approvalRequestId": "0192b3e5-ca19-7eb1-88e6-b1e3982bd2fa",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "activatedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "validAt": "2026-10-07T09:00:00Z"
     },
     "ContractApproveRequest": {
-      "contract": "unspecified",
-      "section": "unspecified",
-      "layer": "unspecified",
-      "clauseData": "unspecified",
-      "reason": "unspecified"
+      "contractId": "0192dfae-81bd-79d8-8d99-a8a7900190bd",
+      "expectedRecordVersion": 1,
+      "decision": "APPROVE",
+      "reason": "Sample text"
     },
     "ContractApproveResponse": {
-      "contractVersion": "unspecified"
+      "contract": {
+        "contractId": "0192db2b-fc6e-7873-8bc2-43a567b09f1d",
+        "contractNumber": "SAMPLE-000001",
+        "stableTreatyId": "Sample text",
+        "legalEntity": "SAMPLE_CODE",
+        "contractType": "XOL_PER_RISK",
+        "contractYear": 1900,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "scope": {
+          "productCodes": [
+            "SAMPLE_CODE"
+          ],
+          "coverageCodes": [
+            "SAMPLE_CODE"
+          ]
+        },
+        "clause": {
+          "alaeIncluded": true,
+          "statutoryInterestIncluded": true,
+          "recoveriesInure": "REALISED_ONLY"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aad": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aal": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "participations": [
+          {
+            "reinsurerPartyId": "01922684-b722-7c30-8a01-b8c5786839e2",
+            "brokerPartyId": "01922487-e270-7a09-83e4-9eec3f501f55",
+            "signedLinePct": "12.50",
+            "lead": true
+          }
+        ],
+        "placedPct": "12.50",
+        "status": "DRAFT",
+        "versionNo": 1,
+        "validFrom": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "maker": "sample",
+        "approvalRequestId": "019288c0-7e68-7a2f-891d-adae0026b14a",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "activatedAt": "2026-10-07T09:00:00Z"
+      },
+      "decision": "APPROVE"
     },
     "ContractCloseRequest": {
       "contract": "unspecified",
@@ -517,14 +792,124 @@
       "contractVersion": "unspecified"
     },
     "ContractCreateRequest": {
-      "contract": "unspecified",
-      "section": "unspecified",
-      "layer": "unspecified",
-      "clauseData": "unspecified",
-      "reason": "unspecified"
+      "legalEntity": "SAMPLE_CODE",
+      "contractType": "XOL_PER_RISK",
+      "contractYear": 1900,
+      "currency": "EUR",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "scope": {
+        "productCodes": [
+          "SAMPLE_CODE"
+        ],
+        "coverageCodes": [
+          "SAMPLE_CODE"
+        ]
+      },
+      "clause": {
+        "alaeIncluded": true,
+        "statutoryInterestIncluded": true,
+        "recoveriesInure": "REALISED_ONLY"
+      },
+      "layers": [
+        {
+          "layerNo": 1,
+          "attachment": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "limit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aad": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aal": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "participations": [
+        {
+          "reinsurerPartyId": "0192ce83-6fb9-7f89-88c5-1d5f09a69368",
+          "brokerPartyId": "01924285-ced6-7809-83e2-3c88532a5a4b",
+          "signedLinePct": "12.50",
+          "lead": true
+        }
+      ],
+      "placedPct": "12.50",
+      "reason": "SAMPLE_CODE"
     },
     "ContractCreateResponse": {
-      "contractVersion": "unspecified"
+      "contract": {
+        "contractId": "01928bfa-65fa-7d41-8ffd-3098f4902185",
+        "contractNumber": "SAMPLE-000001",
+        "stableTreatyId": "Sample text",
+        "legalEntity": "SAMPLE_CODE",
+        "contractType": "XOL_PER_RISK",
+        "contractYear": 1900,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "scope": {
+          "productCodes": [
+            "SAMPLE_CODE"
+          ],
+          "coverageCodes": [
+            "SAMPLE_CODE"
+          ]
+        },
+        "clause": {
+          "alaeIncluded": true,
+          "statutoryInterestIncluded": true,
+          "recoveriesInure": "REALISED_ONLY"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aad": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aal": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "participations": [
+          {
+            "reinsurerPartyId": "01927886-db06-7f6b-8f72-438bf270307a",
+            "brokerPartyId": "019296e1-53aa-7a6b-8cab-526443c796b4",
+            "signedLinePct": "12.50",
+            "lead": true
+          }
+        ],
+        "placedPct": "12.50",
+        "status": "DRAFT",
+        "versionNo": 1,
+        "validFrom": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "maker": "sample",
+        "approvalRequestId": "0192a604-f556-7f7d-8985-716d44c0db5c",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "activatedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ContractEndorseRequest": {
       "contract": "unspecified",
@@ -547,18 +932,100 @@
       "contractVersion": "unspecified"
     },
     "ContractGetResponse": {
-      "contracts": "unspecified",
-      "versions": "unspecified"
+      "contract": {
+        "contractId": "01920f4b-cad1-7aef-84bd-b1a2b9627175",
+        "contractNumber": "SAMPLE-000001",
+        "stableTreatyId": "Sample text",
+        "legalEntity": "SAMPLE_CODE",
+        "contractType": "XOL_PER_RISK",
+        "contractYear": 1900,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "scope": {
+          "productCodes": [
+            "SAMPLE_CODE"
+          ],
+          "coverageCodes": [
+            "SAMPLE_CODE"
+          ]
+        },
+        "clause": {
+          "alaeIncluded": true,
+          "statutoryInterestIncluded": true,
+          "recoveriesInure": "REALISED_ONLY"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aad": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aal": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "participations": [
+          {
+            "reinsurerPartyId": "0192b8b0-20ae-7b54-8371-6a5522615841",
+            "brokerPartyId": "0192a037-56cb-75bc-84f2-8fa31152858b",
+            "signedLinePct": "12.50",
+            "lead": true
+          }
+        ],
+        "placedPct": "12.50",
+        "status": "DRAFT",
+        "versionNo": 1,
+        "validFrom": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "maker": "sample",
+        "approvalRequestId": "019270aa-afb3-72ea-819c-423697f0d968",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "activatedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ContractListItem": {
-      "contracts": "unspecified",
-      "versions": "unspecified"
+      "contractId": "0192d2fe-3fcf-7012-8e5e-3859c3920b5f",
+      "contractNumber": "SAMPLE-000001",
+      "contractType": "XOL_PER_RISK",
+      "contractYear": 1,
+      "currency": "EUR",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "placedPct": "12.50",
+      "status": "DRAFT",
+      "recordVersion": 1
     },
     "ContractListPage": {
       "items": [
         {
-          "contracts": "unspecified",
-          "versions": "unspecified"
+          "contractId": "01924ed2-ee7a-70c4-8e5c-419400ae7085",
+          "contractNumber": "SAMPLE-000001",
+          "contractType": "XOL_PER_RISK",
+          "contractYear": 1,
+          "currency": "EUR",
+          "period": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "placedPct": "12.50",
+          "status": "DRAFT",
+          "recordVersion": 1
         }
       ],
       "nextCursor": "sample",
@@ -573,24 +1040,192 @@
       "premiums": "unspecified"
     },
     "ContractSubmitRequest": {
-      "contract": "unspecified",
-      "section": "unspecified",
-      "layer": "unspecified",
-      "clauseData": "unspecified",
-      "reason": "unspecified"
+      "contractId": "0192408e-101c-7846-87f2-9f4c81a2490d",
+      "expectedRecordVersion": 1
     },
     "ContractSubmitResponse": {
-      "contractVersion": "unspecified"
+      "contract": {
+        "contractId": "0192752d-91b4-7e04-86b0-cc5b17ed60cd",
+        "contractNumber": "SAMPLE-000001",
+        "stableTreatyId": "Sample text",
+        "legalEntity": "SAMPLE_CODE",
+        "contractType": "XOL_PER_RISK",
+        "contractYear": 1900,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "scope": {
+          "productCodes": [
+            "SAMPLE_CODE"
+          ],
+          "coverageCodes": [
+            "SAMPLE_CODE"
+          ]
+        },
+        "clause": {
+          "alaeIncluded": true,
+          "statutoryInterestIncluded": true,
+          "recoveriesInure": "REALISED_ONLY"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aad": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aal": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "participations": [
+          {
+            "reinsurerPartyId": "0192d917-6306-7961-84ea-b695c978a112",
+            "brokerPartyId": "0192a580-6202-788e-8c5b-d2b9a6f0a631",
+            "signedLinePct": "12.50",
+            "lead": true
+          }
+        ],
+        "placedPct": "12.50",
+        "status": "DRAFT",
+        "versionNo": 1,
+        "validFrom": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "maker": "sample",
+        "approvalRequestId": "01927115-dd3f-780d-8a14-2221ea223357",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "activatedAt": "2026-10-07T09:00:00Z"
+      },
+      "approvalRequestId": "0192694e-e6cd-78f1-83b9-3bd5176482c9"
     },
     "ContractUpdateRequest": {
-      "contract": "unspecified",
-      "section": "unspecified",
-      "layer": "unspecified",
-      "clauseData": "unspecified",
-      "reason": "unspecified"
+      "expectedRecordVersion": 1,
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "scope": {
+        "productCodes": [
+          "SAMPLE_CODE"
+        ],
+        "coverageCodes": [
+          "SAMPLE_CODE"
+        ]
+      },
+      "clause": {
+        "alaeIncluded": true,
+        "statutoryInterestIncluded": true,
+        "recoveriesInure": "REALISED_ONLY"
+      },
+      "layers": [
+        {
+          "layerNo": 1,
+          "attachment": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "limit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aad": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aal": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "participations": [
+        {
+          "reinsurerPartyId": "0192b8c5-f463-75ea-8cc0-d6e72d90eaaf",
+          "brokerPartyId": "01922dbb-f9e9-7c17-81b4-a9ac2236a0a5",
+          "signedLinePct": "12.50",
+          "lead": true
+        }
+      ],
+      "placedPct": "12.50",
+      "reason": "SAMPLE_CODE"
     },
     "ContractUpdateResponse": {
-      "contractVersion": "unspecified"
+      "contract": {
+        "contractId": "0192732c-97ae-7e47-8425-88ed2d1862bf",
+        "contractNumber": "SAMPLE-000001",
+        "stableTreatyId": "Sample text",
+        "legalEntity": "SAMPLE_CODE",
+        "contractType": "XOL_PER_RISK",
+        "contractYear": 1900,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "scope": {
+          "productCodes": [
+            "SAMPLE_CODE"
+          ],
+          "coverageCodes": [
+            "SAMPLE_CODE"
+          ]
+        },
+        "clause": {
+          "alaeIncluded": true,
+          "statutoryInterestIncluded": true,
+          "recoveriesInure": "REALISED_ONLY"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aad": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aal": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "participations": [
+          {
+            "reinsurerPartyId": "01923334-234f-789d-8584-26f65f7516e4",
+            "brokerPartyId": "0192b1ec-9660-7b60-82f5-bf7a47c79c03",
+            "signedLinePct": "12.50",
+            "lead": true
+          }
+        ],
+        "placedPct": "12.50",
+        "status": "DRAFT",
+        "versionNo": 1,
+        "validFrom": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "maker": "sample",
+        "approvalRequestId": "01927285-964b-7534-86e8-2746bfb7916f",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "activatedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ContractVersionAtResponse": {
       "contracts": "unspecified",
@@ -974,7 +1609,13 @@
       "recoverableOutstanding": {
         "amount": "120.50",
         "currency": "EUR"
-      }
+      },
+      "claimId": "0192c9be-ab16-7752-8aba-983078cc5c87",
+      "contractYear": 1,
+      "layerNo": 1,
+      "recoveryId": "01927625-034c-7f3f-8d2f-1754907af7ca",
+      "batchId": "01924378-c0bd-7955-8595-643a9333cbc8",
+      "state": "CALCULATED"
     },
     "RecoveryListByClaimPage": {
       "items": [
@@ -993,21 +1634,65 @@
           "recoverableOutstanding": {
             "amount": "120.50",
             "currency": "EUR"
-          }
+          },
+          "claimId": "0192ff21-5a91-7134-8bbc-c5b64c2dfcea",
+          "contractYear": 1,
+          "layerNo": 1,
+          "recoveryId": "0192c4b2-5853-72e7-808a-d01847583207",
+          "batchId": "0192feee-6581-7c8f-8807-f231b50e5500",
+          "state": "CALCULATED"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "RecoveryListByContractItem": {
-      "recoverables": "unspecified",
-      "trace": "unspecified"
+      "contractId": "019240ec-1c4b-7e26-8067-3d77e2c9f27d",
+      "layerId": "01921d4d-8a29-7dfc-85c4-23e151dd3a08",
+      "participantId": "01922888-da88-7c9e-854f-94ca5f812ecb",
+      "recoverableIncurred": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "recoverablePaid": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "recoverableOutstanding": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "claimId": "0192e121-330f-78d3-885f-a845cc3b482a",
+      "contractYear": 1,
+      "layerNo": 1,
+      "recoveryId": "019233d8-faea-760a-881a-a3aaab81931c",
+      "batchId": "0192c221-0c56-79b1-8f1e-6c0d832cb31b",
+      "state": "CALCULATED"
     },
     "RecoveryListByContractPage": {
       "items": [
         {
-          "recoverables": "unspecified",
-          "trace": "unspecified"
+          "contractId": "0192f5ca-fadb-7a27-84fc-4cba11916b8e",
+          "layerId": "01926853-b568-7ed3-8d77-1bacc6422c5e",
+          "participantId": "01922fb1-3bc9-75eb-8dfb-402036dc403c",
+          "recoverableIncurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoverablePaid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoverableOutstanding": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "claimId": "01928b17-b783-7de2-8135-da6594cf4dc6",
+          "contractYear": 1,
+          "layerNo": 1,
+          "recoveryId": "019277cc-af21-7150-8dd5-3b0fa1d24f09",
+          "batchId": "01923a10-dc16-7c18-8817-5c1cbe8de41c",
+          "state": "CALCULATED"
         }
       ],
       "nextCursor": "sample",
@@ -1021,8 +1706,151 @@
       "batchId": "019258b6-3a64-7abb-808a-4c24b665da9c"
     },
     "RecoveryTraceResponse": {
-      "recoverables": "unspecified",
-      "trace": "unspecified"
+      "batchId": "0192d591-3c14-7b4e-8d8b-64fbe0a6c865",
+      "contractId": "01923151-514d-744f-894f-b7ea80c54be3",
+      "contractYear": 1,
+      "engineVersion": "Sample text",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "recoverables": [
+        {
+          "contractId": "019220c7-070e-721f-80f9-e7664f8b5ade",
+          "layerId": "01923e09-7757-7b22-8bd8-26bb350a615d",
+          "participantId": "0192fb75-f84f-7b3f-8a31-580c65be7004",
+          "recoverableIncurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoverablePaid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoverableOutstanding": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "claimId": "01928ce7-207c-73c9-8b3d-550b2a28d8d9",
+          "contractYear": 1,
+          "layerNo": 1,
+          "recoveryId": "01921dda-0848-70b8-8639-ed21e474bd67",
+          "batchId": "01921e78-8054-7ccb-8b79-f7feedd9d9d7",
+          "state": "CALCULATED"
+        }
+      ],
+      "trace": [
+        {
+          "stepNo": 1,
+          "kind": "SAMPLE_CODE",
+          "claimId": "0192f710-f400-75d3-88a1-81d664980678",
+          "layerNo": 1,
+          "participantId": "0192d69d-fc79-7690-8164-f40985048cfe",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "note": "Sample text"
+        }
+      ]
+    },
+    "RecoveryTraceStep": {
+      "stepNo": 1,
+      "kind": "SAMPLE_CODE",
+      "claimId": "01920e99-2350-7402-8efe-b9bb02488ae8",
+      "layerNo": 1,
+      "participantId": "0192ed20-b2a8-71ee-8e1f-1a1dae365659",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "note": "Sample text"
+    },
+    "RiContractClause": {
+      "alaeIncluded": true,
+      "statutoryInterestIncluded": true,
+      "recoveriesInure": "REALISED_ONLY"
+    },
+    "RiContractScope": {
+      "productCodes": [
+        "SAMPLE_CODE"
+      ],
+      "coverageCodes": [
+        "SAMPLE_CODE"
+      ]
+    },
+    "RiContractView": {
+      "contractId": "01929f63-1ed2-7540-80cf-3b6d9b05d772",
+      "contractNumber": "SAMPLE-000001",
+      "stableTreatyId": "Sample text",
+      "legalEntity": "SAMPLE_CODE",
+      "contractType": "XOL_PER_RISK",
+      "contractYear": 1900,
+      "currency": "EUR",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "scope": {
+        "productCodes": [
+          "SAMPLE_CODE"
+        ],
+        "coverageCodes": [
+          "SAMPLE_CODE"
+        ]
+      },
+      "clause": {
+        "alaeIncluded": true,
+        "statutoryInterestIncluded": true,
+        "recoveriesInure": "REALISED_ONLY"
+      },
+      "layers": [
+        {
+          "layerNo": 1,
+          "attachment": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "limit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aad": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aal": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "participations": [
+        {
+          "reinsurerPartyId": "0192cc33-0b1d-791d-8c08-e43e9fbf9f9c",
+          "brokerPartyId": "019234e9-aeca-726c-8a05-23c26751667b",
+          "signedLinePct": "12.50",
+          "lead": true
+        }
+      ],
+      "placedPct": "12.50",
+      "status": "DRAFT",
+      "versionNo": 1,
+      "validFrom": "2026-10-07T09:00:00Z",
+      "recordVersion": 1,
+      "maker": "sample",
+      "approvalRequestId": "0192c59d-f1c0-7f0c-85be-cd4d227f0823",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "activatedAt": "2026-10-07T09:00:00Z"
+    },
+    "RiParticipationInput": {
+      "reinsurerPartyId": "0192ce98-d0eb-7ddf-8e33-104730949b88",
+      "brokerPartyId": "01923ed2-dfdc-7e31-8987-06d787e693f5",
+      "signedLinePct": "12.50",
+      "lead": true
+    },
+    "RiParticipationView": {
+      "reinsurerPartyId": "01921b92-20d6-778c-81d0-0335597e5e2e",
+      "brokerPartyId": "0192ee17-1c2a-79e8-8db3-d3fd514d5c1c",
+      "signedLinePct": "12.50",
+      "lead": true
     },
     "SecurityReportRequest": {
       "rules": "unspecified"

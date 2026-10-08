@@ -28,7 +28,9 @@ public sealed class GrPackConfiguration : IPackConfigurationSource
     public string Country => GrPack.Country;
 
     /// <inheritdoc />
-    public IReadOnlyList<PackConfigValue> Values { get; } =
+    public IReadOnlyList<PackConfigValue> Values { get; } = [.. Core, .. GrTreatmentRules.Values];
+
+    private static IReadOnlyList<PackConfigValue> Core { get; } =
     [
         // IPT: rates Settled (GR-01 "rates only"). The start of validity is not stated in the PRDs: open.
         new("tax.ipt.rate.general", ConfigValueType.ExactDecimal, "0.15", LegalStatus.Settled, Ipt + ": 15% general", MotorPath: true),

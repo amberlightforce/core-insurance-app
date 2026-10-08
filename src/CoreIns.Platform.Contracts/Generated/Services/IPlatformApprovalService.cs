@@ -53,4 +53,15 @@ public interface IPlatformApprovalService
     /// <para>Errors: PLT-ERR-APPROVAL-HASH-MISMATCH (422), PLT-ERR-APPROVAL-SUBJECT-MISMATCH (422), PLT-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalVerifyForExecutionResponse> VerifyForExecutionAsync(global::CoreIns.Platform.Contracts.Api.ApprovalVerifyForExecutionRequest request, global::System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>Maker-checker</summary>
+    /// <remarks>
+    /// <para>Operation plt.Approval.withdraw (command; HTTP POST /api/plt/v1/approval/withdraw).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full; fully typed from REQ-PLT-004, REQ-PLT-114 (SL4-CONTRACTS, D-SL4-14: owner module only, audited, no REST). Wave W1.</para>
+    /// <para>Exposure: internal; consumers: CLM.</para>
+    /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
+    /// <para>Errors: PLT-ERR-NOT-FOUND (404), PLT-ERR-NOT-OWNER (403), PLT-ERR-APPROVAL-STALE (409), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// </remarks>
+    global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalWithdrawResponse> WithdrawAsync(global::CoreIns.Platform.Contracts.Api.ApprovalWithdrawRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

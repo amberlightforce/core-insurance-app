@@ -131,6 +131,9 @@ internal sealed class DisbursementService(
 
     public Task<DisbursementVoidResponse> VoidAsync(DisbursementVoidRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         throw InProcess.NotAvailable("bil.Disbursement.void");
+
+    public Task<DisbursementApproveReleaseResponse> ApproveReleaseAsync(DisbursementApproveReleaseRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("bil.Disbursement.approveRelease");
 }
 
 /// <summary><see cref="IBillingReceiptService"/>: <c>get</c> (REQ-BIL-126).</summary>

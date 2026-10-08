@@ -4,47 +4,46 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Contract.update request. PRD inputs: "contract, section, layer, clause data; reason"</summary>
+/// <summary>ri.Contract.update request. Draft contracts only (RI-ERR-STATE otherwise); members left out are unchanged.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ContractUpdateRequest
 {
-    /// <summary>PRD: "contract"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contract")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Contract { get; init; }
+    /// <summary>The recordVersion the user saw; a different current version is RI-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 
-    /// <summary>PRD: "section"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("section")]
+    /// <summary>Contract member 'period'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Section { get; init; }
+    public global::CoreIns.SharedKernel.DateRange? Period { get; init; }
 
-    /// <summary>PRD: "layer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("layer")]
+    /// <summary>Contract member 'scope'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("scope")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Layer { get; init; }
+    public global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractScope? Scope { get; init; }
 
-    /// <summary>PRD: "clause data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("clauseData")]
+    /// <summary>Contract member 'clause'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("clause")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ClauseData { get; init; }
+    public global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractClause? Clause { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'layers'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layers")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.RiLayer>? Layers { get; init; }
+
+    /// <summary>Contract member 'participations'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("participations")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RiParticipationInput>? Participations { get; init; }
+
+    /// <summary>Contract member 'placedPct'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("placedPct")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+    public decimal? PlacedPct { get; init; }
+
+    /// <summary>Reason code (audit)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
 }

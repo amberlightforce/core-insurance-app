@@ -76,6 +76,19 @@ public sealed record TransactionSetView
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.SetApprovalView>? Approvals { get; init; }
 
+    /// <summary>Before/after per line; always set while the set is PENDING_APPROVAL, null otherwise</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalDiff")]
+    public global::CoreIns.Modules.Claims.Contracts.Api.ApprovalDiff? ApprovalDiff { get; init; }
+
+    /// <summary>True for an evidence-backed set recorded by the system (maker = system principal); such sets never take amounts from a client (PITFALLS 7)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("systemRecorded")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? SystemRecorded { get; init; }
+
+    /// <summary>Evidence reference of a system-recorded set (BIL allocation id, FS notification or statement line); always set when systemRecorded</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("evidenceRef")]
+    public string? EvidenceRef { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
