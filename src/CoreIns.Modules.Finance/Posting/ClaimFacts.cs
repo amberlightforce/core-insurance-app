@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CoreIns.Modules.Claims.Contracts.Events;
 using CoreIns.Modules.Finance.Domain;
+using CoreIns.Platform.Contracts.Common;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Json;
 
@@ -69,6 +70,9 @@ internal static class ClaimFacts
         };
         var amount = reserve.Delta.Transaction;
         var date = reserve.AccountingDate ?? occurredOn;
+        var problem = SingleCurrency(reserve.Delta) && SingleCurrency(reserve.NewOpenAmount)
+            ? null
+            : ((string, string)?)(ExceptionReasons.RateMissing, "ReserveChanged functional or group amounts differ from the transaction amount; FIN has no FX rates (D-SL2-06).");
         return new SourceEntry(
             sourceEventId,
             recovery ? ClaimLegs.RecoveryReserveKind : ClaimLegs.Reserve,
@@ -80,11 +84,37 @@ internal static class ClaimFacts
             ])
         {
             NeedsPolicyContext = false,
+            Problem = problem?.Item2,
+            ProblemReason = problem?.Item1 ?? ExceptionReasons.Unbalanced,
         };
     }
 
     private static SourceEntry Payment(PaymentIssuedV1 payment, Guid? claimId, BusinessDate occurredOn)
     {
+        // Fail closed (D-SL2-12a): never guess a missing line, an unknown eroding flag or an FX conversion.
+        var total = payment.Amount.Transaction;
+        (string Reason, string Detail)? problem = null;
+        if (payment.Lines.Count == 0)
+        {
+            problem = (ExceptionReasons.InvalidEnvelope, "PaymentIssued has no lines: the reserve lines paid are unknown.");
+        }
+        else if (payment.Lines.Any(l => l.Eroding is null))
+        {
+            problem = (ExceptionReasons.InvalidEnvelope, "PaymentIssued line without the eroding flag: whether it consumes the reserve is unknown.");
+        }
+        else if (!SingleCurrency(payment.Amount) || payment.Lines.Any(l => !SingleCurrency(l.Amount)))
+        {
+            problem = (ExceptionReasons.RateMissing, "PaymentIssued functional or group amounts differ from the transaction amount; FIN has no FX rates (D-SL2-06).");
+        }
+        else if (payment.Lines.Any(l => l.Amount.Transaction.Currency != total.Currency)
+                 || Money.Sum(payment.Lines.Select(l => l.Amount.Transaction), total.Currency) != total)
+        {
+            problem = (ExceptionReasons.Unbalanced, $"PaymentIssued lines do not add up to the payment amount {total}.");
+        }
+
+        // A Friendly Settlement payment (method CLEARING) settles through the FS clearing account per statement
+        // (REQ-FIN-299), never the per-payment GL-2510: its own entry type has no rule in the slice, so it suspends.
+        var entryType = payment.Method == ClaimLegs.FsClearingMethod ? ClaimLegs.PaymentFsClearing : ClaimLegs.Payment;
         var lines = new List<SourceLine>();
         foreach (var line in payment.Lines)
         {
@@ -103,35 +133,18 @@ internal static class ClaimFacts
             lines.Add(new SourceLine(ClaimLegs.PaymentClearing, Sides.Credit, amount, dimensions));
         }
 
-        // A payment without lines posts its total (no reserve line dimensions); lines that do not add up to the total are
-        // an intake exception, never a guess.
-        var total = payment.Amount.Transaction;
-        string? problem = null;
-        if (lines.Count == 0)
-        {
-            var dimensions = new Dictionary<string, string?>(StringComparer.Ordinal)
-            {
-                [LineDimensionKeys.ClaimId] = Text(payment.ClaimId?.Value ?? claimId),
-                [LineDimensionKeys.ClaimPaymentId] = Text(payment.PaymentId.Value),
-                [LineDimensionKeys.DisbursementId] = Text(payment.DisbursementId.Value),
-            };
-            lines.Add(new SourceLine(ClaimLegs.CaseReserve, Sides.Debit, total, dimensions));
-            lines.Add(new SourceLine(ClaimLegs.PaymentClearing, Sides.Credit, total, dimensions));
-        }
-        else if (payment.Lines.Any(l => l.Amount.Transaction.Currency != total.Currency)
-                 || Money.Sum(payment.Lines.Select(l => l.Amount.Transaction), total.Currency) != total)
-        {
-            problem = $"PaymentIssued lines do not add up to the payment amount {total}.";
-        }
-
         var date = payment.AccountingDate ?? occurredOn;
-        return new SourceEntry(payment.PaymentId.Value, ClaimLegs.Payment, date, date, lines)
+        return new SourceEntry(payment.PaymentId.Value, entryType, date, date, lines)
         {
             SourceRef = payment.PaymentId.Value.ToString("D"),
             NeedsPolicyContext = false,
-            Problem = problem,
+            Problem = problem?.Detail,
+            ProblemReason = problem?.Reason ?? ExceptionReasons.Unbalanced,
         };
     }
+
+    /// <summary>EUR-only slice (D-SL2-06): functional and group amounts must equal the transaction amount.</summary>
+    private static bool SingleCurrency(MoneyByCurrency3 amount) => amount.Functional == amount.Transaction && amount.Group == amount.Transaction;
 
     private static string? Text(Guid? id) => id?.ToString("D");
 }

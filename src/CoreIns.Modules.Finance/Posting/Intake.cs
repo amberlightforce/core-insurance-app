@@ -158,7 +158,7 @@ internal sealed partial class Intake(
         row.AccountingDate = entry.AccountingDate;
         if (entry.Problem is { } problem)
         {
-            await SuspendAsync(row, ExceptionReasons.Unbalanced, problem, entry, cancellationToken).ConfigureAwait(false);
+            await SuspendAsync(row, entry.ProblemReason, problem, entry, cancellationToken).ConfigureAwait(false);
             return;
         }
 

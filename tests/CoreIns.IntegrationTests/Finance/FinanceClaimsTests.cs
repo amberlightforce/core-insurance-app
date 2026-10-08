@@ -57,7 +57,7 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
     };
 
     /// <summary>CLM ReserveChanged as SL2-CLM-MONEY publishes it (the typed v1 payload, see the SL2-FIN-CLM report).</summary>
-    private Task<EventEnvelope> ReserveAsync(ClaimCase claim, string delta, string newOpen, string kind = "RESERVE", string? accountingDate = Day)
+    private Task<EventEnvelope> ReserveAsync(ClaimCase claim, string delta, string newOpen, string kind = "RESERVE", string? accountingDate = Day, Action<JsonObject>? edit = null)
     {
         var setId = Guid.CreateVersion7();
         var payload = Sample("clm", "ReserveChanged");
@@ -77,13 +77,14 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
         payload["catCode"] = null;
         payload["handlingSegment"] = "STANDARD";
         payload["accountingDate"] = accountingDate;
+        edit?.Invoke(payload);
         return _slice.PublishAsync(ReserveChangedV1.Descriptor, "Claim", claim.ClaimId.ToString(), payload,
             BusinessKeys.Empty.With("claimId", claim.ClaimId.ToString()).With("exposureId", claim.ExposureId.ToString())
                 .With("setId", setId.ToString()).With("policyTermId", claim.PolicyTermId.ToString()));
     }
 
     /// <summary>CLM PaymentIssued (published when BIL's DisbursementIssued arrives) for one eroding line.</summary>
-    private Task<EventEnvelope> PaymentAsync(ClaimCase claim, Guid paymentId, Guid disbursementId, string amount, string? lineAmount = null)
+    private Task<EventEnvelope> PaymentAsync(ClaimCase claim, Guid paymentId, Guid disbursementId, string amount, string? lineAmount = null, Action<JsonObject>? edit = null)
     {
         var transactionId = Guid.CreateVersion7();
         var payload = Sample("clm", "PaymentIssued");
@@ -107,6 +108,7 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
         payload["exGratia"] = false;
         payload["complaintRef"] = null;
         payload["accountingDate"] = Day;
+        edit?.Invoke(payload);
         return _slice.PublishAsync(PaymentIssuedV1.Descriptor, "Claim", claim.ClaimId.ToString(), payload,
             BusinessKeys.Empty.With("claimId", claim.ClaimId.ToString()).With("paymentId", paymentId.ToString()).With("disbursementId", disbursementId.ToString()));
     }
@@ -389,6 +391,27 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
         }
 
         return keys;
+    }
+
+    [Fact]
+    public async Task DSL212a_FS_clearing_payments_missing_lines_unknown_eroding_and_FX_amounts_are_suspended_never_guessed()
+    {
+        var claim = ClaimCase.New();
+        var fs = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00", edit: p => p["method"] = "CLEARING");
+        var noLines = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00", edit: p => p["lines"] = new JsonArray());
+        var unknownEroding = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00", edit: p => p["lines"]![0]!["eroding"] = null);
+        var fxPayment = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00",
+            edit: p => p["lines"]![0]!["amount"]!["group"] = new JsonObject { ["amount"] = "110.00", ["currency"] = "USD" });
+        var fxReserve = await ReserveAsync(claim, "100.00", "100.00",
+            edit: p => p["delta"]!["functional"] = new JsonObject { ["amount"] = "99.99", ["currency"] = "EUR" });
+        await _slice.DrainAsync();
+
+        (await StatusAsync(fs)).ShouldBe("SUSPENDED/NO_RULE", "Friendly Settlement settles per clearing statement, never through GL-2510 (REQ-FIN-299)");
+        (await StatusAsync(noLines)).ShouldBe("SUSPENDED/INVALID_ENVELOPE");
+        (await StatusAsync(unknownEroding)).ShouldBe("SUSPENDED/INVALID_ENVELOPE");
+        (await StatusAsync(fxPayment)).ShouldBe("SUSPENDED/RATE_MISSING");
+        (await StatusAsync(fxReserve)).ShouldBe("SUSPENDED/RATE_MISSING");
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_line WHERE claim_id = '{claim.ClaimId}'")).ShouldBe(0);
     }
 
     [Fact]
