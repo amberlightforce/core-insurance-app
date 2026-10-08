@@ -184,3 +184,5 @@ module with the same need:
   (validAt, current watermark) is compared with the reference's; a new segment id with identical content is not superseded.
 - **Tests:** concurrent writers, a reader during an uncommitted write, a writer whose clock is behind the watermark, a forged
   reference, and every trigger connected as the `app` role (`tests/CoreIns.IntegrationTests/Policy/Temporal`).
+
+Review round (D1, D4): the database requires that a record row's policy was locked and stamped in the same transaction (the pol.policy trigger leaves a transaction-local mark that pol.require_stamp and pol.only_close_record_period check), and the watermark may not run more than pol.max_clock_skew (default 1 day) ahead of the database clock. A Development stack with a shifted clock sets ALTER DATABASE <db> SET pol.max_clock_skew = '36500 days'; never in a deployed environment.

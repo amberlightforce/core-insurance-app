@@ -384,7 +384,8 @@ internal sealed partial class PolicyReader
                 SELECT t.term_id AS TermId, t.policy_id AS PolicyId, t.term_number AS TermNumber, t.valid_from AS ValidFrom, t.valid_to AS ValidTo,
                        t.recorded_from AS RecordedFrom, t.state AS State, t.product_version AS ProductVersion, t.artefact_hash AS ArtefactHash,
                        t.rating_artefact_hash AS RatingArtefactHash, t.resolution_hash AS ResolutionHash, t.configuration_hash AS ConfigurationHash,
-                       t.currency AS Currency, t.producer_code AS ProducerCode, t.payment_plan_ref AS PaymentPlanRef, t.written_date::text AS WrittenDate
+                       t.currency AS Currency, t.producer_code AS ProducerCode, t.payment_plan_ref AS PaymentPlanRef, t.written_date::text AS WrittenDate,
+                       t.cancelled_at AS CancelledAt
                   FROM pol.policy_term t
                   JOIN pol.policy p ON p.policy_id = t.policy_id
                  WHERE t.legal_entity_id = @le AND t.policy_id = ANY(@ids)

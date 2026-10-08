@@ -177,6 +177,13 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                 table: "job",
                 sql: "job_type IN ('SUBMISSION', 'POLICY_CHANGE', 'CANCELLATION', 'RENEWAL')");
 
+            // A change or cancellation names the term it acts on; a renewal names the expiring term (the D-SL3-11 indexes key on them).
+            migrationBuilder.AddCheckConstraint(
+                name: "ck_job_target_term",
+                schema: "pol",
+                table: "job",
+                sql: "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
+
             migrationBuilder.AddCheckConstraint(
                 name: "ck_charge_line_transaction_kind",
                 schema: "pol",
@@ -187,9 +194,12 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
             // what they are (PITFALLS 12: a field a consumer depends on is always set).
             migrationBuilder.Sql("ALTER TABLE pol.charge_line ALTER COLUMN transaction_kind DROP DEFAULT;");
 
-            // D-SL3-03 (a): the per-policy record-time watermark. Backfilled from the latest record of each policy.
+            // D-SL3-03 (a): the per-policy record-time watermark. Backfilled from the latest record of each policy, but never below
+            // the migration's own transaction time: a snapshot reference issued before this migration carries knownAt = the clock
+            // at issue (>= the last record, <= now) and must stay readable instead of being refused as forged.
             migrationBuilder.Sql("""
                 UPDATE pol.policy p SET last_recorded_at = GREATEST(
+                    transaction_timestamp(),
                     p.recorded_at,
                     COALESCE((SELECT max(t.recorded_at) FROM pol.policy_transaction t WHERE t.policy_id = p.policy_id), p.recorded_at),
                     COALESCE((SELECT max(c.recorded_at) FROM pol.charge_line c WHERE c.policy_id = p.policy_id), p.recorded_at),
@@ -201,6 +211,20 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
             // The policy row is frozen (D-SL3-03 b): only last_recorded_at and record_version change, the watermark only
             // forward; never deleted. A new row starts with watermark = recorded_at (the instant it became known).
             migrationBuilder.Sql("""
+                -- The watermark may not run away from real time: a writer (or a bug) that pushed it to 2100 would make every later
+                -- record time at least that and poison the policy for good. Bounded skew, 1 day by default. A Development stack whose
+                -- clock is shifted further sets the database-level setting pol.max_clock_skew (ALTER DATABASE ... SET pol.max_clock_skew
+                -- = '36500 days'); never in a deployed environment.
+                CREATE FUNCTION pol.assert_watermark_cap(candidate timestamptz) RETURNS void LANGUAGE plpgsql AS $$
+                DECLARE
+                    skew interval := COALESCE(NULLIF(current_setting('pol.max_clock_skew', true), '')::interval, interval '1 day');
+                BEGIN
+                    IF candidate > clock_timestamp() + skew THEN
+                        RAISE EXCEPTION 'pol.policy: the watermark % is more than % ahead of the database clock', candidate, skew
+                            USING ERRCODE = 'restrict_violation';
+                    END IF;
+                END $$;
+
                 CREATE FUNCTION pol.policy_frozen() RETURNS trigger LANGUAGE plpgsql AS $$
                 BEGIN
                     IF TG_OP = 'DELETE' THEN
@@ -210,6 +234,8 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         IF NEW.last_recorded_at <> NEW.recorded_at THEN
                             RAISE EXCEPTION 'pol.policy: a new policy starts with its watermark at recorded_at' USING ERRCODE = 'restrict_violation';
                         END IF;
+                        PERFORM pol.assert_watermark_cap(NEW.last_recorded_at);
+                        PERFORM set_config('pol.lk_' || replace(NEW.policy_id::text, '-', ''), NEW.last_recorded_at::text, true);
                         RETURN NEW;
                     END IF;
                     IF (to_jsonb(NEW) - 'last_recorded_at' - 'record_version') IS DISTINCT FROM (to_jsonb(OLD) - 'last_recorded_at' - 'record_version') THEN
@@ -219,13 +245,18 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         RAISE EXCEPTION 'pol.policy: the record-time watermark moves forward only (% -> %)', OLD.last_recorded_at, NEW.last_recorded_at
                             USING ERRCODE = 'restrict_violation';
                     END IF;
+                    PERFORM pol.assert_watermark_cap(NEW.last_recorded_at);
+                    PERFORM set_config('pol.lk_' || replace(NEW.policy_id::text, '-', ''), NEW.last_recorded_at::text, true);
                     RETURN NEW;
                 END $$;
                 CREATE TRIGGER tr_policy_frozen BEFORE INSERT OR UPDATE OR DELETE ON pol.policy
                     FOR EACH ROW EXECUTE FUNCTION pol.policy_frozen();
 
                 -- Every record row is stamped with the policy's watermark, i.e. written by a command that took the policy lock and
-                -- its record time first (D-SL3-03 a). A writer that skips the lock-then-stamp protocol is refused here, so a
+                -- its record time first (D-SL3-03 a), and advanced the watermark in this very transaction: the policy trigger leaves a
+                -- transaction-local mark (pol.lk_<policy>) that this function requires, so a plain SELECT FOR UPDATE, or a committed
+                -- watermark reused by an unlocked writer, is refused. (The row's xmin is not usable: EF Core's SaveChanges runs in a
+                -- savepoint, so the writer's xid is a subtransaction's.) A writer that skips the lock-then-stamp protocol is refused here, so a
                 -- reader's effective knownAt (min(requested, watermark)) can never be overtaken by a later commit.
                 CREATE FUNCTION pol.require_stamp() RETURNS trigger LANGUAGE plpgsql AS $$
                 DECLARE
@@ -237,6 +268,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     IF watermark IS NULL OR stamp IS DISTINCT FROM watermark THEN
                         RAISE EXCEPTION 'pol.%: a record must be stamped with the policy watermark (stamp %, watermark %); take PolicyWriteLock first',
                             TG_TABLE_NAME, stamp, watermark USING ERRCODE = 'restrict_violation';
+                    END IF;
+                    IF NULLIF(current_setting('pol.lk_' || replace(NEW.policy_id::text, '-', ''), true), '')::timestamptz IS DISTINCT FROM watermark THEN
+                        RAISE EXCEPTION 'pol.%: the policy watermark was not advanced in this transaction; take PolicyWriteLock first', TG_TABLE_NAME
+                            USING ERRCODE = 'restrict_violation';
                     END IF;
                     RETURN NEW;
                 END $$;
@@ -263,6 +298,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         RAISE EXCEPTION 'pol.% record periods close at the policy watermark of the closing command (%), never in the past', TG_TABLE_NAME, watermark
                             USING ERRCODE = 'restrict_violation';
                     END IF;
+                    IF NULLIF(current_setting('pol.lk_' || replace(NEW.policy_id::text, '-', ''), true), '')::timestamptz IS DISTINCT FROM watermark THEN
+                        RAISE EXCEPTION 'pol.%: the policy watermark was not advanced in this transaction; take PolicyWriteLock first', TG_TABLE_NAME
+                            USING ERRCODE = 'restrict_violation';
+                    END IF;
                     RETURN NEW;
                 END $$;
                 """);
@@ -279,6 +318,7 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                 DROP TRIGGER IF EXISTS tr_charge_line_stamp ON pol.charge_line;
                 DROP FUNCTION IF EXISTS pol.policy_frozen();
                 DROP FUNCTION IF EXISTS pol.require_stamp();
+                DROP FUNCTION IF EXISTS pol.assert_watermark_cap(timestamptz);
                 CREATE OR REPLACE FUNCTION pol.only_close_record_period() RETURNS trigger LANGUAGE plpgsql AS $$
                 BEGIN
                     IF TG_OP = 'DELETE' THEN
@@ -312,6 +352,11 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
 
             migrationBuilder.DropCheckConstraint(
                 name: "ck_job_sub_state",
+                schema: "pol",
+                table: "job");
+
+            migrationBuilder.DropCheckConstraint(
+                name: "ck_job_target_term",
                 schema: "pol",
                 table: "job");
 
