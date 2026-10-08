@@ -63,6 +63,11 @@ public sealed record TransactionSetBuildRequest
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public PaymentTypeValue? PaymentType { get; init; }
 
+        /// <summary>Recovery case of the line; required for kinds RECOVERY_RESERVE and RECOVERY (a recovery-reserve increase is checked under CLM.RESERVE on the exposure total of open recovery reserve, D-SL4-07). Kind RECOVERY is accepted only from evidence-backed system sets, never from a client (PITFALLS 7)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("recoveryId")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Identifiers.RecoveryId? RecoveryId { get; init; }
+
         /// <summary>Claim financial transaction kind (REQ-CLM-003)</summary>
         [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
         [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

@@ -6024,7 +6024,7 @@
       "x-business-keys": [
         "claimId",
         "paymentId",
-        "disbursementId"
+        "disbursementId|fsStatementId"
       ],
       "setCompleteness": false,
       "consumers": [

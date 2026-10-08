@@ -41,6 +41,11 @@ public sealed record TransactionSetBuildResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.Modules.Claims.Contracts.Api.TransactionSetView? Set { get; init; }
 
+    /// <summary>Dry-run only: what submitting the set would do under authority (type, cost type, aggregate amount, WITHIN/REFER/DENY, role). Always set on a dry run, absent otherwise</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("authorityPreview")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.AuthorityPreviewItem>? AuthorityPreview { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record PreviewItem

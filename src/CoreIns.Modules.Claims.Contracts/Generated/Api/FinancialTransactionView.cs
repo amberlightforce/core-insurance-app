@@ -89,6 +89,14 @@ public sealed record FinancialTransactionView
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
     public required string Status { get; init; }
 
+    /// <summary>Recovery case. Always set for kinds RECOVERY_RESERVE and RECOVERY, null otherwise</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoveryId")]
+    public global::CoreIns.SharedKernel.Identifiers.RecoveryId? RecoveryId { get; init; }
+
+    /// <summary>Evidence of a system-recorded transaction (BIL allocation id, FS statement line reference); null for user-built transactions</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("evidenceRef")]
+    public string? EvidenceRef { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
@@ -101,5 +109,13 @@ public sealed record FinancialTransactionView
         /// <summary><c>PAYMENT</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PAYMENT")]
         Payment,
+
+        /// <summary><c>RECOVERY_RESERVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RECOVERY_RESERVE")]
+        RecoveryReserve,
+
+        /// <summary><c>RECOVERY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RECOVERY")]
+        Recovery,
     }
 }

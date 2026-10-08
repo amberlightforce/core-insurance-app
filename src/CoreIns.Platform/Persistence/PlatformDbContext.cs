@@ -40,6 +40,8 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
 
     public DbSet<ApprovalRequestRow> ApprovalRequests => Set<ApprovalRequestRow>();
 
+    public DbSet<DevClockRow> DevClock => Set<DevClockRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -240,6 +242,22 @@ internal sealed class PlatformDbContext(DbContextOptions<PlatformDbContext> opti
         });
         // Maker-checker requests (REQ-PLT-004, -114, -117; SL2-PLT). One pending request per subject and approval type;
         // a decided request is frozen by trigger (migration ApprovalRequests).
+        // D-SL3-12: the single-row, forward-only offset of the non-production dev clock (never read in Production).
+        modelBuilder.Entity<DevClockRow>(entity =>
+        {
+            entity.ToTable("dev_clock", table =>
+            {
+                table.HasCheckConstraint("ck_dev_clock_single_row", "id = 1");
+                table.HasCheckConstraint("ck_dev_clock_offset", "offset_micros BETWEEN 0 AND 3153600000000000");
+                table.HasCheckConstraint("ck_dev_clock_version", "version >= 0");
+            });
+            entity.HasKey(e => e.Id).HasName("pk_dev_clock");
+            entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedNever();
+            entity.Property(e => e.OffsetMicros).HasColumnName("offset_micros");
+            entity.Property(e => e.Version).HasColumnName("version");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+        });
+
         modelBuilder.Entity<ApprovalRequestRow>(entity =>
         {
             entity.ToTable("approval_request", table =>
@@ -643,6 +661,17 @@ internal sealed class DataKeyRow
 }
 
 /// <summary><c>plt.approval_request</c>: one maker-checker request (runtime access is SQL in <c>ApprovalStore</c>).</summary>
+internal sealed class DevClockRow
+{
+    public short Id { get; set; } = 1;
+
+    public long OffsetMicros { get; set; }
+
+    public long Version { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
+}
+
 internal sealed class ApprovalRequestRow
 {
     public Guid RequestId { get; set; }

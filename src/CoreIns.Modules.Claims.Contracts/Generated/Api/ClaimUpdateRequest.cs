@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Claim.update request. PRD inputs: "ids, changes, reason"</summary>
+/// <summary>clm.Claim.update request. PRD inputs: "ids, changes, reason". SL4-CONTRACTS types liability facts (D-SL4-17).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClaimUpdateRequest
 {
@@ -16,19 +16,27 @@ public sealed record ClaimUpdateRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? Ids { get; init; }
 
-    /// <summary>PRD: "changes"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>The claim recordVersion the user saw; a different current version is CLM-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? ExpectedRecordVersion { get; init; }
+
+    /// <summary>Typed changes. Slice 4 types the liability facts; other changes are defined by later work packages.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("changes")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Changes { get; init; }
+    public ChangesDetail? Changes { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Reason code (audit)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
+
+    /// <summary>Typed changes. Slice 4 types the liability facts; other changes are defined by later work packages.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ChangesDetail
+    {
+        /// <summary>Members present replace the stored facts; absent members are unchanged (D-SL4-17)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("liabilityFacts")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.Modules.Claims.Contracts.Api.LiabilityFacts? LiabilityFacts { get; init; }
+    }
 }

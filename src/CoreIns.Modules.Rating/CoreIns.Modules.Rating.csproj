@@ -15,6 +15,8 @@
     <ProjectReference Include="..\CoreIns.Modules.Rating.Contracts\CoreIns.Modules.Rating.Contracts.csproj" />
     <!-- Tax and levy rates come from MKT configuration: contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
+    <!-- The day count a product artefact declares is read through pfc.Artifact.get: contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.Rules\CoreIns.Rules.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />

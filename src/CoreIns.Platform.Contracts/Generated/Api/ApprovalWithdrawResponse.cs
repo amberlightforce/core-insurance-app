@@ -4,23 +4,19 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Approval.withdraw result. PRD outputs: "request; decision"</summary>
+/// <summary>plt.Approval.withdraw result. Publishes ApprovalDecided with decision WITHDRAWN once. Withdrawing an already withdrawn request is a no-op returning the same result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ApprovalWithdrawResponse
 {
-    /// <summary>PRD: "request"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("request")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Request { get; init; }
+    /// <summary>Contract member 'approvalRequestId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId ApprovalRequestId { get; init; }
 
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    /// <summary>Withdrawn</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required global::CoreIns.Platform.Contracts.Api.ApprovalStatus Status { get; init; }
+
+    /// <summary>Contract member 'withdrawnAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("withdrawnAt")]
+    public required global::CoreIns.SharedKernel.Instant WithdrawnAt { get; init; }
 }

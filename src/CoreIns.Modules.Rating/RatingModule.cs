@@ -1,4 +1,5 @@
 using CoreIns.Modules.Rating.Contracts;
+using CoreIns.Modules.Rating.Contracts.Servicing;
 using CoreIns.Modules.Rating.Persistence;
 using CoreIns.Modules.Rating.Services;
 using CoreIns.Platform.Errors;
@@ -39,6 +40,8 @@ public static class RatingModule
         services.AddScoped<IRatingRateService, RatingRateService>();
         services.AddScoped<IRatingRatingArtifactService, RatingRatingArtifactService>();
         services.AddScoped<IRatingWorksheetService, RatingWorksheetService>();
+        services.AddScoped<IRatingProrationEngine, RatingProrationEngine>(); // SL3-RAT-PRORATE
+        services.AddScoped<IRatingServicingTax, RatingServicingTax>();
 
         services.AddErrorDefinitions(Errors);
         return services;
@@ -69,6 +72,8 @@ public static class RatingModule
             .Describe("Περισσότερες από μία γραμμές ταίριαξαν σε πίνακα μοναδικής επιλογής.", "More than one row matched a unique-hit table."),
         ErrorDefinition.For(ModuleCode.RAT, "SCALE", 422, "Απώλεια ακρίβειας σε υπολογισμό ποσού", "Precision would be lost in an amount calculation")
             .Describe("Ο υπολογισμός δεν αναπαρίσταται ακριβώς· δηλώστε ρητή στρογγυλοποίηση.", "The calculation cannot be represented exactly; declare explicit rounding."),
+        ErrorDefinition.For(ModuleCode.RAT, "CONVENTION", 422, "Η σύμβαση μέτρησης ημερών δεν υποστηρίζεται από το προϊόν", "The day-count convention is not declared by the product")
+            .Describe("Το προϊόν δεν δηλώνει τη σύμβαση ή δεν έχει υλοποιηθεί· η αναλογική κατανομή σταματά.", "The product does not declare the convention, or it is not built; proration stops."),
         ErrorDefinition.For(ModuleCode.RAT, "TAX", 422, "Οι φόροι και οι εισφορές δεν μπορούν να υπολογιστούν", "Taxes and levies cannot be calculated")
             .Describe("Η παραμετροποίηση της αγοράς δεν έδωσε συντελεστή· η τιμολόγηση σταματά.", "Market configuration gave no rate; rating stops (fail closed)."),
         ErrorDefinition.For(ModuleCode.RAT, "DATA-UNAVAILABLE", 503, "Η λειτουργία δεν είναι διαθέσιμη", "The operation is not available")

@@ -209,7 +209,10 @@
             "claimId": "0192cdc5-4068-73c0-85a5-690f937b9efd",
             "transactionKind": "NEW_BUSINESS",
             "cancellationSource": "SAMPLE_CODE",
-            "treatmentRuleId": "SAMPLE_CODE"
+            "treatmentRuleId": "SAMPLE_CODE",
+            "recoveryId": "01923ebe-1eba-788f-842a-f5ea706dc1a5",
+            "statementRef": "Sample text",
+            "counterpartyPartyId": "0192da80-7dd7-7f69-87a9-2328ec32c769"
           }
         }
       ]
@@ -277,7 +280,10 @@
             "claimId": "01921b62-9d26-73d1-8dae-df866c719f9d",
             "transactionKind": "NEW_BUSINESS",
             "cancellationSource": "SAMPLE_CODE",
-            "treatmentRuleId": "SAMPLE_CODE"
+            "treatmentRuleId": "SAMPLE_CODE",
+            "recoveryId": "0192e6b3-7da9-70f4-8f95-73455c054a05",
+            "statementRef": "Sample text",
+            "counterpartyPartyId": "019281f1-4386-72c9-8f92-62040b6617d0"
           }
         }
       ]
@@ -413,7 +419,17 @@
           "arrearsCleared": true
         }
       ],
-      "downPayment": true
+      "downPayment": true,
+      "receivableId": "0192de06-2af6-7655-88e1-0f687bba2e56",
+      "receivableAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "allocationId": "0192f551-74e6-74be-8a17-8230ec7ed466",
+      "claimId": "0192f5a8-cd81-7dc8-8267-4081a9dd3390",
+      "recoveryId": "019213de-db54-77d6-8680-839a36037b9d",
+      "statementRef": "Sample text",
+      "sourceType": "BIL"
     }
   },
   {
@@ -460,7 +476,14 @@
           "arrearsCleared": true
         }
       ],
-      "downPayment": true
+      "downPayment": true,
+      "receivableId": null,
+      "receivableAmount": null,
+      "allocationId": null,
+      "claimId": null,
+      "recoveryId": null,
+      "statementRef": null,
+      "sourceType": null
     }
   },
   {
@@ -1101,7 +1124,9 @@
       "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE",
-      "rejectingParty": "APPROVER"
+      "rejectingParty": "APPROVER",
+      "statementRef": "Sample text",
+      "method": "SAMPLE_CODE"
     }
   },
   {
@@ -1134,7 +1159,9 @@
       "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE",
-      "rejectingParty": "APPROVER"
+      "rejectingParty": "APPROVER",
+      "statementRef": null,
+      "method": null
     }
   },
   {
@@ -1166,7 +1193,9 @@
       "disbursementId": "01926b40-6a71-7d23-84ed-4916c87ac170",
       "sourceType": "BIL",
       "sourceId": "Sample text",
-      "reasonCode": "SAMPLE_CODE"
+      "reasonCode": "SAMPLE_CODE",
+      "statementRef": "Sample text",
+      "method": "SAMPLE_CODE"
     }
   },
   {
@@ -1198,7 +1227,9 @@
       "disbursementId": "0192c8bd-6e0b-76d4-830b-4d43782ac5c8",
       "sourceType": "BIL",
       "sourceId": "Sample text",
-      "reasonCode": "SAMPLE_CODE"
+      "reasonCode": "SAMPLE_CODE",
+      "statementRef": null,
+      "method": null
     }
   },
   {
@@ -1231,7 +1262,9 @@
       "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE",
-      "actor": "Sample text"
+      "actor": "Sample text",
+      "statementRef": "Sample text",
+      "method": "SAMPLE_CODE"
     }
   },
   {
@@ -1264,7 +1297,9 @@
       "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE",
-      "actor": "Sample text"
+      "actor": "Sample text",
+      "statementRef": null,
+      "method": null
     }
   },
   {
@@ -1296,7 +1331,9 @@
       "disbursementId": "01925a24-d17f-794b-8aa1-c676e6462cc6",
       "sourceType": "BIL",
       "sourceId": "Sample text",
-      "reason": "SAMPLE_CODE"
+      "reason": "SAMPLE_CODE",
+      "statementRef": "Sample text",
+      "method": "SAMPLE_CODE"
     }
   },
   {
@@ -1328,7 +1365,9 @@
       "disbursementId": "01928c6f-c24b-784c-8d42-ea0099001a22",
       "sourceType": "BIL",
       "sourceId": "Sample text",
-      "reason": "SAMPLE_CODE"
+      "reason": "SAMPLE_CODE",
+      "statementRef": null,
+      "method": null
     }
   },
   {

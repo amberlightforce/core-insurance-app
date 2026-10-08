@@ -72,7 +72,7 @@ public sealed record RecoveryCalculatedV1 : global::CoreIns.Platform.Contracts.E
     [global::System.Text.Json.Serialization.JsonPropertyName("riContractId")]
     public required global::CoreIns.SharedKernel.Identifiers.RiContractId RiContractId { get; init; }
 
-    /// <summary>Contract member 'layerId'.</summary>
+    /// <summary>Layer of this delta (the layer number as text); one event is published per layer × participant delta of a batch (D-SL4-05), so layerId, participantPartyId and the three deltas are the delta[layer, participant, incurred, paid, outstanding] of the plan</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("layerId")]
     public required string LayerId { get; init; }
 
@@ -96,7 +96,7 @@ public sealed record RecoveryCalculatedV1 : global::CoreIns.Platform.Contracts.E
     [global::System.Text.Json.Serialization.JsonPropertyName("claimLevelTotals")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.ClaimLevelTotal> ClaimLevelTotals { get; init; }
 
-    /// <summary>Contract member 'postingKey'.</summary>
+    /// <summary>Posting key as text (item RECOVERY, contract type, direction CEDED, line, participant type; REQ-RI-234); the structured form is posting</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("postingKey")]
     public required string PostingKey { get; init; }
 
@@ -107,4 +107,69 @@ public sealed record RecoveryCalculatedV1 : global::CoreIns.Platform.Contracts.E
     /// <summary>Contract member 'ifrs17Refs'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("ifrs17Refs")]
     public required global::System.Collections.Generic.IReadOnlyList<string> Ifrs17Refs { get; init; }
+
+    /// <summary>Contract year of the recalculation (REQ-RI-233); RI always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractYear")]
+    public int? ContractYear { get; init; }
+
+    /// <summary>Contract type of the contract (XOL_PER_RISK in slice 4); RI always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractType")]
+    public string? ContractType { get; init; }
+
+    /// <summary>Structured posting key (REQ-RI-234); RI always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("posting")]
+    public PostingDetail? Posting { get; init; }
+
+    /// <summary>RI-held IFRS 17 group reference; UNASSIGNED in slice 4 (D-SL4-10). RI always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ifrs17GroupRef")]
+    public string? Ifrs17GroupRef { get; init; }
+
+    /// <summary>Source correlation key for FIN lineage (REQ-RI-233); not the W3C trace id. RI always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceCorrelationKey")]
+    public string? SourceCorrelationKey { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record PostingDetail
+    {
+        /// <summary>RI item type</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("item")]
+        public required ItemValue Item { get; init; }
+
+        /// <summary>Contract member 'contractType'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("contractType")]
+        public required string ContractType { get; init; }
+
+        /// <summary>Contract member 'direction'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("direction")]
+        public required DirectionValue Direction { get; init; }
+
+        /// <summary>Line of the layer, e.g. L1</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("line")]
+        public required string Line { get; init; }
+
+        /// <summary>Participant type, e.g. REINSURER</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("participantType")]
+        public required string ParticipantType { get; init; }
+
+        /// <summary>RI item type</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ItemValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum ItemValue
+        {
+            /// <summary><c>RECOVERY</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RECOVERY")]
+            Recovery,
+        }
+
+        /// <summary>Generated contract member.</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DirectionValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum DirectionValue
+        {
+            /// <summary><c>CEDED</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CEDED")]
+            Ceded,
+        }
+    }
 }
