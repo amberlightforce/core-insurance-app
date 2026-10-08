@@ -204,7 +204,7 @@
             "receiptId": "0192617a-8240-7110-8a50-b16e4e68ba48",
             "allocationId": "01926516-b6a7-77e7-8ed2-af5775753a46",
             "disbursementId": "0192ea7c-7c36-7486-8e50-70655e173e93",
-            "sourceType": "sample",
+            "sourceType": "BIL",
             "sourceId": "Sample text",
             "claimId": "0192cdc5-4068-73c0-85a5-690f937b9efd"
           }
@@ -269,7 +269,7 @@
             "receiptId": "019204bc-d382-78f5-81ff-63b29bdee572",
             "allocationId": "0192165e-1f68-7ed5-8a4e-046e381779d8",
             "disbursementId": "01925977-98e4-750d-8778-77d08585d96c",
-            "sourceType": "sample",
+            "sourceType": "BIL",
             "sourceId": "Sample text",
             "claimId": "01921b62-9d26-73d1-8dae-df866c719f9d"
           }
@@ -946,7 +946,7 @@
     "dataClassification": "P0",
     "payload": {
       "disbursementId": "0192ba77-116e-7f4f-8af8-ad7e2da349e5",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "valueDate": "2026-10-07",
       "sourceModule": "PTY",
@@ -984,7 +984,7 @@
     "dataClassification": "P0",
     "payload": {
       "disbursementId": "01924aa8-9bd7-7eb5-80a2-150c424283bc",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "valueDate": "2026-10-07"
     }
@@ -1017,7 +1017,7 @@
     "payload": {
       "disbursementId": "019250d0-1701-7406-84c0-56af9f256f0e",
       "sourceModule": "PTY",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "amount": {
         "amount": "120.50",
@@ -1055,7 +1055,7 @@
     "payload": {
       "disbursementId": "01927378-39fd-7084-8a9e-acb45831fff2",
       "sourceModule": "PTY",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "amount": {
         "amount": "120.50",
@@ -1092,7 +1092,7 @@
     "dataClassification": "P0",
     "payload": {
       "disbursementId": "01922d93-1a11-70ef-8f30-b697ab95e624",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE",
       "rejectingParty": "APPROVER"
@@ -1125,7 +1125,7 @@
     "dataClassification": "P0",
     "payload": {
       "disbursementId": "0192485f-0044-72be-861c-106144e26650",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE",
       "rejectingParty": "APPROVER"
@@ -1158,7 +1158,7 @@
     "dataClassification": "P0",
     "payload": {
       "disbursementId": "01926b40-6a71-7d23-84ed-4916c87ac170",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE"
     }
@@ -1190,7 +1190,7 @@
     "dataClassification": "P0",
     "payload": {
       "disbursementId": "0192c8bd-6e0b-76d4-830b-4d43782ac5c8",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE"
     }
@@ -1222,7 +1222,7 @@
     "dataClassification": "P1",
     "payload": {
       "disbursementId": "019281c9-7b11-7466-8398-0746a9694e87",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE",
       "actor": "Sample text"
@@ -1255,7 +1255,7 @@
     "dataClassification": "P1",
     "payload": {
       "disbursementId": "01923f6c-52e0-79e7-8a0e-4e1486f3929a",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "reasonCode": "SAMPLE_CODE",
       "actor": "Sample text"
@@ -1288,7 +1288,7 @@
     "dataClassification": "P0",
     "payload": {
       "disbursementId": "01925a24-d17f-794b-8aa1-c676e6462cc6",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "reason": "SAMPLE_CODE"
     }
@@ -1320,7 +1320,7 @@
     "dataClassification": "P0",
     "payload": {
       "disbursementId": "01928c6f-c24b-784c-8d42-ea0099001a22",
-      "sourceType": "sample",
+      "sourceType": "BIL",
       "sourceId": "Sample text",
       "reason": "SAMPLE_CODE"
     }
