@@ -53,7 +53,7 @@ describe('PolicyViewPage', () => {
 
     // The transaction history (the term timeline is not mocked here, so it falls back to the policy's own transactions).
     const history = await screen.findByRole('list', { name: 'Συναλλαγές όρου 1' });
-    expect(within(history).getByText(/Νέα παραγωγή/)).toBeInTheDocument();
+    expect(within(history).getByText('Νέα παραγωγή')).toBeInTheDocument();
     expect(within(history).getByText('432,35 €')).toBeInTheDocument();
     const invoices = await screen.findByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' });
     expect(within(invoices).getByText('INV000000003')).toBeInTheDocument();

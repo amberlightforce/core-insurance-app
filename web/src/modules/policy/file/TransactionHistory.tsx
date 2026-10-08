@@ -109,7 +109,7 @@ function HistoryRow({
         <span className={styles.eventText}>
           <StatusPill
             semantic={semanticOf[kind]}
-            subLabel={t(`file.kind.${kind}`)}
+            text={t(`file.kind.${kind}`)}
             announceChanges={false}
           />
           <span className="ds-mono">{`#${String(row.sequence)}`}</span>
