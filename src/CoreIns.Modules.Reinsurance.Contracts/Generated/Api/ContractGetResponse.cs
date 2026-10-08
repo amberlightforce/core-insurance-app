@@ -4,23 +4,11 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Contract.get result. PRD outputs: "contracts, versions"</summary>
+/// <summary>ri.Contract.get result (REQ-RI-001)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ContractGetResponse
 {
-    /// <summary>PRD: "contracts"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contracts")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Contracts { get; init; }
-
-    /// <summary>PRD: "versions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("versions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Versions { get; init; }
+    /// <summary>Contract member 'contract'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contract")]
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractView Contract { get; init; }
 }

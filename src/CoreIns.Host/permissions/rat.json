@@ -4,7 +4,8 @@
       "Grants": {
         "rat.Rate.rate": [ "Staff.Underwriter", "Staff.Billing" ],
         "rat.Worksheet.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
-        "rat.RatingArtifact.resolve": [ "Staff.Underwriter", "Staff.Billing" ]
+        "rat.RatingArtifact.resolve": [ "Staff.Underwriter", "Staff.Billing" ],
+        "rat.Proration.prorate": [ "Staff.Underwriter", "Staff.Billing" ]
       }
     }
   }

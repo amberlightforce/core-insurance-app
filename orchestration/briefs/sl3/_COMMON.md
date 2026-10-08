@@ -61,3 +61,5 @@ sending. It is filled from `briefs/BUILDER-TEMPLATE.md`. **Runs on Sonnet 5.5 (m
 
 - **RAM (PITFALLS 38):** before every `dotnet` command set `MSBUILDDISABLENODEREUSE=1` and `DOTNET_CLI_USE_MSBUILD_SERVER=0`
   and pass `-m:2`; write logs to unique paths in your own worktree (PITFALLS 39).
+
+- **Push check (PITFALLS 45):** push with `git push origin HEAD:<remote-branch>` and confirm `git ls-remote` shows your HEAD.

@@ -4,36 +4,15 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Approval.withdraw request. PRD inputs: "type, object ref, payload hash, diff"</summary>
+/// <summary>plt.Approval.withdraw request (SL4-CONTRACTS, D-SL4-14). In-process only: IPlatformApprovalService.WithdrawAsync(request, options). Callable only by the module that created the request (PLT-ERR-NOT-OWNER); no REST route is mapped by the host.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ApprovalWithdrawRequest
 {
-    /// <summary>PRD: "type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("type")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Type { get; init; }
+    /// <summary>The pending approval request to withdraw</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId ApprovalRequestId { get; init; }
 
-    /// <summary>PRD: "object ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("objectRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ObjectRef { get; init; }
-
-    /// <summary>PRD: "payload hash"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("payloadHash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? PayloadHash { get; init; }
-
-    /// <summary>PRD: "diff"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("diff")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Diff { get; init; }
+    /// <summary>Why it is withdrawn (e.g. APPROVAL_WITHDRAWN: the set was rejected or went stale); audited</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
 }

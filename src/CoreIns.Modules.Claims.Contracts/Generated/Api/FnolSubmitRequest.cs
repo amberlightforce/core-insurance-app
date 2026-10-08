@@ -107,6 +107,11 @@ public sealed record FnolSubmitRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? ChannelMetadata { get; init; }
 
+    /// <summary>Optional liability facts captured at FNOL (D-SL4-17)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("liabilityFacts")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Claims.Contracts.Api.LiabilityFacts? LiabilityFacts { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record ReporterDetail

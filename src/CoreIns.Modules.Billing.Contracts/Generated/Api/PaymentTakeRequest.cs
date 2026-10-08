@@ -40,6 +40,19 @@ public sealed record PaymentTakeRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public bool? AutoAllocate { get; init; }
 
+    /// <summary>Payment reference of a receivable (D-SL4-06): matches the cash to the receivable instead of an invoice. billingAccountId must be the receivable's account; a reference that matches no receivable of the account is BIL-ERR-NOT-FOUND</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("paymentReference")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? PaymentReference { get; init; }
+
+    /// <summary>Receivable the payer referenced (alternative to paymentReference); the amount must equal its open amount (BIL-ERR-AMOUNT-MISMATCH, REQ-BIL-135)</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'receivableId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receivableId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? ReceivableId { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<MethodValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

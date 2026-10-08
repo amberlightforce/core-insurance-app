@@ -1896,18 +1896,24 @@ paths:
       x-dry-run: false
       x-dry-run-note: 'PRD dry-run: No; PRD idempotency: Yes'
       x-exposure:
-      - ui
+      - internal
       x-permission: plt.Approval.withdraw
       x-error-codes:
-      - code: PLT-ERR-SELF-APPROVAL
+      - code: PLT-ERR-NOT-FOUND
+        status: 404
+      - code: PLT-ERR-NOT-OWNER
+        note: the caller is not the module that created the request
         status: 403
-      - code: PLT-ERR-EDITOR-CANNOT-APPROVE
-        status: 403
-      - code: PLT-ERR-CHECKER-MUST-BE-HUMAN
-        status: 422
+      - code: PLT-ERR-APPROVAL-STALE
+        note: the request is already approved or rejected
+        status: 409
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      x-in-process: true
+      x-consumers:
+      - CLM
+      x-typed: 'REQ-PLT-004, REQ-PLT-114 (SL4-CONTRACTS, D-SL4-14: owner module only, audited, no REST)'
       x-source:
       - PRD-14 §9.1 l.1965
       parameters:
@@ -1933,6 +1939,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -7546,30 +7554,34 @@ components:
       - decision
     ApprovalWithdrawRequest:
       type: object
-      description: 'plt.Approval.withdraw request. PRD inputs: "type, object ref, payload hash, diff"'
+      description: 'plt.Approval.withdraw request (SL4-CONTRACTS, D-SL4-14). In-process only: IPlatformApprovalService.WithdrawAsync(request, options).
+        Callable only by the module that created the request (PLT-ERR-NOT-OWNER); no REST route is mapped by the host.'
       properties:
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
-        objectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "object ref"'
-        payloadHash:
-          $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "payload hash"'
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The pending approval request to withdraw
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: 'Why it is withdrawn (e.g. APPROVAL_WITHDRAWN: the set was rejected or went stale); audited'
+      required:
+      - approvalRequestId
+      - reason
     ApprovalWithdrawResponse:
       type: object
-      description: 'plt.Approval.withdraw result. PRD outputs: "request; decision"'
+      description: plt.Approval.withdraw result. Publishes ApprovalDecided with decision WITHDRAWN once. Withdrawing an already withdrawn request
+        is a no-op returning the same result.
       properties:
-        request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          $ref: '#/components/schemas/ApprovalStatus'
+          description: Withdrawn
+        withdrawnAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - approvalRequestId
+      - status
+      - withdrawnAt
     ApprovalGetResponse:
       type: object
       description: 'plt.Approval.get result. PRD outputs: "request; decision"'

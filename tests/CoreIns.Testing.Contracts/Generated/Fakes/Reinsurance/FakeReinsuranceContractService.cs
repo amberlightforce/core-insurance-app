@@ -14,10 +14,13 @@ public sealed class FakeReinsuranceContractService : global::CoreIns.Testing.Con
     {
     }
     /// <inheritdoc />
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractApplicableResponse> ApplicableAsync(string productCode, string coverageCode, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractApplicableResponse>("ri.Contract.applicable", [productCode, coverageCode, validAt], cancellationToken);
+
+    /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractGetResponse>("ri.Contract.get", [id], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractListPage> ListAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractListPage>("ri.Contract.list", [cursor, limit], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractListPage> ListAsync(string? cursor = null, int? limit = null, int? contractYear = null, global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractStatus? status = null, global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractType? contractType = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractListPage>("ri.Contract.list", [cursor, limit, contractYear, status, contractType], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractVersionAtResponse> VersionAtAsync(global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractVersionAtResponse>("ri.Contract.versionAt", [], cancellationToken);

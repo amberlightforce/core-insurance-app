@@ -4,15 +4,15 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Contract.submit result. PRD outputs: "contract version"</summary>
+/// <summary>ri.Contract.submit result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ContractSubmitResponse
 {
-    /// <summary>PRD: "contract version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contractVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ContractVersion { get; init; }
+    /// <summary>Contract member 'contract'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contract")]
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractView Contract { get; init; }
+
+    /// <summary>Contract member 'approvalRequestId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId ApprovalRequestId { get; init; }
 }

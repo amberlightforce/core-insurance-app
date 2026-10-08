@@ -95,11 +95,13 @@
         },
         "contractType": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Contract type (open Code). Slice 4 activates XOL_PER_RISK only (D-SL4-04); the PRD values QUOTA_SHARE, SURPLUS, FAC_PROPORTIONAL, FAC_XOL, AUTO_FAC, XOL_PER_EVENT, CAT_XOL, AGGREGATE_XOL and STOP_LOSS are refused with RI-ERR-VALIDATION."
         },
         "period": {
           "$ref": "../common.schema.json#/$defs/DatePeriod",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Half-open period [from, to) in Europe/Athens dates; the contract activates at the period start"
         },
         "currency": {
           "$ref": "../common.schema.json#/$defs/CurrencyCode",
@@ -117,6 +119,78 @@
           "items": {
             "$ref": "../common.schema.json#/$defs/Participant"
           },
+          "x-classification": "P0"
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/RiLayer"
+          },
+          "description": "Layers of the contract (attachment, limit, AAD, AAL). RI always sets them for XOL_PER_RISK; sectionsAndLayers stays an OpenObject for later contract types.",
+          "x-classification": "P0"
+        },
+        "placedPct": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Decimal"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Placed percentage of the contract (the signed lines of the participants sum to it); RI always sets it",
+          "x-classification": "P0"
+        },
+        "recoveriesInure": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Clause: how recoveries reduce ultimate net loss (REALISED_ONLY in slice 4, D-SL4-05); RI always sets it",
+          "x-classification": "P0"
+        },
+        "alaeIncluded": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Clause: ALAE is part of ultimate net loss; RI always sets it",
+          "x-classification": "P0"
+        },
+        "statutoryInterestIncluded": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Clause: statutory interest is part of ultimate net loss; RI always sets it",
+          "x-classification": "P0"
+        },
+        "productCodes": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "description": "Scope: product codes the contract covers (RI always sets them)",
+          "x-classification": "P0"
+        },
+        "coverageCodes": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Code"
+          },
+          "description": "Scope: coverage codes the contract covers (RI always sets them)",
           "x-classification": "P0"
         }
       }
