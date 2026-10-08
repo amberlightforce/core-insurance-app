@@ -48,6 +48,18 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | SL2-UI-CLM | **merged** (round 1 031dc50, round 2) | sonnet | live browser walks PASS both rounds; web 1252 |
 | SL2-E2E | phase A **merged** (f47e5d6); phase B (UI spec) after UI round 2 | sonnet | E2E-02a API passes on fresh stack; amounts reconcile to the cent; CI job e2e02 added (not yet run: Actions billing) |
 
+
+## Side work packages (2026-10-08)
+| WP | Status | Notes |
+|---|---|---|
+| FIX-403 banner | **merged** (d0ccaed) | role-forbidden actions explained |
+| FIX-E2E-RACE | **merged** (44a54ea, d95bf5e) | E2E-01/02 waited on partial journals; no product regression |
+| UW referral decisions (D-UW-01) | **merged** (e9f01ca) | deep review FAIL (creator could approve; rejection laundering) → fixed; uwsenior |
+| Dev superuser | **merged** | all roles, Development only, SoD unchanged |
+| SL-UX restyle (D-USR-11/13) | accepted by user; finishing focus ring + claims restyle | merge after visual check |
+| UW referral workbench (D-USR-13) | building | mockup «Ανάληψη κινδύνου» layout, real data only |
+| SL2-E2E phase B (claims UI spec) | after SL-UX merges | |
+
 ## Module status (feature waves)
 All 116 feature WPs: **not started** (W1 starts after Phase 1 passes). See backlog/BACKLOG.md.
 
