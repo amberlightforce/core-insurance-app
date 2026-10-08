@@ -16,6 +16,11 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
 {
     private static readonly string[] AdminRoles = ["Platform.Admin"];
 
+    private static readonly string[] SuperRoles =
+    [
+        "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin",
+    ];
+
     private static readonly Dictionary<string, string?> Enabled = new() { ["DevAuthentication:Enabled"] = "true" };
 
     [Theory]
@@ -60,7 +65,7 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
         var ct = TestContext.Current.CancellationToken;
 
         var users = await client.GetFromJsonAsync<JsonNode>(new Uri("/api/plt/v1/dev/users", UriKind.Relative), ct);
-        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(["underwriter", "billing", "finance", "claims", "claimsmgr", "admin"]);
+        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(["underwriter", "billing", "finance", "claims", "claimsmgr", "admin", "superuser"]);
 
         using var unknown = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = "nobody" }, ct);
         unknown.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -108,6 +113,28 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
             claimsCreate.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
             using var claimsForbidden = await client.SendAsync(claimsCreate, ct);
             claimsForbidden.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        }
+
+        // The all-roles super user: one token carries every staff role (a `roles` array) and every module's read surface is open.
+        using var superSignIn = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = "superuser" }, ct);
+        var superBody = (await superSignIn.Content.ReadFromJsonAsync<JsonNode>(ct))!;
+        var superToken = superBody["accessToken"]!.GetValue<string>();
+        superBody["user"]!["roles"]!.AsArray().Select(r => r!.GetValue<string>()).ShouldBe(SuperRoles, ignoreOrder: true);
+        var tokenRoles = new JsonWebTokenHandler().ReadJsonWebToken(superToken).Claims.Where(c => c.Type == "roles").Select(c => c.Value).ToList();
+        tokenRoles.ShouldBe(SuperRoles, ignoreOrder: true);
+        foreach (var path in new[]
+                 {
+                     "/api/pty/v1/parties/search?partyNumber=P000000001",
+                     "/api/plt/v1/approval",
+                     "/api/fin/v1/journals/query",
+                     "/api/bil/v1/invoices?policyId=0192f0c4-0000-7000-8000-0000000000aa",
+                 })
+        {
+            using var get = new HttpRequestMessage(HttpMethod.Get, new Uri(path, UriKind.Relative));
+            get.Headers.Authorization = new AuthenticationHeaderValue("Bearer", superToken);
+            using var response = await client.SendAsync(get, ct);
+            response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden, $"superuser GET {path}");
+            response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized, $"superuser GET {path}");
         }
 
         // A token with the dev issuer but signed with another key is rejected.
