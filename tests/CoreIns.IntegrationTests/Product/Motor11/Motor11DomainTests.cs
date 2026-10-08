@@ -139,11 +139,11 @@ public sealed class Motor11DomainTests
     }
 
     [Fact]
-    public void REQ_PFC_010_1_1_differs_from_1_0_only_in_version_day_count_refund_methods_and_change_permissions_so_the_premium_inputs_are_unchanged()
+    public void REQ_PFC_010_1_1_differs_from_1_0_only_in_version_day_count_refund_methods_and_change_permissions_and_windows_so_the_premium_inputs_are_unchanged()
     {
         var v10 = JsonNode.Parse(ProductSeeds.MotorPrivateCarJson())!.AsObject();
         var v11 = JsonNode.Parse(ProductSeeds.MotorPrivateCar11Json())!.AsObject();
-        foreach (var key in new[] { "version", "dayCount", "dayCountProvisional", "dayCountNote", "refundMethods", "changePermissions" })
+        foreach (var key in new[] { "version", "dayCount", "dayCountProvisional", "dayCountNote", "refundMethods", "changePermissions", "windows" })
         {
             v10.Remove(key);
             v11.Remove(key);
@@ -151,8 +151,10 @@ public sealed class Motor11DomainTests
 
         // Rating reference (same algorithm slot, same range), coverages, charge types and windows are identical, so 430.00 + 64.51 is unchanged.
         v11.ToJsonString().ShouldBe(v10.ToJsonString());
-        V11().Windows.NewBusiness.Start.ToString().ShouldBe("2026-01-01");
-        V11().Windows.Renewal.Start.ToString().ShouldBe("2026-01-01");
+        // BR-PFC-001: Locked windows may not overlap, so 1.1 opens on 2026-10-01 and publishing it closes 1.0's open new-business window.
+        V11().Windows.NewBusiness.Start.ToString().ShouldBe("2026-10-01");
+        V11().Windows.Renewal.Start.ToString().ShouldBe("2026-10-01");
+        V10().Windows.NewBusiness.Start.ToString().ShouldBe("2026-01-01");
     }
 
     [Fact]
@@ -166,5 +168,5 @@ public sealed class Motor11DomainTests
     }
 
     // Recorded from the unmodified 1.0 seed (main 72c2095) when MOTOR-GR 1.1 was published.
-    private const string Pinned10Hash = "PLACEHOLDER";
+    private const string Pinned10Hash = "50020ebe2604343834cd2490641a2ed0952417ecb03c691b0b0488dc2a04c50c";
 }

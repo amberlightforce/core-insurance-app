@@ -42,8 +42,8 @@
     "vehicleReplacement": true
   },
   "windows": {
-    "newBusiness": { "from": "2026-01-01", "to": null },
-    "renewal": { "from": "2026-01-01", "to": null }
+    "newBusiness": { "from": "2026-10-01", "to": null },
+    "renewal": { "from": "2026-10-01", "to": null }
   },
   "elements": [
     {

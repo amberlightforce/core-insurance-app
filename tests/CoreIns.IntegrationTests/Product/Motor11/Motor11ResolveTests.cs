@@ -54,6 +54,15 @@ public sealed class Motor11ResolveTests(PostgresFixture database) : IClassFixtur
             body.Text("artefactHash").ShouldBe(hash11);
         }
 
+        // Before 1.1 opens (2026-10-01) a term still resolves 1.0; publishing 1.1 closed 1.0's new-business window there (REQ-PFC-033).
+        var (before, beforeBody) = await ResolveAsync(_client, code, "WEB_DIRECT", "2026-09-30");
+        before.StatusCode.ShouldBe(HttpStatusCode.OK, beforeBody?.ToJsonString());
+        beforeBody.Text("version").ShouldBe("1.0");
+        beforeBody.Text("artefactHash").ShouldBe(hash10);
+        var (beforeRenewal, beforeRenewalBody) = await ResolveAsync(_client, code, "WEB_DIRECT", "2026-09-30", "Renewal");
+        beforeRenewal.StatusCode.ShouldBe(HttpStatusCode.OK, beforeRenewalBody?.ToJsonString());
+        beforeRenewalBody.Text("version").ShouldBe("1.0");
+
         // The term pinned to 1.0 keeps its own artefact: fetched by hash it is still ACT/365F with no refund methods.
         var (pinned, pinnedBody) = await GetAsync(_client, $"/api/pfc/v1/artifacts/{hash10}");
         pinned.StatusCode.ShouldBe(HttpStatusCode.OK, pinnedBody?.ToJsonString());
