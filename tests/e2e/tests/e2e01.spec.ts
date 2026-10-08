@@ -280,9 +280,12 @@ test('E2E-01 happy path: quote, bind, invoice, fiscal MARK, payment, ledger jour
     } while (cursor);
     const mine = all.filter((j) => (j['lines'] as Json[]).some((l) => l['dimensions']?.['billingAccountId'] === accountId));
     const rules = new Set(mine.flatMap((j) => j['ruleCodes'] as string[]));
-    const ready = mine.some((j) => (j['lines'] as Json[]).some((l) => l['account'] === 'GL-2540')) // allocation posted
-      && mine.some((j) => (j['lines'] as Json[]).some((l) => l['account'] === 'GL-1110')) // receipt posted
-      && rules.size > 0;
+    // FIN posts one journal per BIL entry, asynchronously and one entry at a time. Wait for the journal of every entry type
+    // (rule-code families WR-, BL-, ID-, RC-, AL-). Accounts alone are not enough: the RECEIVED journal already holds both
+    // GL-1110 and GL-2540, so waiting for those let the test read the ledger before the ALLOCATED journal (GL-2540 → GL-1210)
+    // was posted, and GL-1210 still showed the whole invoice as open.
+    const families = new Set([...rules].map((code) => code.split('-')[0]));
+    const ready = ['WR', 'BL', 'ID', 'RC', 'AL'].every((family) => families.has(family));
     return ready ? mine : undefined;
   });
   const lines = journals.flatMap((j) => (j['lines'] as Json[]).map((l) => ({ journal: j['journalNumber'] as string, account: l['account'] as string, side: l['side'] as string, amount: cents(l['amount']) })));
