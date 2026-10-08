@@ -101,11 +101,13 @@ internal sealed class PoliciesController : ControllerBase
             return HttpResults.Problem(PolicyQueryContext.BadTime(), HttpContext);
         }
 
-        var response = Guid.TryParse(id, out var policyId)
-            ? await reader.GetPolicyAsync(PolicyQueryContext.LegalEntity(services), PolicyQueryContext.LegalEntityCode(services), policyId, valid, known, cancellationToken)
+        var answered = Guid.TryParse(id, out var policyId)
+            ? await reader.GetPolicyEffectiveAsync(PolicyQueryContext.LegalEntity(services), PolicyQueryContext.LegalEntityCode(services), policyId, valid, known, cancellationToken)
                 .ConfigureAwait(false)
             : null;
-        return response is null ? HttpResults.Problem(JobSupport.NotFound("policy"), HttpContext) : Results.Ok(response);
+        return answered is not var (response, effectiveKnownAt)
+            ? HttpResults.Problem(JobSupport.NotFound("policy"), HttpContext)
+            : Results.Ok(response with { EffectiveKnownAt = effectiveKnownAt });
     }
 
     /// <summary>pol.Term.get as of validAt / knownAt.</summary>
