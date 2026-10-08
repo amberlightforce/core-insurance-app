@@ -33,6 +33,14 @@ const familyOf: Record<HistoryKind, 'success' | 'info' | 'brand' | 'warning' | '
   OTHER: 'neutral',
 };
 
+const semanticOf: Record<HistoryKind, 'success' | 'info' | 'warning' | 'read-only'> = {
+  NEW_BUSINESS: 'success',
+  CHANGE: 'info',
+  CANCELLATION: 'warning',
+  RENEWAL: 'info',
+  OTHER: 'read-only',
+};
+
 /** Charge lines of one transaction: element × charge type, with the provisional tax badge (REQ-POL-128). */
 function ChargesTable({ charges, label }: { charges: ChargeLineModel[]; label: string }) {
   const { t } = useTranslation('policy');
@@ -99,7 +107,11 @@ function HistoryRow({
     <li data-family={familyOf[kind]}>
       <div className={styles.eventRow}>
         <span className={styles.eventText}>
-          <strong>{t(`file.kind.${kind}`)}</strong>
+          <StatusPill
+            semantic={semanticOf[kind]}
+            subLabel={t(`file.kind.${kind}`)}
+            announceChanges={false}
+          />
           <span className="ds-mono">{`#${String(row.sequence)}`}</span>
           {row.reversed ? (
             <StatusPill

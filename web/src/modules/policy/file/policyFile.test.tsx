@@ -221,10 +221,10 @@ describe('Policy file (SL3-UI-POL-FILE)', () => {
     const term1List = await within(groups).findByRole('list', { name: 'Συναλλαγές όρου 1' });
     const rows = within(term1List).getAllByRole('listitem');
     expect(rows.map((r) => /#(\d)/.exec(r.textContent)?.[1])).toEqual(['3', '2', '1']);
-    expect(within(nth(rows, 0)).getByText('Αλλαγή')).toBeInTheDocument();
-    expect(within(nth(rows, 2)).getByText('Νέα παραγωγή')).toBeInTheDocument();
+    expect(within(nth(rows, 0)).getByText(/Αλλαγή/)).toBeInTheDocument();
+    expect(within(nth(rows, 2)).getByText(/Νέα παραγωγή/)).toBeInTheDocument();
     const term2List = within(groups).getByRole('list', { name: 'Συναλλαγές όρου 2' });
-    expect(within(term2List).getByText('Ανανέωση')).toBeInTheDocument();
+    expect(within(term2List).getByText(/Ανανέωση/)).toBeInTheDocument();
 
     // Term premium card in BigInt minor units: written 452,45 (432,35 + 20,10), credits -12,05, net 440,40.
     const premium = screen.getByRole('region', { name: 'Ασφάλιστρο όρου' });
@@ -277,6 +277,14 @@ describe('Policy file (SL3-UI-POL-FILE)', () => {
     expect(
       within(premium).getByRole('button', { name: /Άνοιγμα τιμολογίου INV000000003/ }),
     ).toBeInTheDocument();
+  });
+
+  it('never shows a raw key when the invoice has no fiscal status', async () => {
+    const invoice = { ...fx.invoice().invoice, policyTermId: term1Id };
+    mockApi(routes({ invoices: { items: [{ invoice }], nextCursor: null, limit: 50 } }));
+    view();
+    await screen.findByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' });
+    expect(document.body.textContent).not.toMatch(/fiscal\.status/);
   });
 
   it('hides the action bar without the servicing permission', async () => {
@@ -349,7 +357,7 @@ describe('Policy file (SL3-UI-POL-FILE)', () => {
     expect(
       (await screen.findAllByText(/Δεν έχετε δικαίωμα να δείτε το πλήρες ιστορικό/)).length,
     ).toBeGreaterThan(0);
-    expect((await screen.findAllByText('Νέα παραγωγή')).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText(/Νέα παραγωγή/)).length).toBeGreaterThan(0);
   });
 
   it('shows the loading state, then a not-found state', async () => {
@@ -417,7 +425,7 @@ describe('Policy file (SL3-UI-POL-FILE)', () => {
     expect(await screen.findByRole('list', { name: 'Policy terms' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Renew now' })).toBeInTheDocument();
     const groups = await screen.findByRole('list', { name: 'Transactions by term' });
-    expect(await within(groups).findAllByText('Change')).not.toHaveLength(0);
+    expect(await within(groups).findAllByText(/Change/)).not.toHaveLength(0);
     expect(screen.getByText('As known at')).toBeInTheDocument();
   });
 

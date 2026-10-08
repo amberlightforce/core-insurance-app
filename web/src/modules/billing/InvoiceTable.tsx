@@ -15,6 +15,10 @@ import { SimpleTable } from '../staff/SimpleTable';
 import { FiscalStatusPill } from './FiscalStatusPill';
 import { InvoiceStatePill } from './InvoiceStatePill';
 
+/** The fiscal status code of a row; absent when billing has not reported one yet. */
+const fiscalOf = (row: Row): string | undefined =>
+  (row.fiscalStatus as { status?: string } | undefined)?.status;
+
 type Row = NonNullable<InvoiceListPage['items']>[number];
 
 export interface InvoiceTableProps {
@@ -48,8 +52,8 @@ export function InvoiceTable({ items, label }: InvoiceTableProps) {
       statusColumn<Row>(
         'fiscal',
         t('invoice.columns.fiscal'),
-        (r) => r.fiscalStatus.status,
-        (r) => <FiscalStatusPill status={r.fiscalStatus.status} />,
+        (r) => fiscalOf(r),
+        (r) => <FiscalStatusPill status={fiscalOf(r)} />,
       ),
     ],
     [t],
