@@ -23,6 +23,18 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
 
     public DbSet<ExposureRow> Exposures => Set<ExposureRow>();
 
+    public DbSet<ReserveLineRow> ReserveLines => Set<ReserveLineRow>();
+
+    public DbSet<TransactionSetRow> TransactionSets => Set<TransactionSetRow>();
+
+    public DbSet<FinancialTransactionRow> FinancialTransactions => Set<FinancialTransactionRow>();
+
+    public DbSet<ClaimPaymentRow> ClaimPayments => Set<ClaimPaymentRow>();
+
+    public DbSet<PayeeAccountViewRow> PayeeAccounts => Set<PayeeAccountViewRow>();
+
+    public DbSet<SetApprovalRow> SetApprovals => Set<SetApprovalRow>();
+
     protected override string Schema => ClaimsModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,6 +54,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
                 table.HasCheckConstraint("ck_claim_snapshot_status", Codes.CheckSql<SnapshotStatus>("snapshot_status"));
                 table.HasCheckConstraint("ck_claim_notice_after_loss", "notice_on >= loss_date");
                 table.HasCheckConstraint("ck_claim_exposure_sequence", "last_exposure_sequence >= 0");
+                table.HasCheckConstraint("ck_claim_transaction_sequence", "last_transaction_sequence >= 0");
             });
             entity.HasKey(e => e.ClaimId).HasName("pk_claim");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
@@ -52,6 +65,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.Property(e => e.InsuredPartyId).HasColumnName("insured_party_id");
             entity.Property(e => e.SnapshotRef).HasColumnName("snapshot_ref");
             entity.Property(e => e.SnapshotSegmentId).HasColumnName("snapshot_segment_id");
+            entity.Property(e => e.PolicyTermId).HasColumnName("policy_term_id");
             entity.Property(e => e.SnapshotValidAt).HasColumnName("snapshot_valid_at").HasColumnType("timestamptz");
             entity.Property(e => e.SnapshotKnownAt).HasColumnName("snapshot_known_at").HasColumnType("timestamptz");
             entity.Property(e => e.SnapshotStatus).HasColumnName("snapshot_status");
@@ -80,6 +94,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.Property(e => e.Handler).HasColumnName("handler");
             entity.Property(e => e.ReopenCount).HasColumnName("reopen_count");
             entity.Property(e => e.LastExposureSequence).HasColumnName("last_exposure_sequence");
+            entity.Property(e => e.LastTransactionSequence).HasColumnName("last_transaction_sequence");
             entity.Property(e => e.ClosedAt).HasColumnName("closed_at").HasColumnType("timestamptz");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.LegalEntityId, e.ClaimNumber }).IsUnique().HasDatabaseName("ux_claim_number");
@@ -183,15 +198,19 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.HasOne<ClaimantRow>().WithMany().HasForeignKey(e => e.ClaimantId).HasConstraintName("fk_exposure_claimant").OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<IncidentRow>().WithMany().HasForeignKey(e => e.IncidentId).HasConstraintName("fk_exposure_incident").OnDelete(DeleteBehavior.Restrict);
         });
+
+        MapFinancials(modelBuilder);
     }
 
-    private static void CommonChecks(TableBuilder table, string name)
+    private static void MapFinancials(ModelBuilder modelBuilder) => ClaimsFinancialModel.Map(modelBuilder);
+
+    internal static void CommonChecks(TableBuilder table, string name)
     {
         table.HasCheckConstraint($"ck_{name}_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
         table.HasCheckConstraint($"ck_{name}_record_version", "record_version >= 1");
     }
 
-    private static void MapCommon<T>(EntityTypeBuilder<T> entity)
+    internal static void MapCommon<T>(EntityTypeBuilder<T> entity)
         where T : ClaimsRow
     {
         entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");

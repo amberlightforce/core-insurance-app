@@ -25,7 +25,7 @@ internal sealed class CreateExposureValidator : AbstractValidator<CreateExposure
     {
         RuleFor(c => c.Request.ExpectedRecordVersion).GreaterThanOrEqualTo(1);
         RuleFor(c => c.Request.Kind).IsInEnum();
-        RuleFor(c => c.Request.CoverageCode).NotEmpty().Matches("^[A-Z][A-Z0-9_]{0,63}$").WithErrorCode("CODE");
+        RuleFor(c => c.Request.CoverageCode).NotEmpty().Matches(FnolRequestValidator.CoverageCodePattern).WithErrorCode("CODE");
         RuleFor(c => c.Request.DuplicateReason).Matches("^[A-Z][A-Z0-9_]{0,63}$").When(c => c.Request.DuplicateReason is not null).WithErrorCode("CODE");
     }
 }

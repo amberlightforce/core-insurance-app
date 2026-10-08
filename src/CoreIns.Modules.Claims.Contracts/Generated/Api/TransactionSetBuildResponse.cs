@@ -24,7 +24,7 @@ public sealed record TransactionSetBuildResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? ContentHash { get; init; }
 
-    /// <summary>Balances before → after per line</summary>
+    /// <summary>Balances before → after per line (REQ-CLM-107)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("preview")]
     public required global::System.Collections.Generic.IReadOnlyList<PreviewItem> Preview { get; init; }
 
@@ -35,6 +35,11 @@ public sealed record TransactionSetBuildResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("checks")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Checks { get; init; }
+
+    /// <summary>Contract member 'set'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("set")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Claims.Contracts.Api.TransactionSetView? Set { get; init; }
 
     /// <summary>Generated contract member.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
@@ -55,14 +60,24 @@ public sealed record TransactionSetBuildResponse
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public string? CostCategory { get; init; }
 
-        /// <summary>Contract member 'before'.</summary>
+        /// <summary>Open reserve before the set</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("before")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::CoreIns.SharedKernel.Money? Before { get; init; }
 
-        /// <summary>Contract member 'after'.</summary>
+        /// <summary>Open reserve after the set</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("after")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::CoreIns.SharedKernel.Money? After { get; init; }
+
+        /// <summary>Contract member 'paidBefore'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("paidBefore")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Money? PaidBefore { get; init; }
+
+        /// <summary>Contract member 'paidAfter'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("paidAfter")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Money? PaidAfter { get; init; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using CoreIns.Modules.Claims.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CoreIns.Modules.Claims.Persistence.Migrations
 {
     [DbContext(typeof(ClaimsDbContext))]
-    partial class ClaimsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261008095322_ClaimFinancials")]
+    partial class ClaimFinancials
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1049,115 +1052,6 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         });
                 });
 
-            modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.SetApprovalRow", b =>
-                {
-                    b.Property<Guid>("ApprovalRequestId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("approval_request_id");
-
-                    b.Property<string>("ApprovalType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("approval_type");
-
-                    b.Property<decimal>("AuthorityAmount")
-                        .HasColumnType("numeric(19,4)")
-                        .HasColumnName("authority_amount");
-
-                    b.Property<string>("AuthorityCostType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("authority_cost_type");
-
-                    b.Property<string>("AuthorityType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("authority_type");
-
-                    b.Property<string>("Checker")
-                        .HasColumnType("text")
-                        .HasColumnName("checker");
-
-                    b.Property<Guid?>("CheckerUserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("checker_user_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("char(3)")
-                        .HasColumnName("currency");
-
-                    b.Property<DateTime?>("DecidedAt")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("decided_at");
-
-                    b.Property<string>("Jurisdiction")
-                        .IsRequired()
-                        .HasColumnType("char(2)")
-                        .HasColumnName("jurisdiction");
-
-                    b.Property<Guid>("LegalEntityId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("legal_entity_id");
-
-                    b.Property<string>("PayloadHash")
-                        .IsRequired()
-                        .HasColumnType("char(64)")
-                        .HasColumnName("payload_hash");
-
-                    b.Property<int>("RecordVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("integer")
-                        .HasColumnName("record_version");
-
-                    b.Property<Guid>("SetId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("set_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.Property<string>("SubjectId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("subject_id");
-
-                    b.Property<string>("SubjectType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("subject_type");
-
-                    b.HasKey("ApprovalRequestId")
-                        .HasName("pk_set_approval");
-
-                    b.HasIndex("SetId", "AuthorityType", "AuthorityCostType")
-                        .IsUnique()
-                        .HasDatabaseName("ux_set_approval_bucket");
-
-                    b.ToTable("set_approval", "clm", t =>
-                        {
-                            t.HasCheckConstraint("ck_set_approval_amount", "authority_amount > 0");
-
-                            t.HasCheckConstraint("ck_set_approval_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
-
-                            t.HasCheckConstraint("ck_set_approval_record_version", "record_version >= 1");
-
-                            t.HasCheckConstraint("ck_set_approval_status", "status IN ('PENDING', 'APPROVED', 'REJECTED')");
-                        });
-                });
-
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.TransactionSetRow", b =>
                 {
                     b.Property<Guid>("SetId")
@@ -1443,16 +1337,6 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_reserve_line_exposure");
-                });
-
-            modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.SetApprovalRow", b =>
-                {
-                    b.HasOne("CoreIns.Modules.Claims.Persistence.TransactionSetRow", null)
-                        .WithMany()
-                        .HasForeignKey("SetId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_set_approval_set");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.TransactionSetRow", b =>

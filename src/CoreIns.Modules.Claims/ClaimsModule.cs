@@ -2,12 +2,16 @@ using CoreIns.Modules.Claims.Authority;
 using CoreIns.Modules.Claims.Commands;
 using CoreIns.Modules.Claims.Contracts;
 using CoreIns.Modules.Claims.Contracts.Api;
+using CoreIns.Modules.Billing.Contracts.Events;
 using CoreIns.Modules.Claims.Domain;
+using CoreIns.Modules.Claims.Events;
 using CoreIns.Modules.Claims.Persistence;
 using CoreIns.Modules.Claims.Queries;
 using CoreIns.Modules.Claims.Services;
 using CoreIns.Platform;
 using CoreIns.Platform.Commands;
+using CoreIns.Platform.Contracts.Events;
+using CoreIns.Platform.Events;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel.Identifiers;
@@ -48,6 +52,12 @@ public static class ClaimsModule
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.claim, {Schema}.exposure, {Schema}.claimant, {Schema}.incident TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.fnol_snapshot TO {appRole}",
+
+                // Claim financials (SL2-CLM-MONEY, D-ARC-34): the ledger lines are insert-only; the set header, line flags,
+                // payments and the payee read model move.
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.reserve_line, {Schema}.transaction_set, {Schema}.claim_payment, {Schema}.payee_account_view TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.financial_transaction TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.set_approval TO {appRole}",
             ]),
     ];
 
@@ -67,8 +77,37 @@ public static class ClaimsModule
         services.AddScoped<FnolValidation>();
         services.AddScoped<ICoverageSource, PolicySnapshotAdapter>();
 
-        // The close-guard seam (REQ-CLM-072/073): SL2-CLM-MONEY replaces it with its derived balances (services.Replace).
-        services.TryAddScoped<IClaimFinancialGuard, NoClaimFinancials>();
+        // Claim financials (SL2-CLM-MONEY): derived balances, the set lifecycle and the close guard over them (REQ-CLM-072/073).
+        services.AddScoped<FinancialsReader>();
+        services.AddScoped<SetLifecycle>();
+        services.TryAddScoped<IClaimFinancialGuard, DerivedClaimFinancials>();
+
+        services.AddScoped<IValidator<BuildTransactionSet>, BuildTransactionSetValidator>();
+        services.AddCommandAuditor<BuildTransactionSet, TransactionSetBuildResponse, BuildTransactionSetAuditor>();
+        services.AddCommand<BuildTransactionSet, TransactionSetBuildResponse, BuildTransactionSetHandler>(
+            CommandDescriptor.For("clm.TransactionSet.build") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<SubmitTransactionSet>, SubmitTransactionSetValidator>();
+        services.AddCommandAuditor<SubmitTransactionSet, TransactionSetSubmitResponse, SubmitTransactionSetAuditor>();
+        services.AddCommand<SubmitTransactionSet, TransactionSetSubmitResponse, SubmitTransactionSetHandler>(
+            CommandDescriptor.For("clm.TransactionSet.submit") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<CapturePayeeAccount>, CapturePayeeAccountValidator>();
+        services.AddCommandAuditor<CapturePayeeAccount, PayeeAccountCaptureResponse, CapturePayeeAccountAuditor>();
+        services.AddCommand<CapturePayeeAccount, PayeeAccountCaptureResponse, CapturePayeeAccountHandler>(CommandDescriptor.For("clm.PayeeAccount.capture"));
+
+        // Internal commands run by the event handlers (the outbox marker makes them exactly-once; no idempotency key).
+        services.AddCommandAuditor<ApplyApprovalDecision, ApprovalOutcome, ApplyApprovalDecisionAuditor>();
+        services.AddCommand<ApplyApprovalDecision, ApprovalOutcome, ApplyApprovalDecisionHandler>(
+            CommandDescriptor.For("clm.TransactionSet.applyDecision") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddCommandAuditor<RecordDisbursementOutcome, string, RecordDisbursementOutcomeAuditor>();
+        services.AddCommand<RecordDisbursementOutcome, string, RecordDisbursementOutcomeHandler>(
+            CommandDescriptor.For("clm.Payment.recordDisbursement") with { RequiresIdempotencyKey = false, Idempotent = false });
+
+        // Consumers (worker): PLT decisions on referred sets, BIL disbursement status (REQ-CLM-128).
+        services.AddEventHandler<ApprovalDecidedV1, ApprovalDecidedHandler>(EventDescriptor.From(ApprovalDecidedV1.Descriptor), ApprovalDecidedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementIssuedV1, DisbursementIssuedHandler>(
+            EventDescriptor.From(DisbursementIssuedV1.Descriptor), DisbursementIssuedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementClearedV1, DisbursementClearedHandler>(
+            EventDescriptor.From(DisbursementClearedV1.Descriptor), DisbursementClearedHandler.Name, ModuleCode.CLM);
 
         services.AddScoped<IValidator<SubmitFnol>, SubmitFnolValidator>();
         services.AddCommandAuditor<SubmitFnol, FnolSubmitResponse, SubmitFnolAuditor>();
@@ -85,6 +124,8 @@ public static class ClaimsModule
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IClaimsFnolService, ClaimsFnolService>();
         services.AddScoped<IClaimsClaimService, ClaimsClaimService>();
+        services.AddScoped<IClaimsFinancialsService, ClaimsFinancialsService>();
+        services.AddScoped<IClaimsTransactionSetService, ClaimsTransactionSetService>();
 
         services.AddErrorDefinitions(Errors);
         return services;
@@ -115,6 +156,20 @@ public static class ClaimsModule
             .Describe("Ίδια κάλυψη, αιτών και συμβάν· δώστε αιτιολογία για δεύτερη έκθεση.", "Same coverage, claimant and incident; give a reason to add a second exposure."),
         ErrorDefinition.For(ModuleCode.CLM, "SEARCH-CRITERIA", 422, "Ανεπαρκή κριτήρια αναζήτησης", "Insufficient search criteria")
             .Describe("Δώστε αριθμό ζημίας, αριθμό ασφαλιστηρίου ή ασφαλισμένο.", "Give a claim number, a policy number or an insured party."),
+        ErrorDefinition.For(ModuleCode.CLM, "RESERVE-REASON", 422, "Λείπει η αιτιολογία της μεταβολής αποθέματος", "A reserve change needs a reason")
+            .Describe("Δώστε κωδικό αιτιολογίας για κάθε χειροκίνητη μεταβολή αποθέματος.", "Give a reason code for every manual reserve change."),
+        ErrorDefinition.For(ModuleCode.CLM, "NOT-PAYABLE", 422, "Η πληρωμή δεν επιτρέπεται", "The payment is not allowed")
+            .Describe("Δείτε τους λόγους (reasons): ασφαλιστήριο, κάλυψη έκθεσης, λογαριασμός δικαιούχου.", "See the reasons: policy, exposure cover, payee account."),
+        ErrorDefinition.For(ModuleCode.CLM, "DUPLICATE-PAYMENT", 409, "Υπάρχει ήδη ίδια πληρωμή", "The same payment exists already")
+            .Describe("Ίδιο ποσό στον ίδιο λογαριασμό στην ίδια ζημιά.", "Same amount to the same account on the same claim."),
+        ErrorDefinition.For(ModuleCode.CLM, "PAYMENT-EXCEEDS-RESERVE", 422, "Η πληρωμή υπερβαίνει το ανοικτό απόθεμα", "The payment exceeds the open reserve")
+            .Describe("Αυξήστε πρώτα το απόθεμα της γραμμής.", "Increase the line's reserve first."),
+        ErrorDefinition.For(ModuleCode.CLM, "SET-STALE", 409, "Το σύνολο κινήσεων δεν είναι πλέον έγκυρο", "The transaction set is stale", retryable: true)
+            .Describe("Κάτι άλλαξε από τη δημιουργία του· δημιουργήστε το ξανά.", "Something changed since it was built; build it again."),
+        ErrorDefinition.For(ModuleCode.CLM, "AUTHORITY", 403, "Εκτός ορίων εξουσιοδότησης", "Outside your authority")
+            .Describe("Μια κίνηση υπερβαίνει κάθε διαθέσιμο όριο εξουσιοδότησης.", "A transaction exceeds every available authority limit."),
+        ErrorDefinition.For(ModuleCode.CLM, "PAYEE-NOT-ON-CLAIM", 422, "Ο δικαιούχος δεν συμμετέχει στη ζημιά", "The payee is not on the claim")
+            .Describe("Ο δικαιούχος πρέπει να είναι ο ασφαλισμένος ή αιτών της ζημιάς.", "The payee must be the insured or a claimant of the claim."),
         ErrorDefinition.For(ModuleCode.CLM, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

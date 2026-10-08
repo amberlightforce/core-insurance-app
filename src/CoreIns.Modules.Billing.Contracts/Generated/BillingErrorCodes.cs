@@ -34,7 +34,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-CHARSET (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): bil.PayeeAccount.create, bil.PaymentInstrument.add, bil.PaymentInstrument.list, bil.PaymentInstrument.remove.</para>
+    /// <para>Declared by 5 operation(s): bil.PayeeAccount.create, bil.PaymentInstrument.add, bil.PaymentInstrument.list, bil.PaymentInstrument.remove, clm.PayeeAccount.capture.</para>
     /// </remarks>
     public const string Charset = "BIL-ERR-CHARSET";
 
@@ -76,7 +76,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-IBAN-INVALID (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): bil.PayeeAccount.create, bil.PaymentInstrument.add, bil.PaymentInstrument.list, bil.PaymentInstrument.remove.</para>
+    /// <para>Declared by 5 operation(s): bil.PayeeAccount.create, bil.PaymentInstrument.add, bil.PaymentInstrument.list, bil.PaymentInstrument.remove, clm.PayeeAccount.capture.</para>
     /// </remarks>
     public const string IbanInvalid = "BIL-ERR-IBAN-INVALID";
 

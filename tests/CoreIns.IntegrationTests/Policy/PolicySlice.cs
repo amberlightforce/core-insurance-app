@@ -32,11 +32,11 @@ internal sealed class PolicySlice : IAsyncDisposable
     private readonly ApiHostFactory _root;
     private Sha256Hash? _configurationHash;
 
-    public PolicySlice(string connectionString, bool realRatingAndUnderwriting = false, bool allowMissingDraftValidation = true)
+    public PolicySlice(
+        string connectionString, bool realRatingAndUnderwriting = false, bool allowMissingDraftValidation = true, IReadOnlyDictionary<string, string?>? settings = null)
     {
-        _root = new ApiHostFactory(
-            connectionString,
-            settings: new Dictionary<string, string?> { ["Policy:AllowMissingDraftValidation"] = allowMissingDraftValidation ? "true" : "false" });
+        var all = new Dictionary<string, string?>(settings ?? new Dictionary<string, string?>()) { ["Policy:AllowMissingDraftValidation"] = allowMissingDraftValidation ? "true" : "false" };
+        _root = new ApiHostFactory(connectionString, settings: all);
         Real = realRatingAndUnderwriting;
         Product = Real ? "MOTOR-GR" : "MOTOR-GR-" + Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();
         Factory = Real

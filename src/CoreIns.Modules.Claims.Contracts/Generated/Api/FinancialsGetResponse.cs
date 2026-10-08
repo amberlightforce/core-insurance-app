@@ -4,15 +4,27 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Financials.get result. PRD outputs: "balances by line"</summary>
+/// <summary>clm.Financials.get result. PRD outputs: "balances by line". Derived from the approved transactions recorded at or before knownAt (REQ-CLM-095, -096, -101); never stored as editable totals</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FinancialsGetResponse
 {
-    /// <summary>PRD: "balances by line"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'claimId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimId ClaimId { get; init; }
+
+    /// <summary>The record time the balances are as of (PRD asOf, D-API-08)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("knownAt")]
+    public required global::CoreIns.SharedKernel.Instant KnownAt { get; init; }
+
+    /// <summary>Contract member 'balancesByLine'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("balancesByLine")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? BalancesByLine { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.FinancialLineBalance> BalancesByLine { get; init; }
+
+    /// <summary>Contract member 'exposures'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("exposures")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.FinancialBalance> Exposures { get; init; }
+
+    /// <summary>Contract member 'totals'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("totals")]
+    public required global::CoreIns.Modules.Claims.Contracts.Api.FinancialBalance Totals { get; init; }
 }

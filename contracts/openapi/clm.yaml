@@ -36,6 +36,7 @@ tags:
 - name: Conversation
 - name: Import
 - name: Dsar
+- name: PayeeAccount
 paths:
   /api/clm/v1/fnol/submit:
     post:
@@ -1299,7 +1300,7 @@ paths:
       - W7-CLM-03
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-CLM-003, REQ-CLM-107
+      x-typed: REQ-CLM-003, REQ-CLM-093, REQ-CLM-097, REQ-CLM-098, REQ-CLM-099, REQ-CLM-107, REQ-CLM-119, REQ-CLM-129, REQ-CLM-130 (SL2-CLM-MONEY)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1318,6 +1319,14 @@ paths:
         status: 409
       - code: CLM-ERR-SOD
         status: 403
+      - code: CLM-ERR-PAYMENT-EXCEEDS-RESERVE
+        status: 422
+        note: auto-adjust off for the line (REQ-CLM-097)
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        status: 422
+        note: claim or exposure not Open
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1379,7 +1388,7 @@ paths:
       - W7-CLM-03
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-CLM-108, REQ-CLM-109
+      x-typed: REQ-CLM-108, REQ-CLM-109, REQ-CLM-112, REQ-CLM-004 (SL2-CLM-MONEY)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1398,6 +1407,14 @@ paths:
         status: 409
       - code: CLM-ERR-SOD
         status: 403
+      - code: CLM-ERR-AUTHORITY
+        status: 403
+        note: an authority check denied a transaction of the set (REQ-CLM-108)
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        status: 422
+        note: the set is not Draft
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1673,6 +1690,260 @@ paths:
           $ref: common.yaml#/components/responses/Conflict
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/transaction-sets/{id}:
+    get:
+      operationId: clm.TransactionSet.get
+      summary: Financial sets
+      description: |-
+        A transaction set with its transactions, derived statuses and approval binding (SL2-CLM-MONEY).
+
+        PRD inputs: set id
+        PRD outputs: set
+      tags:
+      - TransactionSet
+      x-requirement:
+      - REQ-CLM-003
+      - REQ-CLM-107..REQ-CLM-113
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-02
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-CLM-003, REQ-CLM-111 (SL2-CLM-MONEY)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.TransactionSet.get
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-07 §9.1 l.1471
+      - PRD-07 §7.3.2
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the TransactionSet
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSetGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/claims/{id}/payments:
+    get:
+      operationId: clm.Payment.list
+      summary: Payments of a claim
+      description: |-
+        The claim's payments with their status from BIL's disbursement events (REQ-CLM-004, REQ-CLM-128); masked payee account only.
+
+        PRD inputs: claim
+        PRD outputs: payments
+      tags:
+      - Payment
+      x-requirement:
+      - REQ-CLM-004
+      - REQ-CLM-119
+      - REQ-CLM-123
+      - REQ-CLM-128
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-CLM-004, REQ-CLM-128 (SL2-CLM-MONEY)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.Payment.list
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-07 §6 SCR-CLM-07
+      - PRD-07 §7.3.3
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Claim
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/payee-accounts/capture:
+    post:
+      operationId: clm.PayeeAccount.capture
+      summary: Capture a payee bank account
+      description: |-
+        Registers a payee's bank account with BIL (bil.PayeeAccount.create, purpose CLAIM_PAYMENT) in the claim's context and keeps CLM's masked read model (REQ-CLM-123, REQ-CLM-131; R-38: CLM stores no IBAN).
+
+        PRD inputs: claim, party, IBAN, holder name, evidence
+        PRD outputs: payee account id, masked IBAN, verification status, cooling-off
+      tags:
+      - PayeeAccount
+      x-requirement:
+      - REQ-CLM-123
+      - REQ-CLM-131
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-CLM-123, REQ-CLM-131 (SL2-CLM-MONEY)
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'The IBAN is P2: no dry-run'
+      x-exposure:
+      - ui
+      x-permission: clm.PayeeAccount.capture
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-PAYEE-NOT-ON-CLAIM
+        status: 422
+      - code: BIL-ERR-IBAN-INVALID
+        status: 422
+      - code: BIL-ERR-CHARSET
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-07 §7.1 PayeeAccountView
+      - PRD-07 §6 SCR-CLM-07
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayeeAccountCaptureRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayeeAccountCaptureResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/claims/{id}/payee-accounts:
+    get:
+      operationId: clm.PayeeAccount.list
+      summary: Payee accounts captured on a claim
+      description: |-
+        CLM's masked read model of the payee accounts captured on the claim (REQ-CLM-123), to pick one for a payment.
+
+        PRD inputs: claim
+        PRD outputs: payee accounts (masked)
+      tags:
+      - PayeeAccount
+      x-requirement:
+      - REQ-CLM-123
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-03
+      x-status: full
+      x-maturity: pre-release
+      x-typed: REQ-CLM-123 (SL2-CLM-MONEY)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.PayeeAccount.list
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-07 §7.1 PayeeAccountView
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Claim
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayeeAccountListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/clm/v1/payments/void:
@@ -1981,7 +2252,10 @@ paths:
       x-consumers:
       - RI
       x-permission: clm.Financials.get
-      x-error-codes: []
+      x-typed: REQ-CLM-095, REQ-CLM-096, REQ-CLM-101 (SL2-CLM-MONEY; knownAt = asOf)
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-07 §9.1 l.1475
       x-prd-param-names:
@@ -4851,21 +5125,34 @@ components:
                 description: Payment transactions
               payeeAccountId:
                 $ref: ../events/common.schema.json#/$defs/Uuid
-                description: BIL payee account (REQ-BIL-343)
+                description: BIL payee account (REQ-BIL-343), captured with clm.PayeeAccount.capture
               reason:
                 $ref: ../events/common.schema.json#/$defs/Code
+                description: Reason code; required for every manual reserve change (REQ-CLM-098, CLM-ERR-RESERVE-REASON)
+              paymentType:
+                type: string
+                enum:
+                - PARTIAL
+                - FINAL
+                description: Payment transactions (REQ-CLM-119; default PARTIAL). A FINAL payment proposes the release of the
+                  line's remaining open reserve in the same set (REQ-CLM-099)
             required:
             - kind
             - exposureId
             - costType
             - costCategory
             - amount
-            description: Claim financial transaction on a reserve line (exposure × cost type × cost category)
+            description: 'Claim financial transaction on a reserve line (exposure × cost type × cost category). SL2-CLM-MONEY:
+              kinds RESERVE and PAYMENT, EUR only (D-SL2-06), at most one payment per set; cost types and categories from the
+              illustrative motor list (D-SL2-04: INDEMNITY → VEHICLE_REPAIR, TOTAL_LOSS; EXPENSE_ALLOCATED → ASSESSOR_FEE)'
           minItems: 1
       required:
       - claimId
       - transactions
-      description: 'Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions"'
+      description: 'Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions". Builds a Draft set: reserve lines are
+        created on first use (REQ-CLM-093), an eroding payment above the open reserve adds a reserve increase to the same set
+        (REQ-CLM-097, auto-adjust on by default) and a FINAL payment proposes the release of the remainder (REQ-CLM-099).
+        With dryRun nothing is stored (preview only).'
     TransactionSetBuildResponse:
       type: object
       properties:
@@ -4888,18 +5175,305 @@ components:
                 $ref: ../events/common.schema.json#/$defs/Code
               before:
                 $ref: ../events/common.schema.json#/$defs/Money
+                description: Open reserve before the set
               after:
                 $ref: ../events/common.schema.json#/$defs/Money
-          description: Balances before → after per line
+                description: Open reserve after the set
+              paidBefore:
+                $ref: ../events/common.schema.json#/$defs/Money
+              paidAfter:
+                $ref: ../events/common.schema.json#/$defs/Money
+          description: Balances before → after per line (REQ-CLM-107)
         checks:
           type: array
           items:
             $ref: common.yaml#/components/schemas/Unspecified
+        set:
+          $ref: '#/components/schemas/TransactionSetView'
       required:
       - setId
       - status
       - preview
       description: 'Typed from REQ-CLM-003, REQ-CLM-107. PRD outputs: "set with preview, checks, approval request"'
+    TransactionSetView:
+      type: object
+      description: A claim transaction set (PRD-07 §7.1 TransactionSet, §7.3.2) with its transactions and derived states
+      properties:
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - PENDING_APPROVAL
+          - APPROVED
+          - REJECTED
+          - POSTED
+        contentHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: SHA-256 of the canonical set (RFC 8785)
+        maker:
+          type: string
+          description: Actor who built the set
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PLT approval request when referred (REQ-CLM-109)
+        approvalPayloadHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Hash the PLT approval is bound to (the set content hash, or the disbursement content hash of the set's payment)
+        fourEyes:
+          type: boolean
+        rejectionReason:
+          $ref: ../events/common.schema.json#/$defs/Code
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        submittedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FinancialTransactionView'
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/SetApprovalView'
+          description: One PLT approval request per referred (authority type, cost type) (D-SL2-13); the set executes when all are approved
+      required:
+      - setId
+      - claimId
+      - status
+      - contentHash
+      - transactions
+    SetApprovalView:
+      type: object
+      description: One PLT approval request of a referred set and the authority it must cover (D-SL2-13)
+      properties:
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        approvalType:
+          type: string
+          description: CLM.CLAIM_PAYMENT (subject the payment) or CLM.TRANSACTION_SET
+        authorityType:
+          type: string
+        costType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        status:
+          type: string
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - approvalRequestId
+      - approvalType
+      - authorityType
+      - costType
+      - amount
+      - status
+    FinancialTransactionView:
+      type: object
+      description: An immutable claim financial transaction (PRD-07 §7.1); status is derived from its set and payment
+      properties:
+        txnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        txnNumber:
+          type: string
+          description: Per-claim transaction number (D-SL2-07)
+        kind:
+          type: string
+          enum:
+          - RESERVE
+          - PAYMENT
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reserveLineId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        costType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        costCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        functionalAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        groupAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        eroding:
+          type: boolean
+        paymentType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        claimPaymentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        proposed:
+          type: boolean
+          description: Added by the system (reserve top-up REQ-CLM-097, final release REQ-CLM-099)
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - txnId
+      - txnNumber
+      - kind
+      - exposureId
+      - costType
+      - costCategory
+      - amount
+      - status
+    TransactionSetGetResponse:
+      type: object
+      description: clm.TransactionSet.get result
+      properties:
+        set:
+          $ref: '#/components/schemas/TransactionSetView'
+      required:
+      - set
+    ClaimPaymentView:
+      type: object
+      description: 'A claim payment (PRD-07 §7.1 ClaimPayment, §7.3.3). No IBAN: the BIL payee account id and the masked
+        account only (R-38)'
+      properties:
+        claimPaymentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeePartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        maskedAccount:
+          type: string
+        method:
+          $ref: ../events/common.schema.json#/$defs/Code
+        paymentType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        status:
+          type: string
+          enum:
+          - PENDING
+          - APPROVED
+          - ON_HOLD
+          - SUBMITTED
+          - ISSUED
+          - CLEARED
+          - REJECTED
+        holdReason:
+          $ref: ../events/common.schema.json#/$defs/Code
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        approvalEvidenceRef:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        submittedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        issuedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        clearedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - claimPaymentId
+      - setId
+      - exposureId
+      - payeePartyId
+      - payeeAccountId
+      - amount
+      - status
+    PaymentListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ClaimPaymentView'
+      description: Page of clm.Payment.list results (cursor pagination, contract §3.5.5)
+    PayeeAccountCaptureRequest:
+      type: object
+      description: 'clm.PayeeAccount.capture (REQ-CLM-123, REQ-CLM-131): registers the payee''s bank account with BIL
+        (bil.PayeeAccount.create, purpose CLAIM_PAYMENT) in the claim''s context. The IBAN is P2: passed to BIL only, never
+        stored, logged, audited or published by CLM'
+      properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The payee (the insured or a claimant of the claim)
+        iban:
+          type: string
+          minLength: 15
+          maxLength: 42
+          description: IBAN (ISO 13616). P2.
+        holderName:
+          type: string
+          minLength: 1
+          maxLength: 140
+        evidenceRef:
+          type: string
+          maxLength: 200
+          description: Change evidence (document reference)
+      required:
+      - claimId
+      - partyId
+      - iban
+      - holderName
+    ClaimPayeeAccountView:
+      type: object
+      description: CLM's read model of a BIL payee account (PRD-07 §7.1 PayeeAccountView); masked only
+      properties:
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        maskedIban:
+          type: string
+          description: Last four characters, masked
+        verificationStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+        coolingOffUntil:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        change:
+          type: boolean
+        capturedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - payeeAccountId
+      - partyId
+      - maskedIban
+      - verificationStatus
+    PayeeAccountCaptureResponse:
+      type: object
+      properties:
+        payeeAccount:
+          $ref: '#/components/schemas/ClaimPayeeAccountView'
+      required:
+      - payeeAccount
+    PayeeAccountListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ClaimPayeeAccountView'
+      description: Page of clm.PayeeAccount.list results (cursor pagination, contract §3.5.5)
     TransactionSetSubmitRequest:
       type: object
       properties:
@@ -4931,10 +5505,39 @@ components:
                 - REFER
                 - DENY
                 description: plt.Authority.check
+              txnId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+                description: Not set since D-SL2-13 (checks are per requirement, not per transaction)
+              type:
+                type: string
+                description: Authority type (CLM.RESERVE, CLM.PAYMENT)
+              costType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              basis:
+                type: string
+                enum:
+                - EXPOSURE_TOTAL_RESERVE
+                - RESERVE_DECREASE
+                - PAYMENT
+                - CLAIM_CUMULATIVE_PAID
+                description: What the amount is (D-SL2-13, REQ-CLM-108)
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+              referralRole:
+                type: string
+        set:
+          $ref: '#/components/schemas/TransactionSetView'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimPaymentView'
+          description: Payments of the set (Submitted to BIL when the set is approved within authority)
       required:
       - setId
       - status
-      description: 'Typed from REQ-CLM-108, REQ-CLM-109. PRD outputs: "set with preview, checks, approval request"'
+      description: 'Typed from REQ-CLM-108, REQ-CLM-109. PRD outputs: "set with preview, checks, approval request". All
+        checks ALLOW: the set is APPROVED at once (no four-eyes); any REFER: PENDING_APPROVAL with a PLT approval request
+        (decided in the PLT inbox; CLM applies the decision from ApprovalDecided); any DENY: CLM-ERR-AUTHORITY.'
     TransactionSetApproveRequest:
       type: object
       properties:
@@ -5117,11 +5720,89 @@ components:
           description: 'PRD: "status"'
     FinancialsGetResponse:
       type: object
-      description: 'clm.Financials.get result. PRD outputs: "balances by line"'
+      description: 'clm.Financials.get result. PRD outputs: "balances by line". Derived from the approved transactions recorded
+        at or before knownAt (REQ-CLM-095, -096, -101); never stored as editable totals'
       properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        knownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: The record time the balances are as of (PRD asOf, D-API-08)
         balancesByLine:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances by line"'
+          type: array
+          items:
+            $ref: '#/components/schemas/FinancialLineBalance'
+        exposures:
+          type: array
+          items:
+            $ref: '#/components/schemas/FinancialBalance'
+        totals:
+          $ref: '#/components/schemas/FinancialBalance'
+      required:
+      - claimId
+      - knownAt
+      - balancesByLine
+      - exposures
+      - totals
+    FinancialBalance:
+      type: object
+      description: Derived balances (REQ-CLM-095, -096); exposureId is set on exposure totals
+      properties:
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reserved:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ approved reserve transactions
+        paid:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ approved payments
+        openReserve:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Σ reserve − Σ eroding payments, never below zero
+        incurred:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: paid + open reserve
+        paymentPending:
+          type: boolean
+          description: A payment is pending approval, approved, on hold or submitted (not yet issued)
+      required:
+      - reserved
+      - paid
+      - openReserve
+      - incurred
+    FinancialLineBalance:
+      type: object
+      description: Balances of one reserve line (exposure × cost type × cost category × currency, REQ-CLM-093)
+      properties:
+        reserveLineId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        costType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        costCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+        final:
+          type: boolean
+          description: FinalLine (final payment or release to zero, PRD-07 §7.3.9)
+        reserved:
+          $ref: ../events/common.schema.json#/$defs/Money
+        paid:
+          $ref: ../events/common.schema.json#/$defs/Money
+        openReserve:
+          $ref: ../events/common.schema.json#/$defs/Money
+        incurred:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - reserveLineId
+      - exposureId
+      - costType
+      - costCategory
+      - final
+      - reserved
+      - paid
+      - openReserve
+      - incurred
     FinancialsDailyTotalsResponse:
       type: object
       description: 'clm.Financials.dailyTotals result. PRD outputs: "totals by currency and cost type with transaction ids"'

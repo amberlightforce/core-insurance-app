@@ -43,7 +43,7 @@ public sealed class ClaimsDomainTests
     }
 
     [Fact]
-    public async Task REQ_CLM_072_The_close_guard_blocks_open_reserve_and_pending_payments_only()
+    public void REQ_CLM_072_The_close_guard_blocks_open_reserve_and_pending_payments_only()
     {
         var a = ExposureId.New();
         var b = ExposureId.New();
@@ -52,7 +52,6 @@ public sealed class ClaimsDomainTests
         blocking.Select(x => x.Exposure).ShouldBe([b, c]);
         blocking[0].Reasons.ShouldBe(["OPEN_RESERVE"]);
         blocking[1].Reasons.ShouldBe(["PAYMENT_PENDING"]);
-        (await new NoClaimFinancials().PositionsAsync(ClaimId.New(), [a], TestContext.Current.CancellationToken)).ShouldAllBe(p => p.OpenReserve == 0m && !p.PaymentPending);
     }
 
     [Fact]
