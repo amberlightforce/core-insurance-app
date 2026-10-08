@@ -69,6 +69,7 @@ internal sealed class CancelPolicyHandler(
     IEventPublisher events,
     Dependency<IMarketRoundingService> rounding,
     Dependency<ITaxCalculator> taxCalculator,
+    IProration proration,
     ICancellationRefundMethods refundMethods,
     IOptions<PolicyOptions> options) : ICommandHandler<CancelPolicy, CancellationCreateResponse>
 {
@@ -137,6 +138,15 @@ internal sealed class CancelPolicyHandler(
         var (term, effective) = picked.Value;
         var applied = kind == CancellationKind.Flat ? RefundMethod.FullRefund : artefactMethod;
 
+        // D-SL3-21: cancelling a term that has a successor (or an open renewal) is refused; the cascade is out of scope for slice 3.
+        var openRenewalStates = new[] { Codes.Of(JobState.Draft), Codes.Of(JobState.Quoted), Codes.Of(JobState.Scheduled) };
+        if (terms.Any(x => x.PredecessorTermId == term.TermId)
+            || await db.Jobs.AsNoTracking().AnyAsync(
+                j => j.JobType == Codes.Of(JobType.Renewal) && j.ExpiringTermId == term.TermId && openRenewalStates.Contains(j.State), cancellationToken).ConfigureAwait(false))
+        {
+            return DomainError.Of(ModuleCode.POL, CancellationErrors.IllegalTransition, "A renewal term exists; cancel the renewal term first.");
+        }
+
         var storedState = Codes.Parse<PolicyTermState>(term.State);
         var derived = DerivedState(storedState, term, effective);
         var fired = PolicyTermStateModel.Machine.Fire(derived, PolicyTermTrigger.Cancel);
@@ -149,7 +159,7 @@ internal sealed class CancelPolicyHandler(
         var termTransactions = transactions.Where(x => x.TermId == term.TermId).ToList();
         var lines = await db.ChargeLines.AsNoTracking().Where(x => x.TermId == term.TermId).ToListAsync(cancellationToken).ConfigureAwait(false);
         var currency = Currency.FromCode(term.Currency.Trim());
-        var engine = new ServicingEngine(new ReferenceProration(), Rounding(currency, effective.ToBusinessDate(zone)));
+        var engine = new ServicingEngine(proration, Rounding(currency, effective.ToBusinessDate(zone)));
 
         var servicingTerm = new ServicingTerm(term.ValidFrom, term.ValidTo, currency, DayCountConvention.TermRatio, zone);
         var transactionId = PolicyTransactionId.New();
@@ -187,6 +197,10 @@ internal sealed class CancelPolicyHandler(
 
         var premiumDeltas = result.Deltas;
         var treated = taxLines.Value;
+        if (treated.Any(x => x.Amount != 0m || x.Treatment.Action != "KEEP_NOT_REDUCED"))
+        {
+            return DomainError.Of(ModuleCode.POL, "GATE-FAILED", "A credit may only carry KEEP_NOT_REDUCED tax lines at 0.00 in this release. Nothing was changed.");
+        }
 
         // ---- the rows --------------------------------------------------------------------------------------------------
         var actor = context.Actor.ToString();
@@ -474,7 +488,7 @@ internal sealed class CancelPolicyHandler(
             var provisional = treatment.LegalStatus != TreatmentLegalStatus.Settled;
             treated.Add(new TreatedTaxLine(
                 group.Key, first.ChargeCategory, first.AnnualRate, 0m, group.Sum(l => l.Amount),
-                new TreatmentInfo(treatment.RuleId, treatment.RuleVersion, provisional ? "PendingOpinion" : "Settled", provisional, treatment.LegalSourceRef)));
+                new TreatmentInfo("KEEP_NOT_REDUCED", treatment.RuleId, treatment.RuleVersion, provisional ? "PendingOpinion" : "Settled", provisional, treatment.LegalSourceRef)));
         }
 
         return treated;
@@ -593,7 +607,7 @@ internal sealed class CancelPolicyHandler(
 }
 
 /// <summary>The MKT treatment of a tax or levy line (action KEEP_NOT_REDUCED is the only one implemented).</summary>
-internal sealed record TreatmentInfo(string RuleId, string RuleVersion, string LegalStatus, bool Provisional, string LegalSourceRef);
+internal sealed record TreatmentInfo(string Action, string RuleId, string RuleVersion, string LegalStatus, bool Provisional, string LegalSourceRef);
 
 /// <summary>A tax or levy line after the MKT treatment: the delta is 0.00 for KEEP_NOT_REDUCED.</summary>
 internal sealed record TreatedTaxLine(ChargeKey Key, string ChargeCategory, decimal AnnualRate, decimal Amount, decimal Written, TreatmentInfo Treatment);

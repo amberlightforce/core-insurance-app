@@ -3,6 +3,7 @@ using CoreIns.Modules.Policy.Commands.Cancellation;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain;
+using CoreIns.Modules.Policy.Domain.Servicing;
 using CoreIns.Modules.Policy.Events;
 using CoreIns.Modules.Policy.Persistence;
 using CoreIns.Modules.Policy.Queries;
@@ -17,6 +18,7 @@ using CoreIns.SharedKernel.Identifiers;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CoreIns.Modules.Policy;
 
@@ -102,6 +104,8 @@ public static class PolicyModule
 
         // SL3-POL-CANCEL: policyholder cancellation now / flat (pol.Cancellation.create; dry run = the refund preview).
         services.AddScoped<ICancellationRefundMethods, IllustrativeRefundMethods>();
+        // Fail-closed default until SL3-POL-WIRING binds RAT; ReferenceProration is test-only. TryAdd: one registration with POL-CHANGE.
+        services.TryAddScoped<IProration, UnavailableProration>();
         services.AddScoped<IValidator<CancelPolicy>, CancelPolicyValidator>();
         services.AddCommandAuditor<CancelPolicy, CancellationCreateResponse, CancelPolicyAuditor>();
         services.AddCommand<CancelPolicy, CancellationCreateResponse, CancelPolicyHandler>(CommandDescriptor.For("pol.Cancellation.create") with { SupportsDryRun = true });

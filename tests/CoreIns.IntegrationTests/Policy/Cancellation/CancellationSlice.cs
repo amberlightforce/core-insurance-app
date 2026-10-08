@@ -54,6 +54,7 @@ internal sealed class CancellationSlice : IAsyncDisposable
             services.AddSingleton<IUnderwritingRulesService>(Underwriting);
             services.AddSingleton<IClock>(Clock);
             services.AddSingleton<ITaxCalculator>(Tax);
+            services.AddSingleton<CoreIns.Modules.Policy.Domain.Servicing.IProration, CoreIns.Modules.Policy.Domain.Servicing.ReferenceProration>();
         }));
         Client = Factory.CreateClient();
         Rating.Setup("rat.Rate.rate", call => Rate((RateRateRequest)call.Arguments[0]!));

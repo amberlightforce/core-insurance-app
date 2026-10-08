@@ -237,6 +237,53 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     }
 
     [Fact]
+    public async Task D_SL3_21_a_term_with_a_scheduled_successor_cannot_be_cancelled()
+    {
+        var policy = await _slice.BindAsync();
+        _slice.Clock.Advance(TimeSpan.FromDays(30));
+        await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        await using (var command = data.CreateCommand($"""
+            CREATE TEMP TABLE successor AS SELECT * FROM pol.policy_term WHERE term_id = '{policy.TermId}' AND recorded_to IS NULL;
+            UPDATE successor SET term_version_id = gen_random_uuid(), term_id = gen_random_uuid(), term_number = 2, valid_from = valid_to,
+                valid_to = valid_to + interval '1 year', state = 'SCHEDULED', predecessor_term_id = '{policy.TermId}',
+                recorded_from = (SELECT last_recorded_at FROM pol.policy WHERE policy_id = '{policy.PolicyId}');
+            INSERT INTO pol.policy_term SELECT * FROM successor;
+            """))
+        {
+            await command.ExecuteNonQueryAsync(Ct);
+        }
+
+        var (response, problem) = await _slice.CancelAsync(policy.PolicyId);
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict, problem?.ToJsonString());
+        problem.Text("code").ShouldBe("POL-ERR-ILLEGAL-TRANSITION");
+        problem!.ToJsonString().ShouldContain("cancel the renewal term first");
+
+        await AssertUntouchedAsync(policy);
+    }
+
+    [Fact]
+    public async Task D_SL3_21_a_term_with_an_open_renewal_job_cannot_be_cancelled()
+    {
+        var policy = await _slice.BindAsync();
+        _slice.Clock.Advance(TimeSpan.FromDays(30));
+        await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        await using (var command = data.CreateCommand($"""
+            CREATE TEMP TABLE renewal AS SELECT * FROM pol.job WHERE policy_id = '{policy.PolicyId}' AND job_type = 'SUBMISSION';
+            UPDATE renewal SET job_id = gen_random_uuid(), job_number = 'Q' || lpad((random() * 999999999)::int::text, 9, '0'),
+                job_type = 'RENEWAL', state = 'QUOTED', expiring_term_id = '{policy.TermId}', bound_transaction_id = NULL;
+            INSERT INTO pol.job SELECT * FROM renewal;
+            """))
+        {
+            await command.ExecuteNonQueryAsync(Ct);
+        }
+
+        var (response, problem) = await _slice.CancelAsync(policy.PolicyId);
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict, problem?.ToJsonString());
+        problem.Text("code").ShouldBe("POL-ERR-ILLEGAL-TRANSITION");
+        await AssertUntouchedAsync(policy);
+    }
+
+    [Fact]
     public async Task REQ_POL_209_cancel_after_expiry_is_refused()
     {
         var policy = await _slice.BindAsync();
