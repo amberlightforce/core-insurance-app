@@ -183,7 +183,8 @@
         ],
         "rejectionCodes": [
           "SAMPLE_CODE"
-        ]
+        ],
+        "correlatedDocumentId": "019282a0-b05d-756a-84d2-aa6e8d49eadb"
       },
       "identifiers": {
         "series": "Sample text",
@@ -801,7 +802,8 @@
         ],
         "rejectionCodes": [
           "SAMPLE_CODE"
-        ]
+        ],
+        "correlatedDocumentId": "0192e330-56a1-7f27-8154-8adf80608b9b"
       },
       "identifiers": {
         "series": "Sample text",
@@ -865,7 +867,8 @@
       ],
       "counterpartyPartyId": "0192417c-44ed-7603-837c-353148f7a8b1",
       "issueDate": "2026-10-07",
-      "correlatedDocumentId": "01921246-1de2-7ff1-8895-73d30b921e20"
+      "correlatedDocumentId": "01921246-1de2-7ff1-8895-73d30b921e20",
+      "documentCategory": "SAMPLE_CODE"
     },
     "FiscalDocumentRequestResponse": {
       "fiscalDocumentId": "01921f4e-04a0-7f60-82de-4ee96f841e24",
@@ -912,7 +915,8 @@
       ],
       "rejectionCodes": [
         "SAMPLE_CODE"
-      ]
+      ],
+      "correlatedDocumentId": "0192b4e1-e616-7235-83c2-94dc838bba15"
     },
     "FiscalReconciliationBreaksItem": {
       "breaks": "unspecified"

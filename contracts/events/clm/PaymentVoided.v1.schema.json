@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.coreinsurance.example/events/clm/PaymentVoided.v1.schema.json",
   "title": "PaymentVoided v1",
-  "description": "void, stop, return or disbursement rejection confirmed",
+  "description": "void, stop, return or disbursement rejection confirmed (D-SL4-13). Published once per payment correction, after the linked reversal transactions are posted.",
   "x-event-type": "PaymentVoided",
   "x-registry-name": "clm.PaymentVoided",
   "x-producer": "CLM",
@@ -87,6 +87,51 @@
             "RETURNED",
             "REJECTED"
           ],
+          "x-classification": "P0",
+          "description": "VOIDED = void before clearing; STOPPED = stopped at release; RETURNED = bank return; REJECTED = disbursement rejected"
+        },
+        "claimId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Claim (the aggregate id, repeated so FIN posts from payload fields only); CLM always sets it",
+          "x-classification": "P0"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/ClaimPaymentLine"
+          },
+          "description": "The reversed payment lines, one per reserve line, with the positive amount reversed (three currencies), the reserve line, exposure, cost type and category and the eroding flag. CLM always sets them; lineKey = the reversal transaction id (one of reversalTransactionIds). FIN posts the reversal from these lines.",
+          "x-classification": "P0"
+        },
+        "amount": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/MoneyByCurrency3"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Total reversed amount; CLM always sets it",
+          "x-classification": "P0"
+        },
+        "method": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Method of the payment that was corrected (CLEARING payments have no disbursement and are voided only through their statement)",
           "x-classification": "P0"
         }
       }

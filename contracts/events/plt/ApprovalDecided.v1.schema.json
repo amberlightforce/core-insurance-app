@@ -72,7 +72,7 @@
         },
         "decision": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "description": "Decision, or withdrawn / expired",
+          "description": "Outcome: APPROVED, REJECTED, RETURNED, EXPIRED or WITHDRAWN. WITHDRAWN (slice 4, D-SL4-14) is published when the owning module withdraws a pending request through IPlatformApprovalService.WithdrawAsync; checkerUserId is null.",
           "x-classification": "P0"
         },
         "checkerUserId": {

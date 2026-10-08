@@ -546,6 +546,37 @@ namespace CoreIns.Platform.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Platform.Persistence.DevClockRow", b =>
+                {
+                    b.Property<short>("Id")
+                        .HasColumnType("smallint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("OffsetMicros")
+                        .HasColumnType("bigint")
+                        .HasColumnName("offset_micros");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_dev_clock");
+
+                    b.ToTable("dev_clock", "plt", t =>
+                        {
+                            t.HasCheckConstraint("ck_dev_clock_offset", "offset_micros BETWEEN 0 AND 3153600000000000");
+
+                            t.HasCheckConstraint("ck_dev_clock_single_row", "id = 1");
+
+                            t.HasCheckConstraint("ck_dev_clock_version", "version >= 0");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.EventArchiveRow", b =>
                 {
                     b.Property<Guid>("EventId")

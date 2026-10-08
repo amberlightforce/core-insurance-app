@@ -46,16 +46,21 @@ public sealed class ClockTimeProvider(IClock clock) : TimeProvider
 public sealed class ShiftableClock : IClock
 {
     private readonly IClock _inner;
+    private readonly IClockOffsetSource? _shared;
     private readonly Lock _gate = new();
     private TimeSpan _offset;
     private Instant? _frozen;
 
-    /// <summary>Creates the clock over a real clock.</summary>
-    public ShiftableClock(IClock inner, TimeSpan initialOffset = default)
+    /// <summary>
+    /// Creates the clock over a real clock. <paramref name="shared"/> is the Development dev clock offset kept in the
+    /// database (D-SL3-12), added to the local offset so the api and the worker move together.
+    /// </summary>
+    public ShiftableClock(IClock inner, TimeSpan initialOffset = default, IClockOffsetSource? shared = null)
     {
         ArgumentNullException.ThrowIfNull(inner);
         _inner = inner;
         _offset = initialOffset;
+        _shared = shared;
     }
 
     /// <inheritdoc />
@@ -65,7 +70,7 @@ public sealed class ShiftableClock : IClock
         {
             lock (_gate)
             {
-                return _frozen ?? _inner.Now.Plus(_offset);
+                return _frozen ?? _inner.Now.Plus(_offset + (_shared?.Offset ?? TimeSpan.Zero));
             }
         }
     }
@@ -176,8 +181,9 @@ public static class ClockConfiguration
 
     /// <summary>
     /// Builds the clock for this environment. A shiftable clock is refused in Production (REQ-PLT-332: never in prod).
+    /// <paramref name="sharedOffset"/> is the dev clock offset source, present only in Development.
     /// </summary>
-    public static IClock Create(IConfiguration configuration, IHostEnvironment environment)
+    public static IClock Create(IConfiguration configuration, IHostEnvironment environment, IClockOffsetSource? sharedOffset = null)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         ArgumentNullException.ThrowIfNull(environment);
@@ -201,6 +207,6 @@ public static class ClockConfiguration
         var offset = configuration[OffsetKey] is { Length: > 0 } text
             ? TimeSpan.Parse(text, System.Globalization.CultureInfo.InvariantCulture)
             : TimeSpan.Zero;
-        return new ShiftableClock(SystemClock.Instance, offset);
+        return new ShiftableClock(SystemClock.Instance, offset, sharedOffset);
     }
 }
