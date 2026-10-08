@@ -1,0 +1,160 @@
+{
+  "title": "Underwriting",
+  "overline": "Underwriting",
+  "views": {
+    "label": "Work views",
+    "heading": "Views",
+    "MINE": "My referrals",
+    "OPEN": "Team",
+    "DECIDED_BY_ME_TODAY": "Completed today",
+    "REJECTED": "Rejected",
+    "countUnknown": "Count unknown",
+    "progress": "Progress today",
+    "progressValue": "{done} of {total}"
+  },
+  "queue": {
+    "label": "Referral queue",
+    "table": "Referrals",
+    "footer": "{count, plural, one {# entry} other {# entries}}",
+    "loadMore": "Load more",
+    "columns": {
+      "customer": "Customer",
+      "reason": "Reason",
+      "waiting": "Waiting since",
+      "premium": "Premium"
+    },
+    "noName": "Customer without a name",
+    "extraReasons": "+{count}",
+    "emptyTitle": {
+      "MINE": "Your queue is empty",
+      "OPEN": "No referral is waiting",
+      "DECIDED_BY_ME_TODAY": "No decisions today",
+      "REJECTED": "No rejected referrals"
+    },
+    "emptyBody": {
+      "MINE": "You completed {done, plural, =0 {no referrals} one {# referral} other {# referrals}} today.",
+      "OPEN": "When a bind stops on an underwriting referral, it appears here.",
+      "DECIDED_BY_ME_TODAY": "The decisions you take today appear here.",
+      "REJECTED": "Referrals with a standing rejection appear here."
+    },
+    "mineUnknown": "Your referrals are not counted while many referrals are open. See the Team view."
+  },
+  "detail": {
+    "label": "Referral details",
+    "overline": "Referral · {product}",
+    "unknownProduct": "Unknown product",
+    "emptyTitle": "Select a referral",
+    "emptyBody": "The issue analysis and the decision appear here.",
+    "loading": "Loading the referral…",
+    "notFound": "The referral was not found",
+    "facts": {
+      "premium": "Premium",
+      "start": "Start",
+      "producer": "Producer"
+    },
+    "issues": "Underwriting issues",
+    "kv": {
+      "label": "Risk details",
+      "product": "Product",
+      "productValue": "{code} · v{version}",
+      "claims": "Claims, last 5 years",
+      "claimsValue": "{count, plural, =0 {No claims} one {# claim} other {# claims}}",
+      "vehicle": "Vehicle",
+      "vehicleAge": "{years, plural, one {# year} other {# years}}",
+      "youngestDriver": "Youngest driver",
+      "start": "Start date",
+      "producer": "Producer code",
+      "ruleSet": "Rules",
+      "factsMissing": "No risk details were recorded for this referral."
+    },
+    "ageBand": {
+      "UNDER_18": "Under 18",
+      "FROM_18_TO_20": "18–20",
+      "FROM_21_TO_24": "21–24",
+      "FROM_25_TO_29": "25–29",
+      "FROM_30_TO_69": "30–69",
+      "FROM_70": "70 and over"
+    }
+  },
+  "issue": {
+    "value": "Value",
+    "limit": "rule limit",
+    "why": "Why?",
+    "hideWhy": "Hide",
+    "noValue": "—",
+    "limitUnavailable": {
+      "RULE_DECLARES_NO_LIMIT": "The rule declares no numeric limit.",
+      "other": "The limit is not available."
+    },
+    "decidedBy": "Decision: {name} · {time}",
+    "decisionReason": "Reason: {reason}"
+  },
+  "decision": {
+    "label": "Decision",
+    "authority": "Your authority for «{issue}»:",
+    "outcome": {
+      "ALLOW": "allowed",
+      "REFER": "needs referral to a senior",
+      "DENY": "not allowed"
+    },
+    "authorityMeter": {
+      "ALLOW": "Within your authority",
+      "REFER": "Above your authority",
+      "DENY": "Outside your authority"
+    },
+    "reject": "Reject…",
+    "approve": "Approve…",
+    "confirmApprove": "Approve",
+    "confirmReject": "Reject",
+    "cancel": "Cancel",
+    "reasonApprove": "Reason for approval",
+    "reasonReject": "Reason for rejection",
+    "reasonHelp": "Required. It is saved with the decision.",
+    "reasonRequired": "Enter the reason for the decision.",
+    "scope": "The decision applies to {count, plural, one {the open issue} other {all # open issues}}.",
+    "receipt": "Decision: {name} · {time}",
+    "cannotDecide": "You cannot decide",
+    "readOnly": "This referral is not waiting for a decision.",
+    "approvedToast": "Referral approved",
+    "rejectedToast": "Referral rejected",
+    "toastBody": "{customer} · {job}",
+    "announceApproved": "You approved referral {job}.",
+    "announceRejected": "You rejected referral {job}.",
+    "reasons": {
+      "SOD_CREATOR": "You created this quote.",
+      "SOD_PARTICIPANT": "You edited or otherwise worked on this quote.",
+      "SOD_PRODUCER": "You are the producer of this quote.",
+      "SOD_EVALUATOR": "You ran or bound the evaluation of this quote.",
+      "NOT_HUMAN": "Only a person can decide.",
+      "NO_AUTHORITY": "Your authority does not cover this issue.",
+      "NOT_OPEN": "No issue is waiting for a decision."
+    }
+  },
+  "errors": {
+    "title": "The decision was not recorded",
+    "retry": "Try again",
+    "reload": "Refresh the referral",
+    "technical": "Technical details",
+    "trace": "Trace id: {id}",
+    "generic": "The decision did not complete. Try again.",
+    "forbidden": "Your role does not allow this decision.",
+    "codes": {
+      "UW-ERR-SOD": "You cannot decide: you took part in creating or editing this quote.",
+      "UW-ERR-AUTHORITY-DENIED": "Your authority does not allow this decision.",
+      "UW-ERR-AUTHORITY-REFER": "The issue exceeds your authority. A senior must decide.",
+      "UW-ERR-STALE": "The referral was changed by someone else or by a new calculation. Refresh and check again before deciding.",
+      "UW-ERR-ISSUE-TRANSITION": "The issue is no longer waiting for a decision.",
+      "UW-ERR-HUMAN-DECISION-REQUIRED": "The decision must be taken by a person.",
+      "UW-ERR-VALIDATION": "The reason or the issues of the decision are not valid.",
+      "UW-ERR-NOT-FOUND": "The referral was not found.",
+      "UW-ERR-IDEMPOTENCY-MISMATCH": "The same request was sent with different details. Repeat the action."
+    }
+  },
+  "list": {
+    "error": "The queue did not load"
+  },
+  "noPermission": {
+    "title": "You do not have permission",
+    "body": "Your role does not allow viewing underwriting referrals."
+  }
+}

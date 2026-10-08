@@ -41,6 +41,7 @@ describe('App', () => {
   });
 
   it('routes a module and marks it current', () => {
+    signInAs(['Staff.UnderwritingManager']);
     renderAt('/underwriting');
     const nav = screen.getByRole('navigation', { name: 'Κύρια πλοήγηση' });
     expect(within(nav).getByRole('link', { name: 'Ανάληψη κινδύνου' })).toHaveAttribute(
