@@ -51,7 +51,8 @@ public sealed class WriteLockTests(PostgresFixture database) : TemporalTestBase(
             winnerHasLock.SetResult();
             await losersDone.Task; // keeps the transaction (and the row lock) open until the losers gave up
         }), Ct);
-        await winnerHasLock.Task;
+        await Task.WhenAny(winnerHasLock.Task, winner);
+        if (winner.IsCompleted) { (await winner).IsSuccess.ShouldBeTrue("winner failed before holding the lock"); }
 
         // The lock wait here is the shortest the option allows (1 s): the winner does not release before the losers are done.
         var barrier = new AsyncBarrier(3);
