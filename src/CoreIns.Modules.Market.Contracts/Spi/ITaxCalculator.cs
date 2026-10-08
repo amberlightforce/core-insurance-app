@@ -239,4 +239,13 @@ public sealed record TaxTreatmentResult
     public required TreatmentLegalStatus LegalStatus { get; init; }
 
     public required string LegalSourceRef { get; init; }
+
+    /// <summary>
+    /// SHA-256 of the configuration the rule was resolved under (PRD-17 §7.5: every result row carries the
+    /// configuration hash). Optional so existing producers compile; MKT sets it on every result from slice 3.
+    /// </summary>
+    public string? ConfigurationHash { get; init; }
+
+    /// <summary>True when <see cref="LegalStatus"/> is not Settled; such a result is provisional (D-REG-02).</summary>
+    public bool Provisional => LegalStatus != TreatmentLegalStatus.Settled;
 }

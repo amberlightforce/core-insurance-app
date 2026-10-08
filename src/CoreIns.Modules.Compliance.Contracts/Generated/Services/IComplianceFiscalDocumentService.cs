@@ -64,7 +64,7 @@ public interface IComplianceFiscalDocumentService
     /// <para>Status: full; fully typed from REQ-CMP-001, REQ-CMP-030..033, REQ-CMP-038, REQ-CMP-046 (SL-BIL stub channel). Wave W5.</para>
     /// <para>Exposure: ui; consumers: BIL, CLM.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: CMP-ERR-VALIDATION (422), CMP-ERR-TRANSPORT-UNAVAILABLE (503), CMP-ERR-FISCAL-TOTAL (422), CMP-ERR-SOURCE-UNKNOWN (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CMP-ERR-VALIDATION (422), CMP-ERR-TRANSPORT-UNAVAILABLE (503), CMP-ERR-FISCAL-TOTAL (422), CMP-ERR-SOURCE-UNKNOWN (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409), CMP-ERR-CORRELATED-NOT-FOUND (422).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.FiscalDocumentRequestResponse> RequestAsync(global::CoreIns.Modules.Compliance.Contracts.Api.FiscalDocumentRequestRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

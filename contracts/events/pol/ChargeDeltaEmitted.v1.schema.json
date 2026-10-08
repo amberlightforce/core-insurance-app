@@ -150,12 +150,65 @@
         },
         "legalStatus": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "description": "Legal status of the tax or levy rate the line was priced with (MKT); absent for premium lines",
+          "description": "Legal status of the tax or levy rate or treatment the line was priced with (MKT); always set on tax and levy lines of servicing transactions, absent for premium lines",
           "x-classification": "P0"
         },
         "provisional": {
           "type": "boolean",
           "description": "True when the line rests on a value that is not Settled (D-REG-02)",
+          "x-classification": "P0"
+        },
+        "transactionKind": {
+          "type": "string",
+          "enum": [
+            "NEW_BUSINESS",
+            "ENDORSEMENT_DEBIT",
+            "ENDORSEMENT_CREDIT",
+            "CANCELLATION",
+            "DISTANCE_WITHDRAWAL_VOID",
+            "VOID",
+            "RETURN_PREMIUM",
+            "REINSTATEMENT",
+            "FEE",
+            "REFUND"
+          ],
+          "description": "Transaction kind of the bound transaction (the MKT TaxTransactionKind values, PRD-17 §7.5). Always set by POL from slice 3; BIL and FIN use it for the tax-treatment check (REQ-BIL-079, REQ-FIN-182). A renewal term is NEW_BUSINESS.",
+          "x-classification": "P0"
+        },
+        "cancellationSource": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Cancellation source (shared code list, REQ-POL-205). Always set when transactionKind is CANCELLATION or VOID, null otherwise.",
+          "x-classification": "P0"
+        },
+        "treatmentRuleId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Id of the MKT treatment rule that decided a tax or levy line on a servicing transaction. Always set on such lines, null on premium lines.",
+          "x-classification": "P0"
+        },
+        "treatmentRuleVersion": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Version of the treatment rule; always set with treatmentRuleId.",
           "x-classification": "P0"
         }
       }

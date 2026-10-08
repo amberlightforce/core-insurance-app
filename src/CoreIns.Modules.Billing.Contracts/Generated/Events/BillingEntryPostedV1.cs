@@ -53,7 +53,7 @@ public sealed record BillingEntryPostedV1 : global::CoreIns.Platform.Contracts.E
     [global::System.Text.Json.Serialization.JsonPropertyName("entryId")]
     public required global::System.Guid EntryId { get; init; }
 
-    /// <summary>Contract member 'eventType'.</summary>
+    /// <summary>Entry type (open Code). Slice 3 adds CREDIT_WRITTEN (reversal of the written premium receivable by a credit), CREDIT_BILLED (reversal of the billed receivable by a credit note) and REFUND_APPROVED (credit moved to refunds payable on approval). Disbursement entries (DISBURSEMENT_RELEASED, DISBURSEMENT_CLEARED) carry the source type BIL_REFUND for policy refunds. Servicing entries always carry the l…</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("eventType")]
     public required string EventTypeValue { get; init; }
 

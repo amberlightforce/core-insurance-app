@@ -65,6 +65,11 @@ public sealed record JobBindResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.DocumentId? CoverNoteDocumentId { get; init; }
 
+    /// <summary>The preview the transaction was bound with (servicing jobs only); equals the frozen charge lines</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("servicingPreview")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Policy.Contracts.Api.ServicingPreview? ServicingPreview { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record GateResultItem

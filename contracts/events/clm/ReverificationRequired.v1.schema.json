@@ -68,14 +68,27 @@
       "properties": {
         "oldSnapshotRef": {
           "$ref": "../common.schema.json#/$defs/Text",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "The snapshot ref the claim currently holds. Always set."
         },
         "newSnapshotRef": {
           "$ref": "../common.schema.json#/$defs/Text",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "The snapshot ref now valid at the loss date (pol.Snapshot.get supersession.successorRef). Always set."
         },
         "causeEventId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0",
+          "description": "Event id of the POL event that superseded the snapshot. Always set."
+        },
+        "claimId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "description": "The claim; equals the aggregate id. Always set.",
+          "x-classification": "P0"
+        },
+        "causeEventType": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "description": "Event type of the POL event that caused the supersession (PolicyChanged, PolicyCancelled, ...). Always set.",
           "x-classification": "P0"
         }
       }
