@@ -266,8 +266,8 @@
       "title": "The claim cannot close yet",
       "body": "Resolve the following and try again.",
       "reason": {
-        "OPEN_RESERVE": "an open reserve must be released",
-        "PAYMENT_PENDING": "a payment is pending"
+        "OPEN_RESERVE": "there is an open reserve: pay it out or release it with a final payment (Financials tab)",
+        "PAYMENT_PENDING": "a payment has not been issued yet: wait for it to complete"
       }
     }
   },

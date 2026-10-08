@@ -18,7 +18,13 @@ import { ProblemBanner } from '../staff/ProblemBanner';
 import { QueryView } from '../staff/QueryView';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
-import { decideApproval, useApproval, useRefreshApprovals } from './api';
+import {
+  decideApproval,
+  setIdOfSubject,
+  useApproval,
+  useRefreshApprovals,
+  useTransactionSet,
+} from './api';
 import { approvalTypeKey, diffRows } from './approvalFormat';
 
 function ApprovalStatusPill({ status }: { status: ApprovalView['status'] }) {
@@ -160,7 +166,10 @@ function ApprovalDetails({ data }: { data: ApprovalGetResponse }) {
       }),
     [request.diff, fmt, t],
   );
-  const pending = request.status === 'PendingApproval';
+  const setQuery = useTransactionSet(setIdOfSubject(request.objectRef));
+  const linkedSet = setQuery.data?.set;
+  const staleSet = linkedSet?.status === 'REJECTED';
+  const pending = request.status === 'PendingApproval' && !staleSet;
 
   return (
     <div className={styles.stack}>
@@ -171,9 +180,16 @@ function ApprovalDetails({ data }: { data: ApprovalGetResponse }) {
         })}
         subtitle={<ApprovalStatusPill status={request.status} />}
         actions={
-          <LinkButton variant="secondary" to="/claims/approvals">
-            {t('approvals.backToInbox')}
-          </LinkButton>
+          <>
+            {linkedSet ? (
+              <LinkButton variant="secondary" to={`/claims/${linkedSet.claimId}?tab=financials`}>
+                {t('approvals.openClaim')}
+              </LinkButton>
+            ) : null}
+            <LinkButton variant="secondary" to="/claims/approvals">
+              {t('approvals.backToInbox')}
+            </LinkButton>
+          </>
         }
       />
       <div className={styles.grid}>
@@ -273,7 +289,7 @@ function ApprovalDetails({ data }: { data: ApprovalGetResponse }) {
         </Section>
       ) : (
         <Banner variant="info" live="none" title={t('approvals.notPending')}>
-          {t('approvals.notPendingBody')}
+          {staleSet ? t('approvals.setRejected') : t('approvals.notPendingBody')}
         </Banner>
       )}
     </div>

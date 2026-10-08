@@ -1,0 +1,162 @@
+{
+  "view": {
+    "tabs": { "label": "Claim sections", "overview": "Overview", "financials": "Financials" }
+  },
+  "codes": {
+    "costType": { "INDEMNITY": "Indemnity", "EXPENSE_ALLOCATED": "Expense (allocated)" },
+    "costCategory": {
+      "VEHICLE_REPAIR": "Vehicle repair",
+      "TOTAL_LOSS": "Total loss",
+      "ASSESSOR_FEE": "Assessor fee"
+    },
+    "reserveReason": {
+      "INITIAL_ESTIMATE": "Initial estimate",
+      "REVISED_ESTIMATE": "Revised estimate",
+      "ASSESSOR_REPORT": "Assessor report",
+      "ADDITIONAL_DAMAGE": "Additional damage"
+    }
+  },
+  "financials": {
+    "title": "Balances",
+    "lines": "Balances per reserve line",
+    "totals": "Claim totals",
+    "emptyTitle": "No reserves yet",
+    "emptyBody": "Set a reserve to see balances.",
+    "finalLine": "Final",
+    "columns": {
+      "exposure": "Exposure",
+      "line": "Line",
+      "reserved": "Reserved",
+      "paid": "Paid",
+      "openReserve": "Open reserve",
+      "incurred": "Incurred",
+      "final": "Final line"
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "emptyTitle": "No payments",
+    "emptyBody": "The claim's payments appear here once submitted.",
+    "columns": {
+      "amount": "Amount",
+      "type": "Type",
+      "status": "Status",
+      "account": "Account",
+      "hold": "Hold",
+      "created": "Created"
+    },
+    "hold": {
+      "COOLING_OFF": "Account cooling-off period",
+      "VOP_HOLD": "Payee verification pending"
+    }
+  },
+  "set": {
+    "title": "Transaction sets",
+    "none": "No transaction sets built from this computer or carrying a payment.",
+    "loading": "Loading set…",
+    "loadFailed": "The transaction set could not be loaded",
+    "label": "Set {id}",
+    "transactions": "Transactions of set {id}",
+    "maker": "By {maker}",
+    "waiting": "Waiting for approval. This page refreshes by itself when the decisions arrive.",
+    "rejected": "The set was rejected",
+    "rejectionReason": {
+      "APPROVER_REJECTED": "Rejected by the approver.",
+      "SET_STALE": "The balances changed after submission. Build the set again.",
+      "APPROVAL_WITHDRAWN": "The approval request was replaced by a newer one.",
+      "APPROVAL_MISMATCH": "The approval does not match the content of the set."
+    },
+    "manual": "Manual",
+    "kind": { "RESERVE": "Reserve", "PAYMENT": "Payment" },
+    "proposed": {
+      "AUTO_ADJUST": "Added by the system: reserve increase",
+      "FINAL_RELEASE": "Added by the system: release of the remainder",
+      "OTHER": "Added by the system"
+    },
+    "columns": {
+      "number": "Number",
+      "kind": "Kind",
+      "line": "Line",
+      "amount": "Amount",
+      "origin": "Origin"
+    },
+    "authority": {
+      "CLM_RESERVE": "Reserve authority",
+      "CLM_PAYMENT": "Payment authority"
+    },
+    "checklist": {
+      "title": "Approvals: {done} of {total}",
+      "label": "Approval checklist",
+      "item": "{type} · {costType} · {amount}",
+      "open": "Open request"
+    }
+  },
+  "builder": {
+    "title": "Reserve change or payment",
+    "kind": "What do you want to record?",
+    "kinds": { "RESERVE": "Reserve change", "PAYMENT": "Payment" },
+    "exposure": "Exposure",
+    "costType": "Cost type",
+    "costCategory": "Cost category",
+    "illustrative": "Illustrative list until the final values are defined.",
+    "direction": "Direction",
+    "directions": { "INCREASE": "Increase", "DECREASE": "Decrease" },
+    "reserveAmount": "Reserve change amount",
+    "paymentAmount": "Payment amount",
+    "reason": "Reason for the change",
+    "account": "Payee account",
+    "noAccounts": "No account is registered. Add one below.",
+    "paymentType": "Payment type",
+    "paymentTypes": { "PARTIAL": "Partial", "FINAL": "Final" },
+    "final": {
+      "title": "Final payment",
+      "body": "A final payment also releases the remaining open reserve of the line in the same set. The release shows in the preview."
+    },
+    "noOpenExposure": "There is no open exposure. Create one from the Overview.",
+    "errors": {
+      "exposure": "Choose an exposure.",
+      "category": "Choose a cost type and category.",
+      "amount": "Enter an amount greater than zero.",
+      "reason": "Choose a reason for the reserve change.",
+      "account": "Choose a payee account."
+    },
+    "preview": {
+      "action": "Preview",
+      "title": "Balance preview",
+      "line": "Line",
+      "open": "Open reserve",
+      "paid": "Paid",
+      "proposedTitle": "The system adds lines",
+      "proposedBody": "Lines marked «Added by the system» were not requested by you: they follow from the reserve rules.",
+      "transactions": "Transactions of the preview"
+    },
+    "hint": {
+      "within": {
+        "title": "Within your authority",
+        "body": "Illustrative limits. The set is approved at once."
+      },
+      "referral": {
+        "title": "Manager approval needed",
+        "body": "Illustrative limits. The set will wait in the approvals inbox."
+      }
+    },
+    "submitReserve": "Submit reserve",
+    "submitPayment": "Submit payment",
+    "failed": "The set was not submitted",
+    "result": {
+      "approved": "The set was approved",
+      "approvedBody": "Within your authority: applied at once. A payment was sent for issue.",
+      "pending": "The set is waiting for approval",
+      "pendingBody": "It is above your limit. It applies when every request in the checklist is approved.",
+      "referrals": "Referrals",
+      "referral": "Referred to {role} for {amount}"
+    }
+  },
+  "approvals": {
+    "columns": { "claim": "Claim" },
+    "openClaim": "Open claim",
+    "noClaimLink": "No link",
+    "hiddenStale": "{count, plural, one {# request hidden} other {# requests hidden}} because its set was already rejected.",
+    "setRejected": "The claim's transaction set was already rejected or replaced: the request needs no decision."
+  }
+}

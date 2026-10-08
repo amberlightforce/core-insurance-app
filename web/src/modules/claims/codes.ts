@@ -27,6 +27,21 @@ export const duplicateReasons = [
 /** Reason codes for a second open exposure on the same coverage and claimant (illustrative, REQ-CLM-063). */
 export const exposureDuplicateReasons = ['ADDITIONAL_DAMAGE', 'SEPARATE_INCIDENT'] as const;
 
+/** Cost types and categories of the motor slice (illustrative, D-SL2-04). */
+export const costTypes = ['INDEMNITY', 'EXPENSE_ALLOCATED'] as const;
+export const costCategories: Record<string, readonly string[]> = {
+  INDEMNITY: ['VEHICLE_REPAIR', 'TOTAL_LOSS'],
+  EXPENSE_ALLOCATED: ['ASSESSOR_FEE'],
+};
+
+/** Reason codes for a manual reserve change (illustrative; a reason is mandatory, REQ-CLM-098). */
+export const reserveReasons = [
+  'INITIAL_ESTIMATE',
+  'REVISED_ESTIMATE',
+  'ASSESSOR_REPORT',
+  'ADDITIONAL_DAMAGE',
+] as const;
+
 /** Closure outcomes a handler can choose (Denied needs a coverage decision, a later work package). */
 export const closeOutcomes = ['COMPLETED', 'WITHDRAWN', 'DUPLICATE', 'NO_PAYMENT'] as const;
 

@@ -57,32 +57,41 @@ const moduleRoutes: RouteObject[] = [
     lazy: async () => ({ Component: (await import('./modules/billing/InvoicePage')).InvoicePage }),
   },
   {
+    // Claims screens: a claims role sees them, everyone else the no-permission state (RequireClaimsRole).
     path: 'claims',
     lazy: async () => ({
-      Component: (await import('./modules/claims/ClaimsHomePage')).ClaimsHomePage,
+      Component: (await import('./modules/claims/RequireClaimsRole')).RequireClaimsRole,
     }),
-  },
-  {
-    path: 'claims/new',
-    lazy: async () => ({ Component: (await import('./modules/claims/FnolPage')).FnolPage }),
-  },
-  {
-    path: 'claims/approvals',
-    lazy: async () => ({
-      Component: (await import('./modules/claims/ApprovalsInboxPage')).ApprovalsInboxPage,
-    }),
-  },
-  {
-    path: 'claims/approvals/:requestId',
-    lazy: async () => ({
-      Component: (await import('./modules/claims/ApprovalDetailPage')).ApprovalDetailPage,
-    }),
-  },
-  {
-    path: 'claims/:claimId',
-    lazy: async () => ({
-      Component: (await import('./modules/claims/ClaimViewPage')).ClaimViewPage,
-    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/claims/ClaimsHomePage')).ClaimsHomePage,
+        }),
+      },
+      {
+        path: 'new',
+        lazy: async () => ({ Component: (await import('./modules/claims/FnolPage')).FnolPage }),
+      },
+      {
+        path: 'approvals',
+        lazy: async () => ({
+          Component: (await import('./modules/claims/ApprovalsInboxPage')).ApprovalsInboxPage,
+        }),
+      },
+      {
+        path: 'approvals/:requestId',
+        lazy: async () => ({
+          Component: (await import('./modules/claims/ApprovalDetailPage')).ApprovalDetailPage,
+        }),
+      },
+      {
+        path: ':claimId',
+        lazy: async () => ({
+          Component: (await import('./modules/claims/ClaimViewPage')).ClaimViewPage,
+        }),
+      },
+    ],
   },
   {
     path: 'finance',
