@@ -67,6 +67,8 @@ public static class PolicyModule
         services.AddScoped<RatingInput>();
         services.AddScoped<JobReader>();
         services.AddScoped<PolicyReader>();
+        services.AddScoped<PolicySnapshots>();
+        services.AddScoped<PolicySearch>();
 
         services.AddScoped<IValidator<CreateSubmission>, CreateSubmissionValidator>();
         services.AddCommandAuditor<CreateSubmission, SubmissionCreateResponse, CreateSubmissionAuditor>();
@@ -90,6 +92,7 @@ public static class PolicyModule
         services.AddScoped<IPolicyJobService, PolicyJobService>();
         services.AddScoped<IPolicyPolicyService, PolicyPolicyService>();
         services.AddScoped<IPolicyTermService, PolicyTermService>();
+        services.AddScoped<IPolicySnapshotService, PolicySnapshotService>();
 
         // UW decides declines; POL marks the job (REQ-POL-156).
         services.AddEventHandler<DeclineIssuedV1, DeclineIssuedHandler>(EventDescriptor.From(DeclineIssuedV1.Descriptor), DeclineIssuedHandler.Name, ModuleCode.POL);

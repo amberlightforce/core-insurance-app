@@ -5,6 +5,7 @@ using CoreIns.Modules.Policy.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
+using CoreIns.Platform.Http;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
@@ -27,6 +28,8 @@ internal static class PolicyPermissions
     public const string JobGet = "pol.Job.get";
     public const string PolicyGet = "pol.Policy.get";
     public const string TermGet = "pol.Term.get";
+    public const string SnapshotGet = "pol.Snapshot.get";
+    public const string PolicySearch = "pol.Policy.search";
 }
 
 /// <summary>REST facade of <c>pol.Submission.*</c> and <c>pol.Job.*</c> (contracts/openapi/pol.yaml): thin, commands through the pipeline.</summary>
@@ -125,6 +128,74 @@ internal sealed class PoliciesController : ControllerBase
     }
 }
 
+/// <summary>REST facade of <c>pol.Snapshot.get</c> (REQ-POL-007): the immutable policy/term/segment view at a loss date.</summary>
+[ApiController]
+[Route("api/pol/v1")]
+internal sealed class SnapshotsController : ControllerBase
+{
+    /// <summary>pol.Snapshot.get; validAt/knownAt are optional (default now) and must not be given with a snapshotRef.</summary>
+    [HttpGet("snapshots/get")]
+    [Authorize(Policy = PolicyPermissions.SnapshotGet)]
+    public async Task<IResult> GetAsync(
+        [FromQuery] string? validAt, [FromQuery] string? knownAt, [FromQuery] string? policyId, [FromQuery] string? snapshotRef,
+        [FromQuery] string? policyNumber, [FromServices] PolicySnapshots snapshots, CancellationToken cancellationToken)
+    {
+        var services = HttpContext.RequestServices;
+        if (!PolicyQueryContext.TryOptionalTime(services, validAt, knownAt, out var valid, out var known))
+        {
+            return HttpResults.Problem(PolicyQueryContext.BadTime(), HttpContext);
+        }
+
+        Guid? id = null;
+        if (policyId is not null)
+        {
+            if (!Guid.TryParse(policyId, out var parsed))
+            {
+                return HttpResults.Problem(DomainError.Of(ModuleCode.POL, "VALIDATION", "policyId must be a UUID."), HttpContext);
+            }
+
+            id = parsed;
+        }
+
+        var result = await snapshots.GetAsync(new SnapshotQuery(id, policyNumber, snapshotRef, valid, known), cancellationToken).ConfigureAwait(false);
+        return result.ToHttpResult(HttpContext);
+    }
+}
+
+/// <summary>REST facade of <c>pol.Policy.search</c> (REQ-POL-014 subset). Personal criteria travel in the POST body only (D-SLC-05).</summary>
+[ApiController]
+[Route("api/pol/v1")]
+internal sealed class PolicySearchController : ControllerBase
+{
+    /// <summary>pol.Policy.search (GET): the policy number only.</summary>
+    [HttpGet("policies/search")]
+    [Authorize(Policy = PolicyPermissions.PolicySearch)]
+    public Task<IResult> SearchAsync(
+        [FromQuery] string? policyNumber, [FromQuery] int? limit, [FromQuery] string? cursor, [FromServices] PolicySearch search, CancellationToken cancellationToken) =>
+        RunAsync(search, policyNumber, null, null, limit, cursor, cancellationToken);
+
+    /// <summary>pol.Policy.searchByCriteria (POST): policy number and/or insured party id in the body.</summary>
+    [HttpPost("policies/search")]
+    [SkipIdempotency]
+    [Authorize(Policy = PolicyPermissions.PolicySearch)]
+    public Task<IResult> SearchByCriteriaAsync(
+        [FromBody] PolicySearchCriteria body, [FromQuery] string? validAt, [FromQuery] int? limit, [FromQuery] string? cursor,
+        [FromServices] PolicySearch search, CancellationToken cancellationToken) =>
+        RunAsync(search, body.PolicyNumber?.Value, body.InsuredPartyId, validAt, limit, cursor, cancellationToken);
+
+    private async Task<IResult> RunAsync(
+        PolicySearch search, string? policyNumber, Guid? insuredPartyId, string? validAt, int? limit, string? cursor, CancellationToken cancellationToken)
+    {
+        if (!PolicyQueryContext.TryOptionalTime(HttpContext.RequestServices, validAt, null, out var valid, out _))
+        {
+            return HttpResults.Problem(PolicyQueryContext.BadTime(), HttpContext);
+        }
+
+        var result = await search.SearchAsync(policyNumber, insuredPartyId, valid, limit, cursor, cancellationToken).ConfigureAwait(false);
+        return result.ToHttpResult(HttpContext);
+    }
+}
+
 /// <summary>Request context helpers of the read side.</summary>
 internal static class PolicyQueryContext
 {
@@ -159,6 +230,40 @@ internal static class PolicyQueryContext
         }
 
         return knownAt is null || Instant.TryParse(knownAt, out known);
+    }
+
+    /// <summary>Like <see cref="TryTime"/> but an absent value stays null (the caller decides the default).</summary>
+    public static bool TryOptionalTime(IServiceProvider services, string? validAt, string? knownAt, out Instant? valid, out Instant? known)
+    {
+        valid = null;
+        known = null;
+        if (validAt is not null)
+        {
+            if (Instant.TryParse(validAt, out var instant))
+            {
+                valid = instant;
+            }
+            else if (BusinessDate.TryParse(validAt, out var date))
+            {
+                valid = PolicyTime.EndOf(date, services.GetRequiredService<IOptions<PolicyOptions>>().Value.Zone);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        if (knownAt is not null)
+        {
+            if (!Instant.TryParse(knownAt, out var instant))
+            {
+                return false;
+            }
+
+            known = instant;
+        }
+
+        return true;
     }
 
     public static DomainError BadTime() => DomainError.Of(ModuleCode.POL, "VALIDATION", "validAt must be a date or instant, knownAt an instant.");

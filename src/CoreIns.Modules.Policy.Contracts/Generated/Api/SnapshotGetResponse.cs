@@ -4,23 +4,56 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Snapshot.get result. PRD outputs: "snapshot ref + content"</summary>
+/// <summary>pol.Snapshot.get result (REQ-POL-007): snapshot ref + content. content is absent when the policy is not in force at validAt.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SnapshotGetResponse
 {
-    /// <summary>PRD: "snapshot ref + content"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Opaque, immutable reference (policy, segment, validAt, knownAt). Passing it back returns the same snapshot byte for byte.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("snapshotRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SnapshotRef { get; init; }
+    public required string SnapshotRef { get; init; }
 
-    /// <summary>PRD: "snapshot ref + content"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>The resolved valid-time instant (a date-form input is resolved to the end of that Athens business day)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validAt")]
+    public required global::CoreIns.SharedKernel.Instant ValidAt { get; init; }
+
+    /// <summary>The resolved transaction-time instant</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("knownAt")]
+    public required global::CoreIns.SharedKernel.Instant KnownAt { get; init; }
+
+    /// <summary>True when a term in state IN_FORCE or PENDING_CANCELLATION covers validAt</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("inForce")]
+    public required bool InForce { get; init; }
+
+    /// <summary>Policy status at validAt (REQ-POL-132); absent when the policy had no term known at knownAt</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Policy.Contracts.Api.TermStateCode? Status { get; init; }
+
+    /// <summary>Why inForce is false. NO_TERM_AT_INSTANT = no term covers validAt (before the first term, after the last, or in a gap); TERM_NOT_IN_FORCE = a term covers it but is cancelled, voided or rewritten.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("notInForceReason")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public NotInForceReasonValue? NotInForceReason { get; init; }
+
+    /// <summary>Contract member 'policy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policy")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.SnapshotPolicy Policy { get; init; }
+
+    /// <summary>Contract member 'content'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("content")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Content { get; init; }
+    public global::CoreIns.Modules.Policy.Contracts.Api.SnapshotContent? Content { get; init; }
+
+    /// <summary>Why inForce is false. NO_TERM_AT_INSTANT = no term covers validAt (before the first term, after the last, or in a gap); TERM_NOT_IN_FORCE = a term covers it but is cancelled, voided or rewritten.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<NotInForceReasonValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum NotInForceReasonValue
+    {
+        /// <summary><c>NO_TERM_AT_INSTANT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NO_TERM_AT_INSTANT")]
+        NoTermAtInstant,
+
+        /// <summary><c>TERM_NOT_IN_FORCE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("TERM_NOT_IN_FORCE")]
+        TermNotInForce,
+    }
 }
