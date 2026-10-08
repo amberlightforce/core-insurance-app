@@ -208,7 +208,7 @@ public sealed class ClaimsApiTests(PostgresFixture database) : IClassFixture<Pos
         body.Text("code").ShouldBe("CLM-ERR-POLICY-UNVERIFIED");
 
         await using var down = new ClaimsSlice(database.AppConnectionString);
-        down.Snapshots.Fail("pol.Snapshot.get", new TimeoutException("POL is down"));
+        down.Snapshots.Fail("pol.Snapshot.get", new InvalidOperationException("POL failed unexpectedly"));
         var (unavailable, unavailableBody) = await down.SubmitAsync(Fnol(down.Policy()));
         unavailable.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable, unavailableBody?.ToJsonString());
         unavailableBody.Text("code").ShouldBe("CLM-ERR-DEPENDENCY-UNAVAILABLE");
@@ -400,6 +400,34 @@ public sealed class ClaimsApiTests(PostgresFixture database) : IClassFixture<Pos
         var (none, noneBody) = await _slice.SendAsync(HttpMethod.Post, "/api/clm/v1/claims/search", new { }, withKey: false);
         none.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, noneBody?.ToJsonString());
         noneBody.Text("code").ShouldBe("CLM-ERR-SEARCH-CRITERIA");
+    }
+
+    [Fact]
+    public async Task A_claim_of_one_legal_entity_is_not_found_searched_or_closed_from_another()
+    {
+        var policy = _slice.Policy();
+        var (response, body) = await _slice.SubmitAsync(Fnol(policy));
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        var claimId = body.Text("claimId");
+
+        // A second synthetic entity in the MKT registry, served by its own stamp on the same database.
+        await database.ExecuteAsSuperuserAsync(
+            """
+            INSERT INTO mkt.legal_entity
+                (legal_entity_id, code, native_name, latin_name, home_jurisdiction, pack_id, functional_currency, timezone, status, is_test_entity, record_version, created_at)
+            VALUES ('0192f0c4-0000-7000-8000-0000000000c2', 'GR-OTHER', 'GR-OTHER (synthetic)', 'GR-OTHER (synthetic)', 'GR', 'gr', 'EUR', 'Europe/Athens', 'ACTIVE', true, 1, now())
+            ON CONFLICT (legal_entity_id) DO NOTHING
+            """, Ct);
+        await using var other = new ClaimsSlice(database.AppConnectionString, settings: new Dictionary<string, string?> { ["Stamp:LegalEntity"] = "GR-OTHER" });
+
+        (await other.SendAsync(HttpMethod.Get, $"/api/clm/v1/claims/{claimId}")).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await other.SendAsync(HttpMethod.Get, $"/api/clm/v1/fnol/{claimId}")).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        var (search, searchBody) = await other.SendAsync(HttpMethod.Post, "/api/clm/v1/claims/search", new { policyNumber = policy.PolicyNumber }, withKey: false);
+        search.StatusCode.ShouldBe(HttpStatusCode.OK, searchBody?.ToJsonString());
+        searchBody!["items"]!.AsArray().ShouldBeEmpty();
+        var (close, closeBody) = await other.SendAsync(HttpMethod.Post, "/api/clm/v1/claims/close", new JsonObject { ["claimId"] = claimId, ["expectedRecordVersion"] = 1, ["outcome"] = "WITHDRAWN" });
+        close.StatusCode.ShouldBe(HttpStatusCode.NotFound, closeBody?.ToJsonString());
+        (await database.ScalarAsync<string>($"SELECT status FROM clm.claim WHERE claim_id = '{claimId}'")).ShouldBe("OPEN");
     }
 
     [Fact]

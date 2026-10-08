@@ -1,6 +1,6 @@
-using System.Text.Json;
 using CoreIns.Modules.Claims.Domain;
 using CoreIns.Modules.Claims.Services;
+using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 
@@ -65,31 +65,27 @@ public sealed class ClaimsDomainTests
     }
 
     [Fact]
-    public void The_snapshot_adapter_reads_the_announced_POL_shape_at_the_root_or_inside_content()
+    public void The_snapshot_adapter_maps_the_typed_POL_snapshot_and_refuses_an_answer_for_another_policy()
     {
         var policyId = Guid.NewGuid();
-        var insured = Guid.NewGuid();
-        var policy = $$"""{"policyId":"{{policyId}}","policyNumber":"POL000000001","productCode":"MOTOR-GR","insuredPartyId":"{{insured}}"}""";
-        var typed = JsonDocument.Parse($$$"""
-            {"snapshotRef":"S1","validAt":"2027-03-01T10:00:00Z","knownAt":"2027-03-02T10:00:00Z","inForce":true,"status":"IN_FORCE","policy":{{{policy}}},
-             "content":{"productVersion":"1.0","segment":{"segmentId":"{{{Guid.Empty}}}"},"coverages":[{"coverageCode":"OD","selected":true},{"coverageCode":"GLASS","selected":false}]}}
-            """).RootElement;
-        var read = PolicySnapshotAdapter.Parse(typed, Instant.FromUtc(2027, 3, 1, 10), Instant.FromUtc(2027, 3, 2, 10));
+        var notInForce = new SnapshotGetResponse
+        {
+            SnapshotRef = "S2", ValidAt = Instant.FromUtc(2027, 3, 1), KnownAt = Instant.FromUtc(2027, 3, 2), InForce = false,
+            NotInForceReason = SnapshotGetResponse.NotInForceReasonValue.NoTermAtInstant,
+            Policy = new SnapshotPolicy
+            {
+                PolicyId = new PolicyId(policyId), PolicyNumber = PolicyNumber.Parse("POL000000001"), ProductCode = "MOTOR-GR",
+                InsuredPartyId = Guid.NewGuid(), LegalEntity = "GR-TEST", Jurisdiction = "GR",
+            },
+        };
+        var read = PolicySnapshotAdapter.Map(notInForce, policyId);
         read.Outcome.ShouldBe(SnapshotReadOutcome.Found);
-        read.Facts!.SnapshotRef.ShouldBe("S1");
-        read.Facts.PolicyId.ShouldBe(policyId);
-        read.Facts.InsuredPartyId.ShouldBe(insured);
-        read.Facts.CoverageCodes.ShouldBe(["OD"]);
-        read.Facts.ProductVersion.ShouldBe("1.0");
+        read.Facts!.InForce.ShouldBeFalse();
+        read.Facts.NotInForceReason.ShouldBe("NO_TERM_AT_INSTANT");
+        read.Facts.CoverageCodes.ShouldBeEmpty();
+        read.Facts.PolicyNumber.ShouldBe("POL000000001");
 
-        var untyped = JsonDocument.Parse($$$"""{"snapshotRef":"S2","content":{"inForce":false,"notInForceReason":"NO_TERM_AT_INSTANT","policy":{{{policy}}}}}""").RootElement;
-        var fallback = PolicySnapshotAdapter.Parse(untyped, Instant.FromUtc(2027, 3, 1), Instant.FromUtc(2027, 3, 2));
-        fallback.Facts!.InForce.ShouldBeFalse();
-        fallback.Facts.NotInForceReason.ShouldBe("NO_TERM_AT_INSTANT");
-        fallback.Facts.CoverageCodes.ShouldBeEmpty();
-
-        PolicySnapshotAdapter.Parse(JsonDocument.Parse("""{"content":{}}""").RootElement, Instant.FromUtc(2027, 3, 1), Instant.FromUtc(2027, 3, 2))
-            .Outcome.ShouldBe(SnapshotReadOutcome.Unverified);
+        PolicySnapshotAdapter.Map(notInForce, Guid.NewGuid()).Outcome.ShouldBe(SnapshotReadOutcome.Unverified);
     }
 
     private static PolicySnapshotFacts Facts(bool inForce, params string[] coverages) =>

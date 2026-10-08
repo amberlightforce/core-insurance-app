@@ -335,6 +335,9 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
             // REQ-CLM-044: the FNOL snapshot is immutable (the app role has no UPDATE/DELETE grant; the trigger refuses them
             // for every role). PRD-07 §7.1: claim number, legal entity, policy reference, loss instant and creation facts of a
             // claim never change (re-verification adoption of a new snapshot is a later, audited path and keeps the policy).
+            // snapshot_ref, snapshot_segment_id, snapshot_valid_at, snapshot_known_at, policy_in_force_at_loss and
+            // snapshot_coverage_codes are deliberately NOT frozen: the re-verification adoption path (REQ-CLM-058) updates them
+            // when a human accepts a superseding POL snapshot.
             migrationBuilder.Sql("""
                 CREATE FUNCTION clm.reject_change() RETURNS trigger LANGUAGE plpgsql AS $$
                 BEGIN
