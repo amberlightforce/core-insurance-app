@@ -87,3 +87,5 @@ found by a review or by CI in slices 1–2; the decision id says where.
     and pass `-m:2`. Node reuse left 114 idle workers (14 GB) on the laptop and capped how many agents could run.
 39. **Unique log/output paths**: write test logs under your own worktree or scratchpad (e.g. `<worktree>/.logs/<class>.log`),
     never a shared path like `.claude/worktrees/t1.log`; another agent clobbered one.
+    (Note: pass `-m:2` to `dotnet build` only; with `dotnet test` it can make test discovery find zero tests. Build with
+    `-m:2`, then `dotnet test --no-build` with the two env vars set.)
