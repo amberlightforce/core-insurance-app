@@ -11,8 +11,27 @@
         // SL2-BIL-DISB: Claims calls create/request in process; the API serves reads (claims roles: SL2-PLT).
         "bil.PayeeAccount.create": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "bil.PayeeAccount.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
-        "bil.Disbursement.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ]
+        "bil.Disbursement.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        // SL3-PLT-SUPPORT: refunds are read by billing staff; only the billing manager decides them (SoD: maker != checker is enforced by plt.Approval).
+        "bil.Refund.get": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Refund.list": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Refund.decide": [ "Staff.BillingManager" ]
       }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (D-SL3-14; no approved refund authority matrix exists): refund authority per refund, EUR. Never presented as
+      // approved limits; "Illustrative": true grants are ignored in Production (fail closed: DENY). The exact limit is allowed; one cent above
+      // refers to the next role (four eyes); above the manager's limit, DENY. The payeeChanged dimension is declared, not limited, in the slice.
+      "Grants": [
+        {
+          "Id": "bil-billing-refund-illustrative", "Role": "Staff.Billing", "Type": "BIL.REFUND", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "500.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "bil-billingmgr-refund-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.REFUND", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
+        }
+      ]
     }
   }
 }
