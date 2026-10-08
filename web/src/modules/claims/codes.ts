@@ -3,7 +3,15 @@
  * list until the reference data work package, the same for duplicate reasons. Labels live in the `claims`
  * namespace under `codes.<list>.<CODE>`.
  */
-export const lossCauses = ['COLLISION', 'THEFT', 'FIRE', 'GLASS', 'GLASS_BREAKAGE', 'VANDALISM', 'WEATHER'] as const;
+export const lossCauses = [
+  'COLLISION',
+  'THEFT',
+  'FIRE',
+  'GLASS',
+  'GLASS_BREAKAGE',
+  'VANDALISM',
+  'WEATHER',
+] as const;
 
 /** Receipt media of SCR-CLM-01 (a contract list, REQ-CLM-036). */
 export const receiptMedia = [

@@ -5,23 +5,22 @@
 
 ## 0. Status in one paragraph
 
-Foundations (Phase 1) and the **thin end-to-end slice** (Phase 2) are done. One motor product can be quoted, rated,
-underwritten and bound into a policy. Billing then:
-- invoices it, with a **stub** myDATA fiscal document;
-- takes an exact payment;
-- posts **balanced journals** in finance.
+Foundations (Phase 1), **slice 1** (Phase 2, E2E-01) and **slice 2 — claims** (Phase 3, E2E-02a) are done.
+- **Slice 1:** one motor product is quoted, rated, underwritten and bound; Billing invoices it (with a **stub** myDATA
+  document), takes an exact payment, and Finance posts **balanced journals**.
+- **Slice 2:** a claims handler reports an own-damage claim; cover is verified on the policy as it stood at the loss date;
+  reserves and payments go through **authority limits and maker ≠ checker approvals**; the payment is paid out through a
+  BIL disbursement (stub screening, VoP and bank); Finance posts claim journals; the claim closes.
+- **Also added on 2026-10-08:** underwriting referral decisions (a senior underwriter approves a referred quote so it can
+  bind, D-UW-01), a Development-only `superuser` with every role, and the **Aegean restyle** of the whole staff UI to
+  match the mockup (D-USR-11/13), including the claim file screen.
 
-All of it runs locally with `docker compose`. It is proven by an automated E2E-01 test, at API and browser level, that
-runs in GitHub CI, and it was accepted after a manual walkthrough in a real Chrome (D-SLC-21). CI on `main` is green.
+All of it runs locally with `docker compose`, proven by automated **E2E-01 and E2E-02a** at API and browser level.
+**GitHub CI is not running** (Actions blocked by account billing); the user chose to gate everything locally
+(D-USR-12) — see §2. About 15–20% of the 3,711 Must requirements are covered, most partially.
 
-The rest of the Motor MVP is **not built**: renewals, changes, cancellations, claims, reinsurance, documents, portals,
-migration and reporting, plus the parts of every module the slice did not need. About 10–15% of the 3,711 Must
-requirements are covered, most of them partially.
-
-**The programme is waiting for the user to choose the next step** (§12).
-
-Read this with `orchestration/STATUS.md`, `PLAN.md`, `SLICE-PLAN.md` and `DECISIONS.md` (about 180 rulings). Those
-files are the programme's memory.
+Read this with `orchestration/STATUS.md`, `PLAN.md`, `SLICE-PLAN.md`, `SLICE-PLAN-2.md` and `DECISIONS.md` (about
+200 rulings). Those files are the programme's memory.
 
 ---
 
@@ -32,10 +31,10 @@ files are the programme's memory.
 | Specifications | Outside the repo, in `../core-insurance-prds` and `../core-insurance-infra`: 18 PRDs, system contract v1.12 (frozen), Aegean design guide, 2 infra specs. Summaries are in `orchestration/digests/` |
 | Plan and backlog | `PLAN.md` (waves W1–W9); `backlog/backlog.json` + `BACKLOG.md` with 134 work packages that hold all 3,711 Must requirements; `SLICE-PLAN.md` for the slice |
 | Foundations | Built, reviewed, merged (§5) |
-| Slice modules | Party, Market, Product, Rating, Underwriting, Policy, Billing, Compliance (fiscal stub only), Finance. Each covers only what E2E-01 needs (§6) |
-| Staff UI | Greek-first React app with these screens: customer search/create/view, 7-step quote wizard, policy view, billing account/invoice/payment, journals |
-| Not started | Claims, Reinsurance, Documents, Work management, Channels/portals, Data/reporting, Migration. Their projects exist with generated contract types only |
-| Tests | 10 .NET test projects with about 1,700 tests, 297 of them Testcontainers integration tests; 1,200 web tests (Vitest + axe); Playwright E2E-01 (API + UI) |
+| Slice modules | Party, Market, Product, Rating, Underwriting, Policy, Billing, Compliance (fiscal stub only), Finance, **Claims**. Each covers only what E2E-01/E2E-02a need (§6) |
+| Staff UI | Greek-first React app in the **Aegean mockup style** (ambient canvas, landing/record pages, role-based home, avatar menu with theme/density/language). Screens: home; customers; 7-step quote wizard with referral explanations; policy view; underwriting referrals; billing account/invoice/payment; journals; claims home, FNOL, claim file (stage strip, money card, history, Financials tab with reserve/payment builder), approvals inbox |
+| Not started | Reinsurance, Documents, Work management, Channels/portals, Data/reporting, Migration; renewals, changes, cancellations. Their projects exist with generated contract types only |
+| Tests | 10 .NET test projects (about 1,900 tests, 441 Testcontainers integration tests); about 1,270 web tests (Vitest + axe); Playwright E2E-01 and E2E-02a (API + UI) |
 
 ### Modules and schemas
 
@@ -46,11 +45,15 @@ files are the programme's memory.
 | Market | `mkt` | Legal entity GR-TEST, configuration resolver (configuration authority, D-SLC-15), rounding, GR pack values from the PRDs with legalStatus |
 | Product | `pfc` | Motor Private Car (MOTOR-GR 1.0): MTPL + own damage + windscreen, MOTOR-RISK question set, charge types, write-once versions resolved by date |
 | Rating | `rat` | Decision-table rating on the shared rule engine (illustrative tariff, D-SLC-04), IPT from MKT, content-addressed worksheets |
-| Underwriting | `uw` | PRE_QUOTE / PRE_BIND rule sets: accept, refer or decline (illustrative thresholds) |
+| Underwriting | `uw` | PRE_QUOTE / PRE_BIND rule sets: accept, refer or decline (illustrative thresholds); issue list and **decide** (approve/reject with reason), SoD over every job participant, fingerprinted approvals (D-UW-01) |
 | Policy | `pol` | Submission → draft → quote → bind; policy/term/transaction/segment with bitemporal storage, exclusion constraints and append-only triggers; gapless policy numbers |
 | Billing | `bil` | Account, charge intake, ANNUAL invoice (gapless number), payment, allocation, sealed sub-ledger, `BillingEntryPosted` |
 | Compliance | `cmp` | Fiscal document request through the GR **stub** channel (never bound in Production) |
-| Finance | `fin` | Posting rules as data, intake from `BillingEntryPosted` only (D-SLC-12), balanced append-only sealed journals, gapless journal numbers |
+| Finance | `fin` | Posting rules as data (rule set v2), intake from `BillingEntryPosted` and CLM `ReserveChanged`/`PaymentIssued` (D-SLC-12, D-SL2-08), balanced append-only sealed journals, gapless journal numbers, journals by claim |
+| Platform (slice 2) | `plt` | Approval requests (maker ≠ checker incl. the maker's principal, content hash, in-process request only, `verifyForExecution` binds type + subject), CLM authority types with illustrative limits (D-SL2-03/13) |
+| Policy (slice 2) | `pol` | `pol.Snapshot.get` at an instant (immutable ref, byte-identical re-read), policy search by number/insured (POST) |
+| Billing (slice 2) | `bil` | Payee accounts (IBAN encrypted + blind index, masked), claim-payment disbursements (duplicate key per claim, screening fail-closed, PLT approval verified), stub VoP/bank, sealed disbursement entries |
+| Claims | `clm` | FNOL (staff), claim/exposure/claimant/incident, cover on the POL snapshot, gapless claim numbers, search, close guard; reserve lines, sealed financial transactions, transaction sets with authority on exposure totals and cumulative paid, one PLT approval per referred authority, derived balances, payments via BIL, `ReserveChanged`/`PaymentIssued` |
 
 ## 2. How to run and test it
 
@@ -83,9 +86,13 @@ docker compose -p coreins -f infra/local/compose.yaml down   # add -v to wipe th
   | User | Role | Can do |
   |---|---|---|
   | `underwriter` | Staff.Underwriter | Customers, quotes, bind, policy; reads invoices (D-SLC-20) |
+  | `uwsenior` | Staff.Underwriter + Staff.UnderwritingManager | Decides underwriting referrals (not on jobs they took part in) |
   | `billing` | Staff.Billing | Accounts, invoices, payments |
   | `finance` | Staff.Finance | Journals |
+  | `claims` | Staff.ClaimsHandler | FNOL, exposures, reserves and payments within EUR 5,000 (illustrative), close |
+  | `claimsmgr` | Staff.ClaimsManager | Approvals inbox, limits up to EUR 50,000 (illustrative) |
   | `admin` | Platform.Admin | Product import and the rest |
+  | `superuser` | every role above | Everything for demos; still cannot approve its own requests |
 
   The token is per tab and is invalidated when the api restarts; a 401 sends you back to sign-in.
 - `infra/local/smoke.sh` and `infra/local/README.md` have curl examples.
@@ -100,7 +107,7 @@ KEEP_STACK=1 tests/e2e/run-e2e01.sh   # leave it running;  SKIP_BUILD=1 reuses t
 - **What it asserts:** the full money path in integer cents (premium, IPT, total, invoice items = policy charge lines, PAID, every journal balanced, clearing accounts net to zero) and as-of reads.
 - **UI spec:** calls `alive(page)` after every navigation to catch render loops.
 
-### Automated E2E-02a (claims happy path, API level)
+### Automated E2E-02a (claims happy path, API and UI)
 ```bash
 tests/e2e/run-e2e02.sh          # fresh "coreins-e2e02" stack (ports 26500+, image coreins-host:e2e02), then down -v
 python infra/local/seed-demo.py http://127.0.0.1:5000 --claims   # demo data plus one CLOSED paid claim and one OPEN claim with a reserve
@@ -108,7 +115,14 @@ python infra/local/seed-demo.py http://127.0.0.1:5000 --claims   # demo data plu
 - **Path:** policy in force (term starts seconds ahead, loss dated inside it) → FNOL → payee account → reserves (1,200.00 approved at submit; +5,300.00 referred, self-approval refused, manager approves) → FINAL payment 6,200.00 (release of 300.00 proposed) → BIL CLEARED → FIN journals → close.
 - **Asserts (integer cents):** open reserve 0, paid = incurred = 620000, every claim journal balanced, GL-5110 net debit 620000, GL-2210/2510/2530 net 0, GL-1110 −620000, disbursement `sourceId` = claim payment id, no IBAN in any response.
 
-### CI (`.github/workflows/`)
+- **UI spec** (`e2e02-ui.spec.ts`): the same journey through the claims screens as `claims` and `claimsmgr` in two browser contexts, asserting the IBAN never appears in a request URL.
+
+### Local merge gate (replaces CI while Actions is blocked, D-USR-12)
+Before every push: `dotnet build CoreIns.sln -c Release`, **every** .NET test project, `ContractGen -- --check`, all web
+gates (use `npx vitest run --maxWorkers=2` when the machine is busy), and for runtime-affecting merges
+`tests/e2e/run-e2e01.sh` and `tests/e2e/run-e2e02.sh`. Not covered locally: CodeQL, Trivy, Bicep lint.
+
+### CI (`.github/workflows/`) — currently not running (account billing)
 - **`ci.yml`:**
   - .NET build and tests (including Testcontainers), web gates (including Prettier `format:check`), Bicep plus the Key Vault least-privilege guard, container image and Trivy scan, SBOMs.
   - **e2e01** job: compose stack plus Playwright Chromium.
@@ -130,6 +144,8 @@ python infra/local/seed-demo.py http://127.0.0.1:5000 --claims   # demo data plu
 3. **Policy view:** status (Scheduled / In force / Expired from "as of"), covers, charge lines, invoices.
 4. **Billing** (as `billing`): invoice with the **stub** fiscal document notice. Record an exact payment and it becomes **Paid**. Paying a different amount goes to suspense rather than being guessed.
 5. **Finance** (as `finance`): journals per policy number, each balanced. Accounts carry *Illustrative (PRD-09)* or *Technical placeholder* badges.
+6. **Referrals:** quote a 1991 car (or a driver aged 18–20, or a value over 100,000) as `underwriter` → bind shows why it is referred → as `uwsenior` (second browser profile) Policies → Underwriting referrals → approve with a reason → `underwriter` checks again and binds.
+7. **Claims** (as `claims`; seed with `seed-demo.py --claims`): Claims → New claim → find the policy → loss inside the term → claim file (stage strip, exposures, money card, history) → Financials tab: capture payee (IBAN GR1601101250000000012300695), reserve 1,200 (approved at once), reserve +5,300 (needs approval) → as `claimsmgr` approve in the inbox → FINAL payment 6,200 (system proposes the −300 release) → manager approves → payment cleared → close. Finance shows the claim's journals.
 
 ## 4. Architecture rules every builder must follow
 
@@ -212,6 +228,26 @@ python infra/local/seed-demo.py http://127.0.0.1:5000 --claims   # demo data plu
 none that blocked, but **a real browser found two render-loop freezes that jsdom unit tests could not**. Hence the
 browser-level E2E and the `alive(page)` checks.
 
+### Slice 2 — claims (Phase 3, `SLICE-PLAN-2.md`)
+
+| WP | Model | Review outcome | Notable |
+|---|---|---|---|
+| SL2-POL-SNAP | Sonnet | deep **FAIL → fixed**: a forged snapshot ref with a future knownAt bypassed the check | Deferrals D-SL2-09 (knownAt race, policy row not bitemporal) |
+| SL2-PLT | strongest | deep **FAIL → fixed**: HTTP request let the maker set authority and supersede a module's request; an AI maker's principal could approve | Request in-process only; verify binds type + subject |
+| SL2-BIL-DISB | strongest | deep **FAIL → fixed**: duplicate key never fired (double payment) | `CLM_CLAIM_PAYMENT`; first account without cooling-off (D-SL2-10) |
+| SL2-CLM-CORE | strongest | deep **FAIL → fixed**: did not compile against the merged POL contract | P1 free text encrypted at rest (D-SL2-11) |
+| SL2-FIN-CLM | strongest | deep **PASS first round** | Fail-closed follow-ups D-SL2-12 |
+| SL2-CLM-MONEY | strongest | deep **FAIL → fixed**: split reserves escaped DENY; no cumulative payment check; mixed set checked one authority | Authority on exposure totals and cumulative paid; one approval per referred authority (D-SL2-13) |
+| SL2-UI-CLM | Sonnet | light + live browser walk **PASS** (two rounds) | The walk found 5 real bugs (wrong cover code etc.) |
+| SL2-E2E | Sonnet | integration | API + UI specs; found two test races, no product regression |
+| Side: UW referral decisions | strongest | deep **FAIL → fixed**: job creator could approve; rejection laundering via REST evaluate | D-UW-01, user `uwsenior` |
+| Side: SL-UX restyle | strongest | user visual acceptance (D-USR-11/13) | Whole UI to the Aegean mockup, focus ring, claim file |
+| Side: superuser, 403 banner, wizard errors | Sonnet | light | Dev-only all-roles user; plain errors |
+
+**Six of seven deep first-round reviews found a real defect again**, mostly in authority/SoD. Pattern for future WPs:
+authority must be checked on **aggregates** (totals, cumulative), never per line, and every approval must be bound to
+its exact subject, type and content.
+
 ## 7. Key decisions index (see DECISIONS.md for the full text)
 
 - **Programme and process:**
@@ -232,8 +268,17 @@ browser-level E2E and the `alive(page)` checks.
   - 21: acceptance and follow-ups.
 - **Architecture:** D-ARC-34 (ledger sealing), D-ARC-26 (outbox ordering), D-ARC-27 (Money precision), D-CON-08b/c (Job state model).
 - **Regulatory:** D-REG-01..07, D-REG-06a (levy split absent); §G lists the open legal questions.
+- **Slice 2 and 2026-10-08:** D-USR-10 (claims slice), D-SL2-01..13 (scope, illustrative limits and categories, stubs, EUR only, posting sources, review rulings, authority dimensions), D-UW-01 (referral decisions), D-USR-11..14 (mockup is binding; CI skipped, local gate; restyle accepted; up to 6 agents), D-ARC-37 (PII-absence assertions).
 
 ## 8. Known gaps, deferrals and follow-ups
+
+- **From slice 2:**
+  - Out of scope (D-SL2-01): MTPL bodily injury and statutory offer clocks, fiscal settlement receipt, recoveries, RI, Friendly Settlement, letters, WRK activities, fraud, cat events, vendors, deductibles.
+  - Payment holds, reissue and void (D-SL2-13); leftover PLT inbox items after a set is rejected need in-process withdrawal.
+  - D-SL2-09 POL knownAt race and policy-row versioning must be solved before endorsements.
+  - Claims UI gaps: no "transaction sets of a claim" read, dry run returns no authority checks, approval `diff` untyped, close-guard detail not in `errors[]`.
+  - UW: per-rule sensitive inputs and tolerances (REQ-UW-091/037), UWApproval entity; the referral **workbench** (mockup «Ανάληψη κινδύνου») was started then paused by the user (branch `worktree-agent-ac9c66400c2402b05`, WIP).
+  - Home dashboard is thin for some roles: no unfiltered lists for policies/parties/claims, no activity feed or KPI time series.
 
 - **From slice acceptance (D-SLC-21):**
   - The dev sign-in Select is intermittently unreliable under remote-driven clicks.
@@ -243,7 +288,7 @@ browser-level E2E and the `alive(page)` checks.
   - The policy journal view omits the cash-receipt journal; it needs a billing-account view.
   - A malformed bearer token returns 500 instead of 401.
   - Customers with policies still show PROSPECT.
-  - The wizard should require vehicle value when own damage is selected.
+  - The wizard should require vehicle value when own damage is selected (being fixed 2026-10-08 with plain rating-error messages).
 - **Platform:**
   - An out-of-range JSON number gives 500 (D-ARC-33).
   - A failed nested idempotent command leaves an InProgress record (D-ARC-35).
@@ -299,16 +344,22 @@ browser-level E2E and the `alive(page)` checks.
   2. The builder works in an isolated git worktree (`.claude/worktrees/`, git-ignored). It builds natively, merges main when told, and commits to its own branch only.
   3. A separate reviewer gives PASS/FAIL. Light for routine code; deep (strongest model) on the first round for security, money and temporal code.
   4. On FAIL, the builder is resumed with the defect list, and the fix is re-checked light. Escalate to the user after 3 failures.
-  5. Merge `--no-ff`, then run the **full gate** (D-PRG-17/18), then push and watch CI.
+  5. Merge `--no-ff` **in the orchestrator worktree** `.claude/worktrees/orchestrator` (branch main; never in the shared checkout, which another session uses), then run the **local gate** (§2), then push, then rebuild the user's `coreins` stack.
   6. On solution or appsettings conflicts, keep both sides.
   7. Tell running builders to merge main.
-- **Parallelism:** at most 4 agents. Start the next batch early on top of an unreviewed reference branch when the review's likely findings won't change the pattern being copied (this saved hours in the slice). Code against generated fakes (interface-first); an integration WP wires the real modules at the end.
+  8. UI work: side-by-side screenshots against the mockup are part of the review (D-USR-11); share them with the user as FYI, do not wait for approval (the user wants the work to keep moving).
+- **Parallelism:** at most 6 agents (D-USR-14). Start the next batch early on top of an unreviewed reference branch when the review's likely findings won't change the pattern being copied (this saved hours in the slice). Code against generated fakes (interface-first); an integration WP wires the real modules at the end.
 - **Lessons learned:**
   - Deep reviews pay off on security, money and temporal code. Every one found a real defect, and two modules made the same ledger mistake, which became a rule.
   - Unit tests with mocks miss real-data UI bugs. Test against the real stack in a real browser before calling UI done.
   - Run every test project before merging; a skipped suite turned CI red twice.
   - Keep wall-clock assertions loose; machine load caused flakes.
   - Briefs must not contradict the PRD. The FIN posting source was wrong in the brief, and the builder caught it.
+  - (Slice 2) Visual fidelity must be reviewed explicitly; behaviour/a11y reviews let a plain UI through for a whole slice.
+  - (Slice 2) Authority and SoD are the most common deep-review findings: check aggregates, bind approvals to subject + type + hash, collect every job participant.
+  - (Slice 2) Builders must commit early: another session deleted worktrees and uncommitted work was lost twice.
+  - (Slice 2) E2E waits must wait for the complete expected set of journals, not the first account seen.
+  - (Slice 2) On this laptop (Core Ultra 7 165U, 14 threads) 4–6 agents saturate the CPU; run vitest with `--maxWorkers=2`, tear down isolated stacks promptly, watch disk space.
 - **Cost and time:**
   - Foundations took about 16–20M agent tokens over about 1.5 days.
   - The slice took about 6–7M sub-agent tokens over about 10–11 wall-clock hours: builders 300k–720k each, deep reviews about 150k–215k, light reviews about 70k–90k.
@@ -316,16 +367,18 @@ browser-level E2E and the `alive(page)` checks.
 
 ## 11. Dev-machine notes
 
-- The user's stack runs as compose project `coreins` with host ports 25000+ (`infra/local/.env`, git-ignored).
-- Several unrelated containers run on this machine: never stop them.
+- The user's stack runs as compose project `coreins` with host ports 25000+ (`infra/local/.env`, git-ignored). Rebuild it from the orchestrator worktree after every pushed merge (the user wants Docker current).
+- The main checkout `core-insurance-app/` is shared with another session ("training portal", untracked `training-portal/` folder). Never switch branches there and never delete `.claude/worktrees`.
+- Several unrelated containers and other sessions run on this machine: never stop them.
 - Claude in Chrome: remote-driven clicks on React Aria Select popovers are unreliable. Pick from the hidden native select via form input, or test with Playwright.
 - Chrome copies sessionStorage into tabs opened from an existing tab, so a new tab may carry a stale dev token.
 
 ## 12. What comes next (the user decides)
 
-1. **Recommended: a second thin slice, claims (E2E-03/04 style).** FNOL → coverage check → reserve → payment → FIN posting. It proves money going out as well as coming in before widening. It touches CLM (new), DOC (minimal), WRK (activities), plus BIL/FIN disbursement.
-2. **Widen wave by wave (W1 → W9)** toward the full Motor MVP, finishing each backlog WP the slice touched (D-SLC-02 tracks partial coverage) and then the untouched modules.
-3. **Harden what exists:** the D-SLC-21 follow-ups, platform items (D-ARC-33/35), design-system polish, Azure environment and deploy.
+1. **Recommended: slice 3 — W6 servicing** (endorsement, cancellation with refund and fiscal credit note E2E-03, renewal E2E-04, non-payment lapse E2E-07, distance withdrawal E2E-08). Without these it is not a sellable motor product. It must first solve D-SL2-09 (POL knownAt race, policy-row versioning). A planning agent was started and stopped by the user; restart it when the user says so.
+2. **Underwriting referral workbench** (mockup «Ανάληψη κινδύνου»), paused WIP branch exists.
+3. **Widen wave by wave (W1 → W9)**; estimate on 2026-10-08: about 180–250 agent wall-clock hours (3–5 weeks on this laptop) and 120–180M tokens to a complete Motor MVP, plus the external items in §9.
+4. **Harden what exists:** D-SLC-21 follow-ups, platform items (D-ARC-33/35), Azure environment and deploy; restore GitHub CI once billing is fixed (or the repo is made public — user's decision).
 
 **To start any new slice:** write a `SLICE-PLAN`-style table (batches, models, review depth), brief builders from the
 template, point them at `docs/module-pattern.md`, and finish with an integration/E2E WP that adds a browser-level E2E
