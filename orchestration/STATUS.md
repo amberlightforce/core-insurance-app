@@ -37,7 +37,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 
 | WP | Status | Owner | Notes |
 |---|---|---|---|
-| SL2-PLT | building | opus | approvals, claims roles, screening stub |
+| SL2-PLT | **merged** (c7df013) | opus | deep review FAIL (D1 HTTP request let maker set authority; D2 AI-maker principal could approve) → fixed, orchestrator re-check; gate green: integration 342, all 10 suites |
 | SL2-POL-SNAP | **merged** (597f2fe) | sonnet | deep review FAIL (D1 forged future knownAt ref) → fixed, orchestrator re-check; gate green: integration 303, all 10 suites |
 | SL2-BIL-DISB | **merged** | opus | deep review FAIL (D1 duplicate key never fired) → fixed + M1/M3/M4/M6, orchestrator re-check; gate green: integration 325, all 10 suites |
 | SL2-CLM-CORE | building | opus | claim reference vertical |

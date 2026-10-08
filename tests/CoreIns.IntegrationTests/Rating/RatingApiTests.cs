@@ -156,7 +156,7 @@ public sealed class RatingApiTests(PostgresFixture database) : IClassFixture<Pos
             .ShouldBeGreaterThanOrEqualTo(1);
         var payload = await ScalarAsync<string>(
             $"SELECT payload::text FROM plt.outbox_message WHERE event_type = 'RatingCalculated' AND business_keys->>'worksheetId' = '{response.WorksheetId}' LIMIT 1");
-        payload.ShouldNotContain("1985"); // no birth date or other driver data
+        payload.ShouldNotContain("1985-06-15"); // no birth date or other driver data (the full date: ids and hashes can contain "1985" by chance, D-ARC-37)
         payload.ShouldContain("coveragePremiumTotal");
     }
 
@@ -306,7 +306,7 @@ public sealed class RatingApiTests(PostgresFixture database) : IClassFixture<Pos
         var (_, body) = await SendAsync(_client, HttpMethod.Get, $"/api/rat/v1/worksheets/{a.WorksheetId}");
 
         b.WorksheetId.ShouldBe(a.WorksheetId);
-        body!["worksheet"]!.ToJsonString().ShouldNotContain("1985");
+        body!["worksheet"]!.ToJsonString().ShouldNotContain("1985-0");
     }
 
     [Fact]
