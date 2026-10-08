@@ -46,6 +46,7 @@ import { ClaimStatusPill } from './ClaimStatusPill';
 import { closeGuardFindings } from './closeGuard';
 import { closeOutcomes, exposureDuplicateReasons } from './codes';
 import { FinancialsTab } from './FinancialsTab';
+import { ReverifyBanner } from './reverify/ReverifyBanner';
 import { StageStrip } from './StageStrip';
 import { amountOf, claimStages } from './stages';
 import { TruncatedRef } from './TruncatedRef';
@@ -352,11 +353,7 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
           {t('fnol.coverageInQuestion.body')}
         </Banner>
       ) : null}
-      {summary.snapshotStatus !== 'VERIFIED' ? (
-        <Banner variant="info" live="none" title={t('view.snapshot.notVerifiedTitle')}>
-          {t(`view.snapshot.status.${summary.snapshotStatus}`)}
-        </Banner>
-      ) : null}
+      <ReverifyBanner claim={claim} />
       <Tabs
         aria-label={t('view.tabs.label')}
         items={tabItems}
