@@ -133,6 +133,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
             entity.HasIndex(e => new { e.LegalEntityId, e.PolicyNumber }).IsUnique().HasDatabaseName("ux_policy_number");
+            entity.HasIndex(e => new { e.LegalEntityId, e.PolicyholderPartyId }).HasDatabaseName("ix_policy_policyholder");
         });
 
         modelBuilder.Entity<PolicyTermRow>(entity =>

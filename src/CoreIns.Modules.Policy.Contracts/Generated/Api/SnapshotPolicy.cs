@@ -4,9 +4,9 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Policy.search result row (REQ-POL-014 subset: policy number and insured party)</summary>
+/// <summary>Generated contract member.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
-public sealed record PolicySearchItem
+public sealed record SnapshotPolicy
 {
     /// <summary>Contract member 'policyId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
@@ -20,20 +20,18 @@ public sealed record PolicySearchItem
     [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
     public required string ProductCode { get; init; }
 
-    /// <summary>Contract member 'insuredPartyId'.</summary>
+    /// <summary>The policyholder (PTY party) as known at knownAt</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'insuredPartyId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("insuredPartyId")]
     public required global::System.Guid InsuredPartyId { get; init; }
 
-    /// <summary>Status at validAt as known at knownAt (now); absent when no term is known</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.Modules.Policy.Contracts.Api.TermStateCode? Status { get; init; }
+    /// <summary>Contract member 'legalEntity'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalEntity")]
+    public required string LegalEntity { get; init; }
 
-    /// <summary>Period of the term that determines the status</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("termPeriod")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.InstantRange? TermPeriod { get; init; }
+    /// <summary>Contract member 'jurisdiction'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jurisdiction")]
+    public required string Jurisdiction { get; init; }
 }

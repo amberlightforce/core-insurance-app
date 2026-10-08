@@ -42,9 +42,23 @@ public interface IPolicyPolicyService
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN, CLM, CMP, PFC.</para>
+    /// <para>Errors: POL-ERR-VALIDATION (422).</para>
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    /// <param name="criteria">PRD: "criteria"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.PolicySearchPage> SearchAsync(string? cursor = null, int? limit = null, string? criteria = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="policyNumber">Exact policy number (a business key, not personal data). Other criteria use the POST form (D-SLC-05).</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.PolicySearchPage> SearchAsync(string? cursor = null, int? limit = null, global::CoreIns.SharedKernel.Identifiers.PolicyNumber? policyNumber = null, global::System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>Policy search (POST form, criteria in the body)</summary>
+    /// <remarks>
+    /// <para>Operation pol.Policy.searchByCriteria (query; HTTP POST /api/pol/v1/policies/search).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full. Wave W4.</para>
+    /// <para>Exposure: ui; consumers: CLM.</para>
+    /// <para>Errors: POL-ERR-VALIDATION (422).</para>
+    /// </remarks>
+    /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
+    /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
+    /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.PolicySearchPage> SearchByCriteriaAsync(global::CoreIns.Modules.Policy.Contracts.Api.PolicySearchCriteria request, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
 }
