@@ -153,13 +153,35 @@ internal sealed record MotorRisk(
 
         // Exact or rejected (D-ARC-27): plain decimal digits only, at most two decimals, no rounding on the way in.
         // The value is normalised to scale 2 so that 70004 and 70004.00 are the same input.
-        if (text is null || !System.Text.RegularExpressions.Regex.IsMatch(text, @"^[0-9]{1,9}(\.[0-9]{1,2}0*)?$", System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromMilliseconds(50))
+        if (text is null || !IsPlainAmount(text)
             || !decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value) || value is <= 0m or > 100_000_000m)
         {
             throw Input(path, "A positive amount with at most two decimals is expected.");
         }
 
         return decimal.Round(value, 2) + 0.00m;
+    }
+
+    /// <summary>
+    /// Plain decimal text: 1–9 digits, optionally a point and 1–2 decimals followed only by zeros (same language as
+    /// <c>^[0-9]{1,9}(\.[0-9]{1,2}0*)?$</c>). Hand-written so that no regex timeout can turn a valid request into a 500 under load.
+    /// </summary>
+    private static bool IsPlainAmount(string text)
+    {
+        var point = text.IndexOf('.', StringComparison.Ordinal);
+        var whole = point < 0 ? text : text[..point];
+        if (whole.Length is < 1 or > 9 || !whole.All(char.IsAsciiDigit))
+        {
+            return false;
+        }
+
+        if (point < 0)
+        {
+            return true;
+        }
+
+        var fraction = text[(point + 1)..];
+        return fraction.Length >= 1 && fraction.All(char.IsAsciiDigit) && (fraction.Length <= 2 || fraction[2..].All(c => c == '0'));
     }
 
     private static DomainException Input(string path, string message) =>

@@ -9,6 +9,7 @@ using CoreIns.Modules.Underwriting.Domain;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts;
+using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel.Identifiers;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -478,6 +479,36 @@ public sealed class IssueReconciliationTests
         (Risk() with { ClaimsLast5Years = 1 }).Fingerprint(Effective, RuleSet, Rule).ShouldNotBe(fingerprint);
         Risk().Fingerprint(Effective.AddDays(1), RuleSet, Rule).ShouldNotBe(fingerprint);
         fingerprint.ShouldNotContain("1985");
+    }
+
+    // The vehicle value check is hand-written (no regex timeout can fail a bind under load); same language as before.
+    [Theory]
+    [InlineData("3000", true)]
+    [InlineData("3000.5", true)]
+    [InlineData("3000.50", true)]
+    [InlineData("3000.500", true)]
+    [InlineData("123456789", true)]
+    [InlineData("1234567890", false)]
+    [InlineData("3000.", false)]
+    [InlineData(".5", false)]
+    [InlineData("3000.501", false)]
+    [InlineData("-1", false)]
+    [InlineData("1e5", false)]
+    [InlineData("١٢٣", false)]
+    public void The_vehicle_value_is_a_plain_amount_with_at_most_two_decimals(string value, bool valid)
+    {
+        var tree = Rating.RatingTestSupport.RiskTree(value: value);
+
+        var parse = () => UwRisk.Parse(System.Text.Json.JsonDocument.Parse(tree.ToJsonString()).RootElement);
+
+        if (valid)
+        {
+            parse().VehicleValue.ShouldBe(decimal.Parse(value, CultureInfo.InvariantCulture));
+        }
+        else
+        {
+            Should.Throw<DomainException>(parse).Error.Code.Value.ShouldBe("UW-ERR-SNAPSHOT");
+        }
     }
 
     private static Dictionary<string, string> Hits(params (string Key, string Fingerprint)[] hits) => hits.ToDictionary(h => h.Key, h => h.Fingerprint);

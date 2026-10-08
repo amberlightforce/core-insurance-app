@@ -74,13 +74,35 @@ internal sealed record UwRisk(
         }
 
         var text = element.ValueKind == JsonValueKind.String ? element.GetString() : element.ValueKind == JsonValueKind.Number ? element.GetRawText() : null;
-        if (text is null || !System.Text.RegularExpressions.Regex.IsMatch(text, @"^[0-9]{1,9}(\.[0-9]{1,2}0*)?$", System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromMilliseconds(50))
+        if (text is null || !IsPlainAmount(text)
             || !decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value))
         {
             throw new FormatException("the vehicle value must be an amount with at most two decimals");
         }
 
         return value;
+    }
+
+    /// <summary>
+    /// Plain decimal text: 1–9 digits, optionally a point and 1–2 decimals followed only by zeros (same language as
+    /// <c>^[0-9]{1,9}(\.[0-9]{1,2}0*)?$</c>). Hand-written so that no regex timeout can turn a valid request into a 500 under load.
+    /// </summary>
+    private static bool IsPlainAmount(string text)
+    {
+        var point = text.IndexOf('.', StringComparison.Ordinal);
+        var whole = point < 0 ? text : text[..point];
+        if (whole.Length is < 1 or > 9 || !whole.All(char.IsAsciiDigit))
+        {
+            return false;
+        }
+
+        if (point < 0)
+        {
+            return true;
+        }
+
+        var fraction = text[(point + 1)..];
+        return fraction.Length >= 1 && fraction.All(char.IsAsciiDigit) && (fraction.Length <= 2 || fraction[2..].All(c => c == '0'));
     }
 }
 
