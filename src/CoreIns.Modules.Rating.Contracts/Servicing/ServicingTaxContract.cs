@@ -39,6 +39,28 @@ public enum ServicingTreatmentAction
     InsurerBears,
 }
 
+/// <summary>What the customer is credited (REQ-MKT-330).</summary>
+public enum ServicingCustomerCredit
+{
+    ProRata,
+    Full,
+    None,
+}
+
+/// <summary>Whether the authority liability is reduced (REQ-MKT-330).</summary>
+public enum ServicingAuthorityLiability
+{
+    Reduce,
+    NotReduce,
+}
+
+/// <summary>Fiscal document of the treatment (REQ-MKT-330).</summary>
+public enum ServicingFiscalDocument
+{
+    CreditNote,
+    None,
+}
+
 /// <summary>A premium delta to tax. The caller supplies one item per (delta x tax charge type) it wants a line for.</summary>
 /// <param name="DeltaRef">Caller's reference, echoed back.</param>
 /// <param name="Element">Element (coverage) the delta belongs to.</param>
@@ -85,8 +107,11 @@ public sealed record ServicingTaxLinesRequest(
 
 /// <summary>One tax line of a delta.</summary>
 /// <param name="CalculationRuleId">Rule of the calculation; null when no calculation ran (KEEP_NOT_REDUCED, INSURER_BEARS).</param>
-/// <param name="LegalStatus">Weakest status of calculation and treatment (PendingOpinion beats Settled).</param>
-/// <param name="Provisional">True when the weakest status is not Settled / NotRegulatory.</param>
+/// <param name="CustomerCredit">What the customer is credited, from the treatment.</param>
+/// <param name="AuthorityLiability">Whether the authority liability is reduced, from the treatment.</param>
+/// <param name="FiscalDocument">Fiscal document of the treatment.</param>
+/// <param name="LegalStatus">Weakest status of calculation and treatment (PendingOpinion beats Settled; NotRegulatory is never reported as Settled).</param>
+/// <param name="Provisional">True unless the weakest status is exactly Settled.</param>
 public sealed record ServicingTaxLine(
     string DeltaRef,
     string Element,
@@ -97,6 +122,9 @@ public sealed record ServicingTaxLine(
     decimal? Rate,
     Money Amount,
     ServicingTreatmentAction TreatmentAction,
+    ServicingCustomerCredit CustomerCredit,
+    ServicingAuthorityLiability AuthorityLiability,
+    ServicingFiscalDocument FiscalDocument,
     string? CalculationRuleId,
     string? CalculationRuleVersion,
     string TreatmentRuleId,

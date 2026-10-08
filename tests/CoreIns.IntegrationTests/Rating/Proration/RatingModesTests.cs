@@ -109,7 +109,8 @@ public sealed class RatingModesTests(PostgresFixture database) : IClassFixture<P
 
     private static RateRateRequest Endorsement(string? pinned, string basis = "2026-11-01", string end = "2027-02-01", string? productVersion = null)
     {
-        var request = RateRequest(mode: "ENDORSEMENT", basisDate: basis, periodEnd: end, ratingArtefactHash: pinned);
+        var request = RateRequest(mode: "ENDORSEMENT", basisDate: basis, periodEnd: end);
+        request = request with { Envelope = request.Envelope with { PinnedRatingArtefactHash = pinned is null ? null : Sha256Hash.Parse(pinned) } };
         return productVersion is null
             ? request
             : request with { Envelope = request.Envelope with { ProductVersion = ProductVersionNumber.Parse(productVersion) } };
@@ -155,6 +156,11 @@ public sealed class RatingModesTests(PostgresFixture database) : IClassFixture<P
         (await ErrorCodeAsync(Endorsement(null))).ShouldBe("RAT-ERR-INPUT"); // never falls back to the active artefact
         (await ErrorCodeAsync(Endorsement(new string('d', 64)))).ShouldBe("RAT-ERR-INPUT");
         (await ErrorCodeAsync(Endorsement(_oldHash, productVersion: "2.0"))).ShouldBe("RAT-ERR-INPUT");
+        // a named ratingArtefactHash that disagrees with the pin is refused too
+        var disagree = Endorsement(_oldHash);
+        (await ErrorCodeAsync(disagree with { Envelope = disagree.Envelope with { RatingArtefactHash = Sha256Hash.Parse(_newHash) } })).ShouldBe("RAT-ERR-INPUT");
+        // the old way of pinning (ratingArtefactHash alone) is not a pin
+        (await ErrorCodeAsync(RateRequest(mode: "ENDORSEMENT", basisDate: "2026-11-01", periodEnd: "2027-02-01", ratingArtefactHash: _oldHash))).ShouldBe("RAT-ERR-INPUT");
         var otherProduct = Endorsement(_oldHash);
         (await ErrorCodeAsync(otherProduct with { Envelope = otherProduct.Envelope with { ProductCode = "HOME-GR" } })).ShouldBe("RAT-ERR-INPUT");
     }
@@ -191,6 +197,11 @@ public sealed class RatingModesTests(PostgresFixture database) : IClassFixture<P
         resolved.RatingArtefactHash!.Value.Value.ShouldBe(_newHash);
         resolved.WorksheetId.ShouldBe(named.WorksheetId);
 
+        // A stale hash (B was already active at the new term start, so A is not) is refused, not repriced under the old tariff.
+        (await ErrorCodeAsync(RateRequest(mode: "RENEWAL", basisDate: "2027-02-01", periodEnd: "2028-02-01", ratingArtefactHash: _oldHash))).ShouldBe("RAT-ERR-INPUT");
+        // ...and so is a forged one.
+        (await ErrorCodeAsync(RateRequest(mode: "RENEWAL", basisDate: "2027-02-01", periodEnd: "2028-02-01", ratingArtefactHash: new string('e', 64)))).ShouldBe("RAT-ERR-INPUT");
+
         // A renewal is a full year, like new business.
         (await ErrorCodeAsync(RateRequest(mode: "RENEWAL", basisDate: "2027-02-01", periodEnd: "2027-08-01"))).ShouldBe("RAT-ERR-PERIOD");
     }
@@ -217,6 +228,14 @@ public sealed class RatingModesTests(PostgresFixture database) : IClassFixture<P
 
         // 1.0 is untouched: its artefact still refuses a 1.1 envelope.
         (await ErrorCodeAsync(V11(Endorsement(_oldHash)))).ShouldBe("RAT-ERR-INPUT");
+    }
+
+    [Fact]
+    public async Task An_undefined_mode_value_is_RAT_ERR_ENVELOPE()
+    {
+        var request = RateRequest();
+
+        (await ErrorCodeAsync(request with { Envelope = request.Envelope with { Mode = (RateRateRequest.EnvelopeDetail.ModeValue)99 } })).ShouldBe("RAT-ERR-ENVELOPE");
     }
 
     [Fact]

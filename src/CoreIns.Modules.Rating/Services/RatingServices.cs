@@ -268,6 +268,17 @@ internal sealed class RatingRateService(
             hash = found.ArtefactHash;
         }
 
+        if (envelope.Mode == RateRateRequest.EnvelopeDetail.ModeValue.Renewal && envelope.RatingArtefactHash is not null)
+        {
+            // The caller's resolution is verified, not trusted: a stale or forged hash would reprice the renewal under an old tariff.
+            var active = await store.ResolveAsync(envelope.ProductCode, version, basis, cancellationToken).ConfigureAwait(false)
+                ?? throw Error("NO-ACTIVE-ARTEFACT", $"No rating artefact is active for {envelope.ProductCode} on {basis:yyyy-MM-dd}.");
+            if (!string.Equals(active.ArtefactHash, hash, StringComparison.Ordinal))
+            {
+                throw Error("INPUT", "The named rating artefact is not the one active at the new term start; a renewal is rated under the active artefact.");
+            }
+        }
+
         // An artefact other than the one named is never substituted (REQ-RAT-049).
         var artefact = await store.LoadAsync(hash, cancellationToken).ConfigureAwait(false)
             ?? throw Error("UNKNOWN-ARTEFACT", "The named rating artefact does not exist.");

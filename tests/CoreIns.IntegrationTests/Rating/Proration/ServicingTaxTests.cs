@@ -94,10 +94,42 @@ public sealed class ServicingTaxTests
         line.LegalStatus.ShouldBe("Unverified");
         line.Provisional.ShouldBeTrue();
 
+        // NotRegulatory is not a statutory tax value: it is never reported as Settled and is provisional (refused in Production).
         var notRegulatory = new ScriptedCalculator { RateStatus = CoreIns.Modules.Market.Contracts.Spi.LegalStatus.NotRegulatory };
         line = (await Service(notRegulatory).LinesAsync(Request(Delta("d", 10m, ServicingTransactionKind.EndorsementDebit)))).Lines.Single();
-        line.LegalStatus.ShouldBe("Settled"); // Settled is weaker than NotRegulatory
-        line.Provisional.ShouldBeFalse();
+        line.LegalStatus.ShouldBe("NotRegulatory");
+        line.Provisional.ShouldBeTrue();
+        var ex = await Should.ThrowAsync<DomainException>(() => Service(notRegulatory, "Production").LinesAsync(Request(Delta("d", 10m, ServicingTransactionKind.EndorsementDebit))));
+        ex.Error.Code.Value.ShouldBe("RAT-ERR-TAX");
+
+        var draft = new ScriptedCalculator { RateStatus = CoreIns.Modules.Market.Contracts.Spi.LegalStatus.Draft };
+        line = (await Service(draft).LinesAsync(Request(Delta("d", 10m, ServicingTransactionKind.EndorsementDebit)))).Lines.Single();
+        line.LegalStatus.ShouldBe("Draft");
+        line.Provisional.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task The_treatment_detail_travels_on_the_line_for_the_POL_adapter()
+    {
+        var keep = (await Service(new ScriptedCalculator()).LinesAsync(Request(Delta("c", -50m, ServicingTransactionKind.EndorsementCredit)))).Lines.Single();
+        keep.CustomerCredit.ShouldBe(ServicingCustomerCredit.None);
+        keep.AuthorityLiability.ShouldBe(ServicingAuthorityLiability.NotReduce);
+        keep.FiscalDocument.ShouldBe(ServicingFiscalDocument.None);
+
+        var apply = (await Service(new ScriptedCalculator()).LinesAsync(Request(Delta("d", 50m, ServicingTransactionKind.EndorsementDebit)))).Lines.Single();
+        apply.CustomerCredit.ShouldBe(ServicingCustomerCredit.ProRata);
+        apply.AuthorityLiability.ShouldBe(ServicingAuthorityLiability.Reduce);
+    }
+
+    [Fact]
+    public async Task A_tax_larger_than_the_delta_or_zero_under_APPLY_is_refused()
+    {
+        var big = new ScriptedCalculator { TaxFactor = 1.5m };
+        (await Should.ThrowAsync<DomainException>(() => Service(big).LinesAsync(Request(Delta("d", 70m, ServicingTransactionKind.EndorsementDebit)))))
+            .Error.Code.Value.ShouldBe("RAT-ERR-TAX");
+        var zero = new ScriptedCalculator { TaxFactor = 0m };
+        (await Should.ThrowAsync<DomainException>(() => Service(zero).LinesAsync(Request(Delta("d", 70m, ServicingTransactionKind.EndorsementDebit)))))
+            .Error.Code.Value.ShouldBe("RAT-ERR-TAX");
     }
 
     [Fact]
@@ -203,6 +235,8 @@ public sealed class ServicingTaxTests
 
         public bool SignFlip { get; init; }
 
+        public decimal TaxFactor { get; init; } = 0.15m;
+
         public bool Boom { get; init; }
 
         public ValueTask<TaxTreatmentResult> TreatmentAsync(TaxTreatmentRequest request, CancellationToken cancellationToken = default)
@@ -238,7 +272,7 @@ public sealed class ServicingTaxTests
 
             CalculateCalls++;
             var line = request.ChargeLines.Single();
-            var amount = decimal.Round(line.PremiumAmount.Amount * 0.15m, 2, MidpointRounding.AwayFromZero) * (SignFlip ? -1m : 1m);
+            var amount = decimal.Round(line.PremiumAmount.Amount * TaxFactor, 2, MidpointRounding.AwayFromZero) * (SignFlip ? -1m : 1m);
             return ValueTask.FromResult(new TaxCalculationResult(
                 [
                     new TaxLine
@@ -260,4 +294,10 @@ public sealed class ServicingTaxTests
                 []));
         }
     }
+}
+
+internal static class ServicingTaxTestExtensions
+{
+    public static Task<ServicingTaxLinesResult> LinesAsync(this IRatingServicingTax service, ServicingTaxLinesRequest request) =>
+        service.TaxLinesAsync(request, TestContext.Current.CancellationToken);
 }

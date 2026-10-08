@@ -13,8 +13,8 @@ namespace CoreIns.Modules.Rating.Services;
 /// The rating modes of <c>rat.Rate.rate</c> and what each one changes (REQ-RAT-038..041, REQ-POL-093, REQ-POL-249 subset):
 /// <list type="bullet">
 /// <item><b>FULL / QUICK / DRY_RUN</b> (new business): unchanged. The artefact is the one the caller names, else the one active on the rating basis date.</item>
-/// <item><b>ENDORSEMENT</b>: rates under the term's pinned artefact, never the currently active one (REQ-POL-093). The pin travels in the envelope's <c>ratingArtefactHash</c> until SL3-CONTRACTS adds <c>pinnedRatingArtefactHash</c>; it is mandatory, and an unknown hash or one that belongs to another product or version is <c>RAT-ERR-INPUT</c>. Segments are the changed part of one annual term (up to a year), not full years.</item>
-/// <item><b>RENEWAL</b>: rates under the artefact active at the new term start, as the caller resolved it (<c>ratingArtefactHash</c>), else resolved here on the rating basis date, which the caller sets to the new term start. Segments are full years like new business. No cap and no change explanation in this slice.</item>
+/// <item><b>ENDORSEMENT</b>: rates under the term's pinned artefact, never the currently active one (REQ-POL-093). The pin is the envelope's <c>pinnedRatingArtefactHash</c>; it is mandatory, and an unknown hash or one that belongs to another product or version is <c>RAT-ERR-INPUT</c>. Segments are the changed part of one annual term (up to a year), not full years.</item>
+/// <item><b>RENEWAL</b>: rates under the artefact active at the new term start, as the caller resolved it (<c>ratingArtefactHash</c>), which RAT verifies against the artefact active on the rating basis date (a stale or forged hash is <c>RAT-ERR-INPUT</c>); when none is named it is resolved on that date, which the caller sets to the new term start. Segments are full years like new business. No cap and no change explanation in this slice.</item>
 /// </list>
 /// ENDORSEMENT and RENEWAL are automated decisions (PRD-03 §6.2) and bindable; QUICK and DRY_RUN never are.
 /// </summary>
@@ -65,8 +65,13 @@ internal static class RatingModes
     public static async Task<CompiledArtefact> ResolvePinnedAsync(
         RatingStore store, RateRateRequest.EnvelopeDetail envelope, string? version, CancellationToken cancellationToken)
     {
-        var pinned = envelope.RatingArtefactHash
-            ?? throw Error("INPUT", "ENDORSEMENT rates under the term's pinned rating artefact; send its hash (pinnedRatingArtefactHash).");
+        var pinned = envelope.PinnedRatingArtefactHash
+            ?? throw Error("INPUT", "ENDORSEMENT rates under the term's pinned rating artefact; send pinnedRatingArtefactHash.");
+        if (envelope.RatingArtefactHash is { } other && other != pinned)
+        {
+            throw Error("INPUT", "ratingArtefactHash and pinnedRatingArtefactHash name different artefacts.");
+        }
+
         var artefact = await store.LoadAsync(pinned.Value, cancellationToken).ConfigureAwait(false)
             ?? throw Error("INPUT", "The pinned rating artefact is unknown.");
         if (!string.Equals(artefact.Definition.ProductCode, envelope.ProductCode, StringComparison.Ordinal)

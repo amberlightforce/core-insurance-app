@@ -127,13 +127,27 @@ internal sealed class RatingServicingTax(
         }
 
         var amount = taxLine is null ? new Money(0m, delta.Delta.Currency) : ToMoney(taxLine.Amount, delta);
+        if (taxLine is not null)
+        {
+            if (Math.Abs(amount.Amount) > Math.Abs(delta.Delta.Amount))
+            {
+                throw Error("TAX", $"TaxCalculator returned a tax larger than the delta {delta.DeltaRef}; refused (fail closed).");
+            }
+
+            if (treatment.Action == TreatmentAction.Apply && amount.Amount == 0m && delta.Delta.Amount != 0m)
+            {
+                throw Error("TAX", $"TaxCalculator returned 0.00 tax for delta {delta.DeltaRef} under APPLY; refused (fail closed).");
+            }
+        }
+
         if (taxLine is not null && amount.Amount != 0m && Math.Sign(amount.Amount) != Math.Sign(delta.Delta.Amount))
         {
             throw Error("TAX", $"TaxCalculator returned a tax of the opposite sign for delta {delta.DeltaRef}; refused (fail closed).");
         }
 
+        // Only a Settled value is settled: NotRegulatory, Draft and anything unknown are provisional, and Production refuses them.
         var status = Weakest(taxLine?.LegalStatus.ToString(), treatment.LegalStatus == TreatmentLegalStatus.Settled ? "Settled" : "PendingOpinion");
-        var provisional = status is not ("Settled" or "NotRegulatory");
+        var provisional = status != "Settled";
         if (provisional && environment.IsProduction())
         {
             throw Error("TAX", $"The tax treatment or rate for delta {delta.DeltaRef} is {status}, which Production refuses (D-SLC-09).");
@@ -149,6 +163,9 @@ internal sealed class RatingServicingTax(
             taxLine?.Rate,
             amount,
             ToAction(treatment.Action),
+            ToCredit(treatment.CustomerCredit),
+            treatment.AuthorityLiability == AuthorityLiability.Reduce ? ServicingAuthorityLiability.Reduce : ServicingAuthorityLiability.NotReduce,
+            treatment.FiscalDocument == FiscalDocumentTreatment.CreditNote ? ServicingFiscalDocument.CreditNote : ServicingFiscalDocument.None,
             taxLine?.RuleId,
             taxLine?.RuleVersion,
             treatment.RuleId,
@@ -187,8 +204,28 @@ internal sealed class RatingServicingTax(
             ? new Money(money.Amount, delta.Delta.Currency)
             : throw Error("CURRENCY", $"TaxCalculator answered in {money.Currency}, not {delta.Delta.Currency.Code}, for delta {delta.DeltaRef}.");
 
+    /// <summary>The weaker of two statuses. Settled is the only strong one; every other value, NotRegulatory included, is weaker.</summary>
     private static string Weakest(string? calculation, string treatment) =>
-        calculation is null || RatingProrationEngine.Strength(treatment) >= RatingProrationEngine.Strength(calculation) ? treatment : calculation;
+        calculation is null || Rank(treatment) >= Rank(calculation) ? treatment : calculation;
+
+    private static int Rank(string status) => status switch
+    {
+        "Settled" => 0,
+        "NotRegulatory" => 1,
+        "Verify" => 2,
+        "PendingOpinion" => 3,
+        "Uncertain" or "MarketPractice" => 4,
+        "Unverified" => 5,
+        "Draft" => 6,
+        _ => 7,
+    };
+
+    private static ServicingCustomerCredit ToCredit(CustomerCredit credit) => credit switch
+    {
+        CustomerCredit.ProRata => ServicingCustomerCredit.ProRata,
+        CustomerCredit.Full => ServicingCustomerCredit.Full,
+        _ => ServicingCustomerCredit.None,
+    };
 
     private static TaxCategory ToSpi(ServicingTaxCategory category) => category switch
     {
