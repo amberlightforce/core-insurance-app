@@ -47,8 +47,8 @@
 }
 
 .segment[data-focused] {
-  background-color: var(--color-interactive-accent-bg);
-  color: var(--color-text-on-accent);
+  background-color: var(--color-state-focus-halo);
+  color: var(--color-text-primary);
 }
 
 .segment[data-disabled] {

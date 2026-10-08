@@ -161,6 +161,14 @@
   --size-hero-trend-h: 56px;
   --size-auth-card: 440px;
   --size-page-max: 1680px;
+
+  /*
+   * Focus (D-USR-13): fields draw one shape on the border box: a solid 2 px edge in border.focus plus a soft
+   * 3 px halo (v3 mockup .input:focus, crisper edge). Resolved per theme because the colours are root tokens.
+   */
+  --size-focus-halo: 3px;
+  --shadow-focus-field-solid:
+    inset 0 0 0 1px var(--color-border-focus), 0 0 0 3px var(--color-state-focus-halo);
 }
 
 [data-theme='dark'] {
