@@ -174,7 +174,7 @@ public sealed class PolicySnapshotTests(PostgresFixture database) : IClassFixtur
         var good = (await SnapshotAsync($"policyId={p.PolicyId}&validAt={Q(Iso(p.Start))}")).Text("snapshotRef");
         (await SnapshotAsync($"snapshotRef={Q(good)}&validAt={Q(Iso(p.Start))}", HttpStatusCode.UnprocessableContent)).Text("code").ShouldBe("POL-ERR-VALIDATION");
         (await SnapshotAsync($"policyId={p.PolicyId}&validAt=not-a-date", HttpStatusCode.UnprocessableContent)).Text("code").ShouldBe("POL-ERR-VALIDATION");
-        (await SnapshotAsync("policyNumber=bad%20number", HttpStatusCode.UnprocessableContent)).Text("code").ShouldBe("POL-ERR-VALIDATION");
+        (await SnapshotAsync("policyNumber=%20leading-space", HttpStatusCode.UnprocessableContent)).Text("code").ShouldBe("POL-ERR-VALIDATION");
 
         // A forged reference with a knownAt in the future is refused (it could answer differently after later changes).
         var parts = good.Split('.');
