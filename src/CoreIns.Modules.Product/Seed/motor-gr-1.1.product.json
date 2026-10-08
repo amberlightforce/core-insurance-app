@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 1,
+  "productLine": {
+    "code": "MOTOR",
+    "family": "motor",
+    "name": { "el": "Αυτοκίνητο", "en": "Motor" }
+  },
+  "product": {
+    "code": "MOTOR-GR",
+    "name": { "el": "Ιδιωτικό Αυτοκίνητο", "en": "Motor Private Car" },
+    "productType": "PERSONAL",
+    "customerType": "ANY"
+  },
+  "legalEntity": "GR-TEST",
+  "jurisdiction": "GR",
+  "version": "1.1",
+  "isAbstract": false,
+  "channels": ["STAFF", "AGENT_PORTAL", "BROKER_PORTAL", "WEB_DIRECT"],
+  "contractCurrency": "EUR",
+  "languages": ["el", "en"],
+  "terms": { "allowed": ["P12M"], "default": "P12M" },
+  "offeringRequired": false,
+  "dayCount": "TERM_RATIO",
+  "dayCountProvisional": true,
+  "dayCountNote": "PRD-03 recommends TERM_RATIO for Greek motor; confirm with finance (PRD-03 §16 item 4, D-SL3-04). Provisional, not approved.",
+  "refundMethods": [
+    {
+      "source": "Policyholder",
+      "method": "PRO_RATA",
+      "illustrative": true,
+      "reference": "D-SL3-08: illustrative commercial value; PRD-02's ShortRate SR-GR-1 is only an example (REQ-PFC-134)"
+    },
+    {
+      "source": "DistanceWithdrawal",
+      "method": "FULL_REFUND",
+      "legalStatus": "SETTLED",
+      "reference": "Law 5317/2026 Art. 72; PRD-05 REQ-POL-207; PRD-17 REQ-MKT-309"
+    }
+  ],
+  "changePermissions": {
+    "editableVehicleFields": ["vehicleValue", "usage", "garagingPostcode", "ownerType", "fuelType", "powerKw", "engineCapacityCc"],
+    "vehicleReplacement": true
+  },
+  "windows": {
+    "newBusiness": { "from": "2026-10-01", "to": null },
+    "renewal": { "from": "2026-10-01", "to": null }
+  },
+  "elements": [
+    {
+      "code": "policyLine",
+      "name": { "el": "Γραμμή συμβολαίου αυτοκινήτου", "en": "Motor policy line" },
+      "minimum": 1,
+      "maximum": 1,
+      "fields": [
+        {
+          "code": "greenCardNumber",
+          "label": { "el": "Αριθμός Πράσινης Κάρτας", "en": "Green Card number" },
+          "dataType": "TEXT",
+          "required": false,
+          "requiredAt": ["ISSUE"],
+          "piiClass": "P1",
+          "displayOrder": 1
+        }
+      ]
+    },
+    {
+      "code": "vehicle",
+      "name": { "el": "Όχημα", "en": "Vehicle" },
+      "parent": "policyLine",
+      "minimum": 1,
+      "maximum": 1,
+      "fields": [
+        { "code": "registrationNumber", "label": { "el": "Αριθμός κυκλοφορίας", "en": "Registration number" }, "dataType": "TEXT", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P2", "displayOrder": 1 },
+        { "code": "make", "label": { "el": "Μάρκα", "en": "Make" }, "dataType": "TEXT", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P1", "displayOrder": 2 },
+        { "code": "model", "label": { "el": "Μοντέλο", "en": "Model" }, "dataType": "TEXT", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P1", "displayOrder": 3 },
+        { "code": "firstRegistrationYear", "label": { "el": "Έτος πρώτης κυκλοφορίας", "en": "Year of first registration" }, "dataType": "INTEGER", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P1", "displayOrder": 4 },
+        { "code": "engineCapacityCc", "label": { "el": "Κυβισμός", "en": "Engine capacity" }, "dataType": "INTEGER", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P1", "unit": "cc", "displayOrder": 5 },
+        { "code": "powerKw", "label": { "el": "Ισχύς", "en": "Power" }, "dataType": "INTEGER", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P1", "unit": "kW", "displayOrder": 6 },
+        { "code": "fuelType", "label": { "el": "Καύσιμο", "en": "Fuel" }, "dataType": "CHOICE", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P1", "choices": ["PETROL", "DIESEL", "LPG", "ELECTRIC", "HYBRID"], "displayOrder": 7 },
+        { "code": "vehicleValue", "label": { "el": "Αξία οχήματος", "en": "Vehicle value" }, "dataType": "MONEY", "required": false, "requiredAt": [], "piiClass": "P1", "unit": "EUR", "displayOrder": 8 },
+        { "code": "usage", "label": { "el": "Χρήση οχήματος", "en": "Vehicle use" }, "dataType": "CHOICE", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P1", "choices": ["PRIVATE", "PRIVATE_COMMUTE", "BUSINESS"], "displayOrder": 9 },
+        { "code": "garagingPostcode", "label": { "el": "Ταχυδρομικός κώδικας στάθμευσης", "en": "Garaging postcode" }, "dataType": "TEXT", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P1", "displayOrder": 10 },
+        { "code": "ownerType", "label": { "el": "Τύπος ιδιοκτήτη", "en": "Owner type" }, "dataType": "CHOICE", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P1", "choices": ["PERSON", "ORGANISATION"], "displayOrder": 11 }
+      ]
+    },
+    {
+      "code": "driver",
+      "name": { "el": "Κύριος οδηγός", "en": "Main driver" },
+      "parent": "policyLine",
+      "minimum": 1,
+      "maximum": 1,
+      "fields": [
+        { "code": "dateOfBirth", "label": { "el": "Ημερομηνία γέννησης", "en": "Date of birth" }, "dataType": "DATE", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P2", "displayOrder": 1 },
+        { "code": "licenceIssueDate", "label": { "el": "Ημερομηνία έκδοσης διπλώματος", "en": "Licence issue date" }, "dataType": "DATE", "required": true, "requiredAt": ["QUOTE"], "piiClass": "P2", "displayOrder": 2 },
+        { "code": "bonusMalusClass", "label": { "el": "Κλάση bonus-malus", "en": "Bonus-malus class" }, "dataType": "INTEGER", "required": false, "requiredAt": [], "piiClass": "P1", "displayOrder": 3 },
+        { "code": "claimsLast5Years", "label": { "el": "Ζημιές τελευταίας πενταετίας", "en": "Claims in the last five years" }, "dataType": "INTEGER", "required": false, "requiredAt": [], "piiClass": "P1", "displayOrder": 4 }
+      ]
+    }
+  ],
+  "coverages": [
+    {
+      "code": "MTPL",
+      "name": { "el": "Αστική Ευθύνη Οχημάτων", "en": "Motor third-party liability" },
+      "existence": "REQUIRED",
+      "removal": "BLOCK",
+      "coveredElement": "vehicle",
+      "coveredParty": "THIRD_PARTY",
+      "regulatory": {
+        "SII_LOB": "4",
+        "IPT_CLASS": "GR-OTHER-15",
+        "STAT_CLASS": "GR-10",
+        "AUTH_CLASS": "10",
+        "IFRS17_PORTFOLIO": "MOTOR-RETAIL"
+      },
+      "terms": [
+        {
+          "code": "BI_PER_PERSON",
+          "name": { "el": "Όριο σωματικής βλάβης ανά παθόντα", "en": "Bodily injury limit per injured person" },
+          "kind": "OPTION_LIST",
+          "valueType": "MONEY",
+          "modelType": "LIMIT",
+          "aggregationBasis": "PER_INJURED_PERSON",
+          "currency": "EUR",
+          "required": true,
+          "options": [
+            { "code": "BI-1300K", "value": "1300000", "currency": "EUR", "name": { "el": "1.300.000 €", "en": "EUR 1,300,000" }, "source": "PRD-02 §9.1, §7.5; REQ-PFC-088" },
+            { "code": "BI-2000K", "value": "2000000", "currency": "EUR", "name": { "el": "2.000.000 €", "en": "EUR 2,000,000" }, "illustrative": true, "source": "PRD-02 §7.5 example option" }
+          ],
+          "finalBinding": {
+            "key": "gr.mtpl.min_bi_per_person",
+            "layer": "COUNTRY",
+            "legalStatus": "UNVERIFIED",
+            "source": "PRD-02 §9.1; REQ-PFC-085, REQ-PFC-088; Law 5113/2024 Art. 5 (PD 237/1986 Art. 6(5)); HICP-indexed, value held by MKT"
+          },
+          "displayOrder": 1
+        },
+        {
+          "code": "PD_PER_ACCIDENT",
+          "name": { "el": "Όριο υλικών ζημιών ανά ατύχημα", "en": "Property damage limit per accident" },
+          "kind": "OPTION_LIST",
+          "valueType": "MONEY",
+          "modelType": "LIMIT",
+          "aggregationBasis": "PER_ACCIDENT",
+          "currency": "EUR",
+          "required": true,
+          "options": [
+            { "code": "PD-1300K", "value": "1300000", "currency": "EUR", "name": { "el": "1.300.000 €", "en": "EUR 1,300,000" }, "source": "PRD-02 §9.1; REQ-PFC-088" }
+          ],
+          "finalBinding": {
+            "key": "gr.mtpl.min_pd_per_accident",
+            "layer": "COUNTRY",
+            "legalStatus": "UNVERIFIED",
+            "source": "PRD-02 §9.1; REQ-PFC-085, REQ-PFC-088; Law 5113/2024 Art. 5 (PD 237/1986 Art. 6(5)); HICP-indexed, value held by MKT"
+          },
+          "displayOrder": 2
+        }
+      ],
+      "displayOrder": 1
+    },
+    {
+      "code": "OWN-DAMAGE",
+      "name": { "el": "Ίδιες Ζημιές Οχήματος", "en": "Own damage" },
+      "existence": "ELECTABLE",
+      "removal": "ALLOWED",
+      "coveredElement": "vehicle",
+      "coveredParty": "FIRST_PARTY",
+      "regulatory": { "IPT_CLASS": "GR-OTHER-15" },
+      "terms": [
+        {
+          "code": "SUM_INSURED",
+          "name": { "el": "Ασφαλισμένο κεφάλαιο", "en": "Sum insured" },
+          "kind": "DIRECT",
+          "valueType": "MONEY",
+          "modelType": "SUM_INSURED",
+          "currency": "EUR",
+          "required": true,
+          "displayOrder": 1
+        },
+        {
+          "code": "DEDUCTIBLE",
+          "name": { "el": "Απαλλαγή", "en": "Deductible" },
+          "kind": "OPTION_LIST",
+          "valueType": "MONEY",
+          "modelType": "DEDUCTIBLE",
+          "aggregationBasis": "PER_CLAIM",
+          "currency": "EUR",
+          "required": true,
+          "options": [
+            { "code": "DED-0", "value": "0", "currency": "EUR", "name": { "el": "Χωρίς απαλλαγή", "en": "No deductible" }, "illustrative": true },
+            { "code": "DED-150", "value": "150", "currency": "EUR", "name": { "el": "150 €", "en": "EUR 150" }, "illustrative": true },
+            { "code": "DED-300", "value": "300", "currency": "EUR", "name": { "el": "300 €", "en": "EUR 300" }, "illustrative": true }
+          ],
+          "displayOrder": 2
+        }
+      ],
+      "displayOrder": 2
+    },
+    {
+      "code": "WINDSCREEN",
+      "name": { "el": "Θραύση Κρυστάλλων", "en": "Windscreen and glass breakage" },
+      "existence": "ELECTABLE",
+      "removal": "ALLOWED",
+      "coveredElement": "vehicle",
+      "coveredParty": "FIRST_PARTY",
+      "regulatory": { "IPT_CLASS": "GR-OTHER-15" },
+      "terms": [],
+      "displayOrder": 3
+    }
+  ],
+  "questionSets": [
+    {
+      "code": "MOTOR-RISK",
+      "type": "UNDERWRITING",
+      "name": { "el": "Ερωτήσεις κινδύνου αυτοκινήτου", "en": "Motor risk questions" },
+      "questions": [
+        {
+          "code": "Q-USAGE",
+          "text": { "el": "Πώς χρησιμοποιείται το όχημα;", "en": "How is the vehicle used?" },
+          "answerType": "CHOICE",
+          "required": true,
+          "customerVisible": true,
+          "mapsToField": "vehicle.usage",
+          "answers": [
+            { "code": "PRIVATE", "label": { "el": "Ιδιωτική χρήση", "en": "Private use" }, "outcome": "NONE" },
+            { "code": "PRIVATE_COMMUTE", "label": { "el": "Ιδιωτική χρήση και μετακίνηση προς εργασία", "en": "Private use and commuting" }, "outcome": "NONE" },
+            { "code": "BUSINESS", "label": { "el": "Επαγγελματική χρήση", "en": "Business use" }, "outcome": "REFERRAL", "reasonKey": "pfc.question.usage.business" }
+          ],
+          "illustrative": true,
+          "displayOrder": 1
+        },
+        {
+          "code": "Q-BUSINESS-USE",
+          "text": { "el": "Περιγράψτε την επαγγελματική χρήση", "en": "Describe the business use" },
+          "answerType": "TEXT",
+          "required": false,
+          "customerVisible": true,
+          "visibleWhen": { "question": "Q-USAGE", "answeredWith": ["BUSINESS"] },
+          "requiredWhen": { "question": "Q-USAGE", "answeredWith": ["BUSINESS"] },
+          "illustrative": true,
+          "displayOrder": 2
+        },
+        {
+          "code": "Q-HIRE-REWARD",
+          "text": { "el": "Χρησιμοποιείται το όχημα για μίσθωση ή μεταφορά επιβατών έναντι αμοιβής (π.χ. ταξί);", "en": "Is the vehicle used for hire or reward (for example taxi or rental)?" },
+          "answerType": "CHOICE",
+          "required": true,
+          "customerVisible": true,
+          "answers": [
+            { "code": "NO", "label": { "el": "Όχι", "en": "No" }, "outcome": "NONE" },
+            { "code": "YES", "label": { "el": "Ναι", "en": "Yes" }, "outcome": "KNOCK_OUT", "reasonKey": "pfc.question.hire.out_of_scope" }
+          ],
+          "illustrative": true,
+          "displayOrder": 3
+        },
+        {
+          "code": "Q-CLAIMS-5Y",
+          "text": { "el": "Πόσες ζημιές με ευθύνη σας είχατε την τελευταία πενταετία;", "en": "How many at-fault claims did you have in the last five years?" },
+          "answerType": "INTEGER",
+          "required": false,
+          "customerVisible": true,
+          "mapsToField": "driver.claimsLast5Years",
+          "illustrative": true,
+          "displayOrder": 4
+        }
+      ]
+    }
+  ],
+  "chargeTypes": [
+    {
+      "code": "PREM-MTPL",
+      "name": { "el": "Ασφάλιστρο Αστικής Ευθύνης", "en": "MTPL premium" },
+      "category": "PREMIUM",
+      "writtenPremium": true,
+      "computedBy": "RATING",
+      "coverage": "MTPL",
+      "handling": "PRO_RATA",
+      "earningPattern": "DAILY_PRO_RATA",
+      "cancellationTreatment": "FOLLOW_PRODUCT_REFUND",
+      "reemitOnReapply": true,
+      "billingTreatment": "BILLED",
+      "taxClass": "GR-OTHER-15",
+      "includedInTaxBases": ["GR-IPT", "GR-AUXF-PH", "GR-AUXF-INS"],
+      "glKey": "PREM-MOTOR-MTPL",
+      "beneficiary": "INSURER",
+      "fiscalCategoryKey": "PREMIUM-NONLIFE",
+      "riCedable": true,
+      "commissionable": true,
+      "configKeys": [],
+      "source": "PRD-02 REQ-PFC-004, REQ-PFC-113",
+      "displayOrder": 1
+    },
+    {
+      "code": "PREM-OD",
+      "name": { "el": "Ασφάλιστρο Ιδίων Ζημιών", "en": "Own damage premium" },
+      "category": "PREMIUM",
+      "writtenPremium": true,
+      "computedBy": "RATING",
+      "coverage": "OWN-DAMAGE",
+      "handling": "PRO_RATA",
+      "earningPattern": "DAILY_PRO_RATA",
+      "cancellationTreatment": "FOLLOW_PRODUCT_REFUND",
+      "reemitOnReapply": true,
+      "billingTreatment": "BILLED",
+      "taxClass": "GR-OTHER-15",
+      "includedInTaxBases": ["GR-IPT"],
+      "glKey": "PREM-MOTOR-OD",
+      "beneficiary": "INSURER",
+      "fiscalCategoryKey": "PREMIUM-NONLIFE",
+      "riCedable": true,
+      "commissionable": true,
+      "configKeys": [],
+      "source": "PRD-02 REQ-PFC-004, REQ-PFC-113; PRD-09 REQ-FIN-050 (GL key PREM-MOTOR-OD)",
+      "displayOrder": 2
+    },
+    {
+      "code": "PREM-WINDSCREEN",
+      "name": { "el": "Ασφάλιστρο Θραύσης Κρυστάλλων", "en": "Windscreen premium" },
+      "category": "PREMIUM",
+      "writtenPremium": true,
+      "computedBy": "RATING",
+      "coverage": "WINDSCREEN",
+      "handling": "PRO_RATA",
+      "earningPattern": "DAILY_PRO_RATA",
+      "cancellationTreatment": "FOLLOW_PRODUCT_REFUND",
+      "reemitOnReapply": true,
+      "billingTreatment": "BILLED",
+      "taxClass": "GR-OTHER-15",
+      "includedInTaxBases": ["GR-IPT"],
+      "glKey": "PREM-MOTOR-WINDSCREEN",
+      "beneficiary": "INSURER",
+      "fiscalCategoryKey": "PREMIUM-NONLIFE",
+      "riCedable": true,
+      "commissionable": true,
+      "configKeys": [],
+      "source": "PRD-02 REQ-PFC-004, REQ-PFC-113",
+      "displayOrder": 3
+    },
+    {
+      "code": "GR-IPT",
+      "name": { "el": "Φόρος ασφαλίστρων (ΦΑΣ)", "en": "Insurance premium tax" },
+      "category": "TAX",
+      "writtenPremium": false,
+      "computedBy": "TAX_CALCULATOR",
+      "baseChargeCodes": ["PREM-MTPL", "PREM-OD", "PREM-WINDSCREEN"],
+      "handling": "PRO_RATA",
+      "earningPattern": "AT_INCEPTION",
+      "cancellationTreatment": "PACK_TAX_TREATMENT",
+      "reemitOnReapply": true,
+      "billingTreatment": "BILLED",
+      "taxClass": "GR-OTHER-15",
+      "glKey": "TAX-IPT",
+      "beneficiary": "TAX_AUTHORITY",
+      "fiscalCategoryKey": "TAX-IPT",
+      "riCedable": false,
+      "commissionable": false,
+      "configKeys": ["tax.ipt.rate.general", "tax.ipt.motor_class"],
+      "legalStatus": "UNVERIFIED",
+      "source": "PRD-02 REQ-PFC-117, REQ-PFC-123; rate and treatment are MKT TaxCalculator pack data (Law 5177/2025 Art. 43)",
+      "displayOrder": 4
+    },
+    {
+      "code": "GR-AUXF-PH",
+      "name": { "el": "Εισφορά Επικουρικού Κεφαλαίου (μερίδιο ασφαλισμένου)", "en": "Auxiliary Fund levy, policyholder share" },
+      "category": "LEVY",
+      "writtenPremium": false,
+      "computedBy": "TAX_CALCULATOR",
+      "baseChargeCodes": ["PREM-MTPL"],
+      "handling": "PRO_RATA",
+      "earningPattern": "AT_INCEPTION",
+      "cancellationTreatment": "PACK_TAX_TREATMENT",
+      "reemitOnReapply": true,
+      "billingTreatment": "BILLED",
+      "includedInTaxBases": ["GR-STAMP-AUXF-PH"],
+      "glKey": "LEVY-AUXF-PH",
+      "beneficiary": "GUARANTEE_FUND",
+      "fiscalCategoryKey": "LEVY-AUXF",
+      "riCedable": false,
+      "commissionable": false,
+      "configKeys": ["tax.levy.auxfund.ceiling_rate", "tax.levy.auxfund.split.policyholder_share", "tax.levy.auxfund.base"],
+      "legalStatus": "UNVERIFIED",
+      "source": "PRD-02 REQ-PFC-124; Law 5113/2024 Art. 14; split pending REQ-MKT-322 (D2)",
+      "displayOrder": 5
+    },
+    {
+      "code": "GR-AUXF-INS",
+      "name": { "el": "Εισφορά Επικουρικού Κεφαλαίου (μερίδιο ασφαλιστή)", "en": "Auxiliary Fund levy, insurer share" },
+      "category": "LEVY",
+      "writtenPremium": false,
+      "computedBy": "TAX_CALCULATOR",
+      "baseChargeCodes": ["PREM-MTPL"],
+      "handling": "PRO_RATA",
+      "earningPattern": "AT_INCEPTION",
+      "cancellationTreatment": "PACK_TAX_TREATMENT",
+      "reemitOnReapply": true,
+      "billingTreatment": "ACCRUED_NOT_BILLED",
+      "glKey": "LEVY-AUXF-INS",
+      "beneficiary": "GUARANTEE_FUND",
+      "riCedable": false,
+      "commissionable": false,
+      "configKeys": ["tax.levy.auxfund.ceiling_rate", "tax.levy.auxfund.split.insurer_share", "tax.levy.auxfund.base"],
+      "legalStatus": "UNVERIFIED",
+      "source": "PRD-02 REQ-PFC-125, REQ-PFC-119; Law 5113/2024 Art. 14; split pending REQ-MKT-322 (D2)",
+      "displayOrder": 6
+    },
+    {
+      "code": "GR-STAMP-AUXF-PH",
+      "name": { "el": "Χαρτόσημο επί εισφοράς Επικουρικού Κεφαλαίου", "en": "Stamp duty on the Auxiliary Fund levy (policyholder share)" },
+      "category": "TAX",
+      "writtenPremium": false,
+      "computedBy": "TAX_CALCULATOR",
+      "baseChargeCodes": ["GR-AUXF-PH"],
+      "handling": "PRO_RATA",
+      "earningPattern": "AT_INCEPTION",
+      "cancellationTreatment": "PACK_TAX_TREATMENT",
+      "reemitOnReapply": true,
+      "billingTreatment": "BILLED",
+      "glKey": "TAX-STAMP",
+      "beneficiary": "TAX_AUTHORITY",
+      "fiscalCategoryKey": "TAX-STAMP",
+      "riCedable": false,
+      "commissionable": false,
+      "configKeys": ["tax.levy.auxfund.ph_stamp_duty_rate"],
+      "legalStatus": "UNVERIFIED",
+      "source": "PRD-02 REQ-PFC-244; Law 5113/2024 Art. 14; rate and applicability are MKT pack data (REQ-MKT-322)",
+      "displayOrder": 7
+    }
+  ],
+  "references": {
+    "rating": {
+      "algorithmCode": "MOTOR-GR-RATING",
+      "inputSchemaVersion": "1",
+      "bindingMode": "FLOATING",
+      "compatibleArtefactRange": "^1"
+    },
+    "uwRuleSets": {
+      "PRE_QUOTE": { "code": "UW-MOTOR-GR-Q", "range": "^1" },
+      "PRE_BIND": { "code": "UW-MOTOR-GR-B", "range": "^1" }
+    },
+    "paymentPlans": {
+      "WEB_DIRECT": ["ANNUAL", "INST-12-DD"],
+      "AGENT_PORTAL": ["ANNUAL", "INST-4"]
+    }
+  }
+}

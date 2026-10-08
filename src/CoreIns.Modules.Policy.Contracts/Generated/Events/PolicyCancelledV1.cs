@@ -54,7 +54,7 @@ public sealed record PolicyCancelledV1 : global::CoreIns.Platform.Contracts.Even
     [global::System.Text.Json.Serialization.JsonPropertyName("termId")]
     public required global::CoreIns.SharedKernel.Identifiers.PolicyTermId TermId { get; init; }
 
-    /// <summary>Contract member 'source'.</summary>
+    /// <summary>Cancellation source from the shared code list (REQ-POL-205: Policyholder, Insurer, NonPayment, DistanceWithdrawal, LongTermWithdrawal, Objection, Statutory). Always set.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("source")]
     public required string Source { get; init; }
 
@@ -66,7 +66,7 @@ public sealed record PolicyCancelledV1 : global::CoreIns.Platform.Contracts.Even
     [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
     public required global::CoreIns.SharedKernel.BusinessDate EffectiveDate { get; init; }
 
-    /// <summary>Contract member 'refundMethod'.</summary>
+    /// <summary>Refund method applied (ProRata, ShortRate, Flat, MinimumRetained, FullRefund). Always set.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("refundMethod")]
     public required string RefundMethod { get; init; }
 
@@ -91,4 +91,9 @@ public sealed record PolicyCancelledV1 : global::CoreIns.Platform.Contracts.Even
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("thirdPartyCoverClockInstanceId")]
     public global::System.Guid? ThirdPartyCoverClockInstanceId { get; init; }
+
+    /// <summary>STANDARD, FLAT or VOID. Always set from slice 3 (the cancellation job kind). FLAT = flat cancellation of a Scheduled term (REQ-POL-217).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Kind { get; init; }
 }

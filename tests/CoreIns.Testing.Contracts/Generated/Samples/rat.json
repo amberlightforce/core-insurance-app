@@ -333,25 +333,119 @@
         "currency": "EUR"
       }
     },
+    "ProrationAnnualRate": {
+      "segmentId": "sample",
+      "elementLocator": "Sample text",
+      "coverageCode": "SAMPLE_CODE",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "annualAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "handling": "FLAT"
+    },
+    "ProrationLine": {
+      "segmentId": "sample",
+      "elementLocator": "Sample text",
+      "coverageCode": "SAMPLE_CODE",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "days": 1,
+      "termDays": 1,
+      "fraction": "12.50",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "residual": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "roundingRuleId": "SAMPLE_CODE"
+    },
+    "ProrationPeriod": {
+      "segmentId": "sample",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "reverse": true
+    },
     "ProrationProrateRequest": {
-      "annualRates": "unspecified",
-      "periods": "unspecified",
-      "term": "unspecified",
-      "convention": "unspecified",
+      "annualRates": [
+        {
+          "segmentId": "sample",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "handling": "FLAT"
+        }
+      ],
+      "term": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "periods": [
+        {
+          "segmentId": "sample",
+          "period": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "reverse": true
+        }
+      ],
+      "convention": "TERM_RATIO",
+      "productArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "orderOperations": "unspecified",
+      "orderOperations": "SAMPLE_CODE",
       "explain": true
     },
     "ProrationProrateResponse": {
-      "amounts": [
+      "lines": [
         {
-          "amount": "120.50",
-          "currency": "EUR"
+          "segmentId": "sample",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "period": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "days": 1,
+          "termDays": 1,
+          "fraction": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "residual": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "roundingRuleId": "SAMPLE_CODE"
         }
       ],
-      "fractions": "unspecified",
-      "residuals": "unspecified",
-      "explanation": "unspecified"
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "convention": "TERM_RATIO",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "explanation": {
+        "note": "sample"
+      }
     },
     "RateCancelBatchRequest": {
       "itemsItemKeys": "unspecified",
@@ -413,6 +507,7 @@
         "productArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
         "productVersion": "1.0",
         "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "pinnedRatingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
         "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
         "mode": "FULL",
         "transactionType": "SAMPLE_CODE",

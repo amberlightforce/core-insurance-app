@@ -68,6 +68,14 @@ public sealed record InvoiceView
     [global::System.Text.Json.Serialization.JsonPropertyName("totalsByCategory")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.CategoryTotal> TotalsByCategory { get; init; }
 
+    /// <summary>For kind CREDIT_NOTE, the invoice it corrects. Always set for a credit note, absent for an INVOICE. A credit note has its own gapless series (technical prefix CN) and negative-direction semantics; total is the positive credited amount.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'originalInvoiceId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("originalInvoiceId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? OriginalInvoiceId { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

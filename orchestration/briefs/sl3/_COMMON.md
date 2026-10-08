@@ -58,3 +58,6 @@ sending. It is filled from `briefs/BUILDER-TEMPLATE.md`. **Runs on Sonnet 5.5 (m
   - the pitfalls that applied and how you handled them;
   - deviations, assumptions and open questions, including any decision the orchestrator should record;
   - contract changes.
+
+- **RAM (PITFALLS 38):** before every `dotnet` command set `MSBUILDDISABLENODEREUSE=1` and `DOTNET_CLI_USE_MSBUILD_SERVER=0`
+  and pass `-m:2`; write logs to unique paths in your own worktree (PITFALLS 39).

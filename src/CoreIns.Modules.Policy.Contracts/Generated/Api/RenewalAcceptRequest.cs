@@ -4,36 +4,33 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Renewal.accept request. PRD inputs: "termId; offer; acceptance evidence; reason"</summary>
+/// <summary>pol.Renewal.accept request (REQ-POL-253, explicit acceptance). Accepting binds the new term n+1 as Scheduled.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RenewalAcceptRequest
 {
-    /// <summary>PRD: "termId"</summary>
+    /// <summary>The renewal job</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
+
+    /// <summary>The expiring term</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("termId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.PolicyTermId? TermId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyTermId TermId { get; init; }
 
-    /// <summary>PRD: "offer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("offer")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Offer { get; init; }
+    /// <summary>Channel of the acceptance (STAFF in slice 3)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    public required string Channel { get; init; }
 
-    /// <summary>PRD: "acceptance evidence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>When the customer accepted (business time)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("acceptedAt")]
+    public required global::CoreIns.SharedKernel.Instant AcceptedAt { get; init; }
+
+    /// <summary>Evidence reference (document or message id); no personal data</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("acceptanceEvidence")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? AcceptanceEvidence { get; init; }
+    public string? AcceptanceEvidence { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
 }

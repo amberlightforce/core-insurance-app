@@ -23,6 +23,7 @@
   <ItemGroup>
     <!-- The product definition the seed loads (the same document the authoring workflow will submit). -->
     <EmbeddedResource Include="Seed\motor-gr.product.json" LogicalName="CoreIns.Modules.Product.Seed.motor-gr.product.json" />
+    <EmbeddedResource Include="Seed\motor-gr-1.1.product.json" LogicalName="CoreIns.Modules.Product.Seed.motor-gr-1.1.product.json" />
   </ItemGroup>
 
   <ItemGroup>

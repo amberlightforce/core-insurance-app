@@ -4,12 +4,26 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.PolicyChange.create result. PRD outputs: "jobId"</summary>
+/// <summary>pol.PolicyChange.create result. PRD outputs: "jobId". The job is the change draft; it is edited with updateDraft, priced with quote and bound with bind.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PolicyChangeCreateResponse
 {
-    /// <summary>PRD: "jobId"</summary>
+    /// <summary>Contract member 'jobId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
+
+    /// <summary>DRAFT on creation (always set)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>The term the change applies to</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyTermId TermId { get; init; }
+
+    /// <summary>Head transaction the job was based on; bind refuses with POL-ERR-PREEMPTED when the head moved</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'baseTransactionId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("baseTransactionId")]
+    public required global::System.Guid BaseTransactionId { get; init; }
 }

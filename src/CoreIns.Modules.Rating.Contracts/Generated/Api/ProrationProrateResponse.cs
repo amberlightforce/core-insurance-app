@@ -4,34 +4,29 @@
 
 namespace CoreIns.Modules.Rating.Contracts.Api;
 
-/// <summary>rat.Proration.prorate result. PRD outputs: "amounts, fractions, residuals, explanation"</summary>
+/// <summary>rat.Proration.prorate result. PRD outputs: "amounts, fractions, residuals, explanation". One line per annual rate x period, in request order.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProrationProrateResponse
 {
-    /// <summary>PRD: "amounts"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("amounts")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Money>? Amounts { get; init; }
+    /// <summary>Contract member 'lines'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Rating.Contracts.Api.ProrationLine> Lines { get; init; }
 
-    /// <summary>PRD: "fractions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("fractions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Fractions { get; init; }
+    /// <summary>Sum of the line amounts (signed)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("total")]
+    public required global::CoreIns.SharedKernel.Money Total { get; init; }
 
-    /// <summary>PRD: "residuals"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("residuals")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Residuals { get; init; }
+    /// <summary>Contract member 'convention'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("convention")]
+    public required global::CoreIns.Modules.Rating.Contracts.Api.DayCountConvention Convention { get; init; }
 
-    /// <summary>PRD: "explanation"</summary>
+    /// <summary>Echo of the configuration hash used</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("configurationHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.ConfigurationHash ConfigurationHash { get; init; }
+
+    /// <summary>Present when explain was requested</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("explanation")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]

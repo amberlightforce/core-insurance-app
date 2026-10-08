@@ -18,7 +18,7 @@ public interface IPolicyRenewalService
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-NOTICE-TOO-LATE (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-NOTICE-TOO-LATE (422), POL-ERR-IDEMPOTENCY-MISMATCH (409), POL-ERR-REBASE-REQUIRED (409), POL-ERR-STALE (409), POL-ERR-ILLEGAL-TRANSITION (422), POL-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.RenewalAcceptResponse> AcceptAsync(global::CoreIns.Modules.Policy.Contracts.Api.RenewalAcceptRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -29,7 +29,7 @@ public interface IPolicyRenewalService
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-NOTICE-TOO-LATE (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-NOTICE-TOO-LATE (422), POL-ERR-IDEMPOTENCY-MISMATCH (409), POL-ERR-REBASE-REQUIRED (409), POL-ERR-STALE (409), POL-ERR-ILLEGAL-TRANSITION (422), POL-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.RenewalCreateResponse> CreateAsync(global::CoreIns.Modules.Policy.Contracts.Api.RenewalCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -62,7 +62,7 @@ public interface IPolicyRenewalService
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-NOTICE-TOO-LATE (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-NOTICE-TOO-LATE (422), POL-ERR-IDEMPOTENCY-MISMATCH (409), POL-ERR-REBASE-REQUIRED (409), POL-ERR-STALE (409), POL-ERR-ILLEGAL-TRANSITION (422), POL-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.RenewalOfferResponse> OfferAsync(global::CoreIns.Modules.Policy.Contracts.Api.RenewalOfferRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }
