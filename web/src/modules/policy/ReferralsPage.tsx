@@ -176,42 +176,44 @@ export function ReferralsPage() {
           title={done === 'APPROVE' ? t('referrals.approved') : t('referrals.rejected')}
         />
       ) : null}
-      <Section title={t('referrals.open')}>
-        <p className={styles.muted}>{t('referrals.openHint')}</p>
-        <QueryView query={query}>
-          {(page) => (
-            <SimpleTable<UwIssueItem>
-              aria-label={t('referrals.table')}
-              columns={columns}
-              data={page.items}
-              getRowId={(i) => i.id}
-              getRowLabel={(i) => text(i).type}
-              onOpen={(i) => {
-                setDone(null);
-                setSelected(i);
-              }}
-              emptyState={
-                <EmptyState
-                  kind="done"
-                  headingLevel={3}
-                  headline={t('referrals.emptyTitle')}
-                  description={t('referrals.emptyBody')}
-                />
-              }
-            />
-          )}
-        </QueryView>
-      </Section>
-      {selected ? (
-        <DecisionForm
-          key={selected.id}
-          issue={selected}
-          onDone={(decision) => {
-            setDone(decision);
-            setSelected(null);
-          }}
-        />
-      ) : null}
+      <div className={selected ? styles.split : styles.stack}>
+        <Section title={t('referrals.open')} family="plum" count={query.data?.items.length}>
+          <p className={styles.muted}>{t('referrals.openHint')}</p>
+          <QueryView query={query}>
+            {(page) => (
+              <SimpleTable<UwIssueItem>
+                aria-label={t('referrals.table')}
+                columns={columns}
+                data={page.items}
+                getRowId={(i) => i.id}
+                getRowLabel={(i) => text(i).type}
+                onOpen={(i) => {
+                  setDone(null);
+                  setSelected(i);
+                }}
+                emptyState={
+                  <EmptyState
+                    kind="done"
+                    headingLevel={3}
+                    headline={t('referrals.emptyTitle')}
+                    description={t('referrals.emptyBody')}
+                  />
+                }
+              />
+            )}
+          </QueryView>
+        </Section>
+        {selected ? (
+          <DecisionForm
+            key={selected.id}
+            issue={selected}
+            onDone={(decision) => {
+              setDone(decision);
+              setSelected(null);
+            }}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }
