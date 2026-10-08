@@ -10,12 +10,17 @@ import { expect, test, type Page } from '@playwright/test';
 const SEED = process.env['E2E_PRODUCT_SEED'] ?? resolve(import.meta.dirname, '../../../src/CoreIns.Modules.Product/Seed/motor-gr.product.json');
 
 // The product is data (D-USR-02): import and lock it as admin (idempotent), as the API-level spec does.
+// On a fresh stack this is the API process's first command: its cold start (JIT, EF models, first PFC compile) took 2-7 s
+// on an idle machine before and after SL2 alike, and more on a busy Docker host, so it gets its own timeout instead of
+// the 15 s actionTimeout meant for UI actions below (which the request fixture inherits).
 test.beforeAll(async ({ request }) => {
+  test.setTimeout(120_000);
   const signIn = await request.post('/api/plt/v1/dev/sign-in', { data: { userId: 'admin' } });
   const token = ((await signIn.json()) as { accessToken: string }).accessToken;
   const imported = await request.post('/api/pfc/v1/product-versions/import', {
     headers: { authorization: `Bearer ${token}`, 'idempotency-key': crypto.randomUUID() },
     data: { definition: JSON.parse(readFileSync(SEED, 'utf8')), lock: true },
+    timeout: 90_000,
   });
   expect(imported.status(), await imported.text()).toBeLessThan(300);
 });
