@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Events;
 
-/// <summary>Payload of clm.PaymentVoided v1.0: void, stop, return or disbursement rejection confirmed.</summary>
+/// <summary>Payload of clm.PaymentVoided v1.0: void, stop, return or disbursement rejection confirmed (D-SL4-13). Published once per payment correction, after the linked reversal transactions are posted..</summary>
 /// <remarks>
 /// <para>Schema contracts/events/clm/PaymentVoided.v1.schema.json; aggregate Claim (ordering key claim_id); trigger: void, stop, return or disbursement rejection confirmed.</para>
 /// <para>Payload status full.</para>
@@ -54,11 +54,28 @@ public sealed record PaymentVoidedV1 : global::CoreIns.Platform.Contracts.Events
     [global::System.Text.Json.Serialization.JsonPropertyName("reversalTransactionIds")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.PolicyTransactionId> ReversalTransactionIds { get; init; }
 
-    /// <summary>Contract member 'reason'.</summary>
+    /// <summary>VOIDED = void before clearing; STOPPED = stopped at release; RETURNED = bank return; REJECTED = disbursement rejected</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     public required ReasonValue Reason { get; init; }
 
-    /// <summary>Generated contract member.</summary>
+    /// <summary>Claim (the aggregate id, repeated so FIN posts from payload fields only); CLM always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>The reversed payment lines, one per reserve line, with the positive amount reversed (three currencies), the reserve line, exposure, cost type and category and the eroding flag. CLM always sets them; lineKey = the reversal transaction id (one of reversalTransactionIds). FIN posts the reversal from these lines.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.ClaimPaymentLine>? Lines { get; init; }
+
+    /// <summary>Total reversed amount; CLM always sets it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+    public global::CoreIns.Platform.Contracts.Common.MoneyByCurrency3? Amount { get; init; }
+
+    /// <summary>Method of the payment that was corrected (CLEARING payments have no disbursement and are voided only through their statement)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("method")]
+    public string? Method { get; init; }
+
+    /// <summary>VOIDED = void before clearing; STOPPED = stopped at release; RETURNED = bank return; REJECTED = disbursement rejected</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ReasonValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public enum ReasonValue

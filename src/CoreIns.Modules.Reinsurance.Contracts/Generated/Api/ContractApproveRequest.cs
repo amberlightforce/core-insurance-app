@@ -4,47 +4,38 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Contract.approve request. PRD inputs: "contract, section, layer, clause data; reason"</summary>
+/// <summary>ri.Contract.approve request. The approver must not be the enterer (RI-ERR-SOD, REQ-RI-065; PRD-08 §12).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ContractApproveRequest
 {
-    /// <summary>PRD: "contract"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contract")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Contract { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "section"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("section")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Section { get; init; }
+    /// <summary>Contract member 'expectedRecordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 
-    /// <summary>PRD: "layer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("layer")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Layer { get; init; }
+    /// <summary>APPROVE moves the contract to Approved (Active at the period start); RETURN moves it back to Draft</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    public required DecisionValue Decision { get; init; }
 
-    /// <summary>PRD: "clause data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("clauseData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ClauseData { get; init; }
-
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Reason; required for RETURN</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
+
+    /// <summary>APPROVE moves the contract to Approved (Active at the period start); RETURN moves it back to Draft</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DecisionValue
+    {
+        /// <summary><c>APPROVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVE")]
+        Approve,
+
+        /// <summary><c>RETURN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RETURN")]
+        Return,
+    }
 }

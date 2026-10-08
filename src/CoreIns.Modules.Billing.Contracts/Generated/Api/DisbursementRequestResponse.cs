@@ -101,6 +101,18 @@ public sealed record DisbursementRequestResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Instant? ClearedAt { get; init; }
 
+    /// <summary>FS_CLEARING statement reference; always set for FS_CLEARING</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statementReference")]
+    public string? StatementReference { get; init; }
+
+    /// <summary>Release approval state. Always set for FS_CLEARING; the disbursement stays PendingApproval until bil.Disbursement.approveRelease</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("releaseApproval")]
+    public ReleaseApprovalDetail? ReleaseApproval { get; init; }
+
+    /// <summary>FS_CLEARING lines as accepted; always set for FS_CLEARING</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.FsClearingLine>? Lines { get; init; }
+
     /// <summary>Canonical disbursement state (REQ-BIL-009)</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
@@ -145,5 +157,23 @@ public sealed record DisbursementRequestResponse
         /// <summary><c>Returned</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Returned")]
         Returned,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ReleaseApprovalDetail
+    {
+        /// <summary>True for every FS_CLEARING disbursement, whatever the amount (D-SL4-12)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("required")]
+        public required bool Required { get; init; }
+
+        /// <summary>Contract member 'approvalRequestId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+        public global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId? ApprovalRequestId { get; init; }
+
+        /// <summary>Requester (cannot approve the release)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("requestedBy")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? RequestedBy { get; init; }
     }
 }

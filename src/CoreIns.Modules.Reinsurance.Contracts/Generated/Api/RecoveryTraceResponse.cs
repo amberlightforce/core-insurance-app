@@ -4,23 +4,40 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Recovery.trace result. PRD outputs: "recoverables, trace"</summary>
+/// <summary>ri.Recovery.trace result (REQ-RI-132). PRD outputs: "recoverables, trace".</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RecoveryTraceResponse
 {
-    /// <summary>PRD: "recoverables"</summary>
+    /// <summary>Contract member 'batchId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'batchId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("recoverables")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Recoverables { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("batchId")]
+    public required global::System.Guid BatchId { get; init; }
 
-    /// <summary>PRD: "trace"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("trace")]
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
+
+    /// <summary>Contract member 'contractYear'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractYear")]
+    public required int ContractYear { get; init; }
+
+    /// <summary>Calculation engine version</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("engineVersion")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Trace { get; init; }
+    public string? EngineVersion { get; init; }
+
+    /// <summary>Contract member 'configurationHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("configurationHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ConfigurationHash? ConfigurationHash { get; init; }
+
+    /// <summary>Contract member 'recoverables'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoverables")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RecoveryListByClaimItem> Recoverables { get; init; }
+
+    /// <summary>Contract member 'trace'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("trace")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RecoveryTraceStep> Trace { get; init; }
 }

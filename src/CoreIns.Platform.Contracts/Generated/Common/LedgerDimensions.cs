@@ -113,6 +113,21 @@ public sealed record LedgerDimensions
     [global::System.Text.Json.Serialization.JsonPropertyName("treatmentRuleId")]
     public string? TreatmentRuleId { get; init; }
 
+    /// <summary>CLM recovery of a receivable entry (D-SL4-06). Always set on RECEIVABLE_REGISTERED and RECEIVABLE_COLLECTED entries of a salvage or subrogation receivable, null otherwise.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'recoveryId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoveryId")]
+    public global::System.Guid? RecoveryId { get; init; }
+
+    /// <summary>Friendly Settlement statement reference (D-SL4-02). Always set on FS_CLEARING_RELEASED, FS_CLEARING_CLEARED and the FS_CLEARING receivable entries, null otherwise.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statementRef")]
+    public string? StatementRef { get; init; }
+
+    /// <summary>Organisation counterparty (insurer, clearing office, reinsurer) of a receivable or FS_CLEARING entry (D-SL4-02, D-SL4-06). Null when the counterparty is a natural person (no personal data in ledger events, PITFALLS 18).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("counterpartyPartyId")]
+    public global::CoreIns.SharedKernel.Identifiers.PartyId? CounterpartyPartyId { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<TransactionKindValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

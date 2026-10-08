@@ -13,10 +13,24 @@ public interface IReinsuranceContractService
 {
     /// <summary>Registry queries</summary>
     /// <remarks>
+    /// <para>Operation ri.Contract.applicable (query; HTTP GET /api/ri/v1/contracts/applicable).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full; fully typed from SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05). Wave W7.</para>
+    /// <para>Exposure: ui; consumers: CLM, FIN.</para>
+    /// <para>Errors: RI-ERR-VALIDATION (422).</para>
+    /// </remarks>
+    /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
+    /// <param name="productCode">query parameter 'productCode'</param>
+    /// <param name="coverageCode">query parameter 'coverageCode'</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractApplicableResponse> ApplicableAsync(string productCode, string coverageCode, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>Registry queries</summary>
+    /// <remarks>
     /// <para>Operation ri.Contract.get (query; HTTP GET /api/ri/v1/contracts/{id}).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W7.</para>
+    /// <para>Status: full; fully typed from SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05). Wave W7.</para>
     /// <para>Exposure: ui; consumers: FIN.</para>
+    /// <para>Errors: RI-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     /// <param name="id">Identifier of the Contract (PRD input: "ids or risk description")</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);
@@ -25,12 +39,15 @@ public interface IReinsuranceContractService
     /// <remarks>
     /// <para>Operation ri.Contract.list (query; HTTP GET /api/ri/v1/contracts).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W7.</para>
+    /// <para>Status: full; fully typed from SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05). Wave W7.</para>
     /// <para>Exposure: ui; consumers: FIN.</para>
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractListPage> ListAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="contractYear">query parameter 'contractYear'</param>
+    /// <param name="status">query parameter 'status'</param>
+    /// <param name="contractType">query parameter 'contractType'</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractListPage> ListAsync(string? cursor = null, int? limit = null, int? contractYear = null, global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractStatus? status = null, global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractType? contractType = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Registry queries</summary>
     /// <remarks>

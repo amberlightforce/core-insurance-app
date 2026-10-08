@@ -228,8 +228,8 @@ Source: PRD-17 §9.4 (catalogue summary §9.4.0, per-SPI specifications §9.4.1�
 ### 23. `FriendlySettlementClearing`
 
 - **Interface:** `IFriendlySettlementClearing` · **Mode:** A · **Binding axis:** RISK_LOCATION · **Idempotency:** K · **Timeout / fallback:** 30 s; queue · **Core default:** `NotApplicable`
-- **Operations:** `submit(agreedClaim)`, `settlementStatement(period)`.
-- **Callers:** CLM (`REQ-CLM-155`…`REQ-CLM-160`).
+- **Operations:** `evaluateEligibility(claimFacts)`, `submit(agreedClaim)`, `receiveNotification(message)`, `settlementStatement(period, counterparty?)`; `submitDispute(receivableRef, reason)` and `recordReply(disputeRef, decision)` are typed but not implemented in slice 4 (D-SL4-01). Capability key `cap.clm.friendly_settlement`. C# contract: `Market.Contracts/Spi/IFriendlySettlementClearing.cs` (SL4-CONTRACTS).
+- **Callers:** CLM (`REQ-CLM-155`…`REQ-CLM-160`, `REQ-CLM-264`).
 - **Source:** PRD-17 §9.4.23 (line 1747); country content there.
 
 ### 24. `PricingConstraint`

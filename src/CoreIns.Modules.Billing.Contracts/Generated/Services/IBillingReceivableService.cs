@@ -11,14 +11,44 @@ namespace CoreIns.Modules.Billing.Contracts;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public interface IBillingReceivableService
 {
+    /// <summary>Receivable</summary>
+    /// <remarks>
+    /// <para>Operation bil.Receivable.get (query; HTTP GET /api/bil/v1/receivables/{id}).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full; fully typed from SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12). Wave W7.</para>
+    /// <para>Exposure: ui; consumers: CLM.</para>
+    /// <para>Errors: BIL-ERR-NOT-FOUND (404).</para>
+    /// </remarks>
+    /// <param name="id">Identifier of the id</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.ReceivableGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>Receivables</summary>
+    /// <remarks>
+    /// <para>Operation bil.Receivable.list (query; HTTP GET /api/bil/v1/receivables).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full; fully typed from SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12). Wave W7.</para>
+    /// <para>Exposure: ui; consumers: CLM.</para>
+    /// </remarks>
+    /// <param name="billingAccountId">query parameter 'billingAccountId'</param>
+    /// <param name="counterpartyPartyId">query parameter 'counterpartyPartyId'</param>
+    /// <param name="claimId">query parameter 'claimId'</param>
+    /// <param name="recoveryId">query parameter 'recoveryId'</param>
+    /// <param name="statementRef">query parameter 'statementRef'</param>
+    /// <param name="paymentReference">query parameter 'paymentReference'</param>
+    /// <param name="sourceType">query parameter 'sourceType'</param>
+    /// <param name="status">query parameter 'status'</param>
+    /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
+    /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.ReceivableListPage> ListAsync(global::CoreIns.SharedKernel.Identifiers.BillingAccountId? billingAccountId = null, global::CoreIns.SharedKernel.Identifiers.PartyId? counterpartyPartyId = null, global::CoreIns.SharedKernel.Identifiers.ClaimId? claimId = null, global::System.Guid? recoveryId = null, string? statementRef = null, string? paymentReference = null, global::CoreIns.Modules.Billing.Contracts.Api.ReceivableSourceType? sourceType = null, global::CoreIns.Modules.Billing.Contracts.Api.ReceivableStatus? status = null, string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+
     /// <summary>Register non-premium receivables: reinsurer receivables (source RI_SETTLEMENT), Friendly Settlement net …</summary>
     /// <remarks>
     /// <para>Operation bil.Receivable.register (command; HTTP POST /api/bil/v1/receivables/register).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W7.</para>
+    /// <para>Status: full; fully typed from SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12). Wave W7.</para>
     /// <para>Exposure: ui; consumers: CLM, RI.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: BIL-ERR-SOURCE (422), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: BIL-ERR-SOURCE (422), BIL-ERR-IDEMPOTENCY-MISMATCH (409), BIL-ERR-VALIDATION (422), BIL-ERR-DUPLICATE (409), BIL-ERR-FISCAL-TREATMENT-OPEN (422), BIL-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.ReceivableRegisterResponse> RegisterAsync(global::CoreIns.Modules.Billing.Contracts.Api.ReceivableRegisterRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

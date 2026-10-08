@@ -65,7 +65,7 @@ public sealed record ReserveChangedV1 : global::CoreIns.Platform.Contracts.Event
     [global::System.Text.Json.Serialization.JsonPropertyName("reserveLine")]
     public required global::CoreIns.Platform.Contracts.Common.ReserveLineKey ReserveLine { get; init; }
 
-    /// <summary>Contract member 'kind'.</summary>
+    /// <summary>RESERVE = claim cost reserve; RECOVERY_RESERVE = expected recovery (salvage, subrogation, Friendly Settlement), which carries recoveryId</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
     public required KindValue Kind { get; init; }
 
@@ -116,7 +116,11 @@ public sealed record ReserveChangedV1 : global::CoreIns.Platform.Contracts.Event
     [global::System.Text.Json.Serialization.JsonPropertyName("accountingDate")]
     public global::CoreIns.SharedKernel.BusinessDate? AccountingDate { get; init; }
 
-    /// <summary>Generated contract member.</summary>
+    /// <summary>Recovery whose reserve changed. Always set when kind is RECOVERY_RESERVE (D-SL4-07), null for kind RESERVE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoveryId")]
+    public global::CoreIns.SharedKernel.Identifiers.RecoveryId? RecoveryId { get; init; }
+
+    /// <summary>RESERVE = claim cost reserve; RECOVERY_RESERVE = expected recovery (salvage, subrogation, Friendly Settlement), which carries recoveryId</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public enum KindValue
