@@ -93,3 +93,55 @@ All 116 feature WPs: **not started** (W1 starts after Phase 1 passes). See backl
 ## Agent-session notes
 - Reviewers and builders are resumed with SendMessage so they keep context. Worktrees are under `.claude/worktrees/` (git-ignored).
 - Branches: F-1a `worktree-agent-a602a1c6b1ab3deea` (merged); events `worktree-agent-a2cb28e17172c7600` (merged); OpenAPI `worktree-agent-a74cec1b448cd4c93`; rule engine `worktree-agent-aae82a473ab0a3abd`; spike `worktree-agent-a7e75bab225abc6b5` (merged); design system `worktree-agent-ad02cb192ca091af7`; F-1b new worktree.
+
+## Phase 6 — slice 5 (planned)
+
+Plan: `SLICE-PLAN-5.md`. Decisions: D-SL5-01..14. Briefs: `briefs/sl5/` (waves 1 and 2). Every builder and reviewer
+runs on Sonnet 5.5 (D-USR-16). The UW workbench WIP branch `worktree-agent-ac9c66400c2402b05` is salvaged by
+SL5-UW-WB-API.
+
+| WP | Wave | Module | Depends on | Review | Est. | Parallel with sl3/sl4 | Status |
+|---|---|---|---|---|---|---|---|
+| SL5-UW-WB-API | 1 | UW (+ WIP salvage) | — | deep (security) | 3.5 h | yes | planned |
+| SL5-UI-UW-WB | 1 | web underwriting | contracts (UW-WB-API first commit) | light + visual | 4 h | yes | planned |
+| SL5-CONTRACTS-PACKS | 1 | contracts mkt/pfc/pol(new paths)/events | — | light | 2 h | yes (quiet window) | planned |
+| SL5-PFC-FALLBACK | 1 | PFC | contracts | deep (config + security) | 3 h | yes | planned |
+| SL5-PLT-ROLES | 1 | PLT dev users/roles | merged SL3-PLT-SUPPORT | light (batched) | 1 h | gated | planned |
+| SL5-MKT-STATE | 2 | MKT + GR/CY pack data | merged SL3-MKT-TREATMENT | deep (config/temporal) | 4.5 h | gated | planned |
+| SL5-RAT-FALLBACK | 2 | RAT | merged SL3-RAT-PRORATE; contracts | light | 1.5 h | gated | planned |
+| SL5-UI-PACKS | 2 | web market/packs, policy/packRollback | contracts (live walk later) | light + visual | 3 h | yes | planned |
+| SL5-MKT-ROLLBACK | 3 | MKT | merged MKT-STATE, PLT-ROLES | deep (config + security) | 4 h | gated | planned |
+| SL5-POL-ROLLBACK | 3 | POL | merged slice-3 POL S1; contracts | deep (config/temporal) | 3.5 h | gated | planned |
+| SL5-E2E | 4 | tests/e2e, ci.yml (e2e12) | all slice-5 merged; merged SL3-E2E | light (integration) | 4.5 h | gated | planned |
+
+## Phase 5 — slice 4 (planned)
+
+```
+## Phase 5 — slice 4 (planned): finish claims (W7)
+Plan: `SLICE-PLAN-4.md`. Decisions: D-SL4-01..20. Briefs: `briefs/sl4/` (waves 1–2). Every builder and reviewer runs on Sonnet 5.5 (D-USR-16). Runs beside slice 3: CLM/BIL/FIN/CMP/MKT/PLT WPs start only after the gating slice-3 WP merges (G:).
+
+| WP | Wave | Module | Depends on | Review | Est. | Status |
+|---|---|---|---|---|---|---|
+| SL4-CONTRACTS | 1 | contracts (all) | — | light | 3 h | planned |
+| SL4-RI-REGISTRY | 1 | RI (registry, persistence) | contracts | deep (security+temporal) | 4 h | planned |
+| SL4-RI-ENGINE | 1 | RI (Domain/Recovery) | contracts | deep (money) | 3.5 h | planned |
+| SL4-E2E-HARNESS | 1 | tests/e2e (runner, helpers) | contracts | light (batched) | 1.5 h | planned |
+| SL4-UI-RI | 1 | web reinsurance | M: contracts | light + visual | 3.5 h | planned |
+| SL4-PLT | 2 | PLT (roles, approvals withdraw) | G: SL3-PLT-SUPPORT | deep (security) | 2.5 h | planned |
+| SL4-MKT-FS | 2 | GR/CY pack FS stub, MKT capability | G: SL3-MKT-TREATMENT, SL5-MKT-STATE | light + reg. checklist | 2.5 h | planned |
+| SL4-CMP-RECEIPT | 2 | CMP | G: SL3-CMP-CREDIT | light | 1.5 h | planned |
+| SL4-RI-RECOVERY | 2 | RI (intake, recovery) | M: RI-REGISTRY, RI-ENGINE | deep (money) | 4.5 h | planned |
+| SL4-FIN-V4 | 2 | FIN | G: SL3-FIN-RULES | deep (ledger) | 4 h | planned |
+| SL4-CLM-MONEY2 | 2 | CLM (money engine, migration) | G: SL3-CLM-REVERIFY | deep (money) | 4.5 h | planned |
+| SL4-BIL-RECV | 2 | BIL (receivables, migration) | G: SL3-BIL-REFUND | deep (money) | 3.5 h | planned |
+| SL4-UI-BIL | 2 | web billing/receivables | contracts (live walk later) | light + visual | 2.5 h | planned |
+| SL4-UI-CLM-REC | 2 | web claims/recoveries, claim file | G: SL3-UI-CLM | light + visual | 4 h | planned |
+| SL4-CLM-RECOVERY-OPS | 3 | CLM (recoveries) | M: CLM-MONEY2 | deep (money) | 4 h | planned |
+| SL4-CLM-FS-CASE | 3 | CLM (FS case) | M: CLM-MONEY2, MKT-FS | deep (money) | 4 h | planned |
+| SL4-CLM-FS-STATEMENT | 3 | CLM (FS statement) | FS-CASE branch | deep (money) | 3.5 h | planned |
+| SL4-BIL-FSOUT | 3 | BIL (FS_CLEARING out) | M: BIL-RECV | deep (money+security) | 3 h | planned |
+| SL4-UI-CLM-FS | 3 | web claims/fs | G: SL3-UI-CLM | light + visual | 3.5 h | planned |
+| SL4-CLM-PAYOPS | 4 | CLM (payment corrections) | M: RECOVERY-OPS, CMP-RECEIPT | deep (money) | 3.5 h | planned |
+| SL4-BIL-DISBOPS | 4 | BIL (stop/void/return) | M: BIL-FSOUT | deep (money+security) | 3.5 h | planned |
+| SL4-E2E | 5 | tests/e2e, seed-demo, ci.yml (e2e06) | all merged; G: SL3-E2E | light (integration) | 5 h | planned |
+```
