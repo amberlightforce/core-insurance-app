@@ -14,5 +14,5 @@ public sealed class FakePolicySnapshotService : global::CoreIns.Testing.Contract
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.SnapshotGetResponse> GetAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, global::CoreIns.SharedKernel.Identifiers.PolicyId? policyId = null, string? snapshotRef = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Policy.Contracts.Api.SnapshotGetResponse>("pol.Snapshot.get", [validAt, knownAt, policyId, snapshotRef], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.SnapshotGetResponse> GetAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, global::CoreIns.SharedKernel.Identifiers.PolicyId? policyId = null, string? snapshotRef = null, global::CoreIns.SharedKernel.Identifiers.PolicyNumber? policyNumber = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Policy.Contracts.Api.SnapshotGetResponse>("pol.Snapshot.get", [validAt, knownAt, policyId, snapshotRef, policyNumber], cancellationToken);
 }

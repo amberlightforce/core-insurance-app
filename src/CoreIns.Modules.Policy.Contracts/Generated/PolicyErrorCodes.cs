@@ -82,7 +82,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.Policy.get, pol.Submission.create, pol.Term.get, pol.Term.timeline.</para>
+    /// <para>Declared by 9 operation(s): pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.Policy.get, pol.Snapshot.get, pol.Submission.create, pol.Term.get, pol.Term.timeline.</para>
     /// </remarks>
     public const string NotFound = "POL-ERR-NOT-FOUND";
 
@@ -172,7 +172,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.Submission.create.</para>
+    /// <para>Declared by 5 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.Policy.searchByCriteria, pol.Snapshot.get, pol.Submission.create.</para>
     /// </remarks>
     public const string Validation = "POL-ERR-VALIDATION";
 

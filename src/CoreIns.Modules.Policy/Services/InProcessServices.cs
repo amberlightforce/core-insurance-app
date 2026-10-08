@@ -74,7 +74,8 @@ internal sealed class PolicyJobService(
 }
 
 /// <summary>The in-process contract <see cref="IPolicyPolicyService"/>: the bitemporal get (REQ-POL-002).</summary>
-internal sealed class PolicyPolicyService(RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IOptions<PolicyOptions> options, PolicyReader reader)
+internal sealed class PolicyPolicyService(
+    RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IOptions<PolicyOptions> options, PolicyReader reader, PolicySearch search)
     : IPolicyPolicyService
 {
     public async Task<PolicyGetResponse> GetAsync(string id, ValidAt? validAt = null, Instant? knownAt = null, CancellationToken cancellationToken = default)
@@ -90,8 +91,27 @@ internal sealed class PolicyPolicyService(RequestContext context, ILegalEntityDi
     public Task<PolicyGetManyResponse> GetManyAsync(ValidAt? validAt = null, Instant? knownAt = null, IReadOnlyList<string>? ids = null, CancellationToken cancellationToken = default) =>
         throw InProcess.NotAvailable("pol.Policy.getMany");
 
-    public Task<PolicySearchPage> SearchAsync(string? cursor = null, int? limit = null, string? criteria = null, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("pol.Policy.search");
+    public async Task<PolicySearchPage> SearchAsync(string? cursor = null, int? limit = null, PolicyNumber? policyNumber = null, CancellationToken cancellationToken = default) =>
+        InProcess.Unwrap(await search.SearchAsync(policyNumber?.Value, null, null, limit, cursor, cancellationToken).ConfigureAwait(false));
+
+    public async Task<PolicySearchPage> SearchByCriteriaAsync(
+        PolicySearchCriteria request, ValidAt? validAt = null, string? cursor = null, int? limit = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var valid = validAt is null ? (Instant?)null : InProcess.Valid(validAt, clock, options.Value);
+        return InProcess.Unwrap(await search.SearchAsync(request.PolicyNumber?.Value, request.InsuredPartyId, valid, limit, cursor, cancellationToken).ConfigureAwait(false));
+    }
+}
+
+/// <summary>The in-process contract <see cref="IPolicySnapshotService"/>: the claims snapshot at a loss date (REQ-POL-007).</summary>
+internal sealed class PolicySnapshotService(IClock clock, IOptions<PolicyOptions> options, PolicySnapshots snapshots) : IPolicySnapshotService
+{
+    public async Task<SnapshotGetResponse> GetAsync(
+        ValidAt? validAt = null, Instant? knownAt = null, PolicyId? policyId = null, string? snapshotRef = null, PolicyNumber? policyNumber = null,
+        CancellationToken cancellationToken = default) =>
+        InProcess.Unwrap(await snapshots.GetAsync(
+            new SnapshotQuery(policyId?.Value, policyNumber?.Value, snapshotRef, validAt is null ? null : InProcess.Valid(validAt, clock, options.Value), knownAt),
+            cancellationToken).ConfigureAwait(false));
 }
 
 /// <summary>The in-process contract <see cref="IPolicyTermService"/>: the bitemporal term get (REQ-POL-002).</summary>

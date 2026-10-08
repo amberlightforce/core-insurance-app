@@ -2694,6 +2694,11 @@ paths:
       description: |-
         Claims snapshot
 
+        The immutable view of the policy, term and segment in force at validAt (the loss date) as known at knownAt
+        (default now; never in the future). A date-form validAt is the end of that business day in Europe/Athens
+        (D-SLC-13). When no term covers the instant (or the term is not in force) the result is a success with
+        inForce=false and no content. The snapshotRef re-reads the same view byte-identically (POL P5).
+
         PRD inputs: policyId or snapshotRef, lossAt, knownAt
         PRD outputs: snapshot ref + content
       tags:
@@ -2718,7 +2723,11 @@ paths:
       - RAT
       - RI
       x-permission: pol.Snapshot.get
-      x-error-codes: []
+      x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-VALIDATION
+        status: 422
       x-source:
       - PRD-05 §9.1 l.1794
       x-prd-param-names:
@@ -2737,9 +2746,15 @@ paths:
       - name: snapshotRef
         in: query
         required: false
-        description: 'PRD: "policyId or snapshotRef" (optional)'
+        description: 'PRD: "policyId or snapshotRef" (optional). Re-reads that snapshot byte-identically; validAt and knownAt are then encoded in the reference and must not be given.'
         schema:
           type: string
+      - name: policyNumber
+        in: query
+        required: false
+        description: Alternative to policyId (policy numbers are business keys, not personal data). Give exactly one of policyId, policyNumber, snapshotRef.
+        schema:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
       responses:
         '200':
           description: Success
@@ -2753,6 +2768,10 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/pol/v1/policies/get-many:
@@ -2855,12 +2874,12 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: criteria
+      - name: policyNumber
         in: query
         required: false
-        description: 'PRD: "criteria"'
+        description: 'Exact policy number (a business key, not personal data). Other criteria use the POST form (D-SLC-05).'
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
       responses:
         '200':
           description: Success
@@ -2874,6 +2893,71 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    post:
+      operationId: pol.Policy.searchByCriteria
+      summary: Policy search (POST form, criteria in the body)
+      description: |-
+        POST form of pol.Policy.search (D-SLC-05): policy number and insured party id travel in the body, never in a URL.
+        A read; no Idempotency-Key.
+
+        PRD inputs: criteria, cursor
+        PRD outputs: results
+      tags:
+      - Policy
+      x-requirement:
+      - REQ-POL-014
+      x-wave: W4
+      x-work-packages:
+      - W4-POL-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Query'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CLM
+      x-permission: pol.Policy.search
+      x-prd-name: pol.Policy.search
+      x-error-codes:
+      - code: POL-ERR-VALIDATION
+        status: 422
+      x-source:
+      - PRD-05 §9.1 l.1796
+      - DECISIONS D-SLC-05
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicySearchCriteria'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '429':
           $ref: common.yaml#/components/responses/TooManyRequests
         '500':
@@ -5161,14 +5245,91 @@ components:
           description: 'PRD: "risk tree"'
     SnapshotGetResponse:
       type: object
-      description: 'pol.Snapshot.get result. PRD outputs: "snapshot ref + content"'
+      description: 'pol.Snapshot.get result (REQ-POL-007): snapshot ref + content. content is absent when the policy is not in force at validAt.'
       properties:
         snapshotRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "snapshot ref + content"'
+          type: string
+          description: Opaque, immutable reference (policy, segment, validAt, knownAt). Passing it back returns the same snapshot byte for byte.
+        validAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: The resolved valid-time instant (a date-form input is resolved to the end of that Athens business day)
+        knownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: The resolved transaction-time instant
+        inForce:
+          type: boolean
+          description: True when a term in state IN_FORCE or PENDING_CANCELLATION covers validAt
+        status:
+          $ref: '#/components/schemas/TermStateCode'
+          description: Policy status at validAt (REQ-POL-132); absent when the policy had no term known at knownAt
+        notInForceReason:
+          type: string
+          enum:
+          - NO_TERM_AT_INSTANT
+          - TERM_NOT_IN_FORCE
+          description: Why inForce is false. NO_TERM_AT_INSTANT = no term covers validAt (before the first term, after the last, or in a gap); TERM_NOT_IN_FORCE = a term covers it but is cancelled, voided or rewritten.
+        policy:
+          $ref: '#/components/schemas/SnapshotPolicy'
         content:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "snapshot ref + content"'
+          $ref: '#/components/schemas/SnapshotContent'
+      required:
+      - snapshotRef
+      - validAt
+      - knownAt
+      - inForce
+      - policy
+    SnapshotPolicy:
+      type: object
+      properties:
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        insuredPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The policyholder (PTY party) as known at knownAt
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        jurisdiction:
+          $ref: ../events/common.schema.json#/$defs/CountryCode
+      required:
+      - policyId
+      - policyNumber
+      - productCode
+      - insuredPartyId
+      - legalEntity
+      - jurisdiction
+    SnapshotContent:
+      type: object
+      description: The segment content valid at validAt as known at knownAt; coverages with their options (limits, deductibles) exactly as stored.
+      properties:
+        term:
+          $ref: '#/components/schemas/TermView'
+        productVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        segment:
+          $ref: '#/components/schemas/SegmentView'
+        vehicles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vehicle'
+        drivers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Driver'
+        coverages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoverageSelection'
+      required:
+      - term
+      - productVersion
+      - segment
+      - vehicles
+      - drivers
+      - coverages
     PolicyGetManyResponse:
       type: object
       description: 'pol.Policy.getMany result. PRD outputs: "policies"'
@@ -5178,11 +5339,36 @@ components:
           description: 'PRD: "policies"'
     PolicySearchItem:
       type: object
-      description: 'pol.Policy.search result. PRD outputs: "results"'
+      description: 'pol.Policy.search result row (REQ-POL-014 subset: policy number and insured party)'
       properties:
-        results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        insuredPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          $ref: '#/components/schemas/TermStateCode'
+          description: Status at validAt as known at knownAt (now); absent when no term is known
+        termPeriod:
+          $ref: ../events/common.schema.json#/$defs/TimeWindow
+          description: Period of the term that determines the status
+      required:
+      - policyId
+      - policyNumber
+      - productCode
+      - insuredPartyId
+    PolicySearchCriteria:
+      type: object
+      description: Body of pol.Policy.searchByCriteria (D-SLC-05). At least one criterion; both are ANDed.
+      properties:
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        insuredPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PTY party id of the policyholder
     PolicySearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
