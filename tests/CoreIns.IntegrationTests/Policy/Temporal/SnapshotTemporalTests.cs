@@ -124,7 +124,7 @@ public sealed class SnapshotTemporalTests(PostgresFixture database) : TemporalTe
         var p = await BindAsync();
         var inside = p.Start.AddDays(30);
         var watermark = await WatermarkAsync(p.PolicyId);
-        var clock = new FakeClock(Instant.FromUtcDateTime(watermark.ToUtcDateTime().AddHours(1)));
+        var clock = new FakeClock(Instant.FromUtcDateTime(DateTime.UtcNow));
         var writerHasLock = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var readDone = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -137,7 +137,8 @@ public sealed class SnapshotTemporalTests(PostgresFixture database) : TemporalTe
                 writerHasLock.SetResult();
                 await readDone.Task; // the lock, the new watermark and the new segment exist but are not committed
             }), Ct);
-        await writerHasLock.Task;
+        await Task.WhenAny(writerHasLock.Task, writer); // a writer that failed before holding the lock surfaces below, not as a hang
+        if (writer.IsCompleted) { (await writer).IsSuccess.ShouldBeTrue("writer failed before holding the lock"); }
 
         try
         {
