@@ -1,7 +1,9 @@
 using CoreIns.Modules.Policy.Commands;
 using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Contracts.Api;
+using CoreIns.Platform.Authorization;
 using CoreIns.Platform.Commands;
+using CoreIns.Platform.Context;
 using CoreIns.Platform.Http;
 using CoreIns.SharedKernel.Identifiers;
 using Microsoft.AspNetCore.Authorization;
@@ -46,9 +48,17 @@ internal sealed class ChangeController : ControllerBase
 
     /// <summary>The diff of the edit and, for a Quoted version, the servicing preview. Reads only; the same code as the bind.</summary>
     [HttpGet("policy-changes/{jobId}/preview")]
-    [Authorize(Policy = ChangePermissions.Change)]
-    public async Task<IResult> PreviewAsync(string jobId, [FromQuery] int? versionNo, [FromServices] ChangePreviewService preview, CancellationToken cancellationToken)
+    [Authorize]
+    public async Task<IResult> PreviewAsync(
+        string jobId, [FromQuery] int? versionNo, [FromServices] ChangePreviewService preview, [FromServices] IPermissionEvaluator permissions,
+        [FromServices] RequestContext context, CancellationToken cancellationToken)
     {
+        // "pol.change" is a two-part permission name, so it is checked here rather than by a [Authorize] policy (policies are <mod>.<Resource>.<verb>).
+        if (!permissions.Has(context, ChangePermissions.Change))
+        {
+            return Results.Forbid();
+        }
+
         if (!Guid.TryParse(jobId, out var id))
         {
             return HttpResults.Problem(JobSupport.NotFound("change job"), HttpContext);

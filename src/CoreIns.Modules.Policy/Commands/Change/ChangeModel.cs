@@ -65,50 +65,18 @@ internal sealed record RiskDiff(
     IReadOnlyList<string> RemovedVehicles,
     IReadOnlyList<string> ChangedVehicles);
 
-/// <summary>One premium or tax line of the servicing preview: before and after annual, the prorated change and the treatment.</summary>
-internal sealed record PreviewLine(
-    string ElementLocator,
-    string CoverageCode,
-    string ChargeType,
-    string ChargeCategory,
-    decimal BeforeAnnual,
-    decimal AfterAnnual,
-    decimal Amount,
-    int Days,
-    int FractionNumerator,
-    int FractionDenominator,
-    string TransactionKind,
-    string? TreatmentAction,
-    string? TreatmentRuleId,
-    string? TreatmentRuleVersion,
-    string? LegalStatus,
-    bool? Provisional);
-
-/// <summary>
-/// The servicing preview of a change (stand-in for the contract field <c>servicingPreview</c> that SL3-CONTRACTS adds to the
-/// quote and bind responses): computed by exactly the code the bind runs (POL P8), never stored.
-/// </summary>
-internal sealed record ServicingPreview(
-    Instant EffectiveAt,
-    string Currency,
-    IReadOnlyList<PreviewLine> Lines,
-    decimal PremiumChange,
-    decimal TaxChange,
-    decimal TotalChange,
-    IReadOnlyList<DiffEntry> Diff);
-
 /// <summary>A tax or levy line on a premium delta, as the tax port returns it (RAT servicing tax lines + MKT treatment).</summary>
 /// <param name="SourceKey">The premium delta the line derives from.</param>
 /// <param name="Rate">The tax rate as a decimal fraction (0.15 = 15 %).</param>
-/// <param name="Action">The MKT treatment action code: <c>APPLY</c> on a debit, <c>KEEP_NOT_REDUCED</c> on a credit.</param>
-internal sealed record ServicingTaxLine(
+/// <param name="Action">The MKT treatment action: <c>Apply</c> on a debit, <c>KeepNotReduced</c> on a credit.</param>
+internal sealed record PricedTaxLine(
     ChargeKey SourceKey,
     string CoverageCode,
     string ChargeType,
     string ChargeCategory,
     decimal Rate,
     decimal Amount,
-    string Action,
+    TreatmentActionCode Action,
     string RuleId,
     string RuleVersion,
     string LegalStatus,
@@ -182,4 +150,18 @@ internal static class ChangeErrors
             CoreIns.SharedKernel.Identifiers.ModuleCode.POL, "JOB-CONFLICT", 409, "Υπάρχει ήδη ανοιχτή εργασία του ίδιου τύπου", "An open job of the same type already exists")
             .Describe("Ο όρος έχει ήδη ανοιχτή αλλαγή. Ολοκληρώστε την ή αποσύρετέ την.", "The term already has an open change. Finish or withdraw it."),
     ];
+}
+
+/// <summary>The wire codes of the MKT treatment actions (as stored on the charge line and carried on the event).</summary>
+internal static class TreatmentActions
+{
+    public static string Code(TreatmentActionCode action) => action switch
+    {
+        TreatmentActionCode.Apply => "APPLY",
+        TreatmentActionCode.ReduceProRata => "REDUCE_PRO_RATA",
+        TreatmentActionCode.ReverseAsVoid => "REVERSE_AS_VOID",
+        TreatmentActionCode.KeepNotReduced => "KEEP_NOT_REDUCED",
+        TreatmentActionCode.InsurerBears => "INSURER_BEARS",
+        _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unknown treatment action."),
+    };
 }

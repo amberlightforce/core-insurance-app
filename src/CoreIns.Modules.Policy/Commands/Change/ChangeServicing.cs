@@ -28,14 +28,14 @@ namespace CoreIns.Modules.Policy.Commands.Change;
 internal interface IServicingTax
 {
     /// <summary>The tax lines for the premium deltas, or a typed refusal.</summary>
-    Task<Result<IReadOnlyList<ServicingTaxLine>>> LinesAsync(ServicingTaxRequest request, CancellationToken cancellationToken);
+    Task<Result<IReadOnlyList<PricedTaxLine>>> LinesAsync(ServicingTaxRequest request, CancellationToken cancellationToken);
 }
 
 /// <summary>The registered adapter until RAT proration and MKT treatment are on main: a change that needs tax fails closed (PITFALLS 10).</summary>
 internal sealed class UnavailableServicingTax : IServicingTax
 {
-    public Task<Result<IReadOnlyList<ServicingTaxLine>>> LinesAsync(ServicingTaxRequest request, CancellationToken cancellationToken) =>
-        Task.FromResult<Result<IReadOnlyList<ServicingTaxLine>>>(DomainError.Of(
+    public Task<Result<IReadOnlyList<PricedTaxLine>>> LinesAsync(ServicingTaxRequest request, CancellationToken cancellationToken) =>
+        Task.FromResult<Result<IReadOnlyList<PricedTaxLine>>>(DomainError.Of(
             ModuleCode.POL, "DEPENDENCY-UNAVAILABLE", "Servicing tax lines (rat.Proration + mkt TaxCalculator.treatment) are not wired in this deployment yet."));
 }
 
@@ -50,7 +50,7 @@ internal sealed class ChangeEngineFactory(
     IProration proration,
     RequestContext context)
 {
-    public async Task<Result<(ServicingEngine Engine, DayCountConvention Convention)>> CreateAsync(PolicyTermRow term, Instant validAt, TimeZoneInfo zone, CancellationToken cancellationToken)
+    public async Task<Result<ChangeEngine>> CreateAsync(PolicyTermRow term, Instant validAt, TimeZoneInfo zone, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(term);
         var convention = await ConventionAsync(term, cancellationToken).ConfigureAwait(false);
@@ -65,7 +65,7 @@ internal sealed class ChangeEngineFactory(
             return rule.Error!;
         }
 
-        return (new ServicingEngine(proration, rule.Value), convention.Value);
+        return new ChangeEngine(new ServicingEngine(proration, rule.Value), convention.Value, rule.Value);
     }
 
     private async Task<Result<DayCountConvention>> ConventionAsync(PolicyTermRow term, CancellationToken cancellationToken)
@@ -114,6 +114,9 @@ internal sealed class ChangeEngineFactory(
         };
     }
 }
+
+/// <summary>The engine of a term with its day-count convention and MKT's premium rounding.</summary>
+internal sealed record ChangeEngine(ServicingEngine Engine, DayCountConvention Convention, PremiumRounding Rounding);
 
 /// <summary>A term's current version with the bound transactions that built it.</summary>
 internal sealed record TermHistory(PolicyTermRow Term, IReadOnlyList<PolicyTransactionRow> Transactions)
@@ -243,37 +246,46 @@ internal sealed record ChangePricing(
     ServicingState Before,
     ServicingState After,
     IReadOnlyList<ServicingDelta> Deltas,
-    IReadOnlyList<ServicingTaxLine> TaxLines,
+    IReadOnlyList<PricedTaxLine> TaxLines,
     IReadOnlyList<ChargeRate> NewRates,
     Money Premium,
     Money Taxes)
 {
     public Money Total => Premium + Taxes;
 
-    /// <summary>The preview, with the diff of the risk.</summary>
-    public ServicingPreview Preview(Instant effectiveAt, Currency currency, IReadOnlyList<DiffEntry> diff)
+    /// <summary>
+    /// The contract <c>servicingPreview</c> (REQ-POL-192): annual premium before and after, the prorated lines per element × charge
+    /// type, the tax lines with their treatment, the signed changes and what is due either way. Built by the code the bind runs.
+    /// </summary>
+    public ServicingPreview ToPreview(PremiumRounding rounding, ConfigurationHash? configuration)
     {
+        var term = After.Term;
+        var currency = term.Currency;
+        var termDays = term.Days;
         var rates = NewRates.ToDictionary(r => r.Key);
-        var lines = new List<PreviewLine>();
-        foreach (var delta in Deltas)
+        var before = Before.Segments.GroupBy(s => s.Key).Select(g => g.OrderBy(s => s.From).Last()).Sum(s => rounding(s.Rate.AnnualRate));
+        var after = NewRates.Sum(r => rounding(r.AnnualRate));
+        var prorated = Deltas.Select(d => new ServicingProratedLine
         {
-            var before = Before.Segments.Where(s => s.Key == delta.Key).OrderBy(s => s.From).LastOrDefault()?.Rate.AnnualRate ?? 0m;
-            lines.Add(new PreviewLine(
-                delta.Key.ElementLocator, delta.Key.CoverageCode, delta.Key.ChargeType, delta.ChargeCategory, before,
-                rates.TryGetValue(delta.Key, out var rate) ? rate.AnnualRate : 0m, delta.Amount, delta.Days, delta.FractionNumerator, delta.FractionDenominator,
-                Codes.Of(ChangeJson.Kind(delta.TransactionKind)), null, null, null, null, null));
-        }
-
-        foreach (var tax in TaxLines)
+            ElementLocator = d.Key.ElementLocator, CoverageCode = d.Key.CoverageCode, ChargeType = d.Key.ChargeType, ChargeCategory = d.ChargeCategory,
+            Period = DateRange.Of(new BusinessDate(d.DateFrom), new BusinessDate(d.DateTo)), Days = d.Days, TermDays = termDays,
+            Fraction = decimal.Round((decimal)d.FractionNumerator / d.FractionDenominator, 12, MidpointRounding.ToZero),
+            AnnualAmount = new Money(rates.TryGetValue(d.Key, out var rate) ? rounding(rate.AnnualRate) : 0m, currency), Amount = new Money(d.Amount, currency),
+        }).ToList();
+        var taxLines = TaxLines.Select(t => new Contracts.Api.ServicingTaxLine
         {
-            var source = Deltas.First(d => d.Key == tax.SourceKey);
-            lines.Add(new PreviewLine(
-                tax.SourceKey.ElementLocator, tax.CoverageCode, tax.ChargeType, tax.ChargeCategory, tax.Rate, tax.Rate, tax.Amount, source.Days,
-                source.FractionNumerator, source.FractionDenominator, Codes.Of(ChangeJson.Kind(source.TransactionKind)), tax.Action, tax.RuleId, tax.RuleVersion,
-                tax.LegalStatus, tax.Provisional));
-        }
-
-        return new ServicingPreview(effectiveAt, currency.Code, lines, Premium.Amount, Taxes.Amount, Total.Amount, diff);
+            ElementLocator = t.SourceKey.ElementLocator, ChargeType = t.ChargeType, ChargeCategory = t.ChargeCategory, Amount = new Money(t.Amount, currency),
+            TreatmentAction = t.Action, RuleId = t.RuleId, RuleVersion = t.RuleVersion, LegalStatus = t.LegalStatus, Provisional = t.Provisional,
+        }).ToList();
+        var total = Total;
+        return new ServicingPreview
+        {
+            AnnualBefore = new Money(before, currency), AnnualAfter = new Money(after, currency), ProratedLines = prorated, TaxLines = taxLines,
+            PremiumChange = Premium, TaxChange = Taxes, TotalChange = total,
+            RefundDue = new Money(total.Amount < 0m ? -total.Amount : 0m, currency), AdditionalDue = new Money(total.Amount > 0m ? total.Amount : 0m, currency),
+            TransactionKind = total.Amount < 0m ? TransactionKindCode.EndorsementCredit : TransactionKindCode.EndorsementDebit,
+            ConfigurationHash = configuration, Provisional = TaxLines.Any(t => t.Provisional),
+        };
     }
 }
 
@@ -291,7 +303,7 @@ internal sealed class ChangePricer(IServicingTax tax, RequestContext context)
         }
 
         var currency = before.Term.Currency;
-        IReadOnlyList<ServicingTaxLine> taxLines = [];
+        IReadOnlyList<PricedTaxLine> taxLines = [];
         if (applied.Deltas.Count > 0)
         {
             var taxed = await tax.LinesAsync(

@@ -64,7 +64,7 @@ internal sealed class CreatePolicyChangeHandler(
 
         var terms = await db.Terms.AsNoTracking().Where(t => t.PolicyId == policyId && t.LegalEntityId == legalEntity && t.RecordedTo == null)
             .OrderBy(t => t.TermNumber).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var effectiveAt = request.EffectiveAt ?? now;
+        var effectiveAt = PolicyWriteLock.Truncate(request.EffectiveAt ?? now);
         var term = terms.FirstOrDefault(t => t.ValidFrom <= effectiveAt && effectiveAt < t.ValidTo);
         if (term is null && request.EffectiveAt is null)
         {

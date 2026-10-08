@@ -121,7 +121,7 @@ internal sealed class ChangeBindService(
         var currency = Currency.FromCode(job.Currency);
         var transactionId = PolicyTransactionId.New();
         var rates = ChangeQuoteService.Rates(JobSupport.FromJson<List<ChargeLine>>(version.Charges));
-        var priced = await pricer.PriceAsync(engine, state, rates, job.EffectiveAt, transactionId.Value.ToString(), job.Jurisdiction, zone, cancellationToken).ConfigureAwait(false);
+        var priced = await pricer.PriceAsync(engine.Engine, state, rates, job.EffectiveAt, transactionId.Value.ToString(), job.Jurisdiction, zone, cancellationToken).ConfigureAwait(false);
         if (priced.IsFailure)
         {
             return priced.Error!;
@@ -256,6 +256,7 @@ internal sealed class ChangeBindService(
             PolicyNumber = policyNumber,
             RecordedAt = t,
             ChargeDeltas = lines,
+            ServicingPreview = pricing.ToPreview(engine.Rounding, ConfigurationHash.Parse(version.ConfigurationHash!)),
             GateResults =
             [
                 Gate("COVER_NOT_ENDED"), Gate("BASE_IS_HEAD"), Gate("IN_SEQUENCE"), Gate("QUOTE_CURRENT"),
@@ -266,7 +267,7 @@ internal sealed class ChangeBindService(
     private ChargeLine AddCharge(
         PolicyTransactionId transactionId, PolicyTermRow term, PolicyId policyId, LegalEntityId legalEntity, BusinessDate today, Instant t, int index, int total,
         string element, string coverage, string chargeType, string category, decimal annualRate, decimal amount, ServicingDelta source, TaxTransactionKind kind,
-        string? action, string? ruleId, string? ruleVersion, string? legalStatus, bool? provisional, Currency currency)
+        TreatmentActionCode? action, string? ruleId, string? ruleVersion, string? legalStatus, bool? provisional, Currency currency)
     {
         var chargeId = ChargeId.New();
         var period = DateRange.Of(new BusinessDate(source.DateFrom), new BusinessDate(source.DateTo));
@@ -276,7 +277,7 @@ internal sealed class ChangeBindService(
             ElementLocator = element, CoverageCode = coverage, ChargeType = chargeType, ChargeCategory = category, DeltaKind = DeltaKinds.Net,
             AnnualRate = annualRate, Amount = amount, Currency = currency.Code, ValidFrom = new BusinessDate(source.DateFrom), ValidTo = new BusinessDate(source.DateTo),
             BookingDate = today, CorrelationKey = transactionId.Value.ToString(), SetIndex = index, SetSize = total, RecordedAt = t,
-            TransactionKind = Codes.Of(kind), LegalStatus = legalStatus, Provisional = provisional, TaxTreatmentRef = action,
+            TransactionKind = Codes.Of(kind), LegalStatus = legalStatus, Provisional = provisional, TaxTreatmentRef = action is { } a ? TreatmentActions.Code(a) : null,
             TreatmentRuleId = ruleId, TreatmentRuleVersion = ruleVersion,
         });
         events.Publish(new OutgoingEvent(
@@ -285,7 +286,8 @@ internal sealed class ChangeBindService(
             {
                 ChargeId = chargeId, TermId = term.TermId, ElementLocator = element, CoverageCode = coverage, ChargeType = chargeType, ChargeCategory = category,
                 DeltaKind = DeltaKinds.Net, NetAmount = new Money(amount, currency), ValidPeriod = period, BookingDate = today, TransactionId = transactionId,
-                CorrelationKey = transactionId.Value.ToString(), TaxTreatmentRef = action, LegalStatus = legalStatus, Provisional = provisional,
+                CorrelationKey = transactionId.Value.ToString(), TaxTreatmentRef = action is { } code ? TreatmentActions.Code(code) : null, LegalStatus = legalStatus, Provisional = provisional,
+                TransactionKind = Enum.Parse<ChargeDeltaEmittedV1.TransactionKindValue>(kind.ToString()), TreatmentRuleId = ruleId, TreatmentRuleVersion = ruleVersion,
             },
             BusinessKeys.Empty.With("policyId", policyId.Value.ToString()).With("chargeId", chargeId.Value.ToString())
                 .With("policyTermId", term.TermId.Value.ToString()).With("transactionId", transactionId.Value.ToString()))

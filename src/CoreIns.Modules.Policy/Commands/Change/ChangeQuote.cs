@@ -19,7 +19,7 @@ using Microsoft.Extensions.Options;
 namespace CoreIns.Modules.Policy.Commands.Change;
 
 /// <summary>A change job's term as of now: history, base risk, the engine for the term and the replayed state.</summary>
-internal sealed record ChangeContext(TermHistory History, SegmentRow BaseSegment, RiskTree BaseTree, ServicingEngine Engine, ServicingState State);
+internal sealed record ChangeContext(TermHistory History, SegmentRow BaseSegment, RiskTree BaseTree, ChangeEngine Engine, ServicingState State);
 
 /// <summary>
 /// Loads what every step of a change job needs (quote, preview, bind) with the same checks in the same order: the cover is not
@@ -76,9 +76,12 @@ internal sealed class ChangeContextLoader(PolicyDbContext db, ChangeHistory hist
         }
 
         var state = await history.ReplayAsync(term, engine.Value.Engine, engine.Value.Convention, zone, cancellationToken).ConfigureAwait(false);
-        return state.IsFailure ? state.Error! : new ChangeContext(term, segment, JobSupport.FromJson<RiskTree>(segment.Snapshot), engine.Value.Engine, state.Value);
+        return state.IsFailure ? state.Error! : new ChangeContext(term, segment, JobSupport.FromJson<RiskTree>(segment.Snapshot), engine.Value, state.Value);
     }
 }
+
+/// <summary>A change job's version priced: the engine and tax result, the quote lines, RAT's response (when it was rated) and MKT's rounding.</summary>
+internal sealed record PricedVersion(ChangePricing Pricing, List<ChargeLine> Lines, RateRateResponse? Rating, Currency Currency, PremiumRounding Rounding);
 
 /// <summary>
 /// <c>pol.Job.quote</c> for a change job (REQ-POL-192, -193, -195, -093; routed here by <c>QuoteJobHandler</c>). Validates the edit
@@ -134,7 +137,7 @@ internal sealed class ChangeQuoteService(
             return priced.Error!;
         }
 
-        var (pricing, lines, rating, currency) = priced.Value;
+        var (pricing, lines, rating, _, rounding) = priced.Value;
         var validUntil = now.Plus(TimeSpan.FromDays(options.Value.QuoteValidityDays));
         version.WorksheetId = rating!.WorksheetId.Value;
         version.WorksheetHash = rating.WorksheetHash.Value;
@@ -182,6 +185,7 @@ internal sealed class ChangeQuoteService(
             Issues = [],
             Warnings = QuoteWarnings.From([.. (rating.Warnings ?? []).Select(w => w.Code)], context.Language),
             ValidUntil = validUntil,
+            ServicingPreview = pricing.ToPreview(rounding, (rating.ConfigurationHash ?? context.ConfigurationHash)?.Hash is { } hash ? new ConfigurationHash(hash) : null),
         };
     }
 
@@ -189,7 +193,7 @@ internal sealed class ChangeQuoteService(
     /// The shared pricing step of quote and preview: the guards, the edit check, the rates (from RAT when <paramref name="rate"/>,
     /// else from the stored quote lines) and the engine plus tax pricing.
     /// </summary>
-    internal async Task<Result<(ChangePricing Pricing, List<ChargeLine> Lines, RateRateResponse? Rating, Currency Currency)>> PriceVersionAsync(
+    internal async Task<Result<PricedVersion>> PriceVersionAsync(
         JobRow job, QuoteVersionRow version, bool rate, CancellationToken cancellationToken)
     {
         var zone = options.Value.Zone;
@@ -231,14 +235,14 @@ internal sealed class ChangeQuoteService(
             rates = Rates(JobSupport.FromJson<List<ChargeLine>>(version.Charges ?? "[]"));
         }
 
-        var pricing = await pricer.PriceAsync(change.Engine, change.State, rates, job.EffectiveAt, job.JobId.Value.ToString(), job.Jurisdiction, zone, cancellationToken)
+        var pricing = await pricer.PriceAsync(change.Engine.Engine, change.State, rates, job.EffectiveAt, job.JobId.Value.ToString(), job.Jurisdiction, zone, cancellationToken)
             .ConfigureAwait(false);
         if (pricing.IsFailure)
         {
             return pricing.Error!;
         }
 
-        return (pricing.Value, Lines(pricing.Value, currency), rating, currency);
+        return new PricedVersion(pricing.Value, Lines(pricing.Value, currency), rating, currency, change.Engine.Rounding);
     }
 
     /// <summary>The risk diff of a version against the base, with the violations of what a change may touch as a validation error.</summary>
@@ -395,8 +399,12 @@ internal sealed class ChangePreviewService(PolicyDbContext db, RequestContext co
         }
 
         var priced = await quotes.PriceVersionAsync(job, version, rate: false, cancellationToken).ConfigureAwait(false);
-        return priced.IsFailure
-            ? priced.Error!
-            : (priced.Value.Pricing.Preview(job.EffectiveAt, priced.Value.Currency, diff.Value.Entries), diff.Value.Entries);
+        if (priced.IsFailure)
+        {
+            return priced.Error!;
+        }
+
+        var hash = version.ConfigurationHash is { } text ? ConfigurationHash.Parse(text) : (ConfigurationHash?)null;
+        return (priced.Value.Pricing.ToPreview(priced.Value.Rounding, hash), diff.Value.Entries);
     }
 }
