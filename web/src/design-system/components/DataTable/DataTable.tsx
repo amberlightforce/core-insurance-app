@@ -122,6 +122,8 @@ export interface DataTableProps<Row> {
 
   /** Enter / O / double-click. */
   onOpen?: (row: Row) => void;
+  /** A picker: a single click (and Space, when there is no quick look) also opens the row. */
+  openOnClick?: boolean;
   /** Space. */
   onQuickLook?: (row: Row) => void;
   /** J/K and clicks move the cursor row (drives a detail pane from cache). */
@@ -163,6 +165,13 @@ function isPointerCoarse(): boolean {
     : false;
 }
 
+/** True when both arrays hold the same row objects in the same order. */
+function sameRows<Row>(a: readonly Row[], b: readonly Row[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return false;
+  return true;
+}
+
 /**
  * Data table (Part 2 §4.35) on TanStack Table v8 + TanStack Virtual v3. `role="grid"` with
  * `aria-rowcount`/`aria-rowindex`, multi-sort with Greek collation, accent-insensitive search, column
@@ -194,6 +203,7 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
     onSelectAllMatching,
     bulkActions,
     onOpen,
+    openOnClick = false,
     onQuickLook,
     onCursorChange,
     getRowState,
@@ -217,6 +227,21 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
   const region = preferences.regionFormat;
   const sortHintId = useId();
   const captionId = useId();
+
+  // A caller that builds its row array anew on every render (`query.data?.items ?? []`, `.map(...)`, an inline literal)
+  // must not make the table believe its data changed: TanStack resets page index and other derived state whenever the
+  // data identity changes, which re-renders, which hands over a new array again, forever. Keep the previous array while
+  // the rows are the same objects in the same order.
+  const [stableData, setStableData] = useState<readonly Row[]>(data);
+  let tableData = stableData;
+  if (stableData !== data) {
+    if (sameRows(stableData, data)) {
+      tableData = stableData;
+    } else {
+      setStableData(data);
+      tableData = data;
+    }
+  }
 
   const [sorting, setSorting] = useState<SortingState>(initialSorting ?? []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -288,7 +313,7 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
   // TanStack's table instance is mutable by design; the hook is the documented integration.
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable<Row>({
-    data: data as Row[],
+    data: tableData as Row[],
     columns: allColumns,
     getRowId: (row) => getRowId(row),
     state: {
@@ -330,7 +355,13 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
     onColumnOrderChange: setColumnOrder,
     onColumnSizingChange: setColumnSizing,
     onExpandedChange: setExpanded,
-    onPaginationChange: setPaging,
+    // A reset to the state already held is not a change: returning the same object stops a re-render cascade.
+    onPaginationChange: (updater) => {
+      setPaging((old) => {
+        const next = typeof updater === 'function' ? updater(old) : updater;
+        return next.pageIndex === old.pageIndex && next.pageSize === old.pageSize ? old : next;
+      });
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -378,7 +409,10 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
     if (!root || typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width ?? 0;
-      if (width > 0) setNarrow(width < cardBreakpoint);
+      // Hysteresis: the card layout can change the page height and so the scrollbar, which changes this width by a few
+      // pixels; without a dead band the table and card layouts could flip back and forth without end.
+      if (width > 0)
+        setNarrow((was) => (was ? width < cardBreakpoint + 32 : width < cardBreakpoint));
     });
     observer.observe(root);
     return () => {
@@ -499,7 +533,8 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
         return true;
       }
       if (key === ' ') {
-        onQuickLook?.(item.row.original);
+        if (onQuickLook) onQuickLook(item.row.original);
+        else if (openOnClick) onOpen?.(item.row.original);
         return true;
       }
       if (single && key === 'x' && selectable) {
@@ -563,6 +598,7 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
     setCursor(index, false);
     if (target.closest('button, a, input')) return;
     if (item.kind === 'group') item.row.toggleExpanded();
+    else if (openOnClick && item.kind === 'row') onOpen?.(item.row.original);
   };
 
   const onBodyDoubleClick = (event: MouseEvent<HTMLDivElement>) => {

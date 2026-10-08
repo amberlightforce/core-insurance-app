@@ -82,3 +82,30 @@ describe('apiRequest', () => {
     expect(offline.problem.retryable).toBe(true);
   });
 });
+
+describe('401 handling', () => {
+  it('drops the held dev session and runs the registered handler', async () => {
+    const { onUnauthorized } = await import('./client');
+    sessionStorage.setItem(
+      'coreins.devSession',
+      JSON.stringify({
+        accessToken: 'stale',
+        expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+        user: { id: 'u', name: 'U', roles: [] },
+      }),
+    );
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/x/v1/things',
+        respond: () => problem(401, 'PLT-ERR-UNAUTHENTICATED', 'Unauthorized'),
+      },
+    ]);
+    const handler = vi.fn();
+    onUnauthorized(handler);
+    await expect(apiRequest('/api/x/v1/things')).rejects.toSatisfy(isApiError);
+    expect(handler).toHaveBeenCalledOnce();
+    expect(sessionStorage.getItem('coreins.devSession')).toBeNull();
+    onUnauthorized(null);
+  });
+});

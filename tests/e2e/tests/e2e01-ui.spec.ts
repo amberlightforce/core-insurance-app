@@ -20,9 +20,27 @@ test.beforeAll(async ({ request }) => {
   expect(imported.status(), await imported.text()).toBeLessThan(300);
 });
 
+/**
+ * The page must stay responsive: a render loop keeps the renderer's main thread busy and evaluate() never answers.
+ * Called after every navigation and after the screens that once froze (customer search, invoice).
+ */
+async function alive(page: Page): Promise<void> {
+  const answer = await Promise.race([
+    page.evaluate(() => 'alive'),
+    new Promise<string>((done) => setTimeout(() => done('frozen'), 5000)),
+  ]);
+  expect(answer, 'the page answers within 5 s (no render loop)').toBe('alive');
+}
+
+/** page.goto followed by the responsiveness check. */
+async function go(page: Page, url: string): Promise<void> {
+  await page.goto(url);
+  await alive(page);
+}
+
 /** Dev sign-in page: pick the user with the mouse (not the keyboard), sign in. */
 async function signInAs(page: Page, name: RegExp | string): Promise<void> {
-  await page.goto('/dev/sign-in');
+  await go(page, '/dev/sign-in');
   const signOut = page.getByRole('button', { name: 'Αποσύνδεση' });
   const picker = page.getByRole('button', { name: /Χρήστης/ });
   await expect(signOut.or(picker)).toBeVisible();
@@ -33,7 +51,10 @@ async function signInAs(page: Page, name: RegExp | string): Promise<void> {
   await expect(page.getByRole('status').filter({ hasText: 'Συνδεθήκατε ως' })).toBeVisible();
 }
 
-test.use({ actionTimeout: 15_000 });
+test.use({
+  actionTimeout: 15_000,
+  contextOptions: { reducedMotion: process.env['E2E_REDUCED_MOTION'] ? 'reduce' : 'no-preference' },
+});
 
 test('E2E-01 through the staff screens', async ({ page }) => {
   test.setTimeout(300_000);
@@ -42,7 +63,7 @@ test('E2E-01 through the staff screens', async ({ page }) => {
   await signInAs(page, /Underwriter|Ανάδοχος|underwriter/i);
 
   // ---- Create the party.
-  await page.goto('/parties/new');
+  await go(page, '/parties/new');
   await page.getByRole('textbox', { name: /^Όνομα υποχρεωτικό/ }).fill('Ελένη');
   await page.getByRole('textbox', { name: /^Επώνυμο/ }).fill('Ιωάννου');
   const birth = page.getByRole('group', { name: /Ημερομηνία γέννησης/ });
@@ -64,16 +85,17 @@ test('E2E-01 through the staff screens', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: /Ιωάννου/ })).toBeVisible();
 
   // ---- The customer search must answer, not freeze the tab: results within 5 s.
-  await page.goto('/parties');
+  await go(page, '/parties');
   await page.getByRole('searchbox').fill('Ιωάννου');
   await page.keyboard.press('Enter');
+  await alive(page);
   await expect(page.getByRole('grid', { name: /Αποτελέσματα/ }).getByText('Ελένη Ιωάννου').first()).toBeVisible({ timeout: 5000 });
   // The page is still alive after the results arrive.
   await page.getByRole('searchbox').fill('Ελένη');
   await expect(page.getByRole('searchbox')).toHaveValue('Ελένη');
 
   // ---- Quote wizard for that party.
-  await page.goto(`/policies/quotes/new?partyId=${partyId}`);
+  await go(page, `/policies/quotes/new?partyId=${partyId}`);
   const next = page.getByRole('button', { name: /Επόμενο/ });
   await expect(page.getByText('MOTOR-GR')).toBeVisible();
   await expect(next).not.toHaveAttribute('aria-disabled', 'true');
@@ -151,6 +173,8 @@ test('E2E-01 through the staff screens', async ({ page }) => {
   // ---- Policy view: a not-yet-started policy opens as of the start of its term, with the covers and a note.
   await page.getByRole('button', { name: 'Άνοιγμα ασφαλιστηρίου' }).click();
   await expect(page.getByRole('heading', { level: 1, name: `Ασφαλιστήριο ${policyNumber}` })).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`/policies/[0-9a-f-]{36}$`));
+  await alive(page);
   await expect(page.getByText('Δεν έχει αρχίσει ακόμη')).toBeVisible();
   const covers = page.getByRole('region', { name: 'Καλύψεις' });
   await expect(covers.getByText('MTPL')).toBeVisible();
@@ -163,7 +187,7 @@ test('E2E-01 through the staff screens', async ({ page }) => {
   await expect
     .poll(
       async () => {
-        await page.goto(policyUrl);
+        await go(page, policyUrl);
         const invoice = page.getByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' }).getByText(/^INV\d+/).first();
         return invoice
           .waitFor({ timeout: 4000 })
@@ -177,9 +201,10 @@ test('E2E-01 through the staff screens', async ({ page }) => {
 
   // ---- Billing: the invoice, the stub fiscal MARK, the exact payment, PAID.
   await signInAs(page, /Billing|Χρέωση|billing/i);
-  await page.goto(policyUrl);
+  await go(page, policyUrl);
   await page.getByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' }).getByText(/^INV\d+/).first().dblclick();
   await expect(page.getByRole('heading', { level: 1, name: /^Τιμολόγιο INV/ })).toBeVisible();
+  await alive(page);
   await expect(page.getByText('GR-IPT').first()).toBeVisible();
   await expect(page.getByText('Προσωρινό').first()).toBeVisible();
   await expect(page.getByText(/STUB-\d+/).first()).toBeVisible({ timeout: 60_000 });
@@ -190,9 +215,92 @@ test('E2E-01 through the staff screens', async ({ page }) => {
 
   // ---- Finance: the policy's journals, every one balanced.
   await signInAs(page, /Finance|Λογιστ|finance/i);
-  await page.goto(`/finance/journals/policy/${policyNumber}`);
+  await go(page, `/finance/journals/policy/${policyNumber}`);
   await expect(page.getByRole('heading', { level: 1, name: new RegExp(policyNumber) })).toBeVisible();
   await expect(page.getByText('Ισοσκελισμένη').first()).toBeVisible({ timeout: 60_000 });
   await expect(page.getByText('Μη ισοσκελισμένη')).toHaveCount(0);
   expect(await page.getByText('Ισοσκελισμένη').count()).toBeGreaterThanOrEqual(6);
+});
+
+// ---- Rough edges found by hand in a real Chrome, kept as regression checks.
+
+async function createParty(request: import('@playwright/test').APIRequestContext, family: string): Promise<void> {
+  const signIn = await request.post('/api/plt/v1/dev/sign-in', { data: { userId: 'underwriter' } });
+  const token = ((await signIn.json()) as { accessToken: string }).accessToken;
+  const created = await request.post('/api/pty/v1/parties', {
+    headers: { authorization: `Bearer ${token}`, 'idempotency-key': crypto.randomUUID() },
+    data: {
+      partyType: 'PERSON',
+      person: { givenNames: 'Σοφία', familyName: family, fatherName: 'Νικόλαος', birthDate: '1979-06-21' },
+      identifiers: [],
+      addresses: [{ types: ['LEGAL', 'MAILING'], country: 'GR', street: 'Πανεπιστημίου', number: '5', postcode: '10679', locality: 'Αθήνα' }],
+      contactPoints: [{ type: 'EMAIL', value: 'sofia.test@example.org', primary: true }],
+      reason: 'NEW_CUSTOMER',
+    },
+  });
+  expect(created.status(), await created.text()).toBe(201);
+}
+
+test('the quote wizard chooses the policyholder with a single click', async ({ page, request }) => {
+  const family = `Επιλογής${Date.now().toString().slice(-6)}`;
+  await createParty(request, family);
+  await signInAs(page, /Underwriter|Ανάδοχος|underwriter/i);
+  await go(page, '/policies/quotes/new');
+  await page.getByRole('searchbox').fill(family);
+  await page.keyboard.press('Enter');
+  await alive(page);
+  const result = page.getByRole('grid', { name: /Αποτελέσματα/ }).getByText(new RegExp(family)).first();
+  await expect(result).toBeVisible({ timeout: 5000 });
+  await result.click(); // one click, not a double click
+  await expect(page.getByRole('region', { name: 'Λήπτης ασφάλισης' }).getByText(new RegExp(family))).toBeVisible();
+  await expect(page.getByRole('button', { name: /Επόμενο/ })).not.toHaveAttribute('aria-disabled', 'true');
+});
+
+test('the dev sign-in select takes a mouse click on an option, every time', async ({ page }) => {
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    await go(page, '/dev/sign-in');
+    const signOut = page.getByRole('button', { name: 'Αποσύνδεση' });
+    const picker = page.getByRole('button', { name: /Χρήστης/ });
+    await expect(signOut.or(picker)).toBeVisible();
+    if (await signOut.isVisible()) await signOut.click();
+    const box = (await picker.boundingBox())!;
+    await page.mouse.move(box.x + 20, box.y + 10);
+    await page.mouse.down();
+    await page.mouse.up();
+    const option = page.getByRole('option').nth(attempt % 4);
+    const target = (await option.boundingBox())!;
+    await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 4 });
+    await page.waitForTimeout(40 * attempt);
+    await page.mouse.down();
+    await page.mouse.up();
+    await expect(picker).not.toContainText('Επιλέξτε');
+    await page.getByRole('button', { name: 'Σύνδεση', exact: true }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Συνδεθήκατε ως' })).toBeVisible();
+  }
+});
+
+test('a stale dev token sends the user back to the sign-in page with a message', async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem(
+      'coreins.devSession',
+      JSON.stringify({
+        // A well-formed JWT whose signature no longer verifies, as after an api restart with a new signing key.
+        accessToken: `${btoa('{"alg":"HS256","typ":"JWT"}')}.${btoa('{"sub":"underwriter","iss":"coreins-dev-local"}')}.c2lnbmF0dXJl`.replaceAll('=', ''),
+        expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+        user: { id: 'underwriter', name: 'Underwriter', roles: ['Staff.Underwriter'] },
+      }),
+    );
+  });
+  await go(page, '/parties');
+  await page.getByRole('searchbox').fill('Παπαδοπούλου');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/dev\/sign-in\?expired=1/);
+  await expect(page.getByText('Η σύνδεση έληξε')).toBeVisible();
+  await alive(page);
+});
+
+test('the favicon is public', async ({ request }) => {
+  const response = await request.get('/favicon.ico', { maxRedirects: 0 });
+  expect(response.status()).not.toBe(401);
+  expect([200, 302]).toContain(response.status());
 });

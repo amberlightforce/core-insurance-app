@@ -15,8 +15,10 @@ import { useSearchParties } from './api';
 import styles from '../staff/staff.module.css';
 
 export interface PartySearchPanelProps {
-  /** Enter or double-click on a result row. */
+  /** Enter or double-click on a result row (also a single click or Space when `pickOnClick`). */
   onOpen: (party: PartySearchItem) => void;
+  /** A picker (the quote wizard): one click on a result chooses it. */
+  pickOnClick?: boolean;
   /** Shown in the empty-result state next to the hint (for example «Νέο πρόσωπο»). */
   emptyAction?: ReactNode;
   /** Label of the search box. */
@@ -31,7 +33,12 @@ const noItems: PartySearchItem[] = [];
  * One search box posting to `pty.Party.searchByCriteria` (name, ΑΦΜ or party number all go in the body, never in
  * the URL: D-SLC-05), with the results in a DataTable. Identifiers in the results are masked by the API.
  */
-export function PartySearchPanel({ onOpen, emptyAction, label }: PartySearchPanelProps) {
+export function PartySearchPanel({
+  onOpen,
+  pickOnClick = false,
+  emptyAction,
+  label,
+}: PartySearchPanelProps) {
   const { t } = useTranslation('party');
   const search = useSearchParties();
   const [text, setText] = useState('');
@@ -128,6 +135,7 @@ export function PartySearchPanel({ onOpen, emptyAction, label }: PartySearchPane
           getRowLabel={(r) => r.displayName}
           isLoading={search.isPending}
           onOpen={onOpen}
+          openOnClick={pickOnClick}
           emptyState={
             search.isSuccess ? (
               <EmptyState

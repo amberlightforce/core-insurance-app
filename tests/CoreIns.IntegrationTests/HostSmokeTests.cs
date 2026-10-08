@@ -31,6 +31,19 @@ public sealed class HostSmokeTests(PostgresFixture database) : IClassFixture<Pos
     }
 
     [Fact]
+    public async Task The_favicon_is_served_anonymously_like_the_static_app()
+    {
+        await using var factory = new ApiHostFactory(database.AppConnectionString);
+        using var client = factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        using var response = await client.GetAsync(new Uri("/favicon.ico", UriKind.Relative), TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized);
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location!.ToString().ShouldBe("/favicon.svg");
+    }
+
+    [Fact]
     public async Task Problem_type_pages_are_served_anonymously()
     {
         await using var factory = new ApiHostFactory(database.AppConnectionString);

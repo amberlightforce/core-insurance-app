@@ -226,7 +226,8 @@ describe('QuoteWizardPage', () => {
       confirmation: true,
     });
     expect(bind?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
-    expect(screen.getByRole('button', { name: 'Άνοιγμα ασφαλιστηρίου' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Άνοιγμα ασφαλιστηρίου' }));
+    expect(screen.getByTestId('location')).toHaveTextContent(/^\/policies\/[0-9a-f-]{36}$/);
   });
 
   it('shows the gate results when binding does not complete', async () => {

@@ -90,6 +90,10 @@ if (role == AppRole.Api)
 
     app.MapHangfireDashboardWithAuthorizationPolicy(AuthPolicies.Admin);
 
+    // A request with a file extension matches no endpoint and would meet the authenticated-user fallback policy: the
+    // browser's /favicon.ico is public like the rest of the static app.
+    app.MapGet("/favicon.ico", () => Results.Redirect("/favicon.svg", permanent: false)).AllowAnonymous();
+
     app.MapFallback("/api/{**path}", () => Results.NotFound());
     app.MapFallbackToFile("index.html").AllowAnonymous();
 }

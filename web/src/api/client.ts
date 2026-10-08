@@ -1,4 +1,4 @@
-import { apiFetch } from '../dev-auth/devAuth';
+import { apiFetch, clearSession } from '../dev-auth/devAuth';
 import i18n from '../i18n';
 
 /** RFC 9457 Problem Details as the platform returns them (`code`, `traceId`, `errors[]` are platform extensions). */
@@ -43,6 +43,17 @@ export class ApiError extends Error {
 
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
+}
+
+let unauthorizedHandler: (() => void) | null = null;
+
+/**
+ * Registers what happens when the API answers 401 (a dev token that no longer verifies, for instance after the api
+ * restarted with a new signing key): the held session is dropped first, then the handler runs (the app sends the user
+ * to the sign-in page).
+ */
+export function onUnauthorized(handler: (() => void) | null): void {
+  unauthorizedHandler = handler;
 }
 
 type QueryValue = string | number | boolean | null | undefined;
@@ -97,6 +108,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error;
     throw new ApiError({ status: 0, code: 'NETWORK', title: 'Network error', retryable: true });
+  }
+  if (response.status === 401) {
+    clearSession();
+    unauthorizedHandler?.();
   }
   if (!response.ok) throw new ApiError(await readProblem(response));
   if (response.status === 204) return undefined as T;

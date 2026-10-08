@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Banner } from '../design-system/components/Banner';
 import { Button } from '../design-system/components/Button';
 import { Card } from '../design-system/components/Card';
 import { Select } from '../design-system/components/Select';
@@ -31,6 +32,8 @@ export function DevSignIn() {
   const [session, setSession] = useState<DevSession | null>(() => readSession());
   const [failed, setFailed] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Sent here by a 401: the previous token is no longer valid.
+  const [expired] = useState(() => new URLSearchParams(window.location.search).has('expired'));
 
   // Sets state only when the request settles (never synchronously inside the effect).
   const loadUsers = useCallback((signal?: AbortSignal) => {
@@ -66,6 +69,18 @@ export function DevSignIn() {
       });
   };
 
+  const userOptions = useMemo(
+    () =>
+      load.kind === 'ready'
+        ? load.users.map((user) => ({
+            id: user.id,
+            label: user.name,
+            description: user.roles.join(', '),
+          }))
+        : [],
+    [load],
+  );
+
   if (load.kind === 'loading') return <LoadingState />;
   if (load.kind === 'error') {
     return (
@@ -91,6 +106,11 @@ export function DevSignIn() {
 
   return (
     <Card title={t('title')} headingLevel={1}>
+      {expired && !session ? (
+        <Banner variant="warning" title={t('expiredTitle')}>
+          {t('expiredBody')}
+        </Banner>
+      ) : null}
       <p>{t('intro')}</p>
       {session ? (
         <>
@@ -111,11 +131,7 @@ export function DevSignIn() {
         <>
           <Select
             label={t('userLabel')}
-            options={load.users.map((user) => ({
-              id: user.id,
-              label: user.name,
-              description: user.roles.join(', '),
-            }))}
+            options={userOptions}
             value={selected}
             onChange={setSelected}
             isRequired
