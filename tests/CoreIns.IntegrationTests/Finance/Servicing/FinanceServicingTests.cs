@@ -359,7 +359,7 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
         // Credit balance cleared: the credit note's Cr GL-1210 is met by the approval's Dr GL-1210; premium stays reduced; IPT untouched.
         (await NetAsync("GL-1210", $"policy_number = '{policy.Number}'")).ShouldBe(0m);
         (await NetAsync("GL-2110", $"policy_number = '{policy.Number}'")).ShouldBe(288.63m);
-        (await ScalarAsync<long>(_db, "SELECT count(*) FROM fin.journal_line WHERE account_code IN ('GL-2410', 'GL-2411')")).ShouldBe(0);
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_line WHERE billing_account_id = '{account}' AND account_code IN ('GL-2410', 'GL-2411')")).ShouldBe(0);
 
         // Every journal balances (REQ-FIN-068).
         (await ScalarAsync<long>(_db, """
