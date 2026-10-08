@@ -61,6 +61,14 @@ public sealed record FiscalDocumentView
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<string>? RejectionCodes { get; init; }
 
+    /// <summary>For a CREDIT document, the fiscal document of the original it corrects (SL3-CMP-CREDIT)</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'correlatedDocumentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("correlatedDocumentId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? CorrelatedDocumentId { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

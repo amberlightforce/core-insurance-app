@@ -4,7 +4,10 @@
       "Grants": {
         "plt.Approval.decide": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "plt.Approval.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
-        "plt.Approval.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+        "plt.Approval.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        // SL3-PLT-SUPPORT (D-SL3-12): the Development dev clock; the routes exist only in Development with Platform:Time:Mode=Shiftable.
+        "plt.DevClock.advance": [ "Platform.Admin" ],
+        "plt.DevClock.get": [ "Platform.Admin" ]
       }
     }
   }
