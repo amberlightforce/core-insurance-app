@@ -144,7 +144,7 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
     (c) => c.selected && vehicleValueCovers.includes(c.coverageCode),
   );
   const thisYear = new Date().getFullYear();
-  const diff = useMemo(() => vehicleDiff(originalForm, form), [originalForm, form]);
+  const diff = vehicleDiff(originalForm, form);
   const vehicleErrors = validateVehicle(form, thisYear);
   const valueMissing = vehicleValueIssue(form.value, valueNeeded) !== undefined;
   const vehicleValid = Object.keys(vehicleErrors).length === 0 && !valueMissing;
@@ -230,7 +230,8 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
         (v) => v.locator && v.locator !== oldLocator,
       );
       const stale = after.riskTree.coverages.some((c) => c.elementLocator === oldLocator);
-      if (replacement?.locator && stale) {
+      const newLocator = replacement?.locator;
+      if (newLocator && stale) {
         const second = {
           jobId: start.jobId,
           versionNo: after.versionNo,
@@ -239,9 +240,7 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
             {
               op: 'SET_COVERAGES' as const,
               coverages: after.riskTree.coverages.map((c) =>
-                c.elementLocator === oldLocator
-                  ? { ...c, elementLocator: replacement.locator as string }
-                  : c,
+                c.elementLocator === oldLocator ? { ...c, elementLocator: newLocator } : c,
               ),
             },
           ],

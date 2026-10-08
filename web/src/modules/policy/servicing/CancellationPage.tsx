@@ -326,13 +326,13 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
                   {
                     id: 'product',
                     label: t('term.product'),
-                    value: `${policy.productCode} ${term?.productVersion ?? ''}`.trim(),
+                    value: `${policy.productCode} ${term.productVersion}`.trim(),
                     kind: 'mono',
                   },
                   {
                     id: 'plan',
                     label: t('term.plan'),
-                    value: term?.paymentPlanRef ?? null,
+                    value: term.paymentPlanRef,
                     kind: 'mono',
                   },
                 ]}

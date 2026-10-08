@@ -117,7 +117,7 @@ function cancellationPreview(): ServicingPreview {
     cancellationSource: 'Policyholder',
     refundMethod: 'ProRata',
     provisional: true,
-  } as ServicingPreview;
+  };
 }
 
 function changePreview(additional: boolean): ServicingPreview {
@@ -147,7 +147,7 @@ function changePreview(additional: boolean): ServicingPreview {
     additionalDue: eur(additional ? '28.75' : '0.00'),
     transactionKind: additional ? 'ENDORSEMENT_DEBIT' : 'ENDORSEMENT_CREDIT',
     provisional: !additional,
-  } as ServicingPreview;
+  };
 }
 
 describe('dueOf and vehicleDiff', () => {
@@ -348,13 +348,12 @@ describe('RenewalPage', () => {
       url: `/policies/${fx.policyId}/renew`,
     });
 
-  const renewPreview = (): ServicingPreview =>
-    ({
-      ...changePreview(true),
-      transactionKind: 'NEW_BUSINESS',
-      annualBefore: eur('430.00'),
-      annualAfter: eur('445.00'),
-    }) as ServicingPreview;
+  const renewPreview = (): ServicingPreview => ({
+    ...changePreview(true),
+    transactionKind: 'NEW_BUSINESS',
+    annualBefore: eur('430.00'),
+    annualAfter: eur('445.00'),
+  });
 
   const renewRoutes = (
     quoteBody: object = { ...fx.quote(), servicingPreview: renewPreview() },

@@ -98,7 +98,7 @@ export function vehicleChangeInstruction(
   else delete fields.powerKw;
   if (form.fuelType) fields.fuelType = form.fuelType;
   else delete fields.fuelType;
-  if (!fields.ownerType) fields.ownerType = 'PERSON';
+  fields.ownerType ??= 'PERSON';
   return {
     op: 'SET_VEHICLE',
     vehicle: {
@@ -111,7 +111,7 @@ export function vehicleChangeInstruction(
       engineCapacityCc: Number(form.engineCapacityCc),
       use: existing?.use ?? 'PRIVATE',
       ...(form.value ? { value: { amount: form.value, currency: 'EUR' } } : {}),
-      fields: fields as NonNullable<Vehicle['fields']>,
+      fields: fields,
     },
   };
 }

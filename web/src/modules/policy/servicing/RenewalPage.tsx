@@ -289,7 +289,7 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
               {
                 id: 'state',
                 label: t('servicing.renew.accepted.state'),
-                value: accepted.termState ? <TermStatusPill state={accepted.termState} /> : null,
+                value: <TermStatusPill state={accepted.termState} />,
               },
             ]}
           />
