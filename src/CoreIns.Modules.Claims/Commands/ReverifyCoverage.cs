@@ -52,8 +52,11 @@ internal sealed class ReverifyCoverageHandler(
     RequestContext context,
     IClock clock,
     ClaimProtection protection,
-    ICoverageSource coverage) : ICommandHandler<ReverifyCoverage, CoverageReverifyResponse>
+    ICoverageSource coverage,
+    Microsoft.Extensions.Options.IOptions<ClaimsOptions> options) : ICommandHandler<ReverifyCoverage, CoverageReverifyResponse>
 {
+    private const string ManagerRole = "Staff.ClaimsManager";
+
     public async Task<Result<CoverageReverifyResponse>> HandleAsync(ReverifyCoverage command, CancellationToken cancellationToken)
     {
         var request = command.Request;
@@ -62,6 +65,11 @@ internal sealed class ReverifyCoverageHandler(
         if (claim is null)
         {
             return ClaimSupport.NotFound("claim");
+        }
+
+        if (!options.Value.ReverificationReasons.Allows(request.Decision == CoverageReverifyRequest.DecisionValue.Adopt, request.ReasonCode))
+        {
+            return FnolAssessment.Invalid("reasonCode", "REASON", "The reason code is not configured for this decision.");
         }
 
         var pending = await db.Reverifications.Where(r => r.ClaimId == claim.ClaimId && r.Status == ReverificationRow.Open)
@@ -104,6 +112,21 @@ internal sealed class ReverifyCoverageHandler(
             }
 
             lost = await AdoptAsync(claim, facts, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            // Keeping a snapshot whose successor is not in force at the loss date (or that POL cannot confirm) is a coverage-
+            // relevant decision: the claims manager only (m1; the full CLM.COVERAGE_DECISION authority is a follow-up).
+            var read = await coverage.ReadByRefAsync(latest.NewSnapshotRef, cancellationToken).ConfigureAwait(false);
+            if (read.Outcome == SnapshotReadOutcome.Unavailable)
+            {
+                return DomainError.Of(ModuleCode.CLM, "DEPENDENCY-UNAVAILABLE", "The policy service did not answer. Try again shortly.");
+            }
+
+            if ((read.Outcome != SnapshotReadOutcome.Found || !read.Facts!.InForce) && !context.Roles.Contains(ManagerRole, StringComparer.Ordinal))
+            {
+                return DomainError.Of(ModuleCode.CLM, "AUTHORITY", "Keeping a snapshot that is not in force at the loss date needs the claims manager.");
+            }
         }
 
         var now = clock.Now;

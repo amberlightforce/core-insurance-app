@@ -16,6 +16,7 @@ internal static class ReverificationModel
                 ClaimsDbContext.CommonChecks(table, "reverification");
                 table.HasCheckConstraint("ck_reverification_status", "status IN ('OPEN', 'KEPT', 'ADOPTED')");
                 table.HasCheckConstraint("ck_reverification_decided_shape", "(status = 'OPEN') = (decided_at IS NULL)");
+                table.HasCheckConstraint("ck_reverification_reason", "status = 'OPEN' OR reason_code IS NOT NULL");
                 table.HasCheckConstraint("ck_reverification_refs", "old_snapshot_ref <> new_snapshot_ref");
             });
             entity.HasKey(e => e.ReverificationId).HasName("pk_reverification");
@@ -53,12 +54,12 @@ internal static class ReverificationSql
                 RAISE EXCEPTION 'clm.reverification rows are never deleted' USING ERRCODE = 'restrict_violation';
             END IF;
             IF (NEW.reverification_id, NEW.claim_id, NEW.cause_event_id, NEW.cause_event_type, NEW.old_snapshot_ref, NEW.new_snapshot_ref,
-                NEW.raised_at, NEW.legal_entity_id, NEW.created_at, NEW.created_by)
+                NEW.raised_at, NEW.legal_entity_id, NEW.jurisdiction, NEW.created_at, NEW.created_by)
                IS DISTINCT FROM
                (OLD.reverification_id, OLD.claim_id, OLD.cause_event_id, OLD.cause_event_type, OLD.old_snapshot_ref, OLD.new_snapshot_ref,
-                OLD.raised_at, OLD.legal_entity_id, OLD.created_at, OLD.created_by)
-               OR (OLD.status <> 'OPEN' AND (NEW.status, NEW.reason_code, NEW.decided_at, NEW.decided_by, NEW.coverage_in_question)
-                   IS DISTINCT FROM (OLD.status, OLD.reason_code, OLD.decided_at, OLD.decided_by, OLD.coverage_in_question)) THEN
+                OLD.raised_at, OLD.legal_entity_id, OLD.jurisdiction, OLD.created_at, OLD.created_by)
+               OR (OLD.status <> 'OPEN' AND (NEW.status, NEW.reason_code, NEW.comment_encrypted, NEW.decided_at, NEW.decided_by, NEW.coverage_in_question)
+                   IS DISTINCT FROM (OLD.status, OLD.reason_code, OLD.comment_encrypted, OLD.decided_at, OLD.decided_by, OLD.coverage_in_question)) THEN
                 RAISE LOG 'SECURITY: change of frozen clm.reverification % refused for role %', OLD.reverification_id, current_user;
                 RAISE EXCEPTION 'clm.reverification binding is frozen and its decision is final' USING ERRCODE = 'restrict_violation';
             END IF;

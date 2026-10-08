@@ -36,11 +36,36 @@ internal sealed class ClaimsOptions
     /// <summary>Claim financials (SL2-CLM-MONEY): illustrative cost categories and the reserve auto-adjust switch.</summary>
     public ClaimFinancialsOptions Financials { get; set; } = new();
 
+    /// <summary>
+    /// Re-verification reason codes per decision (REQ-CLM-058). ILLUSTRATIVE TEST DATA until the claims reason list is
+    /// configured: KEEP and ADOPT codes; any other code is refused with CLM-ERR-VALIDATION.
+    /// </summary>
+    public ReverificationReasonOptions ReverificationReasons { get; set; } = new();
+
     /// <summary>The configured zone.</summary>
     public TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
 
     /// <summary>The business date of an instant in the legal entity's zone.</summary>
     public BusinessDate DateOf(Instant instant) => instant.ToBusinessDate(Zone);
+}
+
+/// <summary>Configuration section <c>Claims:ReverificationReasons</c>: illustrative reason codes of the KEEP / ADOPT decision.</summary>
+internal sealed class ReverificationReasonOptions
+{
+    /// <summary>Marks the lists as illustrative (never presented as approved values).</summary>
+    public bool Illustrative { get; set; } = true;
+
+    /// <summary>Codes accepted for KEEP (empty = the illustrative default).</summary>
+    public string[] Keep { get; set; } = [];
+
+    /// <summary>Codes accepted for ADOPT (empty = the illustrative default).</summary>
+    public string[] Adopt { get; set; } = [];
+
+    /// <summary>True when <paramref name="code"/> is configured for the decision.</summary>
+    public bool Allows(bool adopt, string code) =>
+        (adopt ? (Adopt.Length > 0 ? Adopt : ["POLICY_CHANGE_RELEVANT", "COVER_CHANGED"])
+               : (Keep.Length > 0 ? Keep : ["POLICY_CHANGE_NOT_RELEVANT", "CORRECTION_ONLY"]))
+        .Contains(code, StringComparer.Ordinal);
 }
 
 /// <summary>
