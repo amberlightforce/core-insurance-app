@@ -306,6 +306,7 @@ public sealed class PolicySnapshotTests(PostgresFixture database) : IClassFixtur
         await using var dataSource = NpgsqlDataSource.Create(database.AppConnectionString);
         await using var command = dataSource.CreateCommand($"""
             BEGIN;
+            UPDATE pol.policy SET last_recorded_at = transaction_timestamp(), record_version = record_version + 1 WHERE policy_id = '{p.PolicyId}';
             INSERT INTO pol.policy_transaction (transaction_id, policy_id, term_id, job_id, legal_entity_id, kind, sequence, effective_at, recorded_at,
                 configuration_hash, artefact_hash, resolution_hash, intent, premium, taxes, total, currency, actor, correlation_id, origin)
             SELECT '{Guid.CreateVersion7()}', policy_id, term_id, gen_random_uuid(), legal_entity_id, 'CHANGE', 2, effective_at, transaction_timestamp(),
