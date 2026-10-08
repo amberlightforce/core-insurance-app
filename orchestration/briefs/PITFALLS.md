@@ -74,3 +74,11 @@ found by a review or by CI in slices 1–2; the decision id says where.
 34. **Commit early and often** (WIP commits are fine): another session deleted worktrees and uncommitted work was lost.
 35. **Never touch the user's `coreins` compose project or other projects' containers**; isolated stacks use their own
     project name and ports and are torn down with `down -v`.
+
+## Added during slice 3
+36. **Production gates allow only `LegalStatus == Settled`**: never write the gate as "not in the pending set". A
+    NotRegulatory (or any new) status on a regulatory row then slips through as if settled (SL3-MKT-TREATMENT D1).
+    Load validation also rejects statuses that make no sense for the key (no NotRegulatory on a tax rule).
+37. **Config keys that can never match are load errors**: a key shape the lookup never uses (a source on a kind that
+    ignores sources, an `ANY` where lookups are always explicit) must be rejected at load, or a pack believes it has
+    supplied a rule it hasn't.
