@@ -108,7 +108,7 @@ export function fieldLabelOf(
  * radio group. Returns whether something was focused.
  */
 export function focusFieldByLabel(text: string): boolean {
-  const norm = (s: string | null) => (s ?? '').replace(/\s+/g, ' ').replace('*', '').trim();
+  const norm = (s: string | null) => (s ?? '').replaceAll('*', '').replace(/\s+/g, ' ').trim();
   const wanted = norm(text);
   for (const label of document.querySelectorAll('label')) {
     if (!norm(label.textContent).startsWith(wanted)) continue;

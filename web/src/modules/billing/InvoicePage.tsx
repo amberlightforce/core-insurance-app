@@ -35,8 +35,8 @@ function InvoiceDetails({ data }: { data: InvoiceGetResponse }) {
   const fmt = useFormat();
   const { invoice, fiscalStatus } = data;
   useEffect(() => {
-    rememberRecent('invoice', { id: invoice.invoiceId, label: invoice.invoiceNumber });
-  }, [invoice.invoiceId, invoice.invoiceNumber]);
+    rememberRecent('invoice', invoice.invoiceId);
+  }, [invoice.invoiceId]);
 
   const itemColumns = useMemo<DataColumn<Item>[]>(
     () => [

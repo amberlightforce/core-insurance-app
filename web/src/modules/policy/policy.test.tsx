@@ -204,13 +204,16 @@ describe('PolicyViewPage', () => {
 
 describe('PoliciesHomePage', () => {
   it('offers a new quote, recent policies and an id lookup that validates the UUID', async () => {
-    rememberRecent('policy', { id: fx.policyId, label: 'POL000000007' });
+    rememberRecent('policy', fx.policyId);
+    mockApi(policyRoutes(() => ({ body: fx.policy('IN_FORCE') })));
     const { user, container } = renderScreen(<PoliciesHomePage />, {
       path: '/policies',
       url: '/policies',
     });
     expect(screen.getByRole('button', { name: 'Νέα προσφορά' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Ασφαλιστήριο POL000000007' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: 'Ασφαλιστήριο POL000000007' }),
+    ).toBeInTheDocument();
     await expectNoA11yViolations(container);
 
     await user.type(

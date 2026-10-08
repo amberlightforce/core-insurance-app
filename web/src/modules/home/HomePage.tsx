@@ -23,7 +23,8 @@ import { approvalTypeKey } from '../claims/approvalFormat';
 import { cx } from '../../design-system/utils/cx';
 import { athensToday } from '../quote/time';
 import { Section } from '../staff/PageHeader';
-import { readRecent, type RecentRecord } from '../staff/recent';
+import { readRecent } from '../staff/recent';
+import { useRecentLabels, type RecentLabel } from '../staff/useRecentLabels';
 import staff from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
 import { usePendingApprovals, useAllInvoices } from './api';
@@ -41,7 +42,7 @@ interface QuickAction {
   variant: ButtonVariant;
 }
 
-interface RecentLink extends RecentRecord {
+interface RecentLink extends RecentLabel {
   kind: 'policy' | 'invoice' | 'account' | 'claim';
   to: string;
 }
@@ -108,21 +109,34 @@ export function HomePage() {
     [approvals.data],
   );
 
-  const recent: RecentLink[] = useMemo(() => {
-    const kinds: RecentLink['kind'][] = ['policy', 'invoice', 'account'];
-    if (seesApprovals) kinds.push('claim');
-    const paths = {
-      policy: '/policies/',
-      invoice: '/billing/invoices/',
-      account: '/billing/accounts/',
-      claim: '/claims/',
-    } as const;
-    return kinds.flatMap((kind) =>
-      readRecent(kind)
-        .slice(0, 4)
-        .map((r) => ({ ...r, kind, to: `${paths[kind]}${r.id}` })),
-    );
-  }, [seesApprovals]);
+  // Only ids are remembered in the browser; the numbers are read from the API (cached).
+  const recentIds = useMemo(
+    () => ({
+      policy: readRecent('policy').slice(0, 4),
+      invoice: readRecent('invoice').slice(0, 4),
+      account: readRecent('account').slice(0, 4),
+      claim: seesApprovals ? readRecent('claim').slice(0, 4) : [],
+    }),
+    [seesApprovals],
+  );
+  const recentPolicies = useRecentLabels('policy', recentIds.policy);
+  const recentInvoices = useRecentLabels('invoice', recentIds.invoice);
+  const recentAccounts = useRecentLabels('account', recentIds.account);
+  const recentClaims = useRecentLabels('claim', recentIds.claim);
+  const recent: RecentLink[] = [
+    ...recentPolicies.map((r) => ({ ...r, kind: 'policy' as const, to: `/policies/${r.id}` })),
+    ...recentInvoices.map((r) => ({
+      ...r,
+      kind: 'invoice' as const,
+      to: `/billing/invoices/${r.id}`,
+    })),
+    ...recentAccounts.map((r) => ({
+      ...r,
+      kind: 'account' as const,
+      to: `/billing/accounts/${r.id}`,
+    })),
+    ...recentClaims.map((r) => ({ ...r, kind: 'claim' as const, to: `/claims/${r.id}` })),
+  ];
 
   const dateLine = new Intl.DateTimeFormat(fmt.region, {
     weekday: 'long',
@@ -270,7 +284,7 @@ export function HomePage() {
       error: approvals.isError,
       retry: () => void approvals.refetch(),
     });
-    const claims = readRecent('claim');
+    const claims = recentClaims;
     cards.push({
       id: 'claims',
       title: t('home:cards.recentClaims'),
@@ -333,7 +347,7 @@ export function HomePage() {
       },
     );
   }
-  const policies = readRecent('policy');
+  const policies = recentPolicies;
   if (cards.length < 4 && has(roles, 'Staff.Underwriter', 'Staff.Billing', 'Staff.Finance')) {
     cards.push({
       id: 'policies',
