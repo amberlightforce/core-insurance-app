@@ -89,3 +89,5 @@ found by a review or by CI in slices 1–2; the decision id says where.
     never a shared path like `.claude/worktrees/t1.log`; another agent clobbered one.
     (Note: pass `-m:2` to `dotnet build` only; with `dotnet test` it can make test discovery find zero tests. Build with
     `-m:2`, then `dotnet test --no-build` with the two env vars set.)
+    With `dotnet test --project …` (Microsoft.Testing.Platform) select tests with `--filter-class <Class>` (or
+    `--filter-namespace`); `--filter "FullyQualifiedName~…"` can silently select zero tests.
