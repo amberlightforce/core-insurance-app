@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.coreinsurance.example/events/bil/BillingEntryPosted.v1.schema.json",
   "title": "BillingEntryPosted v1",
-  "description": "Every ledger entry. FIN's sole posting source for BIL facts (REQ-FIN-036). Keyed on legal_entity_id for non-account entries.",
+  "description": "Every ledger entry. FIN's sole posting source for BIL facts (REQ-FIN-036). Keyed on legal_entity_id for non-account entries; disbursement entries (DISBURSEMENT_RELEASED, DISBURSEMENT_CLEARED) are keyed on the disbursement (SL2-BIL-DISB).",
   "x-event-type": "BillingEntryPosted",
   "x-registry-name": "bil.BillingEntryPosted",
   "x-producer": "BIL",
@@ -11,7 +11,8 @@
   "x-ordering-key": "billing_account_id",
   "x-aggregate-type": [
     "BillingAccount",
-    "LegalEntity"
+    "LegalEntity",
+    "Disbursement"
   ],
   "x-data-classification": "P0",
   "x-set-completeness": false,
@@ -42,7 +43,8 @@
     "aggregateType": {
       "enum": [
         "BillingAccount",
-        "LegalEntity"
+        "LegalEntity",
+        "Disbursement"
       ]
     },
     "dataClassification": {

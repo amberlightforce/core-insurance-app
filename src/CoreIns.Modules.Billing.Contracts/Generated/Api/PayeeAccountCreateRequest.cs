@@ -4,52 +4,105 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PayeeAccount.create request. PRD inputs: "party id, purpose, IBAN, holder name, source, evidence ref"</summary>
+/// <summary>Typed from REQ-BIL-343, REQ-BIL-103 (SL2-BIL-DISB). PRD inputs: "party id, purpose, IBAN, holder name, source, evidence ref". The IBAN is P2: stored field-encrypted with a blind index, never returned, logged or published; responses show only the masked form.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PayeeAccountCreateRequest
 {
-    /// <summary>PRD: "party id"</summary>
+    /// <summary>Payee party (PTY)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.PartyId? PartyId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
 
-    /// <summary>PRD: "purpose"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Purpose of the account (PRD-06 §7.1 PaymentInstrument purposes; cooling-off is per purpose, BR-BIL-062)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Purpose { get; init; }
+    public required PurposeValue Purpose { get; init; }
 
-    /// <summary>PRD: "IBAN"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>IBAN (ISO 13616, mod-97 checked; spaces allowed). P2.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("iban")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Iban { get; init; }
+    public required string Iban { get; init; }
 
-    /// <summary>PRD: "holder name"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Account holder name as the bank holds it (verification of payee, REQ-BIL-203)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("holderName")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? HolderName { get; init; }
+    public required string HolderName { get; init; }
 
-    /// <summary>PRD: "source"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Where the details came from; defaults to STAFF</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("source")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Source { get; init; }
+    public SourceValue? Source { get; init; }
 
-    /// <summary>PRD: "evidence ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Evidence document reference (DOC id or external reference, no personal data)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("evidenceRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? EvidenceRef { get; init; }
+    public string? EvidenceRef { get; init; }
+
+    /// <summary>Purpose of the account (PRD-06 §7.1 PaymentInstrument purposes; cooling-off is per purpose, BR-BIL-062)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<PurposeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum PurposeValue
+    {
+        /// <summary><c>COLLECTION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COLLECTION")]
+        Collection,
+
+        /// <summary><c>REFUND</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFUND")]
+        Refund,
+
+        /// <summary><c>CLAIM_PAYMENT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLAIM_PAYMENT")]
+        ClaimPayment,
+
+        /// <summary><c>COMMISSION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COMMISSION")]
+        Commission,
+
+        /// <summary><c>LEVY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("LEVY")]
+        Levy,
+
+        /// <summary><c>RI</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RI")]
+        Ri,
+
+        /// <summary><c>CLEARING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLEARING")]
+        Clearing,
+
+        /// <summary><c>REDRESS</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REDRESS")]
+        Redress,
+
+        /// <summary><c>TAX</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("TAX")]
+        Tax,
+    }
+
+    /// <summary>Where the details came from; defaults to STAFF</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<SourceValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum SourceValue
+    {
+        /// <summary><c>STAFF</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("STAFF")]
+        Staff,
+
+        /// <summary><c>CUSTOMER_PORTAL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CUSTOMER_PORTAL")]
+        CustomerPortal,
+
+        /// <summary><c>VENDOR_MASTER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("VENDOR_MASTER")]
+        VendorMaster,
+
+        /// <summary><c>INBOUND_DOCUMENT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("INBOUND_DOCUMENT")]
+        InboundDocument,
+
+        /// <summary><c>INTERMEDIARY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("INTERMEDIARY")]
+        Intermediary,
+
+        /// <summary><c>MIGRATION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MIGRATION")]
+        Migration,
+    }
 }

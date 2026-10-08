@@ -75,6 +75,64 @@ internal sealed class PaymentService(RequestContext context, ICommandHandler<Tak
         InProcess.RunAsync(context, take, new TakePayment(request), options, cancellationToken);
 }
 
+/// <summary>
+/// <see cref="IBillingPayeeAccountService"/>: <c>create</c> (REQ-BIL-343) and <c>get</c> (REQ-BIL-345, masked IBAN);
+/// <c>verify</c> is a later package (VoP runs at create through the bound adapter).
+/// </summary>
+internal sealed class PayeeAccountService(
+    RequestContext context,
+    ILegalEntityDirectory legalEntities,
+    ICommandHandler<CreatePayeeAccount, PayeeAccountCreateResponse> create,
+    DisbursementReader reader,
+    Microsoft.Extensions.Options.IOptions<BillingOptions> billingOptions) : IBillingPayeeAccountService
+{
+    public Task<PayeeAccountCreateResponse> CreateAsync(PayeeAccountCreateRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, create, new CreatePayeeAccount(request), options, cancellationToken);
+
+    public async Task<PayeeAccountGetResponse> GetAsync(string id, ValidAt? validAt = null, string? purpose = null, CancellationToken cancellationToken = default)
+    {
+        var validOn = validAt is { } at ? at.Date ?? at.Instant!.Value.ToBusinessDate(billingOptions.Value.Zone) : (SharedKernel.BusinessDate?)null;
+        var found = Guid.TryParse(id, out var guid)
+            ? await reader.PayeeAccountAsync(InProcess.LegalEntity(context, legalEntities), guid, validOn, cancellationToken).ConfigureAwait(false)
+            : null;
+        return InProcess.Found(found is not null && (purpose is null || found.Purpose == purpose) ? found : null, "payee account");
+    }
+
+    public Task<PayeeAccountVerifyResponse> VerifyAsync(PayeeAccountVerifyRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("bil.PayeeAccount.verify");
+}
+
+/// <summary>
+/// <see cref="IBillingDisbursementService"/>: <c>request</c> (REQ-BIL-009, source CLM_PAYMENT) and <c>get</c>
+/// (REQ-BIL-213); <c>list</c>, <c>stop</c> and <c>void</c> are later packages.
+/// </summary>
+internal sealed class DisbursementService(
+    RequestContext context,
+    ILegalEntityDirectory legalEntities,
+    ICommandHandler<RequestDisbursement, DisbursementRequestResponse> requestHandler,
+    DisbursementReader reader) : IBillingDisbursementService
+{
+    public Task<DisbursementRequestResponse> RequestAsync(DisbursementRequestRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, requestHandler, new RequestDisbursement(request), options, cancellationToken);
+
+    public async Task<DisbursementGetResponse> GetAsync(string id, CancellationToken cancellationToken = default)
+    {
+        var found = Guid.TryParse(id, out var guid)
+            ? await reader.DisbursementAsync(InProcess.LegalEntity(context, legalEntities), new DisbursementId(guid), cancellationToken).ConfigureAwait(false)
+            : null;
+        return new DisbursementGetResponse { Disbursement = InProcess.Found(found, "disbursement") };
+    }
+
+    public Task<DisbursementListPage> ListAsync(string? cursor = null, int? limit = null, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("bil.Disbursement.list");
+
+    public Task<DisbursementStopResponse> StopAsync(DisbursementStopRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("bil.Disbursement.stop");
+
+    public Task<DisbursementVoidResponse> VoidAsync(DisbursementVoidRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("bil.Disbursement.void");
+}
+
 /// <summary><see cref="IBillingReceiptService"/>: <c>get</c> (REQ-BIL-126).</summary>
 internal sealed class ReceiptService(RequestContext context, ILegalEntityDirectory legalEntities, BillingReader reader) : IBillingReceiptService
 {

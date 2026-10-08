@@ -5481,7 +5481,8 @@
       "orderingKey": "billing_account_id",
       "aggregateType": [
         "BillingAccount",
-        "LegalEntity"
+        "LegalEntity",
+        "Disbursement"
       ],
       "trigger": "Every ledger entry",
       "source": [
@@ -5507,7 +5508,7 @@
           "reaction": "Ingest into report store (REQ-DAT-001; rpt_raw per D-ARC-06)"
         }
       ],
-      "notes": "FIN's sole posting source for BIL facts (REQ-FIN-036). Keyed on legal_entity_id for non-account entries."
+      "notes": "FIN's sole posting source for BIL facts (REQ-FIN-036). Keyed on legal_entity_id for non-account entries; disbursement entries (DISBURSEMENT_RELEASED, DISBURSEMENT_CLEARED) are keyed on the disbursement (SL2-BIL-DISB)."
     },
     {
       "name": "DelinquencyResolved",

@@ -15,7 +15,7 @@ public interface IBillingPayeeAccountService
     /// <remarks>
     /// <para>Operation bil.PayeeAccount.create (command; HTTP POST /api/bil/v1/payee-accounts).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W7.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-343, REQ-BIL-103, REQ-BIL-199 (SL2-BIL-DISB; VoP through the stub adapter). Wave W7.</para>
     /// <para>Exposure: ui; consumers: CHN, CLM.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
     /// <para>Errors: BIL-ERR-IBAN-INVALID (422), BIL-ERR-CHARSET (422), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
@@ -26,7 +26,7 @@ public interface IBillingPayeeAccountService
     /// <remarks>
     /// <para>Operation bil.PayeeAccount.get (query; HTTP GET /api/bil/v1/payee-accounts/{id}).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W7.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-345 (SL2-BIL-DISB; masked IBAN only). Wave W7.</para>
     /// <para>Exposure: ui; consumers: CHN, CLM, PTY, RI.</para>
     /// </remarks>
     /// <param name="id">Identifier of the PayeeAccount (PRD input: "party id")</param>

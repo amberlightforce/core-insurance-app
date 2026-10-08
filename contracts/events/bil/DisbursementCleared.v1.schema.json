@@ -82,6 +82,18 @@
         "valueDate": {
           "$ref": "../common.schema.json#/$defs/LocalDate",
           "x-classification": "P0"
+        },
+        "sourceModule": {
+          "$ref": "../common.schema.json#/$defs/ModuleCode",
+          "x-classification": "P0"
+        },
+        "amount": {
+          "$ref": "../common.schema.json#/$defs/Money",
+          "x-classification": "P0"
+        },
+        "method": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
         }
       }
     }

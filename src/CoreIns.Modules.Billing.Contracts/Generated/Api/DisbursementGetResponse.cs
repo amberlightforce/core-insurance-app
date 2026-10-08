@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Disbursement.get result. PRD outputs: "disbursement"</summary>
+/// <summary>Typed from REQ-BIL-213 (SL2-BIL-DISB). PRD outputs: "disbursement": state, dates, method and masked payee account.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DisbursementGetResponse
 {
     /// <summary>PRD: "disbursement"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("disbursement")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Disbursement { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.DisbursementRequestResponse Disbursement { get; init; }
 }

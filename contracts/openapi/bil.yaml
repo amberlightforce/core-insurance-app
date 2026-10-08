@@ -1563,6 +1563,7 @@ paths:
       - W7-BIL-01
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-343, REQ-BIL-103, REQ-BIL-199 (SL2-BIL-DISB; VoP through the stub adapter)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1760,6 +1761,7 @@ paths:
       - W7-BIL-01
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-345 (SL2-BIL-DISB; masked IBAN only)
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -3903,7 +3905,7 @@ paths:
       - W5-BIL-05
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-BIL-009, REQ-BIL-197, REQ-BIL-198
+      x-typed: REQ-BIL-009, REQ-BIL-197, REQ-BIL-198, REQ-BIL-200, REQ-BIL-202, REQ-BIL-207, REQ-BIL-211 (SL2-BIL-DISB, CLM_PAYMENT through the stub bank channel)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -3948,6 +3950,24 @@ paths:
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: BIL-ERR-CURRENCY
+        note: SL2-BIL-DISB pays EUR only (D-SL2-06)
+        status: 422
+      - code: BIL-ERR-NOT-FOUND
+        note: payee account not found in the caller's legal entity
+        status: 404
+      - code: BIL-ERR-PAYEE-ACCOUNT
+        note: the payee account is not the payee's, not for the purpose or not active
+        status: 422
+      - code: BIL-ERR-VOP-HOLD
+        note: verification of payee is not Match (REQ-BIL-204); held, fail closed
+        status: 409
+      - code: BIL-ERR-COOLING-OFF
+        note: changed payee account within cooling-off needs four-eyes (REQ-BIL-199), not built yet; fail closed
+        status: 409
+      - code: BIL-ERR-SCREENING-UNAVAILABLE
+        note: sanctions screening could not run (REQ-BIL-214); fail closed
+        status: 503
       x-source:
       - PRD-06 §9.1 l.1801
       parameters:
@@ -4001,6 +4021,7 @@ paths:
       - W5-BIL-05
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-213 (SL2-BIL-DISB)
       x-io-shared: 5
       x-operation-kind: query
       x-idempotency: none
@@ -4034,6 +4055,8 @@ paths:
         status: 422
       - code: PLT-ERR-AUTHORITY
         status: 403
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-06 §9.1 l.1801
       parameters:
@@ -6895,39 +6918,92 @@ components:
       description: Page of bil.PaymentInstrument.list results (cursor pagination, contract §3.5.5)
     PayeeAccountCreateRequest:
       type: object
-      description: 'bil.PayeeAccount.create request. PRD inputs: "party id, purpose, IBAN, holder name, source, evidence ref"'
+      description: 'Typed from REQ-BIL-343, REQ-BIL-103 (SL2-BIL-DISB). PRD inputs: "party id, purpose, IBAN, holder name,
+        source, evidence ref". The IBAN is P2: stored field-encrypted with a blind index, never returned, logged or published;
+        responses show only the masked form.'
       properties:
         partyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "party id"'
+          description: Payee party (PTY)
         purpose:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "purpose"'
+          type: string
+          enum:
+          - COLLECTION
+          - REFUND
+          - CLAIM_PAYMENT
+          - COMMISSION
+          - LEVY
+          - RI
+          - CLEARING
+          - REDRESS
+          - TAX
+          description: Purpose of the account (PRD-06 §7.1 PaymentInstrument purposes; cooling-off is per purpose, BR-BIL-062)
         iban:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "IBAN"'
+          type: string
+          minLength: 15
+          maxLength: 42
+          description: IBAN (ISO 13616, mod-97 checked; spaces allowed). P2.
         holderName:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "holder name"'
+          type: string
+          minLength: 1
+          maxLength: 140
+          description: Account holder name as the bank holds it (verification of payee, REQ-BIL-203)
         source:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "source"'
+          type: string
+          enum:
+          - STAFF
+          - CUSTOMER_PORTAL
+          - VENDOR_MASTER
+          - INBOUND_DOCUMENT
+          - INTERMEDIARY
+          - MIGRATION
+          description: Where the details came from; defaults to STAFF
         evidenceRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence ref"'
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Evidence document reference (DOC id or external reference, no personal data)
+      required:
+      - partyId
+      - purpose
+      - iban
+      - holderName
     PayeeAccountCreateResponse:
       type: object
-      description: 'bil.PayeeAccount.create result. PRD outputs: "`payee_account_id`, verification status, cooling_off_until"'
+      description: 'Typed from REQ-BIL-343 (SL2-BIL-DISB). PRD outputs: "`payee_account_id`, verification status, cooling_off_until".
+        Registering the same IBAN again for the same party and purpose returns the existing account.'
       properties:
         payeeAccountId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "payee_account_id"'
         verificationStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "verification status"'
+          $ref: '#/components/schemas/PayeeVerificationStatus'
         coolingOffUntil:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "cooling_off_until"'
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: End of the cooling-off window of `bil.payee.cooling_off.<purpose>` (REQ-BIL-199, BR-BIL-062)
+        maskedIban:
+          type: string
+          description: IBAN masked except the last four characters (REQ-BIL-345)
+        change:
+          type: boolean
+          description: True when this account superseded another account of the party for the purpose (a bank-account change,
+            four-eyes within cooling-off, REQ-BIL-199)
+      required:
+      - payeeAccountId
+      - verificationStatus
+      - coolingOffUntil
+      - maskedIban
+      - change
+    PayeeVerificationStatus:
+      type: string
+      enum:
+      - Unverified
+      - VoPMatched
+      - VoPCloseMatch
+      - VoPNoMatch
+      - VoPNotAvailable
+      - Confirmed
+      description: Verification status of a payee account (REQ-BIL-345)
     PayeeAccountVerifyRequest:
       type: object
       description: 'bil.PayeeAccount.verify request. PRD inputs: "payee_account_id (or IBAN + name for a pre-check)"'
@@ -6957,17 +7033,58 @@ components:
           description: 'PRD: "checked at"'
     PayeeAccountGetResponse:
       type: object
-      description: 'bil.PayeeAccount.get result. PRD outputs: "accounts with periods, verification, cooling-off"'
+      description: 'Typed from REQ-BIL-345 (SL2-BIL-DISB). PRD outputs: "accounts with periods, verification, cooling-off".
+        The IBAN is masked except the last four characters; revealing it (P2 permission plus purpose) is not built yet.'
       properties:
-        accountsPeriods:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "accounts with periods"'
-        verification:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "verification"'
-        coolingOff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "cooling-off"'
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        purpose:
+          $ref: ../events/common.schema.json#/$defs/Code
+        maskedIban:
+          type: string
+          description: IBAN masked except the last four characters
+        holderName:
+          type: string
+        source:
+          $ref: ../events/common.schema.json#/$defs/Code
+        status:
+          type: string
+          enum:
+          - Active
+          - Superseded
+          - Revoked
+        verificationStatus:
+          $ref: '#/components/schemas/PayeeVerificationStatus'
+        vopResult:
+          type: string
+          enum:
+          - Match
+          - CloseMatch
+          - NoMatch
+          - NotAvailable
+          description: Last verification-of-payee outcome (REQ-BIL-203)
+        vopCheckedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        validPeriod:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        coolingOffUntil:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        change:
+          type: boolean
+          description: True when the account superseded another account of the party for the purpose
+      required:
+      - payeeAccountId
+      - partyId
+      - purpose
+      - maskedIban
+      - holderName
+      - status
+      - verificationStatus
+      - validPeriod
+      - coolingOffUntil
+      - change
     PayeeAccountListItem:
       type: object
       description: 'bil.PayeeAccount.list result. PRD outputs: "accounts with periods, verification, cooling-off"'
@@ -7708,6 +7825,16 @@ components:
         approvalEvidenceRef:
           type: string
           description: Source approval evidence, verified against the content hash (REQ-BIL-198)
+        approvalContentHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'Content hash the source approved (REQ-BIL-198): SHA-256 of the canonical JSON (RFC 8785) of
+            {sourceType, sourceId, payeePartyId, payeeAccountId, amount}; computed with
+            CoreIns.Modules.Billing.Contracts.DisbursementContent.Hash. A request whose content differs is refused with
+            BIL-ERR-APPROVAL-MISMATCH. Required for CLM_PAYMENT (SL2-BIL-DISB).'
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: CLM sources only - the claim the payment belongs to (ledger dimension for FIN, D-SL2-08; not part of the
+            content hash)
         purposeText:
           type: string
         statementReference:
@@ -7725,7 +7852,8 @@ components:
       - required:
         - adHocPayee
       description: 'Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method,
-        approval evidence, statement or return reference"'
+        approval evidence, statement or return reference". SL2-BIL-DISB serves source type CLM_PAYMENT (method SEPA_CT,
+        EUR, payeePartyId with payeeAccountId); other sources are refused with BIL-ERR-SOURCE.'
     DisbursementRequestResponse:
       type: object
       properties:
@@ -7761,6 +7889,31 @@ components:
         maskedPayeeAccount:
           type: string
           description: Masked payee account (REQ-BIL-213)
+        disbursementNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: Disbursement number from PLT numbering (REQ-BIL-197)
+        sourceModule:
+          $ref: ../events/common.schema.json#/$defs/ModuleCode
+          description: Calling module from the source register (REQ-BIL-354)
+        payeePartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        valueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Value date of the payment once released
+        approvalEvidenceRef:
+          type: string
+        requestedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        releasedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        issuedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        clearedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
       required:
       - disbursementId
       - status
@@ -7771,11 +7924,14 @@ components:
         "disbursement"'
     DisbursementGetResponse:
       type: object
-      description: 'bil.Disbursement.get result. PRD outputs: "disbursement"'
+      description: 'Typed from REQ-BIL-213 (SL2-BIL-DISB). PRD outputs: "disbursement": state, dates, method and masked payee
+        account.'
       properties:
         disbursement:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/DisbursementRequestResponse'
           description: 'PRD: "disbursement"'
+      required:
+      - disbursement
     DisbursementListItem:
       type: object
       description: 'bil.Disbursement.list result. PRD outputs: "disbursement"'

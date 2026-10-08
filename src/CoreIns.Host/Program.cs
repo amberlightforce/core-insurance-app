@@ -1,6 +1,7 @@
 using CoreIns.Host.Database;
 using CoreIns.Host.Health;
 using CoreIns.Host.Hosting;
+using CoreIns.Modules.Billing.Services;
 using CoreIns.Platform;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Http;
@@ -41,6 +42,9 @@ builder.Services.AddCoreInsDataSource(connectionString);
 builder.Services.AddCoreInsHealthChecks();
 builder.Services.AddCoreInsJobs(connectionString, role);
 builder.Services.AddCountryPacks(builder.Configuration, builder.Environment);
+
+// BIL verification-of-payee and bank-channel stubs (D-SL2-05): never bound in Production.
+builder.Services.AddBillingPaymentAdapters(builder.Environment);
 builder.Services.AddCoreInsDataProtection(builder.Configuration, builder.Environment);
 
 if (role == AppRole.Worker)

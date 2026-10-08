@@ -40,6 +40,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<IntakeExceptionRow> IntakeExceptions => Set<IntakeExceptionRow>();
 
+    public DbSet<PayeeAccountRow> PayeeAccounts => Set<PayeeAccountRow>();
+
+    public DbSet<DisbursementRow> Disbursements => Set<DisbursementRow>();
+
     protected override string Schema => BillingModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -360,8 +364,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.CorrelationId).HasColumnName("correlation_id");
             entity.Property(e => e.LineageKeys).HasColumnName("lineage_keys").HasColumnType("jsonb");
             entity.Property(e => e.ReversesEntryId).HasColumnName("reverses_entry_id");
+            entity.Property(e => e.DisbursementId).HasColumnName("disbursement_id");
             entity.HasIndex(e => new { e.LegalEntityId, e.AccountingDate }).HasDatabaseName("ix_ledger_entry_date");
             entity.HasIndex(e => e.BillingAccountId).HasDatabaseName("ix_ledger_entry_account");
+            entity.HasIndex(e => e.DisbursementId).HasDatabaseName("ix_ledger_entry_disbursement");
         });
 
         modelBuilder.Entity<LedgerLineRow>(entity =>
@@ -396,6 +402,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.InvoiceItemId).HasColumnName("invoice_item_id");
             entity.Property(e => e.ReceiptId).HasColumnName("receipt_id");
             entity.Property(e => e.AllocationId).HasColumnName("allocation_id");
+            entity.Property(e => e.DisbursementId).HasColumnName("disbursement_id");
+            entity.Property(e => e.SourceType).HasColumnName("source_type");
+            entity.Property(e => e.SourceId).HasColumnName("source_id");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
             entity.HasIndex(e => new { e.EntryId, e.LineNo }).IsUnique().HasDatabaseName("ux_ledger_line_no");
             entity.HasIndex(e => new { e.BillingAccountId, e.AccountCode }).HasDatabaseName("ix_ledger_line_account");
             entity.HasOne<LedgerEntryRow>().WithMany().HasForeignKey(e => e.EntryId)
@@ -418,7 +428,117 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.RaisedAt).HasColumnName("raised_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.Kind, e.Subject, e.ReasonCode }).IsUnique().HasDatabaseName("ux_intake_exception");
         });
+
+        ConfigurePayeeAccounts(modelBuilder);
+        ConfigureDisbursements(modelBuilder);
     }
+
+    /// <summary>Payee accounts (REQ-BIL-343): IBAN as ciphertext, blind index and last four characters only.</summary>
+    private static void ConfigurePayeeAccounts(ModelBuilder modelBuilder) =>
+        modelBuilder.Entity<PayeeAccountRow>(entity =>
+        {
+            entity.ToTable("payee_account", table =>
+            {
+                table.HasCheckConstraint("ck_payee_account_status", Codes.CheckSql<PayeeAccountStatus>("status"));
+                table.HasCheckConstraint("ck_payee_account_verification", Codes.CheckSql<PayeeVerification>("verification_status"));
+                table.HasCheckConstraint("ck_payee_account_vop", "vop_result IS NULL OR " + Codes.CheckSql<VopOutcome>("vop_result"));
+                table.HasCheckConstraint("ck_payee_account_purpose", "purpose ~ '^[A-Z][A-Z_]{1,31}$'");
+                table.HasCheckConstraint("ck_payee_account_last4", "iban_last4 ~ '^[A-Z0-9]{4}$'");
+                table.HasCheckConstraint("ck_payee_account_valid", "valid_to IS NULL OR valid_to >= valid_from");
+                table.HasCheckConstraint("ck_payee_account_record_version", "record_version >= 1");
+            });
+            entity.HasKey(e => e.PayeeAccountId).HasName("pk_payee_account");
+            entity.Property(e => e.PayeeAccountId).HasColumnName("payee_account_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.Purpose).HasColumnName("purpose");
+            entity.Property(e => e.IbanEncrypted).HasColumnName("iban_encrypted");
+            entity.Property(e => e.IbanBlindIndex).HasColumnName("iban_blind_index");
+            entity.Property(e => e.IbanLast4).HasColumnName("iban_last4").HasColumnType("char(4)");
+            entity.Property(e => e.HolderName).HasColumnName("holder_name");
+            entity.Property(e => e.Source).HasColumnName("source");
+            entity.Property(e => e.EvidenceRef).HasColumnName("evidence_ref");
+            entity.Property(e => e.VerificationStatus).HasColumnName("verification_status");
+            entity.Property(e => e.VopResult).HasColumnName("vop_result");
+            entity.Property(e => e.VopSuggestedName).HasColumnName("vop_suggested_name");
+            entity.Property(e => e.VopCheckedAt).HasColumnName("vop_checked_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ValidFrom).HasColumnName("valid_from");
+            entity.Property(e => e.ValidTo).HasColumnName("valid_to");
+            entity.Property(e => e.CoolingOffUntil).HasColumnName("cooling_off_until");
+            entity.Property(e => e.IsChange).HasColumnName("is_change");
+            entity.Property(e => e.SupersedesId).HasColumnName("supersedes_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.Purpose }).HasDatabaseName("ix_payee_account_party");
+            entity.HasIndex(e => e.IbanBlindIndex).HasDatabaseName("ix_payee_account_iban_index");
+
+            // One Active account per party and purpose: a change supersedes the previous one (REQ-BIL-343).
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.Purpose }).IsUnique()
+                .HasFilter("status = 'ACTIVE'").HasDatabaseName("ux_payee_account_active");
+        });
+
+    /// <summary>Disbursements (REQ-BIL-009): duplicate key (payee account, amount, source ref) and one live disbursement per source object.</summary>
+    private static void ConfigureDisbursements(ModelBuilder modelBuilder) =>
+        modelBuilder.Entity<DisbursementRow>(entity =>
+        {
+            entity.ToTable("disbursement", table =>
+            {
+                table.HasCheckConstraint("ck_disbursement_state", Codes.CheckSql<DisbursementState>("state"));
+                table.HasCheckConstraint("ck_disbursement_amount", "amount > 0");
+                table.HasCheckConstraint("ck_disbursement_currency", "currency ~ '^[A-Z]{3}$'");
+                table.HasCheckConstraint("ck_disbursement_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+                table.HasCheckConstraint("ck_disbursement_hash", "approval_content_hash ~ '^[0-9a-f]{64}$'");
+                table.HasCheckConstraint("ck_disbursement_record_version", "record_version >= 1");
+            });
+            entity.HasKey(e => e.DisbursementId).HasName("pk_disbursement");
+            entity.Property(e => e.DisbursementId).HasColumnName("disbursement_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction").HasColumnType("char(2)");
+            entity.Property(e => e.DisbursementNumber).HasColumnName("disbursement_number");
+            entity.Property(e => e.SourceModule).HasColumnName("source_module");
+            entity.Property(e => e.SourceType).HasColumnName("source_type");
+            entity.Property(e => e.SourceId).HasColumnName("source_id");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.PayeePartyId).HasColumnName("payee_party_id");
+            entity.Property(e => e.PayeeAccountId).HasColumnName("payee_account_id");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.Method).HasColumnName("method");
+            entity.Property(e => e.RequestedValueDate).HasColumnName("requested_value_date");
+            entity.Property(e => e.ValueDate).HasColumnName("value_date");
+            entity.Property(e => e.ApprovalEvidenceRef).HasColumnName("approval_evidence_ref");
+            entity.Property(e => e.ApprovalContentHash).HasColumnName("approval_content_hash").HasColumnType("char(64)");
+            entity.Property(e => e.PurposeText).HasColumnName("purpose_text");
+            entity.Property(e => e.State).HasColumnName("state");
+            entity.Property(e => e.ScreeningResult).HasColumnName("screening_result");
+            entity.Property(e => e.ScreeningListVersions).HasColumnName("screening_list_versions");
+            entity.Property(e => e.ScreenedAt).HasColumnName("screened_at").HasColumnType("timestamptz");
+            entity.Property(e => e.VopResult).HasColumnName("vop_result");
+            entity.Property(e => e.BankReference).HasColumnName("bank_reference");
+            entity.Property(e => e.RequestedAt).HasColumnName("requested_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ApprovedAt).HasColumnName("approved_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReleasedAt).HasColumnName("released_at").HasColumnType("timestamptz");
+            entity.Property(e => e.IssuedAt).HasColumnName("issued_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ClearedAt).HasColumnName("cleared_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReleaseEntryId).HasColumnName("release_entry_id");
+            entity.Property(e => e.ClearEntryId).HasColumnName("clear_entry_id");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.DisbursementNumber }).IsUnique().HasDatabaseName("ux_disbursement_number");
+            entity.HasIndex(e => e.ClaimId).HasDatabaseName("ix_disbursement_claim");
+
+            // REQ-BIL-202: duplicate key (payee account, amount, source ref) and one live disbursement per source object.
+            // A Rejected, Stopped, Voided or Returned disbursement no longer blocks a new request.
+            const string live = "state NOT IN ('REJECTED', 'STOPPED', 'VOIDED', 'RETURNED')";
+            entity.HasIndex(e => new { e.LegalEntityId, e.PayeeAccountId, e.Amount, e.Currency, e.SourceType, e.SourceId }).IsUnique()
+                .HasFilter(live).HasDatabaseName("ux_disbursement_duplicate_key");
+            entity.HasIndex(e => new { e.LegalEntityId, e.SourceType, e.SourceId }).IsUnique()
+                .HasFilter(live).HasDatabaseName("ux_disbursement_source");
+            entity.HasOne<PayeeAccountRow>().WithMany().HasForeignKey(e => e.PayeeAccountId)
+                .HasConstraintName("fk_disbursement_payee_account").OnDelete(DeleteBehavior.Restrict);
+        });
 }
 
 /// <summary>Design-time factory for <c>dotnet ef migrations add … --project src/CoreIns.Modules.Billing</c> (no connection opened).</summary>

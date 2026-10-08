@@ -22,6 +22,13 @@ internal sealed class BillingOptions
     [RegularExpression("^[A-Z]{3}$")]
     public string DefaultCurrency { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Cooling-off days of a new or changed payee account, <c>bil.payee.cooling_off.&lt;purpose&gt;</c> (PRD-06 §10.2
+    /// default 30, one value for every purpose until MKT serves the key, BR-BIL-062).
+    /// </summary>
+    [Range(0, 365)]
+    public int PayeeCoolingOffDays { get; set; } = 30;
+
     /// <summary>The configured zone.</summary>
     public TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
 

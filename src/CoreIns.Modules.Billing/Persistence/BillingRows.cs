@@ -358,7 +358,11 @@ internal sealed class LedgerEntryRow
 
     public string Jurisdiction { get; set; } = string.Empty;
 
-    public BillingAccountId BillingAccountId { get; set; }
+    /// <summary>The billing account of an account entry; null for a disbursement entry (SL2-BIL-DISB).</summary>
+    public BillingAccountId? BillingAccountId { get; set; }
+
+    /// <summary>The disbursement of a disbursement entry (DISBURSEMENT_RELEASED, DISBURSEMENT_CLEARED).</summary>
+    public DisbursementId? DisbursementId { get; set; }
 
     public string EntryType { get; set; } = string.Empty;
 
@@ -428,6 +432,16 @@ internal sealed class LedgerLineRow
     public PaymentId? ReceiptId { get; set; }
 
     public Guid? AllocationId { get; set; }
+
+    public DisbursementId? DisbursementId { get; set; }
+
+    /// <summary>Disbursement source type (REQ-BIL-354), e.g. CLM_PAYMENT.</summary>
+    public string? SourceType { get; set; }
+
+    /// <summary>Id of the disbursement's source object (e.g. the CLM claim payment).</summary>
+    public string? SourceId { get; set; }
+
+    public ClaimId? ClaimId { get; set; }
 }
 
 /// <summary>An intake exception (quarantined delta, blocked set, unsupported plan, failed fiscal request).</summary>

@@ -1,6 +1,7 @@
 using CoreIns.Modules.Billing.Commands;
 using CoreIns.Modules.Billing.Contracts;
 using CoreIns.Modules.Billing.Contracts.Api;
+using CoreIns.Modules.Billing.Domain;
 using CoreIns.Modules.Billing.Events;
 using CoreIns.Modules.Billing.Persistence;
 using CoreIns.Modules.Billing.Queries;
@@ -49,6 +50,7 @@ public static class BillingModule
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.billing_account, {Schema}.plan_instance, {Schema}.charge, {Schema}.invoice, {Schema}.invoice_item, {Schema}.receipt, {Schema}.intake_exception TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.payee_account, {Schema}.disbursement TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.allocation, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
@@ -90,6 +92,19 @@ public static class BillingModule
         services.AddCommand<AllocateReceipt, AllocationAllocateResponse, AllocateReceiptHandler>(
             CommandDescriptor.For("bil.Allocation.allocate") with { SupportsDryRun = true });
 
+        // SL2-BIL-DISB: payee accounts (IBAN P2) and the disbursement service for CLM claim payments. Both commands are
+        // idempotent on the caller's key; their results carry the masked IBAN only, never the IBAN (REQ-BIL-338).
+        services.AddScoped<PayeeProtection>();
+        services.AddScoped<DisbursementReader>();
+        services.AddScoped<IValidator<CreatePayeeAccount>, CreatePayeeAccountValidator>();
+        services.AddCommandAuditor<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountAuditor>();
+        services.AddCommand<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountHandler>(
+            CommandDescriptor.For("bil.PayeeAccount.create") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<RequestDisbursement>, RequestDisbursementValidator>();
+        services.AddCommandAuditor<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementAuditor>();
+        services.AddCommand<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementHandler>(
+            CommandDescriptor.For("bil.Disbursement.request") with { SupportsDryRun = true });
+
         // Consumers (worker): POL charges and bind, CMP fiscal outcomes.
         services.AddEventHandler<ChargeDeltaEmittedV1, ChargeDeltaEmittedHandler>(
             EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), ChargeDeltaEmittedHandler.Name, ModuleCode.BIL);
@@ -104,6 +119,8 @@ public static class BillingModule
         services.AddScoped<IBillingInvoiceService, InvoiceService>();
         services.AddScoped<IBillingPaymentService, PaymentService>();
         services.AddScoped<IBillingReceiptService, ReceiptService>();
+        services.AddScoped<IBillingPayeeAccountService, PayeeAccountService>();
+        services.AddScoped<IBillingDisbursementService, DisbursementService>();
 
         services.AddErrorDefinitions(Errors);
         return services;
@@ -128,5 +145,25 @@ public static class BillingModule
             .Describe("Κανένας κανόνας του βοηθητικού καθολικού δεν αντιστοιχεί· δεν γίνεται εγγραφή σε προεπιλεγμένο λογαριασμό.", "No sub-ledger rule matches; nothing is posted to a default account."),
         ErrorDefinition.For(ModuleCode.BIL, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
+        ErrorDefinition.For(ModuleCode.BIL, "IBAN-INVALID", 422, "Μη έγκυρο IBAN", "Invalid IBAN")
+            .Describe("Το IBAN δεν έχει έγκυρη μορφή ή ψηφία ελέγχου (ISO 13616).", "The IBAN does not have a valid structure or check digits (ISO 13616)."),
+        ErrorDefinition.For(ModuleCode.BIL, "CHARSET", 422, "Μη επιτρεπτοί χαρακτήρες", "Characters not allowed")
+            .Describe("Το όνομα δικαιούχου περιέχει χαρακτήρες που δεν μεταφέρει μια τραπεζική εντολή.", "The holder name contains characters a bank transfer cannot carry."),
+        ErrorDefinition.For(ModuleCode.BIL, "SOURCE", 422, "Μη καταχωρισμένη πηγή πληρωμής", "Source not registered")
+            .Describe("Η πηγή της πληρωμής δεν είναι στο μητρώο πηγών.", "The payment source is not in the source register."),
+        ErrorDefinition.For(ModuleCode.BIL, "APPROVAL-MISMATCH", 422, "Η πληρωμή δεν αντιστοιχεί στην έγκριση", "The payment does not match its approval")
+            .Describe("Το περιεχόμενο της αίτησης διαφέρει από αυτό που εγκρίθηκε· δεν πληρώνεται.", "The request differs from what was approved; it is not paid."),
+        ErrorDefinition.For(ModuleCode.BIL, "PAYEE-ACCOUNT", 422, "Μη κατάλληλος λογαριασμός δικαιούχου", "Payee account not usable")
+            .Describe("Ο λογαριασμός δεν ανήκει στον δικαιούχο, δεν είναι για αυτόν τον σκοπό ή δεν είναι ενεργός.", "The account is not the payee's, not for this purpose or not active."),
+        ErrorDefinition.For(ModuleCode.BIL, "VOP-HOLD", 409, "Εκκρεμεί επαλήθευση δικαιούχου", "Payee verification pending")
+            .Describe("Η επαλήθευση δικαιούχου δεν επιβεβαίωσε τον λογαριασμό· η πληρωμή κρατείται.", "Verification of payee did not confirm the account; the payment is held."),
+        ErrorDefinition.For(ModuleCode.BIL, "COOLING-OFF", 409, "Πρόσφατη αλλαγή λογαριασμού", "Recent bank account change")
+            .Describe("Ο λογαριασμός άλλαξε πρόσφατα· απαιτείται έγκριση από δεύτερο χρήστη.", "The account changed recently; a second person must approve."),
+        ErrorDefinition.For(ModuleCode.BIL, "PAYEE-BLOCKED", 409, "Ο δικαιούχος δεν ελέγχθηκε επιτυχώς", "Payee not cleared")
+            .Describe("Ο έλεγχος κυρώσεων δεν ήταν καθαρός· η πληρωμή δεν γίνεται.", "Sanctions screening was not clear; the payment is not made."),
+        ErrorDefinition.For(ModuleCode.BIL, "SCREENING-UNAVAILABLE", 503, "Ο έλεγχος κυρώσεων δεν είναι διαθέσιμος", "Sanctions screening unavailable")
+            .Describe("Ο έλεγχος κυρώσεων δεν ολοκληρώθηκε· η πληρωμή δεν γίνεται. Δοκιμάστε ξανά αργότερα.", "Sanctions screening did not complete; the payment is not made. Try again later."),
+        ErrorDefinition.For(ModuleCode.BIL, "DUPLICATE", 409, "Πιθανή διπλή πληρωμή", "Possible duplicate payment")
+            .Describe("Υπάρχει ήδη πληρωμή για την ίδια πηγή ή με τον ίδιο λογαριασμό, ποσό και αναφορά.", "A payment already exists for the same source or with the same account, amount and reference."),
     ];
 }

@@ -27,6 +27,12 @@ internal static class EntryTypes
 
     /// <summary>Unapplied cash allocated to billed receivable (REQ-BIL-129, REQ-BIL-130).</summary>
     public const string Allocated = "ALLOCATED";
+
+    /// <summary>A disbursement released to the bank: source payable or clearing (LA-17 for claim payments) → disbursements in transit LA-13 (REQ-BIL-211).</summary>
+    public const string DisbursementReleased = "DISBURSEMENT_RELEASED";
+
+    /// <summary>A disbursement's statement debit: disbursements in transit LA-13 → cash at bank LA-10 (REQ-BIL-211).</summary>
+    public const string DisbursementCleared = "DISBURSEMENT_CLEARED";
 }
 
 /// <summary>Sub-ledger accounts used by the slice (PRD-06 §7.1.4; the whole chart LA-01…LA-27 is seeded as data, REQ-BIL-282).</summary>
@@ -38,6 +44,8 @@ internal static class LedgerAccounts
     public const string CashAtBank = "LA-10";
     public const string Suspense = "LA-11";
     public const string RefundsPayable = "LA-12";
+    public const string DisbursementsInTransit = "LA-13";
+    public const string ClaimPaymentsClearing = "LA-17";
     public const string IptWrittenNotDue = "LA-27";
 }
 
@@ -119,6 +127,16 @@ internal sealed record LineDimensions
     public PaymentId? ReceiptId { get; init; }
 
     public Guid? AllocationId { get; init; }
+
+    public DisbursementId? DisbursementId { get; init; }
+
+    /// <summary>Disbursement source type (REQ-BIL-354).</summary>
+    public string? SourceType { get; init; }
+
+    /// <summary>Id of the disbursement's source object.</summary>
+    public string? SourceId { get; init; }
+
+    public ClaimId? ClaimId { get; init; }
 }
 
 /// <summary>One leg to post: an amount under a rule, with the line dimensions.</summary>

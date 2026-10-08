@@ -92,7 +92,30 @@
       "process": "unspecified"
     },
     "bil.Disbursement.get": {
-      "disbursement": "unspecified"
+      "disbursement": {
+        "disbursementId": "0192bf98-a13c-746c-846b-a6ada3336ea1",
+        "status": "Requested",
+        "sourceType": "sample",
+        "sourceId": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "method": "SAMPLE_CODE",
+        "requestedValueDate": "2026-10-07",
+        "maskedPayeeAccount": "sample",
+        "disbursementNumber": "SAMPLE-000001",
+        "sourceModule": "PTY",
+        "payeePartyId": "019285da-dff9-7d88-8635-19c2087cf494",
+        "payeeAccountId": "0192e69f-e8b5-7814-8ca9-3aeec5c5fa3b",
+        "claimId": "0192fe38-9988-71f5-839a-a30171d6d436",
+        "valueDate": "2026-10-07",
+        "approvalEvidenceRef": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "releasedAt": "2026-10-07T09:00:00Z",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "clearedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "bil.Disbursement.list": {
       "items": [
@@ -114,7 +137,18 @@
       },
       "method": "SAMPLE_CODE",
       "requestedValueDate": "2026-10-07",
-      "maskedPayeeAccount": "sample"
+      "maskedPayeeAccount": "sample",
+      "disbursementNumber": "SAMPLE-000001",
+      "sourceModule": "PTY",
+      "payeePartyId": "01920b37-f2a5-787a-8d6d-a5a17d4d9d99",
+      "payeeAccountId": "01925322-074a-7b26-829c-210f0f2da773",
+      "claimId": "01928d4f-bdf9-7673-8dac-719467b5eba4",
+      "valueDate": "2026-10-07",
+      "approvalEvidenceRef": "sample",
+      "requestedAt": "2026-10-07T09:00:00Z",
+      "releasedAt": "2026-10-07T09:00:00Z",
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "clearedAt": "2026-10-07T09:00:00Z"
     },
     "bil.Disbursement.stop": {
       "disbursement": {
@@ -371,13 +405,28 @@
     },
     "bil.PayeeAccount.create": {
       "payeeAccountId": "0192f68e-85ea-78d6-8deb-435e099d4138",
-      "verificationStatus": "unspecified",
-      "coolingOffUntil": "unspecified"
+      "verificationStatus": "Unverified",
+      "coolingOffUntil": "2026-10-07",
+      "maskedIban": "sample",
+      "change": true
     },
     "bil.PayeeAccount.get": {
-      "accountsPeriods": "unspecified",
-      "verification": "unspecified",
-      "coolingOff": "unspecified"
+      "payeeAccountId": "01928720-ec73-7594-8796-22c9225fc3c5",
+      "partyId": "0192e547-4bcd-7a8c-89cc-725778b77638",
+      "purpose": "SAMPLE_CODE",
+      "maskedIban": "sample",
+      "holderName": "sample",
+      "source": "SAMPLE_CODE",
+      "status": "Active",
+      "verificationStatus": "Unverified",
+      "vopResult": "Match",
+      "vopCheckedAt": "2026-10-07T09:00:00Z",
+      "validPeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "coolingOffUntil": "2026-10-07",
+      "change": true
     },
     "bil.PayeeAccount.verify": {
       "match": "unspecified",
@@ -992,7 +1041,30 @@
       "fileRef": "unspecified"
     },
     "DisbursementGetResponse": {
-      "disbursement": "unspecified"
+      "disbursement": {
+        "disbursementId": "0192af11-1b15-7b7a-8942-93faa824ab18",
+        "status": "Requested",
+        "sourceType": "sample",
+        "sourceId": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "method": "SAMPLE_CODE",
+        "requestedValueDate": "2026-10-07",
+        "maskedPayeeAccount": "sample",
+        "disbursementNumber": "SAMPLE-000001",
+        "sourceModule": "PTY",
+        "payeePartyId": "01925cd5-6ffa-78f1-8fd0-e6b7eb1390f4",
+        "payeeAccountId": "019288c8-c9e8-72e6-88bf-a0172b03aa00",
+        "claimId": "0192c759-4bd7-7443-8cb1-9e76aa22e344",
+        "valueDate": "2026-10-07",
+        "approvalEvidenceRef": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "releasedAt": "2026-10-07T09:00:00Z",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "clearedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "DisbursementListItem": {
       "disbursement": "unspecified"
@@ -1025,6 +1097,8 @@
       },
       "requestedValueDate": "2026-10-07",
       "approvalEvidenceRef": "sample",
+      "approvalContentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "claimId": "0192e549-607d-7be7-83ae-c8b7ff0ce1a0",
       "purposeText": "sample",
       "statementReference": "sample",
       "returnReference": "sample"
@@ -1040,7 +1114,18 @@
       },
       "method": "SAMPLE_CODE",
       "requestedValueDate": "2026-10-07",
-      "maskedPayeeAccount": "sample"
+      "maskedPayeeAccount": "sample",
+      "disbursementNumber": "SAMPLE-000001",
+      "sourceModule": "PTY",
+      "payeePartyId": "0192def2-fe46-7d80-856e-56bacbae8720",
+      "payeeAccountId": "019208c5-a60c-7aeb-8c02-92c77819038a",
+      "claimId": "0192924d-227e-7208-82dc-05503f726b7d",
+      "valueDate": "2026-10-07",
+      "approvalEvidenceRef": "sample",
+      "requestedAt": "2026-10-07T09:00:00Z",
+      "releasedAt": "2026-10-07T09:00:00Z",
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "clearedAt": "2026-10-07T09:00:00Z"
     },
     "DisbursementStopRequest": {
       "disbursementId": "0192f765-e9a1-753a-83d6-fbc4acf42d3d",
@@ -1524,21 +1609,36 @@
     },
     "PayeeAccountCreateRequest": {
       "partyId": "01928a36-8080-7ad1-860d-c0cc8094beb2",
-      "purpose": "unspecified",
-      "iban": "unspecified",
-      "holderName": "unspecified",
-      "source": "unspecified",
-      "evidenceRef": "unspecified"
+      "purpose": "COLLECTION",
+      "iban": "sample",
+      "holderName": "sample",
+      "source": "STAFF",
+      "evidenceRef": "sample"
     },
     "PayeeAccountCreateResponse": {
       "payeeAccountId": "0192b074-eafb-79cf-8c4a-8318d7c968c0",
-      "verificationStatus": "unspecified",
-      "coolingOffUntil": "unspecified"
+      "verificationStatus": "Unverified",
+      "coolingOffUntil": "2026-10-07",
+      "maskedIban": "sample",
+      "change": true
     },
     "PayeeAccountGetResponse": {
-      "accountsPeriods": "unspecified",
-      "verification": "unspecified",
-      "coolingOff": "unspecified"
+      "payeeAccountId": "0192ff6c-d4ac-75b4-87b8-5cb6b79e096a",
+      "partyId": "0192f17e-f9cc-7983-8fc1-e615c599bc8b",
+      "purpose": "SAMPLE_CODE",
+      "maskedIban": "sample",
+      "holderName": "sample",
+      "source": "SAMPLE_CODE",
+      "status": "Active",
+      "verificationStatus": "Unverified",
+      "vopResult": "Match",
+      "vopCheckedAt": "2026-10-07T09:00:00Z",
+      "validPeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "coolingOffUntil": "2026-10-07",
+      "change": true
     },
     "PayeeAccountListItem": {
       "accountsPeriods": "unspecified",

@@ -885,6 +885,50 @@
               "type": "null"
             }
           ]
+        },
+        "disbursementId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Disbursement (REQ-BIL-283 dimension 'disbursement')"
+        },
+        "sourceType": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DisbursementSourceType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Disbursement source type from the source register (REQ-BIL-354)"
+        },
+        "sourceId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Id of the source object of a disbursement (e.g. the CLM claim payment)"
+        },
+        "claimId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Claim of a CLM disbursement (D-SL2-08)"
         }
       },
       "required": [

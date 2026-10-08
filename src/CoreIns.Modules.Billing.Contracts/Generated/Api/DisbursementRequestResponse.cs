@@ -43,6 +43,64 @@ public sealed record DisbursementRequestResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? MaskedPayeeAccount { get; init; }
 
+    /// <summary>Disbursement number from PLT numbering (REQ-BIL-197)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("disbursementNumber")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.DisbursementNumber? DisbursementNumber { get; init; }
+
+    /// <summary>Calling module from the source register (REQ-BIL-354)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceModule")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ModuleCode? SourceModule { get; init; }
+
+    /// <summary>Contract member 'payeePartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeePartyId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.PartyId? PayeePartyId { get; init; }
+
+    /// <summary>Contract member 'payeeAccountId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? PayeeAccountId { get; init; }
+
+    /// <summary>Contract member 'claimId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>Value date of the payment once released</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("valueDate")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.BusinessDate? ValueDate { get; init; }
+
+    /// <summary>Contract member 'approvalEvidenceRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalEvidenceRef")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ApprovalEvidenceRef { get; init; }
+
+    /// <summary>Contract member 'requestedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("requestedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? RequestedAt { get; init; }
+
+    /// <summary>Contract member 'releasedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("releasedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ReleasedAt { get; init; }
+
+    /// <summary>Contract member 'issuedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issuedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? IssuedAt { get; init; }
+
+    /// <summary>Contract member 'clearedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("clearedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ClearedAt { get; init; }
+
     /// <summary>Canonical disbursement state (REQ-BIL-009)</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
