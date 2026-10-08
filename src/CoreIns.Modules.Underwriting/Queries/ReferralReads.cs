@@ -27,6 +27,8 @@ internal sealed class ReferralCountsRecord
 /// <summary>The derived risk facts of the job's latest evaluation from POL.</summary>
 internal sealed class EvaluationFactsRecord
 {
+    public Guid JobId { get; set; }
+
     public string Facts { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
@@ -36,6 +38,16 @@ internal sealed class EvaluationFactsRecord
     public string RuleSetVersion { get; set; } = string.Empty;
 
     public string Trace { get; set; } = "{}";
+}
+
+/// <summary>A stored rule set a job's evaluation ran.</summary>
+internal sealed class RuleSetOfJob
+{
+    public Guid JobId { get; set; }
+
+    public string Code { get; set; } = string.Empty;
+
+    public string Definition { get; set; } = "{}";
 }
 
 /// <summary>The workbench queues of the referral workbench (D-USR-13), derived from <c>uw.issue</c> per job and legal entity.</summary>
@@ -125,28 +137,50 @@ internal sealed class ReferralReads(DbSession session)
         return [.. rows.Select(r => (r.JobId, r))];
     }
 
-    /// <summary>The jobs among <paramref name="jobIds"/> that <paramref name="actor"/> evaluated or worked on as POL reported it (SOD-UW-02).</summary>
-    public async Task<IReadOnlySet<Guid>> WorkedOnAsync(Guid legalEntity, IReadOnlyCollection<Guid> jobIds, string actor, CancellationToken cancellationToken)
+    /// <summary>
+    /// The Open and Rejected issues of every job of the legal entity that has an Open issue (the MINE computation: at most the cap's
+    /// worth of jobs; the caller checks the count first), oldest first.
+    /// </summary>
+    public async Task<IReadOnlyList<IssueRecord>> OpenReferralIssuesAsync(Guid legalEntity, CancellationToken cancellationToken)
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        return (await connection.QueryAsync<Guid>(new CommandDefinition(
-            """
-            SELECT DISTINCT job_id FROM uw.evaluation
-             WHERE legal_entity_id = @legalEntity AND job_id = ANY(@jobIds) AND (created_by = @actor OR @actor = ANY(job_participants))
-            """, new { legalEntity, jobIds = jobIds.ToArray(), actor }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToHashSet();
+        return (await connection.QueryAsync<IssueRecord>(new CommandDefinition(
+            $"""
+            SELECT {UnderwritingStore.IssueColumns}
+              FROM uw.issue i JOIN uw.evaluation e ON e.evaluation_id = i.raised_evaluation_id
+             WHERE i.legal_entity_id = @legalEntity AND i.status IN ('Open', 'Rejected')
+               AND i.job_id IN (SELECT job_id FROM uw.issue WHERE legal_entity_id = @legalEntity AND status = 'Open')
+             ORDER BY i.created_at, i.issue_id
+            """, new { legalEntity }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
     }
 
-    /// <summary>The facts of the job's latest evaluation that recorded them (POL's in-process evaluation), or null.</summary>
-    public async Task<EvaluationFactsRecord?> LatestFactsAsync(Guid legalEntity, Guid jobId, CancellationToken cancellationToken)
+    /// <summary>The facts of each job's latest evaluation that recorded them (POL's in-process evaluation); jobs without are absent.</summary>
+    public async Task<IReadOnlyDictionary<Guid, EvaluationFactsRecord>> LatestFactsAsync(
+        Guid legalEntity, IReadOnlyCollection<Guid> jobIds, CancellationToken cancellationToken)
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<EvaluationFactsRecord>(new CommandDefinition(
+        var rows = await connection.QueryAsync<EvaluationFactsRecord>(new CommandDefinition(
             """
-            SELECT facts::text AS Facts, created_at AS CreatedAt, rule_set_code AS RuleSetCode, rule_set_version AS RuleSetVersion, trace::text AS Trace
+            SELECT DISTINCT ON (job_id) job_id AS JobId, facts::text AS Facts, created_at AS CreatedAt, rule_set_code AS RuleSetCode,
+                   rule_set_version AS RuleSetVersion, trace::text AS Trace
               FROM uw.evaluation
-             WHERE legal_entity_id = @legalEntity AND job_id = @jobId AND facts IS NOT NULL
-             ORDER BY created_at DESC, evaluation_id DESC LIMIT 1
-            """, new { legalEntity, jobId }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+             WHERE legal_entity_id = @legalEntity AND job_id = ANY(@jobIds) AND facts IS NOT NULL
+             ORDER BY job_id, created_at DESC, evaluation_id DESC
+            """, new { legalEntity, jobIds = jobIds.ToArray() }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        return rows.ToDictionary(r => r.JobId);
+    }
+
+    /// <summary>The stored rule sets (code and definition) the jobs' evaluations ran, for the rules' declared explain.</summary>
+    public async Task<IReadOnlyList<RuleSetOfJob>> RuleSetsOfJobsAsync(
+        Guid legalEntity, IReadOnlyCollection<Guid> jobIds, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        return (await connection.QueryAsync<RuleSetOfJob>(new CommandDefinition(
+            """
+            SELECT DISTINCT e.job_id AS JobId, v.rule_set_code AS Code, v.definition::text AS Definition
+              FROM uw.evaluation e JOIN uw.rule_set_version v ON v.content_hash = e.rule_set_hash
+             WHERE e.legal_entity_id = @legalEntity AND e.job_id = ANY(@jobIds)
+            """, new { legalEntity, jobIds = jobIds.ToArray() }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
     }
 
     private static DynamicParameters Window(Guid legalEntity, string me, DateTime dayStart, DateTime dayEnd)

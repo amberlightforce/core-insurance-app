@@ -119,11 +119,12 @@ internal sealed class UnderwritingController : ControllerBase
                 "APPROVED_TODAY" => ReferralQueueCode.ApprovedToday,
                 "REJECTED" => ReferralQueueCode.Rejected,
                 "DECIDED_BY_ME_TODAY" => ReferralQueueCode.DecidedByMeToday,
+                "MINE" => ReferralQueueCode.Mine,
                 _ => null,
             };
             if (code is null)
             {
-                return Problem(DomainError.Of(ModuleCode.UW, "VALIDATION", "queue must be OPEN, APPROVED_TODAY, REJECTED or DECIDED_BY_ME_TODAY."), HttpContext);
+                return Problem(DomainError.Of(ModuleCode.UW, "VALIDATION", "queue must be OPEN, APPROVED_TODAY, REJECTED, DECIDED_BY_ME_TODAY or MINE."), HttpContext);
             }
         }
 

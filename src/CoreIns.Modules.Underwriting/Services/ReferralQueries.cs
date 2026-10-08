@@ -8,6 +8,7 @@ using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Underwriting.Contracts.Api;
 using CoreIns.Modules.Underwriting.Domain;
 using CoreIns.Modules.Underwriting.Queries;
+using CoreIns.Platform.Authority;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
@@ -16,6 +17,9 @@ using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
 
 namespace CoreIns.Modules.Underwriting.Services;
+
+/// <summary>What a referral rule declares to be read and the fact value observed.</summary>
+internal sealed record RuleReading(string? Observed, string Limit);
 
 /// <summary>
 /// <c>uw.Referral.list</c> and <c>uw.Referral.get</c> (D-USR-13): the referral workbench reads. UW owns the queues (issues and
@@ -26,12 +30,17 @@ namespace CoreIns.Modules.Underwriting.Services;
 /// </summary>
 internal sealed class ReferralQueries(
     ReferralReads reads,
+    UnderwritingStore store,
+    DecisionEligibility eligibility,
     RequestContext context,
     ILegalEntityDirectory legalEntities,
     IClock clock,
     IPolicyJobService jobs,
     IPartyPartyService parties)
 {
+    /// <summary>The most open referrals the MINE view computes over (D-SL5-04); above it the caller narrows the view.</summary>
+    internal const int MineCap = 500;
+
     private static readonly string[] ActiveStatuses = [IssueStatus.Open, IssueStatus.Rejected, "Approved", "ApprovedWithConditions"];
 
     public async Task<Result<ReferralListPage>> ListAsync(ReferralQueueCode? queue, string? cursor, int? limit, CancellationToken cancellationToken)
@@ -45,26 +54,45 @@ internal sealed class ReferralQueries(
         var me = context.Actor.ToString();
         var (dayStart, dayEnd) = Today();
         var size = limit ?? 25;
-        var which = queue switch
+        var counts = await reads.CountsAsync(legalEntity, me, dayStart, dayEnd, cancellationToken).ConfigureAwait(false);
+        var overCap = counts.Open > MineCap;
+        if (queue == ReferralQueueCode.Mine && overCap)
         {
-            ReferralQueueCode.ApprovedToday => ReferralQueue.ApprovedToday,
-            ReferralQueueCode.Rejected => ReferralQueue.Rejected,
-            ReferralQueueCode.DecidedByMeToday => ReferralQueue.DecidedByMeToday,
-            _ => ReferralQueue.Open,
-        };
-        var rows = await reads.JobsAsync(legalEntity, which, me, dayStart, dayEnd, after, size + 1, cancellationToken).ConfigureAwait(false);
+            return DomainError.Of(ModuleCode.UW, "VALIDATION", $"The legal entity has more than {MineCap} open referrals; narrow the view (use the Open queue).");
+        }
+
+        // MINE and counts.mine share one computation: the open referrals whose every Open issue the caller can decide now.
+        var mine = overCap ? null : await MineAsync(legalEntity, cancellationToken).ConfigureAwait(false);
+        List<ReferralJobRecord> rows;
+        if (queue == ReferralQueueCode.Mine)
+        {
+            rows = [.. mine!.Where(m => after is not { } a || Compare(m, a) > 0).Take(size + 1)];
+        }
+        else
+        {
+            var which = queue switch
+            {
+                ReferralQueueCode.ApprovedToday => ReferralQueue.ApprovedToday,
+                ReferralQueueCode.Rejected => ReferralQueue.Rejected,
+                ReferralQueueCode.DecidedByMeToday => ReferralQueue.DecidedByMeToday,
+                _ => ReferralQueue.Open,
+            };
+            rows = [.. await reads.JobsAsync(legalEntity, which, me, dayStart, dayEnd, after, size + 1, cancellationToken).ConfigureAwait(false)];
+        }
+
         var page = rows.Take(size).ToList();
         var jobIds = page.Select(r => r.JobId).ToList();
         var issues = jobIds.Count == 0 ? [] : await reads.IssuesOfJobsAsync(legalEntity, jobIds, cancellationToken).ConfigureAwait(false);
-        var workedOn = jobIds.Count == 0 ? new HashSet<Guid>() : await reads.WorkedOnAsync(legalEntity, jobIds, me, cancellationToken).ConfigureAwait(false);
-        var counts = await reads.CountsAsync(legalEntity, me, dayStart, dayEnd, cancellationToken).ConfigureAwait(false);
+        var participation = jobIds.Count == 0 ? new Dictionary<Guid, JobParticipation>() : await store.ParticipationAsync(legalEntity, jobIds, cancellationToken).ConfigureAwait(false);
+        var explains = await ExplainsAsync(legalEntity, jobIds, cancellationToken).ConfigureAwait(false);
 
         var items = new List<ReferralListItem>(page.Count);
         foreach (var jobId in jobIds)
         {
             var job = await JobAsync(jobId, cancellationToken).ConfigureAwait(false);
             var customer = job is null ? null : await CustomerAsync(job.PolicyholderPartyId, cancellationToken).ConfigureAwait(false);
-            items.Add(Summary(jobId, [.. issues.Where(i => i.JobId == jobId).Select(i => i.Issue)], workedOn.Contains(jobId), job, customer));
+            var workedOn = eligibility.SodReasons(participation.GetValueOrDefault(jobId, JobParticipation.None)).Count > 0;
+            items.Add(Summary(jobId, [.. issues.Where(i => i.JobId == jobId).Select(i => i.Issue)], workedOn, job, customer, explains.GetValueOrDefault(jobId)));
         }
 
         return new ReferralListPage
@@ -78,6 +106,7 @@ internal sealed class ReferralQueries(
                 ApprovedToday = (int)counts.ApprovedToday,
                 Rejected = (int)counts.Rejected,
                 DecidedByMeToday = (int)counts.DecidedByMeToday,
+                Mine = mine?.Count,
             },
         };
     }
@@ -97,19 +126,25 @@ internal sealed class ReferralQueries(
             return NotFound();
         }
 
-        var me = context.Actor.ToString();
-        var workedOn = await reads.WorkedOnAsync(legalEntity, [jobId], me, cancellationToken).ConfigureAwait(false);
+        var participation = (await store.ParticipationAsync(legalEntity, [jobId], cancellationToken).ConfigureAwait(false)).GetValueOrDefault(jobId, JobParticipation.None);
         var job = await JobAsync(jobId, cancellationToken).ConfigureAwait(false);
         var customer = job is null ? null : await CustomerAsync(job.PolicyholderPartyId, cancellationToken).ConfigureAwait(false);
         var version = job?.Versions.FirstOrDefault(v => v.VersionNo == job.CurrentVersionNo);
-        var facts = await reads.LatestFactsAsync(legalEntity, jobId, cancellationToken).ConfigureAwait(false);
+        var facts = (await reads.LatestFactsAsync(legalEntity, [jobId], cancellationToken).ConfigureAwait(false)).GetValueOrDefault(jobId);
+        var explains = await ExplainsAsync(legalEntity, [jobId], cancellationToken).ConfigureAwait(false);
         var zone = BusinessZone();
+
+        // Decidability: the decide check run dry for every issue (nothing is recorded; uw.Issue.decide re-runs it at commit).
+        var checks = await eligibility.DryChecksAsync(issues, cancellationToken).ConfigureAwait(false);
+        var rows = issues.Select(issue => (Issue: issue, Eligibility: eligibility.Evaluate(issue, participation, checks[issue.IssueType]))).ToList();
+        var open = rows.Where(r => r.Issue.Status == IssueStatus.Open).ToList();
+        var viewReasons = open.Count == 0 ? [DecidabilityReason.NotOpen] : open.SelectMany(r => r.Eligibility.Reasons).Distinct().ToList();
 
         return new ReferralGetResponse
         {
             Referral = new ReferralView
             {
-                Summary = Summary(jobId, issues, workedOn.Contains(jobId), job, customer),
+                Summary = Summary(jobId, issues, eligibility.SodReasons(participation).Count > 0, job, customer, explains.GetValueOrDefault(jobId)),
                 ProductVersion = job?.ProductVersion.ToString(),
                 ExpirationDate = job is null ? null : job.ExpirationAt.ToBusinessDate(zone),
                 ProducerCode = job?.ProducerCode,
@@ -117,12 +152,108 @@ internal sealed class ReferralQueries(
                 Premium = version?.Premium,
                 Taxes = version?.Taxes,
                 Facts = facts is null ? null : Facts(facts, job, version),
-                Issues = [.. issues.Select(UnderwritingIssueQueries.Item)],
+                Issues = [.. rows.Select(r => new ReferralIssue { Issue = UnderwritingIssueQueries.Item(r.Issue), Decidability = Decidability(r.Issue, r.Eligibility) })],
+                Decidability = new ReferralDecidability { CanDecide = open.Count > 0 && open.All(r => r.Eligibility.CanDecide), Reasons = viewReasons },
             },
         };
     }
 
-    private static ReferralListItem Summary(Guid jobId, IReadOnlyList<IssueRecord> issues, bool workedOn, JobView? job, ReferralCustomer? customer)
+    private static IssueDecidability Decidability(IssueRecord issue, IssueEligibility result) => new()
+    {
+        CanDecide = result.CanDecide,
+        Reasons = result.Reasons,
+        Authority = new AuthorityPreview
+        {
+            Type = result.Authority.Type.ToString(),
+            IssueType = issue.IssueType,
+            Outcome = result.Authority.Decision switch
+            {
+                AuthorityDecision.Allow => AuthorityPreview.OutcomeValue.Allow,
+                AuthorityDecision.Refer => AuthorityPreview.OutcomeValue.Refer,
+                _ => AuthorityPreview.OutcomeValue.Deny,
+            },
+            SourceGrantId = result.Authority.SourceGrant,
+        },
+    };
+
+    /// <summary>
+    /// The open referrals of the legal entity the caller can decide now, oldest first (the order of the Open queue): a job qualifies
+    /// when it has an Open issue and the dry decide check says yes for every Open issue. Computed set-wise: one read of the open
+    /// issues, one of the participation, one dry authority check per issue type.
+    /// </summary>
+    private async Task<List<ReferralJobRecord>> MineAsync(Guid legalEntity, CancellationToken cancellationToken)
+    {
+        var issues = await reads.OpenReferralIssuesAsync(legalEntity, cancellationToken).ConfigureAwait(false);
+        if (issues.Count == 0)
+        {
+            return [];
+        }
+
+        var jobIds = issues.Select(i => i.JobId).Distinct().ToList();
+        var participation = await store.ParticipationAsync(legalEntity, jobIds, cancellationToken).ConfigureAwait(false);
+        var checks = await eligibility.DryChecksAsync(issues.Where(i => i.Status == IssueStatus.Open), cancellationToken).ConfigureAwait(false);
+        var mine = new List<ReferralJobRecord>();
+        foreach (var group in issues.GroupBy(i => i.JobId))
+        {
+            var part = participation.GetValueOrDefault(group.Key, JobParticipation.None);
+            var open = group.Where(i => i.Status == IssueStatus.Open).ToList();
+            if (open.Count > 0 && open.All(i => eligibility.Evaluate(i, part, checks[i.IssueType]).CanDecide))
+            {
+                mine.Add(new ReferralJobRecord { JobId = group.Key, SortAt = group.Min(i => i.CreatedAt) });
+            }
+        }
+
+        mine.Sort((a, b) => Compare(a, (b.SortAt, b.JobId)));
+        return mine;
+    }
+
+    /// <summary>The queue order: oldest raised first, then job id (the order and the keyset of the cursor).</summary>
+    private static int Compare(ReferralJobRecord row, (DateTime SortAt, Guid JobId) other)
+    {
+        var byTime = row.SortAt.CompareTo(other.SortAt);
+        return byTime != 0 ? byTime : row.JobId.CompareTo(other.JobId);
+    }
+
+    /// <summary>
+    /// What each referral rule of the jobs declares (rule set <c>explain</c>) combined with the stored derived facts: per job and
+    /// rule id, the observed value and the limit; a rule without a declared limit gets none and RULE_DECLARES_NO_LIMIT.
+    /// </summary>
+    private async Task<Dictionary<Guid, Dictionary<string, RuleReading>>> ExplainsAsync(Guid legalEntity, List<Guid> jobIds, CancellationToken cancellationToken)
+    {
+        var result = new Dictionary<Guid, Dictionary<string, RuleReading>>();
+        if (jobIds.Count == 0)
+        {
+            return result;
+        }
+
+        var facts = await reads.LatestFactsAsync(legalEntity, jobIds, cancellationToken).ConfigureAwait(false);
+        foreach (var set in await reads.RuleSetsOfJobsAsync(legalEntity, jobIds, cancellationToken).ConfigureAwait(false))
+        {
+            var readings = result.TryGetValue(set.JobId, out var existing) ? existing : result[set.JobId] = new Dictionary<string, RuleReading>(StringComparer.Ordinal);
+            var record = facts.TryGetValue(set.JobId, out var f) ? JsonSerializer.Deserialize<UwFactsRecord>(f.Facts, RuleSetJson.Options) : null;
+            foreach (var rule in RuleSetJson.Deserialize(set.Definition).Rules)
+            {
+                var explain = rule.Explain ?? BuiltInRuleSets.BuiltInExplain(set.Code, rule);
+                if (explain is not null)
+                {
+                    readings[rule.Id] = new RuleReading(Observed(explain.Fact, record), explain.Limit);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static string? Observed(string fact, UwFactsRecord? record) => record is null ? null : fact switch
+    {
+        BuiltInRuleSets.FactDriverAge => record.YoungestDriverAgeBand,
+        BuiltInRuleSets.FactVehicleAge => record.VehicleAgeYears.ToString(CultureInfo.InvariantCulture),
+        BuiltInRuleSets.FactVehicleValue => record.VehicleValue,
+        _ => null,
+    };
+
+    private static ReferralListItem Summary(
+        Guid jobId, IReadOnlyList<IssueRecord> issues, bool workedOn, JobView? job, ReferralCustomer? customer, Dictionary<string, RuleReading>? readings)
     {
         var active = issues.Where(i => ActiveStatuses.Contains(i.Status, StringComparer.Ordinal)).ToList();
         var waiting = active.Where(i => i.Status is IssueStatus.Open or IssueStatus.Rejected).ToList();
@@ -140,12 +271,19 @@ internal sealed class ReferralQueries(
             ReferralStatus = active.Any(i => i.Status == IssueStatus.Open) ? ReferralStatusCode.Open
                 : active.Any(i => i.Status == IssueStatus.Rejected) ? ReferralStatusCode.Rejected
                 : ReferralStatusCode.Approved,
-            Reasons = [.. active.Select(i => new ReferralReason
+            Reasons = [.. active.Select(i =>
             {
-                IssueId = new UwIssueId(i.IssueId),
-                IssueType = i.IssueType,
-                RuleId = i.RuleId,
-                Status = Enum.Parse<IssueStatusCode>(i.Status),
+                var reading = readings is not null && readings.TryGetValue(i.RuleId, out var found) ? found : null;
+                return new ReferralReason
+                {
+                    IssueId = new UwIssueId(i.IssueId),
+                    IssueType = i.IssueType,
+                    RuleId = i.RuleId,
+                    Status = Enum.Parse<IssueStatusCode>(i.Status),
+                    Observed = reading?.Observed,
+                    Limit = reading?.Limit,
+                    LimitUnavailableReason = reading is null ? "RULE_DECLARES_NO_LIMIT" : null,
+                };
             })],
             RaisedAt = Time((waiting.Count > 0 ? waiting : issues).Min(i => i.CreatedAt)),
             LastDecidedAt = lastDecided?.DecidedAt is { } at ? Time(at) : null,

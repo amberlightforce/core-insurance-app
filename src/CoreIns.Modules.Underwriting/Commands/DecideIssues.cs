@@ -44,14 +44,13 @@ internal sealed class DecideIssuesHandler(
     UnderwritingStore store,
     RequestContext context,
     ILegalEntityDirectory legalEntities,
-    IAuthorityService authority,
-    IClock clock,
+    DecisionEligibility eligibility,
     IEventPublisher events) : ICommandHandler<DecideIssues, IssueDecideResponse>
 {
     public async Task<Result<IssueDecideResponse>> HandleAsync(DecideIssues command, CancellationToken cancellationToken)
     {
         var request = command.Request;
-        if (context.Actor.Kind != ActorKind.User)
+        if (!eligibility.CallerIsHuman)
         {
             return DomainError.Of(ModuleCode.UW, "HUMAN-DECISION-REQUIRED", "Only a person may decide an underwriting issue (REQ-UW-115).");
         }
@@ -89,24 +88,19 @@ internal sealed class DecideIssuesHandler(
         }
 
         var actor = context.Actor.ToString();
+        var participation = await store.ParticipationAsync(legalEntity, [.. issues.Select(i => i.JobId).Distinct()], cancellationToken).ConfigureAwait(false);
         foreach (var jobId in issues.Select(i => i.JobId).Distinct())
         {
-            if ((await store.EvaluatorsAsync(legalEntity, jobId, cancellationToken).ConfigureAwait(false)).Contains(actor, StringComparer.Ordinal))
+            if (eligibility.SodReasons(participation.GetValueOrDefault(jobId, JobParticipation.None)).Count > 0)
             {
                 return DomainError.Of(ModuleCode.UW, "SOD", "You created, edited, quoted or bound this job, so you cannot decide its underwriting issues; ask another underwriter with authority (SOD-UW-02).");
             }
         }
 
-        var now = clock.Now;
         var checks = new Dictionary<Guid, AuthorityCheckResult>();
         foreach (var issue in issues)
         {
-            var check = await authority.CheckAsync(
-                new AuthorityCheckRequest(
-                    context.Actor, context.Roles, UnderwritingAuthorityTypes.IssueApproval,
-                    new Dictionary<string, DimensionValue>(StringComparer.Ordinal) { [UnderwritingAuthorityTypes.IssueTypeDimension] = DimensionValue.OfCodes(issue.IssueType) },
-                    ObjectRef.For(ModuleCode.UW, "Issue", new UwIssueId(issue.IssueId)), now),
-                cancellationToken).ConfigureAwait(false);
+            var check = await eligibility.CheckAuthorityAsync(issue.IssueType, ObjectRef.For(ModuleCode.UW, "Issue", new UwIssueId(issue.IssueId)), cancellationToken).ConfigureAwait(false);
             context.AuthorityChecks.Add(check);
             if (check.Decision != AuthorityDecision.Allow)
             {

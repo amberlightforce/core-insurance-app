@@ -223,7 +223,7 @@ public sealed class ReferralWorkbenchTests(PostgresFixture database) : IClassFix
     [Fact]
     public async Task Bad_queue_cursor_and_unknown_job_are_refused()
     {
-        var (badQueue, badQueueBody, _) = await AsAsync(HttpMethod.Get, "/api/uw/v1/referrals?queue=MINE");
+        var (badQueue, badQueueBody, _) = await AsAsync(HttpMethod.Get, "/api/uw/v1/referrals?queue=NOPE");
         badQueue.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         badQueueBody.Text("code").ShouldBe("UW-ERR-VALIDATION");
         (await AsAsync(HttpMethod.Get, "/api/uw/v1/referrals?cursor=not-a-cursor")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
