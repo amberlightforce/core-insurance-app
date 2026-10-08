@@ -24,7 +24,7 @@ internal sealed record CreatePolicyChange(PolicyChangeCreateRequest Request) : I
 
 internal sealed class CreatePolicyChangeValidator : AbstractValidator<CreatePolicyChange>
 {
-    public CreatePolicyChangeValidator() => RuleFor(c => c.Request.PolicyId).NotNull().WithErrorCode("POLICY_REQUIRED");
+    public CreatePolicyChangeValidator() => RuleFor(c => c.Request.PolicyId.Value).NotEmpty().WithErrorCode("POLICY_REQUIRED");
 }
 
 /// <summary>
@@ -53,7 +53,7 @@ internal sealed class CreatePolicyChangeHandler(
         var now = clock.Now;
         var zone = options.Value.Zone;
         var legalEntity = JobSupport.LegalEntity(context, legalEntities);
-        var policyId = request.PolicyId!.Value;
+        var policyId = request.PolicyId;
 
         var policy = await db.Policies.AsNoTracking().SingleOrDefaultAsync(p => p.PolicyId == policyId && p.LegalEntityId == legalEntity, cancellationToken)
             .ConfigureAwait(false);
@@ -62,17 +62,10 @@ internal sealed class CreatePolicyChangeHandler(
             return JobSupport.NotFound("policy");
         }
 
+        var effectiveAt = PolicyWriteLock.Truncate(request.EffectiveAt);
         var terms = await db.Terms.AsNoTracking().Where(t => t.PolicyId == policyId && t.LegalEntityId == legalEntity && t.RecordedTo == null)
             .OrderBy(t => t.TermNumber).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var effectiveAt = PolicyWriteLock.Truncate(request.EffectiveAt ?? now);
         var term = terms.FirstOrDefault(t => t.ValidFrom <= effectiveAt && effectiveAt < t.ValidTo);
-        if (term is null && request.EffectiveAt is null)
-        {
-            // Default effective date: a Scheduled term has not started, so the earliest change is its start.
-            term = terms.FirstOrDefault(t => t.ValidFrom > now && Codes.Parse<PolicyTermState>(t.State) == PolicyTermState.Scheduled);
-            effectiveAt = term?.ValidFrom ?? effectiveAt;
-        }
-
         if (term is null)
         {
             return DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION", "No term of the policy is in force or scheduled at the effective date.");
@@ -174,11 +167,14 @@ internal sealed class CreatePolicyChangeHandler(
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
         {
-            // A second open change on the term (partial unique index ux_job_open_servicing), or a racing job number.
-            return Conflict();
+            // Two creates raced past the check: the partial unique index ux_job_open_servicing let one through. The loser is "changed meanwhile".
+            return JobSupport.Stale();
         }
 
-        return new PolicyChangeCreateResponse { JobId = jobId };
+        return new PolicyChangeCreateResponse
+        {
+            JobId = jobId, State = JobStateCode.Draft, TermId = term.TermId, BaseTransactionId = term.HeadTransactionId.Value,
+        };
     }
 
     /// <summary>The effective-date range of the caller (REQ-POL-135, -136): from the start of the Athens day N days back, to the end of the term.</summary>
@@ -200,16 +196,18 @@ internal sealed class CreatePolicyChangeAuditor : ICommandAuditor<CreatePolicyCh
     public CommandAuditFacts Describe(CreatePolicyChange command, Result<PolicyChangeCreateResponse>? result)
     {
         var policy = command.Request.PolicyId;
-        if (result is not { IsSuccess: true } success || success.Value.JobId is not { } jobId)
+        if (result is not { IsSuccess: true } success)
         {
-            return policy is { } id ? new CommandAuditFacts { ObjectRef = ObjectRef.For(ModuleCode.POL, "Policy", id) } : new CommandAuditFacts();
+            return new CommandAuditFacts { ObjectRef = ObjectRef.For(ModuleCode.POL, "Policy", policy) };
         }
+
+        var jobId = success.Value.JobId;
 
         return new CommandAuditFacts
         {
             ObjectRef = ObjectRef.For(ModuleCode.POL, "Job", jobId),
-            BusinessKeys = BusinessKeys.Empty.With("jobId", jobId.Value.ToString()).With("policyId", policy?.Value.ToString() ?? string.Empty),
-            Changes = AuditDiff.Compute(null, new { effectiveAt = command.Request.EffectiveAt?.ToString(), kind = "POLICY_CHANGE" }),
+            BusinessKeys = BusinessKeys.Empty.With("jobId", jobId.Value.ToString()).With("policyId", policy.Value.ToString()),
+            Changes = AuditDiff.Compute(null, new { effectiveAt = command.Request.EffectiveAt.ToString(), kind = "POLICY_CHANGE" }),
         };
     }
 }

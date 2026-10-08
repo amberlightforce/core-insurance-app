@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json.Nodes;
 using CoreIns.Modules.Market.Contracts;
+using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Domain;
 using CoreIns.Modules.Policy.Domain.Servicing;
@@ -26,18 +27,18 @@ namespace CoreIns.IntegrationTests.Policy.Change;
 /// </summary>
 internal sealed class ScriptedServicingTax : IServicingTax
 {
-    public Task<Result<IReadOnlyList<ServicingTaxLine>>> LinesAsync(ServicingTaxRequest request, CancellationToken cancellationToken)
+    public Task<Result<IReadOnlyList<PricedTaxLine>>> LinesAsync(ServicingTaxRequest request, CancellationToken cancellationToken)
     {
         var lines = request.PremiumDeltas.Select(delta =>
         {
             var debit = delta.Amount > 0m;
-            return new ServicingTaxLine(
+            return new PricedTaxLine(
                 delta.Key, delta.Key.CoverageCode, "GR-IPT", ChargeCategories.Tax, 0.15m,
                 debit ? decimal.Round(delta.Amount * 0.15m, 2, MidpointRounding.AwayFromZero) : 0m,
-                debit ? "APPLY" : "KEEP_NOT_REDUCED", debit ? "TEST-IPT-ENDORSE-DEBIT" : "TEST-IPT-ENDORSE-CREDIT", "1",
+                debit ? TreatmentActionCode.Apply : TreatmentActionCode.KeepNotReduced, debit ? "TEST-IPT-ENDORSE-DEBIT" : "TEST-IPT-ENDORSE-CREDIT", "1",
                 debit ? "Unverified" : "PendingOpinion", true);
         }).ToList();
-        return Task.FromResult<Result<IReadOnlyList<ServicingTaxLine>>>(lines);
+        return Task.FromResult<Result<IReadOnlyList<PricedTaxLine>>>(lines);
     }
 }
 
@@ -168,7 +169,7 @@ internal sealed class ChangeHarness : IAsyncDisposable
     }
 
     public async Task<(HttpResponseMessage Response, JsonNode? Body)> StartChangeAsync(Issued policy, string? effectiveAt = null, string roles = Underwriter, bool dryRun = false) =>
-        await SendAsync(HttpMethod.Post, "/api/pol/v1/policy-changes" + (dryRun ? "?dryRun=true" : string.Empty), new { policyId = policy.PolicyId, effectiveAt }, roles);
+        await SendAsync(HttpMethod.Post, "/api/pol/v1/policy-changes" + (dryRun ? "?dryRun=true" : string.Empty), new { policyId = policy.PolicyId, effectiveAt = effectiveAt ?? Iso(Clock.Now.ToUtcDateTime()) }, roles);
 
     public async Task<string> NewChangeAsync(Issued policy, string? effectiveAt = null)
     {

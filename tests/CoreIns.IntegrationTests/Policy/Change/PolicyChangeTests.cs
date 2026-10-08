@@ -80,7 +80,7 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         preview.Text("diff.0.field").ShouldBe("engineCapacityCc");
         preview.Text("diff.0.before").ShouldBe("1400");
         preview.Text("diff.0.after").ShouldBe("1600");
-        preview.Text("servicingPreview.totalChange").ShouldBe((mtplDelta + tax).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        preview.Text("servicingPreview.totalChange.amount").ShouldBe((mtplDelta + tax).ToString(System.Globalization.CultureInfo.InvariantCulture));
         var previewMtpl = preview!["servicingPreview"]!["lines"]!.AsArray().Single(l => l!["chargeType"]!.GetValue<string>() == "PREM-MTPL")!;
         previewMtpl.Text("beforeAnnual").ShouldBe(ChangeHarness.MtplRate(1400).ToString(System.Globalization.CultureInfo.InvariantCulture));
         previewMtpl.Text("afterAnnual").ShouldBe(ChangeHarness.MtplRate(1600).ToString(System.Globalization.CultureInfo.InvariantCulture));
@@ -389,7 +389,7 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         expiredBody.Text("code").ShouldBe("POL-ERR-ILLEGAL-TRANSITION");
 
         // An unknown policy is not found.
-        (await _h.SendAsync(HttpMethod.Post, "/api/pol/v1/policy-changes", new { policyId = Guid.NewGuid(), effectiveAt = (string?)null })).Body.Text("code").ShouldBe("POL-ERR-NOT-FOUND");
+        (await _h.SendAsync(HttpMethod.Post, "/api/pol/v1/policy-changes", new { policyId = Guid.NewGuid(), effectiveAt = ChangeHarness.Iso(DateTime.UtcNow) })).Body.Text("code").ShouldBe("POL-ERR-NOT-FOUND");
     }
 
     [Fact]
@@ -440,6 +440,19 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         response.StatusCode.ShouldBe(HttpStatusCode.Conflict, body?.ToJsonString());
         body.Text("code").ShouldBe("POL-ERR-PREEMPTED");
         (await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.policy_transaction WHERE policy_id = '{policy.PolicyId}'")).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task REQ_POL_190_D_SL3_11_concurrent_creates_on_one_policy_one_wins_the_loser_is_409_never_500()
+    {
+        var policy = await _h.IssueAsync();
+        _h.SetDay(policy, 20);
+        var results = await Task.WhenAll(Enumerable.Range(0, 4).Select(_ => _h.StartChangeAsync(policy)));
+        results.Count(r => r.Response.StatusCode == HttpStatusCode.Created).ShouldBe(1);
+        results.Where(r => r.Response.StatusCode != HttpStatusCode.Created).ShouldAllBe(r => r.Response.StatusCode == HttpStatusCode.Conflict);
+        results.Where(r => r.Response.StatusCode != HttpStatusCode.Created).Select(r => r.Body.Text("code"))
+            .ShouldAllBe(code => code == "POL-ERR-STALE" || code == "POL-ERR-JOB-CONFLICT");
+        (await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.job WHERE policy_id = '{policy.PolicyId}' AND job_type = 'POLICY_CHANGE'")).ShouldBe(1);
     }
 
     [Fact]

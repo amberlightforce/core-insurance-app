@@ -42,7 +42,7 @@ internal sealed class ChangeController : ControllerBase
     {
         var result = await handler.HandleAsync(new CreatePolicyChange(request), cancellationToken).ConfigureAwait(false);
         return result.IsSuccess
-            ? Results.Created($"/api/pol/v1/jobs/{result.Value.JobId!.Value.Value}", result.Value)
+            ? Results.Created($"/api/pol/v1/jobs/{result.Value.JobId.Value}", result.Value)
             : HttpResults.Problem(result.Error!, HttpContext);
     }
 
