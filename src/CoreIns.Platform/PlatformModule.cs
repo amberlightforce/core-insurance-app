@@ -57,8 +57,9 @@ public static class PlatformModule
 
         services.AddOptions<StampOptions>().Bind(configuration.GetSection(StampOptions.Section));
         services.AddOptions<OutboxOptions>().Bind(configuration.GetSection(OutboxOptions.Section));
-        services.AddOptions<AuthorityOptions>().Bind(configuration.GetSection(AuthorityOptions.Section))
-            .PostConfigure<IHostEnvironment>((options, environment) => AuthorityOptions.DropIllustrativeIn(options, environment));
+        services.AddOptions<AuthorityOptions>().Bind(configuration.GetSection(AuthorityOptions.Section));
+        services.AddSingleton<IPostConfigureOptions<AuthorityOptions>>(sp => new PostConfigureOptions<AuthorityOptions>(
+            Options.DefaultName, options => AuthorityOptions.DropIllustrativeIn(options, sp.GetService<IHostEnvironment>())));
 
         services.TryAddSingleton<IClock>(sp => configuration[ClockConfiguration.ModeKey] is { Length: > 0 }
             ? ClockConfiguration.Create(configuration, sp.GetRequiredService<IHostEnvironment>())

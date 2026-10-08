@@ -227,13 +227,13 @@ public sealed class AuthorityOptions
 
     /// <summary>
     /// Illustrative grants are test data (e.g. the claims limits of D-SL2-03): they never apply in Production, where the
-    /// affected checks fail closed (no grant → DENY) until approved limits are configured.
+    /// affected checks fail closed (no grant → DENY) until approved limits are configured. Without a known host
+    /// environment they are dropped as well (fail closed).
     /// </summary>
-    public static void DropIllustrativeIn(AuthorityOptions options, Microsoft.Extensions.Hosting.IHostEnvironment environment)
+    public static void DropIllustrativeIn(AuthorityOptions options, Microsoft.Extensions.Hosting.IHostEnvironment? environment)
     {
         ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(environment);
-        if (!Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsProduction(environment))
+        if (environment is not null && !Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsProduction(environment))
         {
             return;
         }

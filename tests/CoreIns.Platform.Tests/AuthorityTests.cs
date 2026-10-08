@@ -137,6 +137,19 @@ public sealed class AuthorityTests
         options.Grants.ShouldContain(g => g.Id == "g-approved");
     }
 
+    [Fact]
+    public void Illustrative_grants_are_dropped_when_the_environment_is_unknown()
+    {
+        var options = new AuthorityOptions();
+        var illustrative = Grant("g-illustrative", role: "Claims.Handler", limit: "5000");
+        illustrative.Illustrative = true;
+        options.Grants.Add(illustrative);
+
+        AuthorityOptions.DropIllustrativeIn(options, null);
+
+        options.Grants.ShouldBeEmpty();
+    }
+
     private sealed class HostEnvironment(string name) : Microsoft.Extensions.Hosting.IHostEnvironment
     {
         public string EnvironmentName { get; set; } = name;
