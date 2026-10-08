@@ -160,7 +160,7 @@ public static class PolicyModule
         ErrorDefinition.For(ModuleCode.POL, "DEPENDENCY-UNAVAILABLE", 503, "Μια απαραίτητη υπηρεσία δεν είναι διαθέσιμη", "A required service is not available", retryable: true)
             .Describe("Η λειτουργία χρειάζεται υπηρεσία άλλης ενότητας που δεν έχει ακόμη συνδεθεί.", "The operation needs another module's service that is not wired yet."),
         ErrorDefinition.For(ModuleCode.POL, PolicyErrorNames.OutOfSequence, 422, "Η ενέργεια προηγείται της τελευταίας δεσμευμένης συναλλαγής του όρου", "The effective time is earlier than the term's latest bound transaction")
-            with { },
+            .Describe("Η ενέργεια ισχύει από ημερομηνία πριν από την τελευταία δεσμευμένη συναλλαγή του όρου. Επιλέξτε μεταγενέστερη ημερομηνία ή ξεκινήστε από τη νεότερη κατάσταση.", "The action takes effect before the term's latest bound transaction. Choose a later date or start again from the latest state."),
         ErrorDefinition.For(ModuleCode.POL, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

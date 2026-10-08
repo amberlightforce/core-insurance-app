@@ -31,6 +31,12 @@ internal static class FiscalDocuments
     /// </summary>
     public const string PlaceholderDocumentType = "UNMAPPED-OQ-012";
 
+    /// <summary>
+    /// Suffix of CMP's own credit-note series. The myDATA credit-note document type is open (OQ-012): the candidate codes
+    /// (PRD-11 BR-CMP-001, OI-CMP-03) stay out of the code and credits carry <see cref="PlaceholderDocumentType"/>.
+    /// </summary>
+    public const string CreditSeriesSuffix = "-CR";
+
     /// <summary>Fiscal source types REQ-CMP-030 lists (open code until CMP settles one list).</summary>
     public static IReadOnlySet<string> SourceTypes { get; } =
         new HashSet<string>(StringComparer.Ordinal) { "TRANSACTION", "INVOICE", "CREDIT", "FEE", "COMMISSION", "CLAIM_PAYMENT" };

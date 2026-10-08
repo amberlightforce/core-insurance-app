@@ -60,6 +60,7 @@ public sealed class PolicyDatabaseTests(PostgresFixture database) : IClassFixtur
             INSERT INTO pol.segment (segment_id, term_id, policy_id, transaction_id, legal_entity_id, valid_from, valid_to, recorded_from, snapshot_hash, snapshot)
             VALUES ('{segment}', '{term}', '{policy}', '{transaction}', '{ApiHostFactory.LegalEntityId}', '2027-01-01T00:00Z', '2028-01-01T00:00Z',
                 '{T0}', '{new string('a', 64)}', jsonb_build_object());
+            {Term(term, 1, "2027-01-01T00:00Z", "2028-01-01T00:00Z", $"'{T0}'")};
             """);
         string Term(Guid id, int number, string from, string to, string recordedFrom) => $"""
             INSERT INTO pol.policy_term (term_version_id, term_id, policy_id, legal_entity_id, term_number, valid_from, valid_to, recorded_from, state,
@@ -68,19 +69,17 @@ public sealed class PolicyDatabaseTests(PostgresFixture database) : IClassFixtur
                 '1.0', 'a', 'r', 'c', 'EUR', 'PLAN', '2026-10-01', '{transaction}', 'test')
             """;
 
-        await ExecuteAsync(dataSource, Term(term, 1, "2027-01-01T00:00Z", "2028-01-01T00:00Z", $"'{T0}'"));
-
-        // Records are stamped with the policy watermark (D-SL3-03): a writer moves it forward first, then stamps with it.
-        await ExecuteAsync(dataSource, $"UPDATE pol.policy SET last_recorded_at = '{T1}', record_version = record_version + 1 WHERE policy_id = '{policy}'");
+        // Records are stamped with the policy watermark (D-SL3-03): a writer moves it forward first, in the same transaction, then stamps with it.
+        string Bump(string to) => $"UPDATE pol.policy SET last_recorded_at = '{to}', record_version = record_version + 1 WHERE policy_id = '{policy}'";
 
         // Overlapping valid time while both are current in record time: refused by the exclusion constraint.
         var overlap = await Should.ThrowAsync<PostgresException>(() =>
-            ExecuteAsync(dataSource, Term(Guid.CreateVersion7(), 2, "2027-06-01T00:00Z", "2028-06-01T00:00Z", $"'{T1}'")));
+            ExecuteAsync(dataSource, $"{Bump(T1)}; {Term(Guid.CreateVersion7(), 2, "2027-06-01T00:00Z", "2028-06-01T00:00Z", $"'{T1}'")}"));
         overlap.SqlState.ShouldBe(PostgresErrorCodes.ExclusionViolation);
         overlap.ConstraintName.ShouldBe("ex_policy_term_no_overlap");
 
         // The adjacent next term (half-open periods) is fine.
-        await ExecuteAsync(dataSource, Term(Guid.CreateVersion7(), 2, "2028-01-01T00:00Z", "2029-01-01T00:00Z", $"'{T1}'"));
+        await ExecuteAsync(dataSource, $"{Bump(T1)}; {Term(Guid.CreateVersion7(), 2, "2028-01-01T00:00Z", "2029-01-01T00:00Z", $"'{T1}'")}");
 
         // Review M1: a retroactive close (here 1 µs after the row was recorded) would erase what was known: refused.
         foreach (var table in new[] { "policy_term", "segment" })
@@ -96,9 +95,9 @@ public sealed class PolicyDatabaseTests(PostgresFixture database) : IClassFixtur
             .SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation);
 
         // Supersession: close at the watermark of the closing command and record the successor at the same instant, in one transaction.
-        await ExecuteAsync(dataSource, $"UPDATE pol.policy SET last_recorded_at = '{T2}', record_version = record_version + 1 WHERE policy_id = '{policy}'");
         await ExecuteAsync(dataSource, $"""
             BEGIN;
+            {Bump(T2)};
             UPDATE pol.policy_term SET recorded_to = '{T2}' WHERE term_id = '{term}' AND recorded_to IS NULL;
             {Term(term, 1, "2027-01-01T00:00Z", "2028-01-01T00:00Z", $"'{T2}'")};
             COMMIT;

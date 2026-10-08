@@ -50,6 +50,10 @@ public sealed class TemporalDatabaseTests(PostgresFixture database) : IClassFixt
     private static async Task MoveWatermarkAsync(NpgsqlDataSource app, Raw raw, string to) =>
         await ExecuteAsync(app, $"UPDATE pol.policy SET last_recorded_at = '{to}', record_version = record_version + 1 WHERE policy_id = '{raw.Policy}'");
 
+    /// <summary>What PolicyWriteLock does inside a transaction: advance the watermark (an UPDATE, so the row belongs to this transaction).</summary>
+    private static string Bump(Raw raw, string to) =>
+        $"UPDATE pol.policy SET last_recorded_at = '{to}', record_version = record_version + 1 WHERE policy_id = '{raw.Policy}'";
+
     private static string Transaction(Raw raw, int sequence, string recordedAt) => $"""
         INSERT INTO pol.policy_transaction (transaction_id, policy_id, term_id, job_id, legal_entity_id, kind, sequence, effective_at, recorded_at,
             configuration_hash, artefact_hash, resolution_hash, intent, premium, taxes, total, currency, actor, correlation_id, origin)
@@ -130,6 +134,39 @@ public sealed class TemporalDatabaseTests(PostgresFixture database) : IClassFixt
         await ExecuteAsync(app, insert(T1));
     }
 
+    [Fact]
+    public async Task REQ_POL_079_D4_the_watermark_cannot_run_away_from_the_database_clock()
+    {
+        await using var app = NpgsqlDataSource.Create(database.AppConnectionString);
+        var raw = await SeedAsync(app);
+
+        // Not to the year 2100 (it would poison every later record time of the policy), not even five years ahead.
+        foreach (var to in new[] { "'2100-01-01T00:00:00Z'::timestamptz", "now() + interval '5 years'" })
+        {
+            (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app,
+                    $"UPDATE pol.policy SET last_recorded_at = {to}, record_version = record_version + 1 WHERE policy_id = '{raw.Policy}'")))
+                .SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation, to);
+        }
+
+        // A new policy cannot start there either.
+        var policy = Guid.CreateVersion7();
+        (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, $"""
+            INSERT INTO pol.policy (policy_id, legal_entity_id, jurisdiction, policy_number, product_code, policyholder_party_id, recorded_at, created_by, record_version)
+            VALUES ('{policy}', '{ApiHostFactory.LegalEntityId}', 'GR', 'POLTEST-{policy:N}', 'P', '{Guid.CreateVersion7()}', '2100-01-01T00:00:00Z', 'test', 1)
+            """))).SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation);
+
+        // A bounded skew (an application clock a little ahead) is fine.
+        await ExecuteAsync(app, $"UPDATE pol.policy SET last_recorded_at = now() + interval '1 hour', record_version = record_version + 1 WHERE policy_id = '{raw.Policy}'");
+
+        // The Development relaxation: the application clock runs ahead of the database clock by the dev clock offset (plt.dev_clock), so
+        // the cap follows it. Thirty days ahead is refused until the dev clock has been advanced that far, then accepted.
+        var thirtyDays = $"UPDATE pol.policy SET last_recorded_at = now() + interval '30 days', record_version = record_version + 1 WHERE policy_id = '{raw.Policy}'";
+        (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, thirtyDays))).SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation);
+        await using var owner = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        await ExecuteAsync(owner, "UPDATE plt.dev_clock SET offset_micros = 31 * 86400 * 1000000::bigint, version = version + 1");
+        await ExecuteAsync(app, thirtyDays);
+    }
+
     // ---- stamping -------------------------------------------------------------------------------------------------------------
 
     [Fact]
@@ -156,8 +193,46 @@ public sealed class TemporalDatabaseTests(PostgresFixture database) : IClassFixt
                 """))).SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation, "term " + stamp);
         }
 
-        // Exactly the watermark: accepted.
-        await ExecuteAsync(app, Transaction(raw, 2, T1));
+        // Exactly the watermark, but by a writer that did not advance it in this transaction (D1: it reuses a committed watermark,
+        // or only took SELECT ... FOR UPDATE): refused for every record table.
+        (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, Transaction(raw, 2, T1)))).SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation, "unlocked transaction");
+        (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, $"""
+            SELECT 1 FROM pol.policy WHERE policy_id = '{raw.Policy}' FOR UPDATE;
+            {Transaction(raw, 2, T1)};
+            """))).SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation, "select for update is not the stamp");
+        (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, $"""
+            INSERT INTO pol.segment (segment_id, term_id, policy_id, transaction_id, legal_entity_id, valid_from, valid_to, recorded_from, snapshot_hash, snapshot)
+            VALUES (gen_random_uuid(), '{raw.Term}', '{raw.Policy}', '{raw.Transaction}', '{ApiHostFactory.LegalEntityId}', '2028-01-01T00:00Z', '2029-01-01T00:00Z',
+                '{T1}', '{new string('a', 64)}', jsonb_build_object())
+            """))).SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation, "unlocked segment");
+
+        // Advancing the watermark and writing at it in one transaction (lock-then-stamp): accepted.
+        await ExecuteAsync(app, $"{Bump(raw, T2)}; {Transaction(raw, 2, T2)}");
+    }
+
+    [Fact]
+    public async Task REQ_POL_079_D1_an_unlocked_writer_cannot_reuse_a_committed_watermark_to_rewrite_what_a_reference_pinned()
+    {
+        await using var app = NpgsqlDataSource.Create(database.AppConnectionString);
+        var raw = await SeedAsync(app);
+        await MoveWatermarkAsync(app, raw, T1); // committed by an earlier command: W = T1
+        var current = $"WHERE segment_id = '{raw.Segment}'";
+
+        // The reviewer's probe: no bump in this transaction; insert a transaction at W, close the segment at W, re-stamp a successor at W.
+        var probe = $"""
+            BEGIN;
+            {Transaction(raw, 2, T1)};
+            UPDATE pol.segment SET recorded_to = '{T1}' {current};
+            INSERT INTO pol.segment (segment_id, term_id, policy_id, transaction_id, legal_entity_id, valid_from, valid_to, recorded_from, snapshot_hash, snapshot)
+            SELECT gen_random_uuid(), term_id, policy_id, transaction_id, legal_entity_id, valid_from, valid_to, '{T1}', '{new string('b', 64)}', snapshot
+              FROM pol.segment {current};
+            COMMIT;
+            """;
+        (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, probe))).SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation);
+
+        (await ScalarAsync<long>(app, $"SELECT count(*) FROM pol.segment WHERE term_id = '{raw.Term}'")).ShouldBe(1);
+        (await ScalarAsync<long>(app, $"SELECT count(*) FROM pol.segment {current} AND recorded_to IS NULL")).ShouldBe(1);
+        (await ScalarAsync<long>(app, $"SELECT count(*) FROM pol.policy_transaction WHERE policy_id = '{raw.Policy}'")).ShouldBe(1);
     }
 
     // ---- record periods never close retroactively -----------------------------------------------------------------------------
@@ -177,17 +252,23 @@ public sealed class TemporalDatabaseTests(PostgresFixture database) : IClassFixt
                 .SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation, closeAt);
         }
 
+        // Closing at the committed watermark without having advanced it in this transaction (D1) is refused, successor or not.
         (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, $"UPDATE pol.segment SET recorded_to = '{T1}' {current}")))
+            .SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation, "unlocked close at the committed watermark");
+
+        // Locked, at the new watermark, but without recording a successor: refused at commit.
+        (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, $"{Bump(raw, T2)}; UPDATE pol.segment SET recorded_to = '{T2}' {current}")))
             .SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation, "closing at the watermark without recording a successor");
 
-        // At the watermark, together with the successor and the transaction that carries it: accepted.
+        // Lock-then-stamp, at the watermark of this command, together with the successor and the transaction that carries it: accepted.
         await ExecuteAsync(app, $"""
             BEGIN;
-            {Transaction(raw, 2, T1)};
-            UPDATE pol.segment SET recorded_to = '{T1}' {current};
+            {Bump(raw, T2)};
+            {Transaction(raw, 2, T2)};
+            UPDATE pol.segment SET recorded_to = '{T2}' {current};
             INSERT INTO pol.segment (segment_id, term_id, policy_id, transaction_id, legal_entity_id, valid_from, valid_to, recorded_from, snapshot_hash, snapshot)
             SELECT gen_random_uuid(), term_id, policy_id, (SELECT transaction_id FROM pol.policy_transaction WHERE term_id = '{raw.Term}' AND sequence = 2),
-                   legal_entity_id, valid_from, valid_to, '{T1}', snapshot_hash, snapshot
+                   legal_entity_id, valid_from, valid_to, '{T2}', snapshot_hash, snapshot
               FROM pol.segment {current};
             COMMIT;
             """);
@@ -196,7 +277,7 @@ public sealed class TemporalDatabaseTests(PostgresFixture database) : IClassFixt
         foreach (var statement in new[]
                  {
                      $"UPDATE pol.segment SET recorded_to = '{T0}' {current}",
-                     $"UPDATE pol.segment SET recorded_to = '{T2}' {current}",
+                     $"UPDATE pol.segment SET recorded_to = '{T1}' {current}",
                      $"UPDATE pol.segment SET recorded_to = NULL {current}",
                      $"UPDATE pol.segment SET recorded_from = '{T1}' {current}",
                  })
@@ -207,7 +288,7 @@ public sealed class TemporalDatabaseTests(PostgresFixture database) : IClassFixt
         (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, $"DELETE FROM pol.segment {current}")))
             .SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
         (await ScalarAsync<long>(app, $"SELECT count(*) FROM pol.segment WHERE term_id = '{raw.Term}' AND recorded_to IS NULL")).ShouldBe(1);
-        (await ScalarAsync<DateTime>(app, $"SELECT recorded_to FROM pol.segment {current}")).ToUniversalTime().ShouldBe(DateTime.Parse(T1).ToUniversalTime());
+        (await ScalarAsync<DateTime>(app, $"SELECT recorded_to FROM pol.segment {current}")).ToUniversalTime().ShouldBe(DateTime.Parse(T2).ToUniversalTime());
         (await ScalarAsync<DateTime>(app, $"SELECT recorded_from FROM pol.segment {current}")).ToUniversalTime().ShouldBe(DateTime.Parse(T0).ToUniversalTime());
     }
 
@@ -245,6 +326,26 @@ public sealed class TemporalDatabaseTests(PostgresFixture database) : IClassFixt
         await ExecuteAsync(app, Insert(second, otherTerm));
         await ExecuteAsync(app, $"UPDATE pol.job SET state = 'BOUND' WHERE state = '{first}' AND {(type == "RENEWAL" ? "expiring_term_id" : "target_term_id")} = '{term}' AND job_type = '{type}'");
         await ExecuteAsync(app, Insert(second, term));
+    }
+
+    [Theory]
+    [InlineData("POLICY_CHANGE")]
+    [InlineData("CANCELLATION")]
+    [InlineData("RENEWAL")]
+    public async Task REQ_POL_086_a_change_cancellation_or_renewal_without_its_term_is_rejected(string type)
+    {
+        await using var app = NpgsqlDataSource.Create(database.AppConnectionString);
+
+        var missing = await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, Job(type, "DRAFT")));
+        missing.SqlState.ShouldBe(PostgresErrorCodes.CheckViolation);
+        missing.ConstraintName.ShouldBe("ck_job_target_term");
+
+        // The renewal's term is the expiring one; a change or cancellation's is the target.
+        var wrong = await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app,
+            type == "RENEWAL" ? Job(type, "DRAFT", targetTerm: Guid.CreateVersion7()) : Job(type, "DRAFT", expiringTerm: Guid.CreateVersion7())));
+        wrong.ConstraintName.ShouldBe("ck_job_target_term");
+
+        await ExecuteAsync(app, type == "RENEWAL" ? Job(type, "DRAFT", expiringTerm: Guid.CreateVersion7()) : Job(type, "DRAFT", targetTerm: Guid.CreateVersion7()));
     }
 
     [Fact]

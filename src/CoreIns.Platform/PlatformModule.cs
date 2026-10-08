@@ -62,7 +62,7 @@ public static class PlatformModule
             Options.DefaultName, options => AuthorityOptions.DropIllustrativeIn(options, sp.GetService<IHostEnvironment>())));
 
         services.TryAddSingleton<IClock>(sp => configuration[ClockConfiguration.ModeKey] is { Length: > 0 }
-            ? ClockConfiguration.Create(configuration, sp.GetRequiredService<IHostEnvironment>())
+            ? ClockConfiguration.Create(configuration, sp.GetRequiredService<IHostEnvironment>(), sp.GetService<IClockOffsetSource>())
             : SystemClock.Instance);
 
         // Libraries written against the BCL TimeProvider (e.g. data protection key rings) follow IClock too.
@@ -108,6 +108,7 @@ public static class PlatformModule
             ErrorDefinition.For(ModuleCode.PLT, NumberingErrors.UnknownScheme, 500, "Δεν έχει οριστεί σειρά αρίθμησης", "No numbering series is defined")
                 .Describe("Ο τύπος αναγνωριστικού δεν έχει ορισμό σειράς στις ρυθμίσεις της πλατφόρμας.", "The identifier type has no series definition in the platform settings."));
         services.AddApprovals();
+        services.AddSupportAuthorityTypes();
         return services;
     }
 
@@ -189,6 +190,8 @@ public static class PlatformModule
 
         // Approval requests: no DELETE; a decided request is frozen by trigger (decided once, REQ-PLT-114).
         $"GRANT SELECT, INSERT, UPDATE ON {Schema}.approval_request TO {appRole}",
+        // Dev clock offset (D-SL3-12): never deleted (trigger); only read/advanced when the Development dev clock is registered.
+        $"GRANT SELECT, UPDATE ON {Schema}.dev_clock TO {appRole}",
         $"GRANT SELECT, INSERT ON {Schema}.audit_event TO {appRole}",
         $"GRANT SELECT ON {Schema}.audit_chain_head TO {appRole}",
         $"REVOKE ALL ON FUNCTION {Schema}.audit_chain_lock(date) FROM PUBLIC",
