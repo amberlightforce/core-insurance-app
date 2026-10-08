@@ -85,7 +85,7 @@ internal sealed class ChangeHarness : IAsyncDisposable
         Sha256Hash configuration;
         await using (var scope = Slice.Factory.Services.CreateAsyncScope())
         {
-            configuration = (await scope.ServiceProvider.GetRequiredService<IMarketConfigurationService>().CurrentHashAsync()).Hash;
+            configuration = (await scope.ServiceProvider.GetRequiredService<IMarketConfigurationService>().CurrentHashAsync()).Hash!.Value;
         }
 
         Slice.Rating.Setup("rat.Rate.rate", call => Rate((RateRateRequest)call.Arguments[0]!, configuration));

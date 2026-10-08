@@ -69,7 +69,7 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         quote!["charges"]!.AsArray().Count.ShouldBe(3);
 
         // RAT: ENDORSEMENT mode under the term's pinned rating artefact (REQ-POL-093).
-        var rated = (Modules.Rating.Contracts.Api.RateRateRequest)_h.Slice.Rating.CallsTo("rat.Rate.rate").Last().Arguments[0]!;
+        var rated = (Modules.Rating.Contracts.Api.RateRateRequest)_h.Slice.Rating.CallsTo("rat.Rate.rate")[^1].Arguments[0]!;
         rated.Envelope.Mode.ShouldBe(Modules.Rating.Contracts.Api.RateRateRequest.EnvelopeDetail.ModeValue.Endorsement);
         rated.Envelope.RatingArtefactHash!.Value.Value.ShouldBe(PolicySlice.RatingArtefactHash);
 
@@ -81,10 +81,15 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         preview.Text("diff.0.before").ShouldBe("1400");
         preview.Text("diff.0.after").ShouldBe("1600");
         preview.Text("servicingPreview.totalChange.amount").ShouldBe((mtplDelta + tax).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        var previewMtpl = preview!["servicingPreview"]!["lines"]!.AsArray().Single(l => l!["chargeType"]!.GetValue<string>() == "PREM-MTPL")!;
-        previewMtpl.Text("beforeAnnual").ShouldBe(ChangeHarness.MtplRate(1400).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        previewMtpl.Text("afterAnnual").ShouldBe(ChangeHarness.MtplRate(1600).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        var previewMtpl = preview!["servicingPreview"]!["proratedLines"]!.AsArray().Single(l => l!["chargeType"]!.GetValue<string>() == "PREM-MTPL")!;
+        previewMtpl.Text("annualAmount.amount").ShouldBe(ChangeHarness.MtplRate(1600).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+        previewMtpl.Text("amount.amount").ShouldBe(mtplDelta.ToString(System.Globalization.CultureInfo.InvariantCulture));
         previewMtpl.Text("days").ShouldBe(days.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        preview.Text("servicingPreview.annualBefore.amount").ShouldBe((ChangeHarness.MtplRate(1400) + ChangeHarness.OwnDamageRate(15000m)).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+        preview.Text("servicingPreview.annualAfter.amount").ShouldBe((ChangeHarness.MtplRate(1600) + ChangeHarness.OwnDamageRate(15000m)).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+        preview.Text("servicingPreview.taxLines.0.treatmentAction").ShouldBe("APPLY");
+        preview.Text("servicingPreview.provisional").ShouldBe("true");
+        quote.Text("servicingPreview.totalChange.amount").ShouldBe(preview.Text("servicingPreview.totalChange.amount"));
 
         // REQ-POL-129: a dry-run bind returns the deltas and writes nothing.
         var transactionsBefore = await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.policy_transaction WHERE policy_id = '{policy.PolicyId}'");
@@ -92,18 +97,18 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         var watermarkBefore = await _h.ScalarAsync<DateTime>($"SELECT last_recorded_at FROM pol.policy WHERE policy_id = '{policy.PolicyId}'");
         var (dryBound, dryBind) = await _h.BindAsync(jobId, dryRun: true);
         dryBound.StatusCode.ShouldBe(HttpStatusCode.OK, dryBind?.ToJsonString());
-        dryBind["chargeDeltas"]!.AsArray().Count.ShouldBe(2);
+        dryBind!["chargeDeltas"]!.AsArray().Count.ShouldBe(2);
         (await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.policy_transaction WHERE policy_id = '{policy.PolicyId}'")).ShouldBe(transactionsBefore);
         (await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.charge_line WHERE policy_id = '{policy.PolicyId}'")).ShouldBe(linesBefore);
         (await _h.ScalarAsync<DateTime>($"SELECT last_recorded_at FROM pol.policy WHERE policy_id = '{policy.PolicyId}'")).ShouldBe(watermarkBefore);
         (await _h.ScalarAsync<string>($"SELECT state FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe("QUOTED");
-        (await _h.ScalarAsync<long>("SELECT count(*) FROM plt.outbox_message WHERE event_type = 'PolicyChanged'")).ShouldBe(0);
+        (await _h.ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'PolicyChanged' AND aggregate_id = '{policy.PolicyId}'")).ShouldBe(0);
 
         // REQ-POL-005, -119, -122: the bind. Preview = bind amounts; one delta per element × charge type.
         var (bound, bind) = await _h.BindAsync(jobId);
         bound.StatusCode.ShouldBe(HttpStatusCode.OK, bind?.ToJsonString());
         bind.Text("state").ShouldBe("BOUND");
-        bind["chargeDeltas"]!.AsArray().Count.ShouldBe(2);
+        bind!["chargeDeltas"]!.AsArray().Count.ShouldBe(2);
         Line(bind, "chargeDeltas", "PREM-MTPL").Text("amount.amount").ShouldBe(quote.Text("premium.amount"));
         Line(bind, "chargeDeltas", "GR-IPT").Text("amount.amount").ShouldBe(quote.Text("taxes.amount"));
         var transactionId = bind.Text("transactionId");
@@ -214,7 +219,9 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         var transactionId = bind.Text("transactionId");
 
         // The credit is the difference over the remaining days; the IPT line is 0.00, KEEP_NOT_REDUCED, provisional (D-SL3-05).
-        (await _h.ScalarAsync<decimal>($"SELECT amount FROM pol.charge_line WHERE transaction_id = '{transactionId}' AND charge_type = 'PREM-MTPL'")).ShouldBe(credit);
+        // The engine's delta is round(exact cumulative) - written cumulative (review fix): within a cent of the simple prorated difference.
+        var written = await _h.ScalarAsync<decimal>($"SELECT amount FROM pol.charge_line WHERE transaction_id = '{transactionId}' AND charge_type = 'PREM-MTPL'");
+        Math.Abs(written - credit).ShouldBeLessThanOrEqualTo(0.01m);
         (await _h.ScalarAsync<decimal>($"SELECT amount FROM pol.charge_line WHERE transaction_id = '{transactionId}' AND charge_type = 'GR-IPT'")).ShouldBe(0m);
         (await _h.ScalarAsync<string>(
             $"SELECT transaction_kind || '/' || tax_treatment_ref || '/' || treatment_rule_id || '/' || legal_status || '/' || provisional FROM pol.charge_line WHERE transaction_id = '{transactionId}' AND charge_type = 'GR-IPT'"))
@@ -223,7 +230,7 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         Line(bind, "chargeDeltas", "GR-IPT").Text("provisional").ShouldBe("true");
 
         // Σ deltas per term = cumulative written across three transactions.
-        (await _h.ScalarAsync<decimal>($"SELECT sum(amount) FROM pol.charge_line WHERE term_id = '{policy.TermId}' AND charge_category = 'PREMIUM'")).ShouldBe(issuancePremium + debit + credit);
+        (await _h.ScalarAsync<decimal>($"SELECT sum(amount) FROM pol.charge_line WHERE term_id = '{policy.TermId}' AND charge_category = 'PREMIUM'")).ShouldBe(issuancePremium + debit + written);
         (await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.segment WHERE term_id = '{policy.TermId}' AND recorded_to IS NULL")).ShouldBe(3);
 
         // The cumulative result is what a replay of the history gives: a third change that restores 1400 credits exactly the unearned remainder.
@@ -277,8 +284,8 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         // The old vehicle's elements are credited (rate 0 from the effective date), the new vehicle's are debited, in one transaction.
         var oldMtpl = ChangeHarness.MtplRate(1400);
         var newMtpl = ChangeHarness.MtplRate(1800);
-        (await _h.ScalarAsync<decimal>($"SELECT amount FROM pol.charge_line WHERE transaction_id = '{transactionId}' AND charge_type = 'PREM-MTPL' AND element_locator = '{policy.Locator}'"))
-            .ShouldBe(-ChangeHarness.Prorated(oldMtpl, days));
+        Math.Abs(await _h.ScalarAsync<decimal>($"SELECT amount FROM pol.charge_line WHERE transaction_id = '{transactionId}' AND charge_type = 'PREM-MTPL' AND element_locator = '{policy.Locator}'")
+            + ChangeHarness.Prorated(oldMtpl, days)).ShouldBeLessThanOrEqualTo(0.01m);
         (await _h.ScalarAsync<decimal>($"SELECT amount FROM pol.charge_line WHERE transaction_id = '{transactionId}' AND charge_type = 'PREM-MTPL' AND element_locator = '{newLocator}'"))
             .ShouldBe(ChangeHarness.Prorated(newMtpl, days));
         (await _h.ScalarAsync<string>($"SELECT transaction_kind FROM pol.charge_line WHERE transaction_id = '{transactionId}' AND charge_type = 'PREM-OD' AND element_locator = '{policy.Locator}'"))
@@ -308,7 +315,7 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         var (bound, bind) = await _h.BindAsync(jobId);
         bound.StatusCode.ShouldBe(HttpStatusCode.OK, bind?.ToJsonString());
         var transactionId = bind.Text("transactionId");
-        bind["chargeDeltas"]!.AsArray().ShouldBeEmpty();
+        bind!["chargeDeltas"]!.AsArray().ShouldBeEmpty();
         (await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.charge_line WHERE transaction_id = '{transactionId}'")).ShouldBe(0);
         (await _h.ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'ChargeDeltaEmitted' AND business_keys->>'transactionId' = '{transactionId}'")).ShouldBe(0);
         (await _h.ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'PolicyChanged' AND business_keys->>'transactionId' = '{transactionId}'")).ShouldBe(1);
