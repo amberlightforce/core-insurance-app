@@ -59,6 +59,7 @@
       "THEFT": "Theft",
       "FIRE": "Fire",
       "GLASS": "Glass breakage",
+      "GLASS_BREAKAGE": "Glass breakage",
       "VANDALISM": "Vandalism",
       "WEATHER": "Weather"
     },
