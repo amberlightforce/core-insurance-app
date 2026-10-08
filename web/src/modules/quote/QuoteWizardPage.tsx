@@ -35,8 +35,8 @@ import {
   useQuestionSet,
 } from './api';
 import { BindReferrals } from './BindReferrals';
-import { focusFieldByLabel, InputProblemBanner } from './InputProblemBanner';
-import type { InputField } from './inputProblems';
+import { InputProblemBanner } from './InputProblemBanner';
+import { focusFieldByLabel, type InputField } from './inputProblems';
 import { QuoteResult, QuoteWarnings } from './QuoteResult';
 import {
   answersInstruction,
@@ -385,7 +385,7 @@ export function QuoteWizardPage() {
     });
   };
   useEffect(() => {
-    if (!pendingFocus || pendingFocus.step !== stepId) return;
+    if (pendingFocus?.step !== stepId) return;
     const timer = setTimeout(() => {
       focusFieldByLabel(pendingFocus.label);
       setPendingFocus(null);

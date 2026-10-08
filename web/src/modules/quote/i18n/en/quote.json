@@ -238,29 +238,29 @@
   "overline": "Policies · New quote",
   "stepOf": "Step {step} of {total}",
   "inputProblem": {
-    "goTo": "Go to {{step}}",
+    "goTo": "Go to {step}",
     "technical": "Technical details",
     "thisCover": "the selected cover",
     "fields": {
       "vehicleValue": {
-        "what": "The vehicle value is missing, so {{cover}} cannot be priced.",
-        "fix": "Enter the market value of the vehicle in euro in the field «{{label}}»."
+        "what": "The vehicle value is missing, so {cover} cannot be priced.",
+        "fix": "Enter the market value of the vehicle in euro in the field «{label}»."
       },
       "firstRegistrationYear": {
         "what": "The year of first registration is missing or not valid.",
-        "fix": "Enter a year from 1950 to next year in the field «{{label}}»."
+        "fix": "Enter a year from 1950 to next year in the field «{label}»."
       },
       "engineCapacityCc": {
         "what": "The engine capacity is missing or not valid.",
-        "fix": "Enter the engine capacity in cc (1 to 20,000) in the field «{{label}}»."
+        "fix": "Enter the engine capacity in cc (1 to 20,000) in the field «{label}»."
       },
       "vehicleDetails": {
         "what": "The vehicle is missing its year of first registration or its engine capacity.",
-        "fix": "Fill in «{{label}}» and the engine capacity on the vehicle step."
+        "fix": "Fill in «{label}» and the engine capacity on the vehicle step."
       },
       "usage": {
         "what": "The use of the vehicle is not valid.",
-        "fix": "Answer the question «{{label}}» again."
+        "fix": "Answer the question «{label}» again."
       },
       "dateOfBirth": {
         "what": "The driver has no date of birth on the customer record, and the premium depends on the driver's age.",
@@ -268,11 +268,11 @@
       },
       "licenceDate": {
         "what": "The date the licence was first issued is missing or not valid.",
-        "fix": "Enter the year in the field «{{label}}»."
+        "fix": "Enter the year in the field «{label}»."
       },
       "claims": {
         "what": "The number of claims is not valid.",
-        "fix": "Enter a whole number from 0 to 50 for «{{label}}», or leave it empty for none."
+        "fix": "Enter a whole number from 0 to 50 for «{label}», or leave it empty for none."
       },
       "driver": {
         "what": "The main driver of the vehicle is missing.",
@@ -284,7 +284,7 @@
       },
       "effectiveDate": {
         "what": "The start date is not valid for rating.",
-        "fix": "Choose a start date from today onwards in the field «{{label}}»."
+        "fix": "Choose a start date from today onwards in the field «{label}»."
       },
       "unknown": {
         "what": "The premium engine rejected one of the details entered.",

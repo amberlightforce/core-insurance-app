@@ -82,3 +82,56 @@ export function explainInputProblem(problem: ProblemDetails): InputFix | null {
       : undefined;
   return { field: rule.field, step: rule.step, ...(cover ? { cover } : {}) };
 }
+
+/** The i18n key (quote namespace) of the label of the field an input problem is about, when it has one. */
+export const inputFieldLabelKeys: Partial<Record<InputField, string>> = {
+  vehicleValue: 'vehicle.value',
+  firstRegistrationYear: 'vehicle.year',
+  engineCapacityCc: 'vehicle.engine',
+  vehicleDetails: 'vehicle.year',
+  licenceDate: 'driver.yearFirstLicensed',
+  effectiveDate: 'policyholder.startDate',
+};
+
+/** The label of the field the problem is about, in the current language. */
+export function fieldLabelOf(
+  fix: InputFix,
+  t: (key: string) => string,
+  questionLabels: Partial<Record<InputField, string>>,
+): string | undefined {
+  const key = inputFieldLabelKeys[fix.field];
+  return key ? t(key) : questionLabels[fix.field];
+}
+
+/**
+ * Moves keyboard focus to the control labelled `text` on the page: a field (its label points at the input) or a
+ * radio group. Returns whether something was focused.
+ */
+export function focusFieldByLabel(text: string): boolean {
+  const norm = (s: string | null) => (s ?? '').replace(/\s+/g, ' ').replace('*', '').trim();
+  const wanted = norm(text);
+  for (const label of document.querySelectorAll('label')) {
+    if (!norm(label.textContent).startsWith(wanted)) continue;
+    const control = label.control;
+    if (control instanceof HTMLElement) {
+      control.focus();
+      return true;
+    }
+  }
+  for (const group of document.querySelectorAll('[role="radiogroup"]')) {
+    const labelledBy = group.getAttribute('aria-labelledby');
+    const labelText = labelledBy
+      ? labelledBy
+          .split(' ')
+          .map((id) => document.getElementById(id)?.textContent)
+          .join(' ')
+      : (group.getAttribute('aria-label') ?? '');
+    if (!norm(labelText).startsWith(wanted)) continue;
+    const target = group.querySelector<HTMLElement>('input:checked, input, [role="radio"]');
+    if (target) {
+      target.focus();
+      return true;
+    }
+  }
+  return false;
+}

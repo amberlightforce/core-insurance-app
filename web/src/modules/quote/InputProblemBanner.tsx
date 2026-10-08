@@ -3,18 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Banner, Button } from '../../design-system';
 import { problemOf } from '../staff/problem';
 import { ProblemBanner } from '../staff/ProblemBanner';
-import { explainInputProblem, type InputField, type InputFix } from './inputProblems';
+import { explainInputProblem, fieldLabelOf, type InputField } from './inputProblems';
 import type { StepId } from './state';
-
-/** The i18n key (quote namespace) of the label of the field an input problem is about, when it has one. */
-export const inputFieldLabelKeys: Partial<Record<InputField, string>> = {
-  vehicleValue: 'vehicle.value',
-  firstRegistrationYear: 'vehicle.year',
-  engineCapacityCc: 'vehicle.engine',
-  vehicleDetails: 'vehicle.year',
-  licenceDate: 'driver.yearFirstLicensed',
-  effectiveDate: 'policyholder.startDate',
-};
 
 export interface InputProblemBannerProps {
   error: unknown;
@@ -24,16 +14,6 @@ export interface InputProblemBannerProps {
   coverNames: ReadonlyMap<string, string>;
   /** Jumps to the step and focuses the field with this label (if any). */
   onGo: (step: StepId, fieldLabel: string | undefined) => void;
-}
-
-/** The label of the field the problem is about, in the current language. */
-export function fieldLabelOf(
-  fix: InputFix,
-  t: (key: string) => string,
-  questionLabels: Partial<Record<InputField, string>>,
-): string | undefined {
-  const key = inputFieldLabelKeys[fix.field];
-  return key ? t(key) : questionLabels[fix.field];
 }
 
 /**
@@ -88,37 +68,4 @@ export function InputProblemBanner({
       </details>
     </Banner>
   );
-}
-
-/**
- * Moves keyboard focus to the control labelled `text` on the page: a field (its label points at the input) or a
- * radio group. Returns whether something was focused.
- */
-export function focusFieldByLabel(text: string): boolean {
-  const norm = (s: string | null) => (s ?? '').replace(/\s+/g, ' ').replace('*', '').trim();
-  const wanted = norm(text);
-  for (const label of document.querySelectorAll('label')) {
-    if (!norm(label.textContent).startsWith(wanted)) continue;
-    const control = label.control;
-    if (control instanceof HTMLElement) {
-      control.focus();
-      return true;
-    }
-  }
-  for (const group of document.querySelectorAll('[role="radiogroup"]')) {
-    const labelledBy = group.getAttribute('aria-labelledby');
-    const labelText = labelledBy
-      ? labelledBy
-          .split(' ')
-          .map((id) => document.getElementById(id)?.textContent)
-          .join(' ')
-      : (group.getAttribute('aria-label') ?? '');
-    if (!norm(labelText).startsWith(wanted)) continue;
-    const target = group.querySelector<HTMLElement>('input:checked, input, [role="radio"]');
-    if (target) {
-      target.focus();
-      return true;
-    }
-  }
-  return false;
 }
