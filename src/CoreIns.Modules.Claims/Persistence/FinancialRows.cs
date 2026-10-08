@@ -179,6 +179,41 @@ internal sealed class ClaimPaymentRow : ClaimsRow
     public Instant UpdatedAt { get; set; }
 }
 
+/// <summary>
+/// <c>clm.set_approval</c>: one PLT approval request of a referred set, per (authority type, cost type) it needs
+/// (D-SL2-13). The set executes only when every one is Approved and each decided authority dominates what CLM computes.
+/// </summary>
+internal sealed class SetApprovalRow : ClaimsRow
+{
+    public Guid ApprovalRequestId { get; set; }
+
+    public ClaimTransactionSetId SetId { get; set; }
+
+    public string ApprovalType { get; set; } = string.Empty;
+
+    public string SubjectType { get; set; } = string.Empty;
+
+    public string SubjectId { get; set; } = string.Empty;
+
+    public string PayloadHash { get; set; } = string.Empty;
+
+    public string AuthorityType { get; set; } = string.Empty;
+
+    public string AuthorityCostType { get; set; } = string.Empty;
+
+    public decimal AuthorityAmount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
+
+    public string? Checker { get; set; }
+
+    public Guid? CheckerUserId { get; set; }
+
+    public Instant? DecidedAt { get; set; }
+}
+
 /// <summary><c>clm.payee_account_view</c>: CLM's masked read model of a BIL payee account (PRD-07 §7.1 PayeeAccountView).</summary>
 internal sealed class PayeeAccountViewRow : ClaimsRow
 {

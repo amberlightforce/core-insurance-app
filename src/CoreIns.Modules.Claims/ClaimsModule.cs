@@ -57,6 +57,7 @@ public static class ClaimsModule
                 // payments and the payee read model move.
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.reserve_line, {Schema}.transaction_set, {Schema}.claim_payment, {Schema}.payee_account_view TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.financial_transaction TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.set_approval TO {appRole}",
             ]),
     ];
 

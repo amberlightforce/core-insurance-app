@@ -5238,12 +5238,47 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FinancialTransactionView'
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/SetApprovalView'
+          description: One PLT approval request per referred (authority type, cost type) (D-SL2-13); the set executes when all are approved
       required:
       - setId
       - claimId
       - status
       - contentHash
       - transactions
+    SetApprovalView:
+      type: object
+      description: One PLT approval request of a referred set and the authority it must cover (D-SL2-13)
+      properties:
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        approvalType:
+          type: string
+          description: CLM.CLAIM_PAYMENT (subject the payment) or CLM.TRANSACTION_SET
+        authorityType:
+          type: string
+        costType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        status:
+          type: string
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - approvalRequestId
+      - approvalType
+      - authorityType
+      - costType
+      - amount
+      - status
     FinancialTransactionView:
       type: object
       description: An immutable claim financial transaction (PRD-07 §7.1); status is derived from its set and payment
@@ -5472,9 +5507,22 @@ components:
                 description: plt.Authority.check
               txnId:
                 $ref: ../events/common.schema.json#/$defs/Uuid
+                description: Not set since D-SL2-13 (checks are per requirement, not per transaction)
               type:
                 type: string
                 description: Authority type (CLM.RESERVE, CLM.PAYMENT)
+              costType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              basis:
+                type: string
+                enum:
+                - EXPOSURE_TOTAL_RESERVE
+                - RESERVE_DECREASE
+                - PAYMENT
+                - CLAIM_CUMULATIVE_PAID
+                description: What the amount is (D-SL2-13, REQ-CLM-108)
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
               referralRole:
                 type: string
         set:

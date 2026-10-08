@@ -140,8 +140,8 @@ internal sealed record CanonicalTransaction(
 /// <summary>
 /// Content and basis hashes of a transaction set. The content hash (REQ-CLM-109) is SHA-256 over the RFC 8785 canonical
 /// JSON of the set id, claim id and every transaction in sequence order (amounts with exactly two decimals). The basis
-/// hash fingerprints what the set was built on: the claim and exposure states and the approved balances of the affected
-/// lines; a change between build and approval makes the set stale (REQ-CLM-112).
+/// hash fingerprints what the set was built on: the claim and exposure states and the approved balances of every line of
+/// the claim (authority amounts depend on exposure totals and the claim's cumulative paid, D-SL2-13); a change between build and approval makes the set stale (REQ-CLM-112).
 /// </summary>
 internal static class SetHashing
 {
@@ -185,7 +185,7 @@ internal static class SetHashing
         }
 
         var lineNodes = new JsonArray();
-        foreach (var (line, amounts) in lines.OrderBy(l => l.Line.ToString(), StringComparer.Ordinal))
+        foreach (var (line, amounts) in lines.Where(l => l.Amounts != LineAmounts.Zero).OrderBy(l => l.Line.ToString(), StringComparer.Ordinal))
         {
             lineNodes.Add(new JsonObject
             {

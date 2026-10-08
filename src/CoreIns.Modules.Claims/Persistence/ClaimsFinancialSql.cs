@@ -136,6 +136,38 @@ internal static class ClaimsFinancialSql
             FOR EACH ROW EXECUTE FUNCTION clm.reject_ledger_change();
         """;
 
+    /// <summary>
+    /// D-SL2-13: a set's approval requests are written in its submitting transaction while the set moves to PendingApproval;
+    /// their binding (request, set, subject, hash, authority) is frozen, the status only moves Pending → Approved/Rejected,
+    /// and nothing is deleted.
+    /// </summary>
+    public const string SetApprovalsUp = """
+        CREATE FUNCTION clm.guard_set_approval() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF TG_OP = 'DELETE' THEN
+                RAISE EXCEPTION 'clm.set_approval rows are never deleted' USING ERRCODE = 'restrict_violation';
+            END IF;
+            IF (NEW.approval_request_id, NEW.set_id, NEW.approval_type, NEW.subject_type, NEW.subject_id, NEW.payload_hash, NEW.authority_type,
+                NEW.authority_cost_type, NEW.authority_amount, NEW.currency, NEW.legal_entity_id, NEW.created_at, NEW.created_by)
+               IS DISTINCT FROM
+               (OLD.approval_request_id, OLD.set_id, OLD.approval_type, OLD.subject_type, OLD.subject_id, OLD.payload_hash, OLD.authority_type,
+                OLD.authority_cost_type, OLD.authority_amount, OLD.currency, OLD.legal_entity_id, OLD.created_at, OLD.created_by)
+               OR (OLD.status <> 'PENDING' AND NEW.status IS DISTINCT FROM OLD.status) THEN
+                RAISE LOG 'SECURITY: change of frozen clm.set_approval % refused for role %', OLD.approval_request_id, current_user;
+                RAISE EXCEPTION 'clm.set_approval binding is frozen and its decision is final' USING ERRCODE = 'restrict_violation';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_set_approval_guard BEFORE UPDATE OR DELETE ON clm.set_approval
+            FOR EACH ROW EXECUTE FUNCTION clm.guard_set_approval();
+        CREATE TRIGGER tr_set_approval_no_truncate BEFORE TRUNCATE ON clm.set_approval
+            FOR EACH STATEMENT EXECUTE FUNCTION clm.reject_ledger_change();
+        """;
+
+    public const string SetApprovalsDown = "DROP FUNCTION IF EXISTS clm.guard_set_approval() CASCADE;";
+
     public const string Down = """
         DROP FUNCTION IF EXISTS clm.reject_ledger_change() CASCADE;
         DROP FUNCTION IF EXISTS clm.seal_to_set() CASCADE;

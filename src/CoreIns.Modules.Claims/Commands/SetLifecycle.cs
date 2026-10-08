@@ -58,7 +58,7 @@ internal sealed partial class SetLifecycle(
         }
 
         var approved = await reader.ApprovedAsync(claim.ClaimId, null, cancellationToken).ConfigureAwait(false);
-        var basis = Basis(claim, exposures.Select(e => (e.ExposureId, e.Status)), content.Lines.Values.Select(l => (Key(l), approved.GetValueOrDefault(l.ReserveLineId))));
+        var basis = Basis(claim, exposures.Select(e => (e.ExposureId, e.Status)), (await reader.LinesAsync(claim.ClaimId, cancellationToken).ConfigureAwait(false)).Select(l => (Key(l), approved.GetValueOrDefault(l.ReserveLineId))));
         return basis.Value == content.Set.BasisHash ? null : "The balances of the set's lines changed since it was built.";
     }
 
@@ -215,7 +215,7 @@ internal sealed partial class SetLifecycle(
     private async Task RequestDisbursementAsync(ClaimRow claim, TransactionSetRow set, ClaimPaymentRow payment, CancellationToken cancellationToken)
     {
         var now = clock.Now;
-        var evidence = set.ApprovalRequestId is { } requestId
+        var evidence = set.ApprovalRequestId is { } requestId && set.ApprovalType == DisbursementApproval.ClaimPaymentType
             ? ClaimApprovals.EvidenceOf(new ApprovalRequestId(requestId))
             : ClaimApprovals.EvidenceOf(set.SetId);
         payment.ApprovalEvidenceRef = evidence;

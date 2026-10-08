@@ -163,6 +163,34 @@ internal static class ClaimsFinancialModel
             entity.HasOne<ExposureRow>().WithMany().HasForeignKey(e => e.ExposureId).HasConstraintName("fk_claim_payment_exposure").OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<SetApprovalRow>(entity =>
+        {
+            entity.ToTable("set_approval", table =>
+            {
+                ClaimsDbContext.CommonChecks(table, "set_approval");
+                table.HasCheckConstraint("ck_set_approval_status", "status IN ('PENDING', 'APPROVED', 'REJECTED')");
+                table.HasCheckConstraint("ck_set_approval_amount", "authority_amount > 0");
+            });
+            entity.HasKey(e => e.ApprovalRequestId).HasName("pk_set_approval");
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            ClaimsDbContext.MapCommon(entity);
+            entity.Property(e => e.SetId).HasColumnName("set_id");
+            entity.Property(e => e.ApprovalType).HasColumnName("approval_type");
+            entity.Property(e => e.SubjectType).HasColumnName("subject_type");
+            entity.Property(e => e.SubjectId).HasColumnName("subject_id");
+            entity.Property(e => e.PayloadHash).HasColumnName("payload_hash").HasColumnType("char(64)");
+            entity.Property(e => e.AuthorityType).HasColumnName("authority_type");
+            entity.Property(e => e.AuthorityCostType).HasColumnName("authority_cost_type");
+            entity.Property(e => e.AuthorityAmount).HasColumnName("authority_amount").HasColumnType(MoneyType);
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Checker).HasColumnName("checker");
+            entity.Property(e => e.CheckerUserId).HasColumnName("checker_user_id");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.SetId, e.AuthorityType, e.AuthorityCostType }).IsUnique().HasDatabaseName("ux_set_approval_bucket");
+            entity.HasOne<TransactionSetRow>().WithMany().HasForeignKey(e => e.SetId).HasConstraintName("fk_set_approval_set").OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<PayeeAccountViewRow>(entity =>
         {
             entity.ToTable("payee_account_view", table => ClaimsDbContext.CommonChecks(table, "payee_account_view"));

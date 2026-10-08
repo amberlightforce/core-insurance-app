@@ -56,7 +56,7 @@ public sealed record TransactionSetSubmitResponse
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public DecisionValue? Decision { get; init; }
 
-        /// <summary>Contract member 'txnId'.</summary>
+        /// <summary>Not set since D-SL2-13 (checks are per requirement, not per transaction)</summary>
         /// <remarks>
         /// <para>Untyped id: no SharedKernel id type is mapped for 'txnId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
         /// </remarks>
@@ -68,6 +68,21 @@ public sealed record TransactionSetSubmitResponse
         [global::System.Text.Json.Serialization.JsonPropertyName("type")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public string? Type { get; init; }
+
+        /// <summary>Contract member 'costType'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("costType")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? CostType { get; init; }
+
+        /// <summary>What the amount is (D-SL2-13, REQ-CLM-108)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("basis")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public BasisValue? Basis { get; init; }
+
+        /// <summary>Contract member 'amount'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Money? Amount { get; init; }
 
         /// <summary>Contract member 'referralRole'.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("referralRole")]
@@ -90,6 +105,28 @@ public sealed record TransactionSetSubmitResponse
             /// <summary><c>DENY</c></summary>
             [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DENY")]
             Deny,
+        }
+
+        /// <summary>What the amount is (D-SL2-13, REQ-CLM-108)</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<BasisValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum BasisValue
+        {
+            /// <summary><c>EXPOSURE_TOTAL_RESERVE</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("EXPOSURE_TOTAL_RESERVE")]
+            ExposureTotalReserve,
+
+            /// <summary><c>RESERVE_DECREASE</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RESERVE_DECREASE")]
+            ReserveDecrease,
+
+            /// <summary><c>PAYMENT</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PAYMENT")]
+            Payment,
+
+            /// <summary><c>CLAIM_CUMULATIVE_PAID</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLAIM_CUMULATIVE_PAID")]
+            ClaimCumulativePaid,
         }
     }
 }

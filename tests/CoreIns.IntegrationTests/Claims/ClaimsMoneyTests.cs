@@ -92,9 +92,11 @@ public sealed class ClaimsMoneyTests(PostgresFixture database) : IClassFixture<P
     [Fact]
     public async Task D_SL2_03_REQ_CLM_108_The_exact_limit_is_allowed_and_one_cent_above_refers_to_the_manager()
     {
-        var claim = await ClaimAsync();
-        (await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 5000.00m)])).Text("status").ShouldBe("APPROVED");
+        var exact = await ClaimAsync();
+        (await _money.BuildAndSubmitAsync(exact, [Reserve(exact, 5000.00m)])).Text("status").ShouldBe("APPROVED");
 
+        // D-SL2-13: CLM.RESERVE is checked on the exposure's total reserve after the set.
+        var claim = await ClaimAsync();
         var refer = await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 5000.01m)]);
         refer.Text("status").ShouldBe("PENDING_APPROVAL");
         refer.Text("authorityChecks.0.decision").ShouldBe("REFER");
@@ -107,11 +109,14 @@ public sealed class ClaimsMoneyTests(PostgresFixture database) : IClassFixture<P
         request.Text("request.authority.amount.amount").ShouldBe("5000.01");
         request.Text("request.referralRole").ShouldBe(Manager);
 
+        refer.Text("authorityChecks.0.basis").ShouldBe("EXPOSURE_TOTAL_RESERVE");
+
         // A pending referral changes no balance.
-        Amount((await _money.FinancialsAsync(claim))["totals"]!["openReserve"]).ShouldBe(5000m);
+        Amount((await _money.FinancialsAsync(claim))["totals"]!["openReserve"]).ShouldBe(0m);
 
         // Above the manager's limit: DENY (D-SL2-03).
-        var (built, build) = await _money.BuildAsync(claim, [Reserve(claim, 50000.01m)]);
+        var big = await ClaimAsync();
+        var (built, build) = await _money.BuildAsync(big, [Reserve(big, 50000.01m)]);
         built.StatusCode.ShouldBe(HttpStatusCode.OK);
         var (denied, deny) = await _money.SubmitAsync(build.Text("setId"));
         denied.StatusCode.ShouldBe(HttpStatusCode.Forbidden, deny?.ToJsonString());
@@ -166,13 +171,13 @@ public sealed class ClaimsMoneyTests(PostgresFixture database) : IClassFixture<P
     {
         var claim = await ClaimAsync();
         await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 1200m)]);
-        await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 5000m)]);
+        await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 5000m)], Manager, ManagerUser);
         var (account, _) = await _money.CaptureAsync(claim);
 
         // Stale at submit: the line changed between build and submit.
         var (built, draft) = await _money.BuildAsync(claim, [Payment(claim, 6000m, account)]);
         built.StatusCode.ShouldBe(HttpStatusCode.OK, draft?.ToJsonString());
-        await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 100m)]);
+        await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 100m)], Manager, ManagerUser);
         var (stale, staleBody) = await _money.SubmitAsync(draft.Text("setId"));
         stale.StatusCode.ShouldBe(HttpStatusCode.Conflict, staleBody?.ToJsonString());
         staleBody.Text("code").ShouldBe("CLM-ERR-SET-STALE");
@@ -180,7 +185,7 @@ public sealed class ClaimsMoneyTests(PostgresFixture database) : IClassFixture<P
         // Stale at approval: a referred payment set, then the line changes; the manager's approval is refused by CLM.
         var pending = await _money.BuildAndSubmitAsync(claim, [Payment(claim, 6200m, account)]);
         pending.Text("status").ShouldBe("PENDING_APPROVAL");
-        await _money.BuildAndSubmitAsync(claim, [Reserve(claim, -50m)]);
+        await _money.BuildAndSubmitAsync(claim, [Reserve(claim, -50m)], Manager, ManagerUser);
         (await _money.DecideAsync(pending.Text("approvalRequestId"))).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
         await _money.DrainAsync();
 
@@ -344,7 +349,7 @@ public sealed class ClaimsMoneyTests(PostgresFixture database) : IClassFixture<P
     public async Task D_SL2_10_d_BIL_verifies_the_PLT_approval_named_as_evidence()
     {
         var claim = await ClaimAsync();
-        await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 7000m)]);
+        (await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 7000m)], Manager, ManagerUser)).Text("status").ShouldBe("APPROVED");
         var (account, _) = await _money.CaptureAsync(claim);
         var pending = await _money.BuildAndSubmitAsync(claim, [Payment(claim, 6000m, account, paymentType: "PARTIAL")]);
         var requestId = Guid.Parse(pending.Text("approvalRequestId"));

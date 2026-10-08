@@ -71,6 +71,11 @@ public sealed record TransactionSetView
     [global::System.Text.Json.Serialization.JsonPropertyName("transactions")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.FinancialTransactionView> Transactions { get; init; }
 
+    /// <summary>One PLT approval request per referred (authority type, cost type) (D-SL2-13); the set executes when all are approved</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvals")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.SetApprovalView>? Approvals { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

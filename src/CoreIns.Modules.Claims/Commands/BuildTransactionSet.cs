@@ -265,7 +265,7 @@ internal sealed class BuildTransactionSetHandler(
         set.BasisHash = SetLifecycle.Basis(
             claim,
             keys.Select(k => k.ExposureId).Distinct().Select(e => (e, exposures[e].Status)),
-            keys.Select(k => (k, BeforeOf(k)))).Value;
+            existingLines.Select(l => (SetLifecycle.Key(l), approved.GetValueOrDefault(l.ReserveLineId)))).Value;
         db.TransactionSets.Add(set);
         db.FinancialTransactions.AddRange(transactions);
         db.ClaimPayments.AddRange(payments);

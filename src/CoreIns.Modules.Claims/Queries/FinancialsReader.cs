@@ -120,12 +120,14 @@ internal sealed class FinancialsReader(ClaimsDbContext db)
             .ToDictionaryAsync(l => l.ReserveLineId, cancellationToken).ConfigureAwait(false);
         var payments = await db.ClaimPayments.AsNoTracking().Where(p => p.SetId == setId).ToDictionaryAsync(p => p.ClaimPaymentId, cancellationToken)
             .ConfigureAwait(false);
-        return View(set, transactions, lines, payments);
+        var approvals = await db.SetApprovals.AsNoTracking().Where(a => a.SetId == setId).OrderBy(a => a.CreatedAt).ThenBy(a => a.AuthorityType)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return View(set, transactions, lines, payments, approvals);
     }
 
     public static TransactionSetView View(
         TransactionSetRow set, IReadOnlyList<FinancialTransactionRow> transactions, IReadOnlyDictionary<ReserveLineId, ReserveLineRow> lines,
-        IReadOnlyDictionary<ClaimPaymentId, ClaimPaymentRow> payments) => new()
+        IReadOnlyDictionary<ClaimPaymentId, ClaimPaymentRow> payments, IReadOnlyList<SetApprovalRow>? approvals = null) => new()
     {
         SetId = set.SetId.Value,
         ClaimId = set.ClaimId,
@@ -140,6 +142,16 @@ internal sealed class FinancialsReader(ClaimsDbContext db)
         SubmittedAt = set.SubmittedAt,
         DecidedAt = set.DecidedAt,
         Transactions = [.. transactions.Select(t => Transaction(set, t, lines[t.ReserveLineId], t.ClaimPaymentId is { } p && payments.TryGetValue(p, out var payment) ? payment : null))],
+        Approvals = [.. (approvals ?? []).Select(a => new SetApprovalView
+        {
+            ApprovalRequestId = new ApprovalRequestId(a.ApprovalRequestId),
+            ApprovalType = a.ApprovalType,
+            AuthorityType = a.AuthorityType,
+            CostType = a.AuthorityCostType,
+            Amount = ClaimMoney.Of(a.AuthorityAmount, a.Currency),
+            Status = Enum.Parse<SetApprovalView.StatusValue>(a.Status, ignoreCase: true),
+            DecidedAt = a.DecidedAt,
+        })],
     };
 
     /// <summary>The derived status of a transaction: its set's state, then its payment's progression (PRD-07 §7.3.3).</summary>

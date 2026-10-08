@@ -33,6 +33,8 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
 
     public DbSet<PayeeAccountViewRow> PayeeAccounts => Set<PayeeAccountViewRow>();
 
+    public DbSet<SetApprovalRow> SetApprovals => Set<SetApprovalRow>();
+
     protected override string Schema => ClaimsModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

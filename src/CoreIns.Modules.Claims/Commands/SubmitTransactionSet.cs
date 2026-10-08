@@ -77,32 +77,31 @@ internal sealed class SubmitTransactionSetHandler(
             return duplicate;
         }
 
-        // REQ-CLM-108: one authority check per transaction.
+        // REQ-CLM-108 / D-SL2-13: the set's authority requirements (exposure total reserve, manual decreases, each payment and
+        // the claim's cumulative paid), each checked for the submitter.
         var now = clock.Now;
-        var checks = new List<(FinancialTransactionRow Txn, AuthorityCheckResult Check)>();
-        foreach (var t in content.Transactions)
+        var claimLines = await reader.LinesAsync(claim.ClaimId, cancellationToken).ConfigureAwait(false);
+        var approved = await reader.ApprovedAsync(claim.ClaimId, null, cancellationToken).ConfigureAwait(false);
+        var checks = new List<(AuthorityRequirement Requirement, AuthorityCheckResult Check)>();
+        foreach (var requirement in SetAuthority.Requirements(content, claimLines, approved))
         {
-            var line = content.Lines[t.ReserveLineId];
             var check = await authority.CheckAsync(
-                new AuthorityCheckRequest(
-                    context.Actor,
-                    context.Roles,
-                    TypeOf(t),
-                    Dimensions(Math.Abs(t.Amount), t.Currency, line.CostType),
-                    new ObjectRef(ModuleCode.CLM, "ClaimFinancialTransaction", t.TxnId.ToString("D")),
-                    now),
+                new AuthorityCheckRequest(context.Actor, context.Roles, requirement.Type, SetAuthority.Dimensions(requirement), ClaimApprovals.SetSubject(set.SetId), now),
                 cancellationToken).ConfigureAwait(false);
             context.AuthorityChecks.Add(check);
-            checks.Add((t, check));
+            checks.Add((requirement, check));
         }
 
-        if (checks.FirstOrDefault(c => c.Check.Decision == AuthorityDecision.Deny) is { Txn: not null } denied)
+        if (checks.FirstOrDefault(c => c.Check.Decision == AuthorityDecision.Deny) is { Requirement: not null } denied)
         {
-            return new DomainError(ErrorCode.For(ModuleCode.CLM, "AUTHORITY"), $"{denied.Txn.TxnNumber}: {denied.Check.Type} {denied.Check.ReasonCode}.")
+            return new DomainError(
+                ErrorCode.For(ModuleCode.CLM, "AUTHORITY"),
+                $"{denied.Check.Type} on {denied.Requirement.Basis} {SetHashing.Fixed(denied.Requirement.Amount)}: {denied.Check.ReasonCode}.")
             {
                 Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
                 {
-                    ["txnNumber"] = denied.Txn.TxnNumber, ["authorityCheckId"] = denied.Check.CheckId.ToString(), ["reasonCode"] = denied.Check.ReasonCode,
+                    ["basis"] = denied.Requirement.Basis, ["amount"] = SetHashing.Fixed(denied.Requirement.Amount),
+                    ["authorityCheckId"] = denied.Check.CheckId.ToString(), ["reasonCode"] = denied.Check.ReasonCode,
                 },
             };
         }
@@ -112,17 +111,18 @@ internal sealed class SubmitTransactionSetHandler(
         set.AuthorityCheckIds = [.. checks.Select(c => c.Check.CheckId.Value)];
         set.UpdatedAt = now;
         var referred = checks.Where(c => c.Check.Decision == AuthorityDecision.Refer).ToList();
+        var requests = new List<SetApprovalRow>();
         if (referred.Count == 0)
         {
             await lifecycle.ApproveAsync(claim, content, context.Actor.ToString(), UserIdOf(context.Actor), fourEyes: false, cancellationToken).ConfigureAwait(false);
         }
         else
         {
-            await ReferAsync(claim, content, referred, cancellationToken).ConfigureAwait(false);
+            requests = await ReferAsync(claim, content, referred, approved, cancellationToken).ConfigureAwait(false);
         }
 
         set.RecordVersion++;
-        var view = FinancialsReader.View(set, content.Transactions, content.Lines, content.Payments.ToDictionary(p => p.ClaimPaymentId));
+        var view = FinancialsReader.View(set, content.Transactions, content.Lines, content.Payments.ToDictionary(p => p.ClaimPaymentId), requests);
         return new TransactionSetSubmitResponse
         {
             SetId = set.SetId.Value,
@@ -132,8 +132,10 @@ internal sealed class SubmitTransactionSetHandler(
             {
                 CheckId = c.Check.CheckId.Value,
                 Decision = c.Check.Decision switch { AuthorityDecision.Allow => Check.DecisionValue.Allow, AuthorityDecision.Refer => Check.DecisionValue.Refer, _ => Check.DecisionValue.Deny },
-                TxnId = c.Txn.TxnId,
                 Type = c.Check.Type.Value,
+                CostType = c.Requirement.CostType,
+                Basis = Enum.Parse<Check.BasisValue>(c.Requirement.Basis.Replace("_", string.Empty, StringComparison.Ordinal), ignoreCase: true),
+                Amount = SetAuthority.MoneyOf(c.Requirement),
                 ReferralRole = c.Check.ReferralTargets.Count > 0 ? c.Check.ReferralTargets[0].Id : null,
             })],
             Set = view,
@@ -142,40 +144,23 @@ internal sealed class SubmitTransactionSetHandler(
     }
 
     /// <summary>
-    /// PendingApproval with one PLT request (REQ-CLM-109). The request carries the largest referred authority (a payment
-    /// first on equal amounts); the slice's grants are the same per type (D-SL2-03), so a checker allowed that amount is
-    /// allowed every referred transaction of the set.
+    /// PendingApproval with one PLT request per referred (authority type, cost type) (D-SL2-13; REQ-CLM-109): each carries
+    /// the largest referred amount of its type and cost type (the grants are monotone in the amount, so it dominates the
+    /// smaller ones). The payment's request has the payment as subject and the disbursement content hash (BIL verifies it,
+    /// D-SL2-10 d); a reserve request has the set (per type and cost type) as subject and the set content hash. The set
+    /// executes only when every request is approved.
     /// </summary>
-    private async Task ReferAsync(ClaimRow claim, SetContent content, List<(FinancialTransactionRow Txn, AuthorityCheckResult Check)> referred, CancellationToken cancellationToken)
+    private async Task<List<SetApprovalRow>> ReferAsync(
+        ClaimRow claim, SetContent content, List<(AuthorityRequirement Requirement, AuthorityCheckResult Check)> referred,
+        IReadOnlyDictionary<ReserveLineId, LineAmounts> approved, CancellationToken cancellationToken)
     {
         var set = content.Set;
-        var lead = referred.OrderByDescending(r => Math.Abs(r.Txn.Amount)).ThenByDescending(r => r.Txn.Kind == Codes.Of(TransactionKind.Payment)).First();
-        var leadLine = content.Lines[lead.Txn.ReserveLineId];
-        var payment = content.Payments.SingleOrDefault();
-        var (type, subject, hash) = payment is null
-            ? (ClaimApprovals.TransactionSet, ClaimApprovals.SetSubject(set.SetId), Sha256Hash.Parse(set.ContentHash))
-            : (DisbursementApproval.ClaimPaymentType, DisbursementApproval.ClaimPaymentSubject(payment.ClaimPaymentId.Value.ToString("D")), Sha256Hash.Parse(payment.DisbursementContentHash));
-        var role = lead.Check.ReferralTargets.FirstOrDefault(t => t.Kind == "ROLE")?.Id ?? lead.Check.ReferralTargets[0].Id;
         set.Status = Codes.Of(SetStatus.PendingApproval);
-        set.ApprovalType = type;
-        set.ApprovalSubjectType = subject.Type;
-        set.ApprovalSubjectId = subject.Id;
-        set.ApprovalPayloadHash = hash.Value;
-        set.ApprovalAuthorityType = lead.Check.Type.Value;
-        set.ApprovalAuthorityAmount = Math.Abs(lead.Txn.Amount);
-        set.ApprovalAuthorityCostType = leadLine.CostType;
-        set.ReferralRole = role;
         foreach (var p in content.Payments)
         {
             p.Status = Codes.Of(PaymentStatus.Pending);
         }
 
-        if (context.DryRun)
-        {
-            return; // a dry run shows the referral without creating the PLT request
-        }
-
-        var approved = await reader.ApprovedAsync(claim.ClaimId, null, cancellationToken).ConfigureAwait(false);
         var diff = JsonSerializer.SerializeToElement(new
         {
             setId = set.SetId.Value,
@@ -198,27 +183,69 @@ internal sealed class SubmitTransactionSetHandler(
                     paidBefore = SetHashing.Fixed(before.Paid), paidAfter = SetHashing.Fixed(after.Paid),
                 };
             }),
+            authority = referred.Select(r => new { type = r.Requirement.Type.Value, r.Requirement.CostType, r.Requirement.Basis, amount = SetHashing.Fixed(r.Requirement.Amount) }),
         });
-        var response = await approvals.RequestAsync(
-            new ApprovalRequestRequest
+
+        var rows = new List<SetApprovalRow>();
+        var payment = content.Payments.SingleOrDefault();
+        var now = clock.Now;
+        foreach (var bucket in SetAuthority.Dominant(referred.Select(r => r.Requirement)))
+        {
+            var check = referred.Where(r => r.Requirement.Bucket == bucket.Bucket).MaxBy(r => r.Requirement.Amount).Check;
+            var role = check.ReferralTargets.FirstOrDefault(t => t.Kind == "ROLE")?.Id ?? check.ReferralTargets[0].Id;
+            var (type, subject, hash) = SubjectOf(set, payment, bucket);
+            var row = new SetApprovalRow
             {
-                Type = type,
-                ObjectRef = subject,
-                PayloadHash = hash,
-                Authority = new ApprovalAuthority
-                {
-                    Type = lead.Check.Type.Value,
-                    Amount = ClaimMoney.Of(Math.Abs(lead.Txn.Amount), lead.Txn.Currency),
-                    Codes = new Dictionary<string, string>(StringComparer.Ordinal) { [ClaimsAuthorityTypes.CostTypeDimension] = leadLine.CostType },
-                },
-                ReferralRole = role,
-                Reason = $"Claim {claim.ClaimNumber.Value}: {referred.Count} transaction(s) above the submitter's authority ({lead.Check.ReasonCode}).",
-                Diff = diff,
-            },
-            new CommandOptions(IdempotencyKey.From(set.SetId.Value)),
-            cancellationToken).ConfigureAwait(false);
-        set.ApprovalRequestId = response.Request.RequestId;
+                SetId = set.SetId, ApprovalType = type, SubjectType = subject.Type, SubjectId = subject.Id, PayloadHash = hash.Value,
+                AuthorityType = bucket.Type.Value, AuthorityCostType = bucket.CostType, AuthorityAmount = bucket.Amount, Currency = bucket.Currency,
+                Status = "PENDING", LegalEntityId = set.LegalEntityId, Jurisdiction = set.Jurisdiction, CreatedAt = now, CreatedBy = context.Actor.ToString(),
+            };
+            if (!context.DryRun)
+            {
+                var response = await approvals.RequestAsync(
+                    new ApprovalRequestRequest
+                    {
+                        Type = type,
+                        ObjectRef = subject,
+                        PayloadHash = hash,
+                        Authority = new ApprovalAuthority
+                        {
+                            Type = bucket.Type.Value,
+                            Amount = SetAuthority.MoneyOf(bucket),
+                            Codes = new Dictionary<string, string>(StringComparer.Ordinal) { [ClaimsAuthorityTypes.CostTypeDimension] = bucket.CostType },
+                        },
+                        ReferralRole = role,
+                        Reason = $"Claim {claim.ClaimNumber.Value}: {bucket.Type} {bucket.CostType} {bucket.Basis} {SetHashing.Fixed(bucket.Amount)} is above the submitter's authority ({check.ReasonCode}).",
+                        Diff = diff,
+                    },
+                    CommandOptions.New(),
+                    cancellationToken).ConfigureAwait(false);
+                row.ApprovalRequestId = response.Request.RequestId;
+                db.SetApprovals.Add(row);
+            }
+
+            rows.Add(row);
+        }
+
+        // The set's primary binding: the payment's request when it has one (BIL's approval evidence), else the first.
+        var primary = rows[0];
+        set.ApprovalRequestId = context.DryRun ? null : primary.ApprovalRequestId;
+        set.ApprovalType = primary.ApprovalType;
+        set.ApprovalSubjectType = primary.SubjectType;
+        set.ApprovalSubjectId = primary.SubjectId;
+        set.ApprovalPayloadHash = primary.PayloadHash;
+        set.ApprovalAuthorityType = primary.AuthorityType;
+        set.ApprovalAuthorityAmount = primary.AuthorityAmount;
+        set.ApprovalAuthorityCostType = primary.AuthorityCostType;
+        set.ReferralRole = referred[0].Check.ReferralTargets.FirstOrDefault(t => t.Kind == "ROLE")?.Id;
+        return rows;
     }
+
+    /// <summary>The PLT subject and bound hash of one approval bucket (shared with the execution check).</summary>
+    public static (string Type, ObjectRef Subject, Sha256Hash Hash) SubjectOf(TransactionSetRow set, ClaimPaymentRow? payment, AuthorityRequirement bucket) =>
+        bucket.Type == ClaimsAuthorityTypes.Payment && payment is not null
+            ? (DisbursementApproval.ClaimPaymentType, DisbursementApproval.ClaimPaymentSubject(payment.ClaimPaymentId.Value.ToString("D")), Sha256Hash.Parse(payment.DisbursementContentHash))
+            : (ClaimApprovals.TransactionSet, new ObjectRef(ModuleCode.CLM, "TransactionSet", $"{set.SetId.Value:D}/{bucket.Type.Value}/{bucket.CostType}"), Sha256Hash.Parse(set.ContentHash));
 
     private async Task<DomainError?> DuplicateAsync(SetContent content, CancellationToken cancellationToken)
     {
@@ -238,15 +265,6 @@ internal sealed class SubmitTransactionSetHandler(
 
         return null;
     }
-
-    public static AuthorityTypeCode TypeOf(FinancialTransactionRow t) =>
-        t.Kind == Codes.Of(TransactionKind.Payment) ? ClaimsAuthorityTypes.Payment : ClaimsAuthorityTypes.Reserve;
-
-    public static Dictionary<string, DimensionValue> Dimensions(decimal amount, string currency, string costType) => new(StringComparer.Ordinal)
-    {
-        [ClaimsAuthorityTypes.AmountDimension] = DimensionValue.Of(ClaimMoney.Of(amount, currency)),
-        [ClaimsAuthorityTypes.CostTypeDimension] = DimensionValue.OfCodes(costType),
-    };
 
     /// <summary>The person's directory object id when the actor is a user with a GUID id (TransactionSetApproved approverUserIds).</summary>
     public static Guid? UserIdOf(ActorRef actor) => actor.Kind == ActorKind.User && Guid.TryParse(actor.Id, out var id) && id != Guid.Empty ? id : null;

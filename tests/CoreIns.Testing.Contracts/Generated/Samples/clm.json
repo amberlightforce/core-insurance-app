@@ -1600,6 +1600,18 @@
     "ServiceUpdateResponse": {
       "status": "unspecified"
     },
+    "SetApprovalView": {
+      "approvalRequestId": "0192e8dd-9056-7163-8f4b-c0feaec02f16",
+      "approvalType": "sample",
+      "authorityType": "sample",
+      "costType": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "status": "PENDING",
+      "decidedAt": "2026-10-07T09:00:00Z"
+    },
     "StatutoryOfferIssueRequest": {
       "exposure": "unspecified",
       "content": "unspecified"
@@ -1729,6 +1741,20 @@
             "proposed": true,
             "status": "SAMPLE_CODE"
           }
+        ],
+        "approvals": [
+          {
+            "approvalRequestId": "0192aecd-2efa-745a-8d5f-8306ac51b587",
+            "approvalType": "sample",
+            "authorityType": "sample",
+            "costType": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "status": "PENDING",
+            "decidedAt": "2026-10-07T09:00:00Z"
+          }
         ]
       }
     },
@@ -1774,6 +1800,20 @@
             "proposed": true,
             "status": "SAMPLE_CODE"
           }
+        ],
+        "approvals": [
+          {
+            "approvalRequestId": "019272c1-0fa0-7f91-84cb-cd5760bb2bfa",
+            "approvalType": "sample",
+            "authorityType": "sample",
+            "costType": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "status": "PENDING",
+            "decidedAt": "2026-10-07T09:00:00Z"
+          }
         ]
       }
     },
@@ -1808,6 +1848,12 @@
           "decision": "ALLOW",
           "txnId": "0192b520-728d-7842-8611-341c6dd617dd",
           "type": "sample",
+          "costType": "SAMPLE_CODE",
+          "basis": "EXPOSURE_TOTAL_RESERVE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
           "referralRole": "sample"
         }
       ],
@@ -1851,6 +1897,20 @@
             "reasonCode": "SAMPLE_CODE",
             "proposed": true,
             "status": "SAMPLE_CODE"
+          }
+        ],
+        "approvals": [
+          {
+            "approvalRequestId": "0192c70c-e7eb-7346-80c8-fc9cb7308490",
+            "approvalType": "sample",
+            "authorityType": "sample",
+            "costType": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "status": "PENDING",
+            "decidedAt": "2026-10-07T09:00:00Z"
           }
         ]
       },
@@ -1919,6 +1979,20 @@
           "reasonCode": "SAMPLE_CODE",
           "proposed": true,
           "status": "SAMPLE_CODE"
+        }
+      ],
+      "approvals": [
+        {
+          "approvalRequestId": "0192ce56-aa58-762d-8e5a-7bbd17c78d2f",
+          "approvalType": "sample",
+          "authorityType": "sample",
+          "costType": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "status": "PENDING",
+          "decidedAt": "2026-10-07T09:00:00Z"
         }
       ]
     },

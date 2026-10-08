@@ -1,13 +1,14 @@
-using CoreIns.Modules.Billing.Contracts;
 using CoreIns.Modules.Claims.Authority;
 using CoreIns.Modules.Claims.Domain;
 using CoreIns.Modules.Claims.Persistence;
+using CoreIns.Modules.Claims.Queries;
 using CoreIns.Platform.Audit;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Contracts.Api;
 using CoreIns.Platform.Errors;
+using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
@@ -21,32 +22,40 @@ namespace CoreIns.Modules.Claims.Commands;
 /// <param name="Decision">APPROVED, REJECTED, WITHDRAWN or EXPIRED.</param>
 internal sealed record ApplyApprovalDecision(Guid RequestId, string Decision) : ICommand<ApprovalOutcome>;
 
-/// <summary>What the decision did to the set (IGNORED when no pending set of this request exists: replays, other modules' requests).</summary>
+/// <summary>What the decision did to the set (IGNORED when no pending request of a pending set exists: replays, other modules' requests).</summary>
 internal sealed record ApprovalOutcome(Guid? SetId, string Outcome);
 
 /// <summary>
-/// The approval path of a referred set (REQ-CLM-109, -111, -112, PRD-07 §7.3.2): the checker decides in the PLT inbox
-/// (maker ≠ checker is PLT's rule, REQ-PLT-115); CLM consumes <c>ApprovalDecided</c> and, for an approval, (1) verifies it
-/// with <c>plt.Approval.verifyForExecution</c> for exactly its type, subject and hash, (2) compares the returned authority
-/// with the one it computes from the set's own transactions, (3) recomputes the content hashes, (4) re-validates claim,
-/// exposures and line balances; any mismatch rejects the set (APPROVAL_MISMATCH / SET_STALE, CLM-ERR-SET-STALE semantics,
-/// REQ-CLM-112) instead of applying it. Rejected, withdrawn or expired requests reject the set (REQ-CLM-111). Idempotent and
-/// race-safe: under the claim and set locks only a PendingApproval set moves, so a replay or a second delivery has no effect.
+/// The approval path of a referred set (REQ-CLM-109, -111, -112; D-SL2-13). The checker decides each of the set's PLT
+/// requests in the inbox (maker ≠ checker and the checker's authority are PLT's rules, REQ-PLT-115); CLM consumes
+/// <c>ApprovalDecided</c>: a rejected, withdrawn or expired request rejects the set; an approved one is recorded, and once
+/// every request of the set is approved CLM (1) verifies each with <c>plt.Approval.verifyForExecution</c> for exactly its
+/// type, subject and hash, (2) checks that each decided authority dominates what CLM computes now from the set's own
+/// transactions and balances (same type and cost type, amount at least the largest requirement of that bucket), and (3)
+/// re-validates claim, exposures and balances; any mismatch rejects the set (APPROVAL_MISMATCH / SET_STALE) instead of
+/// applying it. Idempotent and race-safe under the claim and set locks.
 /// </summary>
 internal sealed partial class ApplyApprovalDecisionHandler(
     ClaimsDbContext db,
     RequestContext context,
+    IClock clock,
     ClaimProtection protection,
     IPlatformApprovalService approvals,
     SetLifecycle lifecycle,
+    FinancialsReader reader,
     ILogger<ApplyApprovalDecisionHandler> logger) : ICommandHandler<ApplyApprovalDecision, ApprovalOutcome>
 {
+    private const string Pending = "PENDING";
+    private const string Approved = "APPROVED";
+
     public async Task<Result<ApprovalOutcome>> HandleAsync(ApplyApprovalDecision command, CancellationToken cancellationToken)
     {
         var legalEntity = protection.Current(context);
-        var target = await db.TransactionSets.AsNoTracking()
-            .Where(s => s.ApprovalRequestId == command.RequestId && s.LegalEntityId == legalEntity)
-            .Select(s => new { s.SetId, s.ClaimId })
+        var target = await (
+                from a in db.SetApprovals.AsNoTracking()
+                join s in db.TransactionSets.AsNoTracking() on a.SetId equals s.SetId
+                where a.ApprovalRequestId == command.RequestId && a.LegalEntityId == legalEntity
+                select new { s.SetId, s.ClaimId })
             .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         if (target is null)
         {
@@ -55,29 +64,33 @@ internal sealed partial class ApplyApprovalDecisionHandler(
 
         var claim = (await ClaimSupport.LoadAsync(db, legalEntity, target.ClaimId, cancellationToken).ConfigureAwait(false))!;
         var set = (await FinancialSupport.LockSetAsync(db, legalEntity, target.SetId, cancellationToken).ConfigureAwait(false))!;
-        if (set.Status != Codes.Of(SetStatus.PendingApproval))
+        var rows = await db.SetApprovals.Where(a => a.SetId == set.SetId).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var row = rows.Single(a => a.ApprovalRequestId == command.RequestId);
+        if (set.Status != Codes.Of(SetStatus.PendingApproval) || row.Status != Pending)
         {
             return new ApprovalOutcome(set.SetId.Value, "IGNORED");
         }
 
         var content = await FinancialSupport.ContentAsync(db, set, cancellationToken).ConfigureAwait(false);
-        switch (command.Decision)
+        var now = clock.Now;
+        row.DecidedAt = now;
+        row.RecordVersion++;
+        if (command.Decision != Approved)
         {
-            case "APPROVED":
-                break;
-            case "REJECTED":
-                lifecycle.Reject(claim, content, FinancialReasons.ApproverRejected);
-                return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Rejected));
-            default:
-                lifecycle.Reject(claim, content, FinancialReasons.Withdrawn);
-                return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Rejected));
+            row.Status = "REJECTED";
+            lifecycle.Reject(claim, content, command.Decision == "REJECTED" ? FinancialReasons.ApproverRejected : FinancialReasons.Withdrawn);
+            return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Rejected));
         }
 
-        if (await VerifyAsync(set, content, cancellationToken).ConfigureAwait(false) is { } mismatch)
+        var decision = (await approvals.GetAsync(command.RequestId.ToString("D"), cancellationToken).ConfigureAwait(false)).Decision;
+        row.Status = Approved;
+        row.Checker = decision is null ? "UNKNOWN" : $"{decision.Checker.Kind.ToString().ToUpperInvariant()}:{decision.Checker.Id}";
+        row.CheckerUserId = decision is { Checker.Kind: Platform.Contracts.Common.Actor.KindValue.User } && Guid.TryParse(decision.Checker.Id, out var oid) && oid != Guid.Empty
+            ? oid
+            : null;
+        if (rows.Any(a => a.Status != Approved))
         {
-            LogMismatch(logger, set.SetId.Value, mismatch);
-            lifecycle.Reject(claim, content, FinancialReasons.ApprovalMismatch);
-            return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Rejected));
+            return new ApprovalOutcome(set.SetId.Value, "AWAITING_APPROVALS");
         }
 
         if (await lifecycle.RevalidateAsync(claim, content, cancellationToken).ConfigureAwait(false) is { } stale)
@@ -87,65 +100,72 @@ internal sealed partial class ApplyApprovalDecisionHandler(
             return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Rejected));
         }
 
-        var decision = (await approvals.GetAsync(command.RequestId.ToString("D"), cancellationToken).ConfigureAwait(false)).Decision;
-        var checker = decision is null ? "UNKNOWN" : $"{decision.Checker.Kind.ToString().ToUpperInvariant()}:{decision.Checker.Id}";
-        var checkerUser = decision is { Checker.Kind: Platform.Contracts.Common.Actor.KindValue.User } && Guid.TryParse(decision.Checker.Id, out var oid) && oid != Guid.Empty
-            ? oid
-            : (Guid?)null;
-        await lifecycle.ApproveAsync(claim, content, checker, checkerUser, fourEyes: true, cancellationToken).ConfigureAwait(false);
+        if (await VerifyAsync(claim, set, content, rows, cancellationToken).ConfigureAwait(false) is { } mismatch)
+        {
+            LogMismatch(logger, set.SetId.Value, mismatch);
+            lifecycle.Reject(claim, content, FinancialReasons.ApprovalMismatch);
+            return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Rejected));
+        }
+
+        await lifecycle.ApproveAsync(claim, content, string.Join(",", rows.Select(a => a.Checker).Distinct()), row.CheckerUserId, fourEyes: true, cancellationToken)
+            .ConfigureAwait(false);
         return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Approved));
     }
 
-    /// <summary>Null when PLT's approval covers exactly this set; otherwise why not.</summary>
-    private async Task<string?> VerifyAsync(TransactionSetRow set, SetContent content, CancellationToken cancellationToken)
+    /// <summary>Null when PLT's approvals together cover exactly this set and dominate every referred requirement; otherwise why not.</summary>
+    private async Task<string?> VerifyAsync(ClaimRow claim, TransactionSetRow set, SetContent content, List<SetApprovalRow> rows, CancellationToken cancellationToken)
     {
-        // CLM's own view of the bound content: the set content hash, or the disbursement content hash of its payment.
+        var contentHash = SetHashing.Content(set.SetId, set.ClaimId, content.Canonical());
+        if (contentHash.Value != set.ContentHash)
+        {
+            return "The set content does not match its content hash.";
+        }
+
         var payment = content.Payments.SingleOrDefault();
-        var expectedType = payment is null ? ClaimApprovals.TransactionSet : DisbursementApproval.ClaimPaymentType;
-        var expectedHash = payment is null
-            ? SetHashing.Content(set.SetId, set.ClaimId, content.Canonical()).Value
-            : DisbursementContent.Hash(
-                DisbursementCodes.ClaimPayment, payment.ClaimPaymentId.Value.ToString("D"), payment.PayeePartyId, payment.PayeeAccountId,
-                ClaimMoney.Of(payment.Amount, payment.Currency)).Value;
-        if (set.ApprovalType != expectedType || set.ApprovalPayloadHash != expectedHash || payment?.DisbursementContentHash is { } stored && stored != expectedHash)
+        var requirements = SetAuthority.Requirements(
+            content,
+            await reader.LinesAsync(claim.ClaimId, cancellationToken).ConfigureAwait(false),
+            await reader.ApprovedAsync(claim.ClaimId, null, cancellationToken).ConfigureAwait(false));
+        foreach (var row in rows)
         {
-            return "The bound content hash does not match the set's content.";
-        }
+            // The bound subject and hash CLM computes itself for this bucket.
+            var bucket = requirements.Where(r => r.Bucket == (row.AuthorityType, row.AuthorityCostType)).MaxBy(r => r.Amount);
+            if (bucket is null)
+            {
+                return $"The set no longer needs {row.AuthorityType} {row.AuthorityCostType}.";
+            }
 
-        ApprovalVerifyForExecutionResponse verified;
-        try
-        {
-            verified = await approvals.VerifyForExecutionAsync(
-                new ApprovalVerifyForExecutionRequest
-                {
-                    RequestId = set.ApprovalRequestId!.Value,
-                    Hash = Sha256Hash.Parse(expectedHash),
-                    Type = expectedType,
-                    ObjectRef = new ObjectRef(ModuleCode.CLM, set.ApprovalSubjectType!, set.ApprovalSubjectId!),
-                },
-                cancellationToken).ConfigureAwait(false);
-        }
-        catch (DomainException ex) when (ex.Error.Code.Module == ModuleCode.PLT)
-        {
-            return $"PLT refused execution ({ex.Error.Code}).";
-        }
+            var (type, subject, hash) = SubmitTransactionSetHandler.SubjectOf(set, payment, bucket);
+            if (row.ApprovalType != type || row.SubjectType != subject.Type || row.SubjectId != subject.Id || row.PayloadHash != hash.Value)
+            {
+                return "An approval's bound subject or hash does not match the set's content.";
+            }
 
-        if (!verified.Ok)
-        {
-            return $"The approval request is {verified.Status}.";
-        }
+            ApprovalVerifyForExecutionResponse verified;
+            try
+            {
+                verified = await approvals.VerifyForExecutionAsync(
+                    new ApprovalVerifyForExecutionRequest { RequestId = row.ApprovalRequestId, Hash = hash, Type = type, ObjectRef = subject }, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (DomainException ex) when (ex.Error.Code.Module == ModuleCode.PLT)
+            {
+                return $"PLT refused execution ({ex.Error.Code}).";
+            }
 
-        // The authority PLT checked the checker against must be the one CLM computes from the set's transactions.
-        var lead = content.Transactions
-            .Where(t => Math.Abs(t.Amount) == set.ApprovalAuthorityAmount && SubmitTransactionSetHandler.TypeOf(t).Value == set.ApprovalAuthorityType)
-            .Select(t => (Amount: Math.Abs(t.Amount), t.Currency, Type: SubmitTransactionSetHandler.TypeOf(t).Value, content.Lines[t.ReserveLineId].CostType))
-            .FirstOrDefault();
-        var authority = verified.Authority;
-        var costType = authority.Codes?.GetValueOrDefault(ClaimsAuthorityTypes.CostTypeDimension);
-        if (lead.Type is null || authority.Type != lead.Type || authority.Amount is not { } amount
-            || amount != ClaimMoney.Of(lead.Amount, lead.Currency) || costType != lead.CostType)
-        {
-            return "The approved authority differs from the set's referred transaction.";
+            if (!verified.Ok)
+            {
+                return $"Approval request {row.ApprovalRequestId} is {verified.Status}.";
+            }
+
+            // The decided authority must dominate what CLM computes: same type and cost type, at least the largest amount.
+            var authority = verified.Authority;
+            if (authority.Type != bucket.Type.Value
+                || authority.Codes?.GetValueOrDefault(ClaimsAuthorityTypes.CostTypeDimension) != bucket.CostType
+                || authority.Amount is not { } amount || amount.Currency.Code != bucket.Currency || amount.Amount < bucket.Amount)
+            {
+                return $"The approved authority {authority.Type} does not cover {bucket.Type} {bucket.CostType} {SetHashing.Fixed(bucket.Amount)}.";
+            }
         }
 
         return null;
