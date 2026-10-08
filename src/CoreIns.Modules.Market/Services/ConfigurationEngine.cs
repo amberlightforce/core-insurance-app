@@ -51,6 +51,11 @@ internal sealed class ConfigurationEngine(
         var keys = request.Keys is { } requested
             ? requested.Distinct(StringComparer.Ordinal).ToList()
             : KeysOfNamespace(request.Namespace!);
+        if (keys.Any(k => k.StartsWith(TaxTreatmentRules.TreatmentNamespace, StringComparison.Ordinal)))
+        {
+            throw Error("CFG-VALIDATION", "tax.treatment.* keys are read only by the TaxCalculator (ARCH-11, REQ-MKT-332).");
+        }
+
         var items = new List<ConfigurationResolveResponse.ValueItem>();
         var missing = new List<string>();
         var refused = new List<string>();
@@ -183,7 +188,7 @@ internal sealed class ConfigurationEngine(
         var dotted = prefix.EndsWith('.') ? prefix : prefix + ".";
         var keys = catalogue.Entries.Select(e => e.Key)
             .Concat(ConfigKeys.All.Where(d => !d.IsPrefix).Select(d => d.Key))
-            .Where(k => k.StartsWith(dotted, StringComparison.Ordinal))
+            .Where(k => k.StartsWith(dotted, StringComparison.Ordinal) && !k.StartsWith(TaxTreatmentRules.TreatmentNamespace, StringComparison.Ordinal))
             .Distinct(StringComparer.Ordinal)
             .Order(StringComparer.Ordinal)
             .ToList();

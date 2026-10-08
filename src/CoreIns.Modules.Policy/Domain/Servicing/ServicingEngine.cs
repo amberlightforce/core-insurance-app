@@ -7,15 +7,15 @@ namespace CoreIns.Modules.Policy.Domain.Servicing;
 /// intent it returns the new segment list and the NET charge deltas per element × coverage × charge type × valid
 /// period. No I/O, no clock, decimal only.
 /// <para>
-/// Arithmetic. Every segment carries its written (rounded) amount and an unrounded exact value (<see cref="ServicingSegment.Exact"/>,
-/// 20 decimals). Per charge key the written cumulative is kept equal to the rounding of the exact cumulative, so a delta is
-/// <c>round(exactCumulativeAfter) − writtenCumulativeBefore</c>: rounding residuals never accumulate beyond one rounding
-/// step however many changes there are (REQ-POL-123), and the residual stays with the elapsed part (REQ-POL-118).
-/// A cancellation or change at <c>t</c> splits the segment containing <c>t</c>: the unearned share
-/// <c>(F − f) ÷ F</c> moves on (F = the convention's fraction for the whole segment, f = the fraction elapsed), so under
-/// ACT/365F a full-term segment earns <c>days ÷ 365</c> and unearned = written − earned. A Change debits
-/// <c>(newRate − oldRate) × (1 − elapsedFraction)</c> with the same fractions, so Change and Cancel share one basis
-/// (REQ-RAT-004). A flat or same-day cancel therefore credits exactly the written amount.
+/// Arithmetic. The exact cumulative of a charge key is a pure function of its segments' rates and periods and the
+/// convention: Σ rate × (elapsed(to) − elapsed(from)), with elapsed from <see cref="IProration"/> (0 at term start, the
+/// full-term fraction at term end), computed to 20 decimals. The written cumulative is always the single MKT rounding of
+/// that exact value, so a delta is <c>round(exactAfter) − writtenBefore</c>, rounding residuals never accumulate beyond one
+/// rounding step however many changes there are (REQ-POL-123), and earned (the rounding up to t) + unearned (the rest) =
+/// written (REQ-POL-118). Change and Cancel share this one basis (REQ-RAT-004); a flat cancel has nothing earned and so
+/// credits exactly the written amount. State is therefore only rates, periods and amounts: nothing else needs persisting.
+/// Segment amounts that are not what the engine would have written (not equal to the rounding of the derived exact
+/// cumulative, or negative) are refused as <see cref="ServicingRefusal.InvalidInput"/>; no clamp hides corrupt input.
 /// </para>
 /// <para>
 /// Callers must pass the <b>full</b> rate set on a <see cref="ChangeIntent"/>: a key missing from it means rate 0 and ends
@@ -104,7 +104,7 @@ internal sealed class ServicingEngine(IProration proration, PremiumRounding roun
             {
                 var exact = rate.Flat ? rate.AnnualRate : Times(rate.AnnualRate, full.Numerator, full.Denominator);
                 var amount = Round(exact);
-                segments.Add(new ServicingSegment(rate, term.From, term.To, amount, exact));
+                segments.Add(new ServicingSegment(rate, term.From, term.To, amount));
                 if (amount != 0m)
                 {
                     deltas.Add(Delta(term, rate, term.From, term.To, amount, termDays, full, TransactionKind.NewBusiness, correlation, deltas.Count + 1));
@@ -131,7 +131,12 @@ internal sealed class ServicingEngine(IProration proration, PremiumRounding roun
                 return rateError;
             }
 
-            var termDays = term.Days;
+            var inconsistent = ValidateAmounts(state);
+            if (inconsistent is not null)
+            {
+                return inconsistent;
+            }
+
             var remainingDays = DayCount.Days(t, term.To, term.Zone);
             var remaining = Remaining(term, t);
             var newRates = intent.NewRates.ToDictionary(r => r.Key);
@@ -168,50 +173,39 @@ internal sealed class ServicingEngine(IProration proration, PremiumRounding roun
                     return ServicingResult.Refused(ServicingRefusal.InvalidInput, $"{key.ChargeType}: a flat charge's rate cannot change mid-term (or be omitted from the rate set).");
                 }
 
-                var oldRate = last?.Rate.AnnualRate ?? 0m;
                 var cumulativeBefore = existing?.Sum(s => s.Amount) ?? 0m;
-                var exactBefore = existing?.Sum(ExactOf) ?? 0m;
+                var priors = existing is null ? [] : existing.Take(existing.Count - 1).ToList();
+                var priorSum = priors.Sum(s => s.Amount);
 
-                decimal unearnedAmount = 0m, unearnedExact = 0m;
-                if (last is not null && !last.Rate.Flat)
-                {
-                    var (num, den) = UnearnedShare(last, t, term, termDays);
-                    unearnedExact = Times(ExactOf(last), num, den);
-                    unearnedAmount = Math.Clamp(Round(Times(last.Amount, num, den)), 0m, last.Amount);
-                }
-
-                decimal delta, deltaExact;
+                decimal cumulativeAfter, newAmount, elapsedAmount = 0m;
                 if (newRate.Flat)
                 {
-                    deltaExact = newRate.AnnualRate;
-                    delta = Round(deltaExact);
-                }
-                else if (newRate.AnnualRate == 0m)
-                {
-                    deltaExact = -unearnedExact;
-                    delta = -unearnedAmount;
+                    cumulativeAfter = Round(newRate.AnnualRate);
+                    newAmount = cumulativeAfter;
                 }
                 else
                 {
-                    deltaExact = Times(newRate.AnnualRate - oldRate, remaining.Numerator, remaining.Denominator);
-                    delta = Math.Max(Round(exactBefore + deltaExact) - cumulativeBefore, -unearnedAmount);
+                    // The key's written cumulative is always the rounding of the exact cumulative, a pure function of the
+                    // segments' rates and periods: residuals are carried and nothing beyond the segments needs persisting.
+                    var exactUpTo = ExactTo(existing, t, term);
+                    cumulativeAfter = Round(exactUpTo + Piece(newRate.AnnualRate, t, term.To, term));
+                    var elapsedSegment = last is not null && t > last.From;
+                    elapsedAmount = elapsedSegment ? Round(exactUpTo) - priorSum : 0m;
+                    newAmount = cumulativeAfter - (priorSum + elapsedAmount);
+                    if (elapsedAmount < 0m || newAmount < 0m)
+                    {
+                        return ServicingResult.Refused(ServicingRefusal.InvalidInput, $"{key.ChargeType}: the segments are inconsistent with the rounding rule (negative amount).");
+                    }
                 }
 
-                if (existing is not null)
-                {
-                    segments.AddRange(existing.Take(existing.Count - 1));
-                }
-
-                var elapsedAmount = 0m;
+                var delta = cumulativeAfter - cumulativeBefore;
+                segments.AddRange(priors);
                 if (last is not null && t > last.From)
                 {
-                    elapsedAmount = last.Amount - unearnedAmount;
-                    segments.Add(last with { To = t, Amount = elapsedAmount, Exact = ExactOf(last) - unearnedExact });
+                    segments.Add(last with { To = t, Amount = elapsedAmount });
                 }
 
-                var carried = last is null ? 0m : last.Amount - elapsedAmount;
-                var carriedExact = unearnedExact;
-                segments.Add(new ServicingSegment(newRate, t, term.To, carried + delta, carriedExact + deltaExact));
+                segments.Add(new ServicingSegment(newRate, t, term.To, newAmount));
                 if (delta != 0m)
                 {
                     var kind = delta > 0m ? TransactionKind.EndorsementDebit : TransactionKind.EndorsementCredit;
@@ -239,16 +233,21 @@ internal sealed class ServicingEngine(IProration proration, PremiumRounding roun
                 return guard;
             }
 
-            var flatCancel = intent.RefundMethod == RefundMethod.FullRefund;
-            if (flatCancel && DayCount.Date(t, term.Zone) != DayCount.Date(term.From, term.Zone))
+            if (intent.RefundMethod == RefundMethod.FullRefund && DayCount.Date(t, term.Zone) != DayCount.Date(term.From, term.Zone))
             {
                 return ServicingResult.Refused(ServicingRefusal.FullRefundNotFlat, "A full refund is only possible for a flat cancel on the term's first date.");
             }
 
-            var termDays = term.Days;
+            var inconsistent = ValidateAmounts(state);
+            if (inconsistent is not null)
+            {
+                return inconsistent;
+            }
+
             var segments = new List<ServicingSegment>();
             var deltas = new List<ServicingDelta>();
             var remainingDays = DayCount.Days(t, term.To, term.Zone);
+            var remaining = Remaining(term, t);
             foreach (var group in state.Segments.GroupBy(s => s.Key).OrderBy(g => g.Key))
             {
                 var list = group.OrderBy(s => s.From).ToList();
@@ -258,36 +257,30 @@ internal sealed class ServicingEngine(IProration proration, PremiumRounding roun
                     return ServicingResult.Refused(ServicingRefusal.OutOfSequence, $"{last.Key.ChargeType} has a segment starting after the effective time.");
                 }
 
-                decimal credit;
-                var elapsedExact = ExactOf(last);
-                ProrationFraction fraction;
+                var cumulative = list.Sum(s => s.Amount);
+                var priorSum = cumulative - last.Amount;
+                decimal credit, elapsedAmount;
                 if (last.Rate.Flat)
                 {
-                    credit = last.Rate.RefundableOnCancel ? list.Sum(s => s.Amount) : 0m;
-                    fraction = new ProrationFraction(1, 1);
-                    elapsedExact = last.Amount - credit;
-                }
-                else if (flatCancel)
-                {
-                    credit = list.Sum(s => s.Amount);
-                    fraction = new ProrationFraction(1, 1);
-                    elapsedExact = last.Amount - credit;
+                    credit = last.Rate.RefundableOnCancel ? cumulative : 0m;
+                    elapsedAmount = last.Amount - credit;
                 }
                 else
                 {
-                    var (num, den) = UnearnedShare(last, t, term, termDays);
-                    var unearnedExact = Times(ExactOf(last), num, den);
-                    var cumulative = list.Sum(s => s.Amount);
-                    credit = Math.Clamp(cumulative - Round(list.Sum(ExactOf) - unearnedExact), 0m, last.Amount);
-                    elapsedExact = ExactOf(last) - unearnedExact;
-                    fraction = new ProrationFraction(checked((int)num), checked((int)den));
+                    // Earned = round(exact cumulative up to t); unearned = written - earned (REQ-POL-118). A flat cancel
+                    // (t on the first date) has nothing earned, so it credits exactly the written amount.
+                    elapsedAmount = Round(ExactTo(list, t, term)) - priorSum;
+                    credit = last.Amount - elapsedAmount;
+                    if (elapsedAmount < 0m || credit < 0m)
+                    {
+                        return ServicingResult.Refused(ServicingRefusal.InvalidInput, $"{last.Key.ChargeType}: the segments are inconsistent with the rounding rule (negative amount).");
+                    }
                 }
 
                 segments.AddRange(list.Take(list.Count - 1));
-                var elapsedAmount = last.Amount - credit;
                 if (t > last.From)
                 {
-                    segments.Add(last with { To = t, Amount = elapsedAmount, Exact = elapsedExact });
+                    segments.Add(last with { To = t, Amount = elapsedAmount });
                 }
                 else if (elapsedAmount != 0m)
                 {
@@ -296,21 +289,17 @@ internal sealed class ServicingEngine(IProration proration, PremiumRounding roun
                     var previousIndex = segments.FindLastIndex(s => s.Key == last.Key);
                     if (previousIndex >= 0)
                     {
-                        segments[previousIndex] = segments[previousIndex] with
-                        {
-                            Amount = segments[previousIndex].Amount + elapsedAmount,
-                            Exact = ExactOf(segments[previousIndex]) + elapsedExact,
-                        };
+                        segments[previousIndex] = segments[previousIndex] with { Amount = segments[previousIndex].Amount + elapsedAmount };
                     }
                     else
                     {
-                        segments.Add(last with { To = t, Amount = elapsedAmount, Exact = elapsedExact });
+                        segments.Add(last with { To = t, Amount = elapsedAmount });
                     }
                 }
 
                 if (credit != 0m)
                 {
-                    deltas.Add(Delta(term, last.Rate, t, last.To, -credit, remainingDays, fraction, TransactionKind.Cancellation, correlation, deltas.Count + 1));
+                    deltas.Add(Delta(term, last.Rate, t, last.To, -credit, remainingDays, last.Rate.Flat ? new ProrationFraction(1, 1) : remaining, TransactionKind.Cancellation, correlation, deltas.Count + 1));
                 }
             }
 
@@ -387,32 +376,61 @@ internal sealed class ServicingEngine(IProration proration, PremiumRounding roun
                 : null;
         }
 
-        private static decimal ExactOf(ServicingSegment segment) => segment.Exact ?? segment.Amount;
-
-        /// <summary>The unearned share (F − f) ÷ F of a segment at <paramref name="t"/>, with F and f from the one shared proration.</summary>
-        private (long Numerator, long Denominator) UnearnedShare(ServicingSegment segment, Instant t, ServicingTerm term, int termDays)
-        {
-            var segmentDays = DayCount.Days(segment.From, segment.To, term.Zone);
-            var elapsedDays = Math.Clamp(DayCount.Days(segment.From, t, term.Zone), 0, Math.Max(segmentDays, 0));
-            if (segmentDays <= 0)
-            {
-                return (0, 1);
-            }
-
-            var whole = proration.Fraction(term.Convention, segmentDays, termDays);
-            var elapsed = proration.Fraction(term.Convention, elapsedDays, termDays);
-            var g = Gcd(whole.Denominator, elapsed.Denominator);
-            long num = ((long)whole.Numerator * (elapsed.Denominator / g)) - ((long)elapsed.Numerator * (whole.Denominator / g));
-            long den = (long)whole.Numerator * (elapsed.Denominator / g);
-            return den <= 0 ? (0, 1) : (Math.Clamp(num, 0, den), den);
-        }
-
-        /// <summary>The fraction of the term still to run from <paramref name="t"/>: 1 − (fraction elapsed since the term's start).</summary>
-        private ProrationFraction Remaining(ServicingTerm term, Instant t)
+        /// <summary>The fraction of the term elapsed at <paramref name="t"/> (0 at the start, the full-term fraction at or after the end).</summary>
+        private ProrationFraction Elapsed(ServicingTerm term, Instant t)
         {
             var termDays = term.Days;
-            var whole = proration.Fraction(term.Convention, termDays, termDays);
-            var elapsed = proration.Fraction(term.Convention, DayCount.Days(term.From, t, term.Zone), termDays);
+            var days = t >= term.To ? termDays : Math.Clamp(DayCount.Days(term.From, t, term.Zone), 0, termDays);
+            return proration.Fraction(term.Convention, days, termDays);
+        }
+
+        /// <summary>rate × (elapsed(b) − elapsed(a)): the exact amount an annual rate earns over [a, b).</summary>
+        private decimal Piece(decimal rate, Instant a, Instant b, ServicingTerm term)
+        {
+            if (b <= a)
+            {
+                return 0m;
+            }
+
+            var ga = Elapsed(term, a);
+            var gb = Elapsed(term, b);
+            var num = ((long)gb.Numerator * ga.Denominator) - ((long)ga.Numerator * gb.Denominator);
+            var den = (long)gb.Denominator * ga.Denominator;
+            return num <= 0 ? 0m : Times(rate, num, den);
+        }
+
+        /// <summary>The exact (unrounded) cumulative of a key's segments earned up to <paramref name="cut"/>: Σ rate × Δelapsed.</summary>
+        private decimal ExactTo(IReadOnlyList<ServicingSegment>? segments, Instant cut, ServicingTerm term) =>
+            segments is null ? 0m : segments.Sum(s => Piece(s.Rate.AnnualRate, s.From, Instant.Min(s.To, cut), term));
+
+        /// <summary>
+        /// Fail closed on state the engine could not have produced: per non-flat key, the written cumulative must be the
+        /// rounding of the exact cumulative derived from the segments' rates and periods, with no negative segment.
+        /// </summary>
+        private ServicingResult? ValidateAmounts(ServicingState state)
+        {
+            foreach (var group in state.Segments.GroupBy(s => s.Key))
+            {
+                var list = group.ToList();
+                if (list.Any(s => s.Amount < 0m && !s.Rate.Flat))
+                {
+                    return ServicingResult.Refused(ServicingRefusal.InvalidInput, $"{group.Key.ChargeType}: a segment has a negative amount.");
+                }
+
+                if (!list[0].Rate.Flat && list.Sum(s => s.Amount) != Round(ExactTo(list, state.Term.To, state.Term)))
+                {
+                    return ServicingResult.Refused(ServicingRefusal.InvalidInput, $"{group.Key.ChargeType}: the written amounts do not match the segments' rates and periods.");
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>The fraction of the term still to run from <paramref name="t"/>: full − elapsed.</summary>
+        private ProrationFraction Remaining(ServicingTerm term, Instant t)
+        {
+            var whole = Elapsed(term, term.To);
+            var elapsed = Elapsed(term, t);
             var g = Gcd(whole.Denominator, elapsed.Denominator);
             var num = ((long)whole.Numerator * (elapsed.Denominator / g)) - ((long)elapsed.Numerator * (whole.Denominator / g));
             var den = (long)whole.Denominator * (elapsed.Denominator / g);
