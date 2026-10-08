@@ -39,10 +39,7 @@ internal sealed class RatingRateService(
         ArgumentNullException.ThrowIfNull(request);
         var envelope = request.Envelope;
         var mode = envelope.Mode;
-        if (mode is not (RateRateRequest.EnvelopeDetail.ModeValue.Full or RateRateRequest.EnvelopeDetail.ModeValue.Quick or RateRateRequest.EnvelopeDetail.ModeValue.DryRun))
-        {
-            throw Error("ENVELOPE", $"Mode {mode} is not available in this slice (FULL, QUICK and DRY_RUN are).");
-        }
+        RatingModes.EnsureSupported(mode);
 
         if (request.Segments.Count is 0 or > MaxSegments)
         {
@@ -70,9 +67,9 @@ internal sealed class RatingRateService(
         var segments = new List<(string SegmentId, MotorRisk Risk, List<CoveragePremium> Premiums)>();
         foreach (var segment in request.Segments)
         {
-            if (segment.ValidPeriod.End != segment.ValidPeriod.Start.AddYears(1))
+            if (!RatingModes.SegmentPeriodAllowed(mode, segment.ValidPeriod))
             {
-                throw Error("PERIOD", $"Segment {segment.SegmentId} must be one year: the slice rates annual terms only (D6).");
+                throw Error("PERIOD", RatingModes.PeriodMessage(mode, segment.SegmentId));
             }
 
             var risk = MotorRisk.Parse(segment.RiskTree, segment.SegmentId);
@@ -215,7 +212,7 @@ internal sealed class RatingRateService(
                     ProductCode = envelope.ProductCode,
                     ProductVersion = ProductVersionNumber.Parse(artefact.Definition.ProductVersion),
                     Slot = artefact.Definition.Code,
-                    Mode = mode == RateRateRequest.EnvelopeDetail.ModeValue.Quick ? RatingCalculatedV1.ModeValue.Quick : RatingCalculatedV1.ModeValue.Full,
+                    Mode = RatingModes.EventMode(mode),
                     Channel = envelope.Channel ?? "DIRECT",
                     ProducerCode = envelope.ProducerCode,
                     RatingCellKey = artefact.Definition.Code,
@@ -224,7 +221,7 @@ internal sealed class RatingRateService(
                     TaxTotal = taxTotal,
                     SignalCodes = [],
                     WorksheetId = worksheetId,
-                    Bindable = mode == RateRateRequest.EnvelopeDetail.ModeValue.Full,
+                    Bindable = RatingModes.IsBindable(mode),
                 },
                 BusinessKeys.Empty.With("worksheetId", worksheetId.Value)));
             }
@@ -241,8 +238,8 @@ internal sealed class RatingRateService(
             RatingArtefactHash = artefact.Hash,
             ConfigurationHash = configurationHash,
             Warnings = warnings,
-            AutomatedDecision = false,
-            Bindable = mode == RateRateRequest.EnvelopeDetail.ModeValue.Full,
+            AutomatedDecision = RatingModes.IsAutomatedDecision(mode),
+            Bindable = RatingModes.IsBindable(mode),
             WorksheetId = worksheetId,
             WorksheetHash = worksheetId,
         };
@@ -254,6 +251,11 @@ internal sealed class RatingRateService(
     private async Task<CompiledArtefact> ResolveArtefactAsync(
         RateRateRequest.EnvelopeDetail envelope, string? version, DateOnly basis, CancellationToken cancellationToken)
     {
+        if (envelope.Mode == RateRateRequest.EnvelopeDetail.ModeValue.Endorsement)
+        {
+            return await RatingModes.ResolvePinnedAsync(store, envelope, version, cancellationToken).ConfigureAwait(false);
+        }
+
         string hash;
         if (envelope.RatingArtefactHash is { } named)
         {
