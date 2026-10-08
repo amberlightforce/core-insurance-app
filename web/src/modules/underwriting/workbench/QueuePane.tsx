@@ -80,15 +80,17 @@ export function QueuePane({ queue, selectedJob, onOpen, list }: QueuePaneProps) 
   );
 
   const getRowId = useMemo(() => (row: ReferralListItem) => row.jobRef, []);
-  const getRowLabel = useMemo(
-    () => (row: ReferralListItem) => row.jobNumber ?? row.jobRef,
-    [],
-  );
+  const getRowLabel = useMemo(() => (row: ReferralListItem) => row.jobNumber ?? row.jobRef, []);
   const selectedIds = useMemo(() => (selectedJob ? [selectedJob] : []), [selectedJob]);
-  const openRow = useMemo(() => (row: ReferralListItem) => onOpen(row.jobRef), [onOpen]);
+  const openRow = useMemo(
+    () => (row: ReferralListItem) => {
+      onOpen(row.jobRef);
+    },
+    [onOpen],
+  );
 
   const done = counts?.decidedByMeToday ?? 0;
-  const mineUnknown = queue === 'MINE' && counts !== undefined && counts.mine === null;
+  const mineUnknown = queue === 'MINE' && counts?.mine === null;
 
   let body;
   if (query.isPending) {
@@ -168,9 +170,7 @@ export function QueuePane({ queue, selectedJob, onOpen, list }: QueuePaneProps) 
       {body}
       {!query.isPending && !(query.isError && items.length === 0) ? (
         <div className={styles.qfoot}>
-          <span className={styles.caption}>
-            {t('queue.footer', { count: items.length })}
-          </span>
+          <span className={styles.caption}>{t('queue.footer', { count: items.length })}</span>
           {query.hasNextPage ? (
             <Button
               variant="ghost"

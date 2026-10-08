@@ -127,6 +127,7 @@
       "SOD_EVALUATOR": "You ran or bound the evaluation of this quote.",
       "NOT_HUMAN": "Only a person can decide.",
       "NO_AUTHORITY": "Your authority does not cover this issue.",
+      "NEEDS_REEVALUATION": "The referral must be re-evaluated first.",
       "NOT_OPEN": "No issue is waiting for a decision."
     }
   },

@@ -32,7 +32,12 @@ function IssueStatusPill({ status }: { status: IssueStatus }) {
       return <StatusPill entity="uwIssue" state="approved" size="sm" announceChanges={false} />;
     case 'ApprovedWithConditions':
       return (
-        <StatusPill entity="uwIssue" state="approvedWithConditions" size="sm" announceChanges={false} />
+        <StatusPill
+          entity="uwIssue"
+          state="approvedWithConditions"
+          size="sm"
+          announceChanges={false}
+        />
       );
     case 'Rejected':
       return <StatusPill entity="uwIssue" state="rejected" size="sm" announceChanges={false} />;
@@ -51,12 +56,18 @@ interface IssueCardProps {
 
 /** One issue (mockup `.issue`): the type with its status, the value against the rule limit, «Γιατί;» and the decision. */
 function IssueCard({ entry, reason }: IssueCardProps) {
-  const { t } = useTranslation('underwriting');
+  const { t, i18n } = useTranslation('underwriting');
   const region = useRegionFormat();
   const describe = useIssueText();
   const typeLabel = useIssueTypeLabel();
   const [showWhy, setShowWhy] = useState(false);
   const { issue } = entry;
+  // A driver-rule value arrives as an age band code («FROM_18_TO_20»): shown in words.
+  const observed = reason?.observed
+    ? i18n.exists(`underwriting:detail.ageBand.${reason.observed}`)
+      ? t(`detail.ageBand.${reason.observed}`)
+      : reason.observed
+    : t('issue.noValue');
   const text = describe(issue);
   const limitReason = reason?.limitUnavailableReason;
 
@@ -68,7 +79,7 @@ function IssueCard({ entry, reason }: IssueCardProps) {
       </div>
       <div className={styles.compare}>
         <span className={styles.muted}>{t('issue.value')}</span>
-        <b className={styles.num}>{reason?.observed ?? t('issue.noValue')}</b>
+        <b className={styles.num}>{observed}</b>
         <span className={styles.faint}>{t('issue.limit')}</span>
         {reason?.limit ? (
           <span className={styles.num}>{reason.limit}</span>
@@ -125,7 +136,10 @@ function Facts({ referral }: { referral: ReferralView }) {
       label: t('detail.kv.product'),
       value: summary.productCode
         ? referral.productVersion
-          ? t('detail.kv.productValue', { code: summary.productCode, version: referral.productVersion })
+          ? t('detail.kv.productValue', {
+              code: summary.productCode,
+              version: referral.productVersion,
+            })
           : summary.productCode
         : null,
     },
@@ -153,7 +167,9 @@ function Facts({ referral }: { referral: ReferralView }) {
       {
         id: 'driver',
         label: t('detail.kv.youngestDriver'),
-        value: facts.driver.youngestAgeBand ? t(`detail.ageBand.${facts.driver.youngestAgeBand}`) : null,
+        value: facts.driver.youngestAgeBand
+          ? t(`detail.ageBand.${facts.driver.youngestAgeBand}`)
+          : null,
       },
     );
   }
@@ -231,7 +247,9 @@ export function DetailPane({ jobRef }: DetailPaneProps) {
         <h1 className={styles.srOnly}>{t('title')}</h1>
         <div className={styles.centre}>
           <ErrorState
-            message={problem.status === 404 ? t('detail.notFound') : (problem.title ?? t('list.error'))}
+            message={
+              problem.status === 404 ? t('detail.notFound') : (problem.title ?? t('list.error'))
+            }
             {...(problem.traceId ? { correlationId: problem.traceId } : {})}
             {...(problem.status === 404
               ? {}
@@ -254,15 +272,29 @@ export function DetailPane({ jobRef }: DetailPaneProps) {
     <div className={styles.sheet}>
       <div className={styles.detailHead}>
         <PageHeader
-          overline={t('detail.overline', { product: summary.productCode ?? t('detail.unknownProduct') })}
-          title={summary.customer?.displayName ?? summary.customer?.partyNumber ?? t('queue.noName')}
+          overline={t('detail.overline', {
+            product: summary.productCode ?? t('detail.unknownProduct'),
+          })}
+          title={
+            summary.customer?.displayName ?? summary.customer?.partyNumber ?? t('queue.noName')
+          }
           {...(summary.jobNumber ? { recordId: summary.jobNumber } : {})}
           subtitle={<ReferralPill status={summary.referralStatus} />}
           facts={[
-            { id: 'premium', label: t('detail.facts.premium'), value: fmt.money(summary.premiumTotal) },
+            {
+              id: 'premium',
+              label: t('detail.facts.premium'),
+              value: fmt.money(summary.premiumTotal),
+            },
             { id: 'start', label: t('detail.facts.start'), value: fmt.date(summary.effectiveDate) },
             ...(referral.producerCode
-              ? [{ id: 'producer', label: t('detail.facts.producer'), value: referral.producerCode }]
+              ? [
+                  {
+                    id: 'producer',
+                    label: t('detail.facts.producer'),
+                    value: referral.producerCode,
+                  },
+                ]
               : []),
           ]}
         />

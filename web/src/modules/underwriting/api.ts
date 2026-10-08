@@ -33,8 +33,12 @@ export interface ReferralListPage {
 }
 
 /** The views of the rail, in order: the mockup's three plus «Απορρίφθηκαν» (D-SL5-03). */
-export const referralQueues = ['MINE', 'OPEN', 'DECIDED_BY_ME_TODAY', 'REJECTED'] as const satisfies
-  readonly ReferralQueue[];
+export const referralQueues = [
+  'MINE',
+  'OPEN',
+  'DECIDED_BY_ME_TODAY',
+  'REJECTED',
+] as const satisfies readonly ReferralQueue[];
 
 export function isReferralQueue(value: string | null): value is (typeof referralQueues)[number] {
   return referralQueues.some((queue) => queue === value);
@@ -75,7 +79,10 @@ export function useReferralList(queue: ReferralQueue, enabled = true) {
   });
   const pages = query.data?.pages;
   // One array per fetched page set: the table never receives a fresh array while nothing changed (PITFALLS 26).
-  const items = useMemo<ReferralListItem[]>(() => pages?.flatMap((page) => page.items) ?? [], [pages]);
+  const items = useMemo<ReferralListItem[]>(
+    () => pages?.flatMap((page) => page.items) ?? [],
+    [pages],
+  );
   const counts = pages?.[0]?.counts;
   return { query, items, counts };
 }

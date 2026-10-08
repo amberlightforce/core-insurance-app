@@ -70,7 +70,9 @@ export function DecisionBar({ referral }: DecisionBarProps) {
       setReason('');
       setTried(false);
       const approved = body.decision === 'APPROVE';
-      announce(t(approved ? 'decision.announceApproved' : 'decision.announceRejected', { job: jobLabel }));
+      announce(
+        t(approved ? 'decision.announceApproved' : 'decision.announceRejected', { job: jobLabel }),
+      );
       // A confirmation without undo: a decision is a recorded fact, not a draft (D-SL5-03).
       toast.success({
         title: t(approved ? 'decision.approvedToast' : 'decision.rejectedToast'),
@@ -109,9 +111,9 @@ export function DecisionBar({ referral }: DecisionBarProps) {
   };
 
   // The server's reasons in plain words: the tooltip and the accessible description of the disabled buttons.
-  const disabledReason = referral.decidability.reasons
-    .map((code) => t(`decision.reasons.${code}`))
-    .join(' ') || t('decision.cannotDecide');
+  const disabledReason =
+    referral.decidability.reasons.map((code) => t(`decision.reasons.${code}`)).join(' ') ||
+    t('decision.cannotDecide');
 
   const problem = mutation.isError ? problemOf(mutation.error) : null;
   const known =
@@ -123,9 +125,7 @@ export function DecisionBar({ referral }: DecisionBarProps) {
     (problem?.status === 403 ? t('errors.forbidden') : (problem?.detail ?? t('errors.generic')));
   const stale = problem?.code === 'UW-ERR-STALE';
 
-  const decidedBy = summary.lastDecidedBy
-    ? summary.lastDecidedBy
-    : displayName(readSession()?.user.name ?? '');
+  const decidedBy = summary.lastDecidedBy ?? displayName(readSession()?.user.name ?? '');
   const receipt =
     summary.lastDecidedAt && open.length === 0 ? (
       <span className={styles.receipt}>
@@ -152,7 +152,9 @@ export function DecisionBar({ referral }: DecisionBarProps) {
             <div
               className={styles.meter}
               role="meter"
-              aria-label={t(`decision.authorityMeter.${restrictive.decidability.authority.outcome}`)}
+              aria-label={t(
+                `decision.authorityMeter.${restrictive.decidability.authority.outcome}`,
+              )}
               aria-valuemin={0}
               aria-valuemax={1}
               aria-valuenow={restrictive.decidability.authority.outcome === 'ALLOW' ? 1 : 0}
