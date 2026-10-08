@@ -1,5 +1,6 @@
 using CoreIns.Modules.Market.Contracts.Spi;
 using CoreIns.Modules.Market.Domain;
+using CoreIns.SharedKernel.Identifiers;
 using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Results;

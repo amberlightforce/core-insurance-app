@@ -6,6 +6,7 @@ using CoreIns.Modules.Market.Domain;
 using CoreIns.Modules.Market.Queries;
 using CoreIns.Modules.Market.Services;
 using CoreIns.Platform.Errors;
+using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
