@@ -23,4 +23,8 @@ public sealed record ReferralQueueCounts
     /// <summary>Contract member 'decidedByMeToday'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("decidedByMeToday")]
     public required int DecidedByMeToday { get; init; }
+
+    /// <summary>Open referrals the caller can decide (the MINE queue; same computation). Null when the legal entity has more than 500 open referrals and the count is not computed.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("mine")]
+    public required int? Mine { get; init; }
 }

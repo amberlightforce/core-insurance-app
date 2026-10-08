@@ -40,7 +40,11 @@ public sealed record ReferralView
     [global::System.Text.Json.Serialization.JsonPropertyName("facts")]
     public global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralRiskFacts? Facts { get; init; }
 
-    /// <summary>Every issue of the job, oldest first, with its decision (the previous decisions)</summary>
+    /// <summary>Every issue of the job, oldest first, with its decision (the previous decisions) and whether the caller can decide it</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueListItem> Issues { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralIssue> Issues { get; init; }
+
+    /// <summary>Contract member 'decidability'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decidability")]
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralDecidability Decidability { get; init; }
 }

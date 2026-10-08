@@ -6170,7 +6170,9 @@ components:
       - APPROVED_TODAY
       - REJECTED
       - DECIDED_BY_ME_TODAY
-      description: Workbench queue (D-USR-13). OPEN - a job issue waits for a decision; APPROVED_TODAY - an issue of the job
+      - MINE
+      description: Workbench queue (D-USR-13). MINE - the OPEN referrals the caller can decide now (D-SL5-03/04; the dry
+        decide check per Open issue; refused with UW-ERR-VALIDATION above 500 open referrals in the legal entity). OPEN - a job issue waits for a decision; APPROVED_TODAY - an issue of the job
         was approved on the legal entity's business day; REJECTED - a rejection still stands on the job; DECIDED_BY_ME_TODAY
         - the caller decided an issue of the job today.
     ReferralStatusCode:
@@ -6197,11 +6199,19 @@ components:
         decidedByMeToday:
           type: integer
           minimum: 0
+        mine:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          description: Open referrals the caller can decide (the MINE queue; same computation). Null when the legal entity has
+            more than 500 open referrals and the count is not computed.
       required:
       - open
       - approvedToday
       - rejected
       - decidedByMeToday
+      - mine
     ReferralCustomer:
       type: object
       description: The policyholder as PTY's masked view shows it (P1 name only, never a P2 value).
@@ -6230,11 +6240,31 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/IssueStatusCode'
+        observed:
+          type:
+          - string
+          - 'null'
+          description: The fact value the rule read, from the stored derived facts (vehicle age in years, vehicle value, or the
+            youngest driver's age band; never a birth date). Null when the facts were not recorded.
+        limit:
+          type:
+          - string
+          - 'null'
+          description: The rule's declared threshold (the rule set's explain.limit). Null when the rule declares none; then
+            limitUnavailableReason is set.
+        limitUnavailableReason:
+          type:
+          - string
+          - 'null'
+          description: Why limit is null, e.g. RULE_DECLARES_NO_LIMIT. Always set when limit is null.
       required:
       - issueId
       - issueType
       - ruleId
       - status
+      - observed
+      - limit
+      - limitUnavailableReason
     ReferralListItem:
       type: object
       description: 'uw.Referral.list result: one referred job (D-USR-13).'
@@ -6431,11 +6461,96 @@ components:
         issues:
           type: array
           items:
-            $ref: '#/components/schemas/IssueListItem'
-          description: Every issue of the job, oldest first, with its decision (the previous decisions)
+            $ref: '#/components/schemas/ReferralIssue'
+          description: Every issue of the job, oldest first, with its decision (the previous decisions) and whether the caller
+            can decide it
+        decidability:
+          $ref: '#/components/schemas/ReferralDecidability'
       required:
       - summary
       - issues
+      - decidability
+    DecidabilityReason:
+      type: string
+      enum:
+      - SOD_CREATOR
+      - SOD_PARTICIPANT
+      - SOD_PRODUCER
+      - SOD_EVALUATOR
+      - NOT_HUMAN
+      - NO_AUTHORITY
+      - NOT_OPEN
+      description: Why the caller cannot decide now. SOD_CREATOR - created the job; SOD_PARTICIPANT - edited or otherwise worked
+        on the job; SOD_PRODUCER - is the job's producer; SOD_EVALUATOR - ran or bound an evaluation of the job; NOT_HUMAN - the
+        actor is not a person (REQ-UW-115); NO_AUTHORITY - UW.ISSUE_APPROVAL for the issue type is refused or refers up; NOT_OPEN -
+        the issue is not Open. SOD-UW-02, BR-UW-013.
+    AuthorityPreview:
+      type: object
+      description: The dry UW.ISSUE_APPROVAL check for the issue type (no check record, approval request or audit event is written).
+        A preview, never an authorisation; uw.Issue.decide re-runs the check.
+      properties:
+        type:
+          type: string
+          description: Authority type code (UW.ISSUE_APPROVAL)
+        issueType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        outcome:
+          type: string
+          enum:
+          - ALLOW
+          - REFER
+          - DENY
+        sourceGrantId:
+          type:
+          - string
+          - 'null'
+          description: The grant that decided (allow) or was exceeded (refer)
+      required:
+      - type
+      - issueType
+      - outcome
+    IssueDecidability:
+      type: object
+      description: Whether the caller can decide one issue now, and why not (always set).
+      properties:
+        canDecide:
+          type: boolean
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecidabilityReason'
+        authority:
+          $ref: '#/components/schemas/AuthorityPreview'
+      required:
+      - canDecide
+      - reasons
+      - authority
+    ReferralDecidability:
+      type: object
+      description: Whether the caller can decide the referral now. canDecide is true only when it is true for every Open issue and
+        at least one issue is Open.
+      properties:
+        canDecide:
+          type: boolean
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecidabilityReason'
+          description: The distinct reasons across the Open issues (NOT_OPEN when no issue is Open)
+      required:
+      - canDecide
+      - reasons
+    ReferralIssue:
+      type: object
+      description: One issue of a referred job with the caller's decidability (the wrapper keeps IssueListItem unchanged for uw.Issue.list).
+      properties:
+        issue:
+          $ref: '#/components/schemas/IssueListItem'
+        decidability:
+          $ref: '#/components/schemas/IssueDecidability'
+      required:
+      - issue
+      - decidability
     ReferralReferUpRequest:
       type: object
       description: 'uw.Referral.referUp request. PRD inputs: "job ref, issue ids, comment, attachments"'

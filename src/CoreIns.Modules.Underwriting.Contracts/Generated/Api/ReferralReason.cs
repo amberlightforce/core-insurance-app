@@ -23,4 +23,16 @@ public sealed record ReferralReason
     /// <summary>Contract member 'status'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
     public required global::CoreIns.Modules.Underwriting.Contracts.Api.IssueStatusCode Status { get; init; }
+
+    /// <summary>The fact value the rule read, from the stored derived facts (vehicle age in years, vehicle value, or the youngest driver's age band; never a birth date). Null when the facts were not recorded.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("observed")]
+    public required string? Observed { get; init; }
+
+    /// <summary>The rule's declared threshold (the rule set's explain.limit). Null when the rule declares none; then limitUnavailableReason is set.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("limit")]
+    public required string? Limit { get; init; }
+
+    /// <summary>Why limit is null, e.g. RULE_DECLARES_NO_LIMIT. Always set when limit is null.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("limitUnavailableReason")]
+    public required string? LimitUnavailableReason { get; init; }
 }

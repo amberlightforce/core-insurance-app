@@ -2195,10 +2195,10 @@ export interface components {
             referral: components["schemas"]["ReferralView"];
         };
         /**
-         * @description Workbench queue (D-USR-13). OPEN - a job issue waits for a decision; APPROVED_TODAY - an issue of the job was approved on the legal entity's business day; REJECTED - a rejection still stands on the job; DECIDED_BY_ME_TODAY - the caller decided an issue of the job today.
+         * @description Workbench queue (D-USR-13). MINE - the OPEN referrals the caller can decide now (D-SL5-03/04; the dry decide check per Open issue; refused with UW-ERR-VALIDATION above 500 open referrals in the legal entity). OPEN - a job issue waits for a decision; APPROVED_TODAY - an issue of the job was approved on the legal entity's business day; REJECTED - a rejection still stands on the job; DECIDED_BY_ME_TODAY - the caller decided an issue of the job today.
          * @enum {string}
          */
-        ReferralQueueCode: "OPEN" | "APPROVED_TODAY" | "REJECTED" | "DECIDED_BY_ME_TODAY";
+        ReferralQueueCode: "OPEN" | "APPROVED_TODAY" | "REJECTED" | "DECIDED_BY_ME_TODAY" | "MINE";
         /**
          * @description Status of the referred job derived from its issues - Open while an issue waits, else Rejected while a rejection stands, else Approved.
          * @enum {string}
@@ -2210,6 +2210,8 @@ export interface components {
             approvedToday: number;
             rejected: number;
             decidedByMeToday: number;
+            /** @description Open referrals the caller can decide (the MINE queue; same computation). Null when the legal entity has more than 500 open referrals and the count is not computed. */
+            mine: number | null;
         };
         /** @description The policyholder as PTY's masked view shows it (P1 name only, never a P2 value). */
         ReferralCustomer: {
@@ -2224,6 +2226,12 @@ export interface components {
             issueType: components["schemas"]["Code"];
             ruleId: string;
             status: components["schemas"]["IssueStatusCode"];
+            /** @description The fact value the rule read, from the stored derived facts (vehicle age in years, vehicle value, or the youngest driver's age band; never a birth date). Null when the facts were not recorded. */
+            observed: string | null;
+            /** @description The rule's declared threshold (the rule set's explain.limit). Null when the rule declares none; then limitUnavailableReason is set. */
+            limit: string | null;
+            /** @description Why limit is null, e.g. RULE_DECLARES_NO_LIMIT. Always set when limit is null. */
+            limitUnavailableReason: string | null;
         };
         /** @description uw.Referral.list result: one referred job (D-USR-13). */
         ReferralListItem: {
@@ -2297,8 +2305,41 @@ export interface components {
             taxes?: components["schemas"]["Money"] | null;
             /** @description Null when no evaluation recorded the facts (evaluations before this slice) */
             facts?: components["schemas"]["ReferralRiskFacts"] | null;
-            /** @description Every issue of the job, oldest first, with its decision (the previous decisions) */
-            issues: components["schemas"]["IssueListItem"][];
+            /** @description Every issue of the job, oldest first, with its decision (the previous decisions) and whether the caller can decide it */
+            issues: components["schemas"]["ReferralIssue"][];
+            decidability: components["schemas"]["ReferralDecidability"];
+        };
+        /**
+         * @description Why the caller cannot decide now. SOD_CREATOR - created the job; SOD_PARTICIPANT - edited or otherwise worked on the job; SOD_PRODUCER - is the job's producer; SOD_EVALUATOR - ran or bound an evaluation of the job; NOT_HUMAN - the actor is not a person (REQ-UW-115); NO_AUTHORITY - UW.ISSUE_APPROVAL for the issue type is refused or refers up; NOT_OPEN - the issue is not Open. SOD-UW-02, BR-UW-013.
+         * @enum {string}
+         */
+        DecidabilityReason: "SOD_CREATOR" | "SOD_PARTICIPANT" | "SOD_PRODUCER" | "SOD_EVALUATOR" | "NOT_HUMAN" | "NO_AUTHORITY" | "NOT_OPEN";
+        /** @description The dry UW.ISSUE_APPROVAL check for the issue type (no check record, approval request or audit event is written). A preview, never an authorisation; uw.Issue.decide re-runs the check. */
+        AuthorityPreview: {
+            /** @description Authority type code (UW.ISSUE_APPROVAL) */
+            type: string;
+            issueType: components["schemas"]["Code"];
+            /** @enum {string} */
+            outcome: "ALLOW" | "REFER" | "DENY";
+            /** @description The grant that decided (allow) or was exceeded (refer) */
+            sourceGrantId?: string | null;
+        };
+        /** @description Whether the caller can decide one issue now, and why not (always set). */
+        IssueDecidability: {
+            canDecide: boolean;
+            reasons: components["schemas"]["DecidabilityReason"][];
+            authority: components["schemas"]["AuthorityPreview"];
+        };
+        /** @description Whether the caller can decide the referral now. canDecide is true only when it is true for every Open issue and at least one issue is Open. */
+        ReferralDecidability: {
+            canDecide: boolean;
+            /** @description The distinct reasons across the Open issues (NOT_OPEN when no issue is Open) */
+            reasons: components["schemas"]["DecidabilityReason"][];
+        };
+        /** @description One issue of a referred job with the caller's decidability (the wrapper keeps IssueListItem unchanged for uw.Issue.list). */
+        ReferralIssue: {
+            issue: components["schemas"]["IssueListItem"];
+            decidability: components["schemas"]["IssueDecidability"];
         };
         /** @description uw.Referral.referUp request. PRD inputs: "job ref, issue ids, comment, attachments" */
         ReferralReferUpRequest: {

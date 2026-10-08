@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>Workbench queue (D-USR-13). OPEN - a job issue waits for a decision; APPROVED_TODAY - an issue of the job was approved on the legal entity's business day; REJECTED - a rejection still stands on the job; DECIDED_BY_ME_TODAY - the caller decided an issue of the job today.</summary>
+/// <summary>Workbench queue (D-USR-13). MINE - the OPEN referrals the caller can decide now (D-SL5-03/04; the dry decide check per Open issue; refused with UW-ERR-VALIDATION above 500 open referrals in the legal entity). OPEN - a job issue waits for a decision; APPROVED_TODAY - an issue of the job was approved on the legal entity's business day; REJECTED - a rejection still stands on the job; DECIDED_BY_ME_TO…</summary>
 [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ReferralQueueCode>))]
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public enum ReferralQueueCode
@@ -24,4 +24,8 @@ public enum ReferralQueueCode
     /// <summary><c>DECIDED_BY_ME_TODAY</c></summary>
     [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DECIDED_BY_ME_TODAY")]
     DecidedByMeToday,
+
+    /// <summary><c>MINE</c></summary>
+    [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MINE")]
+    Mine,
 }
