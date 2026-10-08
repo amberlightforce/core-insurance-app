@@ -105,6 +105,40 @@ internal static class ReceiptCodes
     public const string RuleManual = "MANUAL";
 }
 
+/// <summary>Status of a payee account (PRD-06 §7.1 PaymentInstrument: Active, Superseded, Revoked).</summary>
+internal enum PayeeAccountStatus
+{
+    Active,
+    Superseded,
+    Revoked,
+}
+
+/// <summary>Verification status of a payee account (REQ-BIL-345).</summary>
+internal enum PayeeVerification
+{
+    Unverified,
+    VopMatched,
+    VopCloseMatch,
+    VopNoMatch,
+    VopNotAvailable,
+    Confirmed,
+}
+
+/// <summary>Outcome of one verification of payee (REQ-BIL-203).</summary>
+internal enum VopOutcome
+{
+    Match,
+    CloseMatch,
+    NoMatch,
+    NotAvailable,
+}
+
+/// <summary>Screening outcomes stored on a disbursement (PTY <c>pty.Screening.screen</c>, REQ-BIL-200).</summary>
+internal static class ScreeningCodes
+{
+    public const string Clear = "CLEAR";
+}
+
 /// <summary>Payment plans served by the slice (D-SLC-10c: the happy path uses ANNUAL; BIL defines no other plan).</summary>
 internal static class PaymentPlans
 {

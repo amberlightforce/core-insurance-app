@@ -4,31 +4,105 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PayeeAccount.get result. PRD outputs: "accounts with periods, verification, cooling-off"</summary>
+/// <summary>Typed from REQ-BIL-345 (SL2-BIL-DISB). PRD outputs: "accounts with periods, verification, cooling-off". The IBAN is masked except the last four characters; revealing it (P2 permission plus purpose) is not built yet.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PayeeAccountGetResponse
 {
-    /// <summary>PRD: "accounts with periods"</summary>
+    /// <summary>Contract member 'payeeAccountId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("accountsPeriods")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? AccountsPeriods { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
+    public required global::System.Guid PayeeAccountId { get; init; }
 
-    /// <summary>PRD: "verification"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("verification")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Verification { get; init; }
+    /// <summary>Contract member 'partyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
 
-    /// <summary>PRD: "cooling-off"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("coolingOff")]
+    /// <summary>Contract member 'purpose'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
+    public required string Purpose { get; init; }
+
+    /// <summary>IBAN masked except the last four characters</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("maskedIban")]
+    public required string MaskedIban { get; init; }
+
+    /// <summary>Contract member 'holderName'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("holderName")]
+    public required string HolderName { get; init; }
+
+    /// <summary>Contract member 'source'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("source")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? CoolingOff { get; init; }
+    public string? Source { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'verificationStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("verificationStatus")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.PayeeVerificationStatus VerificationStatus { get; init; }
+
+    /// <summary>Last verification-of-payee outcome (REQ-BIL-203)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("vopResult")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public VopResultValue? VopResult { get; init; }
+
+    /// <summary>Contract member 'vopCheckedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("vopCheckedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? VopCheckedAt { get; init; }
+
+    /// <summary>Contract member 'validPeriod'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validPeriod")]
+    public required global::CoreIns.SharedKernel.DateRange ValidPeriod { get; init; }
+
+    /// <summary>Contract member 'coolingOffUntil'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coolingOffUntil")]
+    public required global::CoreIns.SharedKernel.BusinessDate CoolingOffUntil { get; init; }
+
+    /// <summary>True when the account superseded another account of the party for the purpose</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("change")]
+    public required bool Change { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>Active</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Active")]
+        Active,
+
+        /// <summary><c>Superseded</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Superseded")]
+        Superseded,
+
+        /// <summary><c>Revoked</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Revoked")]
+        Revoked,
+    }
+
+    /// <summary>Last verification-of-payee outcome (REQ-BIL-203)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<VopResultValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum VopResultValue
+    {
+        /// <summary><c>Match</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Match")]
+        Match,
+
+        /// <summary><c>CloseMatch</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CloseMatch")]
+        CloseMatch,
+
+        /// <summary><c>NoMatch</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NoMatch")]
+        NoMatch,
+
+        /// <summary><c>NotAvailable</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NotAvailable")]
+        NotAvailable,
+    }
 }

@@ -84,4 +84,20 @@ public sealed record LedgerDimensions
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("allocationId")]
     public global::System.Guid? AllocationId { get; init; }
+
+    /// <summary>Disbursement (REQ-BIL-283 dimension 'disbursement')</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("disbursementId")]
+    public global::CoreIns.SharedKernel.Identifiers.DisbursementId? DisbursementId { get; init; }
+
+    /// <summary>Disbursement source type from the source register (REQ-BIL-354)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceType")]
+    public string? SourceType { get; init; }
+
+    /// <summary>Id of the source object of a disbursement (e.g. the CLM claim payment)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceId")]
+    public string? SourceId { get; init; }
+
+    /// <summary>Claim of a CLM disbursement (D-SL2-08)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
 }

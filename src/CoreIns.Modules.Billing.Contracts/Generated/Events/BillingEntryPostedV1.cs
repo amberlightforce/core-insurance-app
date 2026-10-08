@@ -4,9 +4,9 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Events;
 
-/// <summary>Payload of bil.BillingEntryPosted v1.0: Every ledger entry. FIN's sole posting source for BIL facts (REQ-FIN-036). Keyed on legal_entity_id for non-account entries..</summary>
+/// <summary>Payload of bil.BillingEntryPosted v1.0: Every ledger entry. FIN's sole posting source for BIL facts (REQ-FIN-036). Keyed on legal_entity_id for non-account entries; disbursement entries (DISBURSEMENT_RELEASED, DISBURSEMENT_CLEARED) are keyed on the disbursement (SL2-BIL-DISB)..</summary>
 /// <remarks>
-/// <para>Schema contracts/events/bil/BillingEntryPosted.v1.schema.json; aggregate BillingAccount | LegalEntity (ordering key billing_account_id); trigger: Every ledger entry.</para>
+/// <para>Schema contracts/events/bil/BillingEntryPosted.v1.schema.json; aggregate BillingAccount | LegalEntity | Disbursement (ordering key billing_account_id); trigger: Every ledger entry.</para>
 /// <para>Payload status full.</para>
 /// <para>Required business keys (D-CON-28): entryId. Consumers: DAT, FIN.</para>
 /// </remarks>
@@ -26,7 +26,7 @@ public sealed record BillingEntryPostedV1 : global::CoreIns.Platform.Contracts.E
     public const global::CoreIns.SharedKernel.Identifiers.DataClassification Classification = global::CoreIns.SharedKernel.Identifiers.DataClassification.P0;
 
     /// <summary>Allowed aggregate types (envelope <c>aggregateType</c>).</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> AggregateTypes { get; } = ["BillingAccount", "LegalEntity"];
+    public static global::System.Collections.Generic.IReadOnlyList<string> AggregateTypes { get; } = ["BillingAccount", "LegalEntity", "Disbursement"];
 
     /// <summary>Lineage keys every envelope must carry (<c>x-business-keys</c>; <c>a|b</c> = at least one).</summary>
     public static global::System.Collections.Generic.IReadOnlyList<string> RequiredBusinessKeys { get; } = ["entryId"];

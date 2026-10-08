@@ -17,11 +17,13 @@ namespace CoreIns.Modules.Billing.Services;
 
 /// <summary>What to post: one sub-ledger entry of a billing account.</summary>
 /// <param name="EntryType">Entry type (<see cref="EntryTypes"/>).</param>
-/// <param name="BillingAccountId">Account the entry belongs to (event ordering key).</param>
+/// <param name="BillingAccountId">Account the entry belongs to (event ordering key); null for a disbursement entry.</param>
 /// <param name="Legs">Rule-matched legs (each gives a debit and a credit line).</param>
 /// <param name="Lineage">Business lineage keys (REQ-BIL-284, D5); the entry id is added.</param>
 /// <param name="Operation">Operation that caused the entry.</param>
-internal sealed record EntrySpec(string EntryType, BillingAccountId BillingAccountId, IReadOnlyList<PostingLeg> Legs, BusinessKeys Lineage, string Operation);
+/// <param name="DisbursementId">The disbursement of a disbursement entry (event ordering key when there is no account).</param>
+internal sealed record EntrySpec(
+    string EntryType, BillingAccountId? BillingAccountId, IReadOnlyList<PostingLeg> Legs, BusinessKeys Lineage, string Operation, DisbursementId? DisbursementId = null);
 
 /// <summary>
 /// The only writer of the billing sub-ledger (REQ-BIL-300). It loads the billing-ledger rule table (REQ-BIL-286), turns
@@ -78,7 +80,15 @@ internal sealed class LedgerWriter(
         var entryId = Guid.CreateVersion7();
         var legalEntityCode = context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.");
         var legalEntityId = LegalEntityId;
-        var keys = spec.Lineage.With("entryId", entryId.ToString()).With("billingAccountId", spec.BillingAccountId.Value.ToString());
+        var (aggregateType, aggregateId) = spec switch
+        {
+            { BillingAccountId: { } account } => ("BillingAccount", account.Value.ToString()),
+            { DisbursementId: { } disbursement } => ("Disbursement", disbursement.Value.ToString()),
+            _ => throw new InvalidOperationException($"A {spec.EntryType} entry needs a billing account or a disbursement."),
+        };
+        var keys = spec.Lineage.With("entryId", entryId.ToString());
+        keys = spec.BillingAccountId is { } accountId ? keys.With("billingAccountId", accountId.Value.ToString()) : keys;
+        keys = spec.DisbursementId is { } disbursementId ? keys.With("disbursementId", disbursementId.Value.ToString()) : keys;
 
         db.LedgerEntries.Add(new LedgerEntryRow
         {
@@ -86,6 +96,7 @@ internal sealed class LedgerWriter(
             LegalEntityId = legalEntityId,
             Jurisdiction = Jurisdiction.Value,
             BillingAccountId = spec.BillingAccountId,
+            DisbursementId = spec.DisbursementId,
             EntryType = spec.EntryType,
             AccountingDate = today,
             BusinessDate = today,
@@ -126,6 +137,10 @@ internal sealed class LedgerWriter(
                 InvoiceItemId = d.InvoiceItemId,
                 ReceiptId = d.ReceiptId,
                 AllocationId = d.AllocationId,
+                DisbursementId = d.DisbursementId,
+                SourceType = d.SourceType,
+                SourceId = d.SourceId,
+                ClaimId = d.ClaimId,
             });
             published.Add(new LedgerLine
             {
@@ -137,7 +152,7 @@ internal sealed class LedgerWriter(
         }
 
         events.Publish(new OutgoingEvent(
-            EventDescriptor.From(BillingEntryPostedV1.Descriptor), "BillingAccount", spec.BillingAccountId.Value.ToString(),
+            EventDescriptor.From(BillingEntryPostedV1.Descriptor), aggregateType, aggregateId,
             new BillingEntryPostedV1 { EntryId = entryId, EventTypeValue = spec.EntryType, AccountingDate = today, BusinessDate = today, Lines = published },
             keys) { OccurredAt = now });
         return entryId;
@@ -169,5 +184,9 @@ internal sealed class LedgerWriter(
         InvoiceItemId = d.InvoiceItemId,
         ReceiptId = d.ReceiptId,
         AllocationId = d.AllocationId,
+        DisbursementId = d.DisbursementId,
+        SourceType = d.SourceType,
+        SourceId = d.SourceId,
+        ClaimId = d.ClaimId,
     };
 }

@@ -202,7 +202,11 @@
             "invoiceId": "01929dea-fa68-78d9-8a68-adbb13f60cfc",
             "invoiceItemId": "019233a4-1871-7ebd-85f8-762f16c436d9",
             "receiptId": "0192617a-8240-7110-8a50-b16e4e68ba48",
-            "allocationId": "01926516-b6a7-77e7-8ed2-af5775753a46"
+            "allocationId": "01926516-b6a7-77e7-8ed2-af5775753a46",
+            "disbursementId": "0192ea7c-7c36-7486-8e50-70655e173e93",
+            "sourceType": "sample",
+            "sourceId": "Sample text",
+            "claimId": "0192cdc5-4068-73c0-85a5-690f937b9efd"
           }
         }
       ]
@@ -263,7 +267,11 @@
             "invoiceId": "0192106e-6ccf-7ef9-8398-cc5012797e51",
             "invoiceItemId": "0192418a-3af9-7db1-8dd7-0696a03cf73d",
             "receiptId": "019204bc-d382-78f5-81ff-63b29bdee572",
-            "allocationId": "0192165e-1f68-7ed5-8a4e-046e381779d8"
+            "allocationId": "0192165e-1f68-7ed5-8a4e-046e381779d8",
+            "disbursementId": "01925977-98e4-750d-8778-77d08585d96c",
+            "sourceType": "sample",
+            "sourceId": "Sample text",
+            "claimId": "01921b62-9d26-73d1-8dae-df866c719f9d"
           }
         }
       ]
@@ -940,7 +948,13 @@
       "disbursementId": "0192ba77-116e-7f4f-8af8-ad7e2da349e5",
       "sourceType": "sample",
       "sourceId": "Sample text",
-      "valueDate": "2026-10-07"
+      "valueDate": "2026-10-07",
+      "sourceModule": "PTY",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "method": "SAMPLE_CODE"
     }
   },
   {

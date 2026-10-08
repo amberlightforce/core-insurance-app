@@ -75,6 +75,7 @@ internal static class IdTypeMap
         ["accountNumber"] = "AccountNumber",
         ["activityNumber"] = "ActivityNumber",
         ["claimNumber"] = "ClaimNumber",
+        ["disbursementNumber"] = "DisbursementNumber",
         ["exposureNumber"] = "ExposureNumber",
         ["invoiceNumber"] = "InvoiceNumber",
         ["jobNumber"] = "JobNumber",

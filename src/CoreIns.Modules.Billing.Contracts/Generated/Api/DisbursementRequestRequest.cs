@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method, approval evidence, statement or return reference"</summary>
+/// <summary>Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method, approval evidence, statement or return reference". SL2-BIL-DISB serves source type CLM_CLAIM_PAYMENT (method SEPA_CT, EUR, payeePartyId with payeeAccountId); other sources are refused with BIL-ERR-SOURCE.</summary>
 /// <remarks>
 /// <para>Exactly one of: payeePartyId | adHocPayee.</para>
 /// </remarks>
@@ -78,6 +78,16 @@ public sealed record DisbursementRequestRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("approvalEvidenceRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? ApprovalEvidenceRef { get; init; }
+
+    /// <summary>Content hash the source approved (REQ-BIL-198): SHA-256 of the canonical JSON (RFC 8785) of {sourceType, sourceId, payeePartyId, payeeAccountId, amount}; computed with CoreIns.Modules.Billing.Contracts.DisbursementContent.Hash. A request whose content differs is refused with BIL-ERR-APPROVAL-MISMATCH. Required for CLM_CLAIM_PAYMENT (SL2-BIL-DISB).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalContentHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? ApprovalContentHash { get; init; }
+
+    /// <summary>CLM sources only (required for CLM_CLAIM_PAYMENT) - the claim the payment belongs to; the source reference of the duplicate key (payee account, amount, claim; REQ-BIL-202) and a ledger dimension for FIN (D-SL2-08); not part of the content hash</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
 
     /// <summary>Contract member 'purposeText'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("purposeText")]

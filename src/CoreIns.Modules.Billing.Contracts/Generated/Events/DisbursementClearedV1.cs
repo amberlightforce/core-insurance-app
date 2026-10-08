@@ -61,4 +61,19 @@ public sealed record DisbursementClearedV1 : global::CoreIns.Platform.Contracts.
     /// <summary>Contract member 'valueDate'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("valueDate")]
     public required global::CoreIns.SharedKernel.BusinessDate ValueDate { get; init; }
+
+    /// <summary>Contract member 'sourceModule'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceModule")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ModuleCode? SourceModule { get; init; }
+
+    /// <summary>Contract member 'amount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? Amount { get; init; }
+
+    /// <summary>Contract member 'method'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("method")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Method { get; init; }
 }

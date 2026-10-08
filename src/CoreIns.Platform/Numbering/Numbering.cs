@@ -45,6 +45,9 @@ public static class NumberingSchemes
     /// <summary>Billing account number (REQ-BIL-030).</summary>
     public const string BillingAccount = "BILLING_ACCOUNT";
 
+    /// <summary>Disbursement number (REQ-BIL-197).</summary>
+    public const string Disbursement = "DISBURSEMENT";
+
     /// <summary>Claim number (REQ-CLM-001).</summary>
     public const string Claim = "CLAIM";
 

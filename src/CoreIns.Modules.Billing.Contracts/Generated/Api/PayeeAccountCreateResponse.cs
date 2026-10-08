@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PayeeAccount.create result. PRD outputs: "`payee_account_id`, verification status, cooling_off_until"</summary>
+/// <summary>Typed from REQ-BIL-343 (SL2-BIL-DISB). PRD outputs: "`payee_account_id`, verification status, cooling_off_until". Registering the same IBAN again for the same party and purpose returns the existing account.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PayeeAccountCreateResponse
 {
@@ -13,22 +13,21 @@ public sealed record PayeeAccountCreateResponse
     /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? PayeeAccountId { get; init; }
+    public required global::System.Guid PayeeAccountId { get; init; }
 
-    /// <summary>PRD: "verification status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'verificationStatus'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("verificationStatus")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? VerificationStatus { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.PayeeVerificationStatus VerificationStatus { get; init; }
 
-    /// <summary>PRD: "cooling_off_until"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>End of the cooling-off window of `bil.payee.cooling_off.&lt;purpose&gt;` for a changed account (REQ-BIL-199, BR-BIL-062); equals the registration date for a first account, which is not held</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("coolingOffUntil")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? CoolingOffUntil { get; init; }
+    public required global::CoreIns.SharedKernel.BusinessDate CoolingOffUntil { get; init; }
+
+    /// <summary>IBAN masked except the last four characters (REQ-BIL-345)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("maskedIban")]
+    public required string MaskedIban { get; init; }
+
+    /// <summary>True when this account superseded another account of the party for the purpose (a bank-account change, four-eyes within cooling-off, REQ-BIL-199)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("change")]
+    public required bool Change { get; init; }
 }
