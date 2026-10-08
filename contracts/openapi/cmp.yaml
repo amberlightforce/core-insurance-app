@@ -6444,6 +6444,9 @@ components:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Code
+        correlatedDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: For a CREDIT document, the fiscal document of the original it corrects (SL3-CMP-CREDIT)
       required:
       - fiscalDocumentId
       - status
