@@ -86,6 +86,29 @@ internal static class ArtefactCompiler
             Add("PFC-LINT-WINDOWS", "windows.renewal", "The renewal window cannot open before the new-business window (REQ-PFC-166).");
         }
 
+        // Day count: a provisional flag or note needs a declared convention (REQ-PFC-135).
+        if (a.DayCount is null && (a.DayCountProvisional == true || a.DayCountNote is not null))
+        {
+            Add("PFC-LINT-DAY-COUNT", "dayCount", "A provisional flag or note needs a declared day-count convention (REQ-PFC-135).");
+        }
+
+        // Refund methods per cancellation source (REQ-PFC-134 subset: the all-seven-sources lint is not built, so a source
+        // with no entry is simply absent and POL refuses it). A method is either settled with a source, or marked illustrative (D-SL3-08).
+        Unique((a.RefundMethods ?? []).Select(r => r.Source), "refundMethods", "Refund source");
+        foreach (var (refund, i) in (a.RefundMethods ?? []).Select((r, i) => (r, i)))
+        {
+            var settled = refund.LegalStatus == ConfigLegalStatus.Settled;
+            if (settled && string.IsNullOrWhiteSpace(refund.Reference))
+            {
+                Add("PFC-LINT-REFUND-SOURCE", $"refundMethods[{i}].reference", "A settled refund method cites its legal source (D-REG-01).");
+            }
+
+            if (!settled && refund.Illustrative != true)
+            {
+                Add("PFC-LINT-REFUND-STATUS", $"refundMethods[{i}]", "A refund method is either Settled or marked illustrative; an unmarked commercial value is refused (D-SL3-08).");
+            }
+        }
+
         // Elements: acyclic parents, unique codes, CHOICE fields list their choices.
         Unique(a.Elements.Select(e => e.Code), "elements", "Element");
         var elementCodes = a.Elements.Select(e => e.Code).ToHashSet(StringComparer.Ordinal);
@@ -110,6 +133,16 @@ internal static class ArtefactCompiler
                 {
                     Add("PFC-LINT-CHOICES", $"elements[{i}].fields[{j}].choices", "A CHOICE field lists its allowed codes.");
                 }
+            }
+        }
+
+        // Mid-term change permissions name fields of the vehicle element (REQ-PFC-066 subset).
+        if (a.ChangePermissions is { } change)
+        {
+            Unique(change.EditableVehicleFields, "changePermissions.editableVehicleFields", "Editable vehicle field");
+            foreach (var field in change.EditableVehicleFields.Where(f => !fields.Contains($"vehicle.{f}")))
+            {
+                Add("PFC-LINT-CHANGE-FIELD", "changePermissions.editableVehicleFields", $"Field 'vehicle.{field}' does not exist.");
             }
         }
 

@@ -1,0 +1,22 @@
+# Override of infra/local/compose.yaml for the automated E2E-03 run. Used only through tests/e2e/run-e2e03.sh, which passes
+# --project-directory infra/local (so every path below is relative to infra/local) and -p coreins-e2e03.
+#
+# - the image gets its own tag, so building it never retags a developer's "coreins-host:local";
+# - env_file points at the E2E environment instead of infra/local/.env (which does not exist on a CI runner).
+name: coreins-e2e03
+
+services:
+  bootstrap:
+    image: coreins-host:e2e03
+  migrate:
+    image: coreins-host:e2e03
+    env_file: !override
+      - ../../tests/e2e/stack/e2e03.env
+  api:
+    image: coreins-host:e2e03
+    env_file: !override
+      - ../../tests/e2e/stack/e2e03.env
+  worker:
+    image: coreins-host:e2e03
+    env_file: !override
+      - ../../tests/e2e/stack/e2e03.env
