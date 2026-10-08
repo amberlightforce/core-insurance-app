@@ -60,7 +60,7 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
         var ct = TestContext.Current.CancellationToken;
 
         var users = await client.GetFromJsonAsync<JsonNode>(new Uri("/api/plt/v1/dev/users", UriKind.Relative), ct);
-        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(["underwriter", "billing", "finance", "claims", "claimsmgr", "admin"]);
+        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(["underwriter", "uwsenior", "billing", "finance", "claims", "claimsmgr", "admin"]);
 
         using var unknown = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = "nobody" }, ct);
         unknown.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -108,6 +108,26 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
             claimsCreate.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
             using var claimsForbidden = await client.SendAsync(claimsCreate, ct);
             claimsForbidden.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        }
+
+        // The synthetic senior underwriter (Staff.UnderwritingManager) may decide UW issues; the plain underwriter only lists them.
+        foreach (var (uwUser, decideAllowed) in new[] { ("uwsenior", true), ("underwriter", false) })
+        {
+            using var uwSignIn = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = uwUser }, ct);
+            var uwToken = (await uwSignIn.Content.ReadFromJsonAsync<JsonNode>(ct))!["accessToken"]!.GetValue<string>();
+            using var list = new HttpRequestMessage(HttpMethod.Get, new Uri($"/api/uw/v1/issues?jobRef={Guid.CreateVersion7()}", UriKind.Relative));
+            list.Headers.Authorization = new AuthenticationHeaderValue("Bearer", uwToken);
+            using var listed = await client.SendAsync(list, ct);
+            listed.StatusCode.ShouldBe(HttpStatusCode.OK, uwUser);
+
+            using var decide = new HttpRequestMessage(HttpMethod.Post, new Uri("/api/uw/v1/issues/decide", UriKind.Relative))
+            {
+                Content = JsonContent.Create(new { issueIds = new[] { Guid.CreateVersion7() }, decision = "APPROVE", reason = "sign-in test" }),
+            };
+            decide.Headers.Authorization = new AuthenticationHeaderValue("Bearer", uwToken);
+            decide.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+            using var decided = await client.SendAsync(decide, ct);
+            decided.StatusCode.ShouldBe(decideAllowed ? HttpStatusCode.NotFound : HttpStatusCode.Forbidden, uwUser); // allowed: the issue does not exist
         }
 
         // A token with the dev issuer but signed with another key is rejected.
