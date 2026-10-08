@@ -76,6 +76,22 @@ public sealed class AuthorityTests
     }
 
     [Fact]
+    public async Task An_actor_holding_several_roles_gets_the_best_limit_whatever_the_role_order()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        foreach (string[] roles in new string[][] { ["Claims.Handler", "Claims.Manager"], ["Claims.Manager", "Claims.Handler"], ["Claims.Viewer", "Claims.Handler", "Claims.Manager"] })
+        {
+            var allowed = await Service(out _).CheckAsync(Request(ActorRef.User("u1"), roles, "20000"), ct);
+            allowed.Decision.ShouldBe(AuthorityDecision.Allow);
+            allowed.SourceGrant.ShouldBe("g-manager");
+        }
+
+        // Above every held grant there is nobody left to refer to.
+        var denied = await Service(out _).CheckAsync(Request(ActorRef.User("u1"), ["Claims.Handler", "Claims.Manager"], "60000"), ct);
+        denied.Decision.ShouldBe(AuthorityDecision.Deny);
+    }
+
+    [Fact]
     public async Task Nobody_holding_enough_authority_means_deny()
     {
         var result = await Service(out _).CheckAsync(Request(ActorRef.User("u1"), ["Claims.Manager"], "60000"), TestContext.Current.CancellationToken);
