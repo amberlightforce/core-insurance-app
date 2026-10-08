@@ -60,6 +60,33 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | UW referral workbench (D-USR-13) | **paused by user** (WIP branch worktree-agent-ac9c66400c2402b05) | |
 | Wizard vehicle value + plain rating errors | **merged** | user report 2026-10-08 |
 
+## Phase 4 — slice 3 (planned)
+Plan: `SLICE-PLAN-3.md`. Decisions: D-SL3-01..14. Briefs: `briefs/sl3/` (S0 and S1). Every builder and reviewer runs on Sonnet 5.5 (D-USR-16), with 6–8 concurrent builders. Precondition: the D-PRG-21 hot-file split has merged.
+
+| WP | Batch | Module | Depends on | Review | Est. | Status |
+|---|---|---|---|---|---|---|
+| SL3-CONTRACTS | S0 | contracts (all) | — | light | 2.5 h | planned |
+| SL3-POL-TEMPORAL | S0 | POL (Persistence, Queries) | contracts | deep (temporal) | 4 h | planned |
+| SL3-POL-ENGINE | S0 | POL (Domain/Servicing) | contracts | deep (money) | 3.5 h | planned |
+| SL3-MKT-TREATMENT | S0 | MKT + GR/CY pack | contracts | deep (money) | 2.5 h | planned |
+| SL3-PFC-MOTOR11 | S0 | PFC seed | — | light | 1.5 h | planned |
+| SL3-RAT-PRORATE | S0 | RAT | contracts | deep (money) | 3 h | planned |
+| SL3-PLT-SUPPORT | S0 | PLT (dev clock, roles, authority) | contracts | deep (security) | 2.5 h | planned |
+| SL3-E2E-HARNESS | S0 | tests/e2e, ci.yml | contracts | light | 2 h | planned |
+| SL3-POL-CHANGE | S1 | POL (Commands/Change) | merged TEMPORAL + ENGINE | deep (temporal+money) | 4 h | planned |
+| SL3-POL-CANCEL | S1 | POL (Commands/Cancellation) | merged TEMPORAL + ENGINE | deep (temporal+money) | 3.5 h | planned |
+| SL3-POL-RENEW | S1 | POL (Commands/Renewal) | merged TEMPORAL + ENGINE | deep (temporal) | 4 h | planned |
+| SL3-BIL-CREDIT | S1 | BIL | contracts | deep (money/ledger) | 4 h | planned |
+| SL3-CMP-CREDIT | S1 | CMP | contracts | light | 2 h | planned |
+| SL3-FIN-RULES | S1 | FIN | contracts | deep (ledger) | 3 h | planned |
+| SL3-CLM-REVERIFY | S1 | CLM | contracts (+ merged TEMPORAL for the real-POL test) | deep (temporal) | 3.5 h | planned |
+| SL3-UI-POL-FILE | S1 | web policy/file | contracts | light + visual | 3 h | planned |
+| SL3-BIL-REFUND | S2 | BIL | merged BIL-CREDIT | deep (money+security) | 4.5 h | planned |
+| SL3-UI-POL-JOBS | S2 | web policy/servicing | contracts (live walk after POL S1) | light + visual | 4 h | planned |
+| SL3-UI-BIL | S2 | web billing/refunds | contracts (live walk after BIL-REFUND) | light + visual | 3 h | planned |
+| SL3-UI-CLM | S2 | web claims/reverify | contracts | light + visual | 2 h | planned |
+| SL3-E2E | S3 | tests/e2e, seed-demo | all merged | light (integration) | 5 h | planned |
+
 ## Module status (feature waves)
 All 116 feature WPs: **not started** (W1 starts after Phase 1 passes). See backlog/BACKLOG.md.
 
