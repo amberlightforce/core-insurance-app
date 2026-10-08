@@ -91,6 +91,90 @@
         "downPayment": {
           "type": "boolean",
           "x-classification": "P0"
+        },
+        "receivableId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "BIL receivable the cash settled (D-SL4-06). Always set when the receipt pays a CLM receivable, null for policy cash",
+          "x-classification": "P0"
+        },
+        "receivableAmount": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Amount allocated to the receivable. Always set when receivableId is set",
+          "x-classification": "P0"
+        },
+        "allocationId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "BIL allocation id: the evidence CLM records the recovery against. Always set when receivableId is set",
+          "x-classification": "P0"
+        },
+        "claimId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Claim of the receivable. Always set when receivableId is set and the receivable names a claim",
+          "x-classification": "P0"
+        },
+        "recoveryId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "CLM recovery of the receivable. Always set for SALVAGE and SUBROGATION receivables",
+          "x-classification": "P0"
+        },
+        "statementRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Friendly Settlement statement reference. Always set for FS_CLEARING receivables",
+          "x-classification": "P0"
+        },
+        "sourceType": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/DisbursementSourceType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Receivable source type (CLM_CLAIM_PAYMENT or FS_CLEARING). Always set when receivableId is set",
+          "x-classification": "P0"
         }
       }
     }

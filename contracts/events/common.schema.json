@@ -976,6 +976,39 @@
             }
           ],
           "description": "Id of the MKT treatment rule that decided a tax or levy line. Always set on such lines of servicing entries, null otherwise."
+        },
+        "recoveryId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "CLM recovery of a receivable entry (D-SL4-06). Always set on RECEIVABLE_REGISTERED and RECEIVABLE_COLLECTED entries of a salvage or subrogation receivable, null otherwise."
+        },
+        "statementRef": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Friendly Settlement statement reference (D-SL4-02). Always set on FS_CLEARING_RELEASED, FS_CLEARING_CLEARED and the FS_CLEARING receivable entries, null otherwise."
+        },
+        "counterpartyPartyId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Organisation counterparty (insurer, clearing office, reinsurer) of a receivable or FS_CLEARING entry (D-SL4-02, D-SL4-06). Null when the counterparty is a natural person (no personal data in ledger events, PITFALLS 18)."
         }
       },
       "required": [
@@ -1378,6 +1411,47 @@
       "required": [
         "clockCode",
         "appliesToRunning"
+      ]
+    },
+    "RiLayer": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One layer of an excess-of-loss reinsurance contract (PRD-08 REQ-RI-031..-043; SL4-CONTRACTS). Amounts are in the contract currency (EUR only in slice 4). attachment, limit and aad are always set; aal is null when the layer has no annual aggregate limit.",
+      "properties": {
+        "layerNo": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Layer number, unique within the contract, 1 = lowest"
+        },
+        "attachment": {
+          "$ref": "#/$defs/Money",
+          "description": "Retention (attachment point) per risk"
+        },
+        "limit": {
+          "$ref": "#/$defs/Money",
+          "description": "Layer limit per risk"
+        },
+        "aad": {
+          "$ref": "#/$defs/Money",
+          "description": "Annual aggregate deductible; zero when none"
+        },
+        "aal": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Annual aggregate limit; null when none"
+        }
+      },
+      "required": [
+        "layerNo",
+        "attachment",
+        "limit",
+        "aad"
       ]
     }
   }

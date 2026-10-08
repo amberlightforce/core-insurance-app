@@ -14,6 +14,9 @@ public sealed class FakeBillingDisbursementService : global::CoreIns.Testing.Con
     {
     }
     /// <inheritdoc />
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.DisbursementApproveReleaseResponse> ApproveReleaseAsync(global::CoreIns.Modules.Billing.Contracts.Api.DisbursementApproveReleaseRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Billing.Contracts.Api.DisbursementApproveReleaseResponse>("bil.Disbursement.approveRelease", [request, options], cancellationToken);
+
+    /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.DisbursementGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Billing.Contracts.Api.DisbursementGetResponse>("bil.Disbursement.get", [id], cancellationToken);
 
     /// <inheritdoc />

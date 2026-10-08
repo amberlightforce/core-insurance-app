@@ -61,4 +61,12 @@ public sealed record DisbursementReturnedV1 : global::CoreIns.Platform.Contracts
     /// <summary>Contract member 'reasonCode'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
     public required string ReasonCode { get; init; }
+
+    /// <summary>Friendly Settlement statement reference of an FS_CLEARING disbursement (D-SL4-02): CLM returns the net to Pending. Always set when sourceType is FS_CLEARING, null otherwise</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statementRef")]
+    public string? StatementRef { get; init; }
+
+    /// <summary>Disbursement method (open Code, including CLEARING); always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("method")]
+    public string? Method { get; init; }
 }
