@@ -212,13 +212,19 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
             // forward; never deleted. A new row starts with watermark = recorded_at (the instant it became known).
             migrationBuilder.Sql("""
                 -- The watermark may not run away from real time: a writer (or a bug) that pushed it to 2100 would make every later
-                -- record time at least that and poison the policy for good. Bounded skew, 1 day by default. A Development stack whose
-                -- clock is shifted further sets the database-level setting pol.max_clock_skew (ALTER DATABASE ... SET pol.max_clock_skew
-                -- = '36500 days'); never in a deployed environment.
-                CREATE FUNCTION pol.assert_watermark_cap(candidate timestamptz) RETURNS void LANGUAGE plpgsql AS $$
+                -- record time at least that and poison the policy for good. Bounded skew: 1 day, plus the Development dev clock offset
+                -- (plt.dev_clock, D-SL3-12, 0 when the table is absent or never advanced), because the application clock then runs
+                -- that far ahead of the database clock. SECURITY DEFINER so the app role needs no access to the plt schema.
+                CREATE FUNCTION pol.assert_watermark_cap(candidate timestamptz) RETURNS void
+                    LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog AS $$
                 DECLARE
-                    skew interval := COALESCE(NULLIF(current_setting('pol.max_clock_skew', true), '')::interval, interval '1 day');
+                    dev_offset bigint := 0;
+                    skew interval;
                 BEGIN
+                    IF to_regclass('plt.dev_clock') IS NOT NULL THEN
+                        EXECUTE 'SELECT COALESCE(max(offset_micros), 0) FROM plt.dev_clock' INTO dev_offset;
+                    END IF;
+                    skew := interval '1 day' + dev_offset * interval '1 microsecond';
                     IF candidate > clock_timestamp() + skew THEN
                         RAISE EXCEPTION 'pol.policy: the watermark % is more than % ahead of the database clock', candidate, skew
                             USING ERRCODE = 'restrict_violation';

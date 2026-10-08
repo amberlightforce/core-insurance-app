@@ -140,8 +140,8 @@ public sealed class TemporalDatabaseTests(PostgresFixture database) : IClassFixt
         await using var app = NpgsqlDataSource.Create(database.AppConnectionString);
         var raw = await SeedAsync(app);
 
-        // Not to the year 2100 (it would poison every later record time of the policy), not even two days ahead.
-        foreach (var to in new[] { "'2100-01-01T00:00:00Z'::timestamptz", "now() + interval '2 days'" })
+        // Not to the year 2100 (it would poison every later record time of the policy), not even five years ahead.
+        foreach (var to in new[] { "'2100-01-01T00:00:00Z'::timestamptz", "now() + interval '5 years'" })
         {
             (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app,
                     $"UPDATE pol.policy SET last_recorded_at = {to}, record_version = record_version + 1 WHERE policy_id = '{raw.Policy}'")))
@@ -158,13 +158,13 @@ public sealed class TemporalDatabaseTests(PostgresFixture database) : IClassFixt
         // A bounded skew (an application clock a little ahead) is fine.
         await ExecuteAsync(app, $"UPDATE pol.policy SET last_recorded_at = now() + interval '1 hour', record_version = record_version + 1 WHERE policy_id = '{raw.Policy}'");
 
-        // The Development relaxation (a shifted dev clock): the cap reads pol.max_clock_skew.
-        await ExecuteAsync(app, $"""
-            BEGIN;
-            SET LOCAL pol.max_clock_skew = '36500 days';
-            UPDATE pol.policy SET last_recorded_at = now() + interval '30 days', record_version = record_version + 1 WHERE policy_id = '{raw.Policy}';
-            COMMIT;
-            """);
+        // The Development relaxation: the application clock runs ahead of the database clock by the dev clock offset (plt.dev_clock), so
+        // the cap follows it. Thirty days ahead is refused until the dev clock has been advanced that far, then accepted.
+        var thirtyDays = $"UPDATE pol.policy SET last_recorded_at = now() + interval '30 days', record_version = record_version + 1 WHERE policy_id = '{raw.Policy}'";
+        (await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(app, thirtyDays))).SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation);
+        await using var owner = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        await ExecuteAsync(owner, "UPDATE plt.dev_clock SET offset_micros = 31 * 86400 * 1000000::bigint, version = version + 1");
+        await ExecuteAsync(app, thirtyDays);
     }
 
     // ---- stamping -------------------------------------------------------------------------------------------------------------
