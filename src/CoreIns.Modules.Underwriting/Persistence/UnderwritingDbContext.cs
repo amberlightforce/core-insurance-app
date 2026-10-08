@@ -58,6 +58,12 @@ internal sealed class EvaluationRow
 
     public string Trace { get; set; } = string.Empty;
 
+    /// <summary>Actors who created, edited, quoted or bound the job, as POL reported them (SOD-UW-02); empty for HTTP evaluations.</summary>
+    public List<string> JobParticipants { get; set; } = [];
+
+    /// <summary>Producer code on the job, as POL reported it (SOD-UW-02).</summary>
+    public string? ProducerCode { get; set; }
+
     public Instant CreatedAt { get; set; }
 
     public string CreatedBy { get; set; } = string.Empty;
@@ -181,6 +187,8 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.Property(e => e.Outcome).HasColumnName("outcome");
             entity.Property(e => e.Lane).HasColumnName("lane");
             entity.Property(e => e.Trace).HasColumnName("trace").HasColumnType("jsonb");
+            entity.Property(e => e.JobParticipants).HasColumnName("job_participants").HasColumnType("text[]").HasDefaultValueSql("'{}'::text[]");
+            entity.Property(e => e.ProducerCode).HasColumnName("producer_code");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.HasIndex(e => new { e.JobId, e.CreatedAt }).HasDatabaseName("ix_evaluation_job");
