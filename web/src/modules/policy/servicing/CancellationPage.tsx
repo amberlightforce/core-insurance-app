@@ -57,7 +57,9 @@ export function CancellationPage() {
   const policy = useServicingPolicy(policyId);
   return (
     <div className={styles.page}>
-      <QueryView query={policy}>{(data) => <CancellationForm key={policyId} data={data} />}</QueryView>
+      <QueryView query={policy}>
+        {(data) => <CancellationForm key={policyId} data={data} />}
+      </QueryView>
     </div>
   );
 }
@@ -67,7 +69,8 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
   const fmt = useFormat();
   const { policy, term } = data;
   const status = policy.status ?? term?.state;
-  const cancellable = term !== undefined && (term.state === 'IN_FORCE' || term.state === 'SCHEDULED');
+  const cancellable =
+    term !== undefined && (term.state === 'IN_FORCE' || term.state === 'SCHEDULED');
   const scheduled = term?.state === 'SCHEDULED';
 
   const [source, setSource] = useState<string>(sources[0]);
@@ -211,7 +214,9 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
           <Banner variant="success" live="status" title={t('servicing.cancel.bound.title')}>
             {t('servicing.cancel.bound.body')}
           </Banner>
-          {bound.servicingPreview ? <ServicingPreviewView preview={bound.servicingPreview} /> : null}
+          {bound.servicingPreview ? (
+            <ServicingPreviewView preview={bound.servicingPreview} />
+          ) : null}
           <div className={styles.actions}>
             <LinkButton variant="primary" to={`/policies/${policy.policyId}`}>
               {t('servicing.openPolicy')}
@@ -241,7 +246,10 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
                   label={t('servicing.cancel.request.reason')}
                   isRequired
                   isDisabled={locked}
-                  options={reasonCodes.map((c) => ({ id: c, label: t(`servicing.cancel.reasons.${c}`) }))}
+                  options={reasonCodes.map((c) => ({
+                    id: c,
+                    label: t(`servicing.cancel.reasons.${c}`),
+                  }))}
                   value={reason}
                   onChange={setReason}
                   helperText={t('servicing.cancel.request.reasonHelp')}
@@ -260,17 +268,25 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
                     {
                       id: 'STANDARD',
                       label: t('servicing.cancel.kinds.STANDARD'),
-                      ...(scheduled ? { disabledReason: t('servicing.cancel.kinds.standardScheduled') } : {}),
+                      ...(scheduled
+                        ? { disabledReason: t('servicing.cancel.kinds.standardScheduled') }
+                        : {}),
                     },
                     {
                       id: 'FLAT',
                       label: t('servicing.cancel.kinds.FLAT'),
-                      ...(!scheduled ? { disabledReason: t('servicing.cancel.kinds.flatInForce') } : {}),
+                      ...(!scheduled
+                        ? { disabledReason: t('servicing.cancel.kinds.flatInForce') }
+                        : {}),
                     },
                   ]}
                 />
                 <p className={styles.muted}>
-                  {t(kind === 'FLAT' ? 'servicing.cancel.request.flatHelp' : 'servicing.cancel.request.nowHelp')}
+                  {t(
+                    kind === 'FLAT'
+                      ? 'servicing.cancel.request.flatHelp'
+                      : 'servicing.cancel.request.nowHelp',
+                  )}
                 </p>
                 <TextField
                   label={t('servicing.cancel.request.requestRef')}
@@ -295,7 +311,12 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
               <KeyValueList
                 aria-label={t('servicing.cancel.policy.title')}
                 items={[
-                  { id: 'number', label: t('servicing.cancel.policy.number'), value: policy.policyNumber, kind: 'mono' },
+                  {
+                    id: 'number',
+                    label: t('servicing.cancel.policy.number'),
+                    value: policy.policyNumber,
+                    kind: 'mono',
+                  },
                   {
                     id: 'plate',
                     label: t('risk.plate'),
@@ -308,7 +329,12 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
                     value: `${policy.productCode} ${term?.productVersion ?? ''}`.trim(),
                     kind: 'mono',
                   },
-                  { id: 'plan', label: t('term.plan'), value: term?.paymentPlanRef ?? null, kind: 'mono' },
+                  {
+                    id: 'plan',
+                    label: t('term.plan'),
+                    value: term?.paymentPlanRef ?? null,
+                    kind: 'mono',
+                  },
                 ]}
               />
             </Section>
@@ -316,7 +342,11 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
           {preview ? (
             <>
               {gateFailure ? (
-                <Banner variant="danger" live="alert" title={t('servicing.change.confirm.gateFailedTitle')}>
+                <Banner
+                  variant="danger"
+                  live="alert"
+                  title={t('servicing.change.confirm.gateFailedTitle')}
+                >
                   <p>{t('servicing.change.confirm.gateFailedBody')}</p>
                   <ul className={styles.problemList}>
                     {gateFailure.gateResults.map((g) => (
@@ -366,7 +396,9 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
         primaryAction={{
           label: t('servicing.cancel.confirm.dialog.confirm'),
           variant: 'danger',
-          ...(confirmed ? {} : { disabledReason: t('servicing.cancel.confirm.dialog.confirmRequired') }),
+          ...(confirmed
+            ? {}
+            : { disabledReason: t('servicing.cancel.confirm.dialog.confirmRequired') }),
           onAction: () => {
             if (confirmed) void bind();
           },

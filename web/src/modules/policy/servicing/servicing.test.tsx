@@ -244,7 +244,9 @@ describe('CancellationPage', () => {
   it('requires the reason, then previews the refund and cancels after explicit confirmation', async () => {
     const api = mockApi(cancelRoutes());
     const { user, container } = page();
-    expect(await screen.findByRole('heading', { level: 1, name: 'Ακύρωση ασφαλιστηρίου' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Ακύρωση ασφαλιστηρίου' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Δεν υπάρχει ακόμη προεπισκόπηση επιστροφής')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Προεπισκόπηση επιστροφής' }));
@@ -274,9 +276,9 @@ describe('CancellationPage', () => {
     await user.click(confirm);
     expect(api.callsTo('POST', '/api/pol/v1/jobs/bind')).toHaveLength(0);
     await user.click(within(dialog).getByRole('checkbox'));
-    await user.click(confirm);
+    await user.click(within(dialog).getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου' }));
 
-    expect(await screen.findByText('Το ασφαλιστήριο ακυρώθηκε')).toBeInTheDocument();
+    expect((await screen.findAllByText('Το ασφαλιστήριο ακυρώθηκε')).length).toBeGreaterThan(0);
     expect(api.callsTo('POST', '/api/pol/v1/jobs/bind')[0]?.body).toMatchObject({
       jobId,
       versionNo: 1,
@@ -320,7 +322,9 @@ describe('CancellationPage', () => {
     await user.click(screen.getByRole('button', { name: /Αιτία/ }));
     await user.click(await screen.findByRole('option', { name: 'Αίτημα πελάτη' }));
     await user.click(screen.getByRole('button', { name: 'Προεπισκόπηση επιστροφής' }));
-    expect(await screen.findByText(/Ο ρόλος σας δεν επιτρέπει αυτή την ενέργεια/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Ο ρόλος σας δεν επιτρέπει αυτή την ενέργεια/),
+    ).toBeInTheDocument();
   });
 
   it('shows the empty state for a policy that is already expired and the error state when it fails to load', async () => {
@@ -352,7 +356,9 @@ describe('RenewalPage', () => {
       annualAfter: eur('445.00'),
     }) as ServicingPreview;
 
-  const renewRoutes = (quoteBody: object = { ...fx.quote(), servicingPreview: renewPreview() }): MockRoute[] => [
+  const renewRoutes = (
+    quoteBody: object = { ...fx.quote(), servicingPreview: renewPreview() },
+  ): MockRoute[] => [
     policyRoute(policyFx('IN_FORCE', 340)),
     {
       method: 'POST',
@@ -409,7 +415,7 @@ describe('RenewalPage', () => {
     await expectNoA11yViolations(container);
 
     await user.click(screen.getByRole('button', { name: 'Έκδοση προσφοράς' }));
-    expect(await screen.findByText('Η προσφορά εκδόθηκε')).toBeInTheDocument();
+    expect((await screen.findAllByText('Η προσφορά εκδόθηκε')).length).toBeGreaterThan(0);
     expect(api.callsTo('POST', '/api/pol/v1/renewals/offer')[0]?.body).toEqual({
       jobId,
       termId: 'term-1',
@@ -419,7 +425,7 @@ describe('RenewalPage', () => {
     const dialog = await screen.findByRole('dialog');
     await user.click(within(dialog).getByRole('checkbox'));
     await user.click(within(dialog).getByRole('button', { name: 'Καταχώριση αποδοχής' }));
-    expect(await screen.findByText('Η ανανέωση έγινε αποδεκτή')).toBeInTheDocument();
+    expect((await screen.findAllByText('Η ανανέωση έγινε αποδεκτή')).length).toBeGreaterThan(0);
     expect(api.callsTo('POST', '/api/pol/v1/renewals/accept')[0]?.body).toMatchObject({
       jobId,
       termId: 'term-1',
@@ -459,16 +465,16 @@ describe('RenewalPage', () => {
     const dialog = await screen.findByRole('dialog');
     await user.click(within(dialog).getByRole('checkbox'));
     await user.click(within(dialog).getByRole('button', { name: 'Καταχώριση αποδοχής' }));
-    expect(
-      await screen.findByText(/Το ασφαλιστήριο άλλαξε μετά την προσφορά/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Το ασφαλιστήριο άλλαξε μετά την προσφορά/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Νέα έκδοση προσφοράς' })).toBeInTheDocument();
   });
 
   it('shows the empty state for a term that is not in force', async () => {
     mockApi([policyRoute(policyFx('SCHEDULED', -30))]);
     page();
-    expect(await screen.findByText('Το ασφαλιστήριο δεν μπορεί να ανανεωθεί τώρα')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Το ασφαλιστήριο δεν μπορεί να ανανεωθεί τώρα'),
+    ).toBeInTheDocument();
   });
 });
 
@@ -505,7 +511,12 @@ describe('ChangeWorkspacePage', () => {
             versionNo: body.versionNo,
             draftVersion: body.expectedDraftVersion + 1,
             state: 'DRAFT',
-            riskTree: { vehicles: [{ locator: 'v1', plate: 'ΙΚΧ1234' }], drivers: [], coverages: [], questionSets: [] },
+            riskTree: {
+              vehicles: [{ locator: 'v1', plate: 'ΙΚΧ1234' }],
+              drivers: [],
+              coverages: [],
+              questionSets: [],
+            },
             validation: [],
           },
         };
@@ -538,12 +549,14 @@ describe('ChangeWorkspacePage', () => {
   it('walks date, vehicle edit, premium preview with diff, and the explicit confirmation', async () => {
     const api = mockApi(changeRoutes());
     const { user, container } = page();
-    expect(await screen.findByRole('heading', { level: 1, name: 'Αλλαγή εντός περιόδου' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Αλλαγή εντός περιόδου' }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Επιτρεπόμενες ημερομηνίες/)).toBeInTheDocument();
 
     await next(user);
     // Nothing is started before the first step is left; then the job is created for the chosen instant.
-    await screen.findByRole('textbox', { name: /Έτος πρώτης ταξινόμησης/ });
+    await screen.findByRole('textbox', { name: /Έτος πρώτης κυκλοφορίας/ });
     const created = api.callsTo('POST', '/api/pol/v1/policy-changes')[0];
     expect(created?.body).toMatchObject({ policyId: fx.policyId });
     expect(created?.headers.get('Idempotency-Key')).toBeTruthy();
@@ -551,12 +564,19 @@ describe('ChangeWorkspacePage', () => {
     // Required inputs are required: the garaging postcode is on the policy, so clear it and the step blocks.
     const engine = screen.getByRole('textbox', { name: /Κυβισμός/ });
     await user.clear(engine);
-    expect(screen.getByRole('button', { name: /Επόμενο/ })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: /Επόμενο/ })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     await user.type(engine, '1800');
     await next(user);
 
-    await user.click(await screen.findByRole('button', { name: 'Υπολογισμός προεπισκόπησης ασφαλίστρου' }));
-    expect(await screen.findByText('Πρόσθετο ποσό προς είσπραξη από τον πελάτη')).toBeInTheDocument();
+    await user.click(
+      await screen.findByRole('button', { name: 'Υπολογισμός προεπισκόπησης ασφαλίστρου' }),
+    );
+    expect(
+      await screen.findByText('Πρόσθετο ποσό προς είσπραξη από τον πελάτη'),
+    ).toBeInTheDocument();
     const update = api.callsTo('POST', '/api/pol/v1/jobs/update-draft')[0]?.body as {
       instructions: { op: string; vehicle: { locator: string; engineCapacityCc: number } }[];
     };
@@ -574,7 +594,7 @@ describe('ChangeWorkspacePage', () => {
     const dialog = await screen.findByRole('dialog');
     await user.click(within(dialog).getByRole('checkbox'));
     await user.click(within(dialog).getByRole('button', { name: 'Εφαρμογή αλλαγής' }));
-    expect(await screen.findByText('Η αλλαγή εφαρμόστηκε')).toBeInTheDocument();
+    expect((await screen.findAllByText('Η αλλαγή εφαρμόστηκε')).length).toBeGreaterThan(0);
     expect(api.callsTo('POST', '/api/pol/v1/jobs/bind')[0]?.body).toMatchObject({
       jobId,
       confirmation: true,
@@ -591,9 +611,13 @@ describe('ChangeWorkspacePage', () => {
     await screen.findByRole('heading', { level: 1, name: 'Αλλαγή εντός περιόδου' });
     await next(user);
     expect(
-      await screen.findByText('Η ημερομηνία ισχύος είναι εκτός των ημερομηνιών που επιτρέπονται στον ρόλο σας.'),
+      await screen.findByText(
+        'Η ημερομηνία ισχύος είναι εκτός των ημερομηνιών που επιτρέπονται στον ρόλο σας.',
+      ),
     ).toBeInTheDocument();
-    expect(screen.getByText('Ημερομηνία ισχύος', { selector: 'label *, label' })).toBeInTheDocument();
+    expect(
+      screen.getByText('Ημερομηνία ισχύος', { selector: 'label *, label' }),
+    ).toBeInTheDocument();
   });
 
   it('explains a rating input the engine refused and takes the user to the vehicle step', async () => {
@@ -619,8 +643,10 @@ describe('ChangeWorkspacePage', () => {
     await user.clear(engine);
     await user.type(engine, '1700');
     await next(user);
-    await user.click(await screen.findByRole('button', { name: 'Υπολογισμός προεπισκόπησης ασφαλίστρου' }));
-    expect(await screen.findByText(/Η αξία του οχήματος λείπει/)).toBeInTheDocument();
+    await user.click(
+      await screen.findByRole('button', { name: 'Υπολογισμός προεπισκόπησης ασφαλίστρου' }),
+    );
+    expect(await screen.findByText(/Λείπει η αξία του οχήματος/)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Μετάβαση στο βήμα οχήματος' }));
     await waitFor(() => {
       expect(screen.getByRole('textbox', { name: /Κυβισμός/ })).toBeInTheDocument();
@@ -630,7 +656,9 @@ describe('ChangeWorkspacePage', () => {
   it('shows the empty state when the term cannot be changed', async () => {
     mockApi([policyRoute(policyFx('EXPIRED', 400))]);
     page();
-    expect(await screen.findByText('Το ασφαλιστήριο δεν μπορεί να τροποποιηθεί')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Το ασφαλιστήριο δεν μπορεί να τροποποιηθεί'),
+    ).toBeInTheDocument();
   });
 
   it('shows a loading state, then the error state with a retry when the policy cannot be read', async () => {

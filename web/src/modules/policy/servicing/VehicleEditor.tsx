@@ -36,7 +36,13 @@ const thisYear = () => new Date().getFullYear();
  * and the validation are the quote wizard's (same required inputs, same plain messages). Identity fields are read
  * only while editing: another plate is a replacement.
  */
-export function VehicleEditor({ mode, onModeChange, form, onChange, valueNeeded }: VehicleEditorProps) {
+export function VehicleEditor({
+  mode,
+  onModeChange,
+  form,
+  onChange,
+  valueNeeded,
+}: VehicleEditorProps) {
   const { t } = useTranslation('policy');
   const q = useTranslation('quote').t;
   const [touched, setTouched] = useState<ReadonlySet<keyof VehicleForm>>(new Set());
@@ -48,7 +54,8 @@ export function VehicleEditor({ mode, onModeChange, form, onChange, valueNeeded 
     setTouched((s) => new Set(s).add(field));
   };
   const issueText = (issue: FieldIssue | undefined) => (issue ? q(`issues.${issue}`) : undefined);
-  const err = (field: keyof VehicleForm) => (touched.has(field) ? issueText(issues[field]) : undefined);
+  const err = (field: keyof VehicleForm) =>
+    touched.has(field) ? issueText(issues[field]) : undefined;
   const errorProp = (message: string | undefined) => (message ? { errorMessage: message } : {});
   const identityReadOnly = mode === 'edit';
 
@@ -66,7 +73,11 @@ export function VehicleEditor({ mode, onModeChange, form, onChange, valueNeeded 
         ]}
       />
       <p className={styles.muted}>
-        {t(mode === 'edit' ? 'servicing.change.vehicle.editHelp' : 'servicing.change.vehicle.replaceHelp')}
+        {t(
+          mode === 'edit'
+            ? 'servicing.change.vehicle.editHelp'
+            : 'servicing.change.vehicle.replaceHelp',
+        )}
       </p>
       <Section title={q('vehicle.identity')} headingLevel={3}>
         <div className={styles.grid}>

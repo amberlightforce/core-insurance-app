@@ -95,6 +95,10 @@ export function bindServicingJob(request: JobBindRequest, key: string) {
 /** pol.Job.get: the current quote version of a job (a renewal job is created without one in the response). */
 export function getServicingJob(jobId: string) {
   return apiRequest<{
-    job: { jobId: string; currentVersionNo: number; versions: { versionNo: number; draftVersion: number }[] };
+    job: {
+      jobId: string;
+      currentVersionNo: number;
+      versions: { versionNo: number; draftVersion: number }[];
+    };
   }>(`/api/pol/v1/jobs/${encodeURIComponent(jobId)}`);
 }

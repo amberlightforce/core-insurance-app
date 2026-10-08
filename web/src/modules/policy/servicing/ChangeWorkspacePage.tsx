@@ -96,7 +96,8 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
   const { policy, term } = data;
   const original = data.riskTree?.vehicles[0];
   const originalForm = useMemo(() => formOf(original), [original]);
-  const changeable = term !== undefined && (term.state === 'IN_FORCE' || term.state === 'SCHEDULED');
+  const changeable =
+    term !== undefined && (term.state === 'IN_FORCE' || term.state === 'SCHEDULED');
 
   const today = athensToday();
   const [stepId, setStepId] = useState<StepId>('when');
@@ -225,7 +226,9 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
     let after = await updateServicingDraft(first, vehicleKey.keyFor(first));
     vehicleKey.release();
     if (mode === 'replace' && oldLocator) {
-      const replacement = after.riskTree.vehicles.find((v) => v.locator && v.locator !== oldLocator);
+      const replacement = after.riskTree.vehicles.find(
+        (v) => v.locator && v.locator !== oldLocator,
+      );
       const stale = after.riskTree.coverages.some((c) => c.elementLocator === oldLocator);
       if (replacement?.locator && stale) {
         const second = {
@@ -247,7 +250,11 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
         coverKey.release();
       }
     }
-    const synced: JobRef = { ...start, versionNo: after.versionNo, draftVersion: after.draftVersion };
+    const synced: JobRef = {
+      ...start,
+      versionNo: after.versionNo,
+      draftVersion: after.draftVersion,
+    };
     setJob(synced);
     return synced;
   }
@@ -356,8 +363,17 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
     <KeyValueList
       aria-label={t('servicing.change.summary.title')}
       items={[
-        { id: 'policy', label: t('servicing.change.summary.policy'), value: policy.policyNumber, kind: 'mono' },
-        { id: 'effective', label: t('servicing.change.summary.effective'), value: fmt.date(effectiveDate) },
+        {
+          id: 'policy',
+          label: t('servicing.change.summary.policy'),
+          value: policy.policyNumber,
+          kind: 'mono',
+        },
+        {
+          id: 'effective',
+          label: t('servicing.change.summary.effective'),
+          value: fmt.date(effectiveDate),
+        },
         {
           id: 'vehicle',
           label: t('servicing.change.summary.vehicle'),
@@ -413,7 +429,10 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
     <>
       {header}
       <Wizard
-        title={t('servicing.change.stepOf', { step: stepIds.indexOf(stepId) + 1, total: stepIds.length })}
+        title={t('servicing.change.stepOf', {
+          step: stepIds.indexOf(stepId) + 1,
+          total: stepIds.length,
+        })}
         steps={steps}
         currentId={stepId}
         onNavigate={(id) => {
@@ -470,11 +489,17 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
                   isLoading={busy === 'quote'}
                   onPress={() => void calculate()}
                 >
-                  {quote ? t('servicing.change.preview.recalculate') : t('servicing.change.preview.calculate')}
+                  {quote
+                    ? t('servicing.change.preview.recalculate')
+                    : t('servicing.change.preview.calculate')}
                 </Button>
               </div>
               {quote && !quoteIsFresh ? (
-                <Banner variant="warning" live="status" title={t('servicing.change.preview.staleTitle')}>
+                <Banner
+                  variant="warning"
+                  live="status"
+                  title={t('servicing.change.preview.staleTitle')}
+                >
                   {t('servicing.change.preview.staleBody')}
                 </Banner>
               ) : null}
@@ -485,7 +510,11 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
                   {preview ? (
                     <ServicingPreviewView preview={preview} />
                   ) : (
-                    <Banner variant="warning" live="status" title={t('servicing.change.preview.noPreview')}>
+                    <Banner
+                      variant="warning"
+                      live="status"
+                      title={t('servicing.change.preview.noPreview')}
+                    >
                       {t('servicing.change.preview.noPreviewBody')}
                     </Banner>
                   )}
@@ -523,7 +552,9 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
           primaryAction={{
             label: t('servicing.change.confirm.dialog.confirm'),
             variant: 'commit',
-            ...(confirmed ? {} : { disabledReason: t('servicing.change.confirm.dialog.confirmRequired') }),
+            ...(confirmed
+              ? {}
+              : { disabledReason: t('servicing.change.confirm.dialog.confirmRequired') }),
             onAction: () => {
               if (confirmed) void bind();
             },
@@ -614,9 +645,14 @@ function DiffSection({
   const q = useTranslation('quote').t;
   const columns = useMemo<DataColumn<DiffRow>[]>(
     () => [
-      textColumn<DiffRow>('field', t('servicing.change.diff.field'), (r) => q(`vehicle.${fieldKey[r.field]}`), {
-        size: 240,
-      }),
+      textColumn<DiffRow>(
+        'field',
+        t('servicing.change.diff.field'),
+        (r) => q(`vehicle.${fieldKey[r.field]}`),
+        {
+          size: 240,
+        },
+      ),
       textColumn<DiffRow>('before', t('servicing.change.diff.before'), (r) => r.before || '—'),
       textColumn<DiffRow>('after', t('servicing.change.diff.after'), (r) => r.after || '—'),
     ],

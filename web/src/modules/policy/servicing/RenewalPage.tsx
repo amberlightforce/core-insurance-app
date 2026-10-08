@@ -235,9 +235,19 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
             {
               id: 'stage',
               label: t('servicing.renew.stage.label'),
-              value: <StatusPill semantic={stage === 'accepted' ? 'success' : 'info'} subLabel={t(`servicing.renew.stage.${stage}`)} announceChanges={false} />,
+              value: (
+                <StatusPill
+                  semantic={stage === 'accepted' ? 'success' : 'info'}
+                  subLabel={t(`servicing.renew.stage.${stage}`)}
+                  announceChanges={false}
+                />
+              ),
             },
-            { id: 'expiry', label: t('servicing.renew.window.expiry'), value: expiry ? fmt.date(expiry) : null },
+            {
+              id: 'expiry',
+              label: t('servicing.renew.window.expiry'),
+              value: expiry ? fmt.date(expiry) : null,
+            },
             {
               id: 'left',
               label: t('servicing.renew.window.daysLeft'),
@@ -271,7 +281,11 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
           <KeyValueList
             aria-label={t('servicing.renew.accepted.title')}
             items={[
-              { id: 'term', label: t('servicing.renew.accepted.newTerm'), value: String(accepted.newTermNumber) },
+              {
+                id: 'term',
+                label: t('servicing.renew.accepted.newTerm'),
+                value: String(accepted.newTermNumber),
+              },
               {
                 id: 'state',
                 label: t('servicing.renew.accepted.state'),
@@ -289,20 +303,28 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
       {quote && !accepted ? (
         <>
           <Section title={t('servicing.renew.rated.title')}>
-            <p className={styles.muted}>
-              {t('servicing.renew.rated.body')}
-            </p>
+            <p className={styles.muted}>{t('servicing.renew.rated.body')}</p>
             <UnderwritingOutcome quote={quote} />
             {referred ? (
-              <Banner variant="warning" live="status" title={t('servicing.renew.rated.referredTitle')}>
+              <Banner
+                variant="warning"
+                live="status"
+                title={t('servicing.renew.rated.referredTitle')}
+              >
                 {t('servicing.renew.rated.referredBody')}{' '}
-                <LinkButton to="/policies/referrals">{t('servicing.renew.rated.openReferrals')}</LinkButton>
+                <LinkButton to="/policies/referrals">
+                  {t('servicing.renew.rated.openReferrals')}
+                </LinkButton>
               </Banner>
             ) : null}
             {preview ? (
               <ServicingPreviewView preview={preview} />
             ) : (
-              <Banner variant="warning" live="status" title={t('servicing.change.preview.noPreview')}>
+              <Banner
+                variant="warning"
+                live="status"
+                title={t('servicing.change.preview.noPreview')}
+              >
                 {t('servicing.change.preview.noPreviewBody')}
               </Banner>
             )}
@@ -316,10 +338,28 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
                 <KeyValueList
                   aria-label={t('servicing.renew.offer.title')}
                   items={[
-                    { id: 'version', label: t('servicing.renew.offer.version'), value: String(offer.offerVersion) },
-                    { id: 'premium', label: t('servicing.renew.offer.premium'), value: fmt.money(offer.premiumSummary.total), kind: 'money' },
-                    { id: 'deadline', label: t('servicing.renew.offer.deadline'), value: fmt.dateTime(offer.deadline) },
-                    { id: 'mode', label: t('servicing.renew.offer.mode'), value: offer.acceptanceMode, kind: 'mono' },
+                    {
+                      id: 'version',
+                      label: t('servicing.renew.offer.version'),
+                      value: String(offer.offerVersion),
+                    },
+                    {
+                      id: 'premium',
+                      label: t('servicing.renew.offer.premium'),
+                      value: fmt.money(offer.premiumSummary.total),
+                      kind: 'money',
+                    },
+                    {
+                      id: 'deadline',
+                      label: t('servicing.renew.offer.deadline'),
+                      value: fmt.dateTime(offer.deadline),
+                    },
+                    {
+                      id: 'mode',
+                      label: t('servicing.renew.offer.mode'),
+                      value: offer.acceptanceMode,
+                      kind: 'mono',
+                    },
                   ]}
                 />
                 <div className={styles.actions}>
@@ -341,7 +381,9 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
                   <Button
                     variant="primary"
                     isLoading={busy === 'offer'}
-                    {...(referred ? { disabledReason: t('servicing.renew.offer.referredReason') } : {})}
+                    {...(referred
+                      ? { disabledReason: t('servicing.renew.offer.referredReason') }
+                      : {})}
                     onPress={() => void issueOffer()}
                   >
                     {t('servicing.renew.offer.commit')}
@@ -373,7 +415,9 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
         primaryAction={{
           label: t('servicing.renew.accept.dialog.confirm'),
           variant: 'commit',
-          ...(confirmed ? {} : { disabledReason: t('servicing.renew.accept.dialog.confirmRequired') }),
+          ...(confirmed
+            ? {}
+            : { disabledReason: t('servicing.renew.accept.dialog.confirmRequired') }),
           onAction: () => {
             if (confirmed) void accept();
           },

@@ -60,7 +60,9 @@ export function ServicingProblem({ error, title, onGoToVehicle, onRetry }: Servi
     <details className="ds-caption">
       <summary>{t('servicing.problems.technical')}</summary>
       {problem.code ? <span className="ds-mono">{problem.code}</span> : null}
-      {problem.traceId ? <span>{` · ${staff('problem.trace', { id: problem.traceId })}`}</span> : null}
+      {problem.traceId ? (
+        <span>{` · ${staff('problem.trace', { id: problem.traceId })}`}</span>
+      ) : null}
       {problem.detail ? <p className="ds-mono">{problem.detail}</p> : null}
     </details>
   );
@@ -82,7 +84,11 @@ export function ServicingProblem({ error, title, onGoToVehicle, onRetry }: Servi
     );
   }
 
-  if (problem.status === 409 && !problem.code?.startsWith('RAT-') && code !== 'IDEMPOTENCY-REPLAY') {
+  if (
+    problem.status === 409 &&
+    !problem.code?.startsWith('RAT-') &&
+    code !== 'IDEMPOTENCY-REPLAY'
+  ) {
     return (
       <Banner variant="danger" live="alert" title={title}>
         <p>
@@ -110,18 +116,22 @@ export function ServicingProblem({ error, title, onGoToVehicle, onRetry }: Servi
           ) : undefined
         }
       >
-        <p>{quote(`inputProblem.fields.${fix.field}.what`, { cover: quote('inputProblem.thisCover'), label })}</p>
-        <p>{quote(`inputProblem.fields.${fix.field}.fix`, { cover: quote('inputProblem.thisCover'), label })}</p>
+        <p>
+          {quote(`inputProblem.fields.${fix.field}.what`, {
+            cover: quote('inputProblem.thisCover'),
+            label,
+          })}
+        </p>
+        <p>
+          {quote(`inputProblem.fields.${fix.field}.fix`, {
+            cover: quote('inputProblem.thisCover'),
+            label,
+          })}
+        </p>
         {technical}
       </Banner>
     );
   }
 
-  return (
-    <ProblemBanner
-      error={error}
-      title={title}
-      {...(onRetry ? { onRetry } : {})}
-    />
-  );
+  return <ProblemBanner error={error} title={title} {...(onRetry ? { onRetry } : {})} />;
 }

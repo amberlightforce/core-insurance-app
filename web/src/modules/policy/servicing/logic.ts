@@ -47,7 +47,9 @@ export function formOf(vehicle: Vehicle | undefined): VehicleForm {
     vin: vehicle.vin ?? '',
     make: vehicle.make ?? '',
     model: vehicle.model ?? '',
-    firstRegistrationYear: vehicle.firstRegistrationYear ? String(vehicle.firstRegistrationYear) : '',
+    firstRegistrationYear: vehicle.firstRegistrationYear
+      ? String(vehicle.firstRegistrationYear)
+      : '',
     engineCapacityCc: vehicle.engineCapacityCc ? String(vehicle.engineCapacityCc) : '',
     powerKw: text(fields.powerKw),
     fuelType: text(fields.fuelType),
