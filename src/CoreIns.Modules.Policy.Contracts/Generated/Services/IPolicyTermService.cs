@@ -34,5 +34,7 @@ public interface IPolicyTermService
     /// </remarks>
     /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
     /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.TermTimelineResponse> TimelineAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="policyId">query parameter 'policyId'</param>
+    /// <param name="termId">The term; defaults to the term valid at validAt</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.TermTimelineResponse> TimelineAsync(global::CoreIns.SharedKernel.Identifiers.PolicyId policyId, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, global::CoreIns.SharedKernel.Identifiers.PolicyTermId? termId = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

@@ -58,11 +58,11 @@ public sealed record PolicyChangedV1 : global::CoreIns.Platform.Contracts.Events
     [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
     public required global::CoreIns.SharedKernel.BusinessDate EffectiveDate { get; init; }
 
-    /// <summary>Contract member 'changedElements'.</summary>
+    /// <summary>Locators of the changed elements (vehicles, drivers, coverages). Always set; one entry per changed element.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("changedElements")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.ChangedElement> ChangedElements { get; init; }
 
-    /// <summary>Contract member 'vehicleCoverFacts'.</summary>
+    /// <summary>Element locators of vehicles whose cover was added or removed by the change. Always set (empty lists when none); CMP derives insured-vehicle facts from it.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("vehicleCoverFacts")]
     public required global::CoreIns.Platform.Contracts.Common.VehicleCoverFacts VehicleCoverFacts { get; init; }
 

@@ -18,7 +18,7 @@ public interface IPolicyCancellationService
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-JOB-CONFLICT (409), POL-ERR-EFFDATE-LIMIT (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-JOB-CONFLICT (409), POL-ERR-EFFDATE-LIMIT (422), POL-ERR-IDEMPOTENCY-MISMATCH (409), POL-ERR-OUT-OF-SEQUENCE (422), POL-ERR-AFTER-CANCELLATION (422), POL-ERR-ILLEGAL-TRANSITION (422), POL-ERR-STALE (409), POL-ERR-NOT-FOUND (404), POL-ERR-DEPENDENCY-UNAVAILABLE (503).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.CancellationCreateResponse> CreateAsync(global::CoreIns.Modules.Policy.Contracts.Api.CancellationCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

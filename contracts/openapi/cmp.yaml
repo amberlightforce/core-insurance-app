@@ -81,6 +81,9 @@ paths:
         status: 422
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
         status: 409
+      - code: CMP-ERR-CORRELATED-NOT-FOUND
+        note: correlatedDocumentId does not exist or is not an ISSUE document of the same counterparty
+        status: 422
       x-source:
       - PRD-11 §9.1 l.1223
       x-superseded-names:
@@ -6334,6 +6337,10 @@ components:
           $ref: ../events/common.schema.json#/$defs/Uuid
         issueDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
+        correlatedDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'For role CREDIT: the fiscal document of the original invoice the credit corrects, so the credit carries its correlated mark (PRD-11
+            credit notes; D-SL3-07). Equal to originalFiscalDocumentId when both are given. Absent = an uncorrelated credit.'
       required:
       - sourceType
       - sourceId

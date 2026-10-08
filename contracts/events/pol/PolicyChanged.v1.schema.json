@@ -94,11 +94,13 @@
           "items": {
             "$ref": "../common.schema.json#/$defs/ChangedElement"
           },
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Locators of the changed elements (vehicles, drivers, coverages). Always set; one entry per changed element."
         },
         "vehicleCoverFacts": {
           "$ref": "../common.schema.json#/$defs/VehicleCoverFacts",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Element locators of vehicles whose cover was added or removed by the change. Always set (empty lists when none); CMP derives insured-vehicle facts from it."
         },
         "priorTerm": {
           "type": "boolean",

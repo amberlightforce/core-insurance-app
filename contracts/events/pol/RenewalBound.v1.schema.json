@@ -76,11 +76,13 @@
       "properties": {
         "newTermId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Id of the renewal term (Scheduled until its start). Always set."
         },
         "newTermNumber": {
           "$ref": "../common.schema.json#/$defs/NonNegativeInt",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Term number of the renewal term (expiring term number + 1). Always set."
         },
         "transactionId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
@@ -100,6 +102,11 @@
         },
         "producerOfRecord": {
           "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0"
+        },
+        "predecessorTermId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "description": "Id of the expiring term this renewal continues (predecessor_term_id). Always set.",
           "x-classification": "P0"
         }
       }

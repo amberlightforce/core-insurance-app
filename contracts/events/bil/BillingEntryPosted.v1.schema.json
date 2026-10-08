@@ -80,7 +80,8 @@
         },
         "eventType": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Entry type (open Code). Slice 3 adds CREDIT_WRITTEN (reversal of the written premium receivable by a credit), CREDIT_BILLED (reversal of the billed receivable by a credit note) and REFUND_APPROVED (credit moved to refunds payable on approval). Disbursement entries (DISBURSEMENT_RELEASED, DISBURSEMENT_CLEARED) carry the source type BIL_REFUND for policy refunds. Servicing entries always carry the line dimensions transactionKind, cancellationSource (cancellations) and treatmentRuleId (tax and levy lines)."
         },
         "accountingDate": {
           "$ref": "../common.schema.json#/$defs/LocalDate",

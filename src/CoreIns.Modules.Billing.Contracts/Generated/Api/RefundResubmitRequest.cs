@@ -4,31 +4,24 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Refund.resubmit request. PRD inputs: "account, credits / decision"</summary>
+/// <summary>bil.Refund.resubmit request: puts a refund in state RETURNED (bank return) or REJECTED back to PROPOSED, optionally with a corrected payee.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RefundResubmitRequest
 {
-    /// <summary>PRD: "account"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("account")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Account { get; init; }
+    /// <summary>Contract member 'refundId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("refundId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RefundId RefundId { get; init; }
 
-    /// <summary>PRD: "credits"</summary>
+    /// <summary>New verified payee account; absent keeps the payee</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("credits")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Credits { get; init; }
+    public global::System.Guid? PayeeAccountId { get; init; }
 
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    public string? Comment { get; init; }
 }

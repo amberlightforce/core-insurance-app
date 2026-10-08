@@ -186,7 +186,11 @@
       "correlationKey": "Sample text",
       "taxTreatmentRef": "Sample text",
       "legalStatus": "SAMPLE_CODE",
-      "provisional": true
+      "provisional": true,
+      "transactionKind": "NEW_BUSINESS",
+      "cancellationSource": "SAMPLE_CODE",
+      "treatmentRuleId": "SAMPLE_CODE",
+      "treatmentRuleVersion": "SAMPLE_CODE"
     },
     "set_id": "01925a23-1611-75b1-8a5a-4eede0a6ae14",
     "set_size": 1,
@@ -239,7 +243,10 @@
       "bookingDate": "2026-10-07",
       "transactionId": "0192c833-c82a-76c3-8b50-031cd1a6e7fa",
       "correlationKey": "Sample text",
-      "taxTreatmentRef": null
+      "taxTreatmentRef": null,
+      "cancellationSource": null,
+      "treatmentRuleId": null,
+      "treatmentRuleVersion": null
     },
     "set_id": "01924953-bf0a-7bda-8c69-3d75a8587a78",
     "set_size": 1,
@@ -644,7 +651,8 @@
       "rewritePolicyId": "01922e5d-07b3-745f-806f-1a6506e5ed98",
       "terminationClockInstanceId": "01920223-78e1-724d-8af0-3b9fdcd85f86",
       "thirdPartyCoverEnd": "2026-10-07T09:00:00Z",
-      "thirdPartyCoverClockInstanceId": "01927c56-4a19-798f-828d-7c26c4da20c7"
+      "thirdPartyCoverClockInstanceId": "01927c56-4a19-798f-828d-7c26c4da20c7",
+      "kind": "SAMPLE_CODE"
     }
   },
   {
@@ -1557,7 +1565,8 @@
       "productCode": "SAMPLE_CODE",
       "productVersion": "1.0",
       "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "producerOfRecord": "SAMPLE_CODE"
+      "producerOfRecord": "SAMPLE_CODE",
+      "predecessorTermId": "0192253c-bdf2-7c61-84fa-8a1e1bee9f82"
     }
   },
   {
@@ -1631,7 +1640,10 @@
       "renewalProductVersion": "1.0",
       "conversionOutcomeSummary": {
         "note": "sample"
-      }
+      },
+      "predecessorTermId": "0192c2ae-ec1a-7854-80eb-d3ee4a3090fc",
+      "newTermNumber": 1,
+      "newTermId": "0192019b-9652-7765-829e-bc2a62d04ce8"
     }
   },
   {
@@ -1668,7 +1680,8 @@
       "renewalProductVersion": "1.0",
       "conversionOutcomeSummary": {
         "note": "sample"
-      }
+      },
+      "newTermId": null
     }
   },
   {
@@ -1715,7 +1728,10 @@
         }
       },
       "acceptanceMode": "SAMPLE_CODE",
-      "deadline": "2026-10-07T09:00:00Z"
+      "deadline": "2026-10-07T09:00:00Z",
+      "predecessorTermId": "0192c64f-9338-75d5-8530-b0c7f8f53821",
+      "newTermNumber": 1,
+      "newTermId": "01920ab6-2e43-79c4-85cf-da2252bcbee8"
     }
   },
   {
@@ -1762,7 +1778,8 @@
         }
       },
       "acceptanceMode": "SAMPLE_CODE",
-      "deadline": "2026-10-07T09:00:00Z"
+      "deadline": "2026-10-07T09:00:00Z",
+      "newTermId": null
     }
   },
   {

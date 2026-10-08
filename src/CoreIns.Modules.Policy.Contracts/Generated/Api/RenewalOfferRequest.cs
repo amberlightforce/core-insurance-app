@@ -4,36 +4,25 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Renewal.offer request. PRD inputs: "termId; offer; acceptance evidence; reason"</summary>
+/// <summary>pol.Renewal.offer request (REQ-POL-249, REQ-POL-250). Issues the offer of a rated renewal job.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RenewalOfferRequest
 {
-    /// <summary>PRD: "termId"</summary>
+    /// <summary>The renewal job</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
+
+    /// <summary>The expiring term</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("termId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.PolicyTermId? TermId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyTermId TermId { get; init; }
 
-    /// <summary>PRD: "offer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("offer")]
+    /// <summary>Acceptance mode; defaults to the configured mode</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("acceptanceMode")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Offer { get; init; }
+    public string? AcceptanceMode { get; init; }
 
-    /// <summary>PRD: "acceptance evidence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("acceptanceEvidence")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? AcceptanceEvidence { get; init; }
-
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
 }
