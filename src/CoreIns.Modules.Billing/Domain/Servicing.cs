@@ -13,6 +13,9 @@ internal static class TransactionKinds
     public const string Cancellation = "CANCELLATION";
     public const string Void = "VOID";
 
+    /// <summary>BIL's own kind for refunds (SL3-BIL-REFUND): set on the lines of refund entries, never on a POL delta.</summary>
+    public const string Refund = "REFUND";
+
     /// <summary>
     /// A servicing transaction: anything but new business (a renewal term is new business, contract note on
     /// <c>transactionKind</c>). The ledger dimensions <c>transactionKind</c>, <c>cancellationSource</c> and

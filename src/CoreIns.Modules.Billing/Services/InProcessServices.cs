@@ -136,6 +136,40 @@ internal sealed class DisbursementService(
         throw InProcess.NotAvailable("bil.Disbursement.approveRelease");
 }
 
+/// <summary><see cref="IBillingRefundService"/>: propose, decide, resubmit, get and list refunds (REQ-BIL-007, -181…-191).</summary>
+internal sealed class RefundService(
+    RequestContext context,
+    ILegalEntityDirectory legalEntities,
+    ICommandHandler<ProposeRefund, RefundProposeResponse> propose,
+    ICommandHandler<DecideRefund, RefundDecideResponse> decide,
+    ICommandHandler<ResubmitRefund, RefundResubmitResponse> resubmit,
+    RefundReader reader) : IBillingRefundService
+{
+    public Task<RefundProposeResponse> ProposeAsync(RefundProposeRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, propose, new ProposeRefund(request), options, cancellationToken);
+
+    public Task<RefundDecideResponse> DecideAsync(RefundDecideRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, decide, new DecideRefund(request), options, cancellationToken);
+
+    public Task<RefundResubmitResponse> ResubmitAsync(RefundResubmitRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, resubmit, new ResubmitRefund(request), options, cancellationToken);
+
+    public async Task<RefundGetResponse> GetAsync(string id, CancellationToken cancellationToken = default) =>
+        new()
+        {
+            Refund = InProcess.Found(
+                Guid.TryParse(id, out var guid)
+                    ? await reader.GetAsync(InProcess.LegalEntity(context, legalEntities), new RefundId(guid), cancellationToken).ConfigureAwait(false)
+                    : null,
+                "refund"),
+        };
+
+    public Task<RefundListPage> ListAsync(
+        string? cursor = null, int? limit = null, BillingAccountId? billingAccountId = null, PolicyId? policyId = null, CoreIns.Modules.Billing.Contracts.Api.RefundState? state = null,
+        CancellationToken cancellationToken = default) =>
+        reader.ListAsync(InProcess.LegalEntity(context, legalEntities), billingAccountId, policyId, state, cursor, limit, cancellationToken);
+}
+
 /// <summary><see cref="IBillingReceiptService"/>: <c>get</c> (REQ-BIL-126).</summary>
 internal sealed class ReceiptService(RequestContext context, ILegalEntityDirectory legalEntities, BillingReader reader) : IBillingReceiptService
 {

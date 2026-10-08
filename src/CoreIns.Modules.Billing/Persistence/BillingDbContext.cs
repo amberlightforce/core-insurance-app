@@ -46,6 +46,12 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<DisbursementRow> Disbursements => Set<DisbursementRow>();
 
+    public DbSet<RefundRow> Refunds => Set<RefundRow>();
+
+    public DbSet<RefundCreditRow> RefundCredits => Set<RefundCreditRow>();
+
+    public DbSet<RefundNettingRow> RefundNettings => Set<RefundNettingRow>();
+
     protected override string Schema => BillingModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -476,8 +482,9 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             {
                 table.HasCheckConstraint("ck_credit_application_amount", "amount > 0");
                 table.HasCheckConstraint("ck_credit_application_currency", "currency ~ '^[A-Z]{3}$'");
-                table.HasCheckConstraint("ck_credit_application_target", "target_kind IN ('INVOICE_ITEM')");
-                table.HasCheckConstraint("ck_credit_application_invoice_item", "target_kind <> 'INVOICE_ITEM' OR (target_invoice_id IS NOT NULL AND target_invoice_item_id IS NOT NULL)");
+                table.HasCheckConstraint("ck_credit_application_target", "target_kind IN ('INVOICE_ITEM', 'REFUND', 'NETTING')");
+                table.HasCheckConstraint("ck_credit_application_invoice_item", "target_kind NOT IN ('INVOICE_ITEM', 'NETTING') OR (target_invoice_id IS NOT NULL AND target_invoice_item_id IS NOT NULL)");
+                table.HasCheckConstraint("ck_credit_application_refund", "(target_kind IN ('REFUND', 'NETTING')) = (refund_id IS NOT NULL) AND (target_kind <> 'REFUND' OR (target_invoice_id IS NULL AND target_invoice_item_id IS NULL))");
             });
             entity.HasKey(e => e.CreditApplicationId).HasName("pk_credit_application");
             entity.Property(e => e.CreditApplicationId).HasColumnName("credit_application_id");
@@ -488,6 +495,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.TargetKind).HasColumnName("target_kind");
             entity.Property(e => e.TargetInvoiceId).HasColumnName("target_invoice_id");
             entity.Property(e => e.TargetInvoiceItemId).HasColumnName("target_invoice_item_id");
+            entity.Property(e => e.RefundId).HasColumnName("refund_id");
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
             entity.Property(e => e.Actor).HasColumnName("actor");
@@ -495,6 +503,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.HasIndex(e => e.CreditItemId).HasDatabaseName("ix_credit_application_credit_item");
             entity.HasIndex(e => e.TargetInvoiceItemId).HasDatabaseName("ix_credit_application_target_item");
             entity.HasIndex(e => e.BillingAccountId).HasDatabaseName("ix_credit_application_account");
+            entity.HasIndex(e => e.RefundId).HasDatabaseName("ix_credit_application_refund");
             entity.HasOne<InvoiceItemRow>().WithMany().HasForeignKey(e => e.CreditItemId)
                 .HasConstraintName("fk_credit_application_credit_item").OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<InvoiceItemRow>().WithMany().HasForeignKey(e => e.TargetInvoiceItemId)
@@ -505,6 +514,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
         ConfigurePayeeAccounts(modelBuilder);
         ConfigureDisbursements(modelBuilder);
+        ConfigureRefunds(modelBuilder);
     }
 
     /// <summary>Payee accounts (REQ-BIL-343): IBAN as ciphertext, blind index and last four characters only.</summary>
@@ -585,6 +595,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.ApprovalEvidenceRef).HasColumnName("approval_evidence_ref");
             entity.Property(e => e.ApprovalContentHash).HasColumnName("approval_content_hash").HasColumnType("char(64)");
             entity.Property(e => e.PurposeText).HasColumnName("purpose_text");
+            entity.Property(e => e.BusinessRef).HasColumnName("business_ref");
             entity.Property(e => e.State).HasColumnName("state");
             entity.Property(e => e.ScreeningResult).HasColumnName("screening_result");
             entity.Property(e => e.ScreeningListVersions).HasColumnName("screening_list_versions");
@@ -613,9 +624,131 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
                 .HasFilter(live + " AND claim_id IS NOT NULL").HasDatabaseName("ux_disbursement_duplicate_key");
             entity.HasIndex(e => new { e.LegalEntityId, e.SourceType, e.SourceId }).IsUnique()
                 .HasFilter(live).HasDatabaseName("ux_disbursement_source");
+            // REQ-BIL-202 for sources that pay a business object other than a claim (a refund pays a set of credit items):
+            // payee account, amount and the object's business reference.
+            entity.HasIndex(e => new { e.LegalEntityId, e.PayeeAccountId, e.Amount, e.Currency, e.SourceType, e.BusinessRef }).IsUnique()
+                .HasFilter(live + " AND business_ref IS NOT NULL").HasDatabaseName("ux_disbursement_business_ref");
             entity.HasOne<PayeeAccountRow>().WithMany().HasForeignKey(e => e.PayeeAccountId)
                 .HasConstraintName("fk_disbursement_payee_account").OnDelete(DeleteBehavior.Restrict);
         });
+
+    /// <summary>
+    /// Refunds (REQ-BIL-007, -181…-191): one open refund per billing account (REQ-BIL-188 aggregate authority: splitting a
+    /// refund cannot escape its limit) and append-only breakdown and netting lines.
+    /// </summary>
+    private static void ConfigureRefunds(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<RefundRow>(entity =>
+        {
+            entity.ToTable("refund", table =>
+            {
+                table.HasCheckConstraint("ck_refund_state", Codes.CheckSql<global::CoreIns.Modules.Billing.Contracts.RefundState>("state"));
+                table.HasCheckConstraint("ck_refund_approval_state", Codes.CheckSql<RefundApprovalStateCode>("approval_state"));
+                table.HasCheckConstraint("ck_refund_amount", "amount > 0");
+                table.HasCheckConstraint("ck_refund_currency", "currency ~ '^[A-Z]{3}$'");
+                table.HasCheckConstraint("ck_refund_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+                table.HasCheckConstraint("ck_refund_record_version", "record_version >= 1");
+                table.HasCheckConstraint("ck_refund_hash", "approval_content_hash IS NULL OR approval_content_hash ~ '^[0-9a-f]{64}$'");
+                table.HasCheckConstraint("ck_refund_credit_set_key", "credit_set_key ~ '^[0-9a-f]{64}$'");
+                table.HasCheckConstraint("ck_refund_approval", "(approval_state = 'PENDING') = (state = 'PENDING_APPROVAL')");
+            });
+            entity.HasKey(e => e.RefundId).HasName("pk_refund");
+            entity.Property(e => e.RefundId).HasColumnName("refund_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction").HasColumnType("char(2)");
+            entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
+            entity.Property(e => e.State).HasColumnName("state");
+            entity.Property(e => e.ApprovalState).HasColumnName("approval_state");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.PayeePartyId).HasColumnName("payee_party_id");
+            entity.Property(e => e.PayeeAccountId).HasColumnName("payee_account_id");
+            entity.Property(e => e.PayeeChanged).HasColumnName("payee_changed");
+            entity.Property(e => e.PayeeAccountChangedBy).HasColumnName("payee_account_changed_by");
+            entity.Property(e => e.PayoutMethod).HasColumnName("payout_method");
+            entity.Property(e => e.ReasonCode).HasColumnName("reason_code");
+            entity.Property(e => e.Comment).HasColumnName("comment");
+            entity.Property(e => e.SelectedCreditNotes).HasColumnName("selected_credit_notes");
+            entity.Property(e => e.CreditSetKey).HasColumnName("credit_set_key").HasColumnType("char(64)");
+            entity.Property(e => e.ResubmitsRefundId).HasColumnName("resubmits_refund_id");
+            entity.Property(e => e.Participants).HasColumnName("participants");
+            entity.Property(e => e.RequestedBy).HasColumnName("requested_by");
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.ApprovalContentHash).HasColumnName("approval_content_hash").HasColumnType("char(64)");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecisionComment).HasColumnName("decision_comment");
+            entity.Property(e => e.DisbursementId).HasColumnName("disbursement_id");
+            entity.Property(e => e.ApprovedEntryId).HasColumnName("approved_entry_id");
+            entity.Property(e => e.ProposedAt).HasColumnName("proposed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.PaidAt).HasColumnName("paid_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.BillingAccountId }).HasDatabaseName("ix_refund_account");
+            entity.HasIndex(e => e.ApprovalRequestId).HasDatabaseName("ix_refund_approval_request");
+
+            // One open refund per billing account: a rejected, paid or returned refund no longer blocks.
+            entity.HasIndex(e => e.BillingAccountId).IsUnique()
+                .HasFilter("state NOT IN ('REJECTED', 'PAID', 'RETURNED')").HasDatabaseName("ux_refund_open_per_account");
+            entity.HasOne<BillingAccountRow>().WithMany().HasForeignKey(e => e.BillingAccountId)
+                .HasConstraintName("fk_refund_account").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<PayeeAccountRow>().WithMany().HasForeignKey(e => e.PayeeAccountId)
+                .HasConstraintName("fk_refund_payee_account").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RefundCreditRow>(entity =>
+        {
+            entity.ToTable("refund_credit", table =>
+            {
+                table.HasCheckConstraint("ck_refund_credit_amount", "amount > 0");
+                table.HasCheckConstraint("ck_refund_credit_currency", "currency ~ '^[A-Z]{3}$'");
+            });
+            entity.HasKey(e => e.RefundCreditId).HasName("pk_refund_credit");
+            entity.Property(e => e.RefundCreditId).HasColumnName("refund_credit_id");
+            entity.Property(e => e.RefundId).HasColumnName("refund_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.CreditNoteId).HasColumnName("credit_note_id");
+            entity.Property(e => e.CreditItemId).HasColumnName("credit_item_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
+            entity.Property(e => e.ChargeType).HasColumnName("charge_type");
+            entity.Property(e => e.ChargeCategory).HasColumnName("charge_category");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.HasIndex(e => new { e.RefundId, e.CreditItemId }).IsUnique().HasDatabaseName("ux_refund_credit_item");
+            entity.HasIndex(e => e.CreditItemId).HasDatabaseName("ix_refund_credit_item");
+            entity.HasOne<RefundRow>().WithMany().HasForeignKey(e => e.RefundId)
+                .HasConstraintName("fk_refund_credit_refund").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<InvoiceItemRow>().WithMany().HasForeignKey(e => e.CreditItemId)
+                .HasConstraintName("fk_refund_credit_item").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RefundNettingRow>(entity =>
+        {
+            entity.ToTable("refund_netting", table =>
+            {
+                table.HasCheckConstraint("ck_refund_netting_amount", "amount > 0");
+                table.HasCheckConstraint("ck_refund_netting_currency", "currency ~ '^[A-Z]{3}$'");
+            });
+            entity.HasKey(e => e.RefundNettingId).HasName("pk_refund_netting");
+            entity.Property(e => e.RefundNettingId).HasColumnName("refund_netting_id");
+            entity.Property(e => e.RefundId).HasColumnName("refund_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.CreditNoteId).HasColumnName("credit_note_id");
+            entity.Property(e => e.CreditItemId).HasColumnName("credit_item_id");
+            entity.Property(e => e.TargetInvoiceId).HasColumnName("target_invoice_id");
+            entity.Property(e => e.TargetInvoiceItemId).HasColumnName("target_invoice_item_id");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.HasIndex(e => new { e.RefundId, e.CreditItemId, e.TargetInvoiceItemId }).IsUnique().HasDatabaseName("ux_refund_netting_pair");
+            entity.HasOne<RefundRow>().WithMany().HasForeignKey(e => e.RefundId)
+                .HasConstraintName("fk_refund_netting_refund").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<InvoiceItemRow>().WithMany().HasForeignKey(e => e.CreditItemId)
+                .HasConstraintName("fk_refund_netting_credit_item").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<InvoiceItemRow>().WithMany().HasForeignKey(e => e.TargetInvoiceItemId)
+                .HasConstraintName("fk_refund_netting_target_item").OnDelete(DeleteBehavior.Restrict);
+        });
+    }
 }
 
 /// <summary>Design-time factory for <c>dotnet ef migrations add … --project src/CoreIns.Modules.Billing</c> (no connection opened).</summary>

@@ -43,7 +43,7 @@ public sealed class SupportAuthorityTests
                 {
                     [SupportAuthorityTypes.AmountDimension] = DimensionValue.Of(new Money(decimal.Parse(amount, System.Globalization.CultureInfo.InvariantCulture), Currency.FromCode("EUR"))),
                     [SupportAuthorityTypes.CurrencyDimension] = DimensionValue.OfCodes("EUR"),
-                    [SupportAuthorityTypes.PayeeChangedDimension] = DimensionValue.Of(false),
+                    [SupportAuthorityTypes.PayeeChangedDimension] = DimensionValue.OfCodes(SupportAuthorityTypes.PayeeChangedCode(false)),
                 },
                 null,
                 Now),
@@ -121,7 +121,7 @@ public sealed class SupportAuthorityTests
 
         registry.TryGet(SupportAuthorityTypes.Refund, out var refund).ShouldBeTrue();
         refund.OwningModule.ShouldBe(ModuleCode.BIL);
-        refund.Dimensions.Select(d => d.Name).ShouldBe(["amount", "currency", "payeeChanged"]);
+        refund.Dimensions.Select(d => d.Name).ShouldBe(["amount", "currency", "payeeChanged", "reason"]);
         registry.TryGet(SupportAuthorityTypes.EffectiveDateOverride, out var overrideType).ShouldBeTrue();
         overrideType.OwningModule.ShouldBe(ModuleCode.POL);
         overrideType.Dimensions.Select(d => d.Name).ShouldBe(["product", "transactionType", "days"]);

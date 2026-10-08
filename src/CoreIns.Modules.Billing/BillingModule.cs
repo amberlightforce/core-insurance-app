@@ -50,7 +50,8 @@ public static class BillingModule
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.billing_account, {Schema}.plan_instance, {Schema}.charge, {Schema}.invoice, {Schema}.invoice_item, {Schema}.receipt, {Schema}.intake_exception TO {appRole}",
-                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.payee_account, {Schema}.disbursement TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.payee_account, {Schema}.disbursement, {Schema}.refund TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.refund_credit, {Schema}.refund_netting TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
@@ -111,6 +112,20 @@ public static class BillingModule
         services.AddCommand<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementHandler>(
             CommandDescriptor.For("bil.Disbursement.request") with { SupportsDryRun = true });
 
+        // SL3-BIL-REFUND: refunds of the credit balance (REQ-BIL-007, -181…-191), paid through the disbursement service (BIL_REFUND).
+        services.AddScoped<RefundCredits>();
+        services.AddScoped<RefundReader>();
+        services.AddScoped<RefundWorkflow>();
+        services.AddScoped<IValidator<ProposeRefund>, ProposeRefundValidator>();
+        services.AddCommandAuditor<ProposeRefund, RefundProposeResponse, ProposeRefundAuditor>();
+        services.AddCommand<ProposeRefund, RefundProposeResponse, ProposeRefundHandler>(CommandDescriptor.For("bil.Refund.propose") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<DecideRefund>, DecideRefundValidator>();
+        services.AddCommandAuditor<DecideRefund, RefundDecideResponse, DecideRefundAuditor>();
+        services.AddCommand<DecideRefund, RefundDecideResponse, DecideRefundHandler>(CommandDescriptor.For("bil.Refund.decide") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ResubmitRefund>, ResubmitRefundValidator>();
+        services.AddCommandAuditor<ResubmitRefund, RefundResubmitResponse, ResubmitRefundAuditor>();
+        services.AddCommand<ResubmitRefund, RefundResubmitResponse, ResubmitRefundHandler>(CommandDescriptor.For("bil.Refund.resubmit") with { SupportsDryRun = true });
+
         // Consumers (worker): POL charges and bind, CMP fiscal outcomes.
         services.AddEventHandler<ChargeDeltaEmittedV1, ChargeDeltaEmittedHandler>(
             EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), ChargeDeltaEmittedHandler.Name, ModuleCode.BIL);
@@ -131,6 +146,7 @@ public static class BillingModule
         services.AddScoped<IBillingReceiptService, ReceiptService>();
         services.AddScoped<IBillingPayeeAccountService, PayeeAccountService>();
         services.AddScoped<IBillingDisbursementService, DisbursementService>();
+        services.AddScoped<IBillingRefundService, RefundService>();
 
         services.AddErrorDefinitions(Errors);
         return services;
@@ -173,6 +189,20 @@ public static class BillingModule
             .Describe("Ο έλεγχος κυρώσεων δεν ήταν καθαρός· η πληρωμή δεν γίνεται.", "Sanctions screening was not clear; the payment is not made."),
         ErrorDefinition.For(ModuleCode.BIL, "SCREENING-UNAVAILABLE", 503, "Ο έλεγχος κυρώσεων δεν είναι διαθέσιμος", "Sanctions screening unavailable")
             .Describe("Ο έλεγχος κυρώσεων δεν ολοκληρώθηκε· η πληρωμή δεν γίνεται. Δοκιμάστε ξανά αργότερα.", "Sanctions screening did not complete; the payment is not made. Try again later."),
+        ErrorDefinition.For(ModuleCode.BIL, "NO-CREDIT", 422, "Δεν υπάρχει πιστωτικό υπόλοιπο προς επιστροφή", "No credit left to refund")
+            .Describe("Ο λογαριασμός δεν έχει πιστωτικό υπόλοιπο ή αυτό συμψηφίστηκε με ανοιχτές ειδοποιήσεις πληρωμής.", "The account has no credit, or it is fully set against open invoices."),
+        ErrorDefinition.For(ModuleCode.BIL, "REFUND-OPEN", 409, "Υπάρχει ήδη ανοιχτή επιστροφή", "A refund is already open")
+            .Describe("Ένας λογαριασμός χρέωσης έχει μία ανοιχτή επιστροφή τη φορά· αποφασίστε πρώτα για αυτήν.", "A billing account has one open refund at a time; decide it first."),
+        ErrorDefinition.For(ModuleCode.BIL, "REFUND-BELOW-MINIMUM", 422, "Η επιστροφή είναι κάτω από το ελάχιστο", "The refund is below the minimum")
+            .Describe("Το ποσό προς επιστροφή είναι μικρότερο από το ελάχιστο· το πιστωτικό μένει στον λογαριασμό.", "The amount to refund is below the minimum; the credit stays on the account."),
+        ErrorDefinition.For(ModuleCode.BIL, "REFUND-STATE", 409, "Η επιστροφή δεν είναι στην κατάλληλη κατάσταση", "The refund is not in the right state")
+            .Describe("Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της επιστροφής.", "The action is not allowed in the refund's current state."),
+        ErrorDefinition.For(ModuleCode.BIL, "SOD", 403, "Διαχωρισμός καθηκόντων", "Segregation of duties")
+            .Describe("Ο αιτών, όποιος επεξεργάστηκε την επιστροφή ή όποιος άλλαξε τον λογαριασμό δικαιούχου δεν μπορεί να την εγκρίνει.", "The requester, an editor of the refund or the person who changed the payee account cannot approve it."),
+        ErrorDefinition.For(ModuleCode.BIL, "PAYEE-UNVERIFIED", 422, "Ο λογαριασμός δικαιούχου δεν έχει επαληθευτεί", "Payee account not verified")
+            .Describe("Η επιστροφή πληρώνεται μόνο σε επαληθευμένο λογαριασμό του πληρωτή.", "A refund is paid only to the payer's verified bank account."),
+        ErrorDefinition.For(ModuleCode.BIL, "NOT-PERMITTED", 403, "Δεν έχετε εξουσιοδότηση για αυτό το ποσό", "No authority for this amount")
+            .Describe("Δεν υπάρχει εξουσιοδότηση επιστροφής για αυτό το ποσό.", "No refund authority covers this amount."),
         ErrorDefinition.For(ModuleCode.BIL, "DUPLICATE", 409, "Πιθανή διπλή πληρωμή", "Possible duplicate payment")
             .Describe("Υπάρχει ήδη πληρωμή για την ίδια πηγή ή με τον ίδιο λογαριασμό, ποσό και αναφορά.", "A payment already exists for the same source or with the same account, amount and reference."),
     ];
