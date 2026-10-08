@@ -54,6 +54,13 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
             source = request.CancellationSource;
         }
 
+        if (request.TransactionKind == TaxTransactionKind.DistanceWithdrawalVoid
+            && !string.IsNullOrWhiteSpace(request.CancellationSource)
+            && request.CancellationSource != TaxTreatmentRules.DistanceWithdrawal)
+        {
+            throw Validation("CANCELLATION_SOURCE_MISMATCH", nameof(request.CancellationSource));
+        }
+
         var key = TaxTreatmentRules.Key(request.Category, request.TransactionKind, source);
         var entry = engine.Catalogue.Find(key, request.RiskJurisdiction, new BusinessDate(request.TaxPointDate));
         if (entry is null)
@@ -63,7 +70,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
                 $"No treatment rule for {key} in {request.RiskJurisdiction} on {request.TaxPointDate:yyyy-MM-dd}; the core holds no default (fail closed).");
         }
 
-        if (engine.EnforceSettled && !entry.IsSettled)
+        if (engine.EnforceSettled && entry.LegalStatus != LegalStatus.Settled)
         {
             throw new DomainException(DomainError.Of(
                 ModuleCode.MKT, "CFG-NOT-SETTLED",
@@ -81,7 +88,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
             FiscalDocument = document,
             RuleId = row.RuleId,
             RuleVersion = row.RuleVersion,
-            LegalStatus = entry.IsSettled ? TreatmentLegalStatus.Settled : TreatmentLegalStatus.Pending,
+            LegalStatus = entry.LegalStatus == LegalStatus.Settled ? TreatmentLegalStatus.Settled : TreatmentLegalStatus.Pending,
             LegalSourceRef = entry.SourceRef,
         };
     }

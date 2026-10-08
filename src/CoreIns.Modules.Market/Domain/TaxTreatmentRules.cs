@@ -11,6 +11,8 @@ namespace CoreIns.Modules.Market.Domain;
 /// </summary>
 internal static class TaxTreatmentRules
 {
+    public const string TreatmentNamespace = "tax.treatment.";
+
     public const string KeyPrefix = "tax.treatment.rule.";
 
     /// <summary>Withdrawal/void routing selector (REQ-MKT-331): registered, not used by the slice.</summary>
@@ -90,8 +92,13 @@ internal static class TaxTreatmentRules
     /// Pack-load validation (TCK-TAX-NET-REFUND, PRD-17 section 9.4.4): a row is well formed, its category and kind are known,
     /// its source is in the code list, and it never gives the customer no credit on a distance withdrawal (a refund net of tax).
     /// </summary>
-    public static void ValidateRow(string key, string json)
+    public static void ValidateRow(string key, string json, LegalStatus legalStatus)
     {
+        if (legalStatus == LegalStatus.NotRegulatory)
+        {
+            throw new InvalidOperationException($"Treatment rule '{key}' is a tax rule and cannot be NotRegulatory: it must be Settled or carry a pending status (D-REG-01).");
+        }
+
         var parts = key[KeyPrefix.Length..].Split('.');
         if (parts.Length != 3)
         {
@@ -109,6 +116,14 @@ internal static class TaxTreatmentRules
         if (source != AnySource && !CancellationSources.Contains(source))
         {
             throw new InvalidOperationException($"Treatment rule '{key}' has a source outside the cancellation-source code list.");
+        }
+
+        var needsSource = kind is TaxTransactionKind.Cancellation or TaxTransactionKind.Void;
+        if (needsSource == (source == AnySource))
+        {
+            throw new InvalidOperationException(needsSource
+                ? $"Treatment rule '{key}' needs an explicit cancellation source (CANCELLATION and VOID rows cannot be ANY)."
+                : $"Treatment rule '{key}' must use source ANY: only CANCELLATION and VOID carry a source.");
         }
 
         var row = Parse(key, json);

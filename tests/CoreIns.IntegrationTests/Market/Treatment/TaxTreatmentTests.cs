@@ -148,12 +148,14 @@ public sealed class TaxTreatmentTests
     }
 
     [Theory]
-    [InlineData(TaxTransactionKind.Reinstatement)]
-    [InlineData(TaxTransactionKind.Void)]
-    public async Task Kinds_without_a_row_fail_closed(TaxTransactionKind kind)
+    [InlineData(TaxTransactionKind.Reinstatement, "Policyholder")]
+    [InlineData(TaxTransactionKind.Void, "Policyholder")]
+    [InlineData(TaxTransactionKind.Void, "Insurer")]
+    [InlineData(TaxTransactionKind.Void, "NonPayment")]
+    public async Task Kinds_without_a_row_fail_closed(TaxTransactionKind kind, string source)
     {
         var error = await Should.ThrowAsync<SpiException>(async () =>
-            await Build("Development").Calculator.TreatmentAsync(Request(kind, source: "Policyholder"), TestContext.Current.CancellationToken));
+            await Build("Development").Calculator.TreatmentAsync(Request(kind, source: source), TestContext.Current.CancellationToken));
 
         error.Category.ShouldBe(SpiErrorCategory.RuleMissing);
     }
@@ -313,8 +315,85 @@ public sealed class TaxTreatmentTests
     {
         var rows = Build("Development").Engine.Catalogue.Entries.Where(e => e.Key.StartsWith(TaxTreatmentRules.KeyPrefix, StringComparison.Ordinal)).ToList();
 
-        rows.Count.ShouldBe(8);
+        rows.Count.ShouldBe(9);
         rows.ShouldAllBe(e => e.LegalStatus == LegalStatus.PendingOpinion && e.Key.StartsWith("tax.treatment.rule.TAX.", StringComparison.Ordinal) && e.SourceRef.Contains("REQ-MKT-331"));
+    }
+
+    [Fact]
+    public async Task REQ_MKT_331c_void_with_source_distance_withdrawal_reverses_as_void()
+    {
+        var result = await Build("Development").Calculator.TreatmentAsync(Request(TaxTransactionKind.Void, source: "DistanceWithdrawal"), TestContext.Current.CancellationToken);
+
+        result.Action.ShouldBe(TreatmentAction.ReverseAsVoid);
+        result.CustomerCredit.ShouldBe(CustomerCredit.Full);
+        result.Provisional.ShouldBeTrue();
+        result.LegalSourceRef.ShouldContain("Law 5317/2026 Art. 72");
+    }
+
+    [Fact]
+    public async Task D4_distance_withdrawal_void_with_another_source_is_a_validation_error()
+    {
+        var calculator = Build("Development").Calculator;
+        var error = await Should.ThrowAsync<SpiException>(async () =>
+            await calculator.TreatmentAsync(Request(TaxTransactionKind.DistanceWithdrawalVoid, source: "Insurer"), TestContext.Current.CancellationToken));
+
+        error.Category.ShouldBe(SpiErrorCategory.Validation);
+        (await calculator.TreatmentAsync(Request(TaxTransactionKind.DistanceWithdrawalVoid, source: "DistanceWithdrawal"), TestContext.Current.CancellationToken))
+            .Action.ShouldBe(TreatmentAction.ReverseAsVoid);
+    }
+
+    [Fact]
+    public void D1_a_not_regulatory_treatment_row_is_rejected_at_load()
+    {
+        var pack = new RowPack(new PackConfigValue("tax.treatment.rule.TAX.REFUND.ANY", ConfigValueType.Json, Json("KEEP_NOT_REDUCED"), LegalStatus.NotRegulatory, "test", false));
+
+        Should.Throw<InvalidOperationException>(() => new ConfigurationCatalogue([pack], Instant.FromUtc(2026, 10, 8))).Message.ShouldContain("NotRegulatory");
+    }
+
+    [Theory]
+    [InlineData(LegalStatus.Unverified)]
+    [InlineData(LegalStatus.Draft)]
+    [InlineData(LegalStatus.Verify)]
+    [InlineData(LegalStatus.Uncertain)]
+    [InlineData(LegalStatus.MarketPractice)]
+    [InlineData(LegalStatus.PendingOpinion)]
+    public async Task D1_the_production_gate_serves_only_settled_rows(LegalStatus status)
+    {
+        var pack = new RowPack(new PackConfigValue("tax.treatment.rule.TAX.REFUND.ANY", ConfigValueType.Json, Json("KEEP_NOT_REDUCED"), status, "test", false));
+
+        await Should.ThrowAsync<DomainException>(async () =>
+            await Build("Production", pack).Calculator.TreatmentAsync(Request(TaxTransactionKind.Refund), TestContext.Current.CancellationToken));
+        (await Build("Development", pack).Calculator.TreatmentAsync(Request(TaxTransactionKind.Refund), TestContext.Current.CancellationToken)).Provisional.ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData("tax.treatment.rule.TAX.NEW_BUSINESS.Policyholder")]
+    [InlineData("tax.treatment.rule.TAX.CANCELLATION.ANY")]
+    [InlineData("tax.treatment.rule.LEVY.CANCELLATION.ANY")]
+    [InlineData("tax.treatment.rule.TAX.VOID.ANY")]
+    public void D3_source_is_required_for_cancellation_and_void_and_forbidden_elsewhere(string key)
+    {
+        var pack = new RowPack(new PackConfigValue(key, ConfigValueType.Json, Json("KEEP_NOT_REDUCED"), LegalStatus.PendingOpinion, "test", false));
+
+        Should.Throw<InvalidOperationException>(() => new ConfigurationCatalogue([pack], Instant.FromUtc(2026, 10, 8)));
+    }
+
+    [Fact]
+    public void D6_treatment_keys_cannot_be_read_through_the_configuration_engine()
+    {
+        var engine = Build("Development").Engine;
+        var at = ValidAt.From(new BusinessDate(2027, 1, 15));
+        var byKey = new ConfigurationResolveRequest { LegalEntity = "GR-TEST", Jurisdiction = "GR", Keys = ["tax.treatment.withdrawal_void_routing"] };
+        var byNamespace = new ConfigurationResolveRequest
+        {
+            LegalEntity = "GR-TEST",
+            Jurisdiction = "GR",
+            Namespace = "tax",
+            TimeBasisDates = new Dictionary<string, BusinessDate> { ["TAX_POINT_DATE"] = new(2027, 1, 15) },
+        };
+
+        Should.Throw<DomainException>(() => engine.Resolve(byKey, at, null));
+        engine.Resolve(byNamespace, at, null).Values.ShouldNotContain(v => v.Key.StartsWith("tax.treatment.", StringComparison.Ordinal));
     }
 
     private sealed class RowPack(PackConfigValue value) : IPackConfigurationSource

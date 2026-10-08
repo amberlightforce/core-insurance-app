@@ -27,6 +27,7 @@ internal static class GrTreatmentRules
         Row("NEW_BUSINESS", "ANY", "APPLY", "GR-TRT-IPT-NEW-BUSINESS", Apply),
         Row("ENDORSEMENT_DEBIT", "ANY", "APPLY", "GR-TRT-IPT-ENDORSEMENT-DEBIT", Apply),
         Row("FEE", "ANY", "APPLY", "GR-TRT-IPT-FEE", Apply),
+        Row("VOID", "DistanceWithdrawal", "REVERSE_AS_VOID", "GR-TRT-IPT-VOID-DISTANCE-WITHDRAWAL", Void),
         Row("DISTANCE_WITHDRAWAL_VOID", "ANY", "REVERSE_AS_VOID", "GR-TRT-IPT-WITHDRAWAL-VOID", Void),
     ];
 

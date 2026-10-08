@@ -9,6 +9,10 @@ public sealed class TreatmentKeyGuardTests
     private static readonly string[] Allowed =
         [SolutionModel.ModulePrefix + "Market", SolutionModel.ModulePrefix + "Market.Contracts", "CoreIns.CountryPacks.GR", "CoreIns.CountryPacks.CY"];
 
+    // Literal, split and concatenated forms of the prefix, and the removed PFC refundability key (REQ-MKT-332).
+    private static readonly string[] Forbidden =
+        ["tax.treatment", "\"tax.\" +", "\"tax\" +", "\"treatment.\"", "\"treatment\"", "refund_on_cancel", "gr.ipt.refund"];
+
     [Fact]
     public void ARCH_11_only_market_and_the_packs_name_a_tax_treatment_key()
     {
@@ -17,7 +21,7 @@ public sealed class TreatmentKeyGuardTests
             .Where(file => !file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
                            && !file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
             .Where(file => !Allowed.Contains(Project(source, file)))
-            .Where(file => File.ReadAllText(file).Contains("tax.treatment.", StringComparison.Ordinal))
+            .Where(file => Forbidden.Any(token => File.ReadAllText(file).Contains(token, StringComparison.Ordinal)))
             .Select(file => Path.GetRelativePath(source, file))
             .ToList();
 

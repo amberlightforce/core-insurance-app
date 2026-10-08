@@ -113,7 +113,7 @@ internal sealed class ConfigurationCatalogue
         Validate(value);
         if (value.Key.StartsWith(TaxTreatmentRules.KeyPrefix, StringComparison.Ordinal))
         {
-            TaxTreatmentRules.ValidateRow(value.Key, value.Value);
+            TaxTreatmentRules.ValidateRow(value.Key, value.Value, value.LegalStatus);
         }
 
         if (string.IsNullOrWhiteSpace(value.SourceRef))
