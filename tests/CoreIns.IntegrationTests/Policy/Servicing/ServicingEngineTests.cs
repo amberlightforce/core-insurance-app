@@ -424,18 +424,90 @@ public sealed class ServicingEngineTests
     [Fact]
     public void ReferenceProration_AgreesWithTheRatContractSampleShape_REQ_RAT_004()
     {
-        // The generated sample for rat.Proration.prorate carries amounts as Money (EUR, minor units); the reference
-        // implementation produces exactly such amounts for the E2E-03 case. The sample leaves fractions untyped until
-        // SL3-RAT-PRORATE lands; reconcile then.
+        // rat.Proration.prorate now returns typed lines (days, termDays, fraction, Money amount) plus total and convention.
+        // The reference implementation parses the sample's convention, and produces EUR minor-unit amounts for E2E-03.
         var path = Path.Combine(RepositoryPaths.Root, "tests", "CoreIns.Testing.Contracts", "Generated", "Samples", "rat.json");
-        var sample = JsonNode.Parse(File.ReadAllText(path))!["schemas"]!["ProrationProrateResponse"]!["amounts"]![0]!;
-        Assert.Equal("EUR", sample["currency"]!.GetValue<string>());
-        Assert.True(decimal.TryParse(sample["amount"]!.GetValue<string>(), System.Globalization.CultureInfo.InvariantCulture, out var amount));
-        Assert.Equal(2, BitConverter.GetBytes(decimal.GetBits(amount)[3])[2]);
+        var response = JsonNode.Parse(File.ReadAllText(path))!["schemas"]!["ProrationProrateResponse"]!;
+        Assert.True(DayCountConventions.TryParse(response["convention"]!.GetValue<string>(), out var convention));
+        var line = response["lines"]![0]!;
+        Assert.True(line["days"]!.GetValue<int>() >= 0 && line["termDays"]!.GetValue<int>() > 0);
+        foreach (var money in new[] { line["amount"]!, response["total"]! })
+        {
+            Assert.Equal("EUR", money["currency"]!.GetValue<string>());
+            Assert.True(decimal.TryParse(money["amount"]!.GetValue<string>(), System.Globalization.CultureInfo.InvariantCulture, out var amount));
+            Assert.Equal(2, BitConverter.GetBytes(decimal.GetBits(amount)[3])[2]);
+        }
 
-        var fraction = new ReferenceProration().Fraction(DayCountConvention.TermRatio, 245, 365);
+        var fraction = new ReferenceProration().Fraction(convention, 245, 365);
         Assert.Equal((245, 365), (fraction.Numerator, fraction.Denominator));
         Assert.Equal(288.63m, decimal.Round(430.00m * fraction.Numerator / fraction.Denominator, 2, MidpointRounding.AwayFromZero));
+    }
+
+    [Fact]
+    public void ReloadedState_RatesPeriodsAndAmountsOnly_ReplaysToTheSameMoney_R3()
+    {
+        for (var seed = 1; seed <= 150; seed++)
+        {
+            var rng = new Random(seed);
+            var term = rng.Next(2) == 0 ? Term365 : Term366 with { Convention = DayCountConvention.Act365F };
+            var live = Open(term, Premium(Math.Round(rng.Next(10_000, 90_000) / 100m, 2)));
+            var reloaded = live;
+            var day = 0;
+            for (var i = 0; i < 6; i++)
+            {
+                day += rng.Next(1, 30);
+                var intent = new ChangeIntent(DayAt(term, day, 12), [Premium(i % 3 == 2 ? 0m : Math.Round(rng.Next(10_000, 90_000) / 100m, 2))]);
+                var a = Engine().Apply(live, intent, Corr);
+                var b = Engine().Apply(reloaded, intent, Corr);
+                Assert.True(a.IsAccepted && b.IsAccepted, $"seed {seed}: {a.Message} {b.Message}");
+                Assert.Equal(a.Deltas.Select(d => d.Amount), b.Deltas.Select(d => d.Amount));
+                live = a.State!;
+
+                // "reload": rebuild every segment from the stored columns only
+                reloaded = b.State! with { Segments = b.State!.Segments.Select(s => new ServicingSegment(s.Rate, s.From, s.To, s.Amount)).ToList() };
+                Assert.Equal(Written(live, Premium(1).Key), Written(reloaded, Premium(1).Key));
+            }
+
+            var cancel = new EndCoverIntent(DayAt(term, Math.Min(term.Days - 1, day + 5), 12), RefundMethod.ProRata);
+            Assert.Equal(Engine().Apply(live, cancel, Corr).Deltas.Select(d => d.Amount), Engine().Apply(reloaded, cancel, Corr).Deltas.Select(d => d.Amount));
+        }
+    }
+
+    [Fact]
+    public void CorruptAmounts_AreRefused_NotClampedAway_R2()
+    {
+        var state = Open(Term365, Premium(430.00m));
+        var bogus = state with { Segments = [state.Segments[0] with { Amount = 10_000.00m }] };
+        var negative = state with { Segments = [state.Segments[0] with { Amount = -1.00m }] };
+
+        foreach (var broken in new[] { bogus, negative })
+        {
+            Assert.Equal(ServicingRefusal.InvalidInput, Engine().Apply(broken, new ChangeIntent(At(2026, 9, 17), [Premium(400.00m)]), Corr).Refusal);
+            Assert.Equal(ServicingRefusal.InvalidInput, Engine().Apply(broken, new EndCoverIntent(At(2026, 9, 17), RefundMethod.ProRata), Corr).Refusal);
+        }
+    }
+
+    [Fact]
+    public void ChangeToRateZero_CarriesTheCumulativeResidual_R1()
+    {
+        for (var seed = 1; seed <= 300; seed++)
+        {
+            var rng = new Random(seed);
+            var state = Open(Term365, Premium(Math.Round(rng.Next(10_000, 90_000) / 100m, 2)));
+            var day = 0;
+            for (var i = 0; i < 5; i++)
+            {
+                day += rng.Next(1, 40);
+                var rate = i == 4 ? 0m : Math.Round(rng.Next(10_000, 90_000) / 100m, 2);
+                var result = Engine().Apply(state, new ChangeIntent(DayAt(Term365, day, 12), [Premium(rate)]), Corr);
+                Assert.True(result.IsAccepted, result.Message);
+                state = result.State!;
+            }
+
+            // the zero-rate remainder is exactly 0 and the cumulative equals the rounding of the earned exact amount
+            Assert.Equal(0m, state.Segments[state.Segments.Count - 1].Amount);
+            Assert.All(state.Segments, s => Assert.True(s.Amount >= 0m));
+        }
     }
 
     // ---- property-style probes ----------------------------------------------------------------------------------
@@ -465,7 +537,7 @@ public sealed class ServicingEngineTests
                     return new ChargeRate("VEH-1", "COV", type, "FEE", fixedRate, true, refundable);
                 }
 
-                return new ChargeRate("VEH-1", "COV", type, "PREMIUM", Math.Round((decimal)rng.Next(0, 200_000) / 100m + (decimal)rng.Next(0, 100) / 10_000m, 4));
+                return new ChargeRate("VEH-1", "COV", type, "PREMIUM", rng.Next(7) == 0 ? 0m : Math.Round((decimal)rng.Next(0, 200_000) / 100m + (decimal)rng.Next(0, 100) / 10_000m, 4));
             }
 
             var state = Open(term, keys.Select(k => RateFor(k.Type, k.Flat)).ToArray());
