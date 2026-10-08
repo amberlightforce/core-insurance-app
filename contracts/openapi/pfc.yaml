@@ -2988,6 +2988,51 @@ components:
       - name
       - productType
       - customerType
+    RefundMethod:
+      type: string
+      enum:
+      - PRO_RATA
+      - SHORT_RATE
+      - FLAT
+      - MINIMUM_RETAINED
+      - FULL_REFUND
+      description: Refund method of a cancellation (REQ-PFC-134, REQ-POL-206).
+    RefundMethodDef:
+      type: object
+      description: The refund method for one cancellation source (REQ-PFC-134, subset). Tax and levy charge types are never
+        listed here, they follow the pack tax treatment (REQ-PFC-116).
+      properties:
+        source:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Cancellation source, for example Policyholder or DistanceWithdrawal.
+        method:
+          $ref: '#/components/schemas/RefundMethod'
+        legalStatus:
+          $ref: '#/components/schemas/ConfigLegalStatus'
+        illustrative:
+          type: boolean
+          description: True when the method is test data, not an approved commercial value (D-SL3-08).
+        reference:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: PRD requirement or legal source citation.
+      required:
+      - source
+      - method
+    ChangePermissions:
+      type: object
+      description: What a mid-term change may touch on this version (REQ-PFC-066, subset).
+      properties:
+        editableVehicleFields:
+          type: array
+          description: Codes of vehicle-element fields that a mid-term change may edit.
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        vehicleReplacement:
+          type: boolean
+          description: True when the insured vehicle may be replaced mid-term.
+      required:
+      - editableVehicleFields
+      - vehicleReplacement
     ProductWindows:
       type: object
       description: New-business and renewal windows of a version (REQ-PFC-166); half-open, `to` null when open.
@@ -3079,6 +3124,21 @@ components:
           type: boolean
         dayCount:
           $ref: ../events/common.schema.json#/$defs/Code
+        dayCountProvisional:
+          type: boolean
+          description: True when the day-count convention is a recommendation awaiting confirmation, not an approved value
+            (REQ-PFC-135, D-SL3-04). Absent means not provisional.
+        dayCountNote:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Why the day count is provisional and who must confirm it.
+        refundMethods:
+          type: array
+          description: Refund method per cancellation source (REQ-PFC-134, subset). A source with no entry has no refund
+            method, so POL refuses a cancellation from it (fail closed).
+          items:
+            $ref: '#/components/schemas/RefundMethodDef'
+        changePermissions:
+          $ref: '#/components/schemas/ChangePermissions'
         windows:
           $ref: '#/components/schemas/ProductWindows'
         elements:
