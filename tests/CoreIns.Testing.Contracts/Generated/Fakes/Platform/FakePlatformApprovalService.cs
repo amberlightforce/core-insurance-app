@@ -17,6 +17,9 @@ public sealed class FakePlatformApprovalService : global::CoreIns.Testing.Contra
     public global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalDecideResponse> DecideAsync(global::CoreIns.Platform.Contracts.Api.ApprovalDecideRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Platform.Contracts.Api.ApprovalDecideResponse>("plt.Approval.decide", [request, options], cancellationToken);
 
     /// <inheritdoc />
+    public global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Platform.Contracts.Api.ApprovalGetResponse>("plt.Approval.get", [id], cancellationToken);
+
+    /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalRequestResponse> RequestAsync(global::CoreIns.Platform.Contracts.Api.ApprovalRequestRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Platform.Contracts.Api.ApprovalRequestResponse>("plt.Approval.request", [request, options], cancellationToken);
 
     /// <inheritdoc />

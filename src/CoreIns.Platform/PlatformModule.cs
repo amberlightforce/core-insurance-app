@@ -1,7 +1,11 @@
+using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Audit;
 using CoreIns.Platform.Authorization;
 using CoreIns.Platform.Authority;
+using CoreIns.Platform.Commands;
 using CoreIns.Platform.Configuration;
+using CoreIns.Platform.Contracts;
+using CoreIns.Platform.Contracts.Api;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
@@ -9,6 +13,7 @@ using CoreIns.Platform.Numbering;
 using CoreIns.Platform.Persistence;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel.Identifiers;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -53,6 +58,8 @@ public static class PlatformModule
         services.AddOptions<StampOptions>().Bind(configuration.GetSection(StampOptions.Section));
         services.AddOptions<OutboxOptions>().Bind(configuration.GetSection(OutboxOptions.Section));
         services.AddOptions<AuthorityOptions>().Bind(configuration.GetSection(AuthorityOptions.Section));
+        services.AddSingleton<IPostConfigureOptions<AuthorityOptions>>(sp => new PostConfigureOptions<AuthorityOptions>(
+            Options.DefaultName, options => AuthorityOptions.DropIllustrativeIn(options, sp.GetService<IHostEnvironment>())));
 
         services.TryAddSingleton<IClock>(sp => configuration[ClockConfiguration.ModeKey] is { Length: > 0 }
             ? ClockConfiguration.Create(configuration, sp.GetRequiredService<IHostEnvironment>())
@@ -100,6 +107,39 @@ public static class PlatformModule
                 .Describe("Δεν απομένουν αριθμοί στη σειρά· ο διαχειριστής πρέπει να ορίσει νέα σειρά.", "No number is left in the series; an administrator must define a new series."),
             ErrorDefinition.For(ModuleCode.PLT, NumberingErrors.UnknownScheme, 500, "Δεν έχει οριστεί σειρά αρίθμησης", "No numbering series is defined")
                 .Describe("Ο τύπος αναγνωριστικού δεν έχει ορισμό σειράς στις ρυθμίσεις της πλατφόρμας.", "The identifier type has no series definition in the platform settings."));
+        services.AddApprovals();
+        return services;
+    }
+
+    /// <summary>
+    /// The maker-checker service (REQ-PLT-004, SL2-PLT subset): <c>plt.Approval.request/decide</c> through the command
+    /// pipeline, the reads, the in-process contract <see cref="IPlatformApprovalService"/> and the PLT-ERR definitions.
+    /// </summary>
+    private static IServiceCollection AddApprovals(this IServiceCollection services)
+    {
+        services.AddScoped<IValidator<RequestApproval>, RequestApprovalValidator>();
+        services.AddCommandAuditor<RequestApproval, ApprovalRequestResponse, RequestApprovalAuditor>();
+        services.AddCommand<RequestApproval, ApprovalRequestResponse, RequestApprovalHandler>(CommandDescriptor.For("plt.Approval.request"));
+
+        services.AddScoped<IValidator<DecideApproval>, DecideApprovalValidator>();
+        services.AddCommandAuditor<DecideApproval, ApprovalDecideResponse, DecideApprovalAuditor>();
+        services.AddCommand<DecideApproval, ApprovalDecideResponse, DecideApprovalHandler>(CommandDescriptor.For("plt.Approval.decide"));
+
+        services.TryAddScoped<ApprovalQueries>();
+        services.TryAddScoped<IPlatformApprovalService, PlatformApprovalService>();
+        services.AddErrorDefinitions(
+            ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.SelfApproval, 403, "Δεν μπορείτε να εγκρίνετε δικό σας αίτημα", "You cannot decide your own request")
+                .Describe("Ο συντάκτης ενός αιτήματος δεν μπορεί να το αποφασίσει· απαιτείται άλλος εξουσιοδοτημένος χρήστης (τέσσερα μάτια).", "The maker of a request cannot decide it; another authorised user must (four eyes)."),
+            ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.EditorCannotApprove, 403, "Όποιος επεξεργάστηκε το περιεχόμενο δεν μπορεί να το εγκρίνει", "An editor of the content cannot decide it")
+                .Describe("Έχετε υποβάλει προηγούμενη έκδοση του ίδιου περιεχομένου· απαιτείται άλλος εξουσιοδοτημένος χρήστης.", "You submitted an earlier version of the same content; another authorised user must decide."),
+            ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.CheckerMustBeHuman, 422, "Την απόφαση παίρνει μόνο πρόσωπο", "Only a person can decide")
+                .Describe("Υπηρεσίες και πράκτορες τεχνητής νοημοσύνης δεν μπορούν να εγκρίνουν ή να απορρίψουν αιτήματα.", "Services and AI agents can never approve or reject a request."),
+            ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.Stale, 409, "Το αίτημα έγκρισης άλλαξε στο μεταξύ", "The approval request changed meanwhile")
+                .Describe("Το αίτημα αποφασίστηκε ή αντικαταστάθηκε, ή το περιεχόμενο άλλαξε μετά τον έλεγχό σας. Φορτώστε το ξανά.", "The request was decided or superseded, or its content changed after you reviewed it. Reload it."),
+            ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.HashMismatch, 422, "Το περιεχόμενο διαφέρει από αυτό που εγκρίθηκε", "The content differs from what was approved")
+                .Describe("Η εκτέλεση επιτρέπεται μόνο για το περιεχόμενο που εγκρίθηκε (ίδιο αποτύπωμα SHA-256).", "Execution is allowed only for the approved content (same SHA-256 hash)."),
+            ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.SubjectMismatch, 422, "Η έγκριση αφορά άλλο αντικείμενο", "The approval is for another subject")
+                .Describe("Το αίτημα έγκρισης είναι άλλου τύπου ή αφορά άλλο αντικείμενο από αυτό που εκτελείται.", "The approval request is of another type or for another subject than the one being executed."));
         return services;
     }
 
@@ -146,6 +186,9 @@ public static class PlatformModule
         $"GRANT SELECT, INSERT, UPDATE, DELETE ON {Schema}.outbox_message, {Schema}.aggregate_sequence, {Schema}.processed_event, "
             + $"{Schema}.outbox_dead_letter, {Schema}.event_archive, {Schema}.idempotency_record TO {appRole}",
         $"GRANT SELECT, INSERT, UPDATE ON {Schema}.number_series, {Schema}.data_key TO {appRole}",
+
+        // Approval requests: no DELETE; a decided request is frozen by trigger (decided once, REQ-PLT-114).
+        $"GRANT SELECT, INSERT, UPDATE ON {Schema}.approval_request TO {appRole}",
         $"GRANT SELECT, INSERT ON {Schema}.audit_event TO {appRole}",
         $"GRANT SELECT ON {Schema}.audit_chain_head TO {appRole}",
         $"REVOKE ALL ON FUNCTION {Schema}.audit_chain_lock(date) FROM PUBLIC",

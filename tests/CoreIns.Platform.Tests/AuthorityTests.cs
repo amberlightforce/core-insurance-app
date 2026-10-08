@@ -118,4 +118,46 @@ public sealed class AuthorityTests
             .Error.Code.Value.ShouldBe("PLT-ERR-TYPE-EXISTS");
         registry.Register(registry.All.Single());
     }
+
+    [Theory]
+    [InlineData("Production", 1)]
+    [InlineData("Development", 2)]
+    [InlineData("Testing", 2)]
+    public void D_SL2_03_illustrative_grants_never_apply_in_Production(string environment, int remaining)
+    {
+        var options = new AuthorityOptions();
+        options.Grants.Add(Grant("g-approved", role: "Claims.Handler", limit: "1"));
+        var illustrative = Grant("g-illustrative", role: "Claims.Handler", limit: "5000");
+        illustrative.Illustrative = true;
+        options.Grants.Add(illustrative);
+
+        AuthorityOptions.DropIllustrativeIn(options, new HostEnvironment(environment));
+
+        options.Grants.Count.ShouldBe(remaining);
+        options.Grants.ShouldContain(g => g.Id == "g-approved");
+    }
+
+    [Fact]
+    public void Illustrative_grants_are_dropped_when_the_environment_is_unknown()
+    {
+        var options = new AuthorityOptions();
+        var illustrative = Grant("g-illustrative", role: "Claims.Handler", limit: "5000");
+        illustrative.Illustrative = true;
+        options.Grants.Add(illustrative);
+
+        AuthorityOptions.DropIllustrativeIn(options, null);
+
+        options.Grants.ShouldBeEmpty();
+    }
+
+    private sealed class HostEnvironment(string name) : Microsoft.Extensions.Hosting.IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = name;
+
+        public string ApplicationName { get; set; } = "tests";
+
+        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+
+        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; } = new Microsoft.Extensions.FileProviders.NullFileProvider();
+    }
 }

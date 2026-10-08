@@ -67,4 +67,19 @@ public sealed record ApprovalDecidedV1 : global::CoreIns.Platform.Contracts.Even
     /// <summary>Contract member 'decidedAt'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("decidedAt")]
     public required global::CoreIns.SharedKernel.Instant DecidedAt { get; init; }
+
+    /// <summary>Approval type code (added by SL2-PLT, pre-release): lets the owning module pick its own decisions</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalType")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ApprovalType { get; init; }
+
+    /// <summary>The subject decided (added by SL2-PLT, pre-release)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("objectRef")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ObjectRef? ObjectRef { get; init; }
+
+    /// <summary>Content hash the decision was made on (added by SL2-PLT, pre-release; REQ-PLT-117)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payloadHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? PayloadHash { get; init; }
 }

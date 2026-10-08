@@ -60,7 +60,7 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
         var ct = TestContext.Current.CancellationToken;
 
         var users = await client.GetFromJsonAsync<JsonNode>(new Uri("/api/plt/v1/dev/users", UriKind.Relative), ct);
-        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(["underwriter", "billing", "finance", "admin"]);
+        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(["underwriter", "billing", "finance", "claims", "claimsmgr", "admin"]);
 
         using var unknown = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = "nobody" }, ct);
         unknown.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -85,6 +85,30 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
         create.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
         using var forbidden = await client.SendAsync(create, ct);
         forbidden.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+
+        // SL2-PLT: the synthetic claims users see parties and their approvals inbox, but cannot create parties.
+        foreach (var claimsUser in new[] { "claims", "claimsmgr" })
+        {
+            using var claimsSignIn = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = claimsUser }, ct);
+            var claimsToken = (await claimsSignIn.Content.ReadFromJsonAsync<JsonNode>(ct))!["accessToken"]!.GetValue<string>();
+            foreach (var (path, expected) in new[]
+                     {
+                         ("/api/pty/v1/parties/search?partyNumber=P000000001", HttpStatusCode.OK),
+                         ("/api/plt/v1/approval", HttpStatusCode.OK),
+                     })
+            {
+                using var get = new HttpRequestMessage(HttpMethod.Get, new Uri(path, UriKind.Relative));
+                get.Headers.Authorization = new AuthenticationHeaderValue("Bearer", claimsToken);
+                using var response = await client.SendAsync(get, ct);
+                response.StatusCode.ShouldBe(expected, $"{claimsUser} GET {path}");
+            }
+
+            using var claimsCreate = new HttpRequestMessage(HttpMethod.Post, new Uri("/api/pty/v1/parties", UriKind.Relative)) { Content = JsonContent.Create(new { }) };
+            claimsCreate.Headers.Authorization = new AuthenticationHeaderValue("Bearer", claimsToken);
+            claimsCreate.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+            using var claimsForbidden = await client.SendAsync(claimsCreate, ct);
+            claimsForbidden.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        }
 
         // A token with the dev issuer but signed with another key is rejected.
         var forged = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor

@@ -224,6 +224,25 @@ public sealed class AuthorityOptions
 
     /// <summary>The grants.</summary>
     public IList<AuthorityGrantOptions> Grants { get; } = [];
+
+    /// <summary>
+    /// Illustrative grants are test data (e.g. the claims limits of D-SL2-03): they never apply in Production, where the
+    /// affected checks fail closed (no grant → DENY) until approved limits are configured. Without a known host
+    /// environment they are dropped as well (fail closed).
+    /// </summary>
+    public static void DropIllustrativeIn(AuthorityOptions options, Microsoft.Extensions.Hosting.IHostEnvironment? environment)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        if (environment is not null && !Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsProduction(environment))
+        {
+            return;
+        }
+
+        foreach (var grant in options.Grants.Where(g => g.Illustrative).ToList())
+        {
+            options.Grants.Remove(grant);
+        }
+    }
 }
 
 /// <summary>One configured grant: a role or user, an authority type, limits and a validity window.</summary>
@@ -249,6 +268,9 @@ public sealed class AuthorityGrantOptions
 
     /// <summary>Limits; all must pass.</summary>
     public IList<AuthorityLimitOptions> Limits { get; } = [];
+
+    /// <summary>True for illustrative test data (not an approved limit); ignored in Production.</summary>
+    public bool Illustrative { get; set; }
 }
 
 /// <summary>One configured limit.</summary>

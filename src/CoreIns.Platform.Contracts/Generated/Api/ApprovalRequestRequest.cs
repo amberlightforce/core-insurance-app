@@ -4,36 +4,40 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Approval.request request. PRD inputs: "type, object ref, payload hash, diff"</summary>
+/// <summary>Typed from REQ-PLT-004, REQ-PLT-114, REQ-PLT-117 (SL2-PLT). PRD inputs: "type, object ref, payload hash, diff". The maker is the calling actor. A new request for a subject that already has a pending request of the same type supersedes it (the old one becomes Withdrawn; its maker and editors may not decide the new one).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ApprovalRequestRequest
 {
-    /// <summary>PRD: "type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>PRD: "type". Approval type code, e.g. CLM.TRANSACTION_SET</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("type")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Type { get; init; }
+    public required string Type { get; init; }
 
     /// <summary>PRD: "object ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("objectRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ObjectRef { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.ObjectRef ObjectRef { get; init; }
 
     /// <summary>PRD: "payload hash"</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("payloadHash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? PayloadHash { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash PayloadHash { get; init; }
 
     /// <summary>PRD: "diff"</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("diff")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? Diff { get; init; }
+
+    /// <summary>Contract member 'authority'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("authority")]
+    public required global::CoreIns.Platform.Contracts.Api.ApprovalAuthority Authority { get; init; }
+
+    /// <summary>Role that works the request (the referral target of the maker's authority check)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("referralRole")]
+    public required string ReferralRole { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Reason { get; init; }
 }
