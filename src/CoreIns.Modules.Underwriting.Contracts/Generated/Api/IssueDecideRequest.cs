@@ -4,68 +4,29 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Issue.decide request. PRD inputs: "issue ids, decision, scope, validity, tolerance, conditions, reason, message"</summary>
+/// <summary>uw.Issue.decide request. PRD inputs: "issue ids, decision, scope, validity, tolerance, conditions, reason, message". Scope, validity, tolerance and conditions come with the full referral workbench: an approval holds through the issue's blocking point while the facts it relied on are unchanged (REQ-UW-091).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IssueDecideRequest
 {
-    /// <summary>PRD: "issue ids"</summary>
+    /// <summary>PRD: "issue ids" (one decision per issue, REQ-UW-079)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("issueIds")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.UwIssueId>? IssueIds { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.UwIssueId> IssueIds { get; init; }
 
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'decision'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.IssueDecisionCode Decision { get; init; }
 
-    /// <summary>PRD: "scope"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("scope")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Scope { get; init; }
-
-    /// <summary>PRD: "validity"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("validity")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Validity { get; init; }
-
-    /// <summary>PRD: "tolerance"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("tolerance")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Tolerance { get; init; }
-
-    /// <summary>PRD: "conditions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("conditions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Conditions { get; init; }
-
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>PRD: "reason" (mandatory)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public required string Reason { get; init; }
 
     /// <summary>PRD: "message"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("message")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Message { get; init; }
+    public string? Message { get; init; }
+
+    /// <summary>Record version of each issue as read (issue id → version); a different version is UW-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersions")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyDictionary<string, int>? ExpectedRecordVersions { get; init; }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CoreIns.Modules.Policy.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CoreIns.Modules.Policy.Persistence.Migrations
 {
     [DbContext(typeof(PolicyDbContext))]
-    partial class PolicyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261008134924_JobParticipants")]
+    partial class JobParticipants
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

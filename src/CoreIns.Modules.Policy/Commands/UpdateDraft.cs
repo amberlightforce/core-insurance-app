@@ -126,6 +126,7 @@ internal sealed class UpdateDraftHandler(
         target.RiskTree = JobSupport.Json(tree.Value);
         target.DraftVersion++;
         target.UpdatedAt = now;
+        JobSupport.AddParticipant(job, context.Actor);
         job.RecordVersion++;
         job.UpdatedAt = now;
 

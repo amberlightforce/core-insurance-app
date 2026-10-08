@@ -1,3 +1,4 @@
+using CoreIns.Modules.Underwriting.Authority;
 using CoreIns.Modules.Underwriting.Commands;
 using CoreIns.Modules.Underwriting.Contracts;
 using CoreIns.Modules.Underwriting.Contracts.Api;
@@ -17,8 +18,9 @@ namespace CoreIns.Modules.Underwriting;
 
 /// <summary>
 /// Composition entry point of the Underwriting module (PRD-04). SL-RAT-UW slice: the evaluation runtime on the shared
-/// rule engine (illustrative rule set), the decision record and a minimal issue lifecycle (Open, Closed). The referral
-/// workbench, decide/approve, declines with refusal documents and authoring screens are later work packages.
+/// rule engine (illustrative rule set), the decision record and the issue lifecycle with decisions (uw.Issue.decide under
+/// UW.ISSUE_APPROVAL authority; an approval holds while the fingerprint of the risk facts is unchanged). Referral routing,
+/// conditions, declines with refusal documents and authoring screens are later work packages.
 /// </summary>
 public static class UnderwritingModule
 {
@@ -46,6 +48,12 @@ public static class UnderwritingModule
         services.AddCommandAuditor<EvaluateRules, RulesEvaluateResponse, EvaluateRulesAuditor>();
         services.AddCommand<EvaluateRules, RulesEvaluateResponse, EvaluateRulesHandler>(CommandDescriptor.For("uw.Rules.evaluate") with { SupportsDryRun = true });
 
+        services.AddUnderwritingAuthorityTypes();
+        services.AddScoped<IValidator<DecideIssues>, DecideIssuesValidator>();
+        services.AddCommandAuditor<DecideIssues, IssueDecideResponse, DecideIssuesAuditor>();
+        services.AddCommand<DecideIssues, IssueDecideResponse, DecideIssuesHandler>(CommandDescriptor.For("uw.Issue.decide") with { SupportsDryRun = true });
+        services.AddScoped<UnderwritingIssueQueries>();
+
         services.AddScoped<IUnderwritingRulesService, UnderwritingRulesService>();
         services.AddScoped<IUnderwritingIssueService, UnderwritingIssueService>();
 
@@ -64,5 +72,17 @@ public static class UnderwritingModule
             .Describe("Ο υπολογισμός των κανόνων απέτυχε· δοκιμάστε ξανά.", "Rule evaluation failed; try again."),
         ErrorDefinition.For(ModuleCode.UW, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
+        ErrorDefinition.For(ModuleCode.UW, "HUMAN-DECISION-REQUIRED", 422, "Την απόφαση πρέπει να την πάρει άνθρωπος", "A person must take this decision")
+            .Describe("Ζητήματα ανάληψης αποφασίζονται μόνο από χρήστη, ποτέ από υπηρεσία ή AI.", "Underwriting issues are decided only by a person, never by a service or AI."),
+        ErrorDefinition.For(ModuleCode.UW, "SOD", 403, "Δεν μπορείτε να αποφασίσετε για εργασία που χειριστήκατε", "You cannot decide on a job you handled")
+            .Describe(
+                "Όποιος έκανε την προσφορά ή τη σύναψη της εργασίας δεν αποφασίζει για τα ζητήματά της· ζητήστε την από άλλο ανάδοχο με εξουσιοδότηση.",
+                "Whoever quoted or bound the job may not decide its issues; ask another underwriter with authority."),
+        ErrorDefinition.For(ModuleCode.UW, "AUTHORITY-REFER", 403, "Απαιτείται υψηλότερη εξουσιοδότηση", "Higher authority is needed")
+            .Describe("Η απόφαση υπερβαίνει την εξουσιοδότησή σας· παραπέμψτε τη στον ρόλο που αναφέρεται.", "The decision is above your authority; refer it to the role named."),
+        ErrorDefinition.For(ModuleCode.UW, "ISSUE-TRANSITION", 422, "Το ζήτημα δεν μπορεί να αλλάξει έτσι", "The issue cannot change this way")
+            .Describe("Μόνο ανοιχτό ζήτημα μπορεί να εγκριθεί ή να απορριφθεί.", "Only an Open issue can be approved or rejected."),
+        ErrorDefinition.For(ModuleCode.UW, "STALE", 409, "Το ζήτημα άλλαξε στο μεταξύ", "The issue changed meanwhile")
+            .Describe("Φορτώστε ξανά το ζήτημα και αποφασίστε πάλι.", "Reload the issue and decide again."),
     ];
 }

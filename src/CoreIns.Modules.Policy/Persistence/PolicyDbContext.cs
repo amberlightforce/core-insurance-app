@@ -75,6 +75,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.DeclineId).HasColumnName("decline_id");
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Participants).HasColumnName("participants").HasColumnType("text[]").HasDefaultValueSql("'{}'::text[]");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.LegalEntityId, e.JobNumber }).IsUnique().HasDatabaseName("ux_job_number");

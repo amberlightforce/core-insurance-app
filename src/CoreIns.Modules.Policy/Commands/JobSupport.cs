@@ -16,6 +16,16 @@ namespace CoreIns.Modules.Policy.Commands;
 /// <summary>Helpers shared by the job commands: loading a job of the caller's legal entity, state transitions, JSON columns, errors.</summary>
 internal static class JobSupport
 {
+    /// <summary>Records that <paramref name="actor"/> worked on the job (created, edited, quoted or bound it; SOD-UW-02).</summary>
+    public static void AddParticipant(JobRow job, ActorRef actor)
+    {
+        var id = actor.ToString();
+        if (!job.Participants.Contains(id, StringComparer.Ordinal))
+        {
+            job.Participants = [.. job.Participants, id];
+        }
+    }
+
     /// <summary>The caller's legal entity id (REQ-POL-035): every query filters by it; another entity's job is "not found".</summary>
     public static LegalEntityId LegalEntity(RequestContext context, ILegalEntityDirectory directory) =>
         directory.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));

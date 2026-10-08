@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using CoreIns.Modules.Underwriting.Commands;
 using CoreIns.Modules.Underwriting.Contracts;
 using CoreIns.Modules.Underwriting.Contracts.Api;
+using CoreIns.Modules.Underwriting.Services;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Contracts.Common;
 using CoreIns.Platform.Errors;
@@ -18,9 +19,11 @@ internal static class UnderwritingPermissions
 {
     public const string Evaluate = "uw.Rules.evaluate";
     public const string BlockingStatus = "uw.Issue.blockingStatus";
+    public const string List = "uw.Issue.list";
+    public const string Decide = "uw.Issue.decide";
 }
 
-/// <summary>REST facade of <c>uw.Rules.evaluate</c> and <c>uw.Issue.blockingStatus</c>.</summary>
+/// <summary>REST facade of <c>uw.Rules.evaluate</c>, <c>uw.Issue.blockingStatus</c>, <c>uw.Issue.list</c> and <c>uw.Issue.decide</c>.</summary>
 [ApiController]
 [Route("api/uw/v1")]
 internal sealed class UnderwritingController : ControllerBase
@@ -65,6 +68,38 @@ internal sealed class UnderwritingController : ControllerBase
         {
             return Problem(ex.Error, HttpContext);
         }
+    }
+
+    /// <summary>uw.Issue.list: the issues of a job, or the referral queue (Open issues of the legal entity).</summary>
+    [HttpGet("issues")]
+    [Authorize(Policy = UnderwritingPermissions.List)]
+    public async Task<IResult> ListAsync(
+        [FromQuery] Guid? jobRef, [FromQuery] string? status, [FromQuery] string? cursor, [FromQuery] int? limit,
+        [FromServices] UnderwritingIssueQueries queries, CancellationToken cancellationToken)
+    {
+        IssueStatusCode? statusCode = null;
+        if (status is not null)
+        {
+            if (!Enum.TryParse<IssueStatusCode>(status, ignoreCase: false, out var parsed) || !Enum.IsDefined(parsed) || int.TryParse(status, out _))
+            {
+                return Problem(DomainError.Of(ModuleCode.UW, "VALIDATION", "status must be Open, Approved, ApprovedWithConditions, Rejected, Invalidated or Closed."), HttpContext);
+            }
+
+            statusCode = parsed;
+        }
+
+        var result = await queries.ListAsync(jobRef, statusCode, cursor, limit, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Issue.decide: approve or reject Open issues (a command: Idempotency-Key required, dry-run supported).</summary>
+    [HttpPost("issues/decide")]
+    [Authorize(Policy = UnderwritingPermissions.Decide)]
+    public async Task<IResult> DecideAsync(
+        [FromBody] IssueDecideRequest request, [FromServices] ICommandHandler<DecideIssues, IssueDecideResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new DecideIssues(request), cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
     }
 
     private static IResult Problem(DomainError error, HttpContext http) =>

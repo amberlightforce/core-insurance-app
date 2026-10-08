@@ -152,6 +152,7 @@ internal sealed class CreateSubmissionHandler(
             RecordVersion = 1,
             CreatedAt = now,
             CreatedBy = actor,
+            Participants = [actor],
             UpdatedAt = now,
         };
         db.Jobs.Add(job);

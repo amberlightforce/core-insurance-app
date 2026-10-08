@@ -55,10 +55,22 @@ function decisionVariant(decision: JobQuoteResponse['decision']): 'success' | 'w
 export function UnderwritingOutcome({ quote }: { quote: JobQuoteResponse }) {
   const { t, i18n } = useTranslation('quote');
   const columns = useMemo<DataColumn<UwIssue>[]>(() => {
+    // A UW rule id (e.g. REFER-OLD-VEHICLE) reads from the shared `uw` namespace; PFC explanation keys from `quote`.
     const reasonText = (key: string) =>
-      i18n.exists(`quote:uw.reasons.${key}`) ? t(`uw.reasons.${key}`) : key;
+      i18n.exists(`uw:reasons.${key}.why`)
+        ? t(`uw:reasons.${key}.why`)
+        : i18n.exists(`quote:uw.reasons.${key}`)
+          ? t(`uw.reasons.${key}`)
+          : key;
+    // The issue type's label, never the raw issue key (VEHICLE_AGE_REFERRAL:<element id>).
+    const typeText = (type: string) =>
+      i18n.exists(`uw:issueTypes.${type}`) ? t(`uw:issueTypes.${type}`) : type;
+    const statusText = (status: string) =>
+      i18n.exists(`uw:statuses.${status}`) ? t(`uw:statuses.${status}`) : status;
     return [
-      textColumn<UwIssue>('issue', t('uw.columns.issue'), (i) => i.issueKey, { size: 220 }),
+      textColumn<UwIssue>('issue', t('uw.columns.issue'), (i) => typeText(i.issueType), {
+        size: 220,
+      }),
       textColumn<UwIssue>(
         'reasons',
         t('uw.columns.reasons'),
@@ -66,7 +78,9 @@ export function UnderwritingOutcome({ quote }: { quote: JobQuoteResponse }) {
         { size: 320 },
       ),
       textColumn<UwIssue>('point', t('uw.columns.point'), (i) => t(`uw.points.${i.blockingPoint}`)),
-      textColumn<UwIssue>('approval', t('uw.columns.approval'), (i) => i.approvalStatus),
+      textColumn<UwIssue>('approval', t('uw.columns.approval'), (i) =>
+        statusText(i.approvalStatus),
+      ),
     ];
   }, [t, i18n]);
   return (

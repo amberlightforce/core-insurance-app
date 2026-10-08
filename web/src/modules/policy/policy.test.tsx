@@ -7,6 +7,7 @@ import * as fx from '../../test/fixtures';
 import { mockApi, problem, renderScreen, type MockRoute } from '../../test/mockApi';
 import { PoliciesHomePage } from './PoliciesHomePage';
 import { PolicyViewPage } from './PolicyViewPage';
+import { ReferralsPage } from './ReferralsPage';
 import { rememberRecent } from '../staff/recent';
 
 vi.setConfig({ testTimeout: 30_000 });
@@ -226,5 +227,155 @@ describe('PoliciesHomePage', () => {
   it('starts empty on first use', () => {
     renderScreen(<PoliciesHomePage />, { path: '/policies', url: '/policies' });
     expect(screen.getByText('Δεν υπάρχουν πρόσφατα ασφαλιστήρια')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Παραπομπές ανάληψης' })).not.toBeInTheDocument();
+  });
+
+  it('links a senior underwriter to the underwriting referrals', async () => {
+    signInAs(['Staff.Underwriter', 'Staff.UnderwritingManager']);
+    const { user } = renderScreen(<PoliciesHomePage />, { path: '/policies', url: '/policies' });
+    await user.click(screen.getByRole('button', { name: 'Παραπομπές ανάληψης' }));
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent('/policies/referrals');
+    });
+  });
+});
+
+function signInAs(roles: string[]) {
+  sessionStorage.setItem(
+    'coreins.devSession',
+    JSON.stringify({
+      accessToken: 't',
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      user: { id: 'uwsenior', name: 'Dev Senior Underwriter (synthetic)', roles },
+    }),
+  );
+}
+
+const referral = {
+  id: '0192f0c4-0000-7000-8000-0000000000aa',
+  jobRef: '0192f0c4-0000-7000-8000-0000000000bb',
+  issueType: 'VEHICLE_AGE_REFERRAL',
+  issueKey: 'VEHICLE_AGE_REFERRAL:veh-1',
+  ruleId: 'REFER-OLD-VEHICLE',
+  severity: 'REFER',
+  blockingPoint: 'PRE_BIND',
+  lane: 'ASSISTED',
+  status: 'Open',
+  recordVersion: 3,
+  messageEn: 'The vehicle is older than 20 years.',
+  messageEl: 'Το όχημα είναι παλαιότερο των 20 ετών.',
+  raisedAt: '2026-10-08T10:00:00Z',
+  raisedBy: 'USER:dev:underwriter',
+  decision: null,
+  closeReason: null,
+};
+
+describe('ReferralsPage', () => {
+  afterEach(() => {
+    sessionStorage.clear();
+  });
+
+  const queue = (items: unknown[]): MockRoute => ({
+    method: 'GET',
+    path: '/api/uw/v1/issues',
+    respond: () => ({ body: { items, nextCursor: null, limit: 200 } }),
+  });
+
+  async function openReferral(user: ReturnType<typeof renderScreen>['user']) {
+    const grid = await screen.findByRole('grid', { name: 'Παραπομπές που αναμένουν απόφαση' });
+    expect(within(grid).getByText('Παλαιό όχημα')).toBeInTheDocument();
+    expect(
+      within(grid).getByText('Το όχημα είναι παλαιότερο των 20 ετών (από το έτος πρώτης άδειας).'),
+    ).toBeInTheDocument();
+    within(grid).getAllByRole('row')[1]?.focus();
+    await user.keyboard('{Enter}');
+    return screen.findByRole('form', { name: 'Απόφαση για: Παλαιό όχημα' });
+  }
+
+  it('approves a referral with a required reason and the version it read', async () => {
+    signInAs(['Staff.UnderwritingManager']);
+    const api = mockApi([
+      queue([referral]),
+      {
+        method: 'POST',
+        path: '/api/uw/v1/issues/decide',
+        respond: () => ({
+          body: {
+            decisions: [
+              {
+                issueId: referral.id,
+                status: 'Approved',
+                recordVersion: 4,
+                authorityCheckId: referral.jobRef,
+              },
+            ],
+            checkIds: [referral.jobRef],
+            pendingSecondApproval: false,
+          },
+        }),
+      },
+    ]);
+    const { user, container } = renderScreen(<ReferralsPage />, {
+      path: '/policies/referrals',
+      url: '/policies/referrals',
+    });
+    const form = await openReferral(user);
+    await expectNoA11yViolations(container);
+
+    await user.click(within(form).getByRole('button', { name: 'Έγκριση' }));
+    expect(await screen.findByText('Συμπληρώστε την αιτιολογία της απόφασης.')).toBeInTheDocument();
+    expect(api.callsTo('POST', '/api/uw/v1/issues/decide')).toHaveLength(0);
+
+    await user.type(
+      within(form).getByRole('textbox', { name: /Αιτιολογία απόφασης/ }),
+      'Το όχημα επιθεωρήθηκε.',
+    );
+    await user.click(within(form).getByRole('button', { name: 'Έγκριση' }));
+
+    expect(
+      await screen.findByText('Εγκρίθηκε. Ο ανάδοχος μπορεί να κάνει ξανά δέσμευση.'),
+    ).toBeInTheDocument();
+    const call = api.callsTo('POST', '/api/uw/v1/issues/decide')[0];
+    expect(call?.body).toEqual({
+      issueIds: [referral.id],
+      decision: 'APPROVE',
+      reason: 'Το όχημα επιθεωρήθηκε.',
+      expectedRecordVersions: { [referral.id]: 3 },
+    });
+    expect(call?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
+  it('shows why a decision is refused (segregation of duties)', async () => {
+    signInAs(['Staff.Underwriter', 'Staff.UnderwritingManager']);
+    mockApi([
+      queue([referral]),
+      {
+        method: 'POST',
+        path: '/api/uw/v1/issues/decide',
+        respond: () =>
+          problem(
+            403,
+            'UW-ERR-SOD',
+            'Δεν μπορείτε να αποφασίσετε για εργασία που χειριστήκατε',
+            'You quoted or bound this job, so you cannot decide its underwriting issues.',
+          ),
+      },
+    ]);
+    const { user } = renderScreen(<ReferralsPage />, {
+      path: '/policies/referrals',
+      url: '/policies/referrals',
+    });
+    const form = await openReferral(user);
+    await user.type(within(form).getByRole('textbox', { name: /Αιτιολογία απόφασης/ }), 'Ok');
+    await user.click(within(form).getByRole('button', { name: 'Απόρριψη' }));
+
+    expect(await screen.findByText('Η απόφαση δεν αποθηκεύτηκε')).toBeInTheDocument();
+    expect(screen.getByText(/You quoted or bound this job/)).toBeInTheDocument();
+  });
+
+  it('says so when no referral is waiting', async () => {
+    mockApi([queue([])]);
+    renderScreen(<ReferralsPage />, { path: '/policies/referrals', url: '/policies/referrals' });
+    expect(await screen.findByText('Καμία παραπομπή σε αναμονή')).toBeInTheDocument();
   });
 });

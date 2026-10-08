@@ -37,6 +37,12 @@ const moduleRoutes: RouteObject[] = [
     }),
   },
   {
+    path: 'policies/referrals',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/ReferralsPage')).ReferralsPage,
+    }),
+  },
+  {
     path: 'policies/:policyId',
     lazy: async () => ({
       Component: (await import('./modules/policy/PolicyViewPage')).PolicyViewPage,
