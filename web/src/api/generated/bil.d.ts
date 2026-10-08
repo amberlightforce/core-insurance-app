@@ -2289,6 +2289,8 @@ export interface components {
             /** @description total − paid */
             open: components["schemas"]["Money"];
             totalsByCategory: components["schemas"]["CategoryTotal"][];
+            /** @description For kind CREDIT_NOTE, the invoice it corrects. Always set for a credit note, absent for an INVOICE. A credit note has its own gapless series (technical prefix CN) and negative-direction semantics; total is the positive credited amount. */
+            originalInvoiceId?: components["schemas"]["Uuid"];
         };
         /** @description Invoice item traced to its POL charge (REQ-BIL-067) */
         InvoiceItemView: {
@@ -2310,6 +2312,12 @@ export interface components {
             open: components["schemas"]["Money"];
             /** @enum {string} */
             state: "PLANNED" | "BILLED" | "OPEN" | "SETTLED" | "CANCELLED" | "WRITTEN_OFF";
+            /** @description Transaction kind of the source POL charge (servicing items; always set there) */
+            transactionKind?: string;
+            /** @description Cancellation source (items from a cancellation) */
+            cancellationSource?: components["schemas"]["Code"];
+            /** @description Treatment rule of a tax or levy item on a servicing transaction (always set there) */
+            treatmentRuleId?: components["schemas"]["Code"];
         };
         /** @description One allocation row of a receipt to an invoice item (REQ-BIL-130) */
         AllocationView: {
@@ -2851,63 +2859,136 @@ export interface components {
             /** @description PRD: "process" */
             process?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Refund.propose request. PRD inputs: "account, credits / decision" */
+        /**
+         * @description Refund lifecycle (PRD-06 §6): Proposed or PendingApproval -> Rejected; Approved -> Held (refund-hold window) -> Approved; Disbursing -> AwaitingProof (refund via an intermediary) -> Paid; Disbursing -> Returned -> Proposed. PAID is reached at the paid point (ISSUED in Greece, D-SL3-09).
+         * @enum {string}
+         */
+        RefundState: "PROPOSED" | "PENDING_APPROVAL" | "APPROVED" | "HELD" | "DISBURSING" | "AWAITING_PROOF" | "PAID" | "REJECTED" | "RETURNED";
+        /**
+         * @description NOT_REQUIRED up to the auto-approval limit (500.00 default, illustrative, D-SL3-08); PENDING until the approver decides; four-eyes at the maker-checker limit. The requester or an editor can never approve (SoD).
+         * @enum {string}
+         */
+        RefundApprovalState: "NOT_REQUIRED" | "PENDING" | "APPROVED" | "REJECTED";
+        /** @description The part of a refund that comes from one charge type of one policy transaction (REQ-BIL-187). Tax and levy lines carry the treatment that decided them; a refund is never net of tax for a distance-withdrawal void. */
+        RefundBreakdownLine: {
+            policyId: components["schemas"]["Uuid"];
+            policyTermId: components["schemas"]["Uuid"];
+            /** @description The POL transaction that produced the credit */
+            transactionId: components["schemas"]["Uuid"];
+            /** @description The credit note (bil invoice of kind CREDIT_NOTE) the amount came from */
+            creditNoteId?: components["schemas"]["Uuid"];
+            chargeType: components["schemas"]["Code"];
+            chargeCategory: components["schemas"]["Code"];
+            /** @description Transaction kind of the credit (CANCELLATION, ENDORSEMENT_CREDIT, ...) */
+            transactionKind?: string;
+            /** @description Cancellation source when the credit comes from a cancellation */
+            cancellationSource?: components["schemas"]["Code"];
+            /** @description Treatment rule of a tax or levy line */
+            treatmentRuleId?: components["schemas"]["Code"];
+            legalStatus?: components["schemas"]["Code"];
+            /** @description True when the line rests on a value that is not Settled (D-REG-02) */
+            provisional?: boolean;
+            /** @description Positive amount refunded for this line */
+            amount: components["schemas"]["Money"];
+        };
+        /** @description Netting against amounts the customer owes on the same account (REQ-BIL-187). A refund is the account credit left after netting. */
+        RefundNettingLine: {
+            /**
+             * @description OPEN_INVOICE = an unpaid invoice the credit was applied to; OFFSET_CREDIT = another credit on the account
+             * @enum {string}
+             */
+            kind: "OPEN_INVOICE" | "OFFSET_CREDIT";
+            invoiceId?: components["schemas"]["Uuid"];
+            /** @description Positive amount netted */
+            amount: components["schemas"]["Money"];
+        };
+        /** @description The payee of a refund. The IBAN is P2 and is never returned; only the masked form is shown (REQ-BIL-345). */
+        RefundPayee: {
+            payeePartyId: components["schemas"]["Uuid"];
+            /** @description A verified bil.PayeeAccount with purpose REFUND (D-SL3-14) */
+            payeeAccountId: components["schemas"]["Uuid"];
+            /** @description IBAN masked except the last four characters */
+            maskedIban: string;
+            verificationStatus: components["schemas"]["PayeeVerificationStatus"];
+        };
+        /** @description A refund (PRD-06 §7, REQ-BIL-187..190). One open refund per billing account (D-SL3-14), so authority is checked on the total. */
+        RefundView: {
+            refundId: components["schemas"]["Uuid"];
+            billingAccountId: components["schemas"]["Uuid"];
+            state: components["schemas"]["RefundState"];
+            approvalState: components["schemas"]["RefundApprovalState"];
+            /** @description Amount payable to the payee after netting; equals the sum of breakdown minus the sum of netting */
+            amount: components["schemas"]["Money"];
+            /** @description Per charge type (always set) */
+            breakdown: components["schemas"]["RefundBreakdownLine"][];
+            /** @description Always set; empty when nothing was netted */
+            netting: components["schemas"]["RefundNettingLine"][];
+            payee: components["schemas"]["RefundPayee"];
+            payoutMethod: components["schemas"]["Code"];
+            reasonCode?: components["schemas"]["Code"];
+            sourcePolicyIds: components["schemas"]["Uuid"][];
+            /** @description User who proposed the refund */
+            requestedBy: components["schemas"]["Uuid"];
+            /** @description User who approved or rejected; absent until decided */
+            decidedBy?: components["schemas"]["Uuid"];
+            decidedAt?: components["schemas"]["Instant"];
+            decisionComment?: components["schemas"]["Text"];
+            /** @description Set once the refund is approved and a disbursement exists */
+            disbursementId?: components["schemas"]["Uuid"];
+            proposedAt: components["schemas"]["Instant"];
+            recordVersion: number;
+        };
+        /** @description bil.Refund.propose request (REQ-BIL-187). PRD inputs: "account, credits / decision". With dryRun it returns the refund that would be proposed. Refused when the account has no credit left after netting (BIL-ERR-NO-CREDIT) or an open refund already exists. */
         RefundProposeRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "credits" */
-            credits?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            /** @description PRD "account" */
+            billingAccountId: components["schemas"]["Uuid"];
+            /** @description Credit notes (invoice ids of kind CREDIT_NOTE) to refund. Empty or absent = the whole credit left on the account. */
+            credits?: components["schemas"]["Uuid"][];
+            /** @description Verified payee account with purpose REFUND; defaults to the payer's verified account */
+            payeeAccountId?: components["schemas"]["Uuid"];
+            reasonCode: components["schemas"]["Code"];
+            comment?: components["schemas"]["Text"];
         };
         /** @description bil.Refund.propose result. PRD outputs: "refund" */
         RefundProposeResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
         };
         /** @description bil.Refund.get result. PRD outputs: "refund" */
         RefundGetResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
         };
         /** @description bil.Refund.list result. PRD outputs: "refund" */
         RefundListItem: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
         };
         /** @description Page of bil.Refund.list results (cursor pagination, contract §3.5.5) */
         RefundListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["RefundListItem"][];
         };
-        /** @description bil.Refund.decide request. PRD inputs: "refund id, decision, comment" */
+        /** @description bil.Refund.decide request (REQ-BIL-188, REQ-BIL-189). PRD inputs: "refund id, decision, comment". The requester, an editor or the maker can never decide (PLT-ERR-SOD); the BIL.Refund authority is checked on the refund total (D-SL3-14). */
         RefundDecideRequest: {
-            /** @description PRD: "refund id" */
-            refundId?: components["schemas"]["Uuid"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
-            /** @description PRD: "comment" */
-            comment?: components["schemas"]["Unspecified"];
+            refundId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            /** @description Required for REJECT */
+            comment?: components["schemas"]["Text"];
         };
-        /** @description bil.Refund.decide result. PRD outputs: "refund, disbursement id on approval" */
+        /** @description bil.Refund.decide result. PRD outputs: "refund, disbursement id on approval". APPROVE publishes RefundApproved; REJECT publishes RefundRejected. */
         RefundDecideResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
-            /** @description PRD: "disbursement id on approval" */
-            disbursementIdOnApproval?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
+            /** @description Present on APPROVE (PRD "disbursement id on approval") */
+            disbursementId?: components["schemas"]["Uuid"];
         };
-        /** @description bil.Refund.resubmit request. PRD inputs: "account, credits / decision" */
+        /** @description bil.Refund.resubmit request: puts a refund in state RETURNED (bank return) or REJECTED back to PROPOSED, optionally with a corrected payee. */
         RefundResubmitRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "credits" */
-            credits?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            refundId: components["schemas"]["Uuid"];
+            /** @description New verified payee account; absent keeps the payee */
+            payeeAccountId?: components["schemas"]["Uuid"];
+            comment?: components["schemas"]["Text"];
         };
         /** @description bil.Refund.resubmit result. PRD outputs: "refund" */
         RefundResubmitResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
         };
         /** @description Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method, approval evidence, statement or return reference". SL2-BIL-DISB serves source type CLM_CLAIM_PAYMENT (method SEPA_CT, EUR, payeePartyId with payeeAccountId); other sources are refused with BIL-ERR-SOURCE. */
         DisbursementRequestRequest: {
@@ -3482,8 +3563,9 @@ export interface components {
             [key: string]: components["schemas"]["OpenValue"];
         };
         /**
-         * @description Disbursement source (contract D1/D4, D-CON-21): refund (BIL), claim payment (CLM; CLM_CLAIM_PAYMENT in the PRD-06 source register, REQ-BIL-354), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change.
+         * @description Disbursement source (contract D1/D4, D-CON-21): refund (BIL; BIL_REFUND for policy refunds from slice 3, BIL for earlier refund sources), claim payment (CLM; CLM_CLAIM_PAYMENT in the PRD-06 source register, REQ-BIL-354), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change.
          * @example BIL
+         * @example BIL_REFUND
          * @example CLM
          * @example CLM_CLAIM_PAYMENT
          * @example RI_SETTLEMENT
@@ -6006,6 +6088,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -6055,6 +6138,9 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                billingAccountId?: components["schemas"]["Uuid"];
+                policyId?: components["schemas"]["Uuid"];
+                state?: components["schemas"]["RefundState"];
             };
             header?: {
                 /**
@@ -6132,6 +6218,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -6183,6 +6270,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

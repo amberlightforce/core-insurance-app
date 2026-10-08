@@ -7,6 +7,7 @@ import { LinkButton } from '../staff/LinkButton';
 import { QueryView } from '../staff/QueryView';
 import { useInvoices } from './api';
 import { InvoiceTable } from './InvoiceTable';
+import { currentRoles, refundViewRoles } from './refunds/roles';
 import { PageHeader, Section } from '../staff/PageHeader';
 import { readRecent } from '../staff/recent';
 import { useRecentLabels } from '../staff/useRecentLabels';
@@ -37,6 +38,13 @@ export function BillingHomePage() {
         title={t('home.title')}
         overline={t('overline')}
         description={t('home.lead')}
+        actions={
+          currentRoles().some((role) => refundViewRoles.includes(role)) ? (
+            <LinkButton variant="secondary" to="/billing/refunds">
+              {t('refunds.open')}
+            </LinkButton>
+          ) : undefined
+        }
       />
       <Section title={t('home.invoices')} family="teal" count={all.data?.items.length}>
         <QueryView query={all}>
