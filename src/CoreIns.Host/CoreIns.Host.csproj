@@ -20,6 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- D-PRG-21: one permission/authority file per module and the Development sign-in users; read at start-up from the content root (build output, publish output, container image). -->
+    <Content Update="permissions\**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Update="dev-users.*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="CoreIns.Host.Tests" />
     <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
     <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />

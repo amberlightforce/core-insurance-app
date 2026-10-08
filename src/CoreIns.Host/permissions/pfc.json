@@ -1,0 +1,16 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "pfc.ProductVersion.resolve": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pfc.ProductVersion.import": [ "Platform.Admin" ],
+        "pfc.Artifact.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pfc.Catalogue.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pfc.Catalogue.getItem": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pfc.ChargeType.list": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pfc.QuestionSet.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pfc.QuestionSet.evaluate": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ]
+      }
+    }
+  }
+}

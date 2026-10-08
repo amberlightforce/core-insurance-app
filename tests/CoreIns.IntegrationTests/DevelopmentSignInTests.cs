@@ -65,7 +65,17 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
         var ct = TestContext.Current.CancellationToken;
 
         var users = await client.GetFromJsonAsync<JsonNode>(new Uri("/api/plt/v1/dev/users", UriKind.Relative), ct);
-        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(["underwriter", "uwsenior", "billing", "finance", "claims", "claimsmgr", "admin", "superuser"]);
+        // D-PRG-21: the expected ids are read from dev-users.Development.json, so adding a dev user needs no test edit.
+        var file = Path.Combine(RepositoryPaths.Root, "src", "CoreIns.Host", "dev-users.Development.json");
+        var configured = JsonNode.Parse(
+            await File.ReadAllTextAsync(file, ct),
+            documentOptions: new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip })!["DevAuthentication"]!["Users"]!
+            .AsArray().Select(u => u!["Id"]!.GetValue<string>()).ToList();
+        configured.ShouldContain("underwriter");
+        configured.ShouldContain("billing");
+        configured.ShouldContain("claims");
+        configured.ShouldContain("superuser");
+        users!["items"]!.AsArray().Select(u => u!["id"]!.GetValue<string>()).ShouldBe(configured);
 
         using var unknown = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = "nobody" }, ct);
         unknown.StatusCode.ShouldBe(HttpStatusCode.NotFound);

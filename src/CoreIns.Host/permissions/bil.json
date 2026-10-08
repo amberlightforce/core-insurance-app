@@ -1,0 +1,18 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "bil.BillingAccount.get": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
+        "bil.Invoice.get": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
+        "bil.Invoice.list": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
+        "bil.Payment.take": [ "Staff.Billing" ],
+        "bil.Receipt.get": [ "Staff.Billing", "Platform.Admin" ],
+        "bil.Allocation.allocate": [ "Staff.Billing" ],
+        // SL2-BIL-DISB: Claims calls create/request in process; the API serves reads (claims roles: SL2-PLT).
+        "bil.PayeeAccount.create": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "bil.PayeeAccount.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "bil.Disbursement.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ]
+      }
+    }
+  }
+}

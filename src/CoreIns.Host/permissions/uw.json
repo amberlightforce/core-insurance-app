@@ -1,0 +1,22 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "uw.Rules.evaluate": [ "Staff.Underwriter" ],
+        "uw.Issue.blockingStatus": [ "Staff.Underwriter", "Staff.Billing" ],
+        "uw.Issue.list": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Issue.decide": [ "Staff.UnderwritingManager" ]
+      }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (PRD-04 §12.2 UW.ISSUE_APPROVAL; no approved underwriting authority matrix exists yet): the
+      // underwriting manager may decide the referrals of the illustrative motor rule set UW-MOTOR-GR-B. Dropped in Production.
+      "Grants": [
+        {
+          "Id": "uw-manager-issue-approval-illustrative", "Role": "Staff.UnderwritingManager", "Type": "UW.ISSUE_APPROVAL", "Illustrative": true,
+          "Limits": [ { "Dimension": "issueType", "Comparison": "InSet", "Codes": [ "DRIVER_AGE_REFERRAL", "VEHICLE_AGE_REFERRAL", "VEHICLE_VALUE_REFERRAL" ] } ]
+        }
+      ]
+    }
+  }
+}

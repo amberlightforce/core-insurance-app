@@ -10,6 +10,8 @@ using Hangfire;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+// D-PRG-21: per-module permission/authority files and the Development sign-in users file (see ModuleSettings).
+builder.Configuration.AddModuleSettings(builder.Environment);
 var role = AppRoles.Parse(builder.Configuration[AppRoles.ConfigurationKey]);
 
 // D-SLC-03: the Development-only local sign-in; the Host refuses to start if the flag is set in any other environment.

@@ -1,0 +1,11 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "fin.Journal.get": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
+        "fin.Journal.query": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
+        "fin.PostingRules.list": [ "Staff.Finance", "Platform.Admin" ]
+      }
+    }
+  }
+}

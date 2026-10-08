@@ -292,3 +292,11 @@ security schemes and path parameters; `x-maturity`; no parameter or property nam
 time-travel input repeated in the body (D-API-08/09); pagination or `x-bounded` on list queries; anchor coverage
 (`anchors.yaml`); the 40 SPIs in `spi.md`; and that `INDEX.md` is current. It warns about property names that join two
 concepts with `And` / `Or`.
+
+**`INDEX.md` is generated; resolve conflicts by regenerating (D-PRG-21).** When a merge or rebase conflicts in
+`contracts/openapi/INDEX.md`, never edit the conflict markers by hand: take either side, finish merging the module
+YAML files first, then run `python contracts/openapi/validate.py --write-index` and commit the result. The output is
+deterministic (modules in a fixed order, operations sorted by `operationId`), so regenerating always gives the same file.
+The same applies to the generated code and samples (`dotnet run --project tools/CoreIns.ContractGen -- ` regenerates;
+`-- --check` verifies). Tests that depend on the number of operations (for example the in-process operation count in
+`GeneratedContractTests`) derive it from these contract files and need no edit when an operation is added.
