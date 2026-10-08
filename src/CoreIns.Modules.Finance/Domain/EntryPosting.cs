@@ -22,8 +22,11 @@ internal sealed record SourceEntry(Guid EntryId, string EntryType, BusinessDate 
     /// <summary>True when the lines need the POL policy context first (BIL premium facts); CLM facts carry their own dimensions.</summary>
     public bool NeedsPolicyContext { get; init; } = true;
 
-    /// <summary>Why the source fact cannot be posted as received (an UNBALANCED intake exception), or null.</summary>
+    /// <summary>Why the source fact cannot be posted as received (an intake exception with <see cref="ProblemReason"/>), or null.</summary>
     public string? Problem { get; init; }
+
+    /// <summary>Intake-exception reason of <see cref="Problem"/>.</summary>
+    public string ProblemReason { get; init; } = ExceptionReasons.Unbalanced;
 }
 
 /// <summary>Policy context FIN keeps from POL PolicyBound (CONTEXT relevance): business key, product and artefact.</summary>

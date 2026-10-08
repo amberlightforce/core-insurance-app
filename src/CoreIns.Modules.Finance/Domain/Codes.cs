@@ -139,4 +139,10 @@ internal static class ClaimLegs
 
     /// <summary>Entry type of an issued claim payment.</summary>
     public const string Payment = "PAYMENT";
+
+    /// <summary>Entry type of a Friendly Settlement payable (method CLEARING): no rule in the slice, it never touches GL-2510 (REQ-FIN-299, D-SL2-12a).</summary>
+    public const string PaymentFsClearing = "PAYMENT_FS_CLEARING";
+
+    /// <summary>Claim payment method of a Friendly Settlement payable (PRD-07 REQ-CLM-264).</summary>
+    public const string FsClearingMethod = "CLEARING";
 }
