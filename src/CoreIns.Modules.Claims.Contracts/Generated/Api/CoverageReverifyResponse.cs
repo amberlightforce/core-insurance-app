@@ -8,11 +8,71 @@ namespace CoreIns.Modules.Claims.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CoverageReverifyResponse
 {
-    /// <summary>PRD: "decision record"</summary>
+    /// <summary>Contract member 'claimId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimId ClaimId { get; init; }
+
+    /// <summary>Contract member 'decisionRecordId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'decisionRecordId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decisionRecord")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("decisionRecordId")]
+    public required global::System.Guid DecisionRecordId { get; init; }
+
+    /// <summary>Contract member 'decision'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    public required DecisionValue Decision { get; init; }
+
+    /// <summary>VERIFIED after the decision (always set)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("snapshotStatus")]
+    public required SnapshotStatusValue SnapshotStatus { get; init; }
+
+    /// <summary>The claim's snapshot ref after the decision (the new ref for ADOPT, unchanged for KEEP)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("snapshotRef")]
+    public required string SnapshotRef { get; init; }
+
+    /// <summary>Contract member 'previousSnapshotRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("previousSnapshotRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DecisionRecord { get; init; }
+    public string? PreviousSnapshotRef { get; init; }
+
+    /// <summary>True when adoption removed the cover of an exposure; new payments on it are refused until cleared</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coverageInQuestion")]
+    public required bool CoverageInQuestion { get; init; }
+
+    /// <summary>Contract member 'decidedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decidedAt")]
+    public required global::CoreIns.SharedKernel.Instant DecidedAt { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DecisionValue
+    {
+        /// <summary><c>KEEP</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("KEEP")]
+        Keep,
+
+        /// <summary><c>ADOPT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ADOPT")]
+        Adopt,
+    }
+
+    /// <summary>VERIFIED after the decision (always set)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<SnapshotStatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum SnapshotStatusValue
+    {
+        /// <summary><c>PENDING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PENDING")]
+        Pending,
+
+        /// <summary><c>VERIFIED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("VERIFIED")]
+        Verified,
+
+        /// <summary><c>REVERIFICATION_REQUIRED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REVERIFICATION_REQUIRED")]
+        ReverificationRequired,
+    }
 }

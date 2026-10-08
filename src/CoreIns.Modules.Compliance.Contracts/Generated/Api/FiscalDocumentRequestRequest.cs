@@ -42,6 +42,14 @@ public sealed record FiscalDocumentRequestRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("issueDate")]
     public required global::CoreIns.SharedKernel.BusinessDate IssueDate { get; init; }
 
+    /// <summary>For role CREDIT: the fiscal document of the original invoice the credit corrects, so the credit carries its correlated mark (PRD-11 credit notes; D-SL3-07). Equal to originalFiscalDocumentId when both are given. Absent = an uncorrelated credit.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'correlatedDocumentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("correlatedDocumentId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? CorrelatedDocumentId { get; init; }
+
     /// <summary>Document role (REQ-CMP-031)</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<RoleValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

@@ -46,18 +46,28 @@ public sealed record ReverificationRequiredV1 : global::CoreIns.Platform.Contrac
     /// <inheritdoc />
     global::CoreIns.Platform.Contracts.Events.EventContract global::CoreIns.Platform.Contracts.Events.IEventPayload.Contract => Descriptor;
 
-    /// <summary>Contract member 'oldSnapshotRef'.</summary>
+    /// <summary>The snapshot ref the claim currently holds. Always set.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("oldSnapshotRef")]
     public required string OldSnapshotRef { get; init; }
 
-    /// <summary>Contract member 'newSnapshotRef'.</summary>
+    /// <summary>The snapshot ref now valid at the loss date (pol.Snapshot.get supersession.successorRef). Always set.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("newSnapshotRef")]
     public required string NewSnapshotRef { get; init; }
 
-    /// <summary>Contract member 'causeEventId'.</summary>
+    /// <summary>Event id of the POL event that superseded the snapshot. Always set.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'causeEventId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("causeEventId")]
     public required global::System.Guid CauseEventId { get; init; }
+
+    /// <summary>The claim; equals the aggregate id. Always set.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>Event type of the POL event that caused the supersession (PolicyChanged, PolicyCancelled, ...). Always set.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("causeEventType")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? CauseEventType { get; init; }
 }

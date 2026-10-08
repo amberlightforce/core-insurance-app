@@ -1487,7 +1487,9 @@
     "payload": {
       "oldSnapshotRef": "Sample text",
       "newSnapshotRef": "Sample text",
-      "causeEventId": "0192489f-fb39-7a8a-829d-c1c673826d14"
+      "causeEventId": "0192489f-fb39-7a8a-829d-c1c673826d14",
+      "claimId": "0192e33e-56bd-7ff1-8add-f3bd8c4208c1",
+      "causeEventType": "SAMPLE_CODE"
     }
   },
   {

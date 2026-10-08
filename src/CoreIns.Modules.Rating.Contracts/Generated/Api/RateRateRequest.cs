@@ -83,12 +83,17 @@ public sealed record RateRateRequest
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? RatingArtefactHash { get; init; }
 
+        /// <summary>Required when mode is ENDORSEMENT (REQ-POL-093): the rating artefact pinned to the term. RAT rates under exactly this artefact, never under the currently active one; an unknown or mismatching hash is RAT-ERR-INPUT. Ignored in the other modes. With mode RENEWAL, ratingArtefactHash carries the artefact active at the new term start as resolved by the caller (REQ-POL-249).</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("pinnedRatingArtefactHash")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? PinnedRatingArtefactHash { get; init; }
+
         /// <summary>SL-RAT-UW - optional. When absent, the current MKT configuration hash is used and recorded in the worksheet</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("configurationHash")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::CoreIns.SharedKernel.Identifiers.ConfigurationHash? ConfigurationHash { get; init; }
 
-        /// <summary>Rating mode (REQ-RAT-038..041; DRY_RUN per PRD-03 §9.1; CANDIDATE is RAT-internal, REQ-RAT-043)</summary>
+        /// <summary>Rating mode (REQ-RAT-038..041; DRY_RUN per PRD-03 §9.1; CANDIDATE is RAT-internal, REQ-RAT-043). ENDORSEMENT rates a mid-term change under pinnedRatingArtefactHash; RENEWAL rates the new term and takes priorRates.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("mode")]
         public required ModeValue Mode { get; init; }
 
@@ -129,7 +134,7 @@ public sealed record RateRateRequest
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public OriginValue? Origin { get; init; }
 
-        /// <summary>Rating mode (REQ-RAT-038..041; DRY_RUN per PRD-03 §9.1; CANDIDATE is RAT-internal, REQ-RAT-043)</summary>
+        /// <summary>Rating mode (REQ-RAT-038..041; DRY_RUN per PRD-03 §9.1; CANDIDATE is RAT-internal, REQ-RAT-043). ENDORSEMENT rates a mid-term change under pinnedRatingArtefactHash; RENEWAL rates the new term and takes priorRates.</summary>
         [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ModeValue>))]
         [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
         public enum ModeValue

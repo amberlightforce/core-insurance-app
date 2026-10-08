@@ -100,4 +100,62 @@ public sealed record LedgerDimensions
     /// <summary>Claim of a CLM disbursement (D-SL2-08)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
     public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>Transaction kind of the POL transaction behind the line (the MKT TaxTransactionKind values). Always set on servicing entries, null otherwise.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("transactionKind")]
+    public TransactionKindValue? TransactionKind { get; init; }
+
+    /// <summary>Cancellation source (shared code list). Always set on lines of cancellation-sourced entries, null otherwise.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cancellationSource")]
+    public string? CancellationSource { get; init; }
+
+    /// <summary>Id of the MKT treatment rule that decided a tax or levy line. Always set on such lines of servicing entries, null otherwise.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("treatmentRuleId")]
+    public string? TreatmentRuleId { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<TransactionKindValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum TransactionKindValue
+    {
+        /// <summary><c>NEW_BUSINESS</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NEW_BUSINESS")]
+        NewBusiness,
+
+        /// <summary><c>ENDORSEMENT_DEBIT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ENDORSEMENT_DEBIT")]
+        EndorsementDebit,
+
+        /// <summary><c>ENDORSEMENT_CREDIT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ENDORSEMENT_CREDIT")]
+        EndorsementCredit,
+
+        /// <summary><c>CANCELLATION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLATION")]
+        Cancellation,
+
+        /// <summary><c>DISTANCE_WITHDRAWAL_VOID</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DISTANCE_WITHDRAWAL_VOID")]
+        DistanceWithdrawalVoid,
+
+        /// <summary><c>VOID</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("VOID")]
+        Void,
+
+        /// <summary><c>RETURN_PREMIUM</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RETURN_PREMIUM")]
+        ReturnPremium,
+
+        /// <summary><c>REINSTATEMENT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REINSTATEMENT")]
+        Reinstatement,
+
+        /// <summary><c>FEE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FEE")]
+        Fee,
+
+        /// <summary><c>REFUND</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFUND")]
+        Refund,
+    }
 }
