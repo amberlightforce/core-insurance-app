@@ -8,11 +8,11 @@ namespace CoreIns.Modules.Claims.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ExposureCreateResponse
 {
-    /// <summary>PRD: "exposure"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'exposure'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("exposure")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Exposure { get; init; }
+    public required global::CoreIns.Modules.Claims.Contracts.Api.ExposureView Exposure { get; init; }
+
+    /// <summary>Contract member 'claim'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claim")]
+    public required global::CoreIns.Modules.Claims.Contracts.Api.ClaimSummary Claim { get; init; }
 }

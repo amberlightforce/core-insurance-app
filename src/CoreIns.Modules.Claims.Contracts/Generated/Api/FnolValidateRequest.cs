@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Fnol.validate request. PRD inputs: "FNOL payload"</summary>
+/// <summary>clm.Fnol.validate request: the FNOL payload a submit would send (no claim, number or event is created).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FnolValidateRequest
 {
-    /// <summary>PRD: "FNOL payload"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("fnolPayload")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FnolPayload { get; init; }
+    /// <summary>Contract member 'fnol'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fnol")]
+    public required global::CoreIns.Modules.Claims.Contracts.Api.FnolSubmitRequest Fnol { get; init; }
 }

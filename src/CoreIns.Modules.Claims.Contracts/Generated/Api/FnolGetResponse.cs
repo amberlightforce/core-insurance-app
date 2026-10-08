@@ -4,39 +4,45 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Fnol.get result. PRD outputs: "claim, exposures, checklist, assignment"</summary>
+/// <summary>clm.Fnol.get result: the immutable FNOL snapshot as submitted (REQ-CLM-044). Typed by SL2-CLM-CORE.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FnolGetResponse
 {
-    /// <summary>PRD: "claim"</summary>
+    /// <summary>Contract member 'fnolId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'fnolId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("claim")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Claim { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("fnolId")]
+    public required global::System.Guid FnolId { get; init; }
 
-    /// <summary>PRD: "exposures"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exposures")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Exposures { get; init; }
+    /// <summary>Contract member 'claimId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimId ClaimId { get; init; }
 
-    /// <summary>PRD: "checklist"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("checklist")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Checklist { get; init; }
+    /// <summary>Contract member 'claimNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimNumber")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimNumber ClaimNumber { get; init; }
 
-    /// <summary>PRD: "assignment"</summary>
+    /// <summary>Contract member 'channel'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    public required string Channel { get; init; }
+
+    /// <summary>Contract member 'reporterPartyId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'reporterPartyId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("assignment")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Assignment { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("reporterPartyId")]
+    public global::System.Guid? ReporterPartyId { get; init; }
+
+    /// <summary>Contract member 'submittedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("submittedAt")]
+    public required global::CoreIns.SharedKernel.Instant SubmittedAt { get; init; }
+
+    /// <summary>Contract member 'submittedBy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("submittedBy")]
+    public required string SubmittedBy { get; init; }
+
+    /// <summary>Contract member 'payload'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payload")]
+    public required global::CoreIns.Modules.Claims.Contracts.Api.FnolSubmitRequest Payload { get; init; }
 }

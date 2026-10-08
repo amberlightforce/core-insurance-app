@@ -32,6 +32,18 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string ContactProhibited = "CLM-ERR-CONTACT-PROHIBITED";
 
+    /// <summary>CLM-ERR-DEPENDENCY-UNAVAILABLE (HTTP 503).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): clm.Fnol.submit, clm.Fnol.validate.</para>
+    /// </remarks>
+    public const string DependencyUnavailable = "CLM-ERR-DEPENDENCY-UNAVAILABLE";
+
+    /// <summary>CLM-ERR-DUPLICATE-CANDIDATES (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.Fnol.submit.</para>
+    /// </remarks>
+    public const string DuplicateCandidates = "CLM-ERR-DUPLICATE-CANDIDATES";
+
     /// <summary>CLM-ERR-DUPLICATE-PAYMENT (HTTP 409).</summary>
     /// <remarks>
     /// <para>Declared by 5 operation(s): clm.TransactionSet.approve, clm.TransactionSet.build, clm.TransactionSet.reject, clm.TransactionSet.return, clm.TransactionSet.submit.</para>
@@ -70,7 +82,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update.</para>
+    /// <para>Declared by 6 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Exposure.create.</para>
     /// </remarks>
     public const string IllegalTransition = "CLM-ERR-ILLEGAL-TRANSITION";
 
@@ -86,11 +98,23 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string InvoiceDuplicate = "CLM-ERR-INVOICE-DUPLICATE";
 
+    /// <summary>CLM-ERR-LOSS-DATE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.Fnol.submit.</para>
+    /// </remarks>
+    public const string LossDate = "CLM-ERR-LOSS-DATE";
+
     /// <summary>CLM-ERR-NO-CONSENT (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 3 operation(s): clm.Conversation.list, clm.Conversation.schedule, clm.Conversation.send.</para>
     /// </remarks>
     public const string NoConsent = "CLM-ERR-NO-CONSENT";
+
+    /// <summary>CLM-ERR-NOT-FOUND (HTTP 404).</summary>
+    /// <remarks>
+    /// <para>Declared by 4 operation(s): clm.Claim.close, clm.Claim.get, clm.Exposure.create, clm.Fnol.get.</para>
+    /// </remarks>
+    public const string NotFound = "CLM-ERR-NOT-FOUND";
 
     /// <summary>CLM-ERR-NOT-PAYABLE (HTTP 422).</summary>
     /// <remarks>
@@ -110,6 +134,12 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string OfferContent = "CLM-ERR-OFFER-CONTENT";
 
+    /// <summary>CLM-ERR-POLICY-UNVERIFIED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.Fnol.submit.</para>
+    /// </remarks>
+    public const string PolicyUnverified = "CLM-ERR-POLICY-UNVERIFIED";
+
     /// <summary>CLM-ERR-RESERVE-REASON (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 5 operation(s): clm.TransactionSet.approve, clm.TransactionSet.build, clm.TransactionSet.reject, clm.TransactionSet.return, clm.TransactionSet.submit.</para>
@@ -124,7 +154,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-SEARCH-CRITERIA (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): clm.Claim.search.</para>
+    /// <para>Declared by 2 operation(s): clm.Claim.search, clm.Claim.searchByCriteria.</para>
     /// </remarks>
     public const string SearchCriteria = "CLM-ERR-SEARCH-CRITERIA";
 
@@ -146,11 +176,17 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string Sod = "CLM-ERR-SOD";
 
+    /// <summary>CLM-ERR-STALE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): clm.Claim.close, clm.Exposure.create.</para>
+    /// </remarks>
+    public const string Stale = "CLM-ERR-STALE";
+
     /// <summary>The code prefix of this module.</summary>
     public const string Prefix = "CLM-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Authority, CertRequester, CloseGuard, ContactProhibited, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, NoConsent, NotPayable, NotStoppable, OfferContent, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, Sod];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Authority, CertRequester, CloseGuard, ContactProhibited, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PolicyUnverified, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, Sod, Stale];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -159,6 +195,8 @@ public static class ClaimsErrorCodes
         [CertRequester] = 422,
         [CloseGuard] = 422,
         [ContactProhibited] = 422,
+        [DependencyUnavailable] = 503,
+        [DuplicateCandidates] = 409,
         [DuplicatePayment] = 409,
         [ExposureDuplicate] = 409,
         [Fnol001] = 422,
@@ -168,15 +206,19 @@ public static class ClaimsErrorCodes
         [IllegalTransition] = 422,
         [ImportValidation] = 422,
         [InvoiceDuplicate] = 409,
+        [LossDate] = 422,
         [NoConsent] = 422,
+        [NotFound] = 404,
         [NotPayable] = 422,
         [NotStoppable] = 422,
         [OfferContent] = 422,
+        [PolicyUnverified] = 422,
         [ReserveReason] = 422,
         [ReverseLiveActivity] = 422,
         [SearchCriteria] = 422,
         [SetStale] = 409,
         [SiuAccess] = 403,
         [Sod] = 403,
+        [Stale] = 409,
     };
 }

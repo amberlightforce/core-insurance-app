@@ -17,5 +17,8 @@ public sealed class FakeClaimsClaimService : global::CoreIns.Testing.Contracts.F
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Claims.Contracts.Api.ClaimGetResponse>("clm.Claim.get", [id], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchPage> SearchAsync(string? cursor = null, int? limit = null, string? criteria = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchPage>("clm.Claim.search", [cursor, limit, criteria], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchPage> SearchAsync(string? cursor = null, int? limit = null, string? claimNumber = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchPage>("clm.Claim.search", [cursor, limit, claimNumber], cancellationToken);
+
+    /// <inheritdoc />
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchPage> SearchByCriteriaAsync(global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchCriteria request, string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Claims.Contracts.Api.ClaimSearchPage>("clm.Claim.searchByCriteria", [request, cursor, limit], cancellationToken);
 }

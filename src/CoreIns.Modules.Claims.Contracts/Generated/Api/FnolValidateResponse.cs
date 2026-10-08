@@ -4,39 +4,35 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Fnol.validate result. PRD outputs: "claim, exposures, checklist, assignment"</summary>
+/// <summary>clm.Fnol.validate result (SL2-CLM-CORE): the findings a submit would raise, coverage indications and duplicate candidates.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FnolValidateResponse
 {
-    /// <summary>PRD: "claim"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("claim")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Claim { get; init; }
+    /// <summary>Contract member 'valid'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("valid")]
+    public required bool Valid { get; init; }
 
-    /// <summary>PRD: "exposures"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exposures")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Exposures { get; init; }
+    /// <summary>Contract member 'issues'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.FnolIssue> Issues { get; init; }
 
-    /// <summary>PRD: "checklist"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("checklist")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Checklist { get; init; }
+    /// <summary>Contract member 'policyNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyNumber")]
+    public global::CoreIns.SharedKernel.Identifiers.PolicyNumber? PolicyNumber { get; init; }
 
-    /// <summary>PRD: "assignment"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("assignment")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Assignment { get; init; }
+    /// <summary>Contract member 'policyInForce'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyInForce")]
+    public bool? PolicyInForce { get; init; }
+
+    /// <summary>Contract member 'policyStatusAtLoss'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyStatusAtLoss")]
+    public string? PolicyStatusAtLoss { get; init; }
+
+    /// <summary>Contract member 'coverageIndications'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coverageIndications")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.CoverageIndication> CoverageIndications { get; init; }
+
+    /// <summary>Contract member 'duplicateCandidates'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("duplicateCandidates")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.DuplicateCandidate> DuplicateCandidates { get; init; }
 }

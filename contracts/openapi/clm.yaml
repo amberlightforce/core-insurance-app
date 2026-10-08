@@ -79,6 +79,18 @@ paths:
         status: 422
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         status: 409
+      - code: CLM-ERR-LOSS-DATE
+        status: 422
+        note: loss date in the future or after the notice date (REQ-CLM-030)
+      - code: CLM-ERR-POLICY-UNVERIFIED
+        status: 422
+        note: POL does not know the policy or gave no snapshot reference (REQ-CLM-002, -050)
+      - code: CLM-ERR-DUPLICATE-CANDIDATES
+        status: 409
+        note: probable duplicates need a duplicateDecision (REQ-CLM-041)
+      - code: CLM-ERR-DEPENDENCY-UNAVAILABLE
+        status: 503
+        note: POL snapshot service unavailable
       x-source:
       - PRD-07 §9.1 l.1466
       parameters:
@@ -111,6 +123,8 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '429':
           $ref: common.yaml#/components/responses/TooManyRequests
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/clm/v1/fnol/save-draft:
@@ -224,6 +238,8 @@ paths:
         status: 422
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         status: 409
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-07 §9.1 l.1466
       parameters:
@@ -232,7 +248,7 @@ paths:
       - name: id
         in: path
         required: true
-        description: Identifier of the Fnol
+        description: Identifier of the FNOL snapshot or of its claim (REQ-CLM-044)
         schema:
           type: string
       responses:
@@ -297,6 +313,8 @@ paths:
         status: 422
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         status: 409
+      - code: CLM-ERR-DEPENDENCY-UNAVAILABLE
+        status: 503
       x-source:
       - PRD-07 §9.1 l.1466
       parameters:
@@ -327,6 +345,8 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '429':
           $ref: common.yaml#/components/responses/TooManyRequests
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/clm/v1/claims/{id}:
@@ -364,6 +384,8 @@ paths:
         status: 422
       - code: CLM-ERR-CLOSE-GUARD
         status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-07 §9.1 l.1467
       parameters:
@@ -512,6 +534,11 @@ paths:
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: CLM-ERR-STALE
+        status: 409
+        note: the claim changed meanwhile (record version)
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-07 §9.1 l.1467
       parameters:
@@ -542,6 +569,8 @@ paths:
           $ref: common.yaml#/components/responses/Conflict
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/clm/v1/claims/reopen:
@@ -727,12 +756,76 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: criteria
+      - name: claimNumber
         in: query
         required: false
-        description: 'PRD: "criteria"'
+        description: Claim number (P0). Every other criterion, personal or not, goes in the body of the POST form (D-SLC-05)
         schema:
           type: string
+          maxLength: 64
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimSearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    post:
+      operationId: clm.Claim.searchByCriteria
+      summary: Claim search (POST form, criteria in the body)
+      description: |-
+        POST form of clm.Claim.search (D-SLC-05): policy number and party ids travel in the body, never in a URL. A read;
+        no Idempotency-Key. Results never show free text and never count claims the caller may not see (REQ-CLM-011).
+
+        PRD inputs: criteria
+        PRD outputs: page of claims
+      tags:
+      - Claim
+      x-requirement:
+      - REQ-CLM-011
+      x-wave: W7
+      x-work-packages:
+      - SL2-CLM-CORE
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: n/a'
+      x-exposure:
+      - ui
+      x-consumers:
+      - CMP
+      - WRK
+      x-permission: clm.Claim.search
+      x-prd-name: clm.Claim.search
+      x-error-codes:
+      - code: CLM-ERR-SEARCH-CRITERIA
+        status: 422
+      x-source:
+      - PRD-07 §9.1 l.1468
+      - DECISIONS D-SLC-05
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimSearchCriteria'
       responses:
         '200':
           description: Success
@@ -784,6 +877,14 @@ paths:
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        status: 422
+        note: claim not Open (REQ-CLM-071)
+      - code: CLM-ERR-STALE
+        status: 409
+        note: the claim changed meanwhile (record version)
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-07 §9.1 l.1469
       parameters:
@@ -814,6 +915,8 @@ paths:
           $ref: common.yaml#/components/responses/Conflict
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/clm/v1/exposures/{id}:
@@ -3827,21 +3930,45 @@ components:
       properties:
         lineOfBusiness:
           $ref: ../events/common.schema.json#/$defs/Code
+          description: Line of business (the slice accepts MOTOR, D-SL2-01)
         policyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Policy chosen in the FNOL policy lookup (pol.Policy.search, REQ-CLM-047); cover is verified on its snapshot at lossAt (REQ-CLM-002)
         policyNumber:
           $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: Optional cross-check; when given it must equal the policy number on the snapshot
         lossAt:
           $ref: ../events/common.schema.json#/$defs/Instant
-          description: Loss date and time (business fact, not a time-travel input)
+          description: Loss date and time (business fact, not a time-travel input); never in the future, never after noticeOn (REQ-CLM-030)
+        noticeOn:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Notice date; defaults to today in Europe/Athens from the PLT time service (REQ-CLM-030)
+        lossCause:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Loss cause from the line's code list (REQ-CLM-030)
+        lossLocation:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Loss location as free description (REQ-CLM-030). May hold personal data; encrypted at rest, never in lists, events or URLs
+        description:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: Free-text description (REQ-CLM-030, ≤ 4,000). May hold personal data; encrypted at rest, never in lists, events or URLs
         lossData:
           $ref: ../events/common.schema.json#/$defs/OpenObject
-          description: Line-specific loss data
+          description: Line-specific loss data; kept only inside the encrypted FNOL snapshot (REQ-CLM-044)
         reporter:
           type: object
           properties:
             partyId:
               $ref: ../events/common.schema.json#/$defs/Uuid
+            relationship:
+              $ref: ../events/common.schema.json#/$defs/Code
+              description: Relationship to the insured (default INSURED)
             adHoc:
               $ref: ../events/common.schema.json#/$defs/OpenObject
         involvedParties:
@@ -3850,28 +3977,153 @@ components:
             $ref: ../events/common.schema.json#/$defs/OpenObject
         incidents:
           type: array
+          maxItems: 10
           items:
-            $ref: ../events/common.schema.json#/$defs/OpenObject
+            $ref: '#/components/schemas/FnolIncidentInput'
+        exposures:
+          type: array
+          maxItems: 10
+          description: Exposure proposals confirmed by the user (REQ-CLM-065); in the slice own-damage style exposures for the insured
+          items:
+            $ref: '#/components/schemas/FnolExposureInput'
+        duplicateDecision:
+          oneOf:
+          - $ref: '#/components/schemas/DuplicateDecision'
+          - type: 'null'
         attachmentRefs:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
         channel:
           $ref: ../events/common.schema.json#/$defs/Code
+          description: Shared channel code list (R-84, REQ-CLM-036)
+        receiptMedium:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: TELEPHONE, EMAIL, LETTER, FAX, SMS, IN_PERSON, ELECTRONIC (REQ-CLM-036)
         channelMetadata:
           $ref: ../events/common.schema.json#/$defs/OpenObject
+      description: 'Mandatory: lineOfBusiness, policyId, lossAt, lossCause, lossLocation, description, channel; they are not schema-required so that a missing one is CLM-ERR-FNOL-001 naming the field (REQ-CLM-030), not a parse error. Typed from REQ-CLM-001, REQ-CLM-030, REQ-CLM-036, REQ-CLM-041, REQ-CLM-065 (SL2-CLM-CORE). PRD inputs: "FNOL payload". A missing required field is CLM-ERR-FNOL-001 naming the field.'
+    FnolIncidentInput:
+      type: object
+      description: An incident of the loss (REQ-CLM-064). The slice records vehicle incidents only; no injury (P3) fields.
+      properties:
+        incidentType:
+          type: string
+          enum:
+          - VEHICLE
+        vehicleRef:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Insured vehicle reference from the snapshot (vehicle id or plate)
+        drivable:
+          type:
+          - boolean
+          - 'null'
+        damageAreas:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
       required:
-      - lineOfBusiness
-      - lossAt
-      - lossData
-      - reporter
-      - channel
-      oneOf:
-      - required:
-        - policyId
-      - required:
-        - policyNumber
-      description: 'Typed from REQ-CLM-001. PRD inputs: "FNOL payload"'
+      - incidentType
+    FnolExposureInput:
+      type: object
+      description: A confirmed exposure proposal (REQ-CLM-062, REQ-CLM-065); the claimant is the insured.
+      properties:
+        kind:
+          $ref: '#/components/schemas/ExposureKind'
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - kind
+      - coverageCode
+    DuplicateDecision:
+      type: object
+      description: The user's choice for probable duplicates (REQ-CLM-041); merge is a later work package.
+      properties:
+        action:
+          type: string
+          enum:
+          - LINK
+          - OVERRIDE
+        linkedClaimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The existing claim (required for LINK)
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - action
+      - reasonCode
+    ExposureKind:
+      type: string
+      description: Exposure kind (REQ-CLM-062)
+      enum:
+      - OWN_DAMAGE
+      - MTPL_PD
+      - MTPL_BI
+      - THEFT
+      - GLASS
+      - ASSISTANCE
+      - LEGAL_PROTECTION
+      - PROPERTY_BUILDING
+      - CONTENTS
+      - ALTERNATIVE_ACCOMMODATION
+      - LIABILITY_PROPERTY
+      - LIABILITY_INJURY
+      - FS_OWN_SETTLEMENT
+    CoverageIndication:
+      type: object
+      description: Coverage indication from the snapshot (REQ-CLM-048), an indication until a coverage decision is recorded.
+      properties:
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        indication:
+          type: string
+          enum:
+          - COVERED
+          - NOT_COVERED
+          - IN_QUESTION
+          description: COVERED = the code is a selected coverage of the in-force snapshot; NOT_COVERED = not on the snapshot; IN_QUESTION = the policy was not in force at the loss date (REQ-CLM-049)
+      required:
+      - coverageCode
+      - indication
+    DuplicateCandidate:
+      type: object
+      description: A probable duplicate (REQ-CLM-041) with its match reasons.
+      properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        reasons:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - claimId
+      - claimNumber
+      - reasons
+    FnolIssue:
+      type: object
+      description: A finding of clm.Fnol.validate.
+      properties:
+        code:
+          type: string
+          description: Error code the submit would return (e.g. CLM-ERR-FNOL-001)
+        field:
+          type:
+          - string
+          - 'null'
+        message:
+          type: string
+      required:
+      - code
+      - message
     FnolSubmitResponse:
       type: object
       properties:
@@ -3879,21 +4131,20 @@ components:
           $ref: ../events/common.schema.json#/$defs/Uuid
         claimNumber:
           $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        claim:
+          $ref: '#/components/schemas/ClaimSummary'
         exposures:
           type: array
           items:
-            type: object
-            properties:
-              exposureId:
-                $ref: ../events/common.schema.json#/$defs/Uuid
-              exposureType:
-                $ref: ../events/common.schema.json#/$defs/Code
-            required:
-            - exposureId
+            $ref: '#/components/schemas/ExposureView'
         coverageIndications:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
+            $ref: '#/components/schemas/CoverageIndication'
+        duplicateCandidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/DuplicateCandidate'
         handlingSegment:
           $ref: ../events/common.schema.json#/$defs/Code
         assignment:
@@ -3915,8 +4166,12 @@ components:
       required:
       - claimId
       - claimNumber
+      - claim
       - exposures
-      description: 'Typed from REQ-CLM-001. PRD outputs: "claim, exposures, checklist, assignment"'
+      - coverageIndications
+      - duplicateCandidates
+      - handlingSegment
+      description: 'Typed from REQ-CLM-001 (SL2-CLM-CORE). PRD outputs: "claim, exposures, checklist, assignment". Holds no free text (stored by the idempotency store).'
     FnolSaveDraftRequest:
       type: object
       description: 'clm.Fnol.saveDraft request. PRD inputs: "FNOL payload"'
@@ -3942,50 +4197,350 @@ components:
           description: 'PRD: "assignment"'
     FnolGetResponse:
       type: object
-      description: 'clm.Fnol.get result. PRD outputs: "claim, exposures, checklist, assignment"'
+      description: 'clm.Fnol.get result: the immutable FNOL snapshot as submitted (REQ-CLM-044). Typed by SL2-CLM-CORE.'
       properties:
-        claim:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
-        exposures:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposures"'
-        checklist:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checklist"'
-        assignment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "assignment"'
+        fnolId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+        reporterPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        submittedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        submittedBy:
+          type: string
+        payload:
+          $ref: '#/components/schemas/FnolSubmitRequest'
+      required:
+      - fnolId
+      - claimId
+      - claimNumber
+      - channel
+      - submittedAt
+      - submittedBy
+      - payload
     FnolValidateRequest:
       type: object
-      description: 'clm.Fnol.validate request. PRD inputs: "FNOL payload"'
+      description: 'clm.Fnol.validate request: the FNOL payload a submit would send (no claim, number or event is created).'
       properties:
-        fnolPayload:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "FNOL payload"'
+        fnol:
+          $ref: '#/components/schemas/FnolSubmitRequest'
+      required:
+      - fnol
     FnolValidateResponse:
       type: object
-      description: 'clm.Fnol.validate result. PRD outputs: "claim, exposures, checklist, assignment"'
+      description: 'clm.Fnol.validate result (SL2-CLM-CORE): the findings a submit would raise, coverage indications and duplicate candidates.'
       properties:
-        claim:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
+        valid:
+          type: boolean
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/FnolIssue'
+        policyNumber:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          - type: 'null'
+        policyInForce:
+          type:
+          - boolean
+          - 'null'
+        policyStatusAtLoss:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        coverageIndications:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoverageIndication'
+        duplicateCandidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/DuplicateCandidate'
+      required:
+      - valid
+      - issues
+      - coverageIndications
+      - duplicateCandidates
+    ClaimSummary:
+      type: object
+      description: The claim header without free text (lists, command results, idempotency store).
+      properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        insuredPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        snapshotRef:
+          type: string
+        snapshotKnownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        snapshotStatus:
+          type: string
+          enum:
+          - PENDING
+          - VERIFIED
+          - REVERIFICATION_REQUIRED
+        policyInForceAtLoss:
+          type: boolean
+        policyStatusAtLoss:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        productVersion:
+          type:
+          - string
+          - 'null'
+        lineOfBusiness:
+          $ref: ../events/common.schema.json#/$defs/Code
+        lossAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        lossDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        noticeOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        lossCause:
+          $ref: ../events/common.schema.json#/$defs/Code
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+        handlingSegment:
+          $ref: ../events/common.schema.json#/$defs/Code
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - OPEN
+          - CLOSED
+        subStatus:
+          oneOf:
+          - $ref: '#/components/schemas/ClaimSubStatus'
+          - type: 'null'
+        outcome:
+          oneOf:
+          - $ref: '#/components/schemas/ClaimOutcome'
+          - type: 'null'
+        coverageInQuestion:
+          type: boolean
+        duplicateOfClaimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        handler:
+          type:
+          - string
+          - 'null'
+        openDays:
+          type: integer
+          minimum: 0
+          description: Days since notice (REQ-CLM-075); frozen at closure
+        recordVersion:
+          type: integer
+          minimum: 1
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        closedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+      required:
+      - claimId
+      - claimNumber
+      - policyId
+      - policyNumber
+      - insuredPartyId
+      - snapshotRef
+      - snapshotKnownAt
+      - snapshotStatus
+      - policyInForceAtLoss
+      - productCode
+      - lineOfBusiness
+      - lossAt
+      - lossDate
+      - noticeOn
+      - lossCause
+      - channel
+      - handlingSegment
+      - status
+      - coverageInQuestion
+      - openDays
+      - recordVersion
+      - createdAt
+    ClaimSubStatus:
+      type: string
+      description: Open sub-state (REQ-CLM-071)
+      enum:
+      - NEW
+      - IN_PROGRESS
+      - UNDER_INVESTIGATION
+      - SETTLED
+    ClaimOutcome:
+      type: string
+      description: Closure outcome (REQ-CLM-071)
+      enum:
+      - COMPLETED
+      - DENIED
+      - WITHDRAWN
+      - DUPLICATE
+      - NO_PAYMENT
+    ClaimView:
+      type: object
+      description: 'The claim (REQ-CLM-061) with exposures, claimants and incidents. Free text (description, lossLocation) is shown to holders of clm.Claim.get only here, never in lists.'
+      properties:
+        summary:
+          $ref: '#/components/schemas/ClaimSummary'
+        legalEntity:
+          type: string
+        jurisdiction:
+          $ref: ../events/common.schema.json#/$defs/CountryCode
+        lossLocation:
+          type: string
+        description:
+          type: string
         exposures:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposures"'
-        checklist:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checklist"'
-        assignment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "assignment"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ExposureView'
+        claimants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimantView'
+        incidents:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncidentView'
+      required:
+      - summary
+      - legalEntity
+      - jurisdiction
+      - lossLocation
+      - description
+      - exposures
+      - claimants
+      - incidents
+    ExposureView:
+      type: object
+      description: An exposure (REQ-CLM-062) = one coverage × one claimant.
+      properties:
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        exposureNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        kind:
+          $ref: '#/components/schemas/ExposureKind'
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        claimantId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimantPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        incidentId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        status:
+          type: string
+          enum:
+          - OPEN
+          - CLOSED
+        outcome:
+          type:
+          - string
+          - 'null'
+        coverageIndication:
+          type: string
+          enum:
+          - COVERED
+          - NOT_COVERED
+          - IN_QUESTION
+        coverageDecision:
+          type: string
+          enum:
+          - PENDING
+          - COVERED
+          - COVERED_WITH_RESERVATION
+          - PARTIALLY_COVERED
+          - NOT_COVERED
+        duplicateReason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - exposureId
+      - exposureNumber
+      - kind
+      - coverageCode
+      - claimantId
+      - claimantPartyId
+      - status
+      - coverageIndication
+      - coverageDecision
+      - createdAt
+    ClaimantView:
+      type: object
+      description: A claimant (REQ-CLM-066 subset) referring to a PTY party.
+      properties:
+        claimantId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimantType:
+          type: string
+          enum:
+          - INSURED
+          - THIRD_PARTY
+      required:
+      - claimantId
+      - partyId
+      - claimantType
+    IncidentView:
+      type: object
+      description: An incident (REQ-CLM-064 subset, vehicle only in the slice).
+      properties:
+        incidentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        incidentType:
+          type: string
+          enum:
+          - VEHICLE
+        vehicleRef:
+          type:
+          - string
+          - 'null'
+        drivable:
+          type:
+          - boolean
+          - 'null'
+        damageAreas:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - incidentId
+      - incidentType
+      - damageAreas
     ClaimGetResponse:
       type: object
       description: 'clm.Claim.get result. PRD outputs: "claim"'
       properties:
         claim:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
+          $ref: '#/components/schemas/ClaimView'
+      required:
+      - claim
     ClaimUpdateRequest:
       type: object
       description: 'clm.Claim.update request. PRD inputs: "ids, changes, reason"'
@@ -4010,26 +4565,38 @@ components:
           description: 'PRD: "claim"'
     ClaimCloseRequest:
       type: object
-      description: 'clm.Claim.close request. PRD inputs: "ids, changes, reason"'
+      description: 'clm.Claim.close request (REQ-CLM-071..073, SL2-CLM-CORE). Open exposures close with the claim when each passes the close guard (REQ-CLM-072).'
       properties:
-        ids:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "ids"'
-        changes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "changes"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE
+        outcome:
+          type: string
+          enum:
+          - COMPLETED
+          - WITHDRAWN
+          - DUPLICATE
+          - NO_PAYMENT
+          description: Closure outcome; Denied needs an approved NotCovered decision and a delivered denial letter (later work package)
+        reasonCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+      required:
+      - claimId
+      - expectedRecordVersion
+      - outcome
     ClaimCloseResponse:
       type: object
       description: 'clm.Claim.close result. PRD outputs: "claim"'
       properties:
         claim:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
+          $ref: '#/components/schemas/ClaimSummary'
+      required:
+      - claim
     ClaimReopenRequest:
       type: object
       description: 'clm.Claim.reopen request. PRD inputs: "ids, changes, reason"'
@@ -4074,13 +4641,33 @@ components:
         claim:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "claim"'
+    ClaimSearchCriteria:
+      type: object
+      description: 'Body of clm.Claim.searchByCriteria (D-SLC-05, REQ-CLM-011 subset). At least one criterion; criteria combine with AND.'
+      properties:
+        claimNumber:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        policyNumber:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        insuredPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: PTY party id of the insured (P1; body only, never a URL)
     ClaimSearchItem:
       type: object
-      description: 'clm.Claim.search result. PRD outputs: "page of claims"'
+      description: 'clm.Claim.search result item: the claim header without free text (masked in lists).'
       properties:
-        pageClaims:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "page of claims"'
+        claim:
+          $ref: '#/components/schemas/ClaimSummary'
+      required:
+      - claim
     ClaimSearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -4093,18 +4680,48 @@ components:
       description: Page of clm.Claim.search results (cursor pagination, contract §3.5.5)
     ExposureCreateRequest:
       type: object
-      description: 'clm.Exposure.create request. PRD inputs: "exposure data"'
+      description: 'clm.Exposure.create request (REQ-CLM-062, REQ-CLM-063, SL2-CLM-CORE). A handler action: a New claim moves to InProgress.'
       properties:
-        exposureData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure data"'
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE
+        kind:
+          $ref: '#/components/schemas/ExposureKind'
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        claimantPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: PTY party of the claimant; default the insured
+        incidentId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        duplicateReason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Reason to allow a second open exposure on the same coverage, claimant and incident (REQ-CLM-063)
+      required:
+      - claimId
+      - expectedRecordVersion
+      - kind
+      - coverageCode
     ExposureCreateResponse:
       type: object
       description: 'clm.Exposure.create result. PRD outputs: "exposure"'
       properties:
         exposure:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure"'
+          $ref: '#/components/schemas/ExposureView'
+        claim:
+          $ref: '#/components/schemas/ClaimSummary'
+      required:
+      - exposure
+      - claim
     ExposureUpdateRequest:
       type: object
       description: 'clm.Exposure.update request. PRD inputs: "exposure data"'

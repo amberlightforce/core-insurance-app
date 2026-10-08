@@ -14,7 +14,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
 | [POL](#pol) | 52 | 48 | 4 | 37 | 15 | 8 | 10 | 0 |
 | [BIL](#bil) | 87 | 87 | 0 | 55 | 32 | 6 | 5 | 1 |
-| [CLM](#clm) | 53 | 53 | 0 | 43 | 10 | 10 | 9 | 5 |
+| [CLM](#clm) | 54 | 54 | 0 | 43 | 11 | 10 | 9 | 5 |
 | [RI](#ri) | 116 | 110 | 6 | 82 | 34 | 9 | 0 | 0 |
 | [FIN](#fin) | 88 | 80 | 8 | 55 | 33 | 10 | 0 | 3 |
 | [DOC](#doc) | 44 | 42 | 2 | 27 | 17 | 4 | 12 | 0 |
@@ -478,6 +478,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `clm.Claim.merge` | POST `/api/clm/v1/claims/merge` | C |  | ui |  | W7 | full | REQ-CLM-061, REQ-CLM-071..REQ-CLM-074, REQ-CLM-042 |
 | `clm.Claim.reopen` | POST `/api/clm/v1/claims/reopen` | C | yes | ui |  | W7 | full | REQ-CLM-061, REQ-CLM-071..REQ-CLM-074, REQ-CLM-042 |
 | `clm.Claim.search` | GET `/api/clm/v1/claims/search` | Q |  | ui | CMP, WRK | W7 | full | REQ-CLM-011 |
+| `clm.Claim.searchByCriteria` | POST `/api/clm/v1/claims/search` | Q |  | ui | CMP, WRK | W7 | full | REQ-CLM-011 |
 | `clm.Claim.update` | PATCH `/api/clm/v1/claims/{id}` | C |  | ui |  | W7 | full | REQ-CLM-061, REQ-CLM-071..REQ-CLM-074, REQ-CLM-042 |
 | `clm.ClaimTracking.get` | GET `/api/clm/v1/claim-trackings/{id}` | Q |  | ui, partner | CHN, DOC | W7 | full | REQ-CLM-009 |
 | `clm.ClaimTracking.list` | GET `/api/clm/v1/claim-trackings` | Q |  | ui | CHN, PTY | W7 | full | REQ-CLM-009 |
@@ -1465,7 +1466,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-CLM-008 | `clm.Certificate.assemble`, `clm.Certificate.issue`, `clm.Certificate.request` |  |
 | REQ-CLM-009 | `chn.PartnerClaim.getTracking`, `clm.ClaimTracking.get`, `clm.ClaimTracking.list` |  |
 | REQ-CLM-010 | `clm.Import.claim`, `clm.Import.convertCurrency`, `clm.Import.financialHistory`, `clm.Import.reverse` |  |
-| REQ-CLM-011 | `clm.Claim.search` |  |
+| REQ-CLM-011 | `clm.Claim.search`, `clm.Claim.searchByCriteria` |  |
 | REQ-RI-001 | `ri.Contract.applicable`, `ri.Contract.get`, `ri.Contract.list`, `ri.Contract.versionAt` (+2) |  |
 | REQ-RI-002 | `ri.Cession.get`, `ri.Cession.listByPolicy`, `ri.Cession.preview`, `ri.Cession.rerun` | mapped by builder |
 | REQ-RI-003 | `ri.Recovery.adjust`, `ri.Recovery.listByClaim`, `ri.Recovery.listByContract`, `ri.Recovery.recalculate` (+1) | mapped by builder |

@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Claim.search result. PRD outputs: "page of claims"</summary>
+/// <summary>clm.Claim.search result item: the claim header without free text (masked in lists).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClaimSearchItem
 {
-    /// <summary>PRD: "page of claims"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("pageClaims")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PageClaims { get; init; }
+    /// <summary>Contract member 'claim'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claim")]
+    public required global::CoreIns.Modules.Claims.Contracts.Api.ClaimSummary Claim { get; init; }
 }
