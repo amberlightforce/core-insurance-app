@@ -1166,6 +1166,8 @@ paths:
       x-dry-run-note: 'PRD: Query'
       x-exposure:
       - ui
+      x-consumers:
+      - UW
       x-permission: pol.Job.get
       x-error-codes:
       - code: POL-ERR-NOT-FOUND

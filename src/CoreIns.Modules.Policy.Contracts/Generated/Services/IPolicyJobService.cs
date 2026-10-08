@@ -24,6 +24,21 @@ public interface IPolicyJobService
 
     /// <summary>Job queries</summary>
     /// <remarks>
+    /// <para>Operation pol.Job.get (query; HTTP GET /api/pol/v1/jobs/{id}).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full; fully typed from REQ-POL-331 (SL-POL). Wave W4.</para>
+    /// <para>Exposure: ui; consumers: UW.</para>
+    /// <para>Errors: POL-ERR-NOT-FOUND (404).</para>
+    /// </remarks>
+    /// <param name="id">Identifier of the Job</param>
+    /// <param name="account">PRD: "account"</param>
+    /// <param name="policy">PRD: "policy"</param>
+    /// <param name="participant">PRD: "participant"</param>
+    /// <param name="state">PRD: "state"</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobGetResponse> GetAsync(string id, string? account = null, string? policy = null, string? participant = null, string? state = null, global::System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>Job queries</summary>
+    /// <remarks>
     /// <para>Operation pol.Job.list (query; HTTP GET /api/pol/v1/jobs).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W4.</para>
