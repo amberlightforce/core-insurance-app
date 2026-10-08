@@ -8,7 +8,7 @@ deep review keeps its depth: adversarial, with probe tests in a scratch copy (D-
 
 - **Read first:**
   - `orchestration/HANDOVER.md` §4.
-  - **`orchestration/briefs/PITFALLS.md`** (items 1–37): self-check against every item before you report. Your brief
+  - **`orchestration/briefs/PITFALLS.md`** (all items, including any added during slices 3–5): self-check against every item before you report. Your brief
     names the likely ones, but they are not the only ones.
   - `orchestration/SLICE-PLAN-5.md`:
     - §3/§3a (workbench) or §4 (E2E-12 design);
