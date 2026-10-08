@@ -230,7 +230,9 @@ public sealed class DevClockTests(PostgresFixture database) : IClassFixture<Post
         first.StatusCode.ShouldBe(HttpStatusCode.OK);
         retry.StatusCode.ShouldBe(HttpStatusCode.OK);
         var expected = baseline + (((2 * 24) + 3) * 3600);
-        (await first.Content.ReadFromJsonAsync<JsonNode>(TestContext.Current.CancellationToken))!["offsetSeconds"]!.GetValue<long>().ShouldBe(expected);
+        var firstBody = (await first.Content.ReadFromJsonAsync<JsonNode>(TestContext.Current.CancellationToken))!;
+        firstBody["offsetSeconds"]!.GetValue<long>().ShouldBe(expected);
+        (firstBody["now"]!.GetValue<DateTimeOffset>() - DateTimeOffset.UtcNow).ShouldBeGreaterThan(TimeSpan.FromSeconds(expected - 5), "the answer's now already includes the advance");
         (await OffsetSecondsAsync(client)).ShouldBe(expected, "the replayed key did not advance again");
         (clock.Now - SystemClock.Instance.Now).ShouldBeGreaterThan(TimeSpan.FromSeconds(expected - 5));
 
