@@ -46,7 +46,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
                 throw Validation("CANCELLATION_SOURCE_REQUIRED", nameof(request.CancellationSource));
             }
 
-            if (!TaxTreatmentRules.CancellationSources.Contains(request.CancellationSource))
+            if (!CancellationSources.All.Contains(request.CancellationSource))
             {
                 throw Validation("CANCELLATION_SOURCE_UNKNOWN", nameof(request.CancellationSource));
             }
@@ -90,6 +90,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
             RuleVersion = row.RuleVersion,
             LegalStatus = entry.LegalStatus == LegalStatus.Settled ? TreatmentLegalStatus.Settled : TreatmentLegalStatus.Pending,
             LegalSourceRef = entry.SourceRef,
+            ConfigurationHash = engine.Catalogue.Hash.Hash.ToString(),
         };
     }
 

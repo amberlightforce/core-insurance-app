@@ -761,6 +761,12 @@
         }
       ]
     },
+    "ChangePermissions": {
+      "editableVehicleFields": [
+        "SAMPLE_CODE"
+      ],
+      "vehicleReplacement": true
+    },
     "ChangeSetAbandonRequest": {
       "product": "unspecified",
       "base": "unspecified",
@@ -1026,6 +1032,23 @@
       },
       "offeringRequired": true,
       "dayCount": "SAMPLE_CODE",
+      "dayCountProvisional": true,
+      "dayCountNote": "Sample text",
+      "refundMethods": [
+        {
+          "source": "SAMPLE_CODE",
+          "method": "PRO_RATA",
+          "legalStatus": "SETTLED",
+          "illustrative": true,
+          "reference": "Sample text"
+        }
+      ],
+      "changePermissions": {
+        "editableVehicleFields": [
+          "SAMPLE_CODE"
+        ],
+        "vehicleReplacement": true
+      },
       "windows": {
         "newBusiness": {
           "from": "2026-01-01",
@@ -1368,6 +1391,23 @@
         },
         "offeringRequired": true,
         "dayCount": "SAMPLE_CODE",
+        "dayCountProvisional": true,
+        "dayCountNote": "Sample text",
+        "refundMethods": [
+          {
+            "source": "SAMPLE_CODE",
+            "method": "PRO_RATA",
+            "legalStatus": "SETTLED",
+            "illustrative": true,
+            "reference": "Sample text"
+          }
+        ],
+        "changePermissions": {
+          "editableVehicleFields": [
+            "SAMPLE_CODE"
+          ],
+          "vehicleReplacement": true
+        },
         "windows": {
           "newBusiness": {
             "from": "2026-01-01",
@@ -1861,6 +1901,13 @@
       "rows": [
         "unspecified"
       ]
+    },
+    "RefundMethodDef": {
+      "source": "SAMPLE_CODE",
+      "method": "PRO_RATA",
+      "legalStatus": "SETTLED",
+      "illustrative": true,
+      "reference": "Sample text"
     },
     "RegulatoryMappingGetResponse": {
       "codesListVersions": "unspecified"

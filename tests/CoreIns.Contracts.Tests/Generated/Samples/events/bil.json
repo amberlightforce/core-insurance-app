@@ -206,7 +206,10 @@
             "disbursementId": "0192ea7c-7c36-7486-8e50-70655e173e93",
             "sourceType": "BIL",
             "sourceId": "Sample text",
-            "claimId": "0192cdc5-4068-73c0-85a5-690f937b9efd"
+            "claimId": "0192cdc5-4068-73c0-85a5-690f937b9efd",
+            "transactionKind": "NEW_BUSINESS",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE"
           }
         }
       ]
@@ -271,7 +274,10 @@
             "disbursementId": "01925977-98e4-750d-8778-77d08585d96c",
             "sourceType": "BIL",
             "sourceId": "Sample text",
-            "claimId": "01921b62-9d26-73d1-8dae-df866c719f9d"
+            "claimId": "01921b62-9d26-73d1-8dae-df866c719f9d",
+            "transactionKind": "NEW_BUSINESS",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE"
           }
         }
       ]

@@ -70,6 +70,8 @@ public sealed class TaxTreatmentTests
         result.LegalSourceRef.ShouldContain("REQ-MKT-331");
         result.LegalSourceRef.ShouldContain("ΠΟΛ 1028/2017");
         result.ChargeType.ShouldBe("IPT");
+            result.ConfigurationHash.ShouldBe(Build("Development").Engine.Catalogue.Hash.Hash.ToString());
+        result.ConfigurationHash!.Length.ShouldBe(64);
     }
 
     [Fact]
@@ -241,7 +243,7 @@ public sealed class TaxTreatmentTests
                 result.LegalSourceRef.ShouldContain("SYNTHETIC");
             }
 
-            foreach (var source in TaxTreatmentRules.CancellationSources)
+            foreach (var source in CancellationSources.All)
             {
                 (await calculator.TreatmentAsync(Request(TaxTransactionKind.Cancellation, category, source, "CY"), TestContext.Current.CancellationToken))
                     .Action.ShouldBe(TreatmentAction.ReduceProRata);
@@ -301,7 +303,7 @@ public sealed class TaxTreatmentTests
     public void REQ_POL_205_the_cancellation_source_code_list_resolves_through_the_configuration_engine()
     {
         var response = Build("Production").Engine.Resolve(
-            new ConfigurationResolveRequest { LegalEntity = "GR-TEST", Jurisdiction = "GR", Keys = [TaxTreatmentRules.CancellationSourceCodeListKey] },
+            new ConfigurationResolveRequest { LegalEntity = "GR-TEST", Jurisdiction = "GR", Keys = [CancellationSources.CodeList] },
             ValidAt.From(new BusinessDate(2027, 1, 15)), null);
 
         var item = response.Values.Single();

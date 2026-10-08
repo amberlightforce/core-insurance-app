@@ -77,7 +77,13 @@
               "SAMPLE_CODE"
             ]
           }
-        ]
+        ],
+        "pendingReverification": {
+          "oldSnapshotRef": "sample",
+          "newSnapshotRef": "sample",
+          "causeEventId": "0192edd6-f893-7dee-8b92-09cb3c62c066",
+          "raisedAt": "2026-10-07T09:00:00Z"
+        }
       }
     },
     "clm.Claim.search": {
@@ -546,7 +552,13 @@
               "SAMPLE_CODE"
             ]
           }
-        ]
+        ],
+        "pendingReverification": {
+          "oldSnapshotRef": "sample",
+          "newSnapshotRef": "sample",
+          "causeEventId": "019246a7-45d8-7c73-8c01-1c34b060d029",
+          "raisedAt": "2026-10-07T09:00:00Z"
+        }
       }
     },
     "ClaimMergeRequest": {
@@ -804,7 +816,13 @@
             "SAMPLE_CODE"
           ]
         }
-      ]
+      ],
+      "pendingReverification": {
+        "oldSnapshotRef": "sample",
+        "newSnapshotRef": "sample",
+        "causeEventId": "0192f3dd-8f3f-7f25-8677-9fa0d04f3aa1",
+        "raisedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ClaimantView": {
       "claimantId": "01925390-d02e-7031-8101-7be8a1631c21",
@@ -852,12 +870,21 @@
       "indication": "COVERED"
     },
     "CoverageReverifyRequest": {
-      "decision": "unspecified",
-      "reasons": "unspecified",
-      "adopt": "unspecified"
+      "claimId": "0192df8d-6f05-7833-8cbf-186aee024f2d",
+      "decision": "KEEP",
+      "reasonCode": "SAMPLE_CODE",
+      "comment": "Sample text",
+      "expectedNewSnapshotRef": "sample"
     },
     "CoverageReverifyResponse": {
-      "decisionRecord": "unspecified"
+      "claimId": "01922140-3688-7fe2-89c7-04f2d680b96e",
+      "decisionRecordId": "019249fe-a72e-7317-89c9-529764da2faf",
+      "decision": "KEEP",
+      "snapshotStatus": "PENDING",
+      "snapshotRef": "sample",
+      "previousSnapshotRef": "sample",
+      "coverageInQuestion": true,
+      "decidedAt": "2026-10-07T09:00:00Z"
     },
     "DsarExportRequest": {
       "party": "unspecified"

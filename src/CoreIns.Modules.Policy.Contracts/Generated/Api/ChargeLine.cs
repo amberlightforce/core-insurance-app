@@ -52,4 +52,29 @@ public sealed record ChargeLine
     [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public bool? Provisional { get; init; }
+
+    /// <summary>Transaction kind of the line (servicing jobs; always set once frozen on a servicing transaction)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("transactionKind")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Policy.Contracts.Api.TransactionKindCode? TransactionKind { get; init; }
+
+    /// <summary>Cancellation source (cancellation transactions only)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cancellationSource")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? CancellationSource { get; init; }
+
+    /// <summary>Treatment action of a tax or levy line on a servicing transaction</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("treatmentAction")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Policy.Contracts.Api.TreatmentActionCode? TreatmentAction { get; init; }
+
+    /// <summary>Treatment rule id (tax and levy lines of servicing transactions; always set there)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("treatmentRuleId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? TreatmentRuleId { get; init; }
+
+    /// <summary>Treatment rule version (always set with treatmentRuleId)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("treatmentRuleVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? TreatmentRuleVersion { get; init; }
 }

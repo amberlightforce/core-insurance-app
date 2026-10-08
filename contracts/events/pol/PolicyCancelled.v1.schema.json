@@ -83,7 +83,8 @@
         },
         "source": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Cancellation source from the shared code list (REQ-POL-205: Policyholder, Insurer, NonPayment, DistanceWithdrawal, LongTermWithdrawal, Objection, Statutory). Always set."
         },
         "reason": {
           "$ref": "../common.schema.json#/$defs/Code",
@@ -95,7 +96,8 @@
         },
         "refundMethod": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Refund method applied (ProRata, ShortRate, Flat, MinimumRetained, FullRefund). Always set."
         },
         "rewritePolicyId": {
           "oneOf": [
@@ -143,6 +145,11 @@
             }
           ],
           "description": "REQ-POL-357",
+          "x-classification": "P0"
+        },
+        "kind": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "description": "STANDARD, FLAT or VOID. Always set from slice 3 (the cancellation job kind). FLAT = flat cancellation of a Scheduled term (REQ-POL-217).",
           "x-classification": "P0"
         }
       }

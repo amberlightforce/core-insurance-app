@@ -20,13 +20,7 @@ internal static class TaxTreatmentRules
 
     public const string AnySource = "ANY";
 
-    public const string CancellationSourceCodeListKey = "code.cancellation_source";
-
-    public const string DistanceWithdrawal = "DistanceWithdrawal";
-
-    /// <summary>The cancellation sources of the shared code list (REQ-POL-205, R-84).</summary>
-    public static IReadOnlyList<string> CancellationSources { get; } =
-        ["Policyholder", "Insurer", "NonPayment", "DistanceWithdrawal", "LongTermWithdrawal", "Objection", "Statutory"];
+    public const string DistanceWithdrawal = CancellationSources.DistanceWithdrawal;
 
     public static string Key(TaxCategory category, TaxTransactionKind kind, string? source) =>
         $"{KeyPrefix}{CategoryCode(category)}.{KindCode(kind)}.{(string.IsNullOrEmpty(source) ? AnySource : source)}";
@@ -113,7 +107,7 @@ internal static class TaxTreatmentRules
         var kind = Enum.GetValues<TaxTransactionKind>().Cast<TaxTransactionKind?>().FirstOrDefault(k => KindCode(k!.Value) == parts[1])
             ?? throw new InvalidOperationException($"Treatment rule '{key}' has unknown transaction kind '{parts[1]}'.");
         var source = parts[2];
-        if (source != AnySource && !CancellationSources.Contains(source))
+        if (source != AnySource && !CancellationSources.All.Contains(source))
         {
             throw new InvalidOperationException($"Treatment rule '{key}' has a source outside the cancellation-source code list.");
         }

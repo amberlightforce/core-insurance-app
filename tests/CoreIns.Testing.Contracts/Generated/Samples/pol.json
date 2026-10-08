@@ -2,7 +2,84 @@
   "responses": {
     "pol.Cancellation.create": {
       "jobId": "01927f17-c665-7a64-8e5b-43a52cc8a8d8",
-      "refundPreview": "unspecified"
+      "state": "DRAFT",
+      "kind": "STANDARD",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "pol.Charges.reconcile": {
       "differences": "unspecified"
@@ -58,7 +135,12 @@
             "currency": "EUR"
           },
           "legalStatus": "SAMPLE_CODE",
-          "provisional": true
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ],
       "gateResults": [
@@ -70,7 +152,82 @@
           "evidenceRef": "sample"
         }
       ],
-      "coverNoteDocumentId": "0192220c-4ba0-78ef-8622-ae7c9b837fd2"
+      "coverNoteDocumentId": "0192220c-4ba0-78ef-8622-ae7c9b837fd2",
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "pol.Job.list": {
       "items": [
@@ -119,7 +276,12 @@
             "currency": "EUR"
           },
           "legalStatus": "SAMPLE_CODE",
-          "provisional": true
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ],
       "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -143,7 +305,82 @@
           "code": "SAMPLE_CODE",
           "message": "Sample text"
         }
-      ]
+      ],
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "pol.Job.updateDraft": {
       "jobId": "01921855-41d9-7752-8ad7-bde9a93d257a",
@@ -355,9 +592,15 @@
             "currency": "EUR"
           },
           "legalStatus": "SAMPLE_CODE",
-          "provisional": true
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
         }
-      ]
+      ],
+      "effectiveKnownAt": "2026-10-07T09:00:00Z"
     },
     "pol.Policy.getMany": {
       "policies": "unspecified"
@@ -397,13 +640,124 @@
       "limit": 1
     },
     "pol.PolicyChange.create": {
-      "jobId": "019209cb-848b-720b-8865-01efe733c130"
+      "jobId": "019209cb-848b-720b-8865-01efe733c130",
+      "state": "DRAFT",
+      "termId": "0192be64-145a-7849-8653-d7fde95ab5bb",
+      "baseTransactionId": "0192d37a-ba27-7652-8458-2f861f2125a2"
     },
     "pol.Renewal.accept": {
-      "job": "unspecified"
+      "jobId": "01920550-086c-7d8b-8e1e-7178c5897994",
+      "state": "DRAFT",
+      "newTermId": "0192514f-4d00-773f-8094-1c0f8111c5b7",
+      "newTermNumber": 2,
+      "predecessorTermId": "0192668f-7e3e-7868-8892-690f6d52ba8a",
+      "transactionId": "0192b34b-24c8-718f-89fb-2e7e559640d0",
+      "termState": "SCHEDULED",
+      "recordedAt": "2026-10-07T09:00:00Z",
+      "chargeDeltas": [
+        {
+          "chargeId": "0192aa93-8b56-70ce-8c05-cf766ee5dfaf",
+          "transactionId": "0192d5dd-6ac7-79ae-8fcb-ca26fc211282",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
+        }
+      ]
     },
     "pol.Renewal.create": {
-      "job": "unspecified"
+      "jobId": "019242fb-0d12-78d6-86b7-e0a108ce0a0b",
+      "state": "DRAFT",
+      "expiringTermId": "0192bdcd-f8bf-7f00-8400-0901c4e165b6",
+      "renewalProductCode": "SAMPLE_CODE",
+      "renewalProductVersion": "1.0",
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "pol.Renewal.decline": {
       "job": "unspecified"
@@ -412,7 +766,100 @@
       "job": "unspecified"
     },
     "pol.Renewal.offer": {
-      "job": "unspecified"
+      "jobId": "019242f0-0449-7c7c-8128-d32db241c231",
+      "state": "DRAFT",
+      "offerVersion": 1,
+      "premiumSummary": {
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxes": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "acceptanceMode": "SAMPLE_CODE",
+      "deadline": "2026-10-07T09:00:00Z",
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "pol.Rewrite.create": {
       "jobId": "01920cf2-e925-799b-8d70-b5067560ba05"
@@ -519,6 +966,12 @@
             }
           }
         ]
+      },
+      "effectiveKnownAt": "2026-10-07T09:00:00Z",
+      "supersession": {
+        "superseded": true,
+        "successorRef": "sample",
+        "supersededAt": "2026-10-07T09:00:00Z"
       }
     },
     "pol.Submission.create": {
@@ -687,15 +1140,62 @@
             "currency": "EUR"
           },
           "legalStatus": "SAMPLE_CODE",
-          "provisional": true
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ]
     },
     "pol.Term.timeline": {
-      "policy": "unspecified",
-      "term": "unspecified",
-      "segment": "unspecified",
-      "riskTree": "unspecified"
+      "policy": {
+        "policyId": "019229db-3915-7e7d-8da6-4df40e405080",
+        "policyNumber": "SAMPLE-000001",
+        "productCode": "SAMPLE_CODE",
+        "policyholderPartyId": "0192f5f3-5901-7fa6-8fcf-906747ff9d42",
+        "accountId": "0192344a-372c-7dbb-8789-db22f3dcf7c0",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "GR",
+        "status": "SCHEDULED",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "term": {
+        "termId": "01923e51-c93e-7da0-8ecf-d005ecdfc258",
+        "termNumber": 1,
+        "period": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "state": "SCHEDULED",
+        "productVersion": "1.0",
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "currency": "EUR",
+        "producerCode": "SAMPLE_CODE",
+        "paymentPlanRef": "Sample text",
+        "writtenDate": "2026-10-07",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "transactions": [
+        {
+          "transactionId": "01927d8b-ac90-7652-8f5f-e50fe91a808f",
+          "kind": "SAMPLE_CODE",
+          "sequence": 1,
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "premiumChange": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "reversed": true,
+          "jobId": "01929b6a-dace-7add-8a35-4892ff0b4b5e"
+        }
+      ],
+      "effectiveKnownAt": "2026-10-07T09:00:00Z"
     },
     "pol.Withdrawal.submit": {
       "voidJob": "unspecified",
@@ -705,15 +1205,95 @@
   "schemas": {
     "CancellationCreateRequest": {
       "policyId": "0192fba2-435e-7bcd-83d6-d8fece88cf96",
-      "source": "unspecified",
-      "reason": "unspecified",
+      "source": "Policyholder",
+      "reasonCode": "SAMPLE_CODE",
       "effectiveAt": "2026-10-07T09:00:00Z",
-      "evidenceRefs": "unspecified",
-      "requestRef": "unspecified"
+      "kind": "STANDARD",
+      "evidenceRefs": [
+        "Sample text"
+      ],
+      "requestRef": "Sample text"
     },
     "CancellationCreateResponse": {
       "jobId": "01926c88-a3d8-7df0-8e1b-93af74f92a07",
-      "refundPreview": "unspecified"
+      "state": "DRAFT",
+      "kind": "STANDARD",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "CancellationRescindRequest": {
       "policyId": "0192e2f9-e615-7650-8b65-27a7026015b6",
@@ -752,7 +1332,12 @@
         "currency": "EUR"
       },
       "legalStatus": "SAMPLE_CODE",
-      "provisional": true
+      "provisional": true,
+      "transactionKind": "NEW_BUSINESS",
+      "cancellationSource": "Policyholder",
+      "treatmentAction": "APPLY",
+      "treatmentRuleId": "SAMPLE_CODE",
+      "treatmentRuleVersion": "SAMPLE_CODE"
     },
     "ChargesReconcileRequest": {
       "termId": "01928174-f0ea-7bd5-83e2-ea5a5bbf8d4d",
@@ -912,7 +1497,12 @@
             "currency": "EUR"
           },
           "legalStatus": "SAMPLE_CODE",
-          "provisional": true
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ],
       "gateResults": [
@@ -924,7 +1514,82 @@
           "evidenceRef": "sample"
         }
       ],
-      "coverNoteDocumentId": "019235d0-54a6-7bd1-81f6-8bae220d26fc"
+      "coverNoteDocumentId": "019235d0-54a6-7bd1-81f6-8bae220d26fc",
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "JobCompareVersionsRequest": {
       "jobId": "0192cfc3-55aa-7596-8e6e-900eb178e0cd",
@@ -1050,7 +1715,12 @@
                   "currency": "EUR"
                 },
                 "legalStatus": "SAMPLE_CODE",
-                "provisional": true
+                "provisional": true,
+                "transactionKind": "NEW_BUSINESS",
+                "cancellationSource": "Policyholder",
+                "treatmentAction": "APPLY",
+                "treatmentRuleId": "SAMPLE_CODE",
+                "treatmentRuleVersion": "SAMPLE_CODE"
               }
             ],
             "issues": [
@@ -1147,7 +1817,12 @@
             "currency": "EUR"
           },
           "legalStatus": "SAMPLE_CODE",
-          "provisional": true
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ],
       "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -1171,7 +1846,82 @@
           "code": "SAMPLE_CODE",
           "message": "Sample text"
         }
-      ]
+      ],
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "JobRebaseRequest": {
       "jobId": "0192abca-0d82-779f-8107-831002687be9"
@@ -1447,7 +2197,12 @@
                 "currency": "EUR"
               },
               "legalStatus": "SAMPLE_CODE",
-              "provisional": true
+              "provisional": true,
+              "transactionKind": "NEW_BUSINESS",
+              "cancellationSource": "Policyholder",
+              "treatmentAction": "APPLY",
+              "treatmentRuleId": "SAMPLE_CODE",
+              "treatmentRuleVersion": "SAMPLE_CODE"
             }
           ],
           "issues": [
@@ -1482,10 +2237,13 @@
     "PolicyChangeCreateRequest": {
       "policyId": "019278f6-5773-7001-8558-06137c29d5d9",
       "effectiveAt": "2026-10-07T09:00:00Z",
-      "description": "unspecified"
+      "description": "Sample text"
     },
     "PolicyChangeCreateResponse": {
-      "jobId": "01925fa1-bff2-7c90-8b2f-76c0efe0d122"
+      "jobId": "01925fa1-bff2-7c90-8b2f-76c0efe0d122",
+      "state": "DRAFT",
+      "termId": "0192d7eb-144a-738f-8bc5-43133477961b",
+      "baseTransactionId": "0192ded7-c6aa-7acf-8e29-993c0c952f7f"
     },
     "PolicyGetManyResponse": {
       "policies": "unspecified"
@@ -1625,9 +2383,15 @@
             "currency": "EUR"
           },
           "legalStatus": "SAMPLE_CODE",
-          "provisional": true
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
         }
-      ]
+      ],
+      "effectiveKnownAt": "2026-10-07T09:00:00Z"
     },
     "PolicyMoveExecuteRequest": {
       "policyIds": [
@@ -1775,7 +2539,12 @@
             "currency": "EUR"
           },
           "legalStatus": "SAMPLE_CODE",
-          "provisional": true
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ],
       "issues": [
@@ -1816,22 +2585,130 @@
       "jobId": "019269a1-40e9-719c-8a96-eb9e276522d7"
     },
     "RenewalAcceptRequest": {
+      "jobId": "0192fc22-d15e-7b63-87e8-dabd86fd9ebb",
       "termId": "0192f41b-ea25-7e6c-889b-108d38fea640",
-      "offer": "unspecified",
-      "acceptanceEvidence": "unspecified",
-      "reason": "unspecified"
+      "channel": "SAMPLE_CODE",
+      "acceptedAt": "2026-10-07T09:00:00Z",
+      "acceptanceEvidence": "Sample text",
+      "reason": "Sample text"
     },
     "RenewalAcceptResponse": {
-      "job": "unspecified"
+      "jobId": "0192e7ca-1351-71e2-8a36-225bfc3b1d08",
+      "state": "DRAFT",
+      "newTermId": "0192e281-74fc-77c5-85f7-4ce5a84519cd",
+      "newTermNumber": 2,
+      "predecessorTermId": "0192c27d-def3-7bdf-8d91-4820e7d99a3f",
+      "transactionId": "01925cc4-a313-7ef7-83a4-2601eb3ace6e",
+      "termState": "SCHEDULED",
+      "recordedAt": "2026-10-07T09:00:00Z",
+      "chargeDeltas": [
+        {
+          "chargeId": "0192ed30-648d-7f11-887b-1fa5acd579c8",
+          "transactionId": "019293f3-de42-74d0-88f9-d8eea78dc5f5",
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "annualRate": "12.50",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
+        }
+      ]
     },
     "RenewalCreateRequest": {
       "termId": "0192d0dd-9d1a-7d8d-8470-fcac93946a81",
-      "offer": "unspecified",
-      "acceptanceEvidence": "unspecified",
-      "reason": "unspecified"
+      "reason": "Sample text"
     },
     "RenewalCreateResponse": {
-      "job": "unspecified"
+      "jobId": "01928a43-f974-70d0-8c6e-7ca0e2427acc",
+      "state": "DRAFT",
+      "expiringTermId": "0192297f-d39a-7155-87eb-14385241e6f6",
+      "renewalProductCode": "SAMPLE_CODE",
+      "renewalProductVersion": "1.0",
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "RenewalDeclineRequest": {
       "termId": "01928633-672b-7900-8b5d-c3c2d1c8f133",
@@ -1852,13 +2729,106 @@
       "job": "unspecified"
     },
     "RenewalOfferRequest": {
+      "jobId": "0192b216-7683-7cf8-86ef-17e8ee5449a4",
       "termId": "019270c9-213f-74eb-8b5f-4c2f2848f4a4",
-      "offer": "unspecified",
-      "acceptanceEvidence": "unspecified",
-      "reason": "unspecified"
+      "acceptanceMode": "SAMPLE_CODE",
+      "reason": "Sample text"
     },
     "RenewalOfferResponse": {
-      "job": "unspecified"
+      "jobId": "0192d4e7-835e-7774-85ae-84562db69253",
+      "state": "DRAFT",
+      "offerVersion": 1,
+      "premiumSummary": {
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxes": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "acceptanceMode": "SAMPLE_CODE",
+      "deadline": "2026-10-07T09:00:00Z",
+      "servicingPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      }
     },
     "RenewalRunPauseRequest": {
       "entity": "unspecified",
@@ -1972,6 +2942,117 @@
         "to": "2027-01-01T00:00:00Z"
       },
       "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ServicingPreview": {
+      "annualBefore": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "annualAfter": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "proratedLines": [
+        {
+          "elementLocator": "Sample text",
+          "coverageCode": "SAMPLE_CODE",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "period": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "days": 1,
+          "termDays": 1,
+          "fraction": "12.50",
+          "annualAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "taxLines": [
+        {
+          "elementLocator": "Sample text",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "treatmentAction": "APPLY",
+          "ruleId": "SAMPLE_CODE",
+          "ruleVersion": "SAMPLE_CODE",
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
+          "legalSourceRef": "Sample text"
+        }
+      ],
+      "premiumChange": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "taxChange": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "totalChange": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "refundDue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "additionalDue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "transactionKind": "NEW_BUSINESS",
+      "cancellationSource": "Policyholder",
+      "refundMethod": "SAMPLE_CODE",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "provisional": true
+    },
+    "ServicingProratedLine": {
+      "elementLocator": "Sample text",
+      "coverageCode": "SAMPLE_CODE",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "days": 1,
+      "termDays": 1,
+      "fraction": "12.50",
+      "annualAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "ServicingTaxLine": {
+      "elementLocator": "Sample text",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "treatmentAction": "APPLY",
+      "ruleId": "SAMPLE_CODE",
+      "ruleVersion": "SAMPLE_CODE",
+      "legalStatus": "SAMPLE_CODE",
+      "provisional": true,
+      "legalSourceRef": "Sample text"
     },
     "SnapshotContent": {
       "term": {
@@ -2145,6 +3226,12 @@
             }
           }
         ]
+      },
+      "effectiveKnownAt": "2026-10-07T09:00:00Z",
+      "supersession": {
+        "superseded": true,
+        "successorRef": "sample",
+        "supersededAt": "2026-10-07T09:00:00Z"
       }
     },
     "SnapshotPolicy": {
@@ -2154,6 +3241,11 @@
       "insuredPartyId": "0192827f-42e8-7c50-8a04-8f2b376e1497",
       "legalEntity": "SAMPLE_CODE",
       "jurisdiction": "GR"
+    },
+    "SnapshotSupersession": {
+      "superseded": true,
+      "successorRef": "sample",
+      "supersededAt": "2026-10-07T09:00:00Z"
     },
     "StatusModelGetResponse": {
       "table": "unspecified"
@@ -2341,15 +3433,62 @@
             "currency": "EUR"
           },
           "legalStatus": "SAMPLE_CODE",
-          "provisional": true
+          "provisional": true,
+          "transactionKind": "NEW_BUSINESS",
+          "cancellationSource": "Policyholder",
+          "treatmentAction": "APPLY",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ]
     },
     "TermTimelineResponse": {
-      "policy": "unspecified",
-      "term": "unspecified",
-      "segment": "unspecified",
-      "riskTree": "unspecified"
+      "policy": {
+        "policyId": "0192cf4a-1ef7-713a-8a20-8e76661c0e0b",
+        "policyNumber": "SAMPLE-000001",
+        "productCode": "SAMPLE_CODE",
+        "policyholderPartyId": "0192845a-30e1-7073-86c1-80d9b3ccf3c9",
+        "accountId": "019276c3-c539-7ee1-8a05-3bd9fce5f932",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "GR",
+        "status": "SCHEDULED",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "term": {
+        "termId": "01925274-5336-764b-8ea1-a50ef42c3b3a",
+        "termNumber": 1,
+        "period": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "state": "SCHEDULED",
+        "productVersion": "1.0",
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "currency": "EUR",
+        "producerCode": "SAMPLE_CODE",
+        "paymentPlanRef": "Sample text",
+        "writtenDate": "2026-10-07",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "transactions": [
+        {
+          "transactionId": "0192c602-ddd8-7247-83f9-4ecbdd230098",
+          "kind": "SAMPLE_CODE",
+          "sequence": 1,
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "premiumChange": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "reversed": true,
+          "jobId": "0192be07-49b0-7023-8bad-dfce629acf3e"
+        }
+      ],
+      "effectiveKnownAt": "2026-10-07T09:00:00Z"
     },
     "TermView": {
       "termId": "019251a7-c440-7f9b-8c08-c2bbf0f3be43",
@@ -2369,6 +3508,19 @@
       "paymentPlanRef": "Sample text",
       "writtenDate": "2026-10-07",
       "recordedAt": "2026-10-07T09:00:00Z"
+    },
+    "TimelineTransaction": {
+      "transactionId": "01926418-9aae-7ce2-8d2c-8442c6b6a0ae",
+      "kind": "SAMPLE_CODE",
+      "sequence": 1,
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "recordedAt": "2026-10-07T09:00:00Z",
+      "premiumChange": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "reversed": true,
+      "jobId": "01927129-6d3b-7649-8901-191778b8e581"
     },
     "TransactionView": {
       "transactionId": "01927f1f-a2b1-727d-82ff-a1b66afdec79",

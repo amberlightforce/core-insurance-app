@@ -10,7 +10,7 @@ public static class PolicyErrorCodes
 {
     /// <summary>POL-ERR-AFTER-CANCELLATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pol.PolicyChange.create, pol.Reactivation.create, pol.Suspension.create.</para>
+    /// <para>Declared by 6 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.quote, pol.PolicyChange.create, pol.Reactivation.create, pol.Suspension.create.</para>
     /// </remarks>
     public const string AfterCancellation = "POL-ERR-AFTER-CANCELLATION";
 
@@ -28,13 +28,13 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-DEPENDENCY-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): pol.Job.bind, pol.Job.quote.</para>
+    /// <para>Declared by 3 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.quote.</para>
     /// </remarks>
     public const string DependencyUnavailable = "POL-ERR-DEPENDENCY-UNAVAILABLE";
 
     /// <summary>POL-ERR-EFFDATE-LIMIT (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.PolicyChange.create, pol.Submission.create.</para>
+    /// <para>Declared by 7 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.Job.bind, pol.Job.quote, pol.PolicyChange.create, pol.Submission.create.</para>
     /// </remarks>
     public const string EffdateLimit = "POL-ERR-EFFDATE-LIMIT";
 
@@ -58,13 +58,13 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): pol.Job.bind, pol.Job.notTaken, pol.Job.quote, pol.Job.updateDraft, pol.Job.withdraw, pol.PolicyChange.create, pol.Reinstatement.create, pol.Rewrite.create.</para>
+    /// <para>Declared by 12 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.notTaken, pol.Job.quote, pol.Job.updateDraft, pol.Job.withdraw, pol.PolicyChange.create, pol.Reinstatement.create, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer, pol.Rewrite.create.</para>
     /// </remarks>
     public const string IllegalTransition = "POL-ERR-ILLEGAL-TRANSITION";
 
     /// <summary>POL-ERR-JOB-CONFLICT (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule.</para>
+    /// <para>Declared by 4 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.PolicyChange.create.</para>
     /// </remarks>
     public const string JobConflict = "POL-ERR-JOB-CONFLICT";
 
@@ -82,7 +82,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 9 operation(s): pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.Policy.get, pol.Snapshot.get, pol.Submission.create, pol.Term.get, pol.Term.timeline.</para>
+    /// <para>Declared by 14 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.Policy.get, pol.PolicyChange.create, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer, pol.Snapshot.get, pol.Submission.create, ….</para>
     /// </remarks>
     public const string NotFound = "POL-ERR-NOT-FOUND";
 
@@ -104,9 +104,15 @@ public static class PolicyErrorCodes
     /// </remarks>
     public const string OpenJob = "POL-ERR-OPEN-JOB";
 
+    /// <summary>POL-ERR-OUT-OF-SEQUENCE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 4 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.quote, pol.PolicyChange.create.</para>
+    /// </remarks>
+    public const string OutOfSequence = "POL-ERR-OUT-OF-SEQUENCE";
+
     /// <summary>POL-ERR-PREEMPTED (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): pol.Job.bind.</para>
+    /// <para>Declared by 2 operation(s): pol.Job.bind, pol.Job.quote.</para>
     /// </remarks>
     public const string Preempted = "POL-ERR-PREEMPTED";
 
@@ -142,7 +148,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-REBASE-REQUIRED (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): pol.Job.bind.</para>
+    /// <para>Declared by 5 operation(s): pol.Job.bind, pol.Job.quote, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer.</para>
     /// </remarks>
     public const string RebaseRequired = "POL-ERR-REBASE-REQUIRED";
 
@@ -166,7 +172,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pol.Job.bind, pol.Job.quote, pol.Job.updateDraft.</para>
+    /// <para>Declared by 7 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.quote, pol.Job.updateDraft, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer.</para>
     /// </remarks>
     public const string Stale = "POL-ERR-STALE";
 
@@ -180,7 +186,7 @@ public static class PolicyErrorCodes
     public const string Prefix = "POL-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AfterCancellation, AuthorityRequired, ConflictsOpen, DependencyUnavailable, EffdateLimit, GateFailed, HumanConfirmationRequired, IdempotencyMismatch, IllegalTransition, JobConflict, Locked, MigrationReversalBlocked, NotFound, NotPreempted, NoticeTooLate, OpenJob, Preempted, ProducerInvalid, ProductUnavailable, QuickQuoteNotBindable, QuoteStale, Rating, RebaseRequired, RetroactiveMtpl, RightExpired, SegmentInvariant, Stale, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AfterCancellation, AuthorityRequired, ConflictsOpen, DependencyUnavailable, EffdateLimit, GateFailed, HumanConfirmationRequired, IdempotencyMismatch, IllegalTransition, JobConflict, Locked, MigrationReversalBlocked, NotFound, NotPreempted, NoticeTooLate, OpenJob, OutOfSequence, Preempted, ProducerInvalid, ProductUnavailable, QuickQuoteNotBindable, QuoteStale, Rating, RebaseRequired, RetroactiveMtpl, RightExpired, SegmentInvariant, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -201,6 +207,7 @@ public static class PolicyErrorCodes
         [NotPreempted] = 409,
         [NoticeTooLate] = 422,
         [OpenJob] = 422,
+        [OutOfSequence] = 422,
         [Preempted] = 409,
         [ProducerInvalid] = 422,
         [ProductUnavailable] = 503,
