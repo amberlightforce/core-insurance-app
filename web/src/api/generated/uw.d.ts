@@ -2310,10 +2310,10 @@ export interface components {
             decidability: components["schemas"]["ReferralDecidability"];
         };
         /**
-         * @description Why the caller cannot decide now. SOD_CREATOR - created the job; SOD_PARTICIPANT - edited or otherwise worked on the job; SOD_PRODUCER - is the job's producer; SOD_EVALUATOR - ran or bound an evaluation of the job; NOT_HUMAN - the actor is not a person (REQ-UW-115); NO_AUTHORITY - UW.ISSUE_APPROVAL for the issue type is refused or refers up; NOT_OPEN - the issue is not Open. SOD-UW-02, BR-UW-013.
+         * @description Why the caller cannot decide now. SOD_CREATOR - created the job; SOD_PARTICIPANT - edited or otherwise worked on the job; SOD_PRODUCER - is the job's producer; SOD_EVALUATOR - ran or bound an evaluation of the job; NOT_HUMAN - the actor is not a person (REQ-UW-115); NO_AUTHORITY - UW.ISSUE_APPROVAL for the issue type is refused or refers up; NOT_OPEN - the issue is not Open; NEEDS_REEVALUATION - the issue was raised before decisions recorded the risk facts, so the job must be re-evaluated (run the bind again) before it can be decided (uw.Issue.decide answers UW-ERR-STALE). SOD-UW-02, BR-UW-013.
          * @enum {string}
          */
-        DecidabilityReason: "SOD_CREATOR" | "SOD_PARTICIPANT" | "SOD_PRODUCER" | "SOD_EVALUATOR" | "NOT_HUMAN" | "NO_AUTHORITY" | "NOT_OPEN";
+        DecidabilityReason: "SOD_CREATOR" | "SOD_PARTICIPANT" | "SOD_PRODUCER" | "SOD_EVALUATOR" | "NOT_HUMAN" | "NO_AUTHORITY" | "NOT_OPEN" | "NEEDS_REEVALUATION";
         /** @description The dry UW.ISSUE_APPROVAL check for the issue type (no check record, approval request or audit event is written). A preview, never an authorisation; uw.Issue.decide re-runs the check. */
         AuthorityPreview: {
             /** @description Authority type code (UW.ISSUE_APPROVAL) */
