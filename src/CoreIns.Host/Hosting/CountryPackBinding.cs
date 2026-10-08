@@ -41,6 +41,7 @@ internal static class CountryPackBinding
             case CyPack.Country:
                 services.AddSingleton<IIdValidator>(sp => new CyIdValidator(sp.GetRequiredService<TimeProvider>()));
                 services.AddSingleton<INameTransliterator, CyNameTransliterator>();
+                services.AddSingleton<IPackConfigurationSource, CyTreatmentRules>();
                 break;
             default:
                 throw new InvalidOperationException($"No country pack is deployed for Stamp:Country '{country}'.");
