@@ -239,4 +239,7 @@ public sealed record TaxTreatmentResult
     public required TreatmentLegalStatus LegalStatus { get; init; }
 
     public required string LegalSourceRef { get; init; }
+
+    /// <summary>True when the rule is not Settled (D-REG-01); additive, derived from <see cref="LegalStatus"/>.</summary>
+    public bool Provisional => LegalStatus != TreatmentLegalStatus.Settled;
 }

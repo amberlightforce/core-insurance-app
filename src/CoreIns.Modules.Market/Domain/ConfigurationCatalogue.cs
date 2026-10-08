@@ -111,6 +111,11 @@ internal sealed class ConfigurationCatalogue
         }
 
         Validate(value);
+        if (value.Key.StartsWith(TaxTreatmentRules.KeyPrefix, StringComparison.Ordinal))
+        {
+            TaxTreatmentRules.ValidateRow(value.Key, value.Value);
+        }
+
         if (string.IsNullOrWhiteSpace(value.SourceRef))
         {
             throw new InvalidOperationException($"Pack value '{value.Key}' has no source reference (D-REG-01).");
@@ -203,6 +208,10 @@ internal static class CoreDefaults
             "PRD-17 REQ-MKT-193 and section 16.5 decision 10: core default only; no Greek tax-line rounding value is stated",
             MotorPath: true,
             Note: "Confirm Greek rounding with finance. Per-tax-class rules cur.rounding.tax.<class> are absent."),
+        new(TaxTreatmentRules.CancellationSourceCodeListKey, ConfigValueType.Json,
+            JsonSerializer.Serialize(TaxTreatmentRules.CancellationSources), LegalStatus.NotRegulatory,
+            "PRD-17 shared cancellation-source code list R-84; REQ-POL-205 (Policyholder, Insurer, NonPayment, DistanceWithdrawal, LongTermWithdrawal, Objection, Statutory)",
+            MotorPath: false),
         new(ConfigKeys.OrderOfOperations, ConfigValueType.Json,
             """{"roundPremiumPerElement":true,"taxOn":"ROUNDED_BASE","documentTotal":"ROUND_THEN_SUM","instalmentRemainder":"FIRST"}""",
             LegalStatus.NotRegulatory,
