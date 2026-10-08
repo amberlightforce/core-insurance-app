@@ -70,6 +70,21 @@ public sealed record InvoiceItemView
     [global::System.Text.Json.Serialization.JsonPropertyName("state")]
     public required StateValue State { get; init; }
 
+    /// <summary>Transaction kind of the source POL charge (servicing items; always set there)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("transactionKind")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? TransactionKind { get; init; }
+
+    /// <summary>Cancellation source (items from a cancellation)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cancellationSource")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? CancellationSource { get; init; }
+
+    /// <summary>Treatment rule of a tax or levy item on a servicing transaction (always set there)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("treatmentRuleId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? TreatmentRuleId { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StateValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

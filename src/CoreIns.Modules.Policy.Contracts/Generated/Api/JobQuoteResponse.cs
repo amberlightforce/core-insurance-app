@@ -70,6 +70,11 @@ public sealed record JobQuoteResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<WarningItem>? Warnings { get; init; }
 
+    /// <summary>Present for servicing jobs (change, cancellation, renewal); absent for new business</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("servicingPreview")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Policy.Contracts.Api.ServicingPreview? ServicingPreview { get; init; }
+
     /// <summary>UW outcome at PRE_QUOTE. REFER with state DRAFT = blocked at PRE_QUOTE; with QUOTED = bind blocked until approval. DECLINE keeps the job in Draft (not quoted); the job becomes Declined when UW issues the decline record (uw.DeclineIssued, REQ-POL-156)</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
