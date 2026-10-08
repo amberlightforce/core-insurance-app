@@ -1,3 +1,5 @@
+import { useMemo, useSyncExternalStore } from 'react';
+
 /**
  * Development-only local sign-in (D-SLC-03). The api offers `GET /api/plt/v1/dev/users` and
  * `POST /api/plt/v1/dev/sign-in` only when it runs in Development with `DevAuthentication:Enabled`; anywhere else the
@@ -29,8 +31,43 @@ export function readSession(): DevSession | null {
   }
 }
 
+/** Same-tab change signal: `storage` events only reach other tabs. */
+const sessionEvent = 'coreins:session';
+
+function notifySessionChange(): void {
+  window.dispatchEvent(new Event(sessionEvent));
+}
+
 export function clearSession(): void {
   sessionStorage.removeItem(storageKey);
+  notifySessionChange();
+}
+
+function subscribeSession(onChange: () => void): () => void {
+  window.addEventListener(sessionEvent, onChange);
+  window.addEventListener('storage', onChange);
+  return () => {
+    window.removeEventListener(sessionEvent, onChange);
+    window.removeEventListener('storage', onChange);
+  };
+}
+
+function rawSession(): string | null {
+  try {
+    return sessionStorage.getItem(storageKey);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The signed-in dev user, re-rendering on sign-in and sign-out. The snapshot is the raw stored string (stable
+ * between reads), parsed once per change, so the store never reports a new object on every render.
+ */
+export function useDevSession(): DevSession | null {
+  const raw = useSyncExternalStore(subscribeSession, rawSession, () => null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `raw` is the cache key; readSession re-reads it
+  return useMemo(() => readSession(), [raw]);
 }
 
 /** `unavailable`: the api does not offer dev sign-in (not Development, or the flag is off). */
@@ -53,6 +90,7 @@ export async function signIn(userId: string): Promise<DevSession> {
   if (!response.ok) throw new Error(`HTTP ${String(response.status)}`);
   const session = (await response.json()) as DevSession;
   sessionStorage.setItem(storageKey, JSON.stringify(session));
+  notifySessionChange();
   return session;
 }
 

@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
+import { Link } from 'react-aria-components';
+import { useNavigate, useParams } from 'react-router';
 
 import { isApiError } from '../../api/client';
 import { useIdempotencyKey } from '../../api/idempotency';
-import type { ClaimView, ExposureView } from '../../api/types';
+import type { ClaimPaymentView, ClaimView, ExposureView, PartyView } from '../../api/types';
 import {
   Banner,
   Button,
   EmptyState,
   KeyValueList,
   Select,
+  StatusPill,
   Tabs,
   announce,
   useTabSearchParam,
@@ -20,6 +22,8 @@ import {
   textColumn,
   type DataColumn,
 } from '../../design-system';
+import { cx } from '../../design-system/utils/cx';
+import { useParty } from '../party/api';
 import { LinkButton } from '../staff/LinkButton';
 import { PageHeader, Section } from '../staff/PageHeader';
 import { ProblemBanner } from '../staff/ProblemBanner';
@@ -28,11 +32,22 @@ import { rememberRecent } from '../staff/recent';
 import { SimpleTable } from '../staff/SimpleTable';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
-import { useClaim, useCloseClaim, useCreateExposure, usePolicyCoverages } from './api';
+import {
+  useClaim,
+  useCloseClaim,
+  useCreateExposure,
+  useFinancials,
+  usePayments,
+  usePolicyCoverages,
+} from './api';
+import file from './ClaimFile.module.css';
+import { ClaimHistory, ClaimMoney } from './ClaimMoney';
 import { ClaimStatusPill } from './ClaimStatusPill';
 import { closeGuardFindings } from './closeGuard';
 import { closeOutcomes, exposureDuplicateReasons } from './codes';
 import { FinancialsTab } from './FinancialsTab';
+import { StageStrip } from './StageStrip';
+import { amountOf, claimStages } from './stages';
 import { TruncatedRef } from './TruncatedRef';
 
 function ExposureForm({ claim }: { claim: ClaimView }) {
@@ -198,8 +213,19 @@ function CloseForm({ claim }: { claim: ClaimView }) {
   );
 }
 
+/** The party's native-script name (the claim carries only the insured's id). */
+function partyName(party: PartyView): string {
+  const name = party.names.find((n) => n.form === 'NATIVE') ?? party.names[0];
+  if (!name) return party.partyNumber;
+  return (
+    name.organisationName ??
+    ([name.givenNames, name.familyName].filter(Boolean).join(' ') || party.partyNumber)
+  );
+}
+
 function ClaimDetails({ claim }: { claim: ClaimView }) {
   const { t } = useTranslation('claims');
+  const navigate = useNavigate();
   const fmt = useFormat();
   const summary = claim.summary;
   const open = summary.status === 'OPEN';
@@ -254,19 +280,60 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
     [t],
   );
 
+  // The insured's name is the file's title (mockup «Φάκελος ζημίας»); the claim number stays next to it in mono.
+  const insured = useParty(summary.insuredPartyId);
+  const insuredName = insured.data ? partyName(insured.data.party) : null;
+  const financials = useFinancials(summary.claimId);
+  const payments = usePayments(summary.claimId);
+  const stages = claimStages(claim, {
+    reserved: financials.data ? amountOf(financials.data.totals.reserved) : null,
+    payments: payments.data ? ((payments.data.items ?? []) as ClaimPaymentView[]) : null,
+  });
+  // Codes outside the illustrative list (e.g. seeded data) show as the code, never as a translation key.
+  const cause = t(`codes.lossCause.${summary.lossCause}`, { defaultValue: summary.lossCause });
+
   return (
     <div className={styles.stack}>
       <PageHeader
-        overline={t('overline')}
-        title={t('view.title', { number: summary.claimNumber })}
+        overline={[t('overline'), summary.productCode, cause].join(' · ')}
+        title={insuredName ?? t('view.title', { number: summary.claimNumber })}
+        {...(insuredName ? { recordId: summary.claimNumber } : {})}
         subtitle={
           <>
             <ClaimStatusPill status={summary.status} subStatus={summary.subStatus} />
+            {summary.coverageInQuestion ? (
+              <StatusPill
+                semantic="warning"
+                subLabel={t('indication.IN_QUESTION')}
+                announceChanges={false}
+              />
+            ) : null}
             {summary.outcome ? (
               <span className="ds-caption">{t(`codes.outcome.${summary.outcome}`)}</span>
             ) : null}
           </>
         }
+        facts={[
+          { id: 'loss', label: t('file.facts.loss'), value: fmt.dateTime(summary.lossAt) },
+          { id: 'cause', label: t('file.facts.cause'), value: cause },
+          {
+            id: 'policy',
+            label: t('file.facts.policy'),
+            value: (
+              <Link href={`/policies/${summary.policyId}`} className={cx(file.factLink)}>
+                {summary.policyNumber}
+              </Link>
+            ),
+          },
+          {
+            id: 'open',
+            label: t('file.facts.open'),
+            value: t('file.facts.days', { count: summary.openDays }),
+          },
+          ...(summary.handler
+            ? [{ id: 'handler', label: t('file.facts.handler'), value: summary.handler }]
+            : []),
+        ]}
         actions={
           <>
             <LinkButton variant="secondary" to={`/policies/${summary.policyId}`}>
@@ -277,7 +344,9 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
             </LinkButton>
           </>
         }
-      />
+      >
+        <StageStrip stages={stages} />
+      </PageHeader>
       {summary.coverageInQuestion ? (
         <Banner variant="warning" live="none" title={t('fnol.coverageInQuestion.title')}>
           {t('fnol.coverageInQuestion.body')}
@@ -298,143 +367,166 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
           item.id === 'financials' ? (
             <FinancialsTab claim={claim} />
           ) : (
-            <div className={styles.stack}>
-              <div className={styles.grid}>
-                <Section title={t('view.header.title')}>
+            <div className={styles.split}>
+              <div className={styles.stack}>
+                <Section
+                  title={t('exposure.title')}
+                  meta={t('file.exposuresMeta')}
+                  count={claim.exposures.length}
+                >
+                  <SimpleTable<ExposureView>
+                    aria-label={t('exposure.title')}
+                    columns={exposureColumns}
+                    data={claim.exposures}
+                    getRowId={(e) => e.exposureId}
+                    emptyState={
+                      <EmptyState
+                        kind="first-use"
+                        headingLevel={3}
+                        illustration={<></>}
+                        headline={t('exposure.emptyTitle')}
+                        description={t('exposure.emptyBody')}
+                      />
+                    }
+                  />
+                </Section>
+                <Section title={t('view.loss.title')}>
                   <KeyValueList
-                    aria-label={t('view.header.title')}
+                    aria-label={t('view.loss.title')}
                     items={[
+                      { id: 'location', label: t('view.loss.location'), value: claim.lossLocation },
                       {
-                        id: 'policy',
-                        label: t('view.header.policy'),
-                        value: summary.policyNumber,
-                        kind: 'mono',
-                      },
-                      {
-                        id: 'product',
-                        label: t('view.header.product'),
-                        value: summary.productVersion
-                          ? `${summary.productCode} ${summary.productVersion}`
-                          : summary.productCode,
-                        kind: 'mono',
-                      },
-                      {
-                        id: 'loss',
-                        label: t('view.header.lossDate'),
-                        value: fmt.dateTime(summary.lossAt),
-                      },
-                      {
-                        id: 'notice',
-                        label: t('view.header.noticeOn'),
-                        value: fmt.date(summary.noticeOn),
-                      },
-                      {
-                        id: 'cause',
-                        label: t('view.header.cause'),
-                        value: t(`codes.lossCause.${summary.lossCause}`),
-                      },
-                      {
-                        id: 'segment',
-                        label: t('view.header.segment'),
-                        value: summary.handlingSegment,
-                        kind: 'mono',
-                      },
-                      {
-                        id: 'handler',
-                        label: t('view.header.handler'),
-                        value: summary.handler ?? null,
-                      },
-                      {
-                        id: 'open',
-                        label: t('view.header.openDays'),
-                        value: String(summary.openDays),
+                        id: 'description',
+                        label: t('view.loss.description'),
+                        value: claim.description,
                       },
                     ]}
                   />
                 </Section>
-                <Section title={t('view.coverage.title')}>
-                  <KeyValueList
-                    aria-label={t('view.coverage.title')}
-                    items={[
-                      {
-                        id: 'inForce',
-                        label: t('view.coverage.inForce'),
-                        value: summary.policyInForceAtLoss
-                          ? t('view.coverage.yes')
-                          : t('view.coverage.no'),
-                      },
-                      {
-                        id: 'statusAtLoss',
-                        label: t('view.coverage.statusAtLoss'),
-                        value: summary.policyStatusAtLoss ?? null,
-                        kind: 'mono',
-                      },
-                      {
-                        id: 'indication',
-                        label: t('view.coverage.indication'),
-                        value: summary.coverageInQuestion
-                          ? t('indication.IN_QUESTION')
-                          : t('view.coverage.perSnapshot'),
-                      },
-                      {
-                        id: 'snapshot',
-                        label: t('view.coverage.snapshotRef'),
-                        value: <TruncatedRef value={summary.snapshotRef} />,
-                      },
-                      {
-                        id: 'known',
-                        label: t('view.coverage.snapshotKnownAt'),
-                        value: fmt.dateTime(summary.snapshotKnownAt),
-                      },
-                    ]}
+                <div className={styles.grid}>
+                  <Section title={t('view.header.title')}>
+                    <KeyValueList
+                      aria-label={t('view.header.title')}
+                      items={[
+                        {
+                          id: 'policy',
+                          label: t('view.header.policy'),
+                          value: summary.policyNumber,
+                          kind: 'mono',
+                        },
+                        {
+                          id: 'product',
+                          label: t('view.header.product'),
+                          value: summary.productVersion
+                            ? `${summary.productCode} ${summary.productVersion}`
+                            : summary.productCode,
+                          kind: 'mono',
+                        },
+                        {
+                          id: 'loss',
+                          label: t('view.header.lossDate'),
+                          value: fmt.dateTime(summary.lossAt),
+                        },
+                        {
+                          id: 'notice',
+                          label: t('view.header.noticeOn'),
+                          value: fmt.date(summary.noticeOn),
+                        },
+                        {
+                          id: 'cause',
+                          label: t('view.header.cause'),
+                          value: cause,
+                        },
+                        {
+                          id: 'segment',
+                          label: t('view.header.segment'),
+                          value: summary.handlingSegment,
+                          kind: 'mono',
+                        },
+                        {
+                          id: 'handler',
+                          label: t('view.header.handler'),
+                          value: summary.handler ?? null,
+                        },
+                        {
+                          id: 'open',
+                          label: t('view.header.openDays'),
+                          value: String(summary.openDays),
+                        },
+                      ]}
+                    />
+                  </Section>
+                  <Section title={t('view.coverage.title')}>
+                    <KeyValueList
+                      aria-label={t('view.coverage.title')}
+                      items={[
+                        {
+                          id: 'inForce',
+                          label: t('view.coverage.inForce'),
+                          value: summary.policyInForceAtLoss
+                            ? t('view.coverage.yes')
+                            : t('view.coverage.no'),
+                        },
+                        {
+                          id: 'statusAtLoss',
+                          label: t('view.coverage.statusAtLoss'),
+                          value: summary.policyStatusAtLoss ?? null,
+                          kind: 'mono',
+                        },
+                        {
+                          id: 'indication',
+                          label: t('view.coverage.indication'),
+                          value: summary.coverageInQuestion
+                            ? t('indication.IN_QUESTION')
+                            : t('view.coverage.perSnapshot'),
+                        },
+                        {
+                          id: 'snapshot',
+                          label: t('view.coverage.snapshotRef'),
+                          value: <TruncatedRef value={summary.snapshotRef} />,
+                        },
+                        {
+                          id: 'known',
+                          label: t('view.coverage.snapshotKnownAt'),
+                          value: fmt.dateTime(summary.snapshotKnownAt),
+                        },
+                      ]}
+                    />
+                  </Section>
+                </div>
+                {open ? (
+                  <Section title={t('exposure.new')}>
+                    <ExposureForm claim={claim} />
+                  </Section>
+                ) : null}
+                {open ? (
+                  <Section title={t('close.title')}>
+                    <CloseForm claim={claim} />
+                  </Section>
+                ) : (
+                  <Banner variant="info" live="none" title={t('close.alreadyClosed')}>
+                    {summary.closedAt
+                      ? t('close.closedAt', { date: fmt.dateTime(summary.closedAt) })
+                      : null}
+                  </Banner>
+                )}
+              </div>
+              <div className={styles.stack}>
+                <Section title={t('file.money.title')} family="success">
+                  <ClaimMoney
+                    claim={claim}
+                    onNewPayment={() => {
+                      setTab('financials');
+                    }}
+                    onRelease={() => {
+                      void navigate('/claims/approvals');
+                    }}
                   />
+                </Section>
+                <Section title={t('file.history.title')}>
+                  <ClaimHistory claim={claim} />
                 </Section>
               </div>
-              <Section title={t('view.loss.title')}>
-                <KeyValueList
-                  aria-label={t('view.loss.title')}
-                  items={[
-                    { id: 'location', label: t('view.loss.location'), value: claim.lossLocation },
-                    {
-                      id: 'description',
-                      label: t('view.loss.description'),
-                      value: claim.description,
-                    },
-                  ]}
-                />
-              </Section>
-              <Section title={t('exposure.title')}>
-                <SimpleTable<ExposureView>
-                  aria-label={t('exposure.title')}
-                  columns={exposureColumns}
-                  data={claim.exposures}
-                  getRowId={(e) => e.exposureId}
-                  emptyState={
-                    <EmptyState
-                      kind="first-use"
-                      headingLevel={3}
-                      headline={t('exposure.emptyTitle')}
-                      description={t('exposure.emptyBody')}
-                    />
-                  }
-                />
-              </Section>
-              {open ? (
-                <Section title={t('exposure.new')}>
-                  <ExposureForm claim={claim} />
-                </Section>
-              ) : null}
-              {open ? (
-                <Section title={t('close.title')}>
-                  <CloseForm claim={claim} />
-                </Section>
-              ) : (
-                <Banner variant="info" live="none" title={t('close.alreadyClosed')}>
-                  {summary.closedAt
-                    ? t('close.closedAt', { date: fmt.dateTime(summary.closedAt) })
-                    : null}
-                </Banner>
-              )}
             </div>
           )
         }

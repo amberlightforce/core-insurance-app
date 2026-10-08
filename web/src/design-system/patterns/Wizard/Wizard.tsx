@@ -76,15 +76,15 @@ export function Wizard({
   const isLast = index === steps.length - 1;
   const previous = steps[index - 1];
   const next = steps[index + 1];
-  const firstRender = useRef(true);
+  const shownId = useRef(currentId);
   const headingId = useId();
 
-  // Move focus to the new step's heading so keyboard and screen-reader users land in the step (MI-38).
+  // Move focus to the new step's heading so keyboard and screen-reader users land in the step (MI-38). Only on a
+  // real step change: comparing ids (not a first-render flag) keeps StrictMode's repeated effects from stealing
+  // focus and scrolling the page on load.
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
+    if (shownId.current === currentId) return;
+    shownId.current = currentId;
     bodyRef.current?.focus();
   }, [currentId]);
 

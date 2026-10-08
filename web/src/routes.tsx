@@ -3,6 +3,7 @@ import type { RouteObject } from 'react-router';
 import { AppLayout, ModulePlaceholder } from './App';
 import { adminNavItem, defaultNavItems } from './app-shell/navigation';
 import { DevSignIn } from './dev-auth/DevSignIn';
+import { HomePage } from './modules/home/HomePage';
 
 /** Module routes load on demand (D-FE-23): the staff screens of the thin slice. */
 const moduleRoutes: RouteObject[] = [
@@ -119,7 +120,8 @@ export const routes: RouteObject[] = [
     path: '/',
     element: <AppLayout />,
     children: [
-      { index: true, element: <ModulePlaceholder /> },
+      // Home is the first screen: loaded with the shell, never lazily (no blank frame while a chunk loads).
+      { index: true, element: <HomePage /> },
       ...[...defaultNavItems.slice(1), adminNavItem]
         .filter((item) => !implemented.has(item.to))
         .map((item) => ({

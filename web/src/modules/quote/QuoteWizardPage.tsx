@@ -19,6 +19,7 @@ import {
   type StepItem,
 } from '../../design-system';
 import { LinkButton } from '../staff/LinkButton';
+import { PageHeader } from '../staff/PageHeader';
 import { ProblemBanner } from '../staff/ProblemBanner';
 import { rememberRecent } from '../staff/recent';
 import styles from '../staff/staff.module.css';
@@ -392,125 +393,131 @@ export function QuoteWizardPage() {
   );
 
   return (
-    <Wizard
-      title={t('title')}
-      steps={steps}
-      currentId={stepId}
-      onNavigate={(id) => {
-        void navigateTo(id as StepId);
-      }}
-      bodyWidth={stepId === 'premium' || stepId === 'bind' ? 'wide' : 'form'}
-      summary={summary}
-      {...(nextReason ? { nextDisabledReason: nextReason } : {})}
-      commit={{
-        label: t('bind.commit'),
-        onCommit: () => {
-          setConfirmOpen(true);
-        },
-        isLoading: busy === 'bind',
-        ...(commitReason ? { disabledReason: commitReason } : {}),
-      }}
-      onSaveDraft={() => {
-        void saveDraft();
-      }}
-      isDirty={syncedAt !== null && syncedAt.fingerprint !== currentFingerprint}
-      lastSavedAt={syncedAt?.at ?? null}
-    >
-      <div className={styles.stack}>
-        {error ? <ProblemBanner error={error.error} title={error.title} /> : null}
-        {stepId === 'policyholder' ? (
-          <PolicyholderStep
-            draft={draft}
-            setDraft={setDraft}
-            product={product}
-            initialPartyId={initialPartyId}
-          />
-        ) : null}
-        {stepId === 'vehicle' ? <VehicleStep draft={draft} setDraft={setDraft} /> : null}
-        {stepId === 'driver' ? <DriverStep draft={draft} setDraft={setDraft} /> : null}
-        {stepId === 'covers' ? (
-          <CoversStep draft={draft} setDraft={setDraft} catalogue={catalogue} />
-        ) : null}
-        {stepId === 'questions' ? (
-          <QuestionsStep
-            draft={draft}
-            setDraft={setDraft}
-            questionSet={questionSet}
-            evaluation={evaluation.data}
-          />
-        ) : null}
-        {stepId === 'premium' ? (
-          <>
-            <div className={styles.actions}>
-              <Button
-                variant="primary"
-                isLoading={busy === 'quote'}
-                onPress={() => void calculate()}
-              >
-                {quote ? t('premium.recalculate') : t('premium.calculate')}
-              </Button>
-            </div>
-            {quote && !quoteIsFresh ? (
-              <Banner variant="warning" live="status" title={t('premium.staleTitle')}>
-                {t('premium.staleBody')}
-              </Banner>
-            ) : null}
-            {quote ? (
-              <QuoteResult
-                quote={quote.response}
-                coverNames={coverNames}
-                productIsIllustrative={productIsIllustrative}
-              />
-            ) : (
-              <EmptyState
-                kind="first-use"
-                headingLevel={3}
-                headline={t('premium.emptyTitle')}
-                description={t('premium.emptyBody')}
-              />
-            )}
-          </>
-        ) : null}
-        {stepId === 'bind' ? (
-          <BindStep
-            draft={draft}
-            quote={quoteIsFresh ? quote.response : null}
-            productIsIllustrative={productIsIllustrative}
-            bound={bound}
-            gateFailure={gateFailure}
-          />
-        ) : null}
-      </div>
-      <Dialog
-        title={t('bind.dialog.title')}
-        tone="brand"
-        isOpen={confirmOpen}
-        isBusy={busy === 'bind'}
-        onOpenChange={(open) => {
-          setConfirmOpen(open);
-          if (!open) setConfirmed(false);
+    <div className={styles.page}>
+      <PageHeader overline={t('overline')} title={t('title')} />
+      <Wizard
+        title={t('stepOf', {
+          step: stepIds.indexOf(stepId) + 1,
+          total: stepIds.length,
+        })}
+        steps={steps}
+        currentId={stepId}
+        onNavigate={(id) => {
+          void navigateTo(id as StepId);
         }}
-        closeOnAction={false}
-        primaryAction={{
-          label: t('bind.dialog.confirm'),
-          variant: 'commit',
-          ...(confirmed ? {} : { disabledReason: t('bind.dialog.confirmRequired') }),
-          onAction: () => {
-            if (confirmed) void bind();
+        bodyWidth={stepId === 'premium' || stepId === 'bind' ? 'wide' : 'form'}
+        summary={summary}
+        {...(nextReason ? { nextDisabledReason: nextReason } : {})}
+        commit={{
+          label: t('bind.commit'),
+          onCommit: () => {
+            setConfirmOpen(true);
           },
+          isLoading: busy === 'bind',
+          ...(commitReason ? { disabledReason: commitReason } : {}),
         }}
+        onSaveDraft={() => {
+          void saveDraft();
+        }}
+        isDirty={syncedAt !== null && syncedAt.fingerprint !== currentFingerprint}
+        lastSavedAt={syncedAt?.at ?? null}
       >
-        <p>
-          {t('bind.dialog.body', {
-            total: quote ? fmt.money(quote.response.total) : '',
-            plan: t('bind.planAnnual'),
-          })}
-        </p>
-        <Checkbox isSelected={confirmed} onChange={setConfirmed}>
-          {t('bind.dialog.check')}
-        </Checkbox>
-      </Dialog>
-    </Wizard>
+        <div className={styles.stack}>
+          {error ? <ProblemBanner error={error.error} title={error.title} /> : null}
+          {stepId === 'policyholder' ? (
+            <PolicyholderStep
+              draft={draft}
+              setDraft={setDraft}
+              product={product}
+              initialPartyId={initialPartyId}
+            />
+          ) : null}
+          {stepId === 'vehicle' ? <VehicleStep draft={draft} setDraft={setDraft} /> : null}
+          {stepId === 'driver' ? <DriverStep draft={draft} setDraft={setDraft} /> : null}
+          {stepId === 'covers' ? (
+            <CoversStep draft={draft} setDraft={setDraft} catalogue={catalogue} />
+          ) : null}
+          {stepId === 'questions' ? (
+            <QuestionsStep
+              draft={draft}
+              setDraft={setDraft}
+              questionSet={questionSet}
+              evaluation={evaluation.data}
+            />
+          ) : null}
+          {stepId === 'premium' ? (
+            <>
+              <div className={styles.actions}>
+                <Button
+                  variant="primary"
+                  isLoading={busy === 'quote'}
+                  onPress={() => void calculate()}
+                >
+                  {quote ? t('premium.recalculate') : t('premium.calculate')}
+                </Button>
+              </div>
+              {quote && !quoteIsFresh ? (
+                <Banner variant="warning" live="status" title={t('premium.staleTitle')}>
+                  {t('premium.staleBody')}
+                </Banner>
+              ) : null}
+              {quote ? (
+                <QuoteResult
+                  quote={quote.response}
+                  coverNames={coverNames}
+                  productIsIllustrative={productIsIllustrative}
+                />
+              ) : (
+                <EmptyState
+                  kind="first-use"
+                  headingLevel={3}
+                  headline={t('premium.emptyTitle')}
+                  description={t('premium.emptyBody')}
+                />
+              )}
+            </>
+          ) : null}
+          {stepId === 'bind' ? (
+            <BindStep
+              draft={draft}
+              quote={quoteIsFresh ? quote.response : null}
+              productIsIllustrative={productIsIllustrative}
+              bound={bound}
+              gateFailure={gateFailure}
+            />
+          ) : null}
+        </div>
+        <Dialog
+          title={t('bind.dialog.title')}
+          tone="brand"
+          isOpen={confirmOpen}
+          isBusy={busy === 'bind'}
+          onOpenChange={(open) => {
+            setConfirmOpen(open);
+            if (!open) setConfirmed(false);
+          }}
+          closeOnAction={false}
+          primaryAction={{
+            label: t('bind.dialog.confirm'),
+            variant: 'commit',
+            ...(confirmed ? {} : { disabledReason: t('bind.dialog.confirmRequired') }),
+            onAction: () => {
+              if (confirmed) void bind();
+            },
+          }}
+        >
+          <p>
+            {t('bind.dialog.body', {
+              total: quote ? fmt.money(quote.response.total) : '',
+              plan: t('bind.planAnnual'),
+            })}
+          </p>
+          <Checkbox isSelected={confirmed} onChange={setConfirmed}>
+            {t('bind.dialog.check')}
+          </Checkbox>
+        </Dialog>
+      </Wizard>
+    </div>
   );
 }
 

@@ -1,0 +1,259 @@
+/* Claim file («Φάκελος ζημίας», v3 mockup screen C): stage strip, money summary, history timeline. */
+
+/* ---------- Stage strip (`.strip`, `.stage`, `.conn`) ---------- */
+.strip {
+  --_node: 22px;
+
+  display: flex;
+  inline-size: 100%;
+  margin: var(--space-0);
+  padding: var(--space-2) var(--space-0) var(--space-0);
+  overflow-x: auto;
+  list-style: none;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--space-1_5);
+  align-items: center;
+  min-inline-size: 84px;
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+  text-align: center;
+}
+
+.stage[data-state='done'],
+.stage[data-state='current'] {
+  color: var(--color-text-primary);
+}
+
+.node {
+  position: relative;
+  z-index: var(--z-raised);
+  display: grid;
+  place-items: center;
+  inline-size: var(--_node);
+  block-size: var(--_node);
+  border: var(--border-width-control) solid var(--color-border-control);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-on-accent);
+}
+
+.stage[data-state='done'] .node {
+  border-color: var(--color-status-success-solid);
+  background-color: var(--color-status-success-solid);
+}
+
+.stage[data-state='current'] .node {
+  border-color: var(--color-interactive-accent-bg);
+  background-color: var(--color-interactive-accent-bg);
+  box-shadow: 0 0 0 var(--space-1) var(--color-state-focus-halo);
+}
+
+.stage[data-state='untracked'] .node {
+  border-style: dashed;
+  border-color: var(--color-border-default);
+}
+
+.stage[data-state='untracked'] .stageLabel {
+  color: var(--color-text-tertiary);
+}
+
+/* Connector from the previous node to this one, through the node centres. */
+.connector {
+  position: absolute;
+  inset-block-start: calc(var(--_node) / 2 - var(--border-width-hairline));
+  inset-inline: calc(-50% + var(--_node) / 2 + var(--space-2))
+    calc(50% + var(--_node) / 2 + var(--space-2));
+  block-size: var(--border-width-thick);
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+  background-color: var(--color-border-default);
+}
+
+.connector::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-tide);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-duration-transition-lg) var(--motion-ease-enter);
+}
+
+.connector[data-filled]::after {
+  transform: scaleX(1);
+}
+
+:dir(rtl) .connector::after {
+  transform-origin: right;
+}
+
+/* ---------- Money summary (mockup right column card) ---------- */
+.money {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.incurred {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0_5);
+}
+
+.incurredLabel {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+}
+
+.incurredValue {
+  color: var(--color-text-primary);
+  font: var(--type-numeric-kpi);
+  letter-spacing: var(--type-numeric-kpi-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.incurredSplit,
+.muted {
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.payments {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.payments > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-0);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+  font: var(--type-body-compact);
+}
+
+.paymentText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.paymentMeta {
+  color: var(--color-text-tertiary);
+  font: var(--type-mono-sm);
+}
+
+.paymentAmount {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: flex-end;
+  font-weight: 500;
+}
+
+.moneyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-block-start: var(--space-1);
+}
+
+/* ---------- History timeline (`.tl`) ---------- */
+.timeline {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-0);
+  padding: var(--space-0) var(--space-0) var(--space-0) var(--space-5);
+  list-style: none;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  inset-block: var(--space-1_5);
+  inset-inline-start: calc(var(--space-1) + var(--space-px));
+  inline-size: var(--border-width-hairline);
+  background-color: var(--color-border-default);
+}
+
+.timeline > li {
+  --_dot: var(--color-status-neutral-solid);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font: var(--type-body-compact);
+}
+
+.timeline > li::before {
+  content: '';
+  position: absolute;
+  inset-block-start: var(--space-1_5);
+  inset-inline-start: calc(var(--space-4) * -1);
+  inline-size: var(--size-status-dot);
+  block-size: var(--size-status-dot);
+  border-radius: var(--radius-full);
+  background-color: var(--_dot);
+  box-shadow: 0 0 0 var(--border-width-thick) var(--color-surface-sheet);
+}
+
+.timeline > li[data-family='success'] {
+  --_dot: var(--color-status-success-solid);
+}
+
+.timeline > li[data-family='info'] {
+  --_dot: var(--color-status-info-solid);
+}
+
+.timeline > li[data-family='brand'] {
+  --_dot: var(--color-status-brand-solid);
+}
+
+.timeline > li[data-family='warning'] {
+  --_dot: var(--color-status-warning-solid);
+}
+
+.eventText {
+  color: var(--color-text-primary);
+}
+
+.eventMeta {
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+}
+
+/* Policy link in the header facts row. */
+.factLink {
+  color: var(--color-text-link);
+  font: var(--type-mono-sm);
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-0_5);
+  outline: none;
+}
+
+.factLink[data-focus-visible] {
+  border-radius: var(--radius-xs);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (forced-colors: active) {
+  .node,
+  .timeline > li::before {
+    forced-color-adjust: none;
+    border-color: CanvasText;
+  }
+}

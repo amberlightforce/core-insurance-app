@@ -8,6 +8,7 @@ import {
   EmptyState,
   dateColumn,
   moneyColumn,
+  queueColumn,
   statusColumn,
   textColumn,
   type DataColumn,
@@ -74,13 +75,16 @@ export function ApprovalsInboxPage() {
 
   const columns = useMemo<DataColumn<Row>[]>(
     () => [
-      textColumn<Row>('type', t('approvals.columns.type'), (r) =>
-        t(approvalTypeKey(r.request.type), { defaultValue: r.request.type }),
-      ),
-      textColumn<Row>(
-        'subject',
-        t('approvals.columns.subject'),
-        (r) => `${r.request.objectRef.module} · ${r.request.objectRef.type}`,
+      // v3 queue row: what is asked (type) over the object in mono and who asked.
+      queueColumn<Row>(
+        'request',
+        t('approvals.columns.type'),
+        (r) => ({
+          primary: t(approvalTypeKey(r.request.type), { defaultValue: r.request.type }),
+          id: `${r.request.objectRef.module} · ${r.request.objectRef.type}`,
+          fact: r.request.maker.id,
+        }),
+        { size: 320 },
       ),
       moneyColumn<Row>(
         'amount',
@@ -88,7 +92,6 @@ export function ApprovalsInboxPage() {
         (r) => r.request.authority.amount?.amount ?? null,
         { currency: 'EUR' },
       ),
-      textColumn<Row>('maker', t('approvals.columns.maker'), (r) => r.request.maker.id),
       dateColumn<Row>(
         'requested',
         t('approvals.columns.requestedAt'),
@@ -115,16 +118,17 @@ export function ApprovalsInboxPage() {
   return (
     <div className={styles.page}>
       <PageHeader
+        variant="landing"
+        description={t('approvals.subtitle')}
         overline={t('overline')}
         title={t('approvals.title')}
-        subtitle={<span className="ds-caption">{t('approvals.subtitle')}</span>}
         actions={
           <LinkButton variant="secondary" to="/claims">
             {t('approvals.backToClaims')}
           </LinkButton>
         }
       />
-      <Section title={t('approvals.pending')}>
+      <Section title={t('approvals.pending')} family="plum" count={rows.length}>
         <QueryView query={query}>
           {() => (
             <div className={styles.stack}>
@@ -136,6 +140,7 @@ export function ApprovalsInboxPage() {
                 columns={columns}
                 data={rows}
                 getRowId={(r) => r.request.requestId}
+                rowVariant="queue"
                 onOpen={(r) => {
                   void navigate(`/claims/approvals/${r.request.requestId}`);
                 }}

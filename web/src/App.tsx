@@ -9,7 +9,6 @@ import {
   visibleNavItems,
   type NavItem,
 } from './app-shell/navigation';
-import { Avatar } from './design-system/components/Avatar';
 import { Button } from './design-system/components/Button';
 import { CommandPalette, type PaletteItem } from './design-system/components/CommandPalette';
 import { NotificationBell, NotificationCenter } from './design-system/components/Notifications';
@@ -17,15 +16,14 @@ import { ShortcutOverlay, type ShortcutGroup } from './design-system/components/
 import { EmptyState } from './design-system/components/States';
 import { Toaster } from './design-system/components/Toast';
 import { moduleIcons } from './design-system/icons';
-import { readSession } from './dev-auth/devAuth';
+import { sampleEntityName } from './app-shell/user';
+import { useDevSession } from './dev-auth/devAuth';
 
 /**
  * Staff portal root: the Aegean shell around the routed module. Modules are placeholders until their work
- * packages land; the palette, help overlay, notifications and language switch are live.
- * Identity (MSAL React, D-FE-03) and the PLT user profile replace the sample user and entity.
+ * packages land; the palette, help overlay, notifications and avatar menu are live. The signed-in user is the
+ * dev session today; identity (MSAL React, D-FE-03) and the PLT user profile replace it and the sample entity.
  */
-const sampleUser = { name: 'Κώστας Νικολάου' };
-const sampleEntity = 'Παράδειγμα Ασφαλιστική Α.Ε.';
 
 function useCurrentNavItem(): NavItem {
   const { pathname } = useLocation();
@@ -39,12 +37,11 @@ export function AppLayout() {
   const { t } = useTranslation(['shell', 'ds']);
   const navigate = useNavigate();
   const current = useCurrentNavItem();
-  const { pathname } = useLocation();
-  // Role-gated entries (claims) follow the signed-in user; the session is re-read on each navigation.
+  const session = useDevSession();
+  // Role-gated entries (claims) follow the signed-in user.
   const navItems = useMemo(
-    () => visibleNavItems(defaultNavItems, readSession()?.user.roles ?? []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- pathname re-reads the session after a sign-in
-    [pathname],
+    () => visibleNavItems(defaultNavItems, session?.user.roles ?? []),
+    [session],
   );
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -92,7 +89,7 @@ export function AppLayout() {
       <AppShell
         pageTitle={t(`shell:nav.${current.id}`)}
         navItems={navItems}
-        entityName={sampleEntity}
+        entityName={sampleEntityName}
         onOpenPalette={openPalette}
         onOpenHelp={openHelp}
         notifications={
@@ -104,7 +101,7 @@ export function AppLayout() {
             }}
           />
         }
-        userMenu={<Avatar name={sampleUser.name} size="md" />}
+        user={session ? { name: session.user.name, roles: session.user.roles } : null}
       >
         <Outlet />
       </AppShell>

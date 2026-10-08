@@ -1,0 +1,247 @@
+/* Staff home (v3 mockup «Πύλη», `#s-home`): canopy on the canvas, then cards directly on the canvas. */
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  inline-size: 100%;
+  max-inline-size: var(--size-page-max);
+  margin-inline: auto;
+  padding-block-end: var(--space-2);
+}
+
+/* `.canopy`: 28 px padding, text left, the quick-action card right, aligned to the bottom. */
+.canopy {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(
+      var(--size-canopy-aside-min),
+      var(--size-canopy-aside)
+    );
+  gap: var(--space-6);
+  align-items: end;
+  min-block-size: var(--size-canopy-min);
+  padding: calc(var(--space-6) + var(--space-1)) calc(var(--space-6) + var(--space-1))
+    var(--space-6);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.greet {
+  margin: var(--space-1) var(--space-0) var(--space-0_5);
+  color: var(--color-text-primary);
+  font: var(--type-display);
+  letter-spacing: var(--type-display-tracking);
+  text-wrap: balance;
+}
+
+.heroLine {
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-body-lg);
+  letter-spacing: var(--type-body-lg-tracking);
+}
+
+/* `.hero`: the one big number of the role (display.xl), never animated (D-FE-05). */
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-block-start: calc(var(--space-4) + var(--space-0_5));
+}
+
+.metricLabel {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+}
+
+.metricRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-5);
+}
+
+.metricValue {
+  color: var(--color-text-primary);
+  font: var(--type-display-xl);
+  letter-spacing: var(--type-display-xl-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.metricNote {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--size-control-sm);
+  padding: var(--space-0) var(--space-2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-brand-bg);
+  color: var(--color-status-brand-fg);
+  font: var(--type-label);
+}
+
+.heroAside {
+  min-inline-size: 0;
+}
+
+/* `.quick`: the floating card on the canopy (radius.xl, elevation.3). */
+.quick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface-sheet);
+  box-shadow: var(--elevation-3);
+}
+
+.quickTitle {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+}
+
+.quickList {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.quickList > * {
+  justify-content: flex-start;
+  inline-size: 100%;
+}
+
+/* `.worklist` and `.kpis`: four equal columns, two below bp.lg, one on phones. */
+.worklist,
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.itemMeta {
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+/* `.split2`: wide list left, recent records right. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.split > :only-child {
+  grid-column: 1 / -1;
+}
+
+.recentList {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.recentList > li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: var(--size-row-table);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.recentList > li:last-child {
+  border-block-end: 0;
+}
+
+/* Timeline-style dots (`.tl li::before`). */
+.recentDot {
+  flex: none;
+  inline-size: var(--size-status-dot);
+  block-size: var(--size-status-dot);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-brand-solid);
+  box-shadow: 0 0 0 var(--border-width-thick) var(--color-surface-sheet);
+}
+
+.recentDot[data-kind='invoice'] {
+  background-color: var(--color-status-teal-solid);
+}
+
+.recentDot[data-kind='account'] {
+  background-color: var(--color-status-info-solid);
+}
+
+.recentDot[data-kind='claim'] {
+  background-color: var(--color-status-plum-solid);
+}
+
+.recentLink {
+  flex: 1;
+  min-inline-size: 0;
+  color: var(--color-text-link);
+  font: var(--type-mono);
+  text-decoration: none;
+  outline: none;
+}
+
+.recentLink[data-hovered] {
+  text-decoration: underline;
+}
+
+.recentLink[data-focus-visible] {
+  border-radius: var(--radius-xs);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.recentNumber {
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.recentKind {
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+}
+
+@media (width < 1240px) {
+  .worklist,
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (width < 905px) {
+  .canopy {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .greet {
+    font: var(--type-heading-1);
+    letter-spacing: var(--type-heading-1-tracking);
+  }
+
+  .metricValue {
+    font: var(--type-display);
+    letter-spacing: var(--type-display-tracking);
+  }
+
+  .worklist,
+  .kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

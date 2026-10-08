@@ -15,7 +15,12 @@ export function FinanceHomePage() {
   const valid = /^[A-Za-z0-9][A-Za-z0-9-]{2,63}$/.test(number.trim());
   return (
     <div className={styles.page}>
-      <PageHeader title={t('home.title')} overline={t('overline')} />
+      <PageHeader
+        variant="landing"
+        title={t('home.title')}
+        overline={t('overline')}
+        description={t('home.lead')}
+      />
       <Section title={t('home.byPolicy')}>
         <form
           noValidate

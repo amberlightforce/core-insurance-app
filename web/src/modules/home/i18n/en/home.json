@@ -1,0 +1,58 @@
+{
+  "greeting": {
+    "morning": "Good morning",
+    "evening": "Good afternoon"
+  },
+  "greet": "{greeting}, {name}",
+  "overlineSignedOut": "Core Insurance · Staff portal",
+  "waiting": "{count, plural, =0 {nothing waiting} one {# task waiting for you} other {# tasks waiting for you}}",
+  "hero": {
+    "openBalance": "Unpaid invoice balance",
+    "openOf": "{open} open of {count, plural, one {# invoice} other {# invoices}}",
+    "pendingApprovals": "Approvals waiting",
+    "pendingNote": "Requests waiting for a decision"
+  },
+  "actions": {
+    "title": "Quick actions",
+    "newQuote": "New quote",
+    "newFnol": "New claim notification",
+    "findParty": "Find a customer",
+    "newParty": "New customer",
+    "journals": "Journal entries"
+  },
+  "signedOut": {
+    "title": "Sign in to start",
+    "body": "Your tasks, invoices and approvals appear here once you sign in.",
+    "signIn": "Sign in"
+  },
+  "cards": {
+    "label": "Work in progress",
+    "approvals": "Approvals waiting",
+    "recentClaims": "Recent claims",
+    "openInvoices": "Open invoices",
+    "overdue": "Overdue balances",
+    "paid": "Paid invoices",
+    "recentPolicies": "Recent policies"
+  },
+  "kpi": {
+    "label": "Billing figures",
+    "invoices": "Invoices",
+    "billed": "Billed",
+    "collected": "Collected",
+    "open": "Unpaid"
+  },
+  "latestInvoices": "Latest invoices",
+  "latestInvoicesMeta": "by issue date",
+  "loading": "Loading…",
+  "recent": {
+    "title": "Recently opened",
+    "meta": "in this browser",
+    "empty": "Records you open appear here so you can get back to them.",
+    "kinds": {
+      "policy": "Policy",
+      "invoice": "Invoice",
+      "account": "Billing account",
+      "claim": "Claim"
+    }
+  }
+}

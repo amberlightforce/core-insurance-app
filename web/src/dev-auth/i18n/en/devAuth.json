@@ -10,5 +10,8 @@
   "unavailableTitle": "Local sign-in is not available",
   "unavailableBody": "The API is not running in Development with local sign-in enabled.",
   "expiredTitle": "Your session ended",
-  "expiredBody": "The api was restarted or the token expired. Sign in again."
+  "expiredBody": "The api was restarted or the token expired. Sign in again.",
+  "product": "Core Insurance · Staff portal",
+  "continue": "Continue to home",
+  "note": "Synthetic users and data. Do not enter real customer details."
 }

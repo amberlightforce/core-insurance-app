@@ -68,8 +68,24 @@ describe('AppShell', () => {
     expect(onOpenHelp).not.toHaveBeenCalled();
     fireEvent.keyDown(document.body, { key: '?' });
     expect(onOpenHelp).toHaveBeenCalledTimes(1);
-    await user.click(screen.getByRole('button', { name: 'Βοήθεια και συντομεύσεις' }));
+    await user.click(screen.getByRole('button', { name: 'Δεν έχετε συνδεθεί' }));
+    await user.click(await screen.findByRole('button', { name: /Βοήθεια και συντομεύσεις/ }));
     expect(onOpenHelp).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows the signed-in user in the avatar menu and switches theme and density there', async () => {
+    const { user } = renderShell({
+      user: { name: 'Dev Underwriter (synthetic)', roles: ['Staff.Underwriter'] },
+    });
+    await user.click(screen.getByRole('button', { name: 'Λογαριασμός: Dev Underwriter' }));
+    const menu = await screen.findByRole('dialog', { name: 'Λογαριασμός και εμφάνιση' });
+    expect(menu).toHaveTextContent('Ανάληψη κινδύνου');
+    await user.click(within(menu).getByRole('radio', { name: 'Σκοτεινό' }));
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    await user.click(within(menu).getByRole('radio', { name: 'Άνετη' }));
+    expect(document.documentElement).toHaveAttribute('data-density', 'comfortable');
+    await user.click(within(menu).getByRole('radio', { name: 'Αυτόματο' }));
+    await user.click(within(menu).getByRole('radio', { name: 'Συμπαγής' }));
   });
 
   it('ignores single-key shortcuts when the user switched them off', () => {
@@ -117,9 +133,11 @@ describe('AppShell', () => {
   it('switches the language, updates <html lang> and persists it (R-101)', async () => {
     const { user } = renderShell();
     expect(document.documentElement.lang).toBe('el');
-    await user.click(screen.getByRole('radio', { name: 'English' }));
+    await user.click(screen.getByRole('button', { name: 'Δεν έχετε συνδεθεί' }));
+    await user.click(await screen.findByRole('radio', { name: 'English' }));
     expect(document.documentElement.lang).toBe('en');
     expect(localStorage.getItem(languageStorageKey)).toBe('en');
+    await user.keyboard('{Escape}');
     expect(screen.getByRole('navigation', { name: 'Main navigation' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Skip to content' })).toBeInTheDocument();
     await act(() => i18n.changeLanguage('el'));

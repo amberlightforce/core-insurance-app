@@ -21,7 +21,8 @@
     "openById": "Open by id",
     "id": "Policy id (UUID)",
     "idInvalid": "Enter a valid UUID.",
-    "open": "Open"
+    "open": "Open",
+    "lead": "Start a new motor quote or get back to a policy you opened recently."
   },
   "term": {
     "title": "Policy term",

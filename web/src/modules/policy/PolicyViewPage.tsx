@@ -1,5 +1,5 @@
 import { parseDate } from '@internationalized/date';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -19,7 +19,7 @@ import {
 import { InvoiceTable } from '../billing/InvoiceTable';
 import { useInvoices } from '../billing/api';
 import { LinkButton } from '../staff/LinkButton';
-import { PageHeader, Section } from '../staff/PageHeader';
+import { PageHeader, Section, type PageFact } from '../staff/PageHeader';
 import { QueryView } from '../staff/QueryView';
 import { rememberRecent } from '../staff/recent';
 import { SimpleTable } from '../staff/SimpleTable';
@@ -31,7 +31,17 @@ import { TermStatusPill } from './TermStatusPill';
 
 type Transaction = PolicyGetResponse['transactions'][number];
 
-function PolicyDetails({ data, asOf }: { data: PolicyGetResponse; asOf: string }) {
+function PolicyDetails({
+  data,
+  asOf,
+  picker,
+  notice,
+}: {
+  data: PolicyGetResponse;
+  asOf: string;
+  picker: ReactNode;
+  notice: ReactNode;
+}) {
   const { t } = useTranslation('policy');
   const fmt = useFormat();
   const { policy, term } = data;
@@ -96,6 +106,7 @@ function PolicyDetails({ data, asOf }: { data: PolicyGetResponse; asOf: string }
           ) : c.legalStatus ? (
             <span>{c.legalStatus}</span>
           ) : null,
+        { size: 240 },
       ),
       moneyColumn<ChargeLine>('amount', t('charges.columns.amount'), (c) => c.amount.amount, {
         currency: 'EUR',
@@ -109,10 +120,35 @@ function PolicyDetails({ data, asOf }: { data: PolicyGetResponse; asOf: string }
   const drivers = data.riskTree?.drivers ?? [];
   const selectedCovers = (data.riskTree?.coverages ?? []).filter((c) => c.selected);
 
+  const facts: PageFact[] = term
+    ? [
+        { id: 'from', label: t('term.from'), value: fmt.date(term.period.from) },
+        {
+          id: 'to',
+          label: t('term.to'),
+          value: term.period.to ? fmt.date(term.period.to) : t('term.open'),
+        },
+        {
+          id: 'product',
+          label: t('term.product'),
+          value: <span className="ds-mono">{`${policy.productCode} ${term.productVersion}`}</span>,
+        },
+        ...(vehicle
+          ? [
+              {
+                id: 'plate',
+                label: t('risk.plate'),
+                value: <span className="ds-mono">{vehicle.plate}</span>,
+              },
+            ]
+          : []),
+      ]
+    : [];
+
   return (
-    <div className={styles.stack}>
+    <>
       <PageHeader
-        overline={t('overline')}
+        overline={[t('overline'), policy.productCode].join(' · ')}
         title={t('title', { number: policy.policyNumber })}
         subtitle={
           <>
@@ -120,6 +156,7 @@ function PolicyDetails({ data, asOf }: { data: PolicyGetResponse; asOf: string }
             <span className="ds-caption">{t('asOfNote', { date: fmt.date(asOf) })}</span>
           </>
         }
+        facts={facts}
         actions={
           <>
             <LinkButton variant="secondary" to={`/finance/journals/policy/${policy.policyNumber}`}>
@@ -130,14 +167,17 @@ function PolicyDetails({ data, asOf }: { data: PolicyGetResponse; asOf: string }
             </LinkButton>
           </>
         }
-      />
+      >
+        {picker}
+      </PageHeader>
+      {notice}
       {term ? null : (
         <Banner variant="info" title={t('noTermTitle')}>
           {t('noTermBody', { date: fmt.date(asOf) })}
         </Banner>
       )}
       <div className={styles.grid}>
-        <Section title={t('term.title')}>
+        <Section title={t('term.title')} family={status === 'IN_FORCE' ? 'success' : 'brand'}>
           {term ? (
             <KeyValueList
               aria-label={t('term.title')}
@@ -194,22 +234,22 @@ function PolicyDetails({ data, asOf }: { data: PolicyGetResponse; asOf: string }
             <p className={styles.muted}>{t('risk.none')}</p>
           )}
         </Section>
+        <Section title={t('covers.title')} count={selectedCovers.length}>
+          {selectedCovers.length > 0 ? (
+            <KeyValueList
+              aria-label={t('covers.title')}
+              items={selectedCovers.map((c) => ({
+                id: c.coverageCode,
+                label: c.coverageCode,
+                value: t('covers.included'),
+              }))}
+            />
+          ) : (
+            <p className={styles.muted}>{t('covers.none')}</p>
+          )}
+        </Section>
       </div>
-      <Section title={t('covers.title')}>
-        {selectedCovers.length > 0 ? (
-          <KeyValueList
-            aria-label={t('covers.title')}
-            items={selectedCovers.map((c) => ({
-              id: c.coverageCode,
-              label: c.coverageCode,
-              value: t('covers.included'),
-            }))}
-          />
-        ) : (
-          <p className={styles.muted}>{t('covers.none')}</p>
-        )}
-      </Section>
-      <Section title={t('transactions.title')}>
+      <Section title={t('transactions.title')} count={data.transactions.length}>
         <SimpleTable<Transaction>
           aria-label={t('transactions.title')}
           columns={transactionColumns}
@@ -232,13 +272,15 @@ function PolicyDetails({ data, asOf }: { data: PolicyGetResponse; asOf: string }
           {(page) => <InvoiceTable items={page.items} label={t('invoices.title')} />}
         </QueryView>
       </Section>
-    </div>
+    </>
   );
 }
 
 /**
  * Policy view with an «as of» date (validAt). The date goes to the API in date form, which means close of
  * business of that day in Athens (D-SLC-13); the status shown (Scheduled, In force, Expired) is the one at that date.
+ * Layout: the record sheet (v3 mockup «Φάκελος»): header strip with the key facts and the as-of picker, then
+ * the money tables on the wide column and the term, vehicle and covers on the side column.
  */
 export function PolicyViewPage() {
   const { policyId = '' } = useParams();
@@ -254,8 +296,8 @@ export function PolicyViewPage() {
       : null;
   const asOf = chosen ?? upcomingStart ?? today;
   const query = usePolicy(policyId, asOf);
-  return (
-    <div className={styles.page}>
+  const picker = (
+    <div className={styles.asOf}>
       <DatePicker
         label={t('asOf.label')}
         description={t('asOf.help')}
@@ -264,13 +306,17 @@ export function PolicyViewPage() {
           if (value) setChosen(value.toString());
         }}
       />
-      {upcomingStart ? (
-        <Banner variant="info" title={t('upcoming.title')}>
-          {t('upcoming.body')}
-        </Banner>
-      ) : null}
+    </div>
+  );
+  const notice = upcomingStart ? (
+    <Banner variant="info" title={t('upcoming.title')}>
+      {t('upcoming.body')}
+    </Banner>
+  ) : null;
+  return (
+    <div className={styles.page}>
       <QueryView query={query} notFoundMessage={t('notFound')}>
-        {(data) => <PolicyDetails data={data} asOf={asOf} />}
+        {(data) => <PolicyDetails data={data} asOf={asOf} picker={picker} notice={notice} />}
       </QueryView>
     </div>
   );

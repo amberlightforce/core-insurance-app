@@ -208,12 +208,22 @@ describe('AccountPage', () => {
 });
 
 describe('BillingHomePage', () => {
+  const listRoute: MockRoute = {
+    method: 'GET',
+    path: '/api/bil/v1/invoices',
+    respond: () => ({ body: fx.invoiceList }),
+  };
+
   it('starts empty, validates a record id and lists recent records', async () => {
+    mockApi([listRoute]);
     const { user, container } = renderScreen(<BillingHomePage />, {
       path: '/billing',
       url: '/billing',
     });
     expect(screen.getByText('Δεν υπάρχουν πρόσφατες εγγραφές')).toBeInTheDocument();
+    // The latest invoices (bil.Invoice.list without a filter) are listed on the landing.
+    const list = await screen.findByRole('grid', { name: 'Τιμολόγια' });
+    expect(within(list).getByText('INV000000003')).toBeInTheDocument();
     await expectNoA11yViolations(container);
     await user.type(screen.getByRole('textbox', { name: /Αναγνωριστικό/ }), 'nope{Enter}');
     expect(await screen.findByText('Δώστε έγκυρο αναγνωριστικό UUID.')).toBeInTheDocument();
@@ -228,6 +238,7 @@ describe('BillingHomePage', () => {
   });
 
   it('lists recently opened invoices', () => {
+    mockApi([listRoute]);
     rememberRecent('invoice', { id: fx.invoiceId, label: 'INV000000003' });
     renderScreen(<BillingHomePage />, { path: '/billing', url: '/billing' });
     expect(screen.getByRole('button', { name: 'Τιμολόγιο INV000000003' })).toBeInTheDocument();

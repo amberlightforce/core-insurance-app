@@ -38,7 +38,7 @@ export function NavRail({ items, expanded, onToggleExpanded }: NavRailProps) {
     const link = (
       <Link
         href={item.to}
-        className={cx(styles.railLink, extraClass)}
+        className={cx(styles.railLink)}
         {...(current ? { 'aria-current': 'page' as const } : {})}
         {...(expanded ? {} : { 'aria-label': label })}
       >
@@ -47,7 +47,7 @@ export function NavRail({ items, expanded, onToggleExpanded }: NavRailProps) {
       </Link>
     );
     return (
-      <li key={item.id} className={cx(styles.railItem)}>
+      <li key={item.id} className={cx(styles.railItem, extraClass)}>
         {expanded ? (
           link
         ) : (
@@ -102,7 +102,9 @@ export function NavRail({ items, expanded, onToggleExpanded }: NavRailProps) {
         </li>
       </ul>
       <span className={cx(styles.railGrow)} />
-      <ul className={cx(styles.railList)}>{renderLink(adminNavItem, styles.railOverflowItem)}</ul>
+      <ul className={cx(styles.railList, styles.railBottom)}>
+        {renderLink(adminNavItem, styles.railOverflowItem)}
+      </ul>
       <div className={cx(styles.railToggle)}>
         <Button
           variant="ghost"
