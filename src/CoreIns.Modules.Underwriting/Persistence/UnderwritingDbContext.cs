@@ -63,7 +63,11 @@ internal sealed class EvaluationRow
     public string CreatedBy { get; set; } = string.Empty;
 }
 
-/// <summary><c>uw.issue</c>: a UW issue, Open until the rule stops hitting (Closed). Decide/approve belongs to the referral workbench work package.</summary>
+/// <summary>
+/// <c>uw.issue</c>: a UW issue (PRD-04 §7.3). Open until decided (Approved, Rejected) or until the rule stops hitting (Closed);
+/// an approval whose facts changed is Invalidated and a new Open issue takes its key. The fingerprint is the SHA-256 of the
+/// facts the rules read at the last evaluation; the decision fingerprint is the one the decider saw (REQ-UW-091).
+/// </summary>
 internal sealed class IssueRow
 {
     public Guid IssueId { get; set; }
@@ -101,6 +105,22 @@ internal sealed class IssueRow
     public Instant CreatedAt { get; set; }
 
     public Instant? ClosedAt { get; set; }
+
+    public string? Fingerprint { get; set; }
+
+    public string? DecisionFingerprint { get; set; }
+
+    public string? Decision { get; set; }
+
+    public string? DecidedBy { get; set; }
+
+    public Instant? DecidedAt { get; set; }
+
+    public string? DecisionReason { get; set; }
+
+    public string? DecisionMessage { get; set; }
+
+    public Guid? AuthorityCheckId { get; set; }
 }
 
 /// <summary>The Underwriting module's EF Core context (schema <c>uw</c>): tables and migrations; reads and writes use Dapper on the scope's connection.</summary>
@@ -175,6 +195,11 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
                 table.HasCheckConstraint("ck_issue_status", "status IN ('Open', 'Approved', 'ApprovedWithConditions', 'Rejected', 'Invalidated', 'Closed')");
                 table.HasCheckConstraint("ck_issue_blocking_point", "blocking_point IN ('PRE_QUOTE', 'PRE_BIND', 'PRE_ISSUE', 'NON_BLOCKING')");
                 table.HasCheckConstraint("ck_issue_severity", "severity IN ('REFER', 'DECLINE', 'WARN')");
+                table.HasCheckConstraint("ck_issue_decision", "decision IS NULL OR decision IN ('APPROVE', 'REJECT')");
+                table.HasCheckConstraint(
+                    "ck_issue_decided",
+                    "status NOT IN ('Approved', 'ApprovedWithConditions', 'Rejected') OR (decision IS NOT NULL AND decided_by IS NOT NULL AND decided_at IS NOT NULL"
+                    + " AND decision_reason IS NOT NULL AND decision_fingerprint IS NOT NULL AND authority_check_id IS NOT NULL)");
             });
             entity.HasKey(e => e.IssueId).HasName("pk_issue");
             entity.Property(e => e.IssueId).HasColumnName("issue_id");
@@ -195,7 +220,18 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.ClosedAt).HasColumnName("closed_at").HasColumnType("timestamptz");
-            entity.HasIndex(e => new { e.JobId, e.IssueKey }).IsUnique().HasFilter("status = 'Open'").HasDatabaseName("ux_issue_open_key");
+            entity.Property(e => e.Fingerprint).HasColumnName("fingerprint").HasColumnType("char(64)");
+            entity.Property(e => e.DecisionFingerprint).HasColumnName("decision_fingerprint").HasColumnType("char(64)");
+            entity.Property(e => e.Decision).HasColumnName("decision");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecisionReason).HasColumnName("decision_reason");
+            entity.Property(e => e.DecisionMessage).HasColumnName("decision_message");
+            entity.Property(e => e.AuthorityCheckId).HasColumnName("authority_check_id");
+            // One non-terminal issue per key (PRD-04 §7.1: unique among non-terminal issues).
+            entity.HasIndex(e => new { e.JobId, e.IssueKey }).IsUnique()
+                .HasFilter("status IN ('Open', 'Approved', 'ApprovedWithConditions', 'Rejected')").HasDatabaseName("ux_issue_open_key");
+            entity.HasIndex(e => new { e.Status, e.CreatedAt }).HasDatabaseName("ix_issue_status");
             entity.HasIndex(e => new { e.JobId, e.Status }).HasDatabaseName("ix_issue_job");
             entity.HasOne<EvaluationRow>().WithMany().HasForeignKey(e => e.RaisedEvaluationId)
                 .HasConstraintName("fk_issue_raised_evaluation").OnDelete(DeleteBehavior.Restrict);

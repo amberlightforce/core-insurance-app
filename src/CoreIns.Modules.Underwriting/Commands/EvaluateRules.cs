@@ -99,15 +99,18 @@ internal sealed class EvaluateRulesHandler(
                     stepsUsed = result.Trace.StepsUsed,
                 }), actor, cancellationToken).ConfigureAwait(false);
 
-            // Reconcile with the job's open issues by issue key (REQ-UW-059): new key → raise, same key → keep, key gone → close.
+            // Reconcile with the job's non-terminal issues by issue key (REQ-UW-059, -092, -093; PRD-04 §7.3): a new key raises
+            // an issue; an Open issue is kept; an approval holds while the facts are unchanged and is invalidated (new Open issue)
+            // when they change; a rejection stays until the facts change; a key that no longer hits closes Open and Rejected issues.
             // Only issues raised by this rule set are reconciled: a PRE_QUOTE evaluation must not close a PRE_BIND referral.
             var ruleIds = ruleSet.Dto.Rules.Select(r => r.Id).ToHashSet(StringComparer.Ordinal);
-            var open = (await store.OpenIssuesAsync(legalEntity, jobId, cancellationToken).ConfigureAwait(false)).Where(i => ruleIds.Contains(i.RuleId)).ToList();
+            var active = (await store.ActiveIssuesAsync(legalEntity, jobId, cancellationToken).ConfigureAwait(false)).Where(i => ruleIds.Contains(i.RuleId)).ToList();
+            var fingerprint = risk.Fingerprint(effective);
+            var steps = IssueReconciliation.Plan([.. active.Select(i => i.ForReconciliation())], [.. hits.Select(h => h.IssueKey)], fingerprint);
             var items = new List<RulesEvaluateResponse.IssueItem>();
             foreach (var hit in hits)
             {
-                var existing = open.FirstOrDefault(i => i.IssueKey == hit.IssueKey);
-                var issueId = existing?.IssueId ?? Guid.CreateVersion7();
+                var step = steps.First(s => s.IssueKey == hit.IssueKey);
                 var blocking = hit.BlockingPoint switch
                 {
                     "PRE_QUOTE" => BlockingPoint.PreQuote,
@@ -115,25 +118,38 @@ internal sealed class EvaluateRulesHandler(
                     "PRE_ISSUE" => BlockingPoint.PreIssue,
                     _ => BlockingPoint.NonBlocking,
                 };
-                if (existing is null)
+                var issueId = step.Existing?.IssueId ?? Guid.CreateVersion7();
+                var status = IssueStatus.Open;
+                switch (step.Action)
                 {
-                    await store.InsertIssueAsync(
-                        issueId, legalEntity, jobId, hit.IssueType, hit.IssueKey, hit.BlockingPoint, hit.RuleType, lane, hit.RuleId, hit.MessageEn, hit.MessageEl,
-                        evaluationId, cancellationToken).ConfigureAwait(false);
-                    events.Publish(new OutgoingEvent(
-                        EventDescriptor.From(UWIssueRaisedV1.Descriptor), "Job", jobId.ToString("D"),
-                        new UWIssueRaisedV1
-                        {
-                            JobId = request.JobRef,
-                            IssueId = new UwIssueId(issueId),
-                            IssueType = hit.IssueType,
-                            IssueKeyHash = Sha256Hash.ComputeUtf8(hit.IssueKey),
-                            BlockingPoint = blocking,
-                            Severity = hit.RuleType,
-                            Lane = lane,
-                            Reopened = false,
-                        },
-                        BusinessKeys.Empty.With("jobId", jobId.ToString("D")).With("issueId", issueId.ToString("D"))));
+                    case IssueAction.KeepOpen:
+                        await store.RefreshFingerprintAsync(issueId, fingerprint, cancellationToken).ConfigureAwait(false);
+                        break;
+                    case IssueAction.KeepApproved or IssueAction.KeepRejected:
+                        status = step.Existing!.Status;
+                        break;
+                    case IssueAction.InvalidateAndRaise:
+                        await store.InvalidateIssueAsync(issueId, evaluationId, "VALUE_CHANGED", cancellationToken).ConfigureAwait(false);
+                        events.Publish(new OutgoingEvent(
+                            EventDescriptor.From(ApprovalInvalidatedV1.Descriptor), "Job", jobId.ToString("D"),
+                            new ApprovalInvalidatedV1
+                            {
+                                JobId = request.JobRef,
+                                IssueId = new UwIssueId(issueId),
+                                ApprovalId = issueId, // the approval is recorded on the issue row until UWApproval exists
+                                Reason = ApprovalInvalidatedV1.ReasonValue.ValueChanged,
+                                ChangedFieldCodes = ["riskFacts"],
+                            },
+                            BusinessKeys.Empty.With("jobId", jobId.ToString("D")).With("issueId", issueId.ToString("D")).With("approvalId", issueId.ToString("D"))));
+                        issueId = await RaiseAsync(hit, blocking, reopened: true).ConfigureAwait(false);
+                        break;
+                    case IssueAction.CloseAndRaise:
+                        await CloseAsync(issueId, "VALUE_CHANGED").ConfigureAwait(false);
+                        issueId = await RaiseAsync(hit, blocking, reopened: true).ConfigureAwait(false);
+                        break;
+                    default:
+                        issueId = await RaiseAsync(hit, blocking, reopened: false).ConfigureAwait(false);
+                        break;
                 }
 
                 items.Add(new RulesEvaluateResponse.IssueItem
@@ -145,17 +161,45 @@ internal sealed class EvaluateRulesHandler(
                     IssueKey = hit.IssueKey,
                     Lane = lane,
                     ExplanationKeys = [hit.RuleId],
-                    ApprovalStatus = "Open",
+                    ApprovalStatus = status,
                 });
             }
 
-            foreach (var gone in open.Where(i => hits.All(h => h.IssueKey != i.IssueKey)))
+            foreach (var gone in steps.Where(s => s.Action == IssueAction.Close))
             {
-                await store.CloseIssueAsync(gone.IssueId, evaluationId, "RULE_NO_LONGER_HITS", cancellationToken).ConfigureAwait(false);
+                await CloseAsync(gone.Existing!.IssueId, "RULE_NO_LONGER_HITS").ConfigureAwait(false);
+            }
+
+            async Task<Guid> RaiseAsync(Hit hit, BlockingPoint blocking, bool reopened)
+            {
+                var id = Guid.CreateVersion7();
+                await store.InsertIssueAsync(
+                    id, legalEntity, jobId, hit.IssueType, hit.IssueKey, hit.BlockingPoint, hit.RuleType, lane, hit.RuleId, hit.MessageEn, hit.MessageEl,
+                    evaluationId, fingerprint, cancellationToken).ConfigureAwait(false);
+                events.Publish(new OutgoingEvent(
+                    EventDescriptor.From(UWIssueRaisedV1.Descriptor), "Job", jobId.ToString("D"),
+                    new UWIssueRaisedV1
+                    {
+                        JobId = request.JobRef,
+                        IssueId = new UwIssueId(id),
+                        IssueType = hit.IssueType,
+                        IssueKeyHash = Sha256Hash.ComputeUtf8(hit.IssueKey),
+                        BlockingPoint = blocking,
+                        Severity = hit.RuleType,
+                        Lane = lane,
+                        Reopened = reopened,
+                    },
+                    BusinessKeys.Empty.With("jobId", jobId.ToString("D")).With("issueId", id.ToString("D"))));
+                return id;
+            }
+
+            async Task CloseAsync(Guid id, string reason)
+            {
+                await store.CloseIssueAsync(id, evaluationId, reason, cancellationToken).ConfigureAwait(false);
                 events.Publish(new OutgoingEvent(
                     EventDescriptor.From(UWIssueClosedV1.Descriptor), "Job", jobId.ToString("D"),
-                    new UWIssueClosedV1 { JobId = request.JobRef, IssueId = new UwIssueId(gone.IssueId), Reason = "RULE_NO_LONGER_HITS" },
-                    BusinessKeys.Empty.With("jobId", jobId.ToString("D")).With("issueId", gone.IssueId.ToString("D"))));
+                    new UWIssueClosedV1 { JobId = request.JobRef, IssueId = new UwIssueId(id), Reason = reason },
+                    BusinessKeys.Empty.With("jobId", jobId.ToString("D")).With("issueId", id.ToString("D"))));
             }
 
             return new RulesEvaluateResponse

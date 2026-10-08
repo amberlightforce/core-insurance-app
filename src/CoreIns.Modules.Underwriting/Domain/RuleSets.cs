@@ -42,6 +42,27 @@ internal sealed record UwRisk(
         }
     }
 
+    /// <summary>
+    /// The approval fingerprint (REQ-UW-091, PRD-04 §7.3): SHA-256 (lower-case hex) of every fact the rules read, in a fixed
+    /// canonical form, at <paramref name="effectiveDate"/> (the ages the rules compute depend on it). An approval holds while
+    /// the fingerprint is unchanged; tolerances per input are later work (every input is EXACT here). The element id is part
+    /// of the issue key, not of the facts, and is left out.
+    /// </summary>
+    public string Fingerprint(DateOnly effectiveDate)
+    {
+        var canonical = string.Join(
+            '\n',
+            "v1",
+            "effectiveDate=" + effectiveDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            "vehicleFirstRegistration=" + FirstRegistrationDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            "vehicleValue=" + decimal.Round(VehicleValue, 2).ToString("0.00", CultureInfo.InvariantCulture),
+            "engineCc=" + EngineCc.ToString(CultureInfo.InvariantCulture),
+            "usage=" + Usage,
+            "driverBirthDates=" + string.Join(',', DriverBirthDates.Order().Select(d => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))),
+            "claimsLast5Years=" + ClaimsLast5Years.ToString(CultureInfo.InvariantCulture));
+        return Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(canonical)));
+    }
+
     private static decimal ReadDecimal(JsonElement element)
     {
         if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty("amount", out var amount))
