@@ -148,7 +148,7 @@ internal static class ChangeErrors
             .Describe("Μετά από δεσμευμένη ακύρωση δεν επιτρέπεται καμία αλλαγή στον όρο.", "Nothing can be changed on the term at or after a bound cancellation."),
         CoreIns.Platform.Errors.ErrorDefinition.For(
             CoreIns.SharedKernel.Identifiers.ModuleCode.POL, "JOB-CONFLICT", 409, "Υπάρχει ήδη ανοιχτή εργασία του ίδιου τύπου", "An open job of the same type already exists")
-            .Describe("Ο όρος έχει ήδη ανοιχτή αλλαγή. Ολοκληρώστε την ή αποσύρετέ την.", "The term already has an open change. Finish or withdraw it."),
+            .Describe("Ο όρος έχει ήδη ανοιχτή αλλαγή. Ολοκληρώστε την ή αποσύρετέ την (pol.Job.withdraw).", "The term already has an open change. Bind it or withdraw it (pol.Job.withdraw)."),
     ];
 }
 
@@ -164,4 +164,42 @@ internal static class TreatmentActions
         TreatmentActionCode.InsurerBears => "INSURER_BEARS",
         _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unknown treatment action."),
     };
+}
+
+/// <summary>The effective-date limits of a change (REQ-POL-008, -135, -136), evaluated at create and again at bind.</summary>
+internal static class ChangeLimits
+{
+    /// <summary>From the start of the Athens day N days back (N by the caller's most permissive role) to the end of the term.</summary>
+    public static (Instant Earliest, Instant Latest) Range(ChangeOptions settings, IEnumerable<string> roles, Instant now, Persistence.PolicyTermRow term, TimeZoneInfo zone)
+    {
+        var days = roles.Where(settings.BackdateDaysByRole.ContainsKey).Select(r => settings.BackdateDaysByRole[r]).DefaultIfEmpty(settings.BackdateDaysDefault).Max();
+        var earliest = Instant.Max(now.ToBusinessDate(zone).AddDays(-days).StartOfDayIn(zone), term.ValidFrom);
+        return (earliest, term.ValidTo.Minus(TimeSpan.FromTicks(10)));
+    }
+
+    /// <summary>EFFDATE-LIMIT carrying the permitted range when <paramref name="effectiveAt"/> is outside it.</summary>
+    public static CoreIns.SharedKernel.Results.DomainError? Check(
+        ChangeOptions settings, IEnumerable<string> roles, Instant now, Persistence.PolicyTermRow term, Instant effectiveAt, TimeZoneInfo zone)
+    {
+        var (earliest, latest) = Range(settings, roles, now, term, zone);
+        return effectiveAt < earliest || effectiveAt > latest
+            ? new CoreIns.SharedKernel.Results.DomainError(
+                CoreIns.SharedKernel.Results.ErrorCode.For(CoreIns.SharedKernel.Identifiers.ModuleCode.POL, PolicyErrorNames.EffdateLimit),
+                "The effective date is outside the range this role may change (REQ-POL-136).")
+            {
+                Metadata = new Dictionary<string, string>(StringComparer.Ordinal) { ["earliest"] = earliest.ToString(), ["latest"] = latest.ToString() },
+            }
+            : null;
+    }
+}
+
+/// <summary>The 403 for a caller without <c>pol.change</c> on a change job (checked in code: two-part permission names have no [Authorize] policy).</summary>
+internal static class ChangeAuthorization
+{
+    public static CoreIns.SharedKernel.Results.DomainError? Check(CoreIns.Platform.Authorization.IPermissionEvaluator permissions, CoreIns.Platform.Context.RequestContext context) =>
+        permissions.Has(context, ChangeNames.Permission)
+            ? null
+            : new CoreIns.SharedKernel.Results.DomainError(
+                CoreIns.SharedKernel.Results.ErrorCode.For(CoreIns.SharedKernel.Identifiers.ModuleCode.POL, CoreIns.Platform.Errors.PlatformErrors.AuthorityDenied),
+                "The acting role does not hold pol.change.");
 }

@@ -1,5 +1,7 @@
 using System.Net;
 using System.Text.Json.Nodes;
+using CoreIns.Modules.Policy.Commands.Change;
+using CoreIns.Modules.Policy.Domain.Servicing;
 using CoreIns.Modules.Policy.Queries;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Platform.Context;
@@ -386,9 +388,10 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         body.Text("code").ShouldBe("POL-ERR-JOB-CONFLICT");
 
         // Once the first is withdrawn (Draft → Withdrawn), the term takes a new one.
-        await _h.ExecuteAsync($"UPDATE pol.job SET state = 'WITHDRAWN' WHERE job_id = '{first}'");
-        (await _h.StartChangeAsync(policy)).Response.StatusCode.ShouldBe(HttpStatusCode.Created);
-        await _h.ExecuteAsync($"UPDATE pol.job SET state = 'WITHDRAWN' WHERE job_type = 'POLICY_CHANGE' AND policy_id = '{policy.PolicyId}'");
+        (await _h.WithdrawAsync(first)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var (again, againBody) = await _h.StartChangeAsync(policy);
+        again.StatusCode.ShouldBe(HttpStatusCode.Created);
+        (await _h.WithdrawAsync(againBody.Text("jobId"))).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         await _h.NewTermVersionAsync(policy, "EXPIRED");
         var (expired, expiredBody) = await _h.StartChangeAsync(policy);
@@ -494,6 +497,105 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
         (await _h.QuoteAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await _h.BindAsync(jobId, confirmation: false)).Body.Text("code").ShouldBe("POL-ERR-HUMAN-CONFIRMATION-REQUIRED");
         (await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.policy_transaction WHERE policy_id = '{policy.PolicyId}'")).ShouldBe(1);
+    }
+
+
+    [Fact]
+    public async Task D2_a_role_with_the_job_permissions_but_not_pol_change_gets_403_on_quote_and_bind()
+    {
+        var policy = await _h.IssueAsync();
+        _h.SetDay(policy, 30);
+        var jobId = await _h.NewChangeAsync(policy);
+        await _h.EditVehicleAsync(jobId, policy, capacity: 1600);
+        var (denied, deniedBody) = await _h.QuoteAsync(jobId, roles: ChangeHarness.NoChange);
+        denied.StatusCode.ShouldBe(HttpStatusCode.Forbidden, deniedBody?.ToJsonString());
+        (await _h.ScalarAsync<string>($"SELECT state FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe("DRAFT");
+        (await _h.QuoteAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await _h.BindAsync(jobId, roles: ChangeHarness.NoChange)).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        (await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.policy_transaction WHERE policy_id = '{policy.PolicyId}'")).ShouldBe(1);
+        (await _h.PreviewAsync(jobId, ChangeHarness.NoChange)).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task D3_the_effective_date_limits_are_checked_again_at_bind_for_the_binders_roles()
+    {
+        var policy = await _h.IssueAsync();
+        var now = _h.SetDay(policy, 60);
+        var backdated = ChangeHarness.Iso(now.ToUtcDateTime().AddDays(-20));
+        var (created, body) = await _h.StartChangeAsync(policy, backdated);
+        created.StatusCode.ShouldBe(HttpStatusCode.Created, body?.ToJsonString());
+        var jobId = body.Text("jobId");
+        await _h.EditVehicleAsync(jobId, policy, capacity: 1600);
+        (await _h.QuoteAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        // A CSR (0 days back) cannot bind what an underwriter started 20 days back.
+        var (refused, refusal) = await _h.BindAsync(jobId, roles: ChangeHarness.Csr);
+        refused.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, refusal?.ToJsonString());
+        refusal.Text("code").ShouldBe("POL-ERR-EFFDATE-LIMIT");
+        refusal.Text("earliest").ShouldNotBe("null");
+        (await _h.ScalarAsync<long>($"SELECT count(*) FROM pol.policy_transaction WHERE policy_id = '{policy.PolicyId}'")).ShouldBe(1);
+        (await _h.BindAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task D4_a_misbehaving_tax_port_fails_closed()
+    {
+        var policy = await _h.IssueAsync();
+        _h.SetDay(policy, 30);
+        var jobId = await _h.NewChangeAsync(policy);
+        await _h.EditVehicleAsync(jobId, policy, capacity: 1600);
+
+        // No tax line for a premium delta.
+        _h.Tax.Mode = "missing";
+        var (response, body) = await _h.QuoteAsync(jobId);
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, body?.ToJsonString());
+        body.Text("code").ShouldBe("POL-ERR-RATING");
+        (await _h.ScalarAsync<string>($"SELECT state FROM pol.job WHERE job_id = '{jobId}'")).ShouldBe("DRAFT");
+
+        // Bound at 1600, then a credit whose tax the port reduces.
+        _h.Tax.Mode = "ok";
+        (await _h.QuoteAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await _h.BindAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        _h.SetDay(policy, 60);
+        var credit = await _h.NewChangeAsync(policy);
+        await _h.EditVehicleAsync(credit, policy, capacity: 1300);
+        _h.Tax.Mode = "credit-tax";
+        var (badCredit, badBody) = await _h.QuoteAsync(credit);
+        badCredit.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, badBody?.ToJsonString());
+        badBody.Text("code").ShouldBe("POL-ERR-RATING");
+    }
+
+    [Fact]
+    public async Task D5_a_draft_or_quoted_change_can_be_withdrawn_a_bound_one_cannot()
+    {
+        var policy = await _h.IssueAsync();
+        _h.SetDay(policy, 30);
+        var draft = await _h.NewChangeAsync(policy);
+        var (withdrawn, body) = await _h.WithdrawAsync(draft);
+        withdrawn.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        (await _h.ScalarAsync<string>($"SELECT state FROM pol.job WHERE job_id = '{draft}'")).ShouldBe("WITHDRAWN");
+        (await _h.WithdrawAsync(draft)).Body.Text("code").ShouldBe("POL-ERR-ILLEGAL-TRANSITION");
+        (await _h.ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'JobWithdrawn' AND aggregate_id = '{policy.PolicyId}'")).ShouldBe(1);
+
+        var quoted = await _h.NewChangeAsync(policy);
+        await _h.EditVehicleAsync(quoted, policy, capacity: 1600);
+        (await _h.QuoteAsync(quoted)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await _h.BindAsync(quoted, dryRun: true)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await _h.WithdrawAsync(quoted)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await _h.BindAsync(quoted)).Body.Text("code").ShouldBe("POL-ERR-ILLEGAL-TRANSITION");
+
+        var bound = await _h.NewChangeAsync(policy);
+        await _h.EditVehicleAsync(bound, policy, capacity: 1600);
+        (await _h.QuoteAsync(bound)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await _h.BindAsync(bound)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await _h.WithdrawAsync(bound)).Body.Text("code").ShouldBe("POL-ERR-ILLEGAL-TRANSITION");
+    }
+
+    [Fact]
+    public void D1_the_default_proration_fails_closed()
+    {
+        var fraction = () => { _ = new UnavailableProration().Fraction(DayCountConvention.TermRatio, 10, 365); };
+        fraction.ShouldThrow<CoreIns.Platform.Errors.DomainException>().Error.Code.Name.ShouldBe("DEPENDENCY-UNAVAILABLE");
     }
 
     private async Task<string> RefAsync(Issued policy, Instant validAt)

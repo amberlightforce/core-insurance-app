@@ -6,6 +6,7 @@ using CoreIns.Modules.Policy.Domain;
 using CoreIns.Modules.Policy.Domain.Servicing;
 using CoreIns.Modules.Policy.Persistence;
 using CoreIns.Modules.Policy.Services;
+using CoreIns.Platform.Authorization;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts.Common;
 using CoreIns.Platform.Errors;
@@ -45,6 +46,7 @@ internal sealed class ChangeBindService(
     ChangeContextLoader loader,
     ChangePricer pricer,
     Dependency<IMarketConfigurationService> marketConfiguration,
+    IPermissionEvaluator permissions,
     IOptions<PolicyOptions> options,
     IOptions<ChangeOptions> changeOptions)
 {
@@ -58,6 +60,11 @@ internal sealed class ChangeBindService(
 
     public async Task<Result<JobBindResponse>> BindAsync(JobBindRequest request, CancellationToken cancellationToken)
     {
+        if (ChangeAuthorization.Check(permissions, context) is { } denied)
+        {
+            return denied;
+        }
+
         var zone = options.Value.Zone;
         if (request.Confirmation != true)
         {
@@ -117,6 +124,14 @@ internal sealed class ChangeBindService(
         }
 
         var (history, baseSegment, baseTree, engine, state) = change.Value;
+
+        // The effective-date limits again, at the record time and for the binder's roles (REQ-POL-008, -135).
+        var outside = ChangeLimits.Check(changeOptions.Value, context.Roles, t, history.Term, job.EffectiveAt, zone);
+        if (outside is not null)
+        {
+            return outside;
+        }
+
         var tree = JobSupport.Tree(version);
         var currency = Currency.FromCode(job.Currency);
         var transactionId = PolicyTransactionId.New();

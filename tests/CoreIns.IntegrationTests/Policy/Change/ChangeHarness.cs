@@ -25,16 +25,27 @@ namespace CoreIns.IntegrationTests.Policy.Change;
 /// a premium debit applies a 15 % tax (<c>APPLY</c>), a credit keeps it not reduced (<c>KEEP_NOT_REDUCED</c>, 0.00); both
 /// carry a rule id, version, legal status and the provisional flag. ILLUSTRATIVE TEST DATA.
 /// </summary>
-internal sealed class ScriptedServicingTax : IServicingTax
+internal sealed class TaxBehaviour
+{
+    /// <summary>"ok", "missing" (no tax lines) or "credit-tax" (a credit that reduces the tax).</summary>
+    public string Mode { get; set; } = "ok";
+}
+
+internal sealed class ScriptedServicingTax(TaxBehaviour behaviour) : IServicingTax
 {
     public Task<Result<IReadOnlyList<PricedTaxLine>>> LinesAsync(ServicingTaxRequest request, CancellationToken cancellationToken)
     {
+        if (behaviour.Mode == "missing")
+        {
+            return Task.FromResult<Result<IReadOnlyList<PricedTaxLine>>>(new List<PricedTaxLine>());
+        }
+
         var lines = request.PremiumDeltas.Select(delta =>
         {
             var debit = delta.Amount > 0m;
             return new PricedTaxLine(
                 delta.Key, delta.Key.CoverageCode, "GR-IPT", ChargeCategories.Tax, 0.15m,
-                debit ? decimal.Round(delta.Amount * 0.15m, 2, MidpointRounding.AwayFromZero) : 0m,
+                debit ? decimal.Round(delta.Amount * 0.15m, 2, MidpointRounding.AwayFromZero) : behaviour.Mode == "credit-tax" ? decimal.Round(delta.Amount * 0.15m, 2, MidpointRounding.AwayFromZero) : 0m,
                 debit ? TreatmentActionCode.Apply : TreatmentActionCode.KeepNotReduced, debit ? "TEST-IPT-ENDORSE-DEBIT" : "TEST-IPT-ENDORSE-CREDIT", "1",
                 debit ? "Unverified" : "PendingOpinion", true);
         }).ToList();
@@ -54,6 +65,9 @@ internal sealed class ChangeHarness : IAsyncDisposable
 {
     public const string Csr = "Staff.Csr";
 
+    /// <summary>Holds the job permissions but not <c>pol.change</c>.</summary>
+    public const string NoChange = "Staff.NoChange";
+
     private static readonly TimeZoneInfo Athens = TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens");
 
     private readonly PostgresFixture _database;
@@ -64,16 +78,22 @@ internal sealed class ChangeHarness : IAsyncDisposable
         _database = database;
         // A CSR holds the change permissions too (the role does not exist in the dev users; it only shows the date limits).
         var settings = new Dictionary<string, string?>();
-        foreach (var permission in new[] { "pol.PolicyChange.create", "pol.change", "pol.Job.updateDraft", "pol.Job.quote", "pol.Job.bind", "pol.Job.get" })
+        foreach (var permission in new[] { "pol.PolicyChange.create", "pol.change", "pol.Job.updateDraft", "pol.Job.quote", "pol.Job.bind", "pol.Job.get", "pol.Job.withdraw" })
         {
             settings[$"Platform:Permissions:Grants:{permission}:0"] = "Staff.Underwriter";
             settings[$"Platform:Permissions:Grants:{permission}:1"] = Csr;
+            if (permission.StartsWith("pol.Job.", StringComparison.Ordinal))
+            {
+                settings[$"Platform:Permissions:Grants:{permission}:2"] = NoChange;
+            }
         }
 
         Slice = new PolicySlice(database.AppConnectionString, settings: settings);
     }
 
     public PolicySlice Slice { get; }
+
+    public TaxBehaviour Tax { get; } = new();
 
     public ManualClock Clock { get; } = new(Instant.FromDateTimeOffset(DateTimeOffset.UtcNow));
 
@@ -94,7 +114,11 @@ internal sealed class ChangeHarness : IAsyncDisposable
             services.RemoveAll<IClock>();
             services.AddSingleton<IClock>(Clock);
             services.RemoveAll<IServicingTax>();
+            services.AddSingleton(Tax);
             services.AddScoped<IServicingTax, ScriptedServicingTax>();
+            // The production default fails closed; the reference proration is test-only.
+            services.RemoveAll<IProration>();
+            services.AddSingleton<IProration, ReferenceProration>();
         }));
         Client = _factory.CreateClient();
     }
@@ -200,6 +224,9 @@ internal sealed class ChangeHarness : IAsyncDisposable
 
     public async Task<(HttpResponseMessage Response, JsonNode? Body)> BindAsync(string jobId, int versionNo = 1, bool dryRun = false, bool confirmation = true, string roles = Underwriter) =>
         await SendAsync(HttpMethod.Post, "/api/pol/v1/jobs/bind" + (dryRun ? "?dryRun=true" : string.Empty), new { jobId, versionNo, paymentPlanOption = "ANNUAL", confirmation }, roles);
+
+    public async Task<(HttpResponseMessage Response, JsonNode? Body)> WithdrawAsync(string jobId, string roles = Underwriter) =>
+        await SendAsync(HttpMethod.Post, "/api/pol/v1/jobs/withdraw", new { jobId, reasonCode = "CUSTOMER_DECLINED" }, roles);
 
     public async Task<(HttpResponseMessage Response, JsonNode? Body)> PreviewAsync(string jobId, string roles = Underwriter) =>
         await SendAsync(HttpMethod.Get, $"/api/pol/v1/policy-changes/{jobId}/preview", roles: roles);

@@ -40,6 +40,15 @@ internal sealed class UnavailableServicingTax : IServicingTax
 }
 
 /// <summary>
+/// The registered proration until RAT's real one is bound (SL3-POL-WIRING): fails closed. <c>ReferenceProration</c> is test-only.
+/// </summary>
+internal sealed class UnavailableProration : IProration
+{
+    public ProrationFraction Fraction(DayCountConvention convention, int days, int termDays) =>
+        throw new DomainException(DomainError.Of(ModuleCode.POL, "DEPENDENCY-UNAVAILABLE", "rat.Proration is not bound in this deployment yet; servicing fails closed."));
+}
+
+/// <summary>
 /// The engine for one term: the day-count convention from the pinned product artefact (fail closed on an unknown code) and MKT's
 /// premium rounding rule, resolved once by one probe of <c>mkt.Rounding.apply</c> (purpose <c>charge.line</c>, the same rule the
 /// issuance used) so that the synchronous engine rounds exactly as MKT does.
@@ -315,18 +324,46 @@ internal sealed class ChangePricer(IServicingTax tax, RequestContext context)
             }
 
             taxLines = taxed.Value;
-            foreach (var line in taxLines)
+            var checkedTax = CheckTax(applied.Deltas, taxLines);
+            if (checkedTax is not null)
             {
-                if (applied.Deltas.All(d => d.Key != line.SourceKey) || decimal.Round(line.Amount, 4) != line.Amount)
-                {
-                    return DomainError.Of(ModuleCode.POL, "RATING", $"The tax line {line.ChargeType} does not belong to a premium delta of this change.");
-                }
+                return checkedTax;
             }
         }
 
         var premium = Money.Sum(applied.Deltas.Select(d => new Money(d.Amount, currency)), currency);
         var taxes = Money.Sum(taxLines.Select(t => new Money(t.Amount, currency)), currency);
         return new ChangePricing(before, applied.State!, applied.Deltas, taxLines, newRates, premium, taxes);
+    }
+
+    /// <summary>
+    /// Fail closed on the tax port (PITFALLS 10): every premium delta has exactly one tax line, a debit applies the tax, a credit keeps it
+    /// not reduced with 0.00 (D-SL3-05), and amounts are in minor units.
+    /// </summary>
+    private static DomainError? CheckTax(IReadOnlyList<ServicingDelta> deltas, IReadOnlyList<PricedTaxLine> lines)
+    {
+        foreach (var delta in deltas)
+        {
+            var own = lines.Where(l => l.SourceKey == delta.Key).ToList();
+            if (own.Count != 1)
+            {
+                return DomainError.Of(ModuleCode.POL, "RATING", $"{delta.Key.ChargeType} has {own.Count} tax lines; a servicing delta needs exactly one.");
+            }
+
+            var line = own[0];
+            var debit = delta.Amount > 0m;
+            var wrongAction = debit ? line.Action != TreatmentActionCode.Apply : line.Action != TreatmentActionCode.KeepNotReduced || line.Amount != 0m;
+            if (wrongAction || decimal.Round(line.Amount, 2) != line.Amount)
+            {
+                return DomainError.Of(
+                    ModuleCode.POL, "RATING",
+                    $"The tax treatment of {delta.Key.ChargeType} ({line.Action}, {line.Amount}) does not fit a {(debit ? "debit" : "credit")} (D-SL3-05).");
+            }
+        }
+
+        return lines.Any(l => deltas.All(d => d.Key != l.SourceKey))
+            ? DomainError.Of(ModuleCode.POL, "RATING", "A tax line does not belong to a premium delta of this change.")
+            : null;
     }
 
     private static DomainError Refusal(ServicingResult result) => result.Refusal switch

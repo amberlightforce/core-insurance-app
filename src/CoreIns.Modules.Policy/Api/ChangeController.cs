@@ -46,6 +46,16 @@ internal sealed class ChangeController : ControllerBase
             : HttpResults.Problem(result.Error!, HttpContext);
     }
 
+    /// <summary>pol.Job.withdraw: a Draft or Quoted job (here: the way to free a term's open change).</summary>
+    [HttpPost("jobs/withdraw")]
+    [Authorize(Policy = "pol.Job.withdraw")]
+    public async Task<IResult> WithdrawAsync(
+        [FromBody] JobWithdrawRequest request, [FromServices] ICommandHandler<WithdrawJob, JobWithdrawResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new WithdrawJob(request), cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : HttpResults.Problem(result.Error!, HttpContext);
+    }
+
     /// <summary>The diff of the edit and, for a Quoted version, the servicing preview. Reads only; the same code as the bind.</summary>
     [HttpGet("policy-changes/{jobId}/preview")]
     [Authorize]

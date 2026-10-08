@@ -94,7 +94,7 @@ public static class PolicyModule
 
         // SL3-POL-CHANGE: in-sequence mid-term change (quote and bind of a change job are routed from pol.Job.quote / pol.Job.bind).
         services.AddOptions<ChangeOptions>().Bind(configuration.GetSection(ChangeOptions.Section));
-        services.TryAddSingleton<IProration, ReferenceProration>();
+        services.TryAddSingleton<IProration, UnavailableProration>();
         services.TryAddScoped<IServicingTax, UnavailableServicingTax>();
         services.AddScoped<ChangeHistory>();
         services.AddScoped<ChangeEngineFactory>();
@@ -107,6 +107,9 @@ public static class PolicyModule
         services.AddCommandAuditor<CreatePolicyChange, PolicyChangeCreateResponse, CreatePolicyChangeAuditor>();
         services.AddCommand<CreatePolicyChange, PolicyChangeCreateResponse, CreatePolicyChangeHandler>(
             CommandDescriptor.For("pol.PolicyChange.create") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<WithdrawJob>, WithdrawJobValidator>();
+        services.AddCommandAuditor<WithdrawJob, JobWithdrawResponse, WithdrawJobAuditor>();
+        services.AddCommand<WithdrawJob, JobWithdrawResponse, WithdrawJobHandler>(CommandDescriptor.For("pol.Job.withdraw"));
         services.AddErrorDefinitions(ChangeErrors.Definitions);
 
         // In-process contracts other modules call (D-ARC-16).

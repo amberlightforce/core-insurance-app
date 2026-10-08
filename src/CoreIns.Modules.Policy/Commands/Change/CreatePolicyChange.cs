@@ -83,13 +83,10 @@ internal sealed class CreatePolicyChangeHandler(
             return state;
         }
 
-        var (earliest, latest) = EffectiveRange(term, now, zone);
-        if (effectiveAt < earliest || effectiveAt > latest)
+        var outside = ChangeLimits.Check(changeOptions.Value, context.Roles, now, term, effectiveAt, zone);
+        if (outside is not null)
         {
-            return new DomainError(ErrorCode.For(ModuleCode.POL, PolicyErrorNames.EffdateLimit), "The effective date is outside the range this role may change (REQ-POL-136).")
-            {
-                Metadata = new Dictionary<string, string>(StringComparer.Ordinal) { ["earliest"] = earliest.ToString(), ["latest"] = latest.ToString() },
-            };
+            return outside;
         }
 
         var sequence = ChangeHistory.GuardSequence(loaded.Value, effectiveAt);
@@ -177,17 +174,8 @@ internal sealed class CreatePolicyChangeHandler(
         };
     }
 
-    /// <summary>The effective-date range of the caller (REQ-POL-135, -136): from the start of the Athens day N days back, to the end of the term.</summary>
-    private (Instant Earliest, Instant Latest) EffectiveRange(PolicyTermRow term, Instant now, TimeZoneInfo zone)
-    {
-        var settings = changeOptions.Value;
-        var days = context.Roles.Where(settings.BackdateDaysByRole.ContainsKey).Select(r => settings.BackdateDaysByRole[r]).DefaultIfEmpty(settings.BackdateDaysDefault).Max();
-        var earliest = Instant.Max(now.ToBusinessDate(zone).AddDays(-days).StartOfDayIn(zone), term.ValidFrom);
-        return (earliest, term.ValidTo.Minus(TimeSpan.FromTicks(10)));
-    }
-
     private static DomainError Conflict() =>
-        DomainError.Of(ModuleCode.POL, "JOB-CONFLICT", "The term already has an open change; finish or withdraw it first (D-SL3-11).");
+        DomainError.Of(ModuleCode.POL, "JOB-CONFLICT", "The term already has an open change; bind it or withdraw it with pol.Job.withdraw first (D-SL3-11).");
 }
 
 /// <summary>Audit facts of <c>pol.PolicyChange.create</c>: the job and the policy (no personal data).</summary>

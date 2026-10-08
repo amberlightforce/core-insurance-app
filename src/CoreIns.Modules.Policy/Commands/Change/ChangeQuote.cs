@@ -7,6 +7,7 @@ using CoreIns.Modules.Policy.Services;
 using CoreIns.Modules.Product.Contracts;
 using CoreIns.Modules.Rating.Contracts;
 using CoreIns.Modules.Rating.Contracts.Api;
+using CoreIns.Platform.Authorization;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
@@ -99,6 +100,7 @@ internal sealed class ChangeQuoteService(
     ChangePricer pricer,
     RatingInput ratingInput,
     Dependency<IRatingRateService> ratingService,
+    IPermissionEvaluator permissions,
     IOptions<PolicyOptions> options,
     IOptions<ChangeOptions> changeOptions)
 {
@@ -112,6 +114,11 @@ internal sealed class ChangeQuoteService(
 
     public async Task<Result<JobQuoteResponse>> QuoteAsync(JobQuoteRequest request, CancellationToken cancellationToken)
     {
+        if (ChangeAuthorization.Check(permissions, context) is { } denied)
+        {
+            return denied;
+        }
+
         var now = clock.Now;
         var loaded = await JobSupport.LoadAsync(db, JobSupport.LegalEntity(context, legalEntities), request.JobId, request.VersionNo, cancellationToken).ConfigureAwait(false);
         if (loaded is not var (job, version))
