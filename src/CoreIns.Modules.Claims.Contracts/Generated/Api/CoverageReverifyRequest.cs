@@ -4,42 +4,43 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Coverage.reverify request. PRD inputs: "decision, reasons; adopt or keep"</summary>
-/// <remarks>
-/// <para>Exactly one of: adopt | keep.</para>
-/// </remarks>
+/// <summary>clm.Coverage.reverify request (REQ-CLM-058). A human decides after ReverificationRequired: KEEP the claim's current snapshot ref, or ADOPT the new one. Never automatic (REQ-CLM-002). PRD inputs: "decision, reasons; adopt or keep".</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CoverageReverifyRequest
 {
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'claimId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimId ClaimId { get; init; }
+
+    /// <summary>Contract member 'decision'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    public required DecisionValue Decision { get; init; }
 
-    /// <summary>PRD: "reasons"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reasons")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reasons { get; init; }
+    /// <summary>Reason from the configured list; PRD "reasons"</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
 
-    /// <summary>PRD: "adopt or keep" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("adopt")]
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Adopt { get; init; }
+    public string? Comment { get; init; }
 
-    /// <summary>PRD: "adopt or keep" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("keep")]
+    /// <summary>The new snapshot ref the decision was taken against. Required for ADOPT and checked for KEEP when given; if POL superseded again meanwhile the call fails with CLM-ERR-SNAPSHOT-MISMATCH.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedNewSnapshotRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Keep { get; init; }
+    public string? ExpectedNewSnapshotRef { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DecisionValue
+    {
+        /// <summary><c>KEEP</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("KEEP")]
+        Keep,
+
+        /// <summary><c>ADOPT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ADOPT")]
+        Adopt,
+    }
 }
