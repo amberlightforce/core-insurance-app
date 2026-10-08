@@ -365,7 +365,32 @@
     "pol.Policy.search": {
       "items": [
         {
-          "results": "unspecified"
+          "policyId": "01924801-286b-7f49-8041-bbf73e864615",
+          "policyNumber": "SAMPLE-000001",
+          "productCode": "SAMPLE_CODE",
+          "insuredPartyId": "01926d7e-18ef-7435-837c-2ebe2ff142f3",
+          "status": "SCHEDULED",
+          "termPeriod": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          }
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "pol.Policy.searchByCriteria": {
+      "items": [
+        {
+          "policyId": "0192f229-4541-75c6-834e-cd7c510efd9c",
+          "policyNumber": "SAMPLE-000001",
+          "productCode": "SAMPLE_CODE",
+          "insuredPartyId": "0192054e-23f2-7a1b-83bb-b11048501fba",
+          "status": "SCHEDULED",
+          "termPeriod": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          }
         }
       ],
       "nextCursor": "sample",
@@ -402,8 +427,99 @@
       "limit": 1
     },
     "pol.Snapshot.get": {
-      "snapshotRef": "unspecified",
-      "content": "unspecified"
+      "snapshotRef": "sample",
+      "validAt": "2026-10-07T09:00:00Z",
+      "knownAt": "2026-10-07T09:00:00Z",
+      "inForce": true,
+      "status": "SCHEDULED",
+      "notInForceReason": "NO_TERM_AT_INSTANT",
+      "policy": {
+        "policyId": "01926729-f032-7ada-8c78-68e6e29ed358",
+        "policyNumber": "SAMPLE-000001",
+        "productCode": "SAMPLE_CODE",
+        "insuredPartyId": "0192ac5b-17e6-7f77-8603-bab733c31d1a",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "GR"
+      },
+      "content": {
+        "term": {
+          "termId": "0192560c-7071-7698-8713-f50e653bd645",
+          "termNumber": 1,
+          "period": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "state": "SCHEDULED",
+          "productVersion": "1.0",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "currency": "EUR",
+          "producerCode": "SAMPLE_CODE",
+          "paymentPlanRef": "Sample text",
+          "writtenDate": "2026-10-07",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        },
+        "productVersion": "1.0",
+        "segment": {
+          "segmentId": "0192ac7f-ad7a-7df3-89ff-f9e4215e5ed2",
+          "transactionId": "01929d65-ec61-7b13-8921-be09c35e76f3",
+          "validPeriod": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "recordedPeriod": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        },
+        "vehicles": [
+          {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "drivers": [
+          {
+            "locator": "Sample text",
+            "partyId": "01926d94-3d46-7c42-8d8e-bf1f1401c57f",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "claimsLast5Years": 1,
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "coverageCode": "SAMPLE_CODE",
+            "elementLocator": "Sample text",
+            "selected": true,
+            "options": {
+              "note": "sample"
+            }
+          }
+        ]
+      }
     },
     "pol.Submission.create": {
       "jobId": "01925eb9-f3a5-7802-86d7-10cffca2a528",
@@ -1523,13 +1639,33 @@
     "PolicyMoveExecuteResponse": {
       "rePointMap": "unspecified"
     },
+    "PolicySearchCriteria": {
+      "policyNumber": "SAMPLE-000001",
+      "insuredPartyId": "0192296d-359f-72f7-8d4d-3c685ca41f2e"
+    },
     "PolicySearchItem": {
-      "results": "unspecified"
+      "policyId": "01926c2c-4b23-7c68-80a8-34305b114fb9",
+      "policyNumber": "SAMPLE-000001",
+      "productCode": "SAMPLE_CODE",
+      "insuredPartyId": "01925d70-5cf3-7d8f-8642-7a590b434dd3",
+      "status": "SCHEDULED",
+      "termPeriod": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      }
     },
     "PolicySearchPage": {
       "items": [
         {
-          "results": "unspecified"
+          "policyId": "01928409-e9e3-7e5b-8a0f-e7b0cdc0940e",
+          "policyNumber": "SAMPLE-000001",
+          "productCode": "SAMPLE_CODE",
+          "insuredPartyId": "0192445c-f083-7d88-8be3-cfcaa7cd3aff",
+          "status": "SCHEDULED",
+          "termPeriod": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          }
         }
       ],
       "nextCursor": "sample",
@@ -1837,9 +1973,187 @@
       },
       "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
+    "SnapshotContent": {
+      "term": {
+        "termId": "0192e9ce-77c7-74f8-8ba2-237170c295d3",
+        "termNumber": 1,
+        "period": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "state": "SCHEDULED",
+        "productVersion": "1.0",
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "currency": "EUR",
+        "producerCode": "SAMPLE_CODE",
+        "paymentPlanRef": "Sample text",
+        "writtenDate": "2026-10-07",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "productVersion": "1.0",
+      "segment": {
+        "segmentId": "019223b6-fa56-74e0-8948-618567158a0e",
+        "transactionId": "019274a4-bedf-752e-819b-9e36659d6d79",
+        "validPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "recordedPeriod": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "vehicles": [
+        {
+          "locator": "Sample text",
+          "plate": "Sample text",
+          "plateNormalised": "Sample text",
+          "vin": "Sample text",
+          "make": "Sample text",
+          "model": "Sample text",
+          "firstRegistrationYear": 1900,
+          "engineCapacityCc": 1,
+          "use": "SAMPLE_CODE",
+          "value": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "fields": {
+            "note": "sample"
+          }
+        }
+      ],
+      "drivers": [
+        {
+          "locator": "Sample text",
+          "partyId": "019252ba-f390-764a-8ff7-1eefe8a82b9c",
+          "driverType": "MAIN",
+          "yearFirstLicensed": 1900,
+          "vehicleLocator": "Sample text",
+          "usagePercent": 1,
+          "claimsLast5Years": 1,
+          "fields": {
+            "note": "sample"
+          }
+        }
+      ],
+      "coverages": [
+        {
+          "coverageCode": "SAMPLE_CODE",
+          "elementLocator": "Sample text",
+          "selected": true,
+          "options": {
+            "note": "sample"
+          }
+        }
+      ]
+    },
     "SnapshotGetResponse": {
-      "snapshotRef": "unspecified",
-      "content": "unspecified"
+      "snapshotRef": "sample",
+      "validAt": "2026-10-07T09:00:00Z",
+      "knownAt": "2026-10-07T09:00:00Z",
+      "inForce": true,
+      "status": "SCHEDULED",
+      "notInForceReason": "NO_TERM_AT_INSTANT",
+      "policy": {
+        "policyId": "0192deaa-6a48-7d2c-8992-947f81f3e7bd",
+        "policyNumber": "SAMPLE-000001",
+        "productCode": "SAMPLE_CODE",
+        "insuredPartyId": "0192c06b-ba6a-7268-8ccc-8528bad5b16f",
+        "legalEntity": "SAMPLE_CODE",
+        "jurisdiction": "GR"
+      },
+      "content": {
+        "term": {
+          "termId": "01924449-31e4-7ed2-81e3-676030e55410",
+          "termNumber": 1,
+          "period": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "state": "SCHEDULED",
+          "productVersion": "1.0",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "currency": "EUR",
+          "producerCode": "SAMPLE_CODE",
+          "paymentPlanRef": "Sample text",
+          "writtenDate": "2026-10-07",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        },
+        "productVersion": "1.0",
+        "segment": {
+          "segmentId": "0192c1cf-cd8d-7958-81e5-05c0c215617b",
+          "transactionId": "01923ebe-127c-7c65-8a9a-78a87f59f66d",
+          "validPeriod": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "recordedPeriod": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        },
+        "vehicles": [
+          {
+            "locator": "Sample text",
+            "plate": "Sample text",
+            "plateNormalised": "Sample text",
+            "vin": "Sample text",
+            "make": "Sample text",
+            "model": "Sample text",
+            "firstRegistrationYear": 1900,
+            "engineCapacityCc": 1,
+            "use": "SAMPLE_CODE",
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "drivers": [
+          {
+            "locator": "Sample text",
+            "partyId": "0192bf8e-c1ff-725b-8f61-20ee4cc3c511",
+            "driverType": "MAIN",
+            "yearFirstLicensed": 1900,
+            "vehicleLocator": "Sample text",
+            "usagePercent": 1,
+            "claimsLast5Years": 1,
+            "fields": {
+              "note": "sample"
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "coverageCode": "SAMPLE_CODE",
+            "elementLocator": "Sample text",
+            "selected": true,
+            "options": {
+              "note": "sample"
+            }
+          }
+        ]
+      }
+    },
+    "SnapshotPolicy": {
+      "policyId": "0192c173-7736-7e9a-80a8-35238af7dce3",
+      "policyNumber": "SAMPLE-000001",
+      "productCode": "SAMPLE_CODE",
+      "insuredPartyId": "0192827f-42e8-7c50-8a04-8f2b376e1497",
+      "legalEntity": "SAMPLE_CODE",
+      "jurisdiction": "GR"
     },
     "StatusModelGetResponse": {
       "table": "unspecified"

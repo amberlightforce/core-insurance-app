@@ -15,7 +15,7 @@ namespace CoreIns.Modules.Policy.Queries;
 /// <c>valid_from ≤ validAt &lt; valid_to</c> and <c>recorded_from ≤ knownAt &lt; recorded_to</c> (half-open, open end
 /// = still current). Filtered by the caller's legal entity.
 /// </summary>
-internal sealed class PolicyReader(DbSession session)
+internal sealed partial class PolicyReader(DbSession session)
 {
     private const string Known = "recorded_from <= @knownAt AND (recorded_to IS NULL OR recorded_to > @knownAt)";
     private const string Valid = "valid_from <= @validAt AND valid_to > @validAt";

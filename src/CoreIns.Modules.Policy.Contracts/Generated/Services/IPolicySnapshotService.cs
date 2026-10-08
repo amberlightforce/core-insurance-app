@@ -17,10 +17,12 @@ public interface IPolicySnapshotService
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W4.</para>
     /// <para>Exposure: ui; consumers: CLM, RAT, RI.</para>
+    /// <para>Errors: POL-ERR-NOT-FOUND (404), POL-ERR-VALIDATION (422).</para>
     /// </remarks>
     /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
     /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>
     /// <param name="policyId">PRD: "policyId or snapshotRef" (optional)</param>
-    /// <param name="snapshotRef">PRD: "policyId or snapshotRef" (optional)</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.SnapshotGetResponse> GetAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, global::CoreIns.SharedKernel.Identifiers.PolicyId? policyId = null, string? snapshotRef = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="snapshotRef">PRD: "policyId or snapshotRef" (optional). Re-reads that snapshot byte-identically; validAt and knownAt are then encoded in the reference and must not be given.</param>
+    /// <param name="policyNumber">Alternative to policyId (policy numbers are business keys, not personal data). Give exactly one of policyId, policyNumber, snapshotRef.</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.SnapshotGetResponse> GetAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, global::CoreIns.SharedKernel.Identifiers.PolicyId? policyId = null, string? snapshotRef = null, global::CoreIns.SharedKernel.Identifiers.PolicyNumber? policyNumber = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

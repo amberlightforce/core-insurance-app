@@ -38,7 +38,7 @@ All six (F-1a … F-1f) **merged**; see HANDOVER §3. CI on main: .NET, Bicep, i
 | WP | Status | Owner | Notes |
 |---|---|---|---|
 | SL2-PLT | building | opus | approvals, claims roles, screening stub |
-| SL2-POL-SNAP | building | sonnet | snapshot at loss date |
+| SL2-POL-SNAP | **merged** (597f2fe) | sonnet | deep review FAIL (D1 forged future knownAt ref) → fixed, orchestrator re-check; gate green: integration 303, all 10 suites |
 | SL2-BIL-DISB | building | opus | payee accounts, disbursement, stub bank |
 | SL2-CLM-CORE | building | opus | claim reference vertical |
 | SL2-CLM-MONEY | not started | opus | S1 |

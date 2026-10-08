@@ -35,6 +35,8 @@
   },
   "noPermission": {
     "title": "No permission",
-    "body": "Your role does not allow you to see this section."
+    "body": "Your role does not allow you to see this section.",
+    "action": "Your current role ({roles}) does not allow this action. Sign in again with a role that does (customers and quotes: Staff.Underwriter).",
+    "actionUnknown": "Your role does not allow this action. Sign in again with a role that does."
   }
 }

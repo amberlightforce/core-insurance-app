@@ -12,7 +12,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [PFC](#pfc) | 32 | 29 | 3 | 16 | 16 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
-| [POL](#pol) | 51 | 47 | 4 | 37 | 14 | 8 | 10 | 0 |
+| [POL](#pol) | 52 | 48 | 4 | 37 | 15 | 8 | 10 | 0 |
 | [BIL](#bil) | 87 | 87 | 0 | 55 | 32 | 6 | 5 | 1 |
 | [CLM](#clm) | 54 | 54 | 0 | 43 | 11 | 10 | 9 | 5 |
 | [RI](#ri) | 116 | 110 | 6 | 82 | 34 | 9 | 0 | 0 |
@@ -340,6 +340,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pol.Policy.get` | GET `/api/pol/v1/policies/{id}` | Q |  | ui, partner | CHN, CLM, CMP, DAT, DOC, FIN, MIG, PTY, RI | W4 | full | REQ-POL-002, REQ-POL-010, REQ-POL-085 |
 | `pol.Policy.getMany` | GET `/api/pol/v1/policies/get-many` | Q |  | ui | DOC | unscheduled | full | REQ-POL-351 |
 | `pol.Policy.search` | GET `/api/pol/v1/policies/search` | Q |  | ui, partner | CHN, CLM, CMP, PFC | W4 | full | REQ-POL-014 |
+| `pol.Policy.searchByCriteria` | POST `/api/pol/v1/policies/search` | Q |  | ui | CLM | W4 | full | REQ-POL-014 |
 | `pol.PolicyChange.create` | POST `/api/pol/v1/policy-changes` | C | yes | ui, partner | BIL, CHN | W6 | full | REQ-POL-190 |
 | `pol.PolicyMove.execute` | POST `/api/pol/v1/policy-moves/execute` | C | yes | ui |  | W6 | full | REQ-POL-233 |
 | `pol.Reactivation.create` | POST `/api/pol/v1/reactivations` | C | yes | ui |  | W6 | full | REQ-POL-236 |
@@ -1442,7 +1443,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-POL-011 | `pol.Job.quote`, `pol.Job.requote` |  |
 | REQ-POL-012 | `chn.PartnerPolicy.requestCancellation`, `pol.Cancellation.create`, `pol.Cancellation.rescind`, `pol.Cancellation.schedule` |  |
 | REQ-POL-013 | `pol.Import.policy`, `pol.Import.term` |  |
-| REQ-POL-014 | `chn.PartnerBook.changes`, `pol.Policy.search` |  |
+| REQ-POL-014 | `chn.PartnerBook.changes`, `pol.Policy.search`, `pol.Policy.searchByCriteria` |  |
 | REQ-BIL-001 | `bil.BillingAccount.close`, `bil.BillingAccount.create`, `bil.BillingAccount.get`, `bil.BillingAccount.reopen` (+3) |  |
 | REQ-BIL-002 | — | event-driven intake of ChargeDeltaEmitted (contracts/events); PRD-06 §9.1 names no operation |
 | REQ-BIL-003 | `bil.DownPayment.initiate`, `bil.DownPayment.status`, `bil.PaymentPlan.list`, `chn.PartnerQuote.bind` |  |
