@@ -17,3 +17,16 @@ export function closeGuardFindings(
   }
   return findings;
 }
+
+/** The illustrative authority hint from dry-run or submit checks: only when every check has a decision. */
+export function authorityHint(
+  checks: readonly unknown[] | undefined,
+): 'within' | 'referral' | null {
+  if (!checks || checks.length === 0) return null;
+  const decisions = checks.map((c) =>
+    typeof c === 'object' && c !== null ? (c as { decision?: unknown }).decision : undefined,
+  );
+  if (decisions.some((d) => d === 'DENY')) return null;
+  if (decisions.some((d) => d === 'REFER')) return 'referral';
+  return decisions.every((d) => d === 'ALLOW') ? 'within' : null;
+}

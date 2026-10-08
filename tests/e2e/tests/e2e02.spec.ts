@@ -16,6 +16,9 @@ const IBAN = 'GR1601101250000000012300695';
 const RESERVE_1 = 120_000n; // 1,200.00 -> inside the handler's authority
 const RESERVE_2 = 530_000n; // +5,300.00 -> exposure reserve 6,500.00 > 5,000.00 -> referred
 const PAYMENT = 620_000n; // 6,200.00 FINAL; the 300.00 left on the reserve is released in the same set
+// The claim's journals by source: three reserve changes (+1,200.00, +5,300.00, the 300.00 release), the payment, and BIL's
+// two disbursement entries (released, cleared).
+const EXPECTED_SOURCES = ['BIL:BillingEntryPosted', 'BIL:BillingEntryPosted', 'CLM:PaymentIssued', 'CLM:ReserveChanged', 'CLM:ReserveChanged', 'CLM:ReserveChanged'];
 const RELEASE = -30_000n;
 
 test('E2E-02a claims happy path: FNOL, reserves, four-eyes approval, final payment via BIL, FIN journals, close', async ({ request }) => {
@@ -291,8 +294,10 @@ test('E2E-02a claims happy path: FNOL, reserves, four-eyes approval, final payme
       all.push(...(page.body['items'] as Json[]).map((i) => i['journal'] as Json));
       cursor = page.body['nextCursor'] ?? undefined;
     } while (cursor);
-    const accounts = new Set(all.flatMap((j) => (j['lines'] as Json[]).map((l) => l['account'] as string)));
-    return accounts.has('GL-1110') && accounts.has('GL-5110') && accounts.has('GL-2530') ? all : undefined;
+    // FIN posts each source fact asynchronously (Claim and Disbursement aggregates independently), so accounts alone can
+    // appear before every journal is in: wait for exactly the expected six journals by source before reading balances.
+    const sources = all.map((j) => `${j['sourceModule']}:${j['sourceEventType']}`).sort();
+    return JSON.stringify(sources) === JSON.stringify(EXPECTED_SOURCES) ? all : undefined;
   });
   const lines = journals.flatMap((j) =>
     (j['lines'] as Json[]).map((l) => ({
@@ -305,7 +310,7 @@ test('E2E-02a claims happy path: FNOL, reserves, four-eyes approval, final payme
   );
   // Three reserve journals (+1,200.00, +5,300.00, the 300.00 release), the payment, and BIL's two disbursement entries.
   const bySource = journals.map((j) => `${j['sourceModule']}:${j['sourceEventType']}`).sort();
-  expect(bySource).toEqual(['BIL:BillingEntryPosted', 'BIL:BillingEntryPosted', 'CLM:PaymentIssued', 'CLM:ReserveChanged', 'CLM:ReserveChanged', 'CLM:ReserveChanged']);
+  expect(bySource).toEqual(EXPECTED_SOURCES);
   for (const journal of journals) {
     const own = lines.filter((l) => l.journal === journal['journalNumber']);
     expect(own.length, `${journal['journalNumber']} has at least two lines`).toBeGreaterThanOrEqual(2);
