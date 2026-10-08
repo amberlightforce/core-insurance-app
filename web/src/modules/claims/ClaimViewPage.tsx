@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router';
 
 import { isApiError } from '../../api/client';
 import { useIdempotencyKey } from '../../api/idempotency';
-import type { ClaimPaymentView, ClaimView, ExposureView, PartyView } from '../../api/types';
+import type { ClaimView, ExposureView, PartyView } from '../../api/types';
 import {
   Banner,
   Button,
@@ -287,7 +287,7 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
   const payments = usePayments(summary.claimId);
   const stages = claimStages(claim, {
     reserved: financials.data ? amountOf(financials.data.totals.reserved) : null,
-    payments: payments.data ? ((payments.data.items ?? []) as ClaimPaymentView[]) : null,
+    payments: payments.data ? payments.data.items : null,
   });
   // Codes outside the illustrative list (e.g. seeded data) show as the code, never as a translation key.
   const cause = t(`codes.lossCause.${summary.lossCause}`, { defaultValue: summary.lossCause });
