@@ -102,7 +102,7 @@ internal sealed class ReverifyHarness : IAsyncDisposable
         MoneyClaim claim, string decision, string? expectedNewRef, string? reason = null, string? comment = null, string roles = Handler) =>
         Money.SendAsync(
             HttpMethod.Post, "/api/clm/v1/coverage/reverify",
-            new { claimId = claim.ClaimId, decision, reasonCode = reason ?? (decision == "KEEP" ? "POLICY_CHANGE_NOT_RELEVANT" : "POLICY_CHANGE_RELEVANT"), comment, expectedNewSnapshotRef = expectedNewRef }, roles);
+            new { claimId = claim.ClaimId, decision, reasonCode = reason ?? (decision == "KEEP" ? "LOSS_BEFORE_CHANGE" : "CHANGE_APPLIES"), comment, expectedNewSnapshotRef = expectedNewRef }, roles);
 
     public async Task<JsonNode> ClaimAsync(MoneyClaim claim) => await Money.ClaimAsync(claim);
 

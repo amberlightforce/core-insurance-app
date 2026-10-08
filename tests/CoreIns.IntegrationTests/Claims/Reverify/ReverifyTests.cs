@@ -175,7 +175,7 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         after.Text("summary.snapshotRef").ShouldBe(oldRef);
         after["pendingReverification"].ShouldBeNull();
         (await _h.RowsAsync(claim, "KEPT")).ShouldBe(1);
-        (await _h.Money.ScalarAsync<string>($"SELECT reason_code FROM clm.reverification WHERE claim_id = '{claim.ClaimId}'")).ShouldBe("POLICY_CHANGE_NOT_RELEVANT");
+        (await _h.Money.ScalarAsync<string>($"SELECT reason_code FROM clm.reverification WHERE claim_id = '{claim.ClaimId}'")).ShouldBe("LOSS_BEFORE_CHANGE");
 
         // The comment is P2: encrypted at rest, in no event, no audit and no idempotency record (PITFALLS 18/31).
         (await _h.Money.ExposuresAsync(secret)).ShouldBe(0);
@@ -269,7 +269,7 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         // Before the decision nothing changed: the exposure is still covered.
         (await _h.ClaimAsync(claim)).Text("exposures.0.coverageIndication").ShouldBe("COVERED");
 
-        var (response, body) = await _h.ReverifyAsync(claim, "ADOPT", newRef, reason: "COVER_CHANGED");
+        var (response, body) = await _h.ReverifyAsync(claim, "ADOPT", newRef, reason: "POLICY_CORRECTED");
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("coverageInQuestion").ShouldBe("true");
 
@@ -302,7 +302,7 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         raised[0]["causeEventId"]!.GetValue<string>().ShouldBe(cause.EventId.Value.ToString());
         (await _h.ClaimAsync(claim)).Text("summary.policyInForceAtLoss").ShouldBe("true");
 
-        var (response, body) = await _h.ReverifyAsync(claim, "ADOPT", raised[0]["newSnapshotRef"]!.GetValue<string>(), reason: "POLICY_CHANGE_RELEVANT");
+        var (response, body) = await _h.ReverifyAsync(claim, "ADOPT", raised[0]["newSnapshotRef"]!.GetValue<string>(), reason: "CHANGE_APPLIES");
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("coverageInQuestion").ShouldBe("true");
         var after = await _h.ClaimAsync(claim);
@@ -403,7 +403,7 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         await _h.DrainAsync();
         var newRef = (await _h.ClaimAsync(claim)).Text("pendingReverification.newSnapshotRef");
 
-        foreach (var (decision, reason) in new[] { ("ADOPT", "MADE_UP"), ("ADOPT", "CORRECTION_ONLY"), ("KEEP", "COVER_CHANGED") })
+        foreach (var (decision, reason) in new[] { ("ADOPT", "MADE_UP"), ("ADOPT", "HANDLER_JUDGEMENT"), ("KEEP", "POLICY_CORRECTED") })
         {
             var (response, body) = await _h.ReverifyAsync(claim, decision, newRef, reason: reason);
             body.Text("code").ShouldBe("CLM-ERR-VALIDATION", body?.ToJsonString());

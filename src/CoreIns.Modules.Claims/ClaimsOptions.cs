@@ -63,8 +63,8 @@ internal sealed class ReverificationReasonOptions
 
     /// <summary>True when <paramref name="code"/> is configured for the decision.</summary>
     public bool Allows(bool adopt, string code) =>
-        (adopt ? (Adopt.Length > 0 ? Adopt : ["POLICY_CHANGE_RELEVANT", "COVER_CHANGED"])
-               : (Keep.Length > 0 ? Keep : ["POLICY_CHANGE_NOT_RELEVANT", "CORRECTION_ONLY"]))
+        (adopt ? (Adopt.Length > 0 ? Adopt : ["CHANGE_APPLIES", "POLICY_CORRECTED"])
+               : (Keep.Length > 0 ? Keep : ["LOSS_BEFORE_CHANGE", "CHANGE_NOT_MATERIAL", "HANDLER_JUDGEMENT"]))
         .Contains(code, StringComparer.Ordinal);
 }
 
