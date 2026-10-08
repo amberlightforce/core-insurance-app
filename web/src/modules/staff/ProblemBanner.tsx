@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { readSession } from '../../dev-auth/devAuth';
 import { Banner, Button } from '../../design-system';
 import { problemOf } from './problem';
 import styles from './staff.module.css';
@@ -32,6 +33,9 @@ export function ProblemBanner({ error, title, onRetry, retryLabel }: ProblemBann
     known ??
     problem.title ??
     (problem.status === 0 ? t('problem.network') : t('problem.generic'));
+  // A 403 carries no body: say plainly that the signed-in role may not do this, instead of a bare «failed».
+  const forbidden = problem.status === 403 && !problem.detail;
+  const roles = readSession()?.user.roles.join(', ') ?? '';
   const fieldErrors = (problem.errors ?? []).filter((e) => e.field !== '$');
   const detail = problem.detail;
 
@@ -49,6 +53,9 @@ export function ProblemBanner({ error, title, onRetry, retryLabel }: ProblemBann
       }
     >
       {known && title ? <p>{known}</p> : null}
+      {forbidden ? (
+        <p>{roles ? t('noPermission.action', { roles }) : t('noPermission.actionUnknown')}</p>
+      ) : null}
       {detail && detail !== headline ? <p>{detail}</p> : null}
       {fieldErrors.length > 0 ? (
         <ul className={styles.problemList}>
