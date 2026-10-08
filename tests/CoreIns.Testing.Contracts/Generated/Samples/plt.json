@@ -167,6 +167,11 @@
         }
       }
     },
+    "plt.Approval.withdraw": {
+      "approvalRequestId": "01920e68-025c-7cfe-8b01-741abeb993da",
+      "status": "PendingApproval",
+      "withdrawnAt": "2026-10-07T09:00:00Z"
+    },
     "plt.ApprovalType.register": {
       "request": "unspecified",
       "decision": "unspecified"
@@ -803,14 +808,13 @@
       "version": 1
     },
     "ApprovalWithdrawRequest": {
-      "type": "unspecified",
-      "objectRef": "unspecified",
-      "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "diff": "unspecified"
+      "approvalRequestId": "0192060a-6497-70a5-87a4-fd1b40a5436e",
+      "reason": "Sample text"
     },
     "ApprovalWithdrawResponse": {
-      "request": "unspecified",
-      "decision": "unspecified"
+      "approvalRequestId": "019242d7-7fb2-70bc-822d-f26c486c6ee6",
+      "status": "PendingApproval",
+      "withdrawnAt": "2026-10-07T09:00:00Z"
     },
     "AuditAppendRequest": {
       "auditEvent": "unspecified"

@@ -89,9 +89,12 @@ public sealed class HostSmokeTests(PostgresFixture database) : IClassFixture<Pos
         (await Can("__ef_migrations_history", "SELECT")).ShouldBeFalse();
 
         await using var history = dataSource.CreateCommand("SELECT count(*) FROM pg_tables WHERE schemaname = 'plt'");
-        ((long)(await history.ExecuteScalarAsync(ct))!).ShouldBe(12); // 9 of F-1b + number_series and data_key (SL-0) + approval_request (SL2-PLT)
+        ((long)(await history.ExecuteScalarAsync(ct))!).ShouldBe(13); // 9 of F-1b + number_series and data_key (SL-0) + approval_request (SL2-PLT) + dev_clock (SL3-PLT-SUPPORT)
         (await Can("approval_request", "UPDATE")).ShouldBeTrue();
         (await Can("approval_request", "DELETE")).ShouldBeFalse();
+        (await Can("dev_clock", "UPDATE")).ShouldBeTrue();
+        (await Can("dev_clock", "DELETE")).ShouldBeFalse();
+        (await Can("dev_clock", "INSERT")).ShouldBeFalse();
     }
 
     [Fact]

@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>Typed from REQ-RI-136. PRD outputs: "recoverables, trace"</summary>
+/// <summary>Typed from REQ-RI-136, SL4-CONTRACTS. PRD outputs: "recoverables, trace". One row per contract x layer x participant of the claim, as known at knownAt.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RecoveryListByClaimItem
 {
@@ -12,12 +12,12 @@ public sealed record RecoveryListByClaimItem
     [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
     public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>Contract member 'layerId'.</summary>
+    /// <summary>Layer id</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("layerId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.RiLayerId? LayerId { get; init; }
 
-    /// <summary>Contract member 'participantId'.</summary>
+    /// <summary>Participant (reinsurer party) id</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'participantId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
@@ -25,15 +25,63 @@ public sealed record RecoveryListByClaimItem
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Guid? ParticipantId { get; init; }
 
-    /// <summary>Contract member 'recoverableIncurred'.</summary>
+    /// <summary>Recoverable incurred (REQ-RI-116)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("recoverableIncurred")]
     public required global::CoreIns.SharedKernel.Money RecoverableIncurred { get; init; }
 
-    /// <summary>Contract member 'recoverablePaid'.</summary>
+    /// <summary>Recoverable on paid losses</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("recoverablePaid")]
     public required global::CoreIns.SharedKernel.Money RecoverablePaid { get; init; }
 
-    /// <summary>Contract member 'recoverableOutstanding'.</summary>
+    /// <summary>Incurred recoverable minus paid recoverable; zero for a closed claim (D-SL4-05)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("recoverableOutstanding")]
     public required global::CoreIns.SharedKernel.Money RecoverableOutstanding { get; init; }
+
+    /// <summary>Claim; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>Contract year; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractYear")]
+    public int? ContractYear { get; init; }
+
+    /// <summary>Layer number; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layerNo")]
+    public int? LayerNo { get; init; }
+
+    /// <summary>Recovery record id; always set</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'recoveryId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoveryId")]
+    public global::System.Guid? RecoveryId { get; init; }
+
+    /// <summary>Batch that last calculated the row (use with ri.Recovery.trace); always set</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'batchId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("batchId")]
+    public global::System.Guid? BatchId { get; init; }
+
+    /// <summary>Recovery state (PRD-08 §7); always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public StateValue? State { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StateValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StateValue
+    {
+        /// <summary><c>CALCULATED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CALCULATED")]
+        Calculated,
+
+        /// <summary><c>POSTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("POSTED")]
+        Posted,
+
+        /// <summary><c>REVERSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REVERSED")]
+        Reversed,
+    }
 }

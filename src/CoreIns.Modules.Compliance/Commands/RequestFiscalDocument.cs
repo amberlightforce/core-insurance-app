@@ -83,12 +83,43 @@ internal sealed class RequestFiscalDocumentHandler(
         var roleCode = FiscalDocuments.Code(role);
         var revision = request.Revision ?? 0;
 
+        // Credit notes (SL3-CMP-CREDIT, REQ-CMP-032): the correlated document is the original ISSUE the credit corrects.
+        if (role != FiscalDocumentRole.Credit && request.CorrelatedDocumentId is not null)
+        {
+            return DomainError.Of(ModuleCode.CMP, "VALIDATION", "correlatedDocumentId applies to role CREDIT only.");
+        }
+
+        if (request.CorrelatedDocumentId is { } given && request.OriginalFiscalDocumentId is { } original && given != original.Value)
+        {
+            return DomainError.Of(ModuleCode.CMP, "VALIDATION", "correlatedDocumentId and originalFiscalDocumentId must be equal when both are given.");
+        }
+
         var existing = await db.FiscalDocuments.AsNoTracking().SingleOrDefaultAsync(
             d => d.LegalEntityId == legalEntity && d.SourceType == request.SourceType && d.SourceId == request.SourceId && d.Role == roleCode && d.Revision == revision,
             cancellationToken).ConfigureAwait(false);
         if (existing is not null)
         {
             return new FiscalDocumentRequestResponse { FiscalDocumentId = existing.FiscalDocumentId, Status = existing.Status, DocumentType = existing.DocumentType };
+        }
+
+        // Replays returned above before this check, so a replayed credit stays stable. A new credit needs a Registered ISSUE
+        // original of the same legal entity and counterparty; a credit of a credit has Role CREDIT and is refused here.
+        Guid? correlatedId = role == FiscalDocumentRole.Credit ? request.CorrelatedDocumentId ?? request.OriginalFiscalDocumentId?.Value : null;
+        string? correlatedMark = null;
+        if (correlatedId is { } correlated)
+        {
+            var target = new FiscalDocumentId(correlated);
+            var originalRow = await db.FiscalDocuments.AsNoTracking().SingleOrDefaultAsync(
+                d => d.FiscalDocumentId == target && d.LegalEntityId == legalEntity, cancellationToken).ConfigureAwait(false);
+            if (originalRow is null
+                || originalRow.Role != FiscalDocuments.Code(FiscalDocumentRole.Issue)
+                || originalRow.Status != FiscalDocuments.Code(FiscalDocumentStatus.Registered)
+                || originalRow.CounterpartyPartyId != request.CounterpartyPartyId)
+            {
+                return DomainError.Of(ModuleCode.CMP, "CORRELATED-NOT-FOUND", "The correlated document does not exist, is not a Registered ISSUE document, or belongs to another counterparty.");
+            }
+
+            correlatedMark = originalRow.Mark;
         }
 
         var channel = services.GetService<IFiscalDocumentChannel>();
@@ -111,9 +142,12 @@ internal sealed class RequestFiscalDocumentHandler(
 
         var now = clock.Now;
         var series = await channel.SeriesAsync(FiscalDocuments.PlaceholderDocumentType, cancellationToken).ConfigureAwait(false);
-        var number = await NextNumberAsync(legalEntity, series.SeriesId, cancellationToken).ConfigureAwait(false);
+
+        // CMP is the sole issuer (REQ-CMP-038) and keeps credits in their own gapless series.
+        var seriesId = role == FiscalDocumentRole.Credit ? series.SeriesId + FiscalDocuments.CreditSeriesSuffix : series.SeriesId;
+        var number = await NextNumberAsync(legalEntity, seriesId, cancellationToken).ConfigureAwait(false);
         var built = await channel.BuildAsync(source, cancellationToken).ConfigureAwait(false);
-        var document = built with { Series = series.SeriesId, Number = number.ToString(System.Globalization.CultureInfo.InvariantCulture) };
+        var document = built with { Series = seriesId, Number = number.ToString(System.Globalization.CultureInfo.InvariantCulture) };
 
         var row = new FiscalDocumentRow
         {
@@ -124,6 +158,7 @@ internal sealed class RequestFiscalDocumentHandler(
             SourceId = request.SourceId,
             Role = roleCode,
             Revision = revision,
+            CorrelatedDocumentId = correlatedId,
             Status = FiscalDocuments.Code(FiscalDocumentStatus.Pending),
             DocumentType = document.DocumentType,
             DocumentTypeIsPlaceholder = string.Equals(document.DocumentType, FiscalDocuments.PlaceholderDocumentType, StringComparison.Ordinal),
@@ -145,7 +180,7 @@ internal sealed class RequestFiscalDocumentHandler(
         {
             var key = $"{request.SourceType}|{request.SourceId}|{roleCode}|{revision}";
             var result = await channel.SubmitAsync(document, key, cancellationToken).ConfigureAwait(false);
-            Apply(row, result, now);
+            Apply(row, result, now, correlatedMark);
         }
 
         db.FiscalDocuments.Add(row);
@@ -153,7 +188,7 @@ internal sealed class RequestFiscalDocumentHandler(
         return new FiscalDocumentRequestResponse { FiscalDocumentId = row.FiscalDocumentId, Status = row.Status, DocumentType = row.DocumentType };
     }
 
-    private void Apply(FiscalDocumentRow row, FiscalSubmissionResult result, Instant now)
+    private void Apply(FiscalDocumentRow row, FiscalSubmissionResult result, Instant now, string? correlatedMark)
     {
         var keys = BusinessKeys.Empty.With("fiscalDocumentId", row.FiscalDocumentId.Value.ToString());
         switch (result.Status)
@@ -169,7 +204,7 @@ internal sealed class RequestFiscalDocumentHandler(
                     new FiscalDocRegisteredV1
                     {
                         SourceType = row.SourceType, SourceId = row.SourceId, DocumentType = row.DocumentType, Mark = mark, Uid = uid,
-                        QrPayloadRef = row.QrPayloadRef, CorrelatedMark = null,
+                        QrPayloadRef = row.QrPayloadRef, CorrelatedMark = correlatedMark,
                     },
                     keys) { OccurredAt = now });
                 break;

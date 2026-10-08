@@ -471,5 +471,12 @@ internal sealed class PlatformApprovalService(
     public Task<ApprovalVerifyForExecutionResponse> VerifyForExecutionAsync(ApprovalVerifyForExecutionRequest request1, CancellationToken cancellationToken = default) =>
         queries.VerifyForExecutionAsync(request1, cancellationToken);
 
+    /// <summary>
+    /// Contract placeholder (SL4-CONTRACTS, D-SL4-14): <c>plt.Approval.withdraw</c> is typed in the contract but its
+    /// behaviour is built by SL4-PLT. Until then the call fails closed rather than silently doing nothing.
+    /// </summary>
+    public Task<ApprovalWithdrawResponse> WithdrawAsync(ApprovalWithdrawRequest request1, CommandOptions options, CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException("plt.Approval.withdraw is built by SL4-PLT.");
+
     private static T Unwrap<T>(Result<T> result) => result.IsSuccess ? result.Value : throw new DomainException(result.Error);
 }

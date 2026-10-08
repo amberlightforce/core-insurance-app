@@ -40,12 +40,18 @@ public sealed class ModuleSettingsTests : IDisposable
         permissions.Grants["pty.Party.create"].ShouldBe(["Staff.Underwriter", "Staff.Billing"]);
 
         // The grants of two different module files (clm, uw) both survive: arrays are re-indexed across files.
-        authority.Grants.Select(g => g.Id).ShouldBe(
-            [
-                "clm-handler-reserve-illustrative", "clm-handler-payment-illustrative", "clm-manager-reserve-illustrative",
-                "clm-manager-payment-illustrative", "uw-manager-issue-approval-illustrative",
-            ],
-            ignoreOrder: true);
+        // Other modules' files add their own grants, so this asserts the ones it knows rather than the whole list.
+        foreach (var id in new[]
+                 {
+                     "clm-handler-reserve-illustrative", "clm-handler-payment-illustrative", "clm-manager-reserve-illustrative",
+                     "clm-manager-payment-illustrative", "uw-manager-issue-approval-illustrative",
+                     "bil-billing-refund-illustrative", "bil-billingmgr-refund-illustrative",
+                 })
+        {
+            authority.Grants.Select(g => g.Id).ShouldContain(id);
+        }
+
+        authority.Grants.Select(g => g.Id).Distinct().Count().ShouldBe(authority.Grants.Count);
         authority.Grants.Single(g => g.Id == "uw-manager-issue-approval-illustrative").Limits.Single().Codes.Count.ShouldBe(3);
         authority.Grants.Single(g => g.Id == "clm-manager-payment-illustrative").Limits.Single().Amount.ShouldBe("50000.00");
     }
@@ -91,17 +97,22 @@ public sealed class ModuleSettingsTests : IDisposable
 
     [Theory]
     [InlineData("Production", 0)]
-    [InlineData("Staging", 5)]
-    [InlineData("Development", 5)]
+    [InlineData("Staging", -1)]
+    [InlineData("Development", -1)]
     public void Illustrative_grants_from_the_module_files_are_dropped_in_Production_only(string environment, int expected)
     {
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(ModuleSettings.Load(Path.Combine(HostDirectory, ModuleSettings.PermissionsDirectory))).Build();
         var authority = new AuthorityOptions();
         configuration.GetSection(AuthorityOptions.Section).Bind(authority);
 
+        // -1 = every grant of every module file survives (the count grows with each module; it is not pinned here).
+        var all = authority.Grants.Count;
+        all.ShouldBeGreaterThanOrEqualTo(7);
+        authority.Grants.ShouldAllBe(g => g.Illustrative);
+
         AuthorityOptions.DropIllustrativeIn(authority, new Env(environment));
 
-        authority.Grants.Count.ShouldBe(expected);
+        authority.Grants.Count.ShouldBe(expected < 0 ? all : expected);
     }
 
     [Fact]

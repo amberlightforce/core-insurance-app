@@ -46,4 +46,19 @@ public sealed record FinancialLineBalance
     /// <summary>Contract member 'incurred'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("incurred")]
     public required global::CoreIns.SharedKernel.Money Incurred { get; init; }
+
+    /// <summary>Σ approved recovery-reserve transactions (REQ-CLM-096); always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoveryReserve")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? RecoveryReserve { get; init; }
+
+    /// <summary>Σ approved recovery transactions (realised); always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoveries")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? Recoveries { get; init; }
+
+    /// <summary>Σ recovery reserves − Σ recoveries, never below zero; always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("openRecoveryReserve")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? OpenRecoveryReserve { get; init; }
 }

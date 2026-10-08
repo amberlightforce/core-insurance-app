@@ -98,3 +98,11 @@ found by a review or by CI in slices 1–2; the decision id says where.
     with a test on seeded pre-migration data (SL3-POL-TEMPORAL D2).
 42. **Money engines refuse, never clamp**: a clamp that "keeps amounts in range" turns corrupt or stale state into
     plausible wrong money; validate the state and return a typed refusal (SL3-POL-ENGINE R2).
+43. **Never bind a test double as the production default**: ports to other modules (proration, tax lines, screening…)
+    default to a fail-closed `Unavailable*` implementation; reference or fake implementations are registered only in
+    tests. A silent reference fallback becomes wrong money once neighbours are wired (SL3-POL-CHANGE D1).
+44. **Re-check permission and limits at every command that commits**, not only at create or preview: routed commands
+    (e.g. a change bound through `pol.Job.bind`) must enforce their own permission and role-based limits at bind time.
+45. **Verify the push landed**: when the local branch name differs from the remote one, a plain `git push` may update
+    nothing. Push explicitly (`git push origin HEAD:<remote-branch>`) and confirm with
+    `git rev-parse HEAD` == `git ls-remote origin <remote-branch>` before reporting a PR as updated.
