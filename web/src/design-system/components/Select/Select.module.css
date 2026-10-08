@@ -40,6 +40,16 @@
   white-space: nowrap;
 }
 
+/* The selected option renders inside the trigger: only its label, on the trigger's single line. */
+.value .check,
+.value .optionDescription {
+  display: none;
+}
+
+.value .optionText {
+  display: inline;
+}
+
 .value[data-placeholder] {
   color: var(--color-text-placeholder);
 }
