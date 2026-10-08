@@ -6289,8 +6289,11 @@ components:
         sourceType:
           allOf:
           - $ref: ../events/common.schema.json#/$defs/Code
-          description: Fiscal source type. REQ-CMP-030 lists TRANSACTION, INVOICE, CREDIT, FEE, COMMISSION, CLAIM_PAYMENT;
-            integration review XRF-001 names BIL_INVOICE / BIL_CREDIT / BIL_COMMISSION. Open code until CMP settles one list.
+          description: 'Fiscal source type. REQ-CMP-030 lists TRANSACTION, INVOICE, CREDIT, FEE, COMMISSION, CLAIM_PAYMENT; integration review XRF-001
+            names BIL_INVOICE / BIL_CREDIT / BIL_COMMISSION. Open code until CMP settles one list. Slice 4 (D-SL4-11) adds CLM_CLAIM_PAYMENT: a CLM
+            claim payment settlement receipt, role ISSUE, documentCategory CLAIM_SETTLEMENT_RECEIPT, sourceId = the CLM claim payment id, idempotency
+            source + id + role + revision. Not requested for payments with method CLEARING (no receipt). Document types are the open codes UNMAPPED-OQ-012
+            (OI-CLM-04); the stub channel is never bound in Production.'
           examples:
           - TRANSACTION
           - INVOICE
@@ -6298,6 +6301,7 @@ components:
           - FEE
           - COMMISSION
           - CLAIM_PAYMENT
+          - CLM_CLAIM_PAYMENT
         sourceId:
           type: string
           description: Id of the source object
@@ -6339,8 +6343,14 @@ components:
           $ref: ../events/common.schema.json#/$defs/LocalDate
         correlatedDocumentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'For role CREDIT: the fiscal document of the original invoice the credit corrects, so the credit carries its correlated mark (PRD-11
-            credit notes; D-SL3-07). Equal to originalFiscalDocumentId when both are given. Absent = an uncorrelated credit.'
+          description: 'For role CREDIT: the fiscal document of the original invoice the credit corrects, so the credit carries its correlated mark
+            (PRD-11 credit notes; D-SL3-07). Equal to originalFiscalDocumentId when both are given. Absent = an uncorrelated credit.'
+        documentCategory:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Document category. For sourceType CLM_CLAIM_PAYMENT it is CLAIM_SETTLEMENT_RECEIPT (always set there); null otherwise. Cyprus
+            resolves NotRequired.
       required:
       - sourceType
       - sourceId
@@ -6348,8 +6358,8 @@ components:
       - lines
       - counterpartyPartyId
       - issueDate
-      description: 'Typed from REQ-CMP-001, REQ-CMP-030..033. PRD inputs: "source type and id, role, lines (fiscal-category
-        key, amount, charge or payment id), counterparty party id, issue date"'
+      description: 'Typed from REQ-CMP-001, REQ-CMP-030..033. PRD inputs: "source type and id, role, lines (fiscal-category key, amount, charge or
+        payment id), counterparty party id, issue date"'
     FiscalDocumentRequestResponse:
       type: object
       properties:
@@ -6434,6 +6444,9 @@ components:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Code
+        correlatedDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: For a CREDIT document, the fiscal document of the original it corrects (SL3-CMP-CREDIT)
       required:
       - fiscalDocumentId
       - status

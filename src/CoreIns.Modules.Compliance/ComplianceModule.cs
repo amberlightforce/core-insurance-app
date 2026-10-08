@@ -63,6 +63,10 @@ public static class ComplianceModule
             .Describe("Οι γραμμές πρέπει να έχουν ένα νόμισμα και στρογγυλοποίηση σε λεπτά.", "Lines must share one currency and be rounded to minor units."),
         ErrorDefinition.For(ModuleCode.CMP, "TRANSPORT-UNAVAILABLE", 503, "Το κανάλι φορολογικών παραστατικών δεν είναι διαθέσιμο", "The fiscal-document channel is not available", retryable: true)
             .Describe("Δεν έχει συνδεθεί κανάλι διαβίβασης για τη νομική οντότητα.", "No transmission channel is bound for the legal entity."),
+        ErrorDefinition.For(ModuleCode.CMP, "VALIDATION", 422, "Μη έγκυρο αίτημα παραστατικού", "The fiscal-document request is not valid")
+            .Describe("Η συσχέτιση ισχύει μόνο για πιστωτικά και πρέπει να συμφωνεί με το αρχικό παραστατικό.", "A correlation applies to credits only and must match the original document."),
+        ErrorDefinition.For(ModuleCode.CMP, "CORRELATED-NOT-FOUND", 422, "Δεν βρέθηκε το συσχετισμένο παραστατικό", "The correlated document was not found")
+            .Describe("Το πιστωτικό πρέπει να αναφέρεται σε καταχωρημένο παραστατικό έκδοσης του ίδιου αντισυμβαλλομένου (όχι σε άλλο πιστωτικό).", "A credit must refer to a Registered ISSUE document of the same counterparty (not to another credit)."),
         ErrorDefinition.For(ModuleCode.CMP, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

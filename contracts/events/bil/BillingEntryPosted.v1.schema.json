@@ -81,7 +81,7 @@
         "eventType": {
           "$ref": "../common.schema.json#/$defs/Code",
           "x-classification": "P0",
-          "description": "Entry type (open Code). Slice 3 adds CREDIT_WRITTEN (reversal of the written premium receivable by a credit), CREDIT_BILLED (reversal of the billed receivable by a credit note) and REFUND_APPROVED (credit moved to refunds payable on approval). Disbursement entries (DISBURSEMENT_RELEASED, DISBURSEMENT_CLEARED) carry the source type BIL_REFUND for policy refunds. Servicing entries always carry the line dimensions transactionKind, cancellationSource (cancellations) and treatmentRuleId (tax and levy lines)."
+          "description": "Entry type (open Code). Slice 3 adds CREDIT_WRITTEN (reversal of the written premium receivable by a credit), CREDIT_BILLED (reversal of the billed receivable by a credit note) and REFUND_APPROVED (credit moved to refunds payable on approval). Disbursement entries (DISBURSEMENT_RELEASED, DISBURSEMENT_CLEARED) carry the source type BIL_REFUND for policy refunds. Servicing entries always carry the line dimensions transactionKind, cancellationSource (cancellations) and treatmentRuleId (tax and levy lines). Slice 4 adds RECEIVABLE_REGISTERED and RECEIVABLE_COLLECTED (CLM salvage, subrogation and FS receivables, D-SL4-06), FS_CLEARING_RELEASED and FS_CLEARING_CLEARED (FS_CLEARING disbursements, D-SL4-02) and DISBURSEMENT_REVERSED (stop, void, return or reject of a disbursement, D-SL4-13). Receivable entries always carry the claim, recovery (salvage and subrogation) and counterparty dimensions; FS_CLEARING entries always carry the statementRef and counterpartyPartyId."
         },
         "accountingDate": {
           "$ref": "../common.schema.json#/$defs/LocalDate",

@@ -623,6 +623,13 @@ paths:
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: RI-ERR-SIGNED-LINES
+        note: the signed lines do not sum to placedPct, or there is not exactly one lead
+        status: 422
+      - code: RI-ERR-NOT-FOUND
+        note: a reinsurer or broker party does not exist
+        status: 404
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
       x-source:
       - PRD-08 §9.1 l.1502
       parameters:
@@ -649,6 +656,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -685,6 +694,7 @@ paths:
       - FIN
       x-permission: ri.Contract.list
       x-error-codes: []
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
       x-source:
       - PRD-08 §9.1 l.1503
       parameters:
@@ -692,6 +702,22 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: contractYear
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1900
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/RiContractStatus'
+      - name: contractType
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/RiContractType'
       responses:
         '200':
           description: Success
@@ -743,6 +769,19 @@ paths:
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: RI-ERR-SIGNED-LINES
+        note: the signed lines do not sum to placedPct, or there is not exactly one lead
+        status: 422
+      - code: RI-ERR-NOT-FOUND
+        note: a reinsurer or broker party does not exist
+        status: 404
+      - code: RI-ERR-STATE
+        note: the contract is not a Draft
+        status: 422
+      - code: RI-ERR-STALE
+        note: expectedRecordVersion differs from the current record version
+        status: 409
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
       x-source:
       - PRD-08 §9.1 l.1502
       parameters:
@@ -812,7 +851,10 @@ paths:
       x-consumers:
       - FIN
       x-permission: ri.Contract.get
-      x-error-codes: []
+      x-error-codes:
+      - code: RI-ERR-NOT-FOUND
+        status: 404
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
       x-source:
       - PRD-08 §9.1 l.1503
       parameters:
@@ -945,6 +987,16 @@ paths:
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: RI-ERR-STATE
+        note: the contract is not a Draft
+        status: 422
+      - code: RI-ERR-SIGNED-LINES
+        status: 422
+      - code: RI-ERR-STALE
+        status: 409
+      - code: RI-ERR-NOT-FOUND
+        status: 404
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
       x-source:
       - PRD-08 §9.1 l.1502
       parameters:
@@ -971,6 +1023,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -1013,6 +1067,17 @@ paths:
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: RI-ERR-STATE
+        note: the contract is not PendingApproval
+        status: 422
+      - code: RI-ERR-SOD
+        note: the approver is the enterer (maker-checker)
+        status: 403
+      - code: RI-ERR-STALE
+        status: 409
+      - code: RI-ERR-NOT-FOUND
+        status: 404
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
       x-source:
       - PRD-08 §9.1 l.1502
       parameters:
@@ -1039,6 +1104,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -1328,12 +1395,32 @@ paths:
       x-exposure:
       - ui
       x-permission: ri.Contract.applicable
-      x-error-codes: []
+      x-error-codes:
+      - code: RI-ERR-VALIDATION
+        note: missing product or coverage code
+        status: 422
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
+      x-prd-param-names:
+        validAt: lossAt (loss instant; D-API-08)
+      x-consumers:
+      - CLM
+      - FIN
       x-source:
       - PRD-08 §9.1 l.1503
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - name: productCode
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: coverageCode
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
       responses:
         '200':
           description: Success
@@ -1347,6 +1434,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/ri/v1/contracts/simulate:
@@ -3090,7 +3179,7 @@ paths:
       - W7-RI-02
       x-status: full
       x-maturity: pre-release
-      x-typed: REQ-RI-136
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3100,7 +3189,9 @@ paths:
       x-consumers:
       - CLM
       x-permission: ri.Recovery.listByClaim
-      x-error-codes: []
+      x-error-codes:
+      - code: RI-ERR-VALIDATION
+        status: 422
       x-source:
       - PRD-08 §9.1 l.1513
       x-prd-param-names:
@@ -3131,6 +3222,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/ri/v1/recoveries/list-by-contract:
@@ -3165,6 +3258,7 @@ paths:
       - ui
       x-permission: ri.Recovery.listByContract
       x-error-codes: []
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
       x-source:
       - PRD-08 §9.1 l.1513
       x-prd-param-names:
@@ -3176,6 +3270,16 @@ paths:
       - $ref: common.yaml#/components/parameters/KnownAt
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: contractId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: claimId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -3222,7 +3326,11 @@ paths:
       x-exposure:
       - ui
       x-permission: ri.Recovery.trace
-      x-error-codes: []
+      x-error-codes:
+      - code: RI-ERR-NOT-FOUND
+        note: unknown batch
+        status: 404
+      x-typed: 'SL4-CONTRACTS: REQ-RI-031..REQ-RI-043, REQ-RI-046..REQ-RI-049, REQ-RI-116..REQ-RI-127, REQ-RI-136 (D-SL4-04, D-SL4-05)'
       x-source:
       - PRD-08 §9.1 l.1513
       x-prd-param-names:
@@ -3232,6 +3340,11 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/KnownAt
+      - name: batchId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -3245,6 +3358,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/ri/v1/recoveries/recalculate:
@@ -7583,56 +7698,293 @@ components:
       description: Page of ri.Programme.list results (cursor pagination, contract §3.5.5)
     ContractCreateRequest:
       type: object
-      description: 'ri.Contract.create request. PRD inputs: "contract, section, layer, clause data; reason"'
+      description: ri.Contract.create request (REQ-RI-031..REQ-RI-049). Creates a Draft; signed lines must sum to placedPct (RI-ERR-SIGNED-LINES).
+        With dryRun nothing is stored.
       properties:
-        contract:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract"'
-        section:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "section"'
-        layer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer"'
-        clauseData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clause data"'
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Legal entity code (the cedant)
+        contractType:
+          $ref: '#/components/schemas/RiContractType'
+          description: XOL_PER_RISK only in slice 4; any other value is RI-ERR-VALIDATION
+        contractYear:
+          type: integer
+          minimum: 1900
+          description: Contract (underwriting) year
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+          description: Contract currency; EUR only in slice 4 (four amounts equal, rate ids null)
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+          description: Half-open period [from, to) of Europe/Athens dates
+        scope:
+          $ref: '#/components/schemas/RiContractScope'
+        clause:
+          $ref: '#/components/schemas/RiContractClause'
+        layers:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/RiLayer
+          minItems: 1
+        participations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiParticipationInput'
+          minItems: 1
+        placedPct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Reason code (audit)
+      required:
+      - legalEntity
+      - contractType
+      - contractYear
+      - currency
+      - period
+      - scope
+      - clause
+      - layers
+      - participations
+      - placedPct
+    RiContractType:
+      type: string
+      enum:
+      - XOL_PER_RISK
+      - QUOTA_SHARE
+      - SURPLUS
+      - FAC_PROPORTIONAL
+      - FAC_XOL
+      - AUTO_FAC
+      - XOL_PER_EVENT
+      - CAT_XOL
+      - AGGREGATE_XOL
+      - STOP_LOSS
+      description: 'RI contract type (PRD-08 §7). Slice 4 builds XOL_PER_RISK only (D-SL4-04): every other value is part of the enum so the contract
+        does not change later, but create and update refuse it with RI-ERR-VALIDATION.'
+    RiContractStatus:
+      type: string
+      enum:
+      - DRAFT
+      - PENDING_APPROVAL
+      - APPROVED
+      - ACTIVE
+      - EXPIRED
+      - CLOSED
+      description: 'Contract lifecycle (slice 4): Draft -> PendingApproval (submit) -> Approved (maker-checker, PLT approval RI.CONTRACT_APPROVE)
+        -> Active at the period start (Europe/Athens, emits RIContractActivated). A RETURN decision moves PendingApproval back to Draft. Expired and
+        Closed are later work packages.'
+    RiContractScope:
+      type: object
+      description: 'Scope of the contract (REQ-RI-036): which claims are in-scope exposures (D-SL4-05). Illustrative treaty: the MTPL coverages.'
+      properties:
+        productCodes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          minItems: 1
+          description: Product codes the contract covers (e.g. MOTOR_TPL)
+        coverageCodes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          minItems: 1
+          description: Coverage codes the contract covers (e.g. MTPL_PD, MTPL_BI)
+      required:
+      - productCodes
+      - coverageCodes
+    RiContractClause:
+      type: object
+      description: Clause data of the contract (REQ-RI-043, REQ-RI-117). UnallocatedExpense is never part of ultimate net loss.
+      properties:
+        alaeIncluded:
+          type: boolean
+          description: ALAE (allocated loss adjustment expense) is part of ultimate net loss
+        statutoryInterestIncluded:
+          type: boolean
+          description: Statutory interest is part of ultimate net loss
+        recoveriesInure:
+          type: string
+          enum:
+          - REALISED_ONLY
+          description: 'How recoveries reduce ultimate net loss (REQ-RI-117 default): only realised recoveries inure; recovery reserves do not. REALISED_ONLY
+            is the only value in slice 4.'
+      required:
+      - alaeIncluded
+      - statutoryInterestIncluded
+      - recoveriesInure
+    RiParticipationInput:
+      type: object
+      description: A reinsurer participation on a contract (REQ-RI-046..REQ-RI-049). No security list, ratings or LEI in slice 4 (D-SL4-04).
+      properties:
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: PTY organisation party of the reinsurer
+        brokerPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: PTY organisation party of the broker, when placed through one
+        signedLinePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Signed line as a percentage of the placed share (decimal string); the lines of all participations sum to placedPct (RI-ERR-SIGNED-LINES)
+        lead:
+          type: boolean
+          description: Lead reinsurer; exactly one participation is the lead. Also receives the rounding residual of a split (D-SL4-05)
+      required:
+      - reinsurerPartyId
+      - signedLinePct
+      - lead
+    RiParticipationView:
+      type: object
+      description: A participation of a contract.
+      properties:
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        brokerPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        signedLinePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        lead:
+          type: boolean
+      required:
+      - reinsurerPartyId
+      - signedLinePct
+      - lead
+    RiContractView:
+      type: object
+      description: A reinsurance contract with its current version (PRD-08 §7 RIContract). Fields with a stated "always set" are never absent.
+      properties:
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          description: Contract number from PLT numbering; always set once the contract is submitted, null for a Draft
+        stableTreatyId:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: 'Stable treaty id: constant across contract years; always set'
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        contractType:
+          $ref: '#/components/schemas/RiContractType'
+        contractYear:
+          type: integer
+          minimum: 1900
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        scope:
+          $ref: '#/components/schemas/RiContractScope'
+        clause:
+          $ref: '#/components/schemas/RiContractClause'
+        layers:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/RiLayer
+        participations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiParticipationView'
+        placedPct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        status:
+          $ref: '#/components/schemas/RiContractStatus'
+        versionNo:
+          type: integer
+          minimum: 1
+          description: Contract version row number; always 1 in slice 4 (endorsement is later, D-SL4-04)
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Start of the version row valid period
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: 'Optimistic-lock token: pass it as expectedRecordVersion (RI-ERR-STALE otherwise)'
+        maker:
+          type: string
+          description: Actor who entered the contract (enterer; SoD, D-SL4-16)
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: PLT approval request while PENDING_APPROVAL
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        activatedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: Set when the contract became ACTIVE
+      required:
+      - contractId
+      - legalEntity
+      - contractType
+      - contractYear
+      - currency
+      - period
+      - scope
+      - clause
+      - layers
+      - participations
+      - placedPct
+      - status
+      - versionNo
+      - recordVersion
+      - createdAt
     ContractCreateResponse:
       type: object
-      description: 'ri.Contract.create result. PRD outputs: "contract version"'
-      properties:
-        contractVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract version"'
-    ContractUpdateRequest:
-      type: object
-      description: 'ri.Contract.update request. PRD inputs: "contract, section, layer, clause data; reason"'
+      description: ri.Contract.create result
       properties:
         contract:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract"'
-        section:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "section"'
-        layer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer"'
-        clauseData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clause data"'
+          $ref: '#/components/schemas/RiContractView'
+      required:
+      - contract
+    ContractUpdateRequest:
+      type: object
+      description: ri.Contract.update request. Draft contracts only (RI-ERR-STATE otherwise); members left out are unchanged.
+      properties:
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The recordVersion the user saw; a different current version is RI-ERR-STALE
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        scope:
+          $ref: '#/components/schemas/RiContractScope'
+        clause:
+          $ref: '#/components/schemas/RiContractClause'
+        layers:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/RiLayer
+          minItems: 1
+        participations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiParticipationInput'
+          minItems: 1
+        placedPct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Reason code (audit)
+      required:
+      - expectedRecordVersion
     ContractUpdateResponse:
       type: object
-      description: 'ri.Contract.update result. PRD outputs: "contract version"'
+      description: ri.Contract.update result
       properties:
-        contractVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract version"'
+        contract:
+          $ref: '#/components/schemas/RiContractView'
+      required:
+      - contract
     ContractEndorseRequest:
       type: object
       description: 'ri.Contract.endorse request. PRD inputs: "contract, section, layer, clause data; reason"'
@@ -7661,56 +8013,63 @@ components:
           description: 'PRD: "contract version"'
     ContractSubmitRequest:
       type: object
-      description: 'ri.Contract.submit request. PRD inputs: "contract, section, layer, clause data; reason"'
+      description: 'ri.Contract.submit request: Draft -> PendingApproval; opens the PLT approval RI.CONTRACT_APPROVE (enterer is the maker).'
       properties:
-        contract:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract"'
-        section:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "section"'
-        layer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer"'
-        clauseData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clause data"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - contractId
+      - expectedRecordVersion
     ContractSubmitResponse:
       type: object
-      description: 'ri.Contract.submit result. PRD outputs: "contract version"'
-      properties:
-        contractVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract version"'
-    ContractApproveRequest:
-      type: object
-      description: 'ri.Contract.approve request. PRD inputs: "contract, section, layer, clause data; reason"'
+      description: ri.Contract.submit result
       properties:
         contract:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract"'
-        section:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "section"'
-        layer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer"'
-        clauseData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clause data"'
+          $ref: '#/components/schemas/RiContractView'
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - contract
+      - approvalRequestId
+    ContractApproveRequest:
+      type: object
+      description: ri.Contract.approve request. The approver must not be the enterer (RI-ERR-SOD, REQ-RI-065; PRD-08 §12).
+      properties:
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - RETURN
+          description: APPROVE moves the contract to Approved (Active at the period start); RETURN moves it back to Draft
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Reason; required for RETURN
+      required:
+      - contractId
+      - expectedRecordVersion
+      - decision
     ContractApproveResponse:
       type: object
-      description: 'ri.Contract.approve result. PRD outputs: "contract version"'
+      description: ri.Contract.approve result
       properties:
-        contractVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract version"'
+        contract:
+          $ref: '#/components/schemas/RiContractView'
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - RETURN
+      required:
+      - contract
+      - decision
     ContractExpireRequest:
       type: object
       description: 'ri.Contract.expire request. PRD inputs: "contract, section, layer, clause data; reason"'
@@ -7791,24 +8150,45 @@ components:
           description: 'PRD: "contract version"'
     ContractGetResponse:
       type: object
-      description: 'ri.Contract.get result. PRD outputs: "contracts, versions"'
+      description: ri.Contract.get result (REQ-RI-001)
       properties:
-        contracts:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contracts"'
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
+        contract:
+          $ref: '#/components/schemas/RiContractView'
+      required:
+      - contract
     ContractListItem:
       type: object
-      description: 'ri.Contract.list result. PRD outputs: "contracts, versions"'
+      description: 'ri.Contract.list item: row of the contract registry'
       properties:
-        contracts:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contracts"'
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        contractType:
+          $ref: '#/components/schemas/RiContractType'
+        contractYear:
+          type: integer
+          minimum: 0
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        placedPct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        status:
+          $ref: '#/components/schemas/RiContractStatus'
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - contractId
+      - contractType
+      - contractYear
+      - currency
+      - period
+      - placedPct
+      - status
+      - recordVersion
     ContractListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7831,14 +8211,20 @@ components:
           description: 'PRD: "versions"'
     ContractApplicableResponse:
       type: object
-      description: 'ri.Contract.applicable result. PRD outputs: "contracts, versions"'
+      description: ri.Contract.applicable result (REQ-RI-001, REQ-RI-116)
       properties:
         contracts:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contracts"'
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
+          type: array
+          items:
+            $ref: '#/components/schemas/RiContractView'
+          description: Active contracts of the legal entity whose period contains the loss instant (Europe/Athens, half-open) and whose scope contains
+            the product and coverage code; empty when none applies
+        validAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: The loss instant the lookup used
+      required:
+      - contracts
+      - validAt
     ContractSimulateRequest:
       type: object
       description: 'ri.Contract.simulate request. PRD inputs: "contract version, scenario"'
@@ -8360,25 +8746,67 @@ components:
       description: Page of ri.Fac.list results (cursor pagination, contract §3.5.5)
     RecoveryListByClaimItem:
       type: object
+      description: 'Typed from REQ-RI-136, SL4-CONTRACTS. PRD outputs: "recoverables, trace". One row per contract x layer x participant of the claim,
+        as known at knownAt.'
       properties:
         contractId:
           $ref: ../events/common.schema.json#/$defs/Uuid
         layerId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Layer id
         participantId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Participant (reinsurer party) id
         recoverableIncurred:
           $ref: ../events/common.schema.json#/$defs/Money
+          description: Recoverable incurred (REQ-RI-116)
         recoverablePaid:
           $ref: ../events/common.schema.json#/$defs/Money
+          description: Recoverable on paid losses
         recoverableOutstanding:
           $ref: ../events/common.schema.json#/$defs/Money
+          description: Incurred recoverable minus paid recoverable; zero for a closed claim (D-SL4-05)
+        claimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Claim; always set
+        contractYear:
+          oneOf:
+          - type: integer
+            minimum: 0
+          - type: 'null'
+          description: Contract year; always set
+        layerNo:
+          oneOf:
+          - type: integer
+            minimum: 1
+          - type: 'null'
+          description: Layer number; always set
+        recoveryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Recovery record id; always set
+        batchId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Batch that last calculated the row (use with ri.Recovery.trace); always set
+        state:
+          oneOf:
+          - type: string
+            enum:
+            - CALCULATED
+            - POSTED
+            - REVERSED
+          - type: 'null'
+          description: Recovery state (PRD-08 §7); always set
       required:
       - contractId
       - recoverableIncurred
       - recoverablePaid
       - recoverableOutstanding
-      description: 'Typed from REQ-RI-136. PRD outputs: "recoverables, trace"'
     RecoveryListByClaimPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -8391,14 +8819,100 @@ components:
       description: Page of ri.Recovery.listByClaim results (cursor pagination, contract §3.5.5)
     RecoveryListByContractItem:
       type: object
-      description: 'ri.Recovery.listByContract result. PRD outputs: "recoverables, trace"'
+      description: ri.Recovery.listByContract row (same shape as listByClaim; claimId is always set)
       properties:
-        recoverables:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "recoverables"'
-        trace:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "trace"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        layerId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Layer id
+        participantId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Participant (reinsurer party) id
+        recoverableIncurred:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Recoverable incurred (REQ-RI-116)
+        recoverablePaid:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Recoverable on paid losses
+        recoverableOutstanding:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Incurred recoverable minus paid recoverable; zero for a closed claim (D-SL4-05)
+        claimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Claim; always set
+        contractYear:
+          oneOf:
+          - type: integer
+            minimum: 0
+          - type: 'null'
+          description: Contract year; always set
+        layerNo:
+          oneOf:
+          - type: integer
+            minimum: 1
+          - type: 'null'
+          description: Layer number; always set
+        recoveryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Recovery record id; always set
+        batchId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Batch that last calculated the row (use with ri.Recovery.trace); always set
+        state:
+          oneOf:
+          - type: string
+            enum:
+            - CALCULATED
+            - POSTED
+            - REVERSED
+          - type: 'null'
+          description: Recovery state (PRD-08 §7); always set
+      required:
+      - contractId
+      - recoverableIncurred
+      - recoverablePaid
+      - recoverableOutstanding
+    RecoveryTraceStep:
+      type: object
+      description: One step of the calculation trace (REQ-RI-132). Engine and configuration hash are on the trace.
+      properties:
+        stepNo:
+          type: integer
+          minimum: 1
+        kind:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: UNL_INCURRED, UNL_PAID, LAYER_LOSS, AGGREGATE, SPLIT_BY_LINE, ROUNDING, DELTA, CLAIM_TOTAL
+        claimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        layerNo:
+          oneOf:
+          - type: integer
+            minimum: 1
+          - type: 'null'
+        participantId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        amount:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Amount produced by the step
+        note:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Human-readable formula with the inputs (e.g. UNL 950000.00 - attachment 250000.00, capped at limit 500000.00)
+      required:
+      - stepNo
+      - kind
     RecoveryListByContractPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -8411,14 +8925,34 @@ components:
       description: Page of ri.Recovery.listByContract results (cursor pagination, contract §3.5.5)
     RecoveryTraceResponse:
       type: object
-      description: 'ri.Recovery.trace result. PRD outputs: "recoverables, trace"'
+      description: 'ri.Recovery.trace result (REQ-RI-132). PRD outputs: "recoverables, trace".'
       properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractYear:
+          type: integer
+          minimum: 0
+        engineVersion:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Calculation engine version
+        configurationHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         recoverables:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "recoverables"'
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryListByClaimItem'
         trace:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "trace"'
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryTraceStep'
+      required:
+      - batchId
+      - contractId
+      - contractYear
+      - recoverables
+      - trace
     RecoveryRecalculateRequest:
       type: object
       properties:

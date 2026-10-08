@@ -11,6 +11,17 @@ namespace CoreIns.Modules.Billing.Contracts;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public interface IBillingDisbursementService
 {
+    /// <summary>Approve the release of a disbursement</summary>
+    /// <remarks>
+    /// <para>Operation bil.Disbursement.approveRelease (command; HTTP POST /api/bil/v1/disbursements/approve-release).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full; fully typed from SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12). Wave W7.</para>
+    /// <para>Exposure: ui; consumers: CLM.</para>
+    /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
+    /// <para>Errors: BIL-ERR-SOD (403), BIL-ERR-NOT-FOUND (404), BIL-ERR-APPROVAL-REQUIRED (422), BIL-ERR-STALE (409), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// </remarks>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.DisbursementApproveReleaseResponse> ApproveReleaseAsync(global::CoreIns.Modules.Billing.Contracts.Api.DisbursementApproveReleaseRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+
     /// <summary>Shared disbursement service for every registered source (CD-13, D1): BIL, CLM, RI (RI_SETTLEMENT), CLM …</summary>
     /// <remarks>
     /// <para>Operation bil.Disbursement.get (query; HTTP GET /api/bil/v1/disbursements/{id}).</para>
@@ -38,10 +49,10 @@ public interface IBillingDisbursementService
     /// <remarks>
     /// <para>Operation bil.Disbursement.request (command; HTTP POST /api/bil/v1/disbursements/request).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full; fully typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198, REQ-BIL-200, REQ-BIL-202, REQ-BIL-207, REQ-BIL-211 (SL2-BIL-DISB, CLM_CLAIM_PAYMENT through the stub bank channel). Wave W5.</para>
+    /// <para>Status: full; fully typed from SL4-CONTRACTS: REQ-BIL-346, REQ-BIL-354..REQ-BIL-357 (D-SL4-02, D-SL4-06, D-SL4-12); REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. Wave W5.</para>
     /// <para>Exposure: ui; consumers: CLM, CMP, FIN, RI, WRK.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: BIL-ERR-SOURCE (422), BIL-ERR-METHOD-NOT-ALLOWED (422), BIL-ERR-AMOUNT-MISMATCH (422), BIL-ERR-REDRESS-ROUTE (422), BIL-ERR-APPROVAL-MISMATCH (422), BIL-ERR-PAYEE-BLOCKED (409), BIL-ERR-DUPLICATE (409), BIL-ERR-NOT-STOPPABLE (422), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409), BIL-ERR-CURRENCY (422), BIL-ERR-NOT-FOUND (404), BIL-ERR-PAYEE-ACCOUNT (422), BIL-ERR-VOP-HOLD (409), BIL-ERR-COOLING-OFF (409), BIL-ERR-SCREENING-UNAVAILABLE (503).</para>
+    /// <para>Errors: BIL-ERR-SOURCE (422), BIL-ERR-METHOD-NOT-ALLOWED (422), BIL-ERR-AMOUNT-MISMATCH (422), BIL-ERR-REDRESS-ROUTE (422), BIL-ERR-APPROVAL-MISMATCH (422), BIL-ERR-PAYEE-BLOCKED (409), BIL-ERR-DUPLICATE (409), BIL-ERR-NOT-STOPPABLE (422), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409), BIL-ERR-CURRENCY (422), BIL-ERR-NOT-FOUND (404), BIL-ERR-PAYEE-ACCOUNT (422), BIL-ERR-VOP-HOLD (409), BIL-ERR-COOLING-OFF (409), BIL-ERR-SCREENING-UNAVAILABLE (503), BIL-ERR-LINES-MISMATCH (422).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.DisbursementRequestResponse> RequestAsync(global::CoreIns.Modules.Billing.Contracts.Api.DisbursementRequestRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -49,10 +60,10 @@ public interface IBillingDisbursementService
     /// <remarks>
     /// <para>Operation bil.Disbursement.stop (command; HTTP POST /api/bil/v1/disbursements/stop).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full; fully typed from REQ-BIL-009, REQ-CLM-126. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-009, REQ-CLM-125, REQ-CLM-126, REQ-BIL-208 (SL4-CONTRACTS: typed events DisbursementStopped/Voided/Returned/Rejected, D-SL4-13). Wave W5.</para>
     /// <para>Exposure: ui; consumers: CLM, WRK.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: BIL-ERR-SOURCE (422), BIL-ERR-METHOD-NOT-ALLOWED (422), BIL-ERR-AMOUNT-MISMATCH (422), BIL-ERR-REDRESS-ROUTE (422), BIL-ERR-APPROVAL-MISMATCH (422), BIL-ERR-PAYEE-BLOCKED (409), BIL-ERR-DUPLICATE (409), BIL-ERR-NOT-STOPPABLE (422), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: BIL-ERR-SOURCE (422), BIL-ERR-METHOD-NOT-ALLOWED (422), BIL-ERR-AMOUNT-MISMATCH (422), BIL-ERR-REDRESS-ROUTE (422), BIL-ERR-APPROVAL-MISMATCH (422), BIL-ERR-PAYEE-BLOCKED (409), BIL-ERR-DUPLICATE (409), BIL-ERR-NOT-STOPPABLE (422), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409), BIL-ERR-NOT-FOUND (404), BIL-ERR-SOD (403).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.DisbursementStopResponse> StopAsync(global::CoreIns.Modules.Billing.Contracts.Api.DisbursementStopRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -60,10 +71,10 @@ public interface IBillingDisbursementService
     /// <remarks>
     /// <para>Operation bil.Disbursement.void (command; HTTP POST /api/bil/v1/disbursements/void).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full; fully typed from REQ-BIL-009, REQ-CLM-125. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-009, REQ-CLM-125, REQ-CLM-126, REQ-BIL-208 (SL4-CONTRACTS: typed events DisbursementStopped/Voided/Returned/Rejected, D-SL4-13). Wave W5.</para>
     /// <para>Exposure: ui; consumers: CLM, WRK.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: BIL-ERR-SOURCE (422), BIL-ERR-METHOD-NOT-ALLOWED (422), BIL-ERR-AMOUNT-MISMATCH (422), BIL-ERR-REDRESS-ROUTE (422), BIL-ERR-APPROVAL-MISMATCH (422), BIL-ERR-PAYEE-BLOCKED (409), BIL-ERR-DUPLICATE (409), BIL-ERR-NOT-STOPPABLE (422), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: BIL-ERR-SOURCE (422), BIL-ERR-METHOD-NOT-ALLOWED (422), BIL-ERR-AMOUNT-MISMATCH (422), BIL-ERR-REDRESS-ROUTE (422), BIL-ERR-APPROVAL-MISMATCH (422), BIL-ERR-PAYEE-BLOCKED (409), BIL-ERR-DUPLICATE (409), BIL-ERR-NOT-STOPPABLE (422), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409), BIL-ERR-NOT-FOUND (404), BIL-ERR-SOD (403).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.DisbursementVoidResponse> VoidAsync(global::CoreIns.Modules.Billing.Contracts.Api.DisbursementVoidRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

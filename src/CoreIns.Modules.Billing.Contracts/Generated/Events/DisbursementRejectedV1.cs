@@ -66,6 +66,14 @@ public sealed record DisbursementRejectedV1 : global::CoreIns.Platform.Contracts
     [global::System.Text.Json.Serialization.JsonPropertyName("rejectingParty")]
     public required RejectingPartyValue RejectingParty { get; init; }
 
+    /// <summary>Friendly Settlement statement reference of an FS_CLEARING disbursement (D-SL4-02): CLM returns the net to Pending. Always set when sourceType is FS_CLEARING, null otherwise</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statementRef")]
+    public string? StatementRef { get; init; }
+
+    /// <summary>Disbursement method (open Code, including CLEARING); always set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("method")]
+    public string? Method { get; init; }
+
     /// <summary>Approver, evidence check or bank pain.002</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<RejectingPartyValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

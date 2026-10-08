@@ -53,7 +53,7 @@ public sealed record ApprovalDecidedV1 : global::CoreIns.Platform.Contracts.Even
     [global::System.Text.Json.Serialization.JsonPropertyName("requestId")]
     public required global::System.Guid RequestId { get; init; }
 
-    /// <summary>Decision, or withdrawn / expired</summary>
+    /// <summary>Outcome: APPROVED, REJECTED, RETURNED, EXPIRED or WITHDRAWN. WITHDRAWN (slice 4, D-SL4-14) is published when the owning module withdraws a pending request through IPlatformApprovalService.WithdrawAsync; checkerUserId is null.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
     public required string Decision { get; init; }
 
