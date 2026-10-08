@@ -233,7 +233,7 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     stamp timestamptz;
                 BEGIN
                     SELECT p.last_recorded_at INTO watermark FROM pol.policy p WHERE p.policy_id = NEW.policy_id;
-                    stamp := CASE TG_TABLE_NAME WHEN 'policy_transaction' THEN NEW.recorded_at WHEN 'charge_line' THEN NEW.recorded_at ELSE NEW.recorded_from END;
+                    stamp := (to_jsonb(NEW) ->> CASE WHEN TG_TABLE_NAME IN ('policy_transaction', 'charge_line') THEN 'recorded_at' ELSE 'recorded_from' END)::timestamptz;
                     IF watermark IS NULL OR stamp IS DISTINCT FROM watermark THEN
                         RAISE EXCEPTION 'pol.%: a record must be stamped with the policy watermark (stamp %, watermark %); take PolicyWriteLock first',
                             TG_TABLE_NAME, stamp, watermark USING ERRCODE = 'restrict_violation';
