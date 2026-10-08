@@ -78,6 +78,8 @@ internal static class RuleQualifiers
 internal static class ChargeCategories
 {
     public const string Tax = "TAX";
+
+    public const string Levy = "LEVY";
 }
 
 /// <summary>Debit or credit.</summary>

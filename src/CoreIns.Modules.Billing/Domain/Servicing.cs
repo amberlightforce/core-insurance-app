@@ -63,6 +63,13 @@ internal static class TransactionKinds
     };
 }
 
+/// <summary>Numbering series owned by billing (D-SLC-08 pattern: technical prefix, gapless).</summary>
+internal static class BillingNumbering
+{
+    /// <summary>Credit note series, technical prefix CN, gapless per legal entity and year (REQ-BIL-091).</summary>
+    public const string CreditNote = "CREDIT_NOTE";
+}
+
 /// <summary>The servicing dimensions of a ledger line (always set on servicing entries, null otherwise).</summary>
 internal static class ServicingDimensions
 {
