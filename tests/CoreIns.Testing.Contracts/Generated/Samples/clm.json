@@ -83,6 +83,14 @@
           "newSnapshotRef": "sample",
           "causeEventId": "0192edd6-f893-7dee-8b92-09cb3c62c066",
           "raisedAt": "2026-10-07T09:00:00Z"
+        },
+        "liabilityFacts": {
+          "insuredFaultPct": "12.50",
+          "faultSource": "SAMPLE_CODE",
+          "counterpartyInsurerPartyId": "0192d0bf-2260-7d64-8f24-afb16cacf87b",
+          "jointReportFlag": true,
+          "vehicleCount": 1,
+          "accidentInGreece": true
         }
       }
     },
@@ -219,6 +227,18 @@
           "incurred": {
             "amount": "120.50",
             "currency": "EUR"
+          },
+          "recoveryReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoveries": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openRecoveryReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
           }
         }
       ],
@@ -241,7 +261,23 @@
             "amount": "120.50",
             "currency": "EUR"
           },
-          "paymentPending": true
+          "paymentPending": true,
+          "recoveryReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoveries": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openRecoveryReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "netIncurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
         }
       ],
       "totals": {
@@ -262,7 +298,23 @@
           "amount": "120.50",
           "currency": "EUR"
         },
-        "paymentPending": true
+        "paymentPending": true,
+        "recoveryReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveries": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openRecoveryReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "netIncurred": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
       }
     },
     "clm.Fnol.saveDraft": {
@@ -415,6 +467,76 @@
     }
   },
   "schemas": {
+    "ApprovalDiff": {
+      "lines": [
+        {
+          "kind": "RESERVE",
+          "exposureId": "0192636a-dc79-7db1-8e5f-fa334abb4794",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "recoveryId": "0192c93e-83a6-7909-898f-c1bea487a00e",
+          "before": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "after": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paidBefore": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paidAfter": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "delta": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ApprovalDiffLine": {
+      "kind": "RESERVE",
+      "exposureId": "019211ab-66ea-7efb-8304-c99a69491014",
+      "costType": "SAMPLE_CODE",
+      "costCategory": "SAMPLE_CODE",
+      "recoveryId": "0192241a-b2da-7c31-86a9-03bc1e476516",
+      "before": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "after": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paidBefore": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paidAfter": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "delta": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "AuthorityPreviewItem": {
+      "type": "sample",
+      "costType": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "basis": "EXPOSURE_TOTAL_RESERVE",
+      "outcome": "WITHIN",
+      "role": "sample"
+    },
     "CatEventAggregateResponse": {
       "totalsByLine": "unspecified"
     },
@@ -558,6 +680,14 @@
           "newSnapshotRef": "sample",
           "causeEventId": "019246a7-45d8-7c73-8c01-1c34b060d029",
           "raisedAt": "2026-10-07T09:00:00Z"
+        },
+        "liabilityFacts": {
+          "insuredFaultPct": "12.50",
+          "faultSource": "SAMPLE_CODE",
+          "counterpartyInsurerPartyId": "019224c5-3cc7-7a85-8913-56b5fae1c322",
+          "jointReportFlag": true,
+          "vehicleCount": 1,
+          "accidentInGreece": true
         }
       }
     },
@@ -601,7 +731,10 @@
       "createdAt": "2026-10-07T09:00:00Z",
       "submittedAt": "2026-10-07T09:00:00Z",
       "issuedAt": "2026-10-07T09:00:00Z",
-      "clearedAt": "2026-10-07T09:00:00Z"
+      "clearedAt": "2026-10-07T09:00:00Z",
+      "reissueOf": "01926db6-1a6e-7c64-83d6-c2ac3c0290cf",
+      "fiscalMark": "Sample text",
+      "fsStatementId": "0192bcf0-e0b4-7cc0-892c-dd4e49b1f664"
     },
     "ClaimReopenRequest": {
       "ids": [
@@ -740,11 +873,59 @@
       "ids": [
         "01926048-e678-70f4-8b0a-0e62e2350c0f"
       ],
-      "changes": "unspecified",
-      "reason": "unspecified"
+      "expectedRecordVersion": 1,
+      "changes": {
+        "liabilityFacts": {
+          "insuredFaultPct": "12.50",
+          "faultSource": "SAMPLE_CODE",
+          "counterpartyInsurerPartyId": "01925406-1284-7067-87a5-238016b22c45",
+          "jointReportFlag": true,
+          "vehicleCount": 1,
+          "accidentInGreece": true
+        }
+      },
+      "reason": "SAMPLE_CODE"
     },
     "ClaimUpdateResponse": {
-      "claim": "unspecified"
+      "claim": {
+        "claimId": "019228d2-8e2b-75ee-83e0-ebec12cb49b1",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "019272e4-beb7-7337-8b73-566ec18efa5c",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "0192acb6-d140-71ae-8956-76b3f90d9e0b",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "0192a983-2430-72ba-8aa1-d8c1135528df",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      },
+      "liabilityFacts": {
+        "insuredFaultPct": "12.50",
+        "faultSource": "SAMPLE_CODE",
+        "counterpartyInsurerPartyId": "01922cf5-4e7b-7bf9-8c8b-1213e39db2db",
+        "jointReportFlag": true,
+        "vehicleCount": 1,
+        "accidentInGreece": true
+      }
     },
     "ClaimView": {
       "summary": {
@@ -822,12 +1003,26 @@
         "newSnapshotRef": "sample",
         "causeEventId": "0192f3dd-8f3f-7f25-8677-9fa0d04f3aa1",
         "raisedAt": "2026-10-07T09:00:00Z"
+      },
+      "liabilityFacts": {
+        "insuredFaultPct": "12.50",
+        "faultSource": "SAMPLE_CODE",
+        "counterpartyInsurerPartyId": "0192f119-5fb3-78ee-81c1-10771f3cbe33",
+        "jointReportFlag": true,
+        "vehicleCount": 1,
+        "accidentInGreece": true
       }
     },
     "ClaimantView": {
       "claimantId": "01925390-d02e-7031-8101-7be8a1631c21",
       "partyId": "0192166a-d366-71d7-87ab-bef7ecec915f",
       "claimantType": "INSURED"
+    },
+    "CloseGuardError": {
+      "code": "SAMPLE_CODE",
+      "exposureIds": [
+        "0192d630-0636-7cce-8a4b-8a3c6bfbdc69"
+      ]
     },
     "ConversationListItem": {
       "messageStatus": "unspecified"
@@ -1032,7 +1227,23 @@
         "amount": "120.50",
         "currency": "EUR"
       },
-      "paymentPending": true
+      "paymentPending": true,
+      "recoveryReserve": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "recoveries": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "openRecoveryReserve": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "netIncurred": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
     },
     "FinancialLineBalance": {
       "reserveLineId": "01921565-92d6-7a50-8307-0f093d624cc2",
@@ -1053,6 +1264,18 @@
         "currency": "EUR"
       },
       "incurred": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "recoveryReserve": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "recoveries": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "openRecoveryReserve": {
         "amount": "120.50",
         "currency": "EUR"
       }
@@ -1082,7 +1305,9 @@
       "claimPaymentId": "0192432b-0c31-7b0f-839f-e91f988a199f",
       "reasonCode": "SAMPLE_CODE",
       "proposed": true,
-      "status": "SAMPLE_CODE"
+      "status": "SAMPLE_CODE",
+      "recoveryId": "0192da46-9323-7137-8517-5ac32fcda21a",
+      "evidenceRef": "Sample text"
     },
     "FinancialsDailyTotalsResponse": {
       "totalsByCurrencyAndCostType": "unspecified"
@@ -1112,6 +1337,18 @@
           "incurred": {
             "amount": "120.50",
             "currency": "EUR"
+          },
+          "recoveryReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoveries": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openRecoveryReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
           }
         }
       ],
@@ -1134,7 +1371,23 @@
             "amount": "120.50",
             "currency": "EUR"
           },
-          "paymentPending": true
+          "paymentPending": true,
+          "recoveryReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoveries": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openRecoveryReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "netIncurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
         }
       ],
       "totals": {
@@ -1155,7 +1408,23 @@
           "amount": "120.50",
           "currency": "EUR"
         },
-        "paymentPending": true
+        "paymentPending": true,
+        "recoveryReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveries": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "openRecoveryReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "netIncurred": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
       }
     },
     "FnolExposureInput": {
@@ -1222,6 +1491,14 @@
         "receiptMedium": "SAMPLE_CODE",
         "channelMetadata": {
           "note": "sample"
+        },
+        "liabilityFacts": {
+          "insuredFaultPct": "12.50",
+          "faultSource": "SAMPLE_CODE",
+          "counterpartyInsurerPartyId": "01927c21-d029-7cf0-811e-29f37946aff8",
+          "jointReportFlag": true,
+          "vehicleCount": 1,
+          "accidentInGreece": true
         }
       }
     },
@@ -1299,6 +1576,14 @@
       "receiptMedium": "SAMPLE_CODE",
       "channelMetadata": {
         "note": "sample"
+      },
+      "liabilityFacts": {
+        "insuredFaultPct": "12.50",
+        "faultSource": "SAMPLE_CODE",
+        "counterpartyInsurerPartyId": "0192a7de-7421-793d-8dfb-dca621fc4de3",
+        "jointReportFlag": true,
+        "vehicleCount": 1,
+        "accidentInGreece": true
       }
     },
     "FnolSubmitResponse": {
@@ -1429,6 +1714,14 @@
         "receiptMedium": "SAMPLE_CODE",
         "channelMetadata": {
           "note": "sample"
+        },
+        "liabilityFacts": {
+          "insuredFaultPct": "12.50",
+          "faultSource": "SAMPLE_CODE",
+          "counterpartyInsurerPartyId": "0192eee0-0323-79d1-8cd2-2087e7d5927c",
+          "jointReportFlag": true,
+          "vehicleCount": 1,
+          "accidentInGreece": true
         }
       }
     },
@@ -1468,6 +1761,551 @@
       "band": "unspecified",
       "caseData": "unspecified"
     },
+    "FsApproveNetRequest": {
+      "fsStatementId": "01923d89-4d0a-7d5d-827e-0f423487b3a2",
+      "counterpartyCode": "SAMPLE_CODE",
+      "expectedRecordVersion": 1,
+      "expectedNet": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "FsApproveNetResponse": {
+      "statement": {
+        "fsStatementId": "019292e5-c45f-75ab-8c39-24e8d9775610",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "reconciliation": "EXCEPTIONS_OPEN",
+        "lines": [
+          {
+            "lineRef": "Sample text",
+            "clearingReference": "Sample text",
+            "direction": "RECEIVABLE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "counterpartyCode": "SAMPLE_CODE",
+            "matchStatus": "MATCHED",
+            "fsCaseId": "01928cc0-a415-7593-855c-21314d8da5be",
+            "claimId": "01929065-fa22-75b8-8d94-1453c8361b7c",
+            "difference": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "nets": [
+          {
+            "counterpartyCode": "SAMPLE_CODE",
+            "counterpartyPartyId": "01924b29-e686-7428-8ffb-6b3de9568002",
+            "direction": "PAYABLE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "status": "PENDING",
+            "approvalRequestId": "01925ac2-6437-7c20-8400-60554c224c67",
+            "statementRef": "Sample text",
+            "bilReferenceType": "DISBURSEMENT",
+            "bilReferenceId": "0192afcc-4524-7b66-83e5-4ca4c601ce0a"
+          }
+        ],
+        "exceptionCount": 1,
+        "importedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "net": {
+        "counterpartyCode": "SAMPLE_CODE",
+        "counterpartyPartyId": "01925679-69ae-7c20-86a5-f207ef88df17",
+        "direction": "PAYABLE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "PENDING",
+        "approvalRequestId": "0192213b-863f-7279-82a3-725a6ad815ef",
+        "statementRef": "Sample text",
+        "bilReferenceType": "DISBURSEMENT",
+        "bilReferenceId": "01929025-6764-7730-83fb-19164cd3226f"
+      },
+      "outcome": "REQUESTED"
+    },
+    "FsCaseView": {
+      "fsCaseId": "01923352-7d92-7643-8914-7b6198b1f115",
+      "claimId": "019278d7-0f9f-7b82-8805-6ce3bdce6c4b",
+      "role": "OWN_INSURER",
+      "state": "ELIGIBILITY_PENDING",
+      "counterpartyCode": "SAMPLE_CODE",
+      "counterpartyPartyId": "01926c04-730b-75fc-8f72-a02e9f050328",
+      "eligibility": {
+        "result": "ELIGIBLE",
+        "reasons": [
+          "SAMPLE_CODE"
+        ],
+        "ruleId": "SAMPLE_CODE",
+        "ruleVersion": "Sample text",
+        "legalStatus": "SAMPLE_CODE",
+        "provisional": true,
+        "clearingValue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "clearingValueBasis": "ACTUAL"
+      },
+      "clearingValue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "clearingReference": "Sample text",
+      "ownSettlementExposureId": "0192f9be-a17b-7658-8604-7d42b7f1e7f3",
+      "recoveryId": "019249f3-9abc-7302-868e-4b93504b6766",
+      "atFaultPaymentId": "01923af7-16da-785a-81c9-058c2e89b826",
+      "fsStatementId": "019221ed-fc3b-782d-8873-c5e0211f946d",
+      "statementLineRef": "Sample text",
+      "expectedGainLoss": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "createdAt": "2026-10-07T09:00:00Z",
+      "recordVersion": 1
+    },
+    "FsEligibility": {
+      "result": "ELIGIBLE",
+      "reasons": [
+        "SAMPLE_CODE"
+      ],
+      "ruleId": "SAMPLE_CODE",
+      "ruleVersion": "Sample text",
+      "legalStatus": "SAMPLE_CODE",
+      "provisional": true,
+      "clearingValue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "clearingValueBasis": "ACTUAL"
+    },
+    "FsEvaluateRequest": {
+      "claimId": "0192f8e4-666d-79d8-8128-6a97cc3848cd"
+    },
+    "FsEvaluateResponse": {
+      "fsCase": {
+        "fsCaseId": "019287ba-4923-76f5-8b27-6c1a94c94f79",
+        "claimId": "0192d0db-93df-701b-87c9-45baf762fe35",
+        "role": "OWN_INSURER",
+        "state": "ELIGIBILITY_PENDING",
+        "counterpartyCode": "SAMPLE_CODE",
+        "counterpartyPartyId": "0192b980-a1eb-7fca-8e20-a883630338ae",
+        "eligibility": {
+          "result": "ELIGIBLE",
+          "reasons": [
+            "SAMPLE_CODE"
+          ],
+          "ruleId": "SAMPLE_CODE",
+          "ruleVersion": "Sample text",
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
+          "clearingValue": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "clearingValueBasis": "ACTUAL"
+        },
+        "clearingValue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "clearingReference": "Sample text",
+        "ownSettlementExposureId": "01920415-1b3f-795d-8665-451777dc115d",
+        "recoveryId": "019218e0-6345-7dbe-8ad1-eae72ae71d81",
+        "atFaultPaymentId": "0192025e-a9e1-74d2-8898-9e0c22ad9b5e",
+        "fsStatementId": "01924aae-30d9-7fc7-8c2a-cab798111ae9",
+        "statementLineRef": "Sample text",
+        "expectedGainLoss": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "eligibility": {
+        "result": "ELIGIBLE",
+        "reasons": [
+          "SAMPLE_CODE"
+        ],
+        "ruleId": "SAMPLE_CODE",
+        "ruleVersion": "Sample text",
+        "legalStatus": "SAMPLE_CODE",
+        "provisional": true,
+        "clearingValue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "clearingValueBasis": "ACTUAL"
+      }
+    },
+    "FsGetResponse": {
+      "fsCase": {
+        "fsCaseId": "01929d82-77b7-7e90-8657-33ae55e5ffa8",
+        "claimId": "0192e2db-8868-7ab1-829a-388c12082157",
+        "role": "OWN_INSURER",
+        "state": "ELIGIBILITY_PENDING",
+        "counterpartyCode": "SAMPLE_CODE",
+        "counterpartyPartyId": "0192e257-ba6e-79d6-8b19-5f57265aa60c",
+        "eligibility": {
+          "result": "ELIGIBLE",
+          "reasons": [
+            "SAMPLE_CODE"
+          ],
+          "ruleId": "SAMPLE_CODE",
+          "ruleVersion": "Sample text",
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
+          "clearingValue": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "clearingValueBasis": "ACTUAL"
+        },
+        "clearingValue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "clearingReference": "Sample text",
+        "ownSettlementExposureId": "019297e3-2de5-7d58-8dbc-d7c4786fbbec",
+        "recoveryId": "01921ac8-c85e-730e-8eaa-75864c3777bf",
+        "atFaultPaymentId": "0192b455-275d-7616-895b-0a51a102212e",
+        "fsStatementId": "01924219-430a-78b0-82ac-b9f3e64a95aa",
+        "statementLineRef": "Sample text",
+        "expectedGainLoss": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "FsGetStatementResponse": {
+      "statement": {
+        "fsStatementId": "0192cd6f-c416-7ad1-88f6-83d9690d3c99",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "reconciliation": "EXCEPTIONS_OPEN",
+        "lines": [
+          {
+            "lineRef": "Sample text",
+            "clearingReference": "Sample text",
+            "direction": "RECEIVABLE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "counterpartyCode": "SAMPLE_CODE",
+            "matchStatus": "MATCHED",
+            "fsCaseId": "019299b0-d03e-756e-8d44-8e81fcc3110a",
+            "claimId": "019242ce-2706-7318-81ab-70558b7054a3",
+            "difference": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "nets": [
+          {
+            "counterpartyCode": "SAMPLE_CODE",
+            "counterpartyPartyId": "0192c67f-9fb0-7c35-88d1-dd7b8fd252f9",
+            "direction": "PAYABLE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "status": "PENDING",
+            "approvalRequestId": "0192b1cf-0a85-71b4-8a63-311d88235801",
+            "statementRef": "Sample text",
+            "bilReferenceType": "DISBURSEMENT",
+            "bilReferenceId": "019237dd-e25d-7784-8fdd-429e6d0b5276"
+          }
+        ],
+        "exceptionCount": 1,
+        "importedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "FsImportStatementRequest": {
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "counterpartyCode": "SAMPLE_CODE"
+    },
+    "FsImportStatementResponse": {
+      "statement": {
+        "fsStatementId": "01926411-915b-7e86-8a1b-e8af7f59f588",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "reconciliation": "EXCEPTIONS_OPEN",
+        "lines": [
+          {
+            "lineRef": "Sample text",
+            "clearingReference": "Sample text",
+            "direction": "RECEIVABLE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "counterpartyCode": "SAMPLE_CODE",
+            "matchStatus": "MATCHED",
+            "fsCaseId": "01927864-99ad-747b-8ef3-253504dd42b1",
+            "claimId": "01929892-a76a-7088-88f9-fdd3d819518a",
+            "difference": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "nets": [
+          {
+            "counterpartyCode": "SAMPLE_CODE",
+            "counterpartyPartyId": "0192a7ac-1454-7bed-8642-0c38892f4005",
+            "direction": "PAYABLE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "status": "PENDING",
+            "approvalRequestId": "019275d1-ec78-7d40-849e-9631f85c4952",
+            "statementRef": "Sample text",
+            "bilReferenceType": "DISBURSEMENT",
+            "bilReferenceId": "0192e319-5613-7bb3-8cd4-5504a3ca8d8b"
+          }
+        ],
+        "exceptionCount": 1,
+        "importedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "FsListPage": {
+      "items": [
+        {
+          "fsCaseId": "019225d5-e679-7e93-82bc-ac7fc6b96585",
+          "claimId": "0192c97d-a983-7fdb-852c-1f88385e2138",
+          "role": "OWN_INSURER",
+          "state": "ELIGIBILITY_PENDING",
+          "counterpartyCode": "SAMPLE_CODE",
+          "counterpartyPartyId": "0192ba13-3932-7281-8081-fe171168424c",
+          "eligibility": {
+            "result": "ELIGIBLE",
+            "reasons": [
+              "SAMPLE_CODE"
+            ],
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "Sample text",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "clearingValue": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "clearingValueBasis": "ACTUAL"
+          },
+          "clearingValue": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "clearingReference": "Sample text",
+          "ownSettlementExposureId": "01925d73-f92d-73cb-84c0-c4dec01b5c9d",
+          "recoveryId": "0192ac11-3107-7a1f-8279-4808924d1c4e",
+          "atFaultPaymentId": "0192a6f6-3701-717d-83ce-957d2e7068a8",
+          "fsStatementId": "01920f68-6ea6-78f9-8bef-0669faf84c17",
+          "statementLineRef": "Sample text",
+          "expectedGainLoss": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "createdAt": "2026-10-07T09:00:00Z",
+          "recordVersion": 1
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "FsNetView": {
+      "counterpartyCode": "SAMPLE_CODE",
+      "counterpartyPartyId": "0192bfb4-4779-7a65-86d9-688a294a8cfb",
+      "direction": "PAYABLE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "status": "PENDING",
+      "approvalRequestId": "01928e42-f51e-73d0-88d7-3e703710de71",
+      "statementRef": "Sample text",
+      "bilReferenceType": "DISBURSEMENT",
+      "bilReferenceId": "01922cfd-ee2d-7bca-88f0-42da0a89a888"
+    },
+    "FsOpenOwnSettlementRequest": {
+      "fsCaseId": "0192d3cd-595b-7012-8782-5066a7125e5e",
+      "expectedRecordVersion": 1,
+      "claimantPartyId": "0192b291-175c-73d8-8cdc-63b461ff6b6c"
+    },
+    "FsOpenOwnSettlementResponse": {
+      "fsCase": {
+        "fsCaseId": "0192046f-904d-7be9-8c91-78df04acf6f2",
+        "claimId": "019254a8-c2b1-7e56-8783-ea63750073a8",
+        "role": "OWN_INSURER",
+        "state": "ELIGIBILITY_PENDING",
+        "counterpartyCode": "SAMPLE_CODE",
+        "counterpartyPartyId": "01921f07-d068-7676-8dd8-a265155f9861",
+        "eligibility": {
+          "result": "ELIGIBLE",
+          "reasons": [
+            "SAMPLE_CODE"
+          ],
+          "ruleId": "SAMPLE_CODE",
+          "ruleVersion": "Sample text",
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
+          "clearingValue": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "clearingValueBasis": "ACTUAL"
+        },
+        "clearingValue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "clearingReference": "Sample text",
+        "ownSettlementExposureId": "0192495d-e31b-7b2c-8692-2ac38b68f4ee",
+        "recoveryId": "01923b2c-1428-76f8-885c-91fc54932fa5",
+        "atFaultPaymentId": "01920bfb-195b-7513-85a7-8f6583d8d232",
+        "fsStatementId": "01922920-2fd1-70e8-89dc-04ce3af44ffc",
+        "statementLineRef": "Sample text",
+        "expectedGainLoss": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "exposureId": "0192ecee-a9fa-7659-82c4-802b6874648c",
+      "recoveryId": "01920447-ae6f-7cb8-846f-118369b5b747"
+    },
+    "FsStatementLine": {
+      "lineRef": "Sample text",
+      "clearingReference": "Sample text",
+      "direction": "RECEIVABLE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "counterpartyCode": "SAMPLE_CODE",
+      "matchStatus": "MATCHED",
+      "fsCaseId": "0192bc60-bdd6-746d-89b6-37744e5474d5",
+      "claimId": "01925951-8157-7369-87ca-42782f923e57",
+      "difference": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "FsStatementView": {
+      "fsStatementId": "01921a1b-c25c-7189-893b-ae8a7b587c6e",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "reconciliation": "EXCEPTIONS_OPEN",
+      "lines": [
+        {
+          "lineRef": "Sample text",
+          "clearingReference": "Sample text",
+          "direction": "RECEIVABLE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "counterpartyCode": "SAMPLE_CODE",
+          "matchStatus": "MATCHED",
+          "fsCaseId": "01929762-47b0-7e27-813e-b675baaf08ec",
+          "claimId": "01922e07-2bfc-7087-886c-909a989c9fab",
+          "difference": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "nets": [
+        {
+          "counterpartyCode": "SAMPLE_CODE",
+          "counterpartyPartyId": "01925aa4-fb86-7c71-8683-a5f85637fff7",
+          "direction": "PAYABLE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "status": "PENDING",
+          "approvalRequestId": "0192136b-324c-75a2-8bc3-565e47ec82d3",
+          "statementRef": "Sample text",
+          "bilReferenceType": "DISBURSEMENT",
+          "bilReferenceId": "01928e5a-86a4-73e2-864d-01efed6c33e9"
+        }
+      ],
+      "exceptionCount": 1,
+      "importedAt": "2026-10-07T09:00:00Z",
+      "recordVersion": 1
+    },
+    "FsSubmitRequest": {
+      "fsCaseId": "01928f5e-8612-73d4-8e5c-4e88fa33b8cd",
+      "expectedRecordVersion": 1
+    },
+    "FsSubmitResponse": {
+      "fsCase": {
+        "fsCaseId": "01926627-473e-7967-8a4f-71803b10a269",
+        "claimId": "01920b32-e966-7559-8d62-10676f59ff1d",
+        "role": "OWN_INSURER",
+        "state": "ELIGIBILITY_PENDING",
+        "counterpartyCode": "SAMPLE_CODE",
+        "counterpartyPartyId": "01921464-f33d-7927-867e-07865da9017f",
+        "eligibility": {
+          "result": "ELIGIBLE",
+          "reasons": [
+            "SAMPLE_CODE"
+          ],
+          "ruleId": "SAMPLE_CODE",
+          "ruleVersion": "Sample text",
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
+          "clearingValue": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "clearingValueBasis": "ACTUAL"
+        },
+        "clearingValue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "clearingReference": "Sample text",
+        "ownSettlementExposureId": "01928df9-3d95-771a-8d2a-f5c1255cb7a1",
+        "recoveryId": "01920c8e-1964-7e17-853e-3ab15cb38704",
+        "atFaultPaymentId": "0192408f-06dc-7efd-8e78-d69208798aa2",
+        "fsStatementId": "01926047-6f11-759b-8faf-52aeccc3e5e5",
+        "statementLineRef": "Sample text",
+        "expectedGainLoss": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "clearingReference": "Sample text"
+    },
     "ImportClaimRequest": {
       "legacyClaim": "unspecified"
     },
@@ -1500,6 +2338,14 @@
       "damageAreas": [
         "SAMPLE_CODE"
       ]
+    },
+    "LiabilityFacts": {
+      "insuredFaultPct": "12.50",
+      "faultSource": "SAMPLE_CODE",
+      "counterpartyInsurerPartyId": "0192b270-0248-711d-8e88-65a6235906e3",
+      "jointReportFlag": true,
+      "vehicleCount": 1,
+      "accidentInGreece": true
     },
     "PayeeAccountCaptureRequest": {
       "claimId": "01921353-5b1c-7845-8efb-23a17657e01d",
@@ -1558,7 +2404,10 @@
           "createdAt": "2026-10-07T09:00:00Z",
           "submittedAt": "2026-10-07T09:00:00Z",
           "issuedAt": "2026-10-07T09:00:00Z",
-          "clearedAt": "2026-10-07T09:00:00Z"
+          "clearedAt": "2026-10-07T09:00:00Z",
+          "reissueOf": "0192bb29-0416-7ae1-8735-70cd62b276b2",
+          "fiscalMark": "Sample text",
+          "fsStatementId": "0192a189-da91-7d28-8bd7-fb6f040bff63"
         }
       ],
       "nextCursor": "sample",
@@ -1592,6 +2441,460 @@
       "status": "SAMPLE_CODE",
       "reversalTransactionId": "0192555c-7bb8-7c24-8cfa-39d6bc938828"
     },
+    "RecoveryAllocationLine": {
+      "exposureId": "0192b823-0b3c-70a4-8290-83e82afc5fcf",
+      "costType": "SAMPLE_CODE",
+      "costCategory": "SAMPLE_CODE",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "RecoveryCreateRequest": {
+      "claimId": "0192c45a-9036-73a1-8c85-250d8ff4693f",
+      "exposureId": "0192579d-60dc-7d27-810c-799c2a3b7dd1",
+      "type": "SUBROGATION",
+      "counterpartyPartyId": "0192281e-d6dc-74a9-8c85-905bbad8dfe7",
+      "expectedAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "salvage": {
+        "estimate": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "buyerPartyId": "01929ff7-1b9c-787a-811c-9cc961a58473",
+        "salePrice": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "soldOn": "2026-10-07"
+      },
+      "allocationRule": "PRO_RATA_PAID",
+      "reason": "SAMPLE_CODE"
+    },
+    "RecoveryCreateResponse": {
+      "recovery": {
+        "recoveryId": "0192cada-a0dd-78ae-8d20-0705696fa321",
+        "claimId": "01920ee6-3b6c-7165-8f72-9443dbca6c7b",
+        "exposureId": "0192a035-29b2-78c3-8be2-de1ba2d442ba",
+        "type": "SUBROGATION",
+        "state": "OPEN",
+        "counterpartyPartyId": "0192be19-a751-753e-8039-4011c58e3382",
+        "expectedAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveryReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveredAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocationRule": "PRO_RATA_PAID",
+        "salvage": {
+          "estimate": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "buyerPartyId": "019283be-494a-797c-8454-bee4256eaf98",
+          "salePrice": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "soldOn": "2026-10-07"
+        },
+        "milestones": [
+          {
+            "milestone": "SAMPLE_CODE",
+            "occurredOn": "2026-10-07",
+            "recordedAt": "2026-10-07T09:00:00Z",
+            "recordedBy": "sample",
+            "note": "Sample text"
+          }
+        ],
+        "receivableId": "01925589-fab6-7e0c-8fda-eb0149a2fbbe",
+        "paymentReference": "sample",
+        "fsCaseId": "0192f753-28b9-73ce-8a06-a6867f30cc7a",
+        "fsStatementId": "0192b8ac-075d-7691-822c-412aabe4f718",
+        "demandedOn": "2026-10-07",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "RecoveryDemandRequest": {
+      "recoveryId": "0192a2c0-dd24-752f-8dc8-6f68ae51151d",
+      "expectedRecordVersion": 1,
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "dueDate": "2026-10-07",
+      "allocationRule": "PRO_RATA_PAID",
+      "allocation": [
+        {
+          "exposureId": "0192d1bd-1129-7f8a-8f7c-373c36ba5ab6",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
+    },
+    "RecoveryDemandResponse": {
+      "recovery": {
+        "recoveryId": "019227b2-1be4-7bde-8c15-307bef01de87",
+        "claimId": "0192b0ce-b9ea-769c-819f-d2ef998153f6",
+        "exposureId": "0192889b-f9c3-73a4-8e6e-867a808034c7",
+        "type": "SUBROGATION",
+        "state": "OPEN",
+        "counterpartyPartyId": "0192d1d9-79e2-7496-8704-bc498275cb88",
+        "expectedAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveryReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveredAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocationRule": "PRO_RATA_PAID",
+        "salvage": {
+          "estimate": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "buyerPartyId": "0192d01a-eaa6-71ff-85a7-beb961989b2d",
+          "salePrice": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "soldOn": "2026-10-07"
+        },
+        "milestones": [
+          {
+            "milestone": "SAMPLE_CODE",
+            "occurredOn": "2026-10-07",
+            "recordedAt": "2026-10-07T09:00:00Z",
+            "recordedBy": "sample",
+            "note": "Sample text"
+          }
+        ],
+        "receivableId": "01927d7c-9aac-7422-8294-0ef98eabc7a3",
+        "paymentReference": "sample",
+        "fsCaseId": "01929383-8eed-7160-8ab4-1bf5540b5653",
+        "fsStatementId": "01924d55-0207-75b1-8928-d8d12dcbad78",
+        "demandedOn": "2026-10-07",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "receivableId": "01922ef0-9a05-708b-8f09-a0234d23db8a",
+      "billingAccountId": "01927ddd-fef6-7cbd-8aa4-710ff4de33ed",
+      "paymentReference": "sample"
+    },
+    "RecoveryGetResponse": {
+      "recovery": {
+        "recoveryId": "01922b34-5490-7b51-8cfc-73b7d33c5ae2",
+        "claimId": "01921867-11ac-75ff-8d79-82ff87a346a5",
+        "exposureId": "0192888a-c727-711d-83d5-1e1e2972b413",
+        "type": "SUBROGATION",
+        "state": "OPEN",
+        "counterpartyPartyId": "019271ae-17bc-7b05-8a95-94cd16eddfc2",
+        "expectedAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveryReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveredAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocationRule": "PRO_RATA_PAID",
+        "salvage": {
+          "estimate": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "buyerPartyId": "019222cc-0f8e-7645-867b-deb0216bc704",
+          "salePrice": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "soldOn": "2026-10-07"
+        },
+        "milestones": [
+          {
+            "milestone": "SAMPLE_CODE",
+            "occurredOn": "2026-10-07",
+            "recordedAt": "2026-10-07T09:00:00Z",
+            "recordedBy": "sample",
+            "note": "Sample text"
+          }
+        ],
+        "receivableId": "01928d0c-ac3f-7cc0-86b7-54f4eea2b02e",
+        "paymentReference": "sample",
+        "fsCaseId": "0192524d-3f96-711d-8f3e-667bc3919979",
+        "fsStatementId": "019260cf-634a-72e7-8dd8-31e02e704428",
+        "demandedOn": "2026-10-07",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "RecoveryListPage": {
+      "items": [
+        {
+          "recoveryId": "01925c59-0c9e-7c51-860d-c3258e9165dc",
+          "claimId": "01924113-7b68-74e1-897c-b4854e28dda1",
+          "exposureId": "01921b5c-ce77-72dd-8a52-32732f0e3835",
+          "type": "SUBROGATION",
+          "state": "OPEN",
+          "counterpartyPartyId": "0192b3c6-1f62-7785-8d18-317f9e848b85",
+          "expectedAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoveryReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoveredAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "allocationRule": "PRO_RATA_PAID",
+          "salvage": {
+            "estimate": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "buyerPartyId": "01929b0f-972b-73ac-81ed-0bef1e72136e",
+            "salePrice": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "soldOn": "2026-10-07"
+          },
+          "milestones": [
+            {
+              "milestone": "SAMPLE_CODE",
+              "occurredOn": "2026-10-07",
+              "recordedAt": "2026-10-07T09:00:00Z",
+              "recordedBy": "sample",
+              "note": "Sample text"
+            }
+          ],
+          "receivableId": "0192d0e4-0612-7f72-871b-6c89c7610380",
+          "paymentReference": "sample",
+          "fsCaseId": "0192eb28-c361-793c-8e5c-7e0b317d4e83",
+          "fsStatementId": "0192b801-8912-7fab-8bb1-d25f690c4c60",
+          "demandedOn": "2026-10-07",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "recordVersion": 1
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "RecoveryMilestoneView": {
+      "milestone": "SAMPLE_CODE",
+      "occurredOn": "2026-10-07",
+      "recordedAt": "2026-10-07T09:00:00Z",
+      "recordedBy": "sample",
+      "note": "Sample text"
+    },
+    "RecoveryRecordMilestoneRequest": {
+      "recoveryId": "01929b45-e2d3-7a12-844e-fa8ec8ed6dc4",
+      "expectedRecordVersion": 1,
+      "milestone": "SAMPLE_CODE",
+      "occurredOn": "2026-10-07",
+      "note": "Sample text",
+      "salvage": {
+        "estimate": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "buyerPartyId": "0192cc29-bdc7-76e8-83be-13b443f9386a",
+        "salePrice": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "soldOn": "2026-10-07"
+      }
+    },
+    "RecoveryRecordMilestoneResponse": {
+      "recovery": {
+        "recoveryId": "01925c7c-da06-74d9-8f0e-e8c39bfcbbf9",
+        "claimId": "01925812-883b-7e53-8920-6baeffa25adf",
+        "exposureId": "01928ae9-2f6d-777b-8ee0-b8efe2c346eb",
+        "type": "SUBROGATION",
+        "state": "OPEN",
+        "counterpartyPartyId": "01925c7f-a08a-74fd-8702-134a3f183479",
+        "expectedAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveryReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveredAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocationRule": "PRO_RATA_PAID",
+        "salvage": {
+          "estimate": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "buyerPartyId": "0192d391-87b7-70c5-8bb4-58613c6dd162",
+          "salePrice": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "soldOn": "2026-10-07"
+        },
+        "milestones": [
+          {
+            "milestone": "SAMPLE_CODE",
+            "occurredOn": "2026-10-07",
+            "recordedAt": "2026-10-07T09:00:00Z",
+            "recordedBy": "sample",
+            "note": "Sample text"
+          }
+        ],
+        "receivableId": "01928caf-646d-78ed-807d-18f9ec8115aa",
+        "paymentReference": "sample",
+        "fsCaseId": "0192af98-7c87-7a57-8dfb-ccc40819953c",
+        "fsStatementId": "0192cc47-21f9-722a-8dc8-5f3537af2906",
+        "demandedOn": "2026-10-07",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "RecoveryView": {
+      "recoveryId": "01926169-65bc-7df7-820f-c26a8463a475",
+      "claimId": "0192ba1f-c8e1-74aa-86e5-4fb69323c951",
+      "exposureId": "019231e3-72e6-760e-86c9-47388b70578c",
+      "type": "SUBROGATION",
+      "state": "OPEN",
+      "counterpartyPartyId": "019241d9-4728-738b-85f7-0fa1f76949bf",
+      "expectedAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "recoveryReserve": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "recoveredAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "allocationRule": "PRO_RATA_PAID",
+      "salvage": {
+        "estimate": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "buyerPartyId": "0192ae79-6d87-7dce-82be-5c1bdd0813ef",
+        "salePrice": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "soldOn": "2026-10-07"
+      },
+      "milestones": [
+        {
+          "milestone": "SAMPLE_CODE",
+          "occurredOn": "2026-10-07",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "recordedBy": "sample",
+          "note": "Sample text"
+        }
+      ],
+      "receivableId": "0192dd28-368a-7d3f-80c1-187ba5486efb",
+      "paymentReference": "sample",
+      "fsCaseId": "0192e6aa-a01f-72a8-8422-92640a8b0523",
+      "fsStatementId": "01928bff-9b61-7542-8718-2b7502e99db0",
+      "demandedOn": "2026-10-07",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "recordVersion": 1
+    },
+    "RecoveryWriteOffRequest": {
+      "recoveryId": "0192b127-3b13-7850-8b8f-0811e9724756",
+      "expectedRecordVersion": 1,
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "reason": "SAMPLE_CODE"
+    },
+    "RecoveryWriteOffResponse": {
+      "recovery": {
+        "recoveryId": "0192a2a9-c28d-7217-89b9-97ee0e6246ec",
+        "claimId": "01924a21-9be9-7631-8bf5-685f0fa39a7d",
+        "exposureId": "0192b38c-bf18-7a0e-85c5-5f03a4217e19",
+        "type": "SUBROGATION",
+        "state": "OPEN",
+        "counterpartyPartyId": "019252ee-d80d-76e1-8ec1-a8d41c4e608a",
+        "expectedAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveryReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveredAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocationRule": "PRO_RATA_PAID",
+        "salvage": {
+          "estimate": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "buyerPartyId": "01929fb6-5e66-74d4-8431-09748d6c31df",
+          "salePrice": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "soldOn": "2026-10-07"
+        },
+        "milestones": [
+          {
+            "milestone": "SAMPLE_CODE",
+            "occurredOn": "2026-10-07",
+            "recordedAt": "2026-10-07T09:00:00Z",
+            "recordedBy": "sample",
+            "note": "Sample text"
+          }
+        ],
+        "receivableId": "019263b2-4138-7453-8643-30ed38150bb1",
+        "paymentReference": "sample",
+        "fsCaseId": "01925625-fd03-7b67-8409-6fdeb03462fa",
+        "fsStatementId": "01928202-3a55-7eb8-84f6-1975e250922f",
+        "demandedOn": "2026-10-07",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "outcome": "WRITTEN_OFF",
+      "setId": "0192f35a-d0ba-76ff-833f-990f8f36a0da",
+      "approvalRequestId": "01929a3a-930b-719a-8c74-199d345137e4"
+    },
     "RedressRequestRequest": {
       "complaintId": "019200a3-4d39-793f-8cc5-dac608571440",
       "claimId": "01929508-3da9-7577-8937-9077c7fd5aea",
@@ -1605,6 +2908,18 @@
     "RedressRequestResponse": {
       "setId": "0192b0c8-51da-715a-8481-e45bae967b36",
       "status": "unspecified"
+    },
+    "SalvageDetails": {
+      "estimate": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "buyerPartyId": "0192c8a9-3e24-7e6a-8ef4-b423424d856d",
+      "salePrice": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "soldOn": "2026-10-07"
     },
     "ServiceCancelRequest": {
       "serviceData": "unspecified",
@@ -1693,7 +3008,8 @@
           "payeePartyId": "0192ed9e-f497-71b7-853d-e0ecf615bacd",
           "payeeAccountId": "019286b6-1878-7643-8a52-2cbb34ed529a",
           "reason": "SAMPLE_CODE",
-          "paymentType": "PARTIAL"
+          "paymentType": "PARTIAL",
+          "recoveryId": "019227c7-4806-79f9-87c5-c581c8d50417"
         }
       ]
     },
@@ -1766,7 +3082,9 @@
             "claimPaymentId": "01929d24-e413-7864-85d7-6d50d9784d2a",
             "reasonCode": "SAMPLE_CODE",
             "proposed": true,
-            "status": "SAMPLE_CODE"
+            "status": "SAMPLE_CODE",
+            "recoveryId": "0192b3b4-8f12-72db-8a29-737383889bb3",
+            "evidenceRef": "Sample text"
           }
         ],
         "approvals": [
@@ -1782,8 +3100,55 @@
             "status": "PENDING",
             "decidedAt": "2026-10-07T09:00:00Z"
           }
-        ]
-      }
+        ],
+        "approvalDiff": {
+          "lines": [
+            {
+              "kind": "RESERVE",
+              "exposureId": "0192005e-c67b-71e2-8cfb-c6438ef290cc",
+              "costType": "SAMPLE_CODE",
+              "costCategory": "SAMPLE_CODE",
+              "recoveryId": "019229a5-c92a-79a8-80cf-39a1dcae1937",
+              "before": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "after": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "paidBefore": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "paidAfter": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "delta": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        },
+        "systemRecorded": true,
+        "evidenceRef": "Sample text"
+      },
+      "authorityPreview": [
+        {
+          "type": "sample",
+          "costType": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "basis": "EXPOSURE_TOTAL_RESERVE",
+          "outcome": "WITHIN",
+          "role": "sample"
+        }
+      ]
     },
     "TransactionSetGetResponse": {
       "set": {
@@ -1825,7 +3190,9 @@
             "claimPaymentId": "019234b4-be57-710c-82e7-13459e340a16",
             "reasonCode": "SAMPLE_CODE",
             "proposed": true,
-            "status": "SAMPLE_CODE"
+            "status": "SAMPLE_CODE",
+            "recoveryId": "0192158b-a7fc-73be-8053-5b06e7109ae0",
+            "evidenceRef": "Sample text"
           }
         ],
         "approvals": [
@@ -1841,8 +3208,76 @@
             "status": "PENDING",
             "decidedAt": "2026-10-07T09:00:00Z"
           }
-        ]
+        ],
+        "approvalDiff": {
+          "lines": [
+            {
+              "kind": "RESERVE",
+              "exposureId": "01920862-6080-789e-8313-2f4e50967906",
+              "costType": "SAMPLE_CODE",
+              "costCategory": "SAMPLE_CODE",
+              "recoveryId": "0192e4b0-923c-7e2e-8db9-0fb04af54397",
+              "before": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "after": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "paidBefore": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "paidAfter": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "delta": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        },
+        "systemRecorded": true,
+        "evidenceRef": "Sample text"
       }
+    },
+    "TransactionSetListItem": {
+      "setId": "0192e319-3747-7b4b-874a-562bfc13c8db",
+      "claimId": "01924823-ef51-702e-8dc2-f1a9ad5d165f",
+      "status": "DRAFT",
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "maker": "sample",
+      "fourEyes": true,
+      "transactionCount": 1,
+      "hasPayment": true,
+      "systemRecorded": true,
+      "createdAt": "2026-10-07T09:00:00Z",
+      "submittedAt": "2026-10-07T09:00:00Z",
+      "decidedAt": "2026-10-07T09:00:00Z"
+    },
+    "TransactionSetListPage": {
+      "items": [
+        {
+          "setId": "0192de8b-aede-7e33-83b1-323488444187",
+          "claimId": "0192d80e-3580-70c2-8ce3-5e1737336bb7",
+          "status": "DRAFT",
+          "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "maker": "sample",
+          "fourEyes": true,
+          "transactionCount": 1,
+          "hasPayment": true,
+          "systemRecorded": true,
+          "createdAt": "2026-10-07T09:00:00Z",
+          "submittedAt": "2026-10-07T09:00:00Z",
+          "decidedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
     },
     "TransactionSetRejectRequest": {
       "setId": "0192cc23-d706-75c7-80bb-8cfb10d57560",
@@ -1923,7 +3358,9 @@
             "claimPaymentId": "0192c365-39e2-7824-8faa-1f26bc361ffe",
             "reasonCode": "SAMPLE_CODE",
             "proposed": true,
-            "status": "SAMPLE_CODE"
+            "status": "SAMPLE_CODE",
+            "recoveryId": "0192f1b0-6939-7f76-88e4-58f8cea44fb0",
+            "evidenceRef": "Sample text"
           }
         ],
         "approvals": [
@@ -1939,7 +3376,41 @@
             "status": "PENDING",
             "decidedAt": "2026-10-07T09:00:00Z"
           }
-        ]
+        ],
+        "approvalDiff": {
+          "lines": [
+            {
+              "kind": "RESERVE",
+              "exposureId": "01928c1e-145e-7a44-8534-f0094545cebe",
+              "costType": "SAMPLE_CODE",
+              "costCategory": "SAMPLE_CODE",
+              "recoveryId": "01927f9c-64f8-7c9d-88c4-c329912b7688",
+              "before": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "after": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "paidBefore": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "paidAfter": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "delta": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        },
+        "systemRecorded": true,
+        "evidenceRef": "Sample text"
       },
       "payments": [
         {
@@ -1962,7 +3433,10 @@
           "createdAt": "2026-10-07T09:00:00Z",
           "submittedAt": "2026-10-07T09:00:00Z",
           "issuedAt": "2026-10-07T09:00:00Z",
-          "clearedAt": "2026-10-07T09:00:00Z"
+          "clearedAt": "2026-10-07T09:00:00Z",
+          "reissueOf": "01923eb2-df01-7aea-8f56-6c7fdd3fa4c9",
+          "fiscalMark": "Sample text",
+          "fsStatementId": "01925d08-7bc8-738e-8105-c133aaaaeea9"
         }
       ]
     },
@@ -2005,7 +3479,9 @@
           "claimPaymentId": "0192d7d6-5c58-7d10-8967-d6d6faaf0780",
           "reasonCode": "SAMPLE_CODE",
           "proposed": true,
-          "status": "SAMPLE_CODE"
+          "status": "SAMPLE_CODE",
+          "recoveryId": "019268d4-42bc-7fd1-8d14-fb44874e3ab9",
+          "evidenceRef": "Sample text"
         }
       ],
       "approvals": [
@@ -2021,7 +3497,41 @@
           "status": "PENDING",
           "decidedAt": "2026-10-07T09:00:00Z"
         }
-      ]
+      ],
+      "approvalDiff": {
+        "lines": [
+          {
+            "kind": "RESERVE",
+            "exposureId": "0192a89f-c73d-7f2b-8f09-922165ec3d14",
+            "costType": "SAMPLE_CODE",
+            "costCategory": "SAMPLE_CODE",
+            "recoveryId": "01921b4d-ce06-7692-815f-1821dac94d7c",
+            "before": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "after": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "paidBefore": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "paidAfter": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "delta": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "systemRecorded": true,
+      "evidenceRef": "Sample text"
     },
     "VendorInvoiceDecideRequest": {
       "serviceData": "unspecified",

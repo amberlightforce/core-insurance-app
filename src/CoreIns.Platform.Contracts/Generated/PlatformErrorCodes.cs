@@ -40,7 +40,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-APPROVAL-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): plt.Approval.decide, plt.Approval.request.</para>
+    /// <para>Declared by 3 operation(s): plt.Approval.decide, plt.Approval.request, plt.Approval.withdraw.</para>
     /// </remarks>
     public const string ApprovalStale = "PLT-ERR-APPROVAL-STALE";
 
@@ -88,7 +88,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-CHECKER-MUST-BE-HUMAN (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.Approval.withdraw, plt.ApprovalType.register.</para>
+    /// <para>Declared by 5 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register.</para>
     /// </remarks>
     public const string CheckerMustBeHuman = "PLT-ERR-CHECKER-MUST-BE-HUMAN";
 
@@ -106,7 +106,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-EDITOR-CANNOT-APPROVE (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.Approval.withdraw, plt.ApprovalType.register.</para>
+    /// <para>Declared by 5 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register.</para>
     /// </remarks>
     public const string EditorCannotApprove = "PLT-ERR-EDITOR-CANNOT-APPROVE";
 
@@ -202,9 +202,15 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.verifyForExecution.</para>
+    /// <para>Declared by 4 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.verifyForExecution, plt.Approval.withdraw.</para>
     /// </remarks>
     public const string NotFound = "PLT-ERR-NOT-FOUND";
+
+    /// <summary>PLT-ERR-NOT-OWNER (HTTP 403).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.Approval.withdraw.</para>
+    /// </remarks>
+    public const string NotOwner = "PLT-ERR-NOT-OWNER";
 
     /// <summary>PLT-ERR-NOT-RETRYABLE (HTTP 422).</summary>
     /// <remarks>
@@ -262,7 +268,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-SELF-APPROVAL (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 12 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.Approval.withdraw, plt.ApprovalType.register, rat.RatingArtifact.build, rat.RatingArtifact.cancelSchedule, rat.RatingArtifact.return, rat.RatingArtifact.rollback, rat.RatingArtifact.schedule, rat.RatingArtifact.submit.</para>
+    /// <para>Declared by 11 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register, rat.RatingArtifact.build, rat.RatingArtifact.cancelSchedule, rat.RatingArtifact.return, rat.RatingArtifact.rollback, rat.RatingArtifact.schedule, rat.RatingArtifact.submit.</para>
     /// </remarks>
     public const string SelfApproval = "PLT-ERR-SELF-APPROVAL";
 
@@ -342,7 +348,7 @@ public static class PlatformErrorCodes
     public const string Prefix = "PLT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotRetryable, NotRunnable, OutOfOrgScope, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -375,6 +381,7 @@ public static class PlatformErrorCodes
         [InvalidTransition] = 422,
         [NoRate] = 422,
         [NotFound] = 404,
+        [NotOwner] = 403,
         [NotRetryable] = 422,
         [NotRunnable] = 422,
         [OutOfOrgScope] = 403,

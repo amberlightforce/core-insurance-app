@@ -8,7 +8,7 @@ namespace CoreIns.Modules.Claims.Contracts.Events;
 /// <remarks>
 /// <para>Schema contracts/events/clm/PaymentIssued.v1.schema.json; aggregate Claim (ordering key claim_id); trigger: DisbursementIssued received for a claim payment.</para>
 /// <para>Payload status full.</para>
-/// <para>Required business keys (D-CON-28): claimId, paymentId, disbursementId. Consumers: CHN, DAT, FIN, POL, RI.</para>
+/// <para>Required business keys (D-CON-28): claimId, paymentId, disbursementId|fsStatementId. Consumers: CHN, DAT, FIN, POL, RI.</para>
 /// </remarks>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PaymentIssuedV1 : global::CoreIns.Platform.Contracts.Events.IEventPayload<PaymentIssuedV1>
@@ -29,7 +29,7 @@ public sealed record PaymentIssuedV1 : global::CoreIns.Platform.Contracts.Events
     public static global::System.Collections.Generic.IReadOnlyList<string> AggregateTypes { get; } = ["Claim"];
 
     /// <summary>Lineage keys every envelope must carry (<c>x-business-keys</c>; <c>a|b</c> = at least one).</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> RequiredBusinessKeys { get; } = ["claimId", "paymentId", "disbursementId"];
+    public static global::System.Collections.Generic.IReadOnlyList<string> RequiredBusinessKeys { get; } = ["claimId", "paymentId", "disbursementId|fsStatementId"];
 
     /// <summary>The catalogue entry.</summary>
     public static global::CoreIns.Platform.Contracts.Events.EventContract Descriptor { get; } = new(Producer, EventType, SchemaVersion, AggregateTypes, Classification)
@@ -73,13 +73,13 @@ public sealed record PaymentIssuedV1 : global::CoreIns.Platform.Contracts.Events
     [global::System.Text.Json.Serialization.JsonPropertyName("payeePartyId")]
     public required global::CoreIns.SharedKernel.Identifiers.PartyId PayeePartyId { get; init; }
 
-    /// <summary>Contract member 'method'.</summary>
+    /// <summary>Payment method (open Code), including CLEARING (Friendly Settlement at-fault leg, no cash movement by CLM)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("method")]
     public required string Method { get; init; }
 
-    /// <summary>Contract member 'disbursementId'.</summary>
+    /// <summary>BIL disbursement. Always set unless method is CLEARING (D-SL4-02: the at-fault leg of a Friendly Settlement has no disbursement), then null and fsStatementId is set</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("disbursementId")]
-    public required global::CoreIns.SharedKernel.Identifiers.DisbursementId DisbursementId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.DisbursementId? DisbursementId { get; init; }
 
     /// <summary>Contract member 'exGratia'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("exGratia")]
@@ -92,4 +92,11 @@ public sealed record PaymentIssuedV1 : global::CoreIns.Platform.Contracts.Events
     /// <summary>Accounting date of the payment transactions (PRD-07 §7.1 ClaimFinancialTransaction.accounting_date); FIN derives it from occurredAt in the entity zone when absent</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("accountingDate")]
     public global::CoreIns.SharedKernel.BusinessDate? AccountingDate { get; init; }
+
+    /// <summary>Friendly Settlement statement a CLEARING payment belongs to. Always set when method is CLEARING, null otherwise</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'fsStatementId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fsStatementId")]
+    public global::System.Guid? FsStatementId { get; init; }
 }

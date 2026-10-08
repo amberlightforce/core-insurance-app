@@ -34,6 +34,10 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("channel");
 
+                    b.Property<Guid?>("CorrelatedDocumentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlated_document_id");
+
                     b.Property<Guid>("CounterpartyPartyId")
                         .HasColumnType("uuid")
                         .HasColumnName("counterparty_party_id");

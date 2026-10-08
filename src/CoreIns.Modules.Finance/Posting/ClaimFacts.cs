@@ -126,7 +126,7 @@ internal static class ClaimFacts
                 [LineDimensionKeys.CostType] = line.CostType,
                 [LineDimensionKeys.CostCategory] = line.CostCategory,
                 [LineDimensionKeys.ClaimPaymentId] = Text(payment.PaymentId.Value),
-                [LineDimensionKeys.DisbursementId] = Text(payment.DisbursementId.Value),
+                [LineDimensionKeys.DisbursementId] = Text(payment.DisbursementId?.Value), // null for method CLEARING (SL4-CONTRACTS)
             };
             var amount = line.Amount.Transaction;
             lines.Add(new SourceLine(line.Eroding == false ? ClaimLegs.PaidNonEroding : ClaimLegs.CaseReserve, Sides.Debit, amount, dimensions));

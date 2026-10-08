@@ -35,6 +35,19 @@ public sealed class MyDataStubFiscalChannelTests
     }
 
     [Fact]
+    public async Task REQ_CMP_032_a_credit_registers_synchronously_with_the_placeholder_type_and_its_own_MARK()
+    {
+        var document = await _channel.BuildAsync(Source() with { SourceType = "CREDIT" }, TestContext.Current.CancellationToken);
+        document.DocumentType.ShouldBe("UNMAPPED-OQ-012");
+
+        var credit = await _channel.SubmitAsync(document, "CREDIT|c1|CREDIT|1", TestContext.Current.CancellationToken);
+        var issue = await _channel.SubmitAsync(document, "INVOICE|c1|ISSUE|1", TestContext.Current.CancellationToken);
+        credit.Status.ShouldBe(FiscalSubmissionStatus.Registered);
+        credit.RegistrationId.ShouldNotBeNull().ShouldStartWith(MyDataStubFiscalChannel.StubPrefix);
+        credit.RegistrationId.ShouldNotBe(issue.RegistrationId);
+    }
+
+    [Fact]
     public async Task REQ_CMP_031_the_same_key_returns_the_same_identifiers_and_another_key_differs()
     {
         var document = await _channel.BuildAsync(Source(), TestContext.Current.CancellationToken);

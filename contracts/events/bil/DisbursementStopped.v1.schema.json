@@ -88,6 +88,30 @@
           "$ref": "../common.schema.json#/$defs/Text",
           "x-classification": "P1",
           "x-personal-data": true
+        },
+        "statementRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Friendly Settlement statement reference of an FS_CLEARING disbursement (D-SL4-02): CLM returns the net to Pending. Always set when sourceType is FS_CLEARING, null otherwise",
+          "x-classification": "P0"
+        },
+        "method": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Disbursement method (open Code, including CLEARING); always set",
+          "x-classification": "P0"
         }
       }
     }

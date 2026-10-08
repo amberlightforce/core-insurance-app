@@ -4,23 +4,48 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Contract.list result. PRD outputs: "contracts, versions"</summary>
+/// <summary>ri.Contract.list item: row of the contract registry</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ContractListItem
 {
-    /// <summary>PRD: "contracts"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contracts")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Contracts { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "versions"</summary>
+    /// <summary>Contract member 'contractNumber'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Business number issued by PLT numbering (format is configuration).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("versions")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractNumber")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Versions { get; init; }
+    public string? ContractNumber { get; init; }
+
+    /// <summary>Contract member 'contractType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractType")]
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractType ContractType { get; init; }
+
+    /// <summary>Contract member 'contractYear'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractYear")]
+    public required int ContractYear { get; init; }
+
+    /// <summary>Contract member 'currency'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
+    public required global::CoreIns.SharedKernel.Currency Currency { get; init; }
+
+    /// <summary>Contract member 'period'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    public required global::CoreIns.SharedKernel.DateRange Period { get; init; }
+
+    /// <summary>Contract member 'placedPct'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("placedPct")]
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+    public required decimal PlacedPct { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractStatus Status { get; init; }
+
+    /// <summary>Contract member 'recordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
 }

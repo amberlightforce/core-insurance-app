@@ -109,7 +109,8 @@
         },
         "layerId": {
           "$ref": "../common.schema.json#/$defs/Text",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Layer of this delta (the layer number as text); one event is published per layer × participant delta of a batch (D-SL4-05), so layerId, participantPartyId and the three deltas are the delta[layer, participant, incurred, paid, outstanding] of the plan"
         },
         "participantPartyId": {
           "$ref": "../common.schema.json#/$defs/Uuid",
@@ -136,7 +137,8 @@
         },
         "postingKey": {
           "$ref": "../common.schema.json#/$defs/Text",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Posting key as text (item RECOVERY, contract type, direction CEDED, line, participant type; REQ-RI-234); the structured form is posting"
         },
         "siiLob": {
           "$ref": "../common.schema.json#/$defs/Code",
@@ -147,6 +149,100 @@
           "items": {
             "$ref": "../common.schema.json#/$defs/Text"
           },
+          "x-classification": "P0"
+        },
+        "contractYear": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/NonNegativeInt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Contract year of the recalculation (REQ-RI-233); RI always sets it",
+          "x-classification": "P0"
+        },
+        "contractType": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Contract type of the contract (XOL_PER_RISK in slice 4); RI always sets it",
+          "x-classification": "P0"
+        },
+        "posting": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "item",
+                "contractType",
+                "direction",
+                "line",
+                "participantType"
+              ],
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "enum": [
+                    "RECOVERY"
+                  ],
+                  "description": "RI item type"
+                },
+                "contractType": {
+                  "$ref": "../common.schema.json#/$defs/Code"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "CEDED"
+                  ]
+                },
+                "line": {
+                  "$ref": "../common.schema.json#/$defs/Code",
+                  "description": "Line of the layer, e.g. L1"
+                },
+                "participantType": {
+                  "$ref": "../common.schema.json#/$defs/Code",
+                  "description": "Participant type, e.g. REINSURER"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Structured posting key (REQ-RI-234); RI always sets it",
+          "x-classification": "P0"
+        },
+        "ifrs17GroupRef": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "RI-held IFRS 17 group reference; UNASSIGNED in slice 4 (D-SL4-10). RI always sets it",
+          "x-classification": "P0"
+        },
+        "sourceCorrelationKey": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Source correlation key for FIN lineage (REQ-RI-233); not the W3C trace id. RI always sets it",
           "x-classification": "P0"
         }
       }

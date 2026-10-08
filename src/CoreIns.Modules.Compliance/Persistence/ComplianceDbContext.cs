@@ -42,6 +42,7 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
             entity.Property(e => e.SourceId).HasColumnName("source_id");
             entity.Property(e => e.Role).HasColumnName("role");
             entity.Property(e => e.Revision).HasColumnName("revision");
+            entity.Property(e => e.CorrelatedDocumentId).HasColumnName("correlated_document_id");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.DocumentType).HasColumnName("document_type");
             entity.Property(e => e.DocumentTypeIsPlaceholder).HasColumnName("document_type_is_placeholder");
@@ -95,6 +96,9 @@ internal sealed class FiscalDocumentRow
     public string Role { get; set; } = string.Empty;
 
     public int Revision { get; set; }
+
+    /// <summary>For a CREDIT: the fiscal document of the original it corrects (null = uncorrelated credit).</summary>
+    public Guid? CorrelatedDocumentId { get; set; }
 
     public string Status { get; set; } = string.Empty;
 

@@ -17,7 +17,7 @@
   "x-business-keys": [
     "claimId",
     "paymentId",
-    "disbursementId"
+    "disbursementId|fsStatementId"
   ],
   "x-payload-status": "full",
   "x-source": [
@@ -51,8 +51,23 @@
       "description": "Lineage keys this event must carry (D5, D-CON-01, D-CON-28). 'a|b' in x-business-keys means at least one of them.",
       "required": [
         "claimId",
-        "paymentId",
-        "disbursementId"
+        "paymentId"
+      ],
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "required": [
+                "disbursementId"
+              ]
+            },
+            {
+              "required": [
+                "fsStatementId"
+              ]
+            }
+          ]
+        }
       ]
     },
     "payload": {
@@ -117,10 +132,19 @@
         },
         "method": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Payment method (open Code), including CLEARING (Friendly Settlement at-fault leg, no cash movement by CLM)"
         },
         "disbursementId": {
-          "$ref": "../common.schema.json#/$defs/Uuid",
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "BIL disbursement. Always set unless method is CLEARING (D-SL4-02: the at-fault leg of a Friendly Settlement has no disbursement), then null and fsStatementId is set",
           "x-classification": "P0"
         },
         "exGratia": {
@@ -149,6 +173,18 @@
             }
           ],
           "description": "Accounting date of the payment transactions (PRD-07 §7.1 ClaimFinancialTransaction.accounting_date); FIN derives it from occurredAt in the entity zone when absent",
+          "x-classification": "P0"
+        },
+        "fsStatementId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Friendly Settlement statement a CLEARING payment belongs to. Always set when method is CLEARING, null otherwise",
           "x-classification": "P0"
         }
       }

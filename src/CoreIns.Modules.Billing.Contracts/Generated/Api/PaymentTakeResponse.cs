@@ -20,6 +20,10 @@ public sealed record PaymentTakeResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("allocationOutcome")]
     public required AllocationOutcomeValue AllocationOutcome { get; init; }
 
+    /// <summary>Set (outcome RECEIVABLE_ALLOCATED) when the cash settled a receivable; allocations is then empty. Publishes CashAllocated with the receivable, claim, recovery and statement references</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receivableAllocation")]
+    public ReceivableAllocationDetail? ReceivableAllocation { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<AllocationOutcomeValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
@@ -36,5 +40,40 @@ public sealed record PaymentTakeResponse
         /// <summary><c>NOT_REQUESTED</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NOT_REQUESTED")]
         NotRequested,
+
+        /// <summary><c>RECEIVABLE_ALLOCATED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RECEIVABLE_ALLOCATED")]
+        ReceivableAllocated,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ReceivableAllocationDetail
+    {
+        /// <summary>Contract member 'receivableId'.</summary>
+        /// <remarks>
+        /// <para>Untyped id: no SharedKernel id type is mapped for 'receivableId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+        /// </remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("receivableId")]
+        public required global::System.Guid ReceivableId { get; init; }
+
+        /// <summary>The BIL allocation id: the evidence CLM records the recovery against</summary>
+        /// <remarks>
+        /// <para>Untyped id: no SharedKernel id type is mapped for 'allocationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+        /// </remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("allocationId")]
+        public required global::System.Guid AllocationId { get; init; }
+
+        /// <summary>Contract member 'amount'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+
+        /// <summary>Contract member 'openAmountAfter'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("openAmountAfter")]
+        public required global::CoreIns.SharedKernel.Money OpenAmountAfter { get; init; }
+
+        /// <summary>Contract member 'status'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+        public required global::CoreIns.Modules.Billing.Contracts.Api.ReceivableStatus Status { get; init; }
     }
 }
