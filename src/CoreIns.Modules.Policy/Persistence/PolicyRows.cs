@@ -75,6 +75,39 @@ internal sealed class JobRow
     public List<string> Participants { get; set; } = [];
 
     public Instant UpdatedAt { get; set; }
+
+    /// <summary>Target term of a PolicyChange or Cancellation job (one open job of each type per term).</summary>
+    public PolicyTermId? TargetTermId { get; set; }
+
+    /// <summary>Cancellation: the source from the MKT code list (REQ-POL-205).</summary>
+    public string? CancellationSource { get; set; }
+
+    /// <summary>Cancellation: Standard or Flat (<see cref="Domain.CancellationKind"/>).</summary>
+    public string? CancellationKind { get; set; }
+
+    /// <summary>Cancellation: the refund method resolved from the artefact by source.</summary>
+    public string? RefundMethod { get; set; }
+
+    /// <summary>Cancellation: the reason code.</summary>
+    public string? ReasonCode { get; set; }
+
+    /// <summary>Change: the head transaction the change was started on (bind refuses when it moved, POL-ERR-PREEMPTED).</summary>
+    public PolicyTransactionId? BaseTransactionId { get; set; }
+
+    /// <summary>Renewal: the expiring term (one open renewal per term).</summary>
+    public PolicyTermId? ExpiringTermId { get; set; }
+
+    /// <summary>Renewal: how the customer accepted the offer.</summary>
+    public string? AcceptanceChannel { get; set; }
+
+    /// <summary>Renewal: when the offer was accepted.</summary>
+    public Instant? AcceptedAt { get; set; }
+
+    /// <summary>Renewal: who recorded the acceptance.</summary>
+    public string? AcceptedBy { get; set; }
+
+    /// <summary>Sub-state of the state (<see cref="Domain.JobSubState"/>), e.g. <c>OFFERED</c> under Quoted.</summary>
+    public string? SubState { get; set; }
 }
 
 /// <summary><c>pol.quote_version</c>: one quote version of a job (PRD-05 §7.1 QuoteVersion, PRD-18 §9.2.1).</summary>
@@ -152,6 +185,12 @@ internal sealed class PolicyRow
     public string CreatedBy { get; set; } = string.Empty;
 
     public int RecordVersion { get; set; }
+
+    /// <summary>
+    /// The policy's record-time watermark (D-SL3-03): the record time of the last command that wrote for this policy. Moves
+    /// only forward, only under the row lock (<c>PolicyWriteLock</c>); every record row carries exactly this instant.
+    /// </summary>
+    public Instant LastRecordedAt { get; set; }
 }
 
 /// <summary>
@@ -202,6 +241,12 @@ internal sealed class PolicyTermRow
     public PolicyTransactionId HeadTransactionId { get; set; }
 
     public string CreatedBy { get; set; } = string.Empty;
+
+    /// <summary>Renewal: the term this one follows (term n+1 → term n).</summary>
+    public PolicyTermId? PredecessorTermId { get; set; }
+
+    /// <summary>When the cover ended, for a Cancelled version (the effective instant of the cancellation).</summary>
+    public Instant? CancelledAt { get; set; }
 }
 
 /// <summary><c>pol.policy_transaction</c>: an append-only bound transaction (PRD-05 §7.1 PolicyTransaction, REQ-POL-075).</summary>
@@ -336,4 +381,16 @@ internal sealed class ChargeLineRow
     public bool? Provisional { get; set; }
 
     public Instant RecordedAt { get; set; }
+
+    /// <summary>The MKT transaction kind of the line (<see cref="Domain.TaxTransactionKind"/>); always set.</summary>
+    public string TransactionKind { get; set; } = string.Empty;
+
+    /// <summary>The cancellation source for lines of a cancellation or void.</summary>
+    public string? CancellationSource { get; set; }
+
+    /// <summary>The MKT treatment rule applied to the line.</summary>
+    public string? TreatmentRuleId { get; set; }
+
+    /// <summary>The version of the treatment rule.</summary>
+    public string? TreatmentRuleVersion { get; set; }
 }
