@@ -1147,6 +1147,8 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_reverification_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
 
+                            t.HasCheckConstraint("ck_reverification_reason", "status = 'OPEN' OR reason_code IS NOT NULL");
+
                             t.HasCheckConstraint("ck_reverification_record_version", "record_version >= 1");
 
                             t.HasCheckConstraint("ck_reverification_refs", "old_snapshot_ref <> new_snapshot_ref");

@@ -40,6 +40,7 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                     table.PrimaryKey("pk_reverification", x => x.reverification_id);
                     table.CheckConstraint("ck_reverification_decided_shape", "(status = 'OPEN') = (decided_at IS NULL)");
                     table.CheckConstraint("ck_reverification_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+                    table.CheckConstraint("ck_reverification_reason", "status = 'OPEN' OR reason_code IS NOT NULL");
                     table.CheckConstraint("ck_reverification_record_version", "record_version >= 1");
                     table.CheckConstraint("ck_reverification_refs", "old_snapshot_ref <> new_snapshot_ref");
                     table.CheckConstraint("ck_reverification_status", "status IN ('OPEN', 'KEPT', 'ADOPTED')");

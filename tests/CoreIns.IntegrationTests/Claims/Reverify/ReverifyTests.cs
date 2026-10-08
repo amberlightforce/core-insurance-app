@@ -175,7 +175,7 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         after.Text("summary.snapshotRef").ShouldBe(oldRef);
         after["pendingReverification"].ShouldBeNull();
         (await _h.RowsAsync(claim, "KEPT")).ShouldBe(1);
-        (await _h.Money.ScalarAsync<string>($"SELECT reason_code FROM clm.reverification WHERE claim_id = '{claim.ClaimId}'")).ShouldBe("ADJUSTER_REVIEW");
+        (await _h.Money.ScalarAsync<string>($"SELECT reason_code FROM clm.reverification WHERE claim_id = '{claim.ClaimId}'")).ShouldBe("POLICY_CHANGE_NOT_RELEVANT");
 
         // The comment is P2: encrypted at rest, in no event, no audit and no idempotency record (PITFALLS 18/31).
         (await _h.Money.ExposuresAsync(secret)).ShouldBe(0);
@@ -269,7 +269,7 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         // Before the decision nothing changed: the exposure is still covered.
         (await _h.ClaimAsync(claim)).Text("exposures.0.coverageIndication").ShouldBe("COVERED");
 
-        var (response, body) = await _h.ReverifyAsync(claim, "ADOPT", newRef, reason: "COVER_REMOVED");
+        var (response, body) = await _h.ReverifyAsync(claim, "ADOPT", newRef, reason: "COVER_CHANGED");
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("coverageInQuestion").ShouldBe("true");
 
@@ -302,7 +302,7 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         raised[0]["causeEventId"]!.GetValue<string>().ShouldBe(cause.EventId.Value.ToString());
         (await _h.ClaimAsync(claim)).Text("summary.policyInForceAtLoss").ShouldBe("true");
 
-        var (response, body) = await _h.ReverifyAsync(claim, "ADOPT", raised[0]["newSnapshotRef"]!.GetValue<string>(), reason: "CANCELLED");
+        var (response, body) = await _h.ReverifyAsync(claim, "ADOPT", raised[0]["newSnapshotRef"]!.GetValue<string>(), reason: "POLICY_CHANGE_RELEVANT");
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("coverageInQuestion").ShouldBe("true");
         var after = await _h.ClaimAsync(claim);
@@ -374,6 +374,94 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
     }
 
     [Fact]
+    public async Task REQ_CLM_058_m1_KEEP_of_a_snapshot_that_is_not_in_force_at_the_loss_needs_the_claims_manager()
+    {
+        var policy = _h.Policy();
+        var claim = await _h.OpenClaimAsync(policy);
+        _h.Supersede(policy, ["OD", "MTPL"], end: Instant.FromDateTimeOffset(DateTimeOffset.UtcNow.AddDays(-3)));
+        await _h.PublishCancelledAsync(policy, DaysAgo(3));
+        await _h.DrainAsync();
+        var newRef = (await _h.ClaimAsync(claim)).Text("pendingReverification.newSnapshotRef");
+
+        var (denied, deniedBody) = await _h.ReverifyAsync(claim, "KEEP", newRef);
+        denied.StatusCode.ShouldBe(HttpStatusCode.Forbidden, deniedBody?.ToJsonString());
+        deniedBody.Text("code").ShouldBe("CLM-ERR-AUTHORITY");
+        (await _h.RowsAsync(claim, "OPEN")).ShouldBe(1);
+
+        var (allowed, allowedBody) = await _h.ReverifyAsync(claim, "KEEP", newRef, roles: ClaimsSlice.Manager);
+        allowed.StatusCode.ShouldBe(HttpStatusCode.OK, allowedBody?.ToJsonString());
+        (await _h.RowsAsync(claim, "KEPT")).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task REQ_CLM_058_m2_A_reason_code_outside_the_configured_list_for_the_decision_is_a_validation_error()
+    {
+        var policy = _h.Policy();
+        var claim = await _h.OpenClaimAsync(policy);
+        _h.Supersede(policy, ["OD", "MTPL", "GLASS"]);
+        await _h.PublishChangedAsync(policy, DaysAgo(3));
+        await _h.DrainAsync();
+        var newRef = (await _h.ClaimAsync(claim)).Text("pendingReverification.newSnapshotRef");
+
+        foreach (var (decision, reason) in new[] { ("ADOPT", "MADE_UP"), ("ADOPT", "CORRECTION_ONLY"), ("KEEP", "COVER_CHANGED") })
+        {
+            var (response, body) = await _h.ReverifyAsync(claim, decision, newRef, reason: reason);
+            body.Text("code").ShouldBe("CLM-ERR-VALIDATION", body?.ToJsonString());
+            ((int)response.StatusCode).ShouldBeInRange(400, 422);
+        }
+
+        (await _h.RowsAsync(claim, "OPEN")).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task P1_A_payment_set_built_before_an_adoption_that_removes_the_cover_cannot_be_approved()
+    {
+        var policy = _h.Policy();
+        var claim = await _h.OpenClaimAsync(policy);
+        (await _h.Money.BuildAndSubmitAsync(claim, [Reserve(claim, 1200m)])).Text("status").ShouldBe("APPROVED");
+        var (account, _) = await _h.Money.CaptureAsync(claim);
+        var (built, build) = await _h.Money.BuildAsync(claim, [Payment(claim, 500m, account, paymentType: "PARTIAL")]);
+        built.StatusCode.ShouldBe(HttpStatusCode.OK, build?.ToJsonString());
+        var setId = build.Text("setId");
+
+        _h.Supersede(policy, ["MTPL"]);
+        await _h.PublishChangedAsync(policy, DaysAgo(3));
+        await _h.DrainAsync();
+        var newRef = (await _h.ClaimAsync(claim)).Text("pendingReverification.newSnapshotRef");
+        (await _h.ReverifyAsync(claim, "ADOPT", newRef)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var (submitted, submit) = await _h.Money.SubmitAsync(setId);
+        submitted.StatusCode.ShouldBe(HttpStatusCode.Conflict, submit?.ToJsonString());
+        submit.Text("code").ShouldBe("CLM-ERR-SET-STALE");
+        (await _h.Money.ScalarAsync<long>($"SELECT count(*) FROM clm.claim_payment WHERE claim_id = '{claim.ClaimId}' AND status NOT IN ('REJECTED')")).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task P2_POL_down_during_consumption_records_nothing_and_a_retry_succeeds_later()
+    {
+        var policy = _h.Policy();
+        var claim = await _h.OpenClaimAsync(policy);
+        _h.Supersede(policy, ["OD", "MTPL", "GLASS"]);
+
+        _h.PolDown = true;
+        await _h.PublishChangedAsync(policy, DaysAgo(3));
+        await _h.DrainAsync();
+        (await _h.RowsAsync(claim)).ShouldBe(0);
+        (await _h.RaisedAsync(claim)).ShouldBeEmpty();
+        (await _h.ClaimAsync(claim)).Text("summary.snapshotStatus").ShouldBe("VERIFIED");
+
+        _h.PolDown = false;
+        for (var attempt = 0; attempt < 40 && (await _h.RaisedAsync(claim)).Count == 0; attempt++)
+        {
+            await Task.Delay(1500, ClaimsSlice.Ct);
+            await _h.DrainAsync();
+        }
+
+        (await _h.RaisedAsync(claim)).Count.ShouldBe(1);
+        (await _h.RowsAsync(claim, "OPEN")).ShouldBe(1);
+    }
+
+    [Fact]
     public async Task D_ARC_34_The_demand_record_is_frozen_and_its_decision_final_even_for_the_owner()
     {
         var policy = _h.Policy();
@@ -395,6 +483,9 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         var newRef = (await _h.ClaimAsync(claim)).Text("pendingReverification.newSnapshotRef");
         (await _h.ReverifyAsync(claim, "KEEP", newRef)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await Refused($"UPDATE clm.reverification SET status = 'ADOPTED' WHERE claim_id = '{claim.ClaimId}'")).SqlState.ShouldBe("23001");
+        (await Refused($"UPDATE clm.reverification SET comment_encrypted = '\\x00' WHERE claim_id = '{claim.ClaimId}'")).SqlState.ShouldBe("23001");
+        (await Refused($"UPDATE clm.reverification SET jurisdiction = 'CY' WHERE claim_id = '{claim.ClaimId}'")).SqlState.ShouldBe("23001");
+        (await Refused($"UPDATE clm.reverification SET reason_code = NULL WHERE claim_id = '{claim.ClaimId}'")).SqlState.ShouldBeOneOf("23001", "23514");
 
         // The app role has no DELETE on the table at all.
         await using var app = NpgsqlDataSource.Create(database.AppConnectionString);

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CoreIns.Modules.Claims.Persistence.Migrations
 {
     [DbContext(typeof(ClaimsDbContext))]
-    [Migration("20261008200704_Reverification")]
+    [Migration("20261008234008_Reverification")]
     partial class Reverification
     {
         /// <inheritdoc />
@@ -1149,6 +1149,8 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                             t.HasCheckConstraint("ck_reverification_decided_shape", "(status = 'OPEN') = (decided_at IS NULL)");
 
                             t.HasCheckConstraint("ck_reverification_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                            t.HasCheckConstraint("ck_reverification_reason", "status = 'OPEN' OR reason_code IS NOT NULL");
 
                             t.HasCheckConstraint("ck_reverification_record_version", "record_version >= 1");
 

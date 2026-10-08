@@ -138,5 +138,5 @@ public sealed class ReverifyRealPolTests(PostgresFixture database) : IClassFixtu
     private Task<(HttpResponseMessage Response, System.Text.Json.Nodes.JsonNode? Body)> ReverifyAsync(MoneyClaim claim, string expectedNewRef) =>
         _money.SendAsync(
             HttpMethod.Post, "/api/clm/v1/coverage/reverify",
-            new { claimId = claim.ClaimId, decision = "ADOPT", reasonCode = "ADJUSTER_REVIEW", expectedNewSnapshotRef = expectedNewRef });
+            new { claimId = claim.ClaimId, decision = "ADOPT", reasonCode = "POLICY_CHANGE_RELEVANT", expectedNewSnapshotRef = expectedNewRef });
 }

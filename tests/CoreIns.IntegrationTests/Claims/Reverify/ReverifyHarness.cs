@@ -99,10 +99,10 @@ internal sealed class ReverifyHarness : IAsyncDisposable
             .ReplayAsync(handlerName, new ReplayFilter { EventIds = [.. events.Select(e => e.EventId.Value)] }, Ct);
 
     public Task<(HttpResponseMessage Response, JsonNode? Body)> ReverifyAsync(
-        MoneyClaim claim, string decision, string? expectedNewRef, string reason = "ADJUSTER_REVIEW", string? comment = null, string roles = Handler) =>
+        MoneyClaim claim, string decision, string? expectedNewRef, string? reason = null, string? comment = null, string roles = Handler) =>
         Money.SendAsync(
             HttpMethod.Post, "/api/clm/v1/coverage/reverify",
-            new { claimId = claim.ClaimId, decision, reasonCode = reason, comment, expectedNewSnapshotRef = expectedNewRef }, roles);
+            new { claimId = claim.ClaimId, decision, reasonCode = reason ?? (decision == "KEEP" ? "POLICY_CHANGE_NOT_RELEVANT" : "POLICY_CHANGE_RELEVANT"), comment, expectedNewSnapshotRef = expectedNewRef }, roles);
 
     public async Task<JsonNode> ClaimAsync(MoneyClaim claim) => await Money.ClaimAsync(claim);
 
