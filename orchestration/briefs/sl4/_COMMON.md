@@ -7,7 +7,7 @@ sending. It is filled from `briefs/BUILDER-TEMPLATE.md`.
 
 - **Read first:**
   - `orchestration/HANDOVER.md` §4.
-  - **`orchestration/briefs/PITFALLS.md`** (items 1–37 and any added since). Self-check against every item before you
+  - **`orchestration/briefs/PITFALLS.md`** (items 1–39 and any added since). Self-check against every item before you
     report. The items your brief names are the likely ones, but not the only ones.
   - `orchestration/SLICE-PLAN-4.md`:
     - §3 journeys and amounts;
@@ -42,6 +42,9 @@ sending. It is filled from `briefs/BUILDER-TEMPLATE.md`.
     `== Settled` (PITFALLS 36).
   - An open value stays absent and fails closed.
   - Commercial values (treaty, authority grants, thresholds, GL placeholders) are marked **illustrative**.
+- **RAM and logs (PITFALLS 38, 39):** before every `dotnet` command set `MSBUILDDISABLENODEREUSE=1` and
+  `DOTNET_CLI_USE_MSBUILD_SERVER=0`, and pass `-m:2`. Write logs to unique paths in your own worktree (e.g.
+  `<worktree>/.logs/<class>.log`).
 - **Do not spawn sub-agents** (D-PRG-15). Commit early and often (WIP commits are fine): worktrees have been lost before.
 - **Pull-request workflow (D-PRG-19, D-USR-18):**
   1. Run `git merge origin/main` before you finish.

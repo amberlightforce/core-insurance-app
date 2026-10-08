@@ -265,7 +265,7 @@ Estimates are builder wall-clock hours on this laptop. **All agents run on Sonne
 | **SL4-CONTRACTS** | contracts + generated `*.Contracts`; `Market.Contracts/Spi/IFriendlySettlementClearing.cs` | Type every op, event and SPI of §6 and regenerate; samples valid; new error codes | D-API-06/06a; §6 | none | light (completeness, additivity) | 12, 18, 21, 22, 23 | 3 h |
 | **SL4-RI-REGISTRY** | RI `Persistence/**` (**RI migration owner, wave 1**), `Registry/**`, `Api/Contracts*`, `ReinsuranceModule.cs`; permission file `ri.json` (new) | RI schema; per-risk XoL contract (scope, clause, layers, participations, Σ signed lines = placed %); one version row (valid + record period); Draft → Submitted → Approved → Active → Expired; maker ≠ checker via PLT approval (`RI.CONTRACT_APPROVE`, enterer ≠ approver); activation at period start (Athens, `IClock`); `RIContractActivated`; create/update/submit/approve/get/list/applicable | REQ-RI-001, -030, -031, -032 (XoL), -037, -038, -046, -047, -056, -057, -058, -065, -231 | C (can start on storage before C merges) | **deep (security + temporal)** | 3, 4, 5, 8, 13, 14, 15, 17 | 4 h |
 | **SL4-RI-ENGINE** | RI `Domain/Recovery/**` (**no DB, no DI**) + its tests | Pure engine: UNL per clause; per-occurrence layer loss; annual aggregate R(Cₖ) − R(Cₖ₋₁) with full-year restatement; paid/outstanding split; target − booked deltas per occurrence × layer × participant; rounding residual to the lead; trace object; property tests (idempotence, order independence, Σ participants = layer × placed %); goldens GT-05, REQ-RI-116/119/123/125/126 examples | REQ-RI-116, -117 (realised only), -119, -122, -123, -125, -126, -127, -129, -132 (trace data) | C | **deep (money)** | 10, 11 | 3.5 h |
-| **SL4-E2E-HARNESS** | `tests/e2e/support/claims4/**` (new), `tests/e2e/run-e2e06.sh`, `.github/workflows/ci.yml` (new `e2e06` job block only) | Own stack (project `coreins-e2e06`, ports 28000+, image tag `coreins-host:e2e06`, executable bit); helpers: dev sign-in for the new users, create/approve RI treaty, wait for complete journal sets (incl. RI and FS), FS dev notification, manual stub-bank actions; placeholder health spec; make sure the `e2e02` job's spec filter excludes `e2e02x*` | PRD-18 §17.1; XMR-FR-250 | C | light (batched, no own PR, D-USR-18) | 29, 30, 32, 33, 35 | 1.5 h |
+| **SL4-E2E-HARNESS** | `tests/e2e/support/claims4/**` (new), `tests/e2e/run-e2e06.sh` | Own stack (project `coreins-e2e06`, ports 28000+, image tag `coreins-host:e2e06`, executable bit); helpers: dev sign-in for the new users, create/approve RI treaty, wait for complete journal sets (incl. RI and FS), FS dev notification, manual stub-bank actions; placeholder health spec. **No `ci.yml` edit** (SL3-E2E owns it until it merges; the `e2e06` job comes with SL4-E2E) | PRD-18 §17.1; XMR-FR-250 | C | light (batched, no own PR, D-USR-18) | 29, 30, 32, 33, 35 | 1.5 h |
 | **SL4-UI-RI** | `web/src/modules/reinsurance/**` (new) | Treaty registry (list), treaty editor (layer diagram, participations, clause), submit; approve/return for `rimgr`; treaty detail; MSW fakes from samples; Greek-first | SCR-RI-02, -03, -04 (subsets) | M: CONTRACTS | light + visual | 25–28 | 3.5 h |
 
 ### Wave 2 — each WP starts at its gate (9 WPs)
@@ -273,7 +273,7 @@ Estimates are builder wall-clock hours on this laptop. **All agents run on Sonne
 | WP | Module (owned area) | Scope | PRD / REQ | Depends on | Review | PITFALLS | Est. |
 |---|---|---|---|---|---|---|---|
 | **SL4-PLT** | PLT `Approvals/**` (withdraw), dev-users file, role catalogue | Roles Staff.RecoverySpecialist (ROLE-20), Staff.ReinsuranceManager (ROLE-27), Staff.ReinsuranceAccountant (ROLE-28); dev users `recovery`, `rimgr`, `riacct`; `superuser` gains them (SoD unchanged); in-process `WithdrawAsync(approvalId, reason)` callable only by the module that created the request, audited, no REST | REQ-PLT-004 (subset); PRD-07 §12; PRD-08 §12 | **G: SL3-PLT-SUPPORT**; C | **deep (security)** | 3, 4, 5, 6 | 2.5 h |
-| **SL4-MKT-FS** | `CountryPacks.GR/Claims/**` (new), `CountryPacks.CY/Claims/**` (new), MKT capability resolution for `cap.clm.friendly_settlement`, `Host/Hosting/CountryPackBinding.cs` (append one binding) | GR stub `IFriendlySettlementClearing` (never in Production): eligibility rules with provisional limit (D-SL4-03), member list, `submit`, `receiveNotification`, `settlementStatement` built from its own store; CY `NotApplicable`; capability switch GR on (non-Production) / CY off | REQ-MKT-004, -109, -313, REQ-CLM-155, -156; PRD-17 GR-06 | **G: SL3-MKT-TREATMENT**; C | light + regulatory checklist | 10, 24, 36, 37 | 2.5 h |
+| **SL4-MKT-FS** | `CountryPacks.GR/Claims/**` (new), `CountryPacks.CY/Claims/**` (new), MKT capability resolution for `cap.clm.friendly_settlement` (`Modules.Market/Services/Capability*`), `Host/Hosting/CountryPackBinding.cs` (append one binding) | GR stub `IFriendlySettlementClearing` (never in Production): eligibility rules with provisional limit (D-SL4-03), member list, `submit`, `receiveNotification`, `settlementStatement` built from its own store; CY `NotApplicable`; capability switch GR on (non-Production) / CY off | REQ-MKT-004, -109, -313, REQ-CLM-155, -156; PRD-17 GR-06 | **G: SL3-MKT-TREATMENT and SL5-MKT-STATE** (slice 5 owns `Modules.Market/**` and the GR/CY configuration until then); C | light + regulatory checklist | 10, 24, 36, 37 | 2.5 h |
 | **SL4-CMP-RECEIPT** | CMP fiscal source mapping, GR stub channel mapping | Fiscal request from source `CLM_CLAIM_PAYMENT`, role ISSUE, category `CLAIM_SETTLEMENT_RECEIPT`; idempotency source + id + role + revision; stub codes `UNMAPPED-OQ-012` (OI-CLM-04); CY `NotRequired`; `CLEARING` payments refused (no receipt) | REQ-CMP-001, -030 (subset), R-43, REQ-CLM-138 (CMP side) | **G: SL3-CMP-CREDIT**; C | light (+ money checklist) | 9, 10, 12 | 1.5 h |
 | **SL4-RI-RECOVERY** | RI `Intake/**`, `Recovery/**` (commands, persistence use), `Api/Recovery*`, **RI migration (wave 2)** | ClaimView consumer (ExposureCreated, ReserveChanged, PaymentIssued, PaymentVoided, RecoveryRecorded, ClaimClosed/Reopened), idempotent on event id, monotonic `aggregateSequence`; claim attributes via `clm.Claim.get`; applicability (contract active at the loss date, scope); occurrence = claim; recalculation under a per-contract-year lock; sealed booked recovery rows; `RecoveryCalculated`; trace; `ri.Recovery.listByClaim/listByContract/trace` (as of record time); closed claim → outstanding 0 | REQ-RI-003, -004, -113, -114, -115 (per risk), -122, -127, -128, -129, -131 (Calculated only), -132, -136 | M: RI-REGISTRY, RI-ENGINE; C (CLM events) | **deep (money)** | 8, 9, 10, 12, 15, 22 | 4.5 h |
 | **SL4-FIN-V4** | FIN `Seed/gr-test.finance.v4.json`, `Posting/**` (new handlers + rule wiring), `Domain/PostingRules.cs` | Rule set v4: recovery reserve; `RecoveryRecorded` by type with counterparty; recovery clearing per recovery against BIL receivable cash; FS: `CLEARING` payable and FS recovery → GL-2515, BIL `FS_CLEARING` cash → GL-2515, nets per counterparty + statement (check), `CLEARING` excluded from GL-2510; `RecoveryCalculated` → recoverable on paid and outstanding separately; `PaymentVoided` → reversal; every new path fail-closed on missing fields | REQ-FIN-037, -159, -160, -164, -299, BR-FIN-096/097, GF-05/GF-10 (subsets) | **G: SL3-FIN-RULES**; C | **deep (ledger)** | 8, 9, 10, 11, 12 | 4 h |
@@ -303,7 +303,7 @@ Estimates are builder wall-clock hours on this laptop. **All agents run on Sonne
 
 | WP | Module (owned area) | Scope | Depends on | Review | Est. |
 |---|---|---|---|---|---|
-| **SL4-E2E** | `tests/e2e/tests/e2e02x*`, `e2e06*`, `payops*`; `infra/local/seed-demo.py --claims4`; integration fixes (small, listed) | API specs: E2E-02 §3.1 (all assertions of the amount table, every journal balanced, GL-2510 and recovery clearing 0, RI deltas per participant, replay idempotent), E2E-06 §3.2 incl. the receivable variant (GL-2515 = 0 per statement), payment corrections §3.3. Playwright UI specs for E2E-02 and E2E-06 with `alive(page)`. CI job `e2e06` turned on | phase A (API) at M: RECOVERY-OPS, RI-RECOVERY, FIN-V4, BIL-RECV; phase B at M: all | light (integration) | 5 h |
+| **SL4-E2E** | `tests/e2e/tests/e2e02x*`, `e2e06*`, `payops*`; `infra/local/seed-demo.py --claims4`; `ci.yml` (new `e2e06` block, after SL3-E2E merged; the `e2e02` job's spec filter must not pick up `e2e02x*`); integration fixes (small, listed) | API specs: E2E-02 §3.1 (all assertions of the amount table, every journal balanced, GL-2510 and recovery clearing 0, RI deltas per participant, replay idempotent), E2E-06 §3.2 incl. the receivable variant (GL-2515 = 0 per statement), payment corrections §3.3. Playwright UI specs for E2E-02 and E2E-06 with `alive(page)`. CI job `e2e06` turned on | phase A (API) at M: RECOVERY-OPS, RI-RECOVERY, FIN-V4, BIL-RECV; phase B at M: all | light (integration) | 5 h |
 
 ### Critical path
 
@@ -342,10 +342,10 @@ migration. Later CLM WPs ask the orchestrator for schema changes, and those go t
 | SL4-CONTRACTS | `contracts/**`, `src/*.Contracts/Generated/**`, `Market.Contracts/Spi/IFriendlySettlementClearing.cs`, `INDEX.md` (regenerated) | count tests (self-maintaining) | Edits only new ops/schemas in `clm.yaml`/`bil.yaml`. If a slice-3 WP typed its own op meanwhile, merge textually, then regenerate. **Never concurrent with a slice-5 contracts WP** (§7.3) | med |
 | SL4-RI-REGISTRY | `Modules.Reinsurance/Persistence/**` (RI migration owner, wave 1), `Registry/**`, `Api/Contracts*`, `ReinsuranceModule.cs`, `Host/permissions/ri.json` (new); `tests/…/Reinsurance/Registry/` | migrate-job DbContext list in `Host/Database/**` (append one line) | — | low |
 | SL4-RI-ENGINE | `Modules.Reinsurance/Domain/Recovery/**`; `tests/…/Reinsurance/Engine/` | none | No DB, no DI | low |
-| SL4-E2E-HARNESS | `tests/e2e/support/claims4/**`, `run-e2e06.sh` | `ci.yml` (new `e2e06` block only) | Never edits `e2e01–03` blocks or existing helpers | low |
+| SL4-E2E-HARNESS | `tests/e2e/support/claims4/**`, `run-e2e06.sh` | none | Never edits existing helpers; no `ci.yml` edit | low |
 | SL4-UI-RI | `web/src/modules/reinsurance/**` | `routes.tsx`, staff nav list (append) | — | low |
 | SL4-PLT | `Platform/Approvals/Withdraw*`, PLT role catalogue | `dev-users.Development.json` (append) | **G: SL3-PLT-SUPPORT** | low |
-| SL4-MKT-FS | `CountryPacks.GR/Claims/**`, `CountryPacks.CY/Claims/**`, `Modules.Market/Services/Capability*` | `Host/Hosting/CountryPackBinding.cs` (append), GR/CY configuration (append keys) | **G: SL3-MKT-TREATMENT**; serialise with slice-5 MKT WPs (§7.3); no MKT migration | med |
+| SL4-MKT-FS | `CountryPacks.GR/Claims/**`, `CountryPacks.CY/Claims/**`, `Modules.Market/Services/Capability*` | `Host/Hosting/CountryPackBinding.cs` (append), GR/CY configuration (append one capability row to the pack version SL5-MKT-STATE marks current) | **G: SL3-MKT-TREATMENT and SL5-MKT-STATE**; never touches SL5-MKT-ROLLBACK's `Commands/Packs*`; no MKT migration | med |
 | SL4-CMP-RECEIPT | CMP fiscal source/category mapping files, `CountryPacks.GR/Fiscal/MyDataStubFiscalChannel.cs` | CMP permission file | **G: SL3-CMP-CREDIT** | low |
 | SL4-RI-RECOVERY | `Modules.Reinsurance/Intake/**`, `Recovery/**`, `Api/Recovery*`, `Persistence/**` (RI migration owner, wave 2) | `ReinsuranceModule.cs` (DI append), `ri.json` | M: RI-REGISTRY + RI-ENGINE | low |
 | SL4-FIN-V4 | `Modules.Finance/Seed/gr-test.finance.v4.json`, `Posting/Recovery*`, `Posting/Fs*`, `Posting/RiFacts.cs`, `Posting/ClaimFacts.cs` (edit), `Domain/PostingRules.cs` | FIN permission file | **G: SL3-FIN-RULES**; FIN migration only if needed (owner) | med |
@@ -360,7 +360,7 @@ migration. Later CLM WPs ask the orchestrator for schema changes, and those go t
 | SL4-UI-CLM-FS | `web/src/modules/claims/fs/**`, `claims/fs-statements/**` | `routes.tsx` | Never edits `ClaimViewPage.tsx`; exports slot components that UI-CLM-REC mounts | low |
 | SL4-CLM-PAYOPS | `Commands/Payments/**`, `Commands/RecordDisbursementOutcome.cs`, `Api/PaymentsController.cs`, `Events/Fiscal*` | `ClaimsModule.cs` | M: RECOVERY-OPS; no migration | med |
 | SL4-BIL-DISBOPS | `Commands/DisbursementOps*`, `Services/PaymentAdapters.cs`, `Host/Hosting/DevBankEndpoints.cs` (new) | `Commands/Disbursements.cs` (state hooks) | M: BIL-FSOUT; BIL migration owner, wave 4, if needed | med |
-| SL4-E2E | `tests/e2e/tests/e2e02x*`, `e2e06*`, `payops*`; `infra/local/seed-demo.py` (`--claims4` block) | `ci.yml` (`e2e06` block) | After SL3-E2E merged (seed-demo owner in slice 3) | low |
+| SL4-E2E | `tests/e2e/tests/e2e02x*`, `e2e06*`, `payops*`; `infra/local/seed-demo.py` (`--claims4` block) | `ci.yml` (new `e2e06` block) | After SL3-E2E merged (owner of `ci.yml` and `seed-demo.py` in slice 3) | low |
 
 ### 7.2 Shared files and their single owner in slice 4
 
@@ -371,7 +371,7 @@ migration. Later CLM WPs ask the orchestrator for schema changes, and those go t
 | CLM `Persistence/**` | SL4-CLM-MONEY2 only |
 | BIL `Persistence/**` | SL4-BIL-RECV (wave 2), then SL4-BIL-DISBOPS (wave 4) |
 | RI `Persistence/**` | SL4-RI-REGISTRY (wave 1), then SL4-RI-RECOVERY (wave 2) |
-| `ci.yml` | SL4-E2E-HARNESS adds the `e2e06` block; SL4-E2E edits only that block |
+| `ci.yml` | SL4-E2E adds the `e2e06` block after SL3-E2E merged, and edits only that block (plus the `e2e02` spec filter if it would match `e2e02x*`) |
 | `seed-demo.py` | SL4-E2E only, after SL3-E2E merged |
 | `DECISIONS.md`, `STATUS.md`, `HANDOVER.md`, `PITFALLS.md` | Orchestrator only |
 
@@ -379,13 +379,18 @@ migration. Later CLM WPs ask the orchestrator for schema changes, and those go t
 
 - **Slice 3 has priority on its gates.** A slice-4 WP never edits a file that a running or unmerged slice-3 WP owns
   (`SLICE-PLAN-3.md` §7). The gates are listed in §8.
-- **Contracts:** SL4-CONTRACTS and any slice-5 contracts WP must not run at the same time. Generated folders and
-  `INDEX.md` are resolved by regeneration only (D-PRG-21).
-- **MKT:** SL4-MKT-FS owns only the new `Claims/` pack folders and the capability resolver. Slice-5 MKT work (pack
-  rollback) must not edit those, and vice versa. Neither adds an MKT migration without the orchestrator serialising
-  them.
+- **Contracts:** SL4-CONTRACTS and SL5-CONTRACTS-PACKS must not merge at the same time. Whichever lands second merges
+  main and regenerates; generated folders and `INDEX.md` are resolved by regeneration only (D-PRG-21). Note for the
+  orchestrator: SL4-CONTRACTS touches `clm.yaml`, `ri.yaml`, **`bil.yaml`, `cmp.yaml`, PLT and the hand-written
+  `Market.Contracts/Spi/IFriendlySettlementClearing.cs`** (SLICE-PLAN-5 §7 assumes only `clm`/`ri`); it never edits
+  `mkt.yaml`, `pfc.yaml` or `pol.yaml`.
+- **MKT:** slice 5's SL5-MKT-STATE owns `Modules.Market/**`, `CountryPacks.GR/Configuration/**` and `CountryPacks.CY/**`
+  (MKT migration owner). SL4-MKT-FS therefore starts **after SL5-MKT-STATE merges** (≈ t 8.5). It owns only the new
+  `Claims/` pack folders and `Services/Capability*`, appends one capability row to the current pack version, adds no
+  migration and never touches SL5-MKT-ROLLBACK's `Commands/Packs*`.
 - **Dev users and roles:** append only. Slice 5's UW roles and slice 4's recovery/RI roles are disjoint.
-- **CI:** one job block per slice (`e2e03`, `e2e06`, slice 5's own). No job edits another slice's block.
+- **CI:** one job block per slice (`e2e03`, `e2e06`, `e2e12`), each added only after SL3-E2E merges. No job edits
+  another slice's block.
 
 ## 8. Rolling schedule (6–8 builders across the machine, pipelined)
 
@@ -396,11 +401,11 @@ Slice 3 keeps priority on builder slots; slice 4 uses what is free (about 4 slot
 | t (h) | Gates expected (slice 3) | Merging / in review (slice 4) | Starts building (slice 4) |
 |---|---|---|---|
 | 0 | — | — | **Wave 1:** CONTRACTS, RI-REGISTRY, RI-ENGINE, E2E-HARNESS (4) |
-| 2–3 | G: SL3-MKT-TREATMENT, SL3-PLT-SUPPORT | CONTRACTS PR (light) → merge, HARNESS rides on it (D-USR-18) | UI-RI, UI-BIL (contracts); MKT-FS; PLT |
+| 2–3 | G: SL3-MKT-TREATMENT, SL3-PLT-SUPPORT | CONTRACTS PR (light) → merge (not at the same time as SL5-CONTRACTS-PACKS), HARNESS rides on it (D-USR-18) | UI-RI, UI-BIL (contracts); PLT |
 | 4–5 | G: SL3-CMP-CREDIT | RI-ENGINE PR → deep review; RI-REGISTRY PR → deep review | CMP-RECEIPT |
-| 5–7 | G: SL3-UI-CLM | MKT-FS + CMP-RECEIPT one batch PR (light); PLT PR → deep review; RI fixes → merged | RI-RECOVERY; UI-CLM-REC, UI-CLM-FS (contracts) |
+| 5–7 | G: SL3-UI-CLM | PLT PR → deep review; RI fixes → merged; CMP-RECEIPT pushed (waits for its batch) | RI-RECOVERY; UI-CLM-REC, UI-CLM-FS (contracts) |
 | 7–8 | G: SL3-FIN-RULES, **SL3-CLM-REVERIFY** | UI-RI PR (light + visual) | FIN-V4; **CLM-MONEY2** |
-| 8–12 | G: **SL3-BIL-REFUND** (≈ t12) | PLT merged; UI-BIL PR (contracts-only round) | **BIL-RECV** (t12) |
+| 8–12 | G: SL5-MKT-STATE (≈ t 8.5); **SL3-BIL-REFUND** (≈ t12) | PLT merged; UI-BIL round 1 (contracts only); MKT-FS + CMP-RECEIPT one batch PR (light) ≈ t 11.5 | MKT-FS (t 8.5); **BIL-RECV** (t12) |
 | 11–13 | — | RI-RECOVERY PR, FIN-V4 PR → deep reviews | — |
 | 12.5–14.5 | — | CLM-MONEY2 PR → deep review → fix → merged | CLM-RECOVERY-OPS, **CLM-FS-CASE** (t14.5) |
 | 15.5–17 | — | BIL-RECV PR → deep review → merged; RI-RECOVERY, FIN-V4 merged | **BIL-FSOUT** (t17); CLM-FS-STATEMENT on the FS-CASE branch (t16) |
@@ -483,7 +488,7 @@ Wall-clock:
 | D-SL4-12 | **FS net approval and BIL release.**<br>- `CLM.FS_NET_SETTLEMENT`, illustrative: Staff.RecoverySpecialist ≤ 50,000.00 (BR-CLM-042 default threshold); above that, four-eyes with Staff.ClaimsManager.<br>- Every `FS_CLEARING` disbursement needs a **release approval** by a Staff.BillingManager other than the requester (new `bil.Disbursement.approveRelease`). With no disbursement batches in the slice, this stands in for "every FS_CLEARING batch regardless of amount".<br>- The clearing office is an organisation party from the pack binding with a verified payee account; it is screened and VoP-checked once, with no claimant-level VoP | D1; REQ-BIL-206/357; values illustrative | Made |
 | D-SL4-13 | **Payment corrections in, holds out.**<br>- Void (Issued, not Cleared), stop (Released, not Issued), return and reject create a linked reversal transaction (reserve restored if eroding) and publish `PaymentVoided` once.<br>- Reissue creates a new payment linked to the original and re-runs every check. A changed account waits for a BIL release approval by a user who did not change it (REQ-BIL-199).<br>- A Development-only manual stub-bank mode (`Billing:StubBank:Mode=Manual`, dev endpoints) lets tests hold a disbursement at Released/Issued.<br>- D-SL2-10e is fixed: the same IBAN with a new holder name gives a new account version and re-runs VoP.<br>- Sanctions/SIU/VoP holds and D-SL2-10a's hold-with-override stay out (no hold source exists) | D-SL2-12c/13 follow-ups; REQ-CLM-125…127, REQ-BIL-208/210/361 | Made |
 | D-SL4-14 | **Slice-2 follow-ups.**<br>**Folded in:**<br>- `clm.TransactionSet.list` by claim;<br>- the dry-run `authorityPreview`;<br>- typed approval `diff`;<br>- close-guard detail in `errors[]`;<br>- PLT in-process `WithdrawAsync` (the owning module only) used by CLM when a set is rejected or stale;<br>- void/stop/reissue (D-SL4-13);<br>- FIN payment-void reversal.<br>**Cut, with reason:**<br>- payment holds (D-SL4-13);<br>- the GL-2510 break check (REQ-FIN-249), claim journals by policy number and rule-set history (reads, not on the journeys) | `SLICE-3-PLANNING-HANDOVER.md` §6 | Made |
-| D-SL4-15 | **Slice-4 process.**<br>- 22 WPs in five waves; the CLM, BIL, FIN, CMP, MKT and PLT WPs are gated on the merge of the slice-3 WP that owns the area (§8). Wave 1 (contracts, RI, E2E harness, RI UI) starts at once.<br>- Disjoint-folder ownership where CLM has 2–3 builders at once; one migration owner per module per wave (CLM: MONEY2 for the whole slice).<br>- Never concurrent with a slice-5 contracts WP; MKT folders split with slice 5.<br>- **Every builder and reviewer runs on Sonnet 5.5.**<br>- Deep first-round reviews for 13 money/ledger/security/temporal WPs; reviews ≤ 45 min | Speed without touching slice 3's files or losing review depth | Made |
+| D-SL4-15 | **Slice-4 process.**<br>- 22 WPs in five waves; the CLM, BIL, FIN, CMP, MKT and PLT WPs are gated on the merge of the slice-3 WP that owns the area (§8). Wave 1 (contracts, RI, E2E harness, RI UI) starts at once.<br>- Disjoint-folder ownership where CLM has 2–3 builders at once; one migration owner per module per wave (CLM: MONEY2 for the whole slice).<br>- SL4-CONTRACTS and SL5-CONTRACTS-PACKS never merge at the same time; SL4-MKT-FS waits for SL5-MKT-STATE; the `e2e06` CI block waits for SL3-E2E.<br>- **Every builder and reviewer runs on Sonnet 5.5.**<br>- Deep first-round reviews for 13 money/ledger/security/temporal WPs; reviews ≤ 45 min | Speed without touching slice 3's files or losing review depth | Made |
 | D-SL4-16 | **Roles and dev users.**<br>- Staff.RecoverySpecialist (ROLE-20, `recovery`), Staff.ReinsuranceAccountant (ROLE-28, `riacct`, enters treaties), Staff.ReinsuranceManager (ROLE-27, `rimgr`, approves treaties).<br>- `superuser` gains them; SoD is unchanged.<br>- FS net maker: `recovery`; approver above the threshold: `claimsmgr`. Treaty maker: `riacct`; checker: `rimgr` | Contract role catalogue; SoD PRD-08 §12 (enterer ≠ approver) | Made |
 | D-SL4-17 | **Liability facts on the claim.**<br>- Insured fault %, fault source, counterparty insurer (organisation party), joint accident report flag, vehicle count and accident-in-Greece flag, set at FNOL or by `clm.Claim.update` and audited.<br>- Subrogation is proposed when the insured's fault is < 100%, a counterparty insurer is known, the claim is not FS-eligible, and the exposure is paid or reserved (REQ-CLM-144).<br>- No other vehicle's plate or driver is stored (P2 not needed) | REQ-CLM-076/144/155 need the facts; WRK classification of the joint report is out | Made |
 | D-SL4-18 | **The FS at-fault notification enters through a Development-only endpoint** `POST /dev/fs-clearing/notifications`. It is outside the public contract set like `/dev/clock` and `/dev/sign-in`, requires Platform.Admin, is audited and is never registered in Production (startup test). It hands the message to the stub's `ReceiveNotificationAsync`, and CLM's handler creates or matches the claim | No EAEE channel exists (OI-CLM-01) | Made |
@@ -501,10 +506,10 @@ Plan: `SLICE-PLAN-4.md`. Decisions: D-SL4-01..20. Briefs: `briefs/sl4/` (waves 1
 | SL4-CONTRACTS | 1 | contracts (all) | — | light | 3 h | planned |
 | SL4-RI-REGISTRY | 1 | RI (registry, persistence) | contracts | deep (security+temporal) | 4 h | planned |
 | SL4-RI-ENGINE | 1 | RI (Domain/Recovery) | contracts | deep (money) | 3.5 h | planned |
-| SL4-E2E-HARNESS | 1 | tests/e2e, ci.yml | contracts | light (batched) | 1.5 h | planned |
+| SL4-E2E-HARNESS | 1 | tests/e2e (runner, helpers) | contracts | light (batched) | 1.5 h | planned |
 | SL4-UI-RI | 1 | web reinsurance | M: contracts | light + visual | 3.5 h | planned |
 | SL4-PLT | 2 | PLT (roles, approvals withdraw) | G: SL3-PLT-SUPPORT | deep (security) | 2.5 h | planned |
-| SL4-MKT-FS | 2 | GR/CY pack FS stub, MKT capability | G: SL3-MKT-TREATMENT | light + reg. checklist | 2.5 h | planned |
+| SL4-MKT-FS | 2 | GR/CY pack FS stub, MKT capability | G: SL3-MKT-TREATMENT, SL5-MKT-STATE | light + reg. checklist | 2.5 h | planned |
 | SL4-CMP-RECEIPT | 2 | CMP | G: SL3-CMP-CREDIT | light | 1.5 h | planned |
 | SL4-RI-RECOVERY | 2 | RI (intake, recovery) | M: RI-REGISTRY, RI-ENGINE | deep (money) | 4.5 h | planned |
 | SL4-FIN-V4 | 2 | FIN | G: SL3-FIN-RULES | deep (ledger) | 4 h | planned |
@@ -519,5 +524,5 @@ Plan: `SLICE-PLAN-4.md`. Decisions: D-SL4-01..20. Briefs: `briefs/sl4/` (waves 1
 | SL4-UI-CLM-FS | 3 | web claims/fs | G: SL3-UI-CLM | light + visual | 3.5 h | planned |
 | SL4-CLM-PAYOPS | 4 | CLM (payment corrections) | M: RECOVERY-OPS, CMP-RECEIPT | deep (money) | 3.5 h | planned |
 | SL4-BIL-DISBOPS | 4 | BIL (stop/void/return) | M: BIL-FSOUT | deep (money+security) | 3.5 h | planned |
-| SL4-E2E | 5 | tests/e2e, seed-demo | all merged | light (integration) | 5 h | planned |
+| SL4-E2E | 5 | tests/e2e, seed-demo, ci.yml (e2e06) | all merged; G: SL3-E2E | light (integration) | 5 h | planned |
 ```

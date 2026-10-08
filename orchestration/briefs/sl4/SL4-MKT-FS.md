@@ -5,11 +5,16 @@ Runs on Sonnet 5.5 (model: sonnet), D-USR-16.
 Wave 2, **batched** with SL4-CMP-RECEIPT (different modules, D-PRG-22). Review: light, plus a regulatory checklist
 (PITFALLS 36/37). Estimate: 2.5 h.
 
-**Gate:** start only after **SL3-MKT-TREATMENT has merged**. It owns `CountryPacks.GR/Configuration/**` and MKT tax
-services in slice 3.
+**Gate:** start only after **SL3-MKT-TREATMENT and SL5-MKT-STATE have both merged**. In slice 3, SL3-MKT-TREATMENT owns
+`CountryPacks.GR/Configuration/**` and the MKT tax services. In slice 5, SL5-MKT-STATE owns `Modules.Market/**`,
+`CountryPacks.GR/Configuration/**` and `CountryPacks.CY/**`, and is the MKT migration owner.
 
-**Cross-slice:** slice 5 (pack rollback, E2E-12) also works in MKT. You own only the new `Claims/` pack folders and the
-capability resolver. Do not touch pack activation or rollback code, and add **no MKT migration**.
+**Cross-slice:**
+- You own only the new `CountryPacks.GR/Claims/**` and `CountryPacks.CY/Claims/**` folders and
+  `Modules.Market/Services/Capability*`.
+- Append the capability row to the pack version that SL5-MKT-STATE's registry marks current, using the pack data path
+  it defines (read its merged code first).
+- Never touch SL5-MKT-ROLLBACK's `Commands/Packs*` or pack activation/rollback code, and add **no MKT migration**.
 
 - **WP / PRD:**
   - REQ-MKT-004 (capability switch);

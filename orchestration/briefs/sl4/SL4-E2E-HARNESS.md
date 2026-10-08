@@ -1,4 +1,4 @@
-# Brief SL4-E2E-HARNESS — e2e06 stack, helpers and CI job (wave 1)
+# Brief SL4-E2E-HARNESS — e2e06 stack and helpers (wave 1)
 
 Runs on Sonnet 5.5 (model: sonnet), D-USR-16.
 
@@ -20,20 +20,16 @@ light. Estimate: 1.5 h.
      - `postFsNotification(payload)` for the Development-only `/dev/fs-clearing/notifications` (D-SL4-18);
      - `stubBank(disbursementId, action)` for `/dev/bank/disbursements/{id}/{issue|clear|return|reject}` (D-SL4-13);
      - an IBAN-not-in-URL guard reused from slice 3.
-  3. **CI:**
-     - add a new job block `e2e06` to `.github/workflows/ci.yml`, the same shape as `e2e03`, running a placeholder
-       health spec until SL4-E2E;
-     - **check the `e2e02` job's spec filter** and make sure it cannot pick up `e2e02x*` specs (they need the RI and FS
-       pieces);
-     - do not touch any other job block.
+  3. **No CI change in this WP.** SL3-E2E owns `.github/workflows/ci.yml` until it merges, so the `e2e06` job block
+     is added by SL4-E2E. Do check the `e2e02` job's spec filter and **report** whether it would pick up `e2e02x*`
+     specs, so that SL4-E2E can fix it.
 - **Depends on / provides:**
   - **Depends on:** the contracts only for endpoint paths; start at once.
   - **Provides:** the runner and helpers for SL4-E2E.
 - **Files you own:**
   - `tests/e2e/support/claims4/**`;
   - `tests/e2e/run-e2e06.sh`;
-  - `tests/e2e/tests/e2e06-health.spec.ts` (placeholder);
-  - the `e2e06` block of `ci.yml`.
+  - `tests/e2e/tests/e2e06-health.spec.ts` (placeholder).
 - **PITFALLS to self-check (likely):**
   - 29, 30, 32, 33;
   - 35 (never the user's `coreins` stack; own project, `down -v`).

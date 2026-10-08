@@ -19,7 +19,9 @@ Wave 1, **own PR**. Review: light (completeness and additivity), plus an orchest
   - Slice-3 WPs may add small additive typing to their own operations in `clm.yaml`, `bil.yaml` and `cmp.yaml` while
     you work. Edit only **new** operations, schemas and enum values in those files.
   - On a conflict, merge textually, then regenerate. Never hand-edit generated files.
-  - The orchestrator will not run a slice-5 contracts WP at the same time as you.
+  - SL5-CONTRACTS-PACKS (slice 5) types `mkt.yaml`, `pfc.yaml` and new `pol.yaml` paths. Never edit those files. The
+    orchestrator will not merge both contracts PRs at the same time; whichever lands second merges main and
+    regenerates.
 - **What to type (all additive; most operations already exist with `x-status` minimal):**
   - **RI** (`contracts/openapi/ri.yaml`, `contracts/events/ri/`):
     - `ri.Contract.create`:
