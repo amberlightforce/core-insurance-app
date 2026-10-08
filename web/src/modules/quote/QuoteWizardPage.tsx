@@ -34,6 +34,7 @@ import {
   useQuestionEvaluation,
   useQuestionSet,
 } from './api';
+import { BindReferrals } from './BindReferrals';
 import { QuoteResult, QuoteWarnings } from './QuoteResult';
 import {
   answersInstruction,
@@ -58,6 +59,7 @@ import {
 import { CoversStep, DriverStep, PolicyholderStep, QuestionsStep, VehicleStep } from './steps';
 import { addDays, athensToday, effectiveInstant } from './time';
 import { useLocalised } from './useLocalised';
+import { useRefreshIssues } from './uwIssues';
 
 type Busy = null | 'submission' | 'quote' | 'bind';
 
@@ -101,6 +103,7 @@ export function QuoteWizardPage() {
   const riskKey = useIdempotencyKey();
   const quoteKey = useIdempotencyKey();
   const bindKey = useIdempotencyKey();
+  const refreshIssues = useRefreshIssues();
   /** The effectiveAt instant is fixed per submission so that a retry sends an identical payload (same key). */
   const instant = useRef<{ for: string; value: string } | null>(null);
 
@@ -310,6 +313,8 @@ export function QuoteWizardPage() {
         announce(t('bind.bound', { number: response.policyNumber ?? '' }));
       } else {
         setGateFailure(response);
+        // The bind re-evaluated the underwriting rules: show the issues as they are now.
+        void refreshIssues();
       }
     } catch (cause) {
       setConfirmOpen(false);
@@ -509,6 +514,9 @@ export function QuoteWizardPage() {
   );
 }
 
+/** The bind gate's reason when open underwriting issues stop it (pol.Job.bind gate UW_ISSUES). */
+const uwIssuesOpen = 'UW_ISSUES_OPEN';
+
 function BindStep({
   draft,
   quote,
@@ -568,11 +576,14 @@ function BindStep({
                 <strong>{t(`bind.gate.${g.gate}`, { defaultValue: g.gate })}</strong>
                 {': '}
                 {g.passed ? t('bind.gatePassed') : t('bind.gateFailed')}
-                {g.reason ? ` (${g.reason})` : ''}
+                {g.reason && g.reason !== uwIssuesOpen ? ` (${g.reason})` : ''}
               </li>
             ))}
           </ul>
         </Banner>
+      ) : null}
+      {gateFailure?.gateResults.some((g) => !g.passed && g.reason === uwIssuesOpen) ? (
+        <BindReferrals jobId={quote.jobId} />
       ) : null}
       <KeyValueList
         aria-label={t('bind.summary')}

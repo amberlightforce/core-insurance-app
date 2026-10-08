@@ -1,0 +1,87 @@
+{
+  "reasons": {
+    "REFER-YOUNG-DRIVER": {
+      "why": "The youngest driver is under 21 on the start date.",
+      "change": "Check the driver's date of birth, or name an older main driver."
+    },
+    "REFER-OLD-VEHICLE": {
+      "why": "The vehicle is more than 20 years old (from its year of first registration).",
+      "change": "Check the year of first registration."
+    },
+    "REFER-HIGH-VALUE": {
+      "why": "The vehicle value is above 100,000.",
+      "change": "Check the vehicle value."
+    },
+    "DECLINE-UNDERAGE-DRIVER": {
+      "why": "The driver is under 18 on the start date.",
+      "change": "Check the driver's date of birth; a driver under 18 cannot be insured."
+    },
+    "DECLINE-CLAIMS-HISTORY": {
+      "why": "Five or more claims in the last five years.",
+      "change": "Check the number of claims in the last five years."
+    },
+    "DECLINE-USAGE": {
+      "why": "Business use is not covered by the private car product.",
+      "change": "Check the vehicle use."
+    }
+  },
+  "issueTypes": {
+    "DRIVER_AGE_REFERRAL": "Young driver",
+    "VEHICLE_AGE_REFERRAL": "Old vehicle",
+    "VEHICLE_VALUE_REFERRAL": "High vehicle value",
+    "DRIVER_UNDERAGE": "Driver under 18",
+    "CLAIMS_HISTORY": "Claims history",
+    "USAGE_NOT_ELIGIBLE": "Vehicle use not eligible"
+  },
+  "statuses": {
+    "Open": "Waiting for a decision",
+    "Approved": "Approved",
+    "ApprovedWithConditions": "Approved with conditions",
+    "Rejected": "Rejected",
+    "Invalidated": "Approval no longer valid",
+    "Closed": "Closed"
+  },
+  "nextStep": {
+    "Open": "Ask a senior underwriter to approve it (Policies › Underwriting referrals), then bind again. Or change the answer: {change}",
+    "OpenDecline": "Change the answer: {change}",
+    "Approved": "Approved. Bind again.",
+    "Rejected": "A senior underwriter rejected it. Change the answer and quote again: {change}",
+    "Invalidated": "The answers changed after the approval, so it no longer applies. Ask for a new approval.",
+    "Closed": "Nothing to do."
+  },
+  "columns": {
+    "issue": "Issue",
+    "reason": "Reason",
+    "status": "Status",
+    "nextStep": "What to do"
+  },
+  "bindBlocked": {
+    "title": "Underwriting issues stop the bind",
+    "body": "The bind needs a decision on these issues first.",
+    "table": "Underwriting issues of this quote",
+    "refresh": "Check again"
+  },
+  "referrals": {
+    "link": "Underwriting referrals",
+    "title": "Underwriting referrals",
+    "subtitle": "Referred risks waiting for a decision. Approve to let the underwriter bind; reject to stop the bind.",
+    "back": "Policies",
+    "open": "Waiting for a decision",
+    "table": "Referrals waiting for a decision",
+    "emptyTitle": "No referrals waiting",
+    "emptyBody": "When a bind is stopped by an underwriting referral, it appears here.",
+    "quote": "Quote",
+    "raisedBy": "Raised by",
+    "raisedAt": "Raised",
+    "decision": "Decision on: {issue}",
+    "reason": "Reason for the decision",
+    "reasonHelp": "Required. Saved with the decision.",
+    "reasonRequired": "Enter the reason for the decision.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approved": "Approved. The underwriter can bind again.",
+    "rejected": "Rejected. The bind stays stopped.",
+    "failed": "The decision was not saved",
+    "selfNote": "You cannot decide a referral on a quote you created or tried to bind: another senior underwriter must decide it."
+  }
+}
