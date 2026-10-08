@@ -1,9 +1,24 @@
 name: CodeQL
 
+# Docs-only changes skip CI (D-USR-17). Markdown under contracts/openapi (INDEX.md, spi.md) is a checked input of
+# contracts/openapi/validate.py, so the Markdown patterns deliberately do not cover contracts/openapi. Pushes to main skip only
+# orchestration/**.
+
 on:
   pull_request:
+    paths-ignore:
+      - "orchestration/**"
+      - "*.md"
+      - "docs/**/*.md"
+      - "infra/**/*.md"
+      - "spikes/**/*.md"
+      - "src/**/*.md"
+      - "web/**/*.md"
+      - "contracts/README.md"
   push:
     branches: [main]
+    paths-ignore:
+      - "orchestration/**"
   schedule:
     - cron: "17 3 * * 1"
 

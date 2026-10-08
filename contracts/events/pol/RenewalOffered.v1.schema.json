@@ -89,6 +89,28 @@
         "deadline": {
           "$ref": "../common.schema.json#/$defs/Instant",
           "x-classification": "P0"
+        },
+        "predecessorTermId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "description": "Id of the expiring term this renewal continues (predecessor_term_id). Always set.",
+          "x-classification": "P0"
+        },
+        "newTermNumber": {
+          "$ref": "../common.schema.json#/$defs/NonNegativeInt",
+          "description": "Term number of the renewal term (expiring term number + 1). Always set.",
+          "x-classification": "P0"
+        },
+        "newTermId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Id of the renewal term; null until the term is allocated at bind (RenewalBound always carries it)",
+          "x-classification": "P0"
         }
       }
     }

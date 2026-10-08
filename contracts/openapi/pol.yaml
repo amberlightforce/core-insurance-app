@@ -272,6 +272,18 @@ paths:
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: POL-ERR-PREEMPTED
+        note: another job bound after this one was based
+        status: 409
+      - code: POL-ERR-REBASE-REQUIRED
+        status: 409
+      - code: POL-ERR-EFFDATE-LIMIT
+        status: 422
+      - code: POL-ERR-OUT-OF-SEQUENCE
+        note: effective time earlier than the latest bound non-reversed transaction of the term; fails closed (D-SL3-02)
+        status: 422
+      - code: POL-ERR-AFTER-CANCELLATION
+        status: 422
       x-source:
       - PRD-05 §9.1 l.1776
       x-superseded-names:
@@ -629,6 +641,13 @@ paths:
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: POL-ERR-EFFDATE-LIMIT
+        status: 422
+      - code: POL-ERR-OUT-OF-SEQUENCE
+        note: effective time earlier than the latest bound non-reversed transaction of the term; fails closed (D-SL3-02)
+        status: 422
+      - code: POL-ERR-AFTER-CANCELLATION
+        status: 422
       x-source:
       - PRD-05 §9.1 l.1778
       x-superseded-names:
@@ -1264,6 +1283,14 @@ paths:
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: POL-ERR-OUT-OF-SEQUENCE
+        note: effective time earlier than the latest bound non-reversed transaction of the term; fails closed (D-SL3-02)
+        status: 422
+      - code: POL-ERR-JOB-CONFLICT
+        note: one open change job per term
+        status: 409
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-05 §9.1 l.1784
       parameters:
@@ -1290,6 +1317,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -1345,6 +1374,21 @@ paths:
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: POL-ERR-OUT-OF-SEQUENCE
+        note: effective time earlier than the latest bound non-reversed transaction of the term; fails closed (D-SL3-02)
+        status: 422
+      - code: POL-ERR-AFTER-CANCELLATION
+        status: 422
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        note: for example FLAT on a term that is not Scheduled
+        status: 422
+      - code: POL-ERR-STALE
+        status: 409
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-DEPENDENCY-UNAVAILABLE
+        note: MKT treatment or RAT proration unavailable; fails closed
+        status: 503
       x-source:
       - PRD-05 §9.1 l.1785
       parameters:
@@ -1371,6 +1415,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -1379,6 +1425,8 @@ paths:
           $ref: common.yaml#/components/responses/TooManyRequests
         '500':
           $ref: common.yaml#/components/responses/InternalError
+        '503':
+          $ref: common.yaml#/components/responses/ServiceUnavailable
   /api/pol/v1/cancellations/schedule:
     post:
       operationId: pol.Cancellation.schedule
@@ -1901,6 +1949,15 @@ paths:
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: POL-ERR-REBASE-REQUIRED
+        note: the expiring head moved after the renewal was created
+        status: 409
+      - code: POL-ERR-STALE
+        status: 409
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-05 §9.1 l.1790
       parameters:
@@ -1927,6 +1984,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -1975,6 +2034,15 @@ paths:
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: POL-ERR-REBASE-REQUIRED
+        note: the expiring head moved after the renewal was created
+        status: 409
+      - code: POL-ERR-STALE
+        status: 409
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-05 §9.1 l.1790
       parameters:
@@ -2001,6 +2069,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -2049,6 +2119,15 @@ paths:
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: POL-ERR-REBASE-REQUIRED
+        note: the expiring head moved after the renewal was created
+        status: 409
+      - code: POL-ERR-STALE
+        status: 409
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-05 §9.1 l.1790
       parameters:
@@ -2075,6 +2154,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -2670,6 +2751,17 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/KnownAt
+      - name: policyId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: termId
+        in: query
+        required: false
+        description: The term; defaults to the term valid at validAt
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -3967,6 +4059,21 @@ components:
         provisional:
           type: boolean
           description: True when the tax or levy value is not Settled (refused in production, D-REG-02)
+        transactionKind:
+          $ref: '#/components/schemas/TransactionKindCode'
+          description: Transaction kind of the line (servicing jobs; always set once frozen on a servicing transaction)
+        cancellationSource:
+          $ref: '#/components/schemas/CancellationSourceCode'
+          description: Cancellation source (cancellation transactions only)
+        treatmentAction:
+          $ref: '#/components/schemas/TreatmentActionCode'
+          description: Treatment action of a tax or levy line on a servicing transaction
+        treatmentRuleId:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Treatment rule id (tax and levy lines of servicing transactions; always set there)
+        treatmentRuleVersion:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Treatment rule version (always set with treatmentRuleId)
       required:
       - elementLocator
       - coverageCode
@@ -4152,6 +4259,9 @@ components:
             - code
             - message
           description: Non-blocking warnings of the quote (additive; none when the quote is clean)
+        servicingPreview:
+          $ref: '#/components/schemas/ServicingPreview'
+          description: Present for servicing jobs (change, cancellation, renewal); absent for new business
       required:
       - jobId
       - quoteId
@@ -4346,6 +4456,9 @@ components:
         coverNoteDocumentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: doc.ProofOfCover.issue result
+        servicingPreview:
+          $ref: '#/components/schemas/ServicingPreview'
+          description: The preview the transaction was bound with (servicing jobs only); equals the frozen charge lines
       required:
       - jobId
       - state
@@ -4644,6 +4757,10 @@ components:
           items:
             $ref: '#/components/schemas/ChargeLine'
           description: Charge lines of the term as known at knownAt
+        effectiveKnownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'The transaction-time instant the answer was resolved at: min(requested knownAt or now, the policy''s record-time watermark). Always
+            set; the UI shows it next to the as-of date (D-SL3-03).'
       required:
       - policy
       - transactions
@@ -4794,58 +4911,340 @@ components:
             items:
               $ref: '#/components/schemas/JobListItem'
       description: Page of pol.Job.list results (cursor pagination, contract §3.5.5)
+    CancellationSourceCode:
+      type: string
+      minLength: 1
+      maxLength: 128
+      examples:
+      - Policyholder
+      - Insurer
+      - NonPayment
+      - DistanceWithdrawal
+      - LongTermWithdrawal
+      - Objection
+      - Statutory
+      description: 'Cancellation source (REQ-POL-205, shared code list R-84, held by MKT as the code list `mkt.cancellation_source`, constants in
+        `CoreIns.Modules.Market.Contracts.CancellationSources`). An open Code, so a pack can add a source. The source decides the refund method (PFC
+        REQ-PFC-134) and the tax treatment (`TaxCalculator.treatment`).'
+    CancellationKind:
+      type: string
+      enum:
+      - STANDARD
+      - FLAT
+      description: 'STANDARD = cancellation from effectiveAt with the refund method of the source. FLAT = flat cancellation at the term start, allowed
+        only while the term is Scheduled (REQ-POL-217); the credit equals the written amount exactly. VOID (withdrawal) is a separate operation and is not
+        created here.'
+    TransactionKindCode:
+      type: string
+      enum:
+      - NEW_BUSINESS
+      - ENDORSEMENT_DEBIT
+      - ENDORSEMENT_CREDIT
+      - CANCELLATION
+      - DISTANCE_WITHDRAWAL_VOID
+      - VOID
+      - RETURN_PREMIUM
+      - REINSTATEMENT
+      - FEE
+      - REFUND
+      description: 'Transaction kind of a charge or servicing line: the MKT `TaxTransactionKind` values (PRD-17 Â§9.4.4). `ENDORSEMENT` alone is invalid.
+        A renewal term bound by POL is NEW_BUSINESS.'
+    TreatmentActionCode:
+      type: string
+      enum:
+      - APPLY
+      - REDUCE_PRO_RATA
+      - REVERSE_AS_VOID
+      - KEEP_NOT_REDUCED
+      - INSURER_BEARS
+      description: Tax treatment action returned by MKT `TaxCalculator.treatment` (REQ-MKT-330)
+    ServicingProratedLine:
+      type: object
+      description: 'One prorated line of a servicing preview: a charge of one element and charge type, prorated over the affected period (D-SL3-04,
+        `rat.Proration.prorate`). The amount is signed: negative for a credit.'
+      properties:
+        elementLocator:
+          $ref: ../events/common.schema.json#/$defs/Text
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: PREMIUM, TAX or LEVY
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+          description: The affected period (half-open, Europe/Athens dates)
+        days:
+          type: integer
+          minimum: 0
+          description: Whole Europe/Athens calendar days of the affected period
+        termDays:
+          type: integer
+          minimum: 1
+          description: Days of the term (365 or 366)
+        fraction:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: days / termDays, the fraction applied to the annual amount
+        annualAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: The annual amount that was prorated
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Prorated amount, signed (negative = credit), rounded by the MKT premium rule
+      required:
+      - elementLocator
+      - coverageCode
+      - chargeType
+      - chargeCategory
+      - period
+      - days
+      - termDays
+      - fraction
+      - annualAmount
+      - amount
+    ServicingTaxLine:
+      type: object
+      description: 'One tax or levy line of a servicing preview with its treatment (PRD-17 Â§7.5). Always carries the rule that decided it. A line whose
+        rule is not Settled is `provisional` (refused in Production, D-REG-02).'
+      properties:
+        elementLocator:
+          $ref: ../events/common.schema.json#/$defs/Text
+        chargeType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: TAX, LEVY or STAMP
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Signed amount after the treatment (negative = credit; zero when the action keeps the tax)
+        treatmentAction:
+          $ref: '#/components/schemas/TreatmentActionCode'
+        ruleId:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Treatment rule id from MKT (always set)
+        ruleVersion:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Treatment rule version from MKT (always set)
+        legalStatus:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Legal status of the rule (Settled, Pending or PendingOpinion; always set)
+        provisional:
+          type: boolean
+          description: True when legalStatus is not Settled (always set)
+        legalSourceRef:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - elementLocator
+      - chargeType
+      - chargeCategory
+      - amount
+      - treatmentAction
+      - ruleId
+      - ruleVersion
+      - legalStatus
+      - provisional
+    ServicingPreview:
+      type: object
+      description: 'What a servicing job (change, cancellation, renewal) would do to the premium (REQ-POL-190, REQ-POL-206). Present on the quote and bind
+        responses of servicing jobs and on `pol.Cancellation.create`; absent for new business. All money fields share one currency. Exactly one of
+        refundDue and additionalDue is non-zero unless the change is neutral; both are always set.'
+      properties:
+        annualBefore:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Annual premium before the change
+        annualAfter:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Annual premium after the change
+        proratedLines:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServicingProratedLine'
+          description: Prorated charge lines per element x charge type
+        taxLines:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServicingTaxLine'
+        premiumChange:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Signed sum of the premium lines
+        taxChange:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Signed sum of the tax and levy lines after treatment
+        totalChange:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: premiumChange + taxChange, signed
+        refundDue:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Amount due back to the customer (zero when none); the credit before BIL netting
+        additionalDue:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Additional amount due from the customer (zero when none)
+        transactionKind:
+          $ref: '#/components/schemas/TransactionKindCode'
+        cancellationSource:
+          $ref: '#/components/schemas/CancellationSourceCode'
+        refundMethod:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Refund method of the source from the term's pinned artefact (cancellation only)
+        configurationHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: MKT configuration hash the tax lines were resolved under
+        provisional:
+          type: boolean
+          description: True when any tax line is provisional (always set)
+      required:
+      - annualBefore
+      - annualAfter
+      - proratedLines
+      - taxLines
+      - premiumChange
+      - taxChange
+      - totalChange
+      - refundDue
+      - additionalDue
+      - provisional
+    TimelineTransaction:
+      type: object
+      description: A transaction of the term in the timeline (REQ-POL-002, REQ-POL-085)
+      properties:
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Transaction kind (ISSUANCE, CHANGE, CANCELLATION, ...)
+        sequence:
+          type: integer
+          minimum: 1
+          description: Gap-free sequence within the term
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Valid time of the transaction
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Transaction time (knownAt) of the transaction
+        premiumChange:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Signed premium change of the transaction
+        reversed:
+          type: boolean
+          description: True when a later transaction reversed this one
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - transactionId
+      - kind
+      - sequence
+      - effectiveAt
+      - recordedAt
+      - premiumChange
+      - reversed
+    SnapshotSupersession:
+      type: object
+      description: 'Live metadata beside the immutable snapshot content (REQ-POL-007, D-SL3-03c). Computed at read time by comparing the content hash at
+        (validAt, current watermark) with the content hash of the ref; a different segment id with identical content is NOT superseded. Only this object can
+        change between two reads of the same ref.'
+      properties:
+        superseded:
+          type: boolean
+          description: Always set
+        successorRef:
+          type: string
+          description: Snapshot ref of the content now valid at validAt; present only when superseded
+        supersededAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Transaction time at which the content was superseded; present only when superseded
+      required:
+      - superseded
     PolicyChangeCreateRequest:
       type: object
-      description: 'pol.PolicyChange.create request. PRD inputs: "policyId, effectiveAt, description"'
+      description: 'pol.PolicyChange.create request (REQ-POL-190). PRD inputs: "policyId, effectiveAt, description". Effective-date limits and the
+        in-sequence guard apply (D-SL3-02).'
       properties:
         policyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "policyId"'
         effectiveAt:
           $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "effectiveAt"'
+          description: Effective time of the change (valid time)
         description:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "description"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Free-text description of the change; no personal data
+      required:
+      - policyId
+      - effectiveAt
     PolicyChangeCreateResponse:
       type: object
-      description: 'pol.PolicyChange.create result. PRD outputs: "jobId"'
+      description: 'pol.PolicyChange.create result. PRD outputs: "jobId". The job is the change draft; it is edited with updateDraft, priced with quote and
+        bound with bind.'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+          description: DRAFT on creation (always set)
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The term the change applies to
+        baseTransactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Head transaction the job was based on; bind refuses with POL-ERR-PREEMPTED when the head moved
+      required:
+      - jobId
+      - state
+      - termId
+      - baseTransactionId
     CancellationCreateRequest:
       type: object
-      description: 'pol.Cancellation.create request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef"'
+      description: 'pol.Cancellation.create request (REQ-POL-012, REQ-POL-205..211). PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs,
+        requestRef". With dryRun it returns the servicing preview and creates nothing.'
       properties:
         policyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "policyId"'
         source:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "source"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: '#/components/schemas/CancellationSourceCode'
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Reason code from the configured list (REQ-POL-205); PRD name "reason"
         effectiveAt:
           $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "effectiveAt"'
+          description: Effective time of the cancellation. Ignored for kind FLAT, which takes the term start.
+        kind:
+          $ref: '#/components/schemas/CancellationKind'
         evidenceRefs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidenceRefs"'
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Text
+          description: Evidence references (document ids); no personal data
         requestRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "requestRef"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Reference of the customer request (channel message or document id); no personal data
+      required:
+      - policyId
+      - source
+      - reasonCode
+      - effectiveAt
+      - kind
     CancellationCreateResponse:
       type: object
-      description: 'pol.Cancellation.create result. PRD outputs: "jobId, refund preview"'
+      description: 'pol.Cancellation.create result. PRD outputs: "jobId, refund preview". The preview is the servicing preview with refundDue.'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
-        refundPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund preview"'
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        kind:
+          $ref: '#/components/schemas/CancellationKind'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: The effective time used (the term start for FLAT)
+        servicingPreview:
+          $ref: '#/components/schemas/ServicingPreview'
+      required:
+      - jobId
+      - state
+      - kind
+      - effectiveAt
+      - servicingPreview
     CancellationScheduleRequest:
       type: object
       description: 'pol.Cancellation.schedule request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef"'
@@ -5036,73 +5435,144 @@ components:
           description: 'PRD: "jobId"'
     RenewalCreateRequest:
       type: object
-      description: 'pol.Renewal.create request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      description: 'pol.Renewal.create request (REQ-POL-245, REQ-POL-246). Creates the renewal job of the expiring term ("Renew now" inside the renewal
+        window). PRD inputs: "termId; offer; acceptance evidence; reason", narrowed per operation.'
       properties:
         termId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "termId"'
-        offer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "offer"'
-        acceptanceEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "acceptance evidence"'
+          description: The expiring term
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Reason or note; no personal data
+      required:
+      - termId
     RenewalCreateResponse:
       type: object
       description: 'pol.Renewal.create result. PRD outputs: "job"'
       properties:
-        job:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        expiringTermId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        renewalProductCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        renewalProductVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+          description: Product version resolved at the new term start
+        servicingPreview:
+          $ref: '#/components/schemas/ServicingPreview'
+          description: Present once the renewal has been rated
+      required:
+      - jobId
+      - state
+      - expiringTermId
     RenewalOfferRequest:
       type: object
-      description: 'pol.Renewal.offer request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      description: 'pol.Renewal.offer request (REQ-POL-249, REQ-POL-250). Issues the offer of a rated renewal job.'
       properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The renewal job
         termId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "termId"'
-        offer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "offer"'
-        acceptanceEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "acceptance evidence"'
+          description: The expiring term
+        acceptanceMode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Acceptance mode; defaults to the configured mode
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - jobId
+      - termId
     RenewalOfferResponse:
       type: object
-      description: 'pol.Renewal.offer result. PRD outputs: "job"'
+      description: 'pol.Renewal.offer result. PRD outputs: "job". Mirrors the RenewalOffered event.'
       properties:
-        job:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        offerVersion:
+          $ref: ../events/common.schema.json#/$defs/NonNegativeInt
+        premiumSummary:
+          $ref: ../events/common.schema.json#/$defs/PremiumSummary
+        acceptanceMode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        deadline:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        servicingPreview:
+          $ref: '#/components/schemas/ServicingPreview'
+      required:
+      - jobId
+      - state
+      - offerVersion
+      - premiumSummary
+      - acceptanceMode
+      - deadline
     RenewalAcceptRequest:
       type: object
-      description: 'pol.Renewal.accept request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      description: 'pol.Renewal.accept request (REQ-POL-253, explicit acceptance). Accepting binds the new term n+1 as Scheduled.'
       properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The renewal job
         termId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "termId"'
-        offer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "offer"'
+          description: The expiring term
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Channel of the acceptance (STAFF in slice 3)
+        acceptedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: When the customer accepted (business time)
         acceptanceEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "acceptance evidence"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Evidence reference (document or message id); no personal data
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - jobId
+      - termId
+      - channel
+      - acceptedAt
     RenewalAcceptResponse:
       type: object
-      description: 'pol.Renewal.accept result. PRD outputs: "job"'
+      description: 'pol.Renewal.accept result. PRD outputs: "job". The new term is bound; mirrors the RenewalBound event.'
       properties:
-        job:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        newTermId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        newTermNumber:
+          type: integer
+          minimum: 2
+        predecessorTermId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The expiring term
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        termState:
+          $ref: '#/components/schemas/TermStateCode'
+          description: SCHEDULED until the term start
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        chargeDeltas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeLine'
+      required:
+      - jobId
+      - state
+      - newTermId
+      - newTermNumber
+      - predecessorTermId
+      - transactionId
+      - termState
+      - recordedAt
     RenewalDeclineRequest:
       type: object
       description: 'pol.Renewal.decline request. PRD inputs: "termId; offer; acceptance evidence; reason"'
@@ -5233,20 +5703,25 @@ components:
           description: 'PRD: "re-point map"'
     TermTimelineResponse:
       type: object
-      description: 'pol.Term.timeline result. PRD outputs: "policy, term, segment, risk tree"'
+      description: 'pol.Term.timeline result (REQ-POL-002, REQ-POL-085): the term and its transactions in sequence order, as known at effectiveKnownAt.'
       properties:
         policy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policy"'
+          $ref: '#/components/schemas/PolicyView'
         term:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term"'
-        segment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "segment"'
-        riskTree:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "risk tree"'
+          $ref: '#/components/schemas/TermView'
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineTransaction'
+          description: Ordered by sequence ascending
+        effectiveKnownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: min(requested knownAt or now, the policy's record-time watermark); always set (D-SL3-03)
+      required:
+      - policy
+      - term
+      - transactions
+      - effectiveKnownAt
     SnapshotGetResponse:
       type: object
       description: 'pol.Snapshot.get result (REQ-POL-007): snapshot ref + content. content is absent when the policy is not in force at validAt.'
@@ -5276,6 +5751,13 @@ components:
           $ref: '#/components/schemas/SnapshotPolicy'
         content:
           $ref: '#/components/schemas/SnapshotContent'
+        effectiveKnownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'min(requested knownAt or now, the policy''s record-time watermark). Always set; equals knownAt, which is the effective value and is
+            encoded in snapshotRef. Outside `content`.'
+        supersession:
+          $ref: '#/components/schemas/SnapshotSupersession'
+          description: Always set, outside `content` and its hash (D-SL3-03c)
       required:
       - snapshotRef
       - validAt

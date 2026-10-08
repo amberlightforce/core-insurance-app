@@ -99,7 +99,7 @@ public sealed record ChargeDeltaEmittedV1 : global::CoreIns.Platform.Contracts.E
     [global::System.Text.Json.Serialization.JsonPropertyName("taxTreatmentRef")]
     public string? TaxTreatmentRef { get; init; }
 
-    /// <summary>Legal status of the tax or levy rate the line was priced with (MKT); absent for premium lines</summary>
+    /// <summary>Legal status of the tax or levy rate or treatment the line was priced with (MKT); always set on tax and levy lines of servicing transactions, absent for premium lines</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? LegalStatus { get; init; }
@@ -108,4 +108,67 @@ public sealed record ChargeDeltaEmittedV1 : global::CoreIns.Platform.Contracts.E
     [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public bool? Provisional { get; init; }
+
+    /// <summary>Transaction kind of the bound transaction (the MKT TaxTransactionKind values, PRD-17 §7.5). Always set by POL from slice 3; BIL and FIN use it for the tax-treatment check (REQ-BIL-079, REQ-FIN-182). A renewal term is NEW_BUSINESS.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("transactionKind")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public TransactionKindValue? TransactionKind { get; init; }
+
+    /// <summary>Cancellation source (shared code list, REQ-POL-205). Always set when transactionKind is CANCELLATION or VOID, null otherwise.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cancellationSource")]
+    public string? CancellationSource { get; init; }
+
+    /// <summary>Id of the MKT treatment rule that decided a tax or levy line on a servicing transaction. Always set on such lines, null on premium lines.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("treatmentRuleId")]
+    public string? TreatmentRuleId { get; init; }
+
+    /// <summary>Version of the treatment rule; always set with treatmentRuleId.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("treatmentRuleVersion")]
+    public string? TreatmentRuleVersion { get; init; }
+
+    /// <summary>Transaction kind of the bound transaction (the MKT TaxTransactionKind values, PRD-17 §7.5). Always set by POL from slice 3; BIL and FIN use it for the tax-treatment check (REQ-BIL-079, REQ-FIN-182). A renewal term is NEW_BUSINESS.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<TransactionKindValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum TransactionKindValue
+    {
+        /// <summary><c>NEW_BUSINESS</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NEW_BUSINESS")]
+        NewBusiness,
+
+        /// <summary><c>ENDORSEMENT_DEBIT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ENDORSEMENT_DEBIT")]
+        EndorsementDebit,
+
+        /// <summary><c>ENDORSEMENT_CREDIT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ENDORSEMENT_CREDIT")]
+        EndorsementCredit,
+
+        /// <summary><c>CANCELLATION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLATION")]
+        Cancellation,
+
+        /// <summary><c>DISTANCE_WITHDRAWAL_VOID</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DISTANCE_WITHDRAWAL_VOID")]
+        DistanceWithdrawalVoid,
+
+        /// <summary><c>VOID</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("VOID")]
+        Void,
+
+        /// <summary><c>RETURN_PREMIUM</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RETURN_PREMIUM")]
+        ReturnPremium,
+
+        /// <summary><c>REINSTATEMENT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REINSTATEMENT")]
+        Reinstatement,
+
+        /// <summary><c>FEE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FEE")]
+        Fee,
+
+        /// <summary><c>REFUND</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFUND")]
+        Refund,
+    }
 }

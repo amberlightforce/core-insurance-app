@@ -46,11 +46,11 @@ public sealed record RenewalBoundV1 : global::CoreIns.Platform.Contracts.Events.
     /// <inheritdoc />
     global::CoreIns.Platform.Contracts.Events.EventContract global::CoreIns.Platform.Contracts.Events.IEventPayload.Contract => Descriptor;
 
-    /// <summary>Contract member 'newTermId'.</summary>
+    /// <summary>Id of the renewal term (Scheduled until its start). Always set.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("newTermId")]
     public required global::CoreIns.SharedKernel.Identifiers.PolicyTermId NewTermId { get; init; }
 
-    /// <summary>Contract member 'newTermNumber'.</summary>
+    /// <summary>Term number of the renewal term (expiring term number + 1). Always set.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("newTermNumber")]
     public required int NewTermNumber { get; init; }
 
@@ -73,4 +73,12 @@ public sealed record RenewalBoundV1 : global::CoreIns.Platform.Contracts.Events.
     /// <summary>Contract member 'producerOfRecord'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("producerOfRecord")]
     public required string ProducerOfRecord { get; init; }
+
+    /// <summary>Id of the expiring term this renewal continues (predecessor_term_id). Always set.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'predecessorTermId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("predecessorTermId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? PredecessorTermId { get; init; }
 }

@@ -39,4 +39,34 @@ public sealed record ClaimView
     /// <summary>Contract member 'incidents'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("incidents")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.IncidentView> Incidents { get; init; }
+
+    /// <summary>Present while snapshotStatus is REVERIFICATION_REQUIRED (the ReverificationRequired payload)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("pendingReverification")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public PendingReverificationDetail? PendingReverification { get; init; }
+
+    /// <summary>Present while snapshotStatus is REVERIFICATION_REQUIRED (the ReverificationRequired payload)</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record PendingReverificationDetail
+    {
+        /// <summary>Contract member 'oldSnapshotRef'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("oldSnapshotRef")]
+        public required string OldSnapshotRef { get; init; }
+
+        /// <summary>Contract member 'newSnapshotRef'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("newSnapshotRef")]
+        public required string NewSnapshotRef { get; init; }
+
+        /// <summary>Contract member 'causeEventId'.</summary>
+        /// <remarks>
+        /// <para>Untyped id: no SharedKernel id type is mapped for 'causeEventId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+        /// </remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("causeEventId")]
+        public required global::System.Guid CauseEventId { get; init; }
+
+        /// <summary>Contract member 'raisedAt'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("raisedAt")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Instant? RaisedAt { get; init; }
+    }
 }
