@@ -18,6 +18,7 @@ import { LinkButton } from '../staff/LinkButton';
 import { PageHeader, Section } from '../staff/PageHeader';
 import { ProblemBanner } from '../staff/ProblemBanner';
 import { readRecent } from '../staff/recent';
+import { useRecentLabels } from '../staff/useRecentLabels';
 import { SimpleTable } from '../staff/SimpleTable';
 import styles from '../staff/staff.module.css';
 import { searchClaims } from './api';
@@ -30,7 +31,7 @@ export function ClaimsHomePage() {
   const [claimNumber, setClaimNumber] = useState('');
   const [policyNumber, setPolicyNumber] = useState('');
   const [tried, setTried] = useState(false);
-  const recent = readRecent('claim');
+  const recent = useRecentLabels('claim', readRecent('claim'));
   const empty = claimNumber.trim() === '' && policyNumber.trim() === '';
 
   const search = useMutation({

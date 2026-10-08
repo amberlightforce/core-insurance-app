@@ -231,8 +231,8 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
   const open = summary.status === 'OPEN';
 
   useEffect(() => {
-    rememberRecent('claim', { id: summary.claimId, label: summary.claimNumber });
-  }, [summary.claimId, summary.claimNumber]);
+    rememberRecent('claim', summary.claimId);
+  }, [summary.claimId]);
 
   const exposureColumns = useMemo<DataColumn<ExposureView>[]>(
     () => [

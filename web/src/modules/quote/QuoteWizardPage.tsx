@@ -342,8 +342,7 @@ export function QuoteWizardPage() {
       if (response.policyId && response.gateResults.every((g) => g.passed)) {
         setBound(response);
         setGateFailure(null);
-        if (response.policyNumber)
-          rememberRecent('policy', { id: response.policyId, label: response.policyNumber });
+        if (response.policyNumber) rememberRecent('policy', response.policyId);
         announce(t('bind.bound', { number: response.policyNumber ?? '' }));
       } else {
         setGateFailure(response);

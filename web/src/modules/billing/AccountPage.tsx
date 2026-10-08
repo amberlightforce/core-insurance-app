@@ -28,9 +28,11 @@ function AccountDetails({ data }: { data: BillingAccountGetResponse }) {
   const { account, balancesByState: balances } = data;
   const invoices = useInvoices({ billingAccountId: account.billingAccountId });
 
+  // The opaque record id comes from the route, not from the account payload.
+  const { accountId: recordId = '' } = useParams();
   useEffect(() => {
-    rememberRecent('account', { id: account.billingAccountId, label: account.accountNumber });
-  }, [account.billingAccountId, account.accountNumber]);
+    if (recordId) rememberRecent('account', recordId);
+  }, [recordId]);
 
   const termColumns = useMemo<DataColumn<Term>[]>(
     () => [

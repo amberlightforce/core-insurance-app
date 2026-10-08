@@ -208,7 +208,7 @@ export function FinancialsTab({ claim }: { claim: ClaimView }) {
   // The API has no list of a claim's sets: show the ones this browser built plus those carrying a payment.
   // Sets built in this session show at once; earlier ones come from this browser's memory (newest first).
   const [justBuilt, setJustBuilt] = useState<string[]>([]);
-  const remembered = [...justBuilt, ...readRecent(`claimset.${claimId}`).map((r) => r.id)];
+  const remembered = [...justBuilt, ...readRecent(`claimset.${claimId}`)];
   const setIds = [
     ...new Set([
       ...remembered,
