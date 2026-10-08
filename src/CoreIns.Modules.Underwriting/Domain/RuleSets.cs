@@ -45,14 +45,17 @@ internal sealed record UwRisk(
     /// <summary>
     /// The approval fingerprint (REQ-UW-091, PRD-04 §7.3): SHA-256 (lower-case hex) of every fact the rules read, in a fixed
     /// canonical form, at <paramref name="effectiveDate"/> (the ages the rules compute depend on it). An approval holds while
-    /// the fingerprint is unchanged; tolerances per input are later work (every input is EXACT here). The element id is part
-    /// of the issue key, not of the facts, and is left out.
+    /// the fingerprint is unchanged; tolerances per input are later work (every input is EXACT here). The rule set (code,
+    /// version, content hash) and the raising rule are part of it, so a new rule-set version invalidates older approvals. The
+    /// element id is part of the issue key, not of the facts, and is left out.
     /// </summary>
-    public string Fingerprint(DateOnly effectiveDate)
+    public string Fingerprint(DateOnly effectiveDate, string ruleSet, string ruleId)
     {
         var canonical = string.Join(
             '\n',
-            "v1",
+            "v2",
+            "ruleSet=" + ruleSet,
+            "rule=" + ruleId,
             "effectiveDate=" + effectiveDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             "vehicleFirstRegistration=" + FirstRegistrationDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             "vehicleValue=" + decimal.Round(VehicleValue, 2).ToString("0.00", CultureInfo.InvariantCulture),

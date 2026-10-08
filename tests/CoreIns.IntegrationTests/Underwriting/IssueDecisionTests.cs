@@ -69,15 +69,13 @@ public sealed class IssueDecisionTests(PostgresFixture database) : IClassFixture
         return (response, text.Length == 0 ? null : JsonNode.Parse(text));
     }
 
-    private async Task<JsonNode> EvaluateAsync(Guid job, JsonObject risk)
+    private static object Body(Guid job, JsonObject risk) => new
     {
-        var (response, body) = await SendAsUserAsync(HttpMethod.Post, "/api/uw/v1/rules/evaluate", Anna, Underwriter, new
-        {
-            jobRef = job, checkpoint = "PRE_BIND", snapshotRef = $"snapshot-{job:N}", productCode = MotorProduct, effectiveDate = "2026-11-01", riskSnapshot = risk,
-        });
-        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
-        return body!;
-    }
+        jobRef = job, checkpoint = "PRE_BIND", snapshotRef = $"snapshot-{job:N}", productCode = MotorProduct, effectiveDate = "2026-11-01", riskSnapshot = risk,
+    };
+
+    /// <summary>POL's in-process evaluation (the only one that changes job issues), as Anna.</summary>
+    private Task<JsonNode> EvaluateAsync(Guid job, JsonObject risk) => UwTestSupport.EvaluateInProcessAsync(_factory.Services, Body(job, risk), Anna);
 
     private Task<(HttpResponseMessage Response, JsonNode? Body)> DecideAsync(string issueId, string decision = "APPROVE", string user = Boss, string roles = Manager, string reason = "Vehicle inspected; acceptable.") =>
         SendAsUserAsync(HttpMethod.Post, "/api/uw/v1/issues/decide", user, roles, new { issueIds = new[] { issueId }, decision, reason });
@@ -188,6 +186,64 @@ public sealed class IssueDecisionTests(PostgresFixture database) : IClassFixture
         fixedRisk.Text("outcome").ShouldBe("ACCEPT");
         (await BlockedAsync(job)).ShouldBeFalse();
         (await IssuesAsync(job))[0].Text("status").ShouldBe("Closed");
+        (await IssuesAsync(job))[0].Text("closeReason").ShouldBe("VALUE_CHANGED");
+
+        // A rejection sticks to its facts: going back to the rejected risk raises the issue Rejected again, not Open.
+        var back = await EvaluateAsync(job, OldCar());
+        back.Text("issues.0.approvalStatus").ShouldBe("Rejected");
+        (await BlockedAsync(job)).ShouldBeTrue();
+        var (decideAgain, decideAgainBody) = await DecideAsync(back.Text("issues.0.issueId"), user: "uw-boss2");
+        decideAgain.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, decideAgainBody?.ToJsonString());
+        decideAgainBody.Text("code").ShouldBe("UW-ERR-ISSUE-TRANSITION");
+    }
+
+    // Reviewer probe 2 (D-UW-01): an HTTP evaluation with a made-up clean snapshot cannot close a rejection, so the rejected
+    // risk cannot come back Open for a second manager to approve.
+    [Fact]
+    public async Task A_rejection_cannot_be_laundered_through_an_http_evaluation_with_a_clean_snapshot()
+    {
+        var job = Guid.CreateVersion7();
+        var issueId = (await EvaluateAsync(job, OldCar())).Text("issues.0.issueId");
+        (await DecideAsync(issueId, "REJECT", user: "uw-boss1")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var (fake, fakeBody) = await SendAsUserAsync(HttpMethod.Post, "/api/uw/v1/rules/evaluate", Anna, Underwriter, Body(job, RiskTree()));
+        fake.StatusCode.ShouldBe(HttpStatusCode.OK, fakeBody?.ToJsonString());
+        fakeBody.Text("outcome").ShouldBe("ACCEPT");
+        (await IssuesAsync(job))[0].Text("status").ShouldBe("Rejected");
+
+        var real = await EvaluateAsync(job, OldCar());
+        real.Text("issues.0.issueId").ShouldBe(issueId);
+        real.Text("issues.0.approvalStatus").ShouldBe("Rejected");
+        (await DecideAsync(issueId, user: "uw-boss2")).Response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        (await BlockedAsync(job)).ShouldBeTrue();
+    }
+
+    // Reviewer probe 3 (m1): concurrent evaluations that invalidate one approval serialise on the job (no 500 on the key index).
+    [Fact]
+    public async Task Concurrent_evaluations_of_a_changed_risk_all_succeed_and_leave_one_open_issue()
+    {
+        var job = Guid.CreateVersion7();
+        var issueId = (await EvaluateAsync(job, OldCar())).Text("issues.0.issueId");
+        (await DecideAsync(issueId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var results = await Task.WhenAll(Enumerable.Range(0, 6).Select(_ => EvaluateAsync(job, OldCar(value: "3100.00"))));
+
+        results.Select(r => r.Text("issues.0.approvalStatus")).ShouldAllBe(s => s == "Open");
+        (await CountAsync($"SELECT count(*) FROM uw.issue WHERE job_id = '{job}' AND status = 'Open'")).ShouldBe(1);
+        (await CountAsync($"SELECT count(*) FROM uw.issue WHERE job_id = '{job}' AND status = 'Invalidated'")).ShouldBe(1);
+    }
+
+    // m2 / REQ-UW-091: the fingerprint names the rule set and rule, so an approval does not outlive a new rule-set version.
+    [Fact]
+    public void The_fingerprint_changes_with_the_rule_set_version_and_the_rule()
+    {
+        var risk = UwRisk.Parse(System.Text.Json.JsonDocument.Parse(OldCar().ToJsonString()).RootElement);
+        var effective = new DateOnly(2026, 11, 1);
+
+        risk.Fingerprint(effective, "UW-MOTOR-GR-B@1.0#a", "REFER-OLD-VEHICLE")
+            .ShouldNotBe(risk.Fingerprint(effective, "UW-MOTOR-GR-B@1.1#b", "REFER-OLD-VEHICLE"));
+        risk.Fingerprint(effective, "UW-MOTOR-GR-B@1.0#a", "REFER-OLD-VEHICLE")
+            .ShouldNotBe(risk.Fingerprint(effective, "UW-MOTOR-GR-B@1.0#a", "REFER-HIGH-VALUE"));
     }
 
     // SOD-UW-02 / BR-UW-013 / REQ-UW-116: whoever ran an evaluation for the job may not decide its issues, even with authority.
@@ -336,11 +392,69 @@ public sealed class ReferralApprovalBindTests(PostgresFixture database) : IClass
         bind.Text("state").ShouldBe("BOUND");
         bind!["gateResults"]!.AsArray().Single(g => g!["gate"]!.GetValue<string>() == "UW_ISSUES")!["passed"]!.GetValue<bool>().ShouldBeTrue();
     }
+
+    private void As(string user)
+    {
+        _slice.Client.DefaultRequestHeaders.Remove(TestAuthHandler.UserHeader);
+        _slice.Client.DefaultRequestHeaders.Add(TestAuthHandler.UserHeader, user);
+    }
+
+    private async Task<HttpResponseMessage> DecideAsSeniorAsync(string user, string issueId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri("/api/uw/v1/issues/decide", UriKind.Relative));
+        request.Headers.Add(TestAuthHandler.RolesHeader, "Staff.Underwriter,Staff.UnderwritingManager");
+        request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        request.Content = JsonContent.Create(new { issueIds = new[] { issueId }, decision = "APPROVE", reason = "decided" });
+        As(user);
+        return await _slice.Client.SendAsync(request, Ct);
+    }
+
+    // Reviewer probe 1 (BR-UW-013 / SOD-UW-02 / REQ-UW-116): the job's creator and its draft editor never evaluated it, yet
+    // may not decide its referral; only an uninvolved senior underwriter may.
+    [Fact]
+    public async Task REQ_UW_116_the_job_creator_and_editor_cannot_decide_the_jobs_referral_even_when_someone_else_quoted()
+    {
+        try
+        {
+            var birth = DateTime.UtcNow.AddYears(-19).AddDays(-30).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            As("uw-creator");
+            var party = await _slice.CreatePartyAsync(birth);
+            var (jobId, _, _) = await _slice.DraftAsync(party, DateTimeOffset.UtcNow.AddDays(2));
+
+            As("uw-quoter");
+            (await _slice.QuoteAsync(jobId)).Body.Text("state").ShouldBe("QUOTED");
+            (await _slice.BindAsync(jobId)).Body.Text("state").ShouldBe("QUOTED");
+            var (_, issues) = await SendAsync(_slice.Client, HttpMethod.Get, $"/api/uw/v1/issues?jobRef={jobId}");
+            var issueId = issues!["items"]!.AsArray().Single(i => i!["status"]!.GetValue<string>() == "Open")!.Text("id");
+
+            foreach (var involved in new[] { "uw-creator", "uw-quoter" })
+            {
+                using var refused = await DecideAsSeniorAsync(involved, issueId);
+                var body = await refused.Content.ReadAsStringAsync(Ct);
+                refused.StatusCode.ShouldBe(HttpStatusCode.Forbidden, body);
+                body.ShouldContain("UW-ERR-SOD");
+            }
+
+            using (var approved = await DecideAsSeniorAsync("uw-outsider", issueId))
+            {
+                approved.StatusCode.ShouldBe(HttpStatusCode.OK, await approved.Content.ReadAsStringAsync(Ct));
+            }
+
+            As("uw-creator");
+            (await _slice.BindAsync(jobId)).Body.Text("state").ShouldBe("BOUND");
+        }
+        finally
+        {
+            _slice.Client.DefaultRequestHeaders.Remove(TestAuthHandler.UserHeader);
+        }
+    }
 }
 
 /// <summary>The approval fingerprint and the issue reconciliation without a database (REQ-UW-059, -091..093).</summary>
 public sealed class IssueReconciliationTests
 {
+    private const string RuleSet = "UW-MOTOR-GR-B@1.0#h";
+    private const string Rule = "REFER-OLD-VEHICLE";
     private static readonly DateOnly Effective = new(2026, 11, 1);
 
     private static UwRisk Risk(int year = 1991, decimal value = 3000m, string birth = "1985-06-15") =>
@@ -349,22 +463,24 @@ public sealed class IssueReconciliationTests
     [Fact]
     public void REQ_UW_091_the_fingerprint_is_stable_for_the_same_facts_and_changes_with_any_fact_the_rules_read()
     {
-        var fingerprint = Risk().Fingerprint(Effective);
+        var fingerprint = Risk().Fingerprint(Effective, RuleSet, Rule);
 
         fingerprint.Length.ShouldBe(64);
         fingerprint.ShouldMatch("^[0-9a-f]{64}$");
-        Risk().Fingerprint(Effective).ShouldBe(fingerprint);
-        (Risk() with { VehicleElementId = "veh-9" }).Fingerprint(Effective).ShouldBe(fingerprint); // the element is the key, not a fact
-        Risk(value: 3000.0m).Fingerprint(Effective).ShouldBe(fingerprint); // same amount, other scale
-        Risk(year: 1990).Fingerprint(Effective).ShouldNotBe(fingerprint);
-        Risk(value: 3000.01m).Fingerprint(Effective).ShouldNotBe(fingerprint);
-        Risk(birth: "1985-06-16").Fingerprint(Effective).ShouldNotBe(fingerprint);
-        (Risk() with { Usage = "TAXI" }).Fingerprint(Effective).ShouldNotBe(fingerprint);
-        (Risk() with { EngineCc = 1600 }).Fingerprint(Effective).ShouldNotBe(fingerprint);
-        (Risk() with { ClaimsLast5Years = 1 }).Fingerprint(Effective).ShouldNotBe(fingerprint);
-        Risk().Fingerprint(Effective.AddDays(1)).ShouldNotBe(fingerprint);
+        Risk().Fingerprint(Effective, RuleSet, Rule).ShouldBe(fingerprint);
+        (Risk() with { VehicleElementId = "veh-9" }).Fingerprint(Effective, RuleSet, Rule).ShouldBe(fingerprint); // the element is the key, not a fact
+        Risk(value: 3000.0m).Fingerprint(Effective, RuleSet, Rule).ShouldBe(fingerprint); // same amount, other scale
+        Risk(year: 1990).Fingerprint(Effective, RuleSet, Rule).ShouldNotBe(fingerprint);
+        Risk(value: 3000.01m).Fingerprint(Effective, RuleSet, Rule).ShouldNotBe(fingerprint);
+        Risk(birth: "1985-06-16").Fingerprint(Effective, RuleSet, Rule).ShouldNotBe(fingerprint);
+        (Risk() with { Usage = "TAXI" }).Fingerprint(Effective, RuleSet, Rule).ShouldNotBe(fingerprint);
+        (Risk() with { EngineCc = 1600 }).Fingerprint(Effective, RuleSet, Rule).ShouldNotBe(fingerprint);
+        (Risk() with { ClaimsLast5Years = 1 }).Fingerprint(Effective, RuleSet, Rule).ShouldNotBe(fingerprint);
+        Risk().Fingerprint(Effective.AddDays(1), RuleSet, Rule).ShouldNotBe(fingerprint);
         fingerprint.ShouldNotContain("1985");
     }
+
+    private static Dictionary<string, string> Hits(params (string Key, string Fingerprint)[] hits) => hits.ToDictionary(h => h.Key, h => h.Fingerprint);
 
     private static ReconcilableIssue Issue(string key, string status, string? decided = null) => new(Guid.CreateVersion7(), key, status, "f-old", decided);
 
@@ -373,7 +489,7 @@ public sealed class IssueReconciliationTests
     {
         var open = Issue("A", IssueStatus.Open);
 
-        var steps = IssueReconciliation.Plan([open], ["A", "B"], "f1");
+        var steps = IssueReconciliation.Plan([open], Hits(("A", "f1"), ("B", "f1")));
 
         steps.Select(s => (s.IssueKey, s.Action)).ShouldBe([("A", IssueAction.KeepOpen), ("B", IssueAction.Raise)]);
         steps[0].Existing.ShouldBe(open);
@@ -382,25 +498,25 @@ public sealed class IssueReconciliationTests
     [Fact]
     public void REQ_UW_092_093_an_approval_holds_on_the_same_fingerprint_and_is_invalidated_on_another()
     {
-        IssueReconciliation.Plan([Issue("A", IssueStatus.Approved, "f1")], ["A"], "f1").Single().Action.ShouldBe(IssueAction.KeepApproved);
-        IssueReconciliation.Plan([Issue("A", IssueStatus.Approved, "f1")], ["A"], "f2").Single().Action.ShouldBe(IssueAction.InvalidateAndRaise);
-        IssueReconciliation.Plan([Issue("A", IssueStatus.ApprovedWithConditions, "f1")], ["A"], "f1").Single().Action.ShouldBe(IssueAction.KeepApproved);
+        IssueReconciliation.Plan([Issue("A", IssueStatus.Approved, "f1")], Hits(("A", "f1"))).Single().Action.ShouldBe(IssueAction.KeepApproved);
+        IssueReconciliation.Plan([Issue("A", IssueStatus.Approved, "f1")], Hits(("A", "f2"))).Single().Action.ShouldBe(IssueAction.InvalidateAndRaise);
+        IssueReconciliation.Plan([Issue("A", IssueStatus.ApprovedWithConditions, "f1")], Hits(("A", "f1"))).Single().Action.ShouldBe(IssueAction.KeepApproved);
     }
 
     [Fact]
     public void A_rejection_stays_on_the_same_facts_and_is_closed_and_raised_again_when_they_change()
     {
-        IssueReconciliation.Plan([Issue("A", IssueStatus.Rejected, "f1")], ["A"], "f1").Single().Action.ShouldBe(IssueAction.KeepRejected);
-        IssueReconciliation.Plan([Issue("A", IssueStatus.Rejected, "f1")], ["A"], "f2").Single().Action.ShouldBe(IssueAction.CloseAndRaise);
+        IssueReconciliation.Plan([Issue("A", IssueStatus.Rejected, "f1")], Hits(("A", "f1"))).Single().Action.ShouldBe(IssueAction.KeepRejected);
+        IssueReconciliation.Plan([Issue("A", IssueStatus.Rejected, "f1")], Hits(("A", "f2"))).Single().Action.ShouldBe(IssueAction.CloseAndRaise);
     }
 
     [Fact]
     public void REQ_UW_059_a_key_that_no_longer_hits_closes_open_and_rejected_issues_but_leaves_an_approval()
     {
         var steps = IssueReconciliation.Plan(
-            [Issue("A", IssueStatus.Open), Issue("B", IssueStatus.Rejected, "f1"), Issue("C", IssueStatus.Approved, "f1")], [], "f1");
+            [Issue("A", IssueStatus.Open), Issue("B", IssueStatus.Rejected, "f1"), Issue("C", IssueStatus.Approved, "f1")], Hits());
 
-        steps.Select(s => (s.IssueKey, s.Action)).ShouldBe([("A", IssueAction.Close), ("B", IssueAction.Close)]);
+        steps.Select(s => (s.IssueKey, s.Action)).ShouldBe([("A", IssueAction.Close), ("B", IssueAction.CloseRejected)]);
     }
 
     [Fact]

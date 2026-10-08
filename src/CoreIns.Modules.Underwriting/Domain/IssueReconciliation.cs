@@ -46,8 +46,11 @@ internal enum IssueAction
     /// <summary>A rejection whose facts changed: Closed (VALUE_CHANGED) and a new Open issue for the key.</summary>
     CloseAndRaise,
 
-    /// <summary>The rule no longer hits: an Open or Rejected issue is Closed (RULE_NO_LONGER_HITS).</summary>
+    /// <summary>The rule no longer hits: an Open issue is Closed (RULE_NO_LONGER_HITS).</summary>
     Close,
+
+    /// <summary>The rule no longer hits a Rejected issue because the quote's facts changed: Closed (VALUE_CHANGED).</summary>
+    CloseRejected,
 }
 
 /// <summary>One step of the reconciliation.</summary>
@@ -58,17 +61,21 @@ internal sealed record ReconciliationStep(IssueAction Action, string IssueKey, R
 
 /// <summary>
 /// Reconciles an evaluation's hits with the job's non-terminal issues by issue key (REQ-UW-059, -092, -093; PRD-04 §7.3).
-/// Pure: the evaluate command applies the steps. An approval holds while the fingerprint of the facts the rules read is
-/// the one the decider saw; an approved issue whose rule stops hitting stays Approved (it blocks nothing).
+/// Pure: the evaluate command applies the steps, and only for POL's in-process evaluation of a real quote version
+/// (D-UW-01). An approval holds while the fingerprint of the facts the rule read is the one the decider saw; an approved
+/// issue whose rule stops hitting stays Approved (it blocks nothing); a rejection is closed only when the quote's facts
+/// changed.
 /// </summary>
 internal static class IssueReconciliation
 {
-    public static IReadOnlyList<ReconciliationStep> Plan(IReadOnlyCollection<ReconcilableIssue> existing, IReadOnlyCollection<string> hitKeys, string fingerprint)
+    /// <param name="existing">The job's non-terminal issues of the rule set.</param>
+    /// <param name="hits">Issue key → fingerprint of the facts its rule read.</param>
+    public static IReadOnlyList<ReconciliationStep> Plan(IReadOnlyCollection<ReconcilableIssue> existing, IReadOnlyDictionary<string, string> hits)
     {
         ArgumentNullException.ThrowIfNull(existing);
-        ArgumentNullException.ThrowIfNull(hitKeys);
+        ArgumentNullException.ThrowIfNull(hits);
         var steps = new List<ReconciliationStep>();
-        foreach (var key in hitKeys.Distinct(StringComparer.Ordinal))
+        foreach (var (key, fingerprint) in hits)
         {
             var issue = existing.FirstOrDefault(i => string.Equals(i.IssueKey, key, StringComparison.Ordinal));
             var unchanged = issue?.DecisionFingerprint is { } seen && string.Equals(seen, fingerprint, StringComparison.Ordinal);
@@ -83,9 +90,16 @@ internal static class IssueReconciliation
             steps.Add(new ReconciliationStep(action, key, issue));
         }
 
-        foreach (var gone in existing.Where(i => !hitKeys.Contains(i.IssueKey, StringComparer.Ordinal) && i.Status is IssueStatus.Open or IssueStatus.Rejected))
+        foreach (var gone in existing.Where(i => !hits.ContainsKey(i.IssueKey)))
         {
-            steps.Add(new ReconciliationStep(IssueAction.Close, gone.IssueKey, gone));
+            if (gone.Status == IssueStatus.Open)
+            {
+                steps.Add(new ReconciliationStep(IssueAction.Close, gone.IssueKey, gone));
+            }
+            else if (gone.Status == IssueStatus.Rejected)
+            {
+                steps.Add(new ReconciliationStep(IssueAction.CloseRejected, gone.IssueKey, gone));
+            }
         }
 
         return steps;

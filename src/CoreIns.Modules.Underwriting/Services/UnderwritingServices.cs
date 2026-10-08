@@ -24,7 +24,7 @@ internal sealed class UnderwritingRulesService(RequestContext context, ICommandH
         ArgumentNullException.ThrowIfNull(options);
         using (context.Use(options.IdempotencyKey, options.DryRun))
         {
-            var result = await evaluate.HandleAsync(new EvaluateRules(request), cancellationToken).ConfigureAwait(false);
+            var result = await evaluate.HandleAsync(new EvaluateRules(request, ReconcileIssues: true), cancellationToken).ConfigureAwait(false);
             return result.IsSuccess ? result.Value : throw new DomainException(result.Error);
         }
     }

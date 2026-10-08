@@ -139,18 +139,18 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
 
     public async Task InsertEvaluationAsync(
         Guid evaluationId, Guid legalEntity, Guid jobId, string checkpoint, CompiledRuleSet ruleSet, string snapshotRef, string? snapshotHash,
-        string outcome, string lane, string trace, string actor, CancellationToken cancellationToken)
+        string outcome, string lane, string trace, string actor, IReadOnlyList<string> jobParticipants, string? producerCode, CancellationToken cancellationToken)
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await connection.ExecuteAsync(new CommandDefinition(
             """
-            INSERT INTO uw.evaluation (evaluation_id, legal_entity_id, job_id, checkpoint, rule_set_code, rule_set_version, rule_set_hash, snapshot_ref, snapshot_hash, outcome, lane, trace, created_at, created_by)
-            VALUES (@evaluationId, @legalEntity, @jobId, @checkpoint, @code, @version, @hash, @snapshotRef, @snapshotHash, @outcome, @lane, @trace::jsonb, @now, @actor)
+            INSERT INTO uw.evaluation (evaluation_id, legal_entity_id, job_id, checkpoint, rule_set_code, rule_set_version, rule_set_hash, snapshot_ref, snapshot_hash, outcome, lane, trace, created_at, created_by, job_participants, producer_code)
+            VALUES (@evaluationId, @legalEntity, @jobId, @checkpoint, @code, @version, @hash, @snapshotRef, @snapshotHash, @outcome, @lane, @trace::jsonb, @now, @actor, @participants, @producerCode)
             """,
             new
             {
                 evaluationId, legalEntity, jobId, checkpoint, code = ruleSet.Dto.Code, version = ruleSet.Dto.Version, hash = ruleSet.Hash, snapshotRef, snapshotHash,
-                outcome, lane, trace, now = clock.Now.ToUtcDateTime(), actor,
+                outcome, lane, trace, now = clock.Now.ToUtcDateTime(), actor, participants = jobParticipants.ToArray(), producerCode,
             }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 
@@ -215,27 +215,77 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
             """, new { legalEntity, issueIds = issueIds.ToArray() }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
     }
 
-    /// <summary>Everyone who ran an evaluation for the job (SOD-UW-02: the quoting and binding side of the referral).</summary>
+    /// <summary>
+    /// Everyone who may not decide the job's issues (SOD-UW-02 / BR-UW-013): whoever ran an evaluation for it, and the
+    /// actors POL reported as having created, edited, quoted or bound it.
+    /// </summary>
     public async Task<IReadOnlyList<string>> EvaluatorsAsync(Guid legalEntity, Guid jobId, CancellationToken cancellationToken)
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         return (await connection.QueryAsync<string>(new CommandDefinition(
-            "SELECT DISTINCT created_by FROM uw.evaluation WHERE legal_entity_id = @legalEntity AND job_id = @jobId",
+            """
+            SELECT created_by FROM uw.evaluation WHERE legal_entity_id = @legalEntity AND job_id = @jobId
+             UNION
+            SELECT unnest(job_participants) FROM uw.evaluation WHERE legal_entity_id = @legalEntity AND job_id = @jobId
+            """,
             new { legalEntity, jobId }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
     }
 
-    public async Task InsertIssueAsync(
-        Guid issueId, Guid legalEntity, Guid jobId, string issueType, string issueKey, string blockingPoint, string severity, string lane, string ruleId,
-        string messageEn, string messageEl, Guid evaluationId, string fingerprint, CancellationToken cancellationToken)
+    /// <summary>The distinct jobs of the given issues, in id order (read without locks, before the job locks are taken).</summary>
+    public async Task<IReadOnlyList<Guid>> JobsOfIssuesAsync(Guid legalEntity, IReadOnlyCollection<Guid> issueIds, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        return (await connection.QueryAsync<Guid>(new CommandDefinition(
+            "SELECT DISTINCT job_id FROM uw.issue WHERE legal_entity_id = @legalEntity AND issue_id = ANY(@issueIds) ORDER BY job_id",
+            new { legalEntity, issueIds = issueIds.ToArray() }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
+    }
+
+    /// <summary>Serialises evaluations and decisions of one job (transaction-scoped advisory lock).</summary>
+    public async Task LockJobAsync(Guid jobId, CancellationToken cancellationToken)
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await connection.ExecuteAsync(new CommandDefinition(
+            "SELECT pg_advisory_xact_lock(hashtextextended(@key, 0))",
+            new { key = "uw.job:" + jobId.ToString("D") }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+    }
+
+    /// <summary>The latest rejection on the job for the issue key whose decider saw exactly these facts, or null.</summary>
+    public async Task<IssueRecord?> RejectionOfAsync(Guid legalEntity, Guid jobId, string issueKey, string fingerprint, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        return await connection.QueryFirstOrDefaultAsync<IssueRecord>(new CommandDefinition(
+            $"""
+            SELECT {IssueColumns}
+              FROM uw.issue i JOIN uw.evaluation e ON e.evaluation_id = i.raised_evaluation_id
+             WHERE i.legal_entity_id = @legalEntity AND i.job_id = @jobId AND i.issue_key = @issueKey
+               AND i.decision = 'REJECT' AND i.decision_fingerprint = @fingerprint
+             ORDER BY i.decided_at DESC LIMIT 1
+            """, new { legalEntity, jobId, issueKey, fingerprint }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+    }
+
+    /// <summary>Inserts an issue: Open, or Rejected with the decision of <paramref name="rejectedBefore"/> when its facts were rejected already.</summary>
+    public async Task InsertIssueAsync(
+        Guid issueId, Guid legalEntity, Guid jobId, string issueType, string issueKey, string blockingPoint, string severity, string lane, string ruleId,
+        string messageEn, string messageEl, Guid evaluationId, string fingerprint, IssueRecord? rejectedBefore, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var args = new DynamicParameters(new
+        {
+            issueId, legalEntity, jobId, issueType, issueKey, blockingPoint, severity, lane, ruleId, messageEn, messageEl, evaluationId, now = clock.Now.ToUtcDateTime(), fingerprint,
+            status = rejectedBefore is null ? IssueStatus.Open : IssueStatus.Rejected,
+            decision = rejectedBefore?.Decision, decidedBy = rejectedBefore?.DecidedBy, reason = rejectedBefore?.DecisionReason,
+            message = rejectedBefore?.DecisionMessage, checkId = rejectedBefore?.AuthorityCheckId,
+            decisionFingerprint = rejectedBefore is null ? null : fingerprint,
+        });
+        args.Add("decidedAt", rejectedBefore?.DecidedAt, DbType.DateTime);
+        await connection.ExecuteAsync(new CommandDefinition(
             """
-            INSERT INTO uw.issue (issue_id, legal_entity_id, job_id, issue_type, issue_key, blocking_point, severity, lane, status, rule_id, message_en, message_el, raised_evaluation_id, record_version, created_at, fingerprint)
-            VALUES (@issueId, @legalEntity, @jobId, @issueType, @issueKey, @blockingPoint, @severity, @lane, 'Open', @ruleId, @messageEn, @messageEl, @evaluationId, 1, @now, @fingerprint)
+            INSERT INTO uw.issue (issue_id, legal_entity_id, job_id, issue_type, issue_key, blocking_point, severity, lane, status, rule_id, message_en, message_el, raised_evaluation_id, record_version, created_at, fingerprint,
+                                  decision, decided_by, decided_at, decision_reason, decision_message, authority_check_id, decision_fingerprint)
+            VALUES (@issueId, @legalEntity, @jobId, @issueType, @issueKey, @blockingPoint, @severity, @lane, @status, @ruleId, @messageEn, @messageEl, @evaluationId, 1, @now, @fingerprint,
+                    @decision, @decidedBy, @decidedAt, @reason, @message, @checkId, @decisionFingerprint)
             """,
-            new { issueId, legalEntity, jobId, issueType, issueKey, blockingPoint, severity, lane, ruleId, messageEn, messageEl, evaluationId, now = clock.Now.ToUtcDateTime(), fingerprint },
-            session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+            args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 
     /// <summary>Stores the current fingerprint of an Open issue; a change bumps the record version (a decision prepared on the old facts becomes stale).</summary>

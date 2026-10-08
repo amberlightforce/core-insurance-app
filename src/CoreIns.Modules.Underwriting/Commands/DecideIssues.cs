@@ -58,6 +58,12 @@ internal sealed class DecideIssuesHandler(
 
         var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.")).Value;
         var ids = request.IssueIds.Select(i => i.Value).ToList();
+        // Serialise with evaluations of the same jobs (per-job advisory lock, taken in a fixed order), then lock the rows.
+        foreach (var job in await store.JobsOfIssuesAsync(legalEntity, ids, cancellationToken).ConfigureAwait(false))
+        {
+            await store.LockJobAsync(job, cancellationToken).ConfigureAwait(false);
+        }
+
         var issues = await store.LockIssuesAsync(legalEntity, ids, cancellationToken).ConfigureAwait(false);
         if (ids.FirstOrDefault(id => issues.All(i => i.IssueId != id)) is var missing && missing != Guid.Empty)
         {
@@ -87,7 +93,7 @@ internal sealed class DecideIssuesHandler(
         {
             if ((await store.EvaluatorsAsync(legalEntity, jobId, cancellationToken).ConfigureAwait(false)).Contains(actor, StringComparer.Ordinal))
             {
-                return DomainError.Of(ModuleCode.UW, "SOD", "You quoted or bound this job, so you cannot decide its underwriting issues; ask another underwriter with authority (SOD-UW-02).");
+                return DomainError.Of(ModuleCode.UW, "SOD", "You created, edited, quoted or bound this job, so you cannot decide its underwriting issues; ask another underwriter with authority (SOD-UW-02).");
             }
         }
 
