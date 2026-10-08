@@ -28,19 +28,20 @@ import { rememberRecent } from '../staff/recent';
 import { SimpleTable } from '../staff/SimpleTable';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
-import { useClaim, useCloseClaim, useCreateExposure } from './api';
+import { useClaim, useCloseClaim, useCreateExposure, usePolicyCoverages } from './api';
 import { ClaimStatusPill } from './ClaimStatusPill';
 import { closeGuardFindings } from './closeGuard';
 import { closeOutcomes, exposureDuplicateReasons } from './codes';
 import { FinancialsTab } from './FinancialsTab';
 import { TruncatedRef } from './TruncatedRef';
 
-const exposureCoverages = ['OD'] as const;
-
 function ExposureForm({ claim }: { claim: ClaimView }) {
   const { t } = useTranslation('claims');
   const { keyFor, release } = useIdempotencyKey();
-  const [coverage, setCoverage] = useState<string | null>('OD');
+  // The coverages come from the policy; the own-damage one is preselected.
+  const covers = usePolicyCoverages(claim.summary.policyId);
+  const [picked, setCoverage] = useState<string | null>(null);
+  const coverage = picked ?? covers.data?.ownDamage ?? null;
   const [duplicateReason, setDuplicateReason] = useState<string | null>(null);
   const mutation = useCreateExposure(claim.summary.claimId);
   const duplicate =
@@ -90,7 +91,7 @@ function ExposureForm({ claim }: { claim: ClaimView }) {
           label={t('exposure.coverage')}
           isRequired
           helperText={t('exposure.coverageIllustrative')}
-          options={exposureCoverages.map((c) => ({ id: c, label: t(`exposure.coverages.${c}`) }))}
+          options={(covers.data?.codes ?? []).map((c) => ({ id: c, label: c }))}
           value={coverage}
           onChange={setCoverage}
         />

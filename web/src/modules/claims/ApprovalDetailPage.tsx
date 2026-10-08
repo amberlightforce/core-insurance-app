@@ -20,7 +20,8 @@ import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
 import {
   decideApproval,
-  setIdOfSubject,
+  approvalClaimId,
+  approvalSetId,
   useApproval,
   useRefreshApprovals,
   useTransactionSet,
@@ -166,8 +167,9 @@ function ApprovalDetails({ data }: { data: ApprovalGetResponse }) {
       }),
     [request.diff, fmt, t],
   );
-  const setQuery = useTransactionSet(setIdOfSubject(request.objectRef));
+  const setQuery = useTransactionSet(approvalSetId(request));
   const linkedSet = setQuery.data?.set;
+  const linkedClaimId = approvalClaimId(request) ?? linkedSet?.claimId ?? null;
   const staleSet = linkedSet?.status === 'REJECTED';
   const pending = request.status === 'PendingApproval' && !staleSet;
 
@@ -181,8 +183,8 @@ function ApprovalDetails({ data }: { data: ApprovalGetResponse }) {
         subtitle={<ApprovalStatusPill status={request.status} />}
         actions={
           <>
-            {linkedSet ? (
-              <LinkButton variant="secondary" to={`/claims/${linkedSet.claimId}?tab=financials`}>
+            {linkedClaimId ? (
+              <LinkButton variant="secondary" to={`/claims/${linkedClaimId}?tab=financials`}>
                 {t('approvals.openClaim')}
               </LinkButton>
             ) : null}
@@ -287,7 +289,7 @@ function ApprovalDetails({ data }: { data: ApprovalGetResponse }) {
         <Section title={t('approvals.decision')}>
           <DecisionForm request={request} />
         </Section>
-      ) : (
+      ) : decision ? null : (
         <Banner variant="info" live="none" title={t('approvals.notPending')}>
           {staleSet ? t('approvals.setRejected') : t('approvals.notPendingBody')}
         </Banner>

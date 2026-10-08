@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ClaimPaymentView, ClaimView, FinancialLineBalance } from '../../api/types';
@@ -206,7 +206,9 @@ export function FinancialsTab({ claim }: { claim: ClaimView }) {
     claim.summary.insuredPartyId;
 
   // The API has no list of a claim's sets: show the ones this browser built plus those carrying a payment.
-  const remembered = readRecent(`claimset.${claimId}`).map((r) => r.id);
+  // Sets built in this session show at once; earlier ones come from this browser's memory (newest first).
+  const [justBuilt, setJustBuilt] = useState<string[]>([]);
+  const remembered = [...justBuilt, ...readRecent(`claimset.${claimId}`).map((r) => r.id)];
   const setIds = [
     ...new Set([
       ...remembered,
@@ -241,6 +243,9 @@ export function FinancialsTab({ claim }: { claim: ClaimView }) {
               claimId={claimId}
               exposures={claim.exposures}
               accounts={accountItems}
+              onSubmitted={(setId) => {
+                setJustBuilt((ids) => [setId, ...ids]);
+              }}
             />
           </Section>
           <Section title={t('payee.title')}>

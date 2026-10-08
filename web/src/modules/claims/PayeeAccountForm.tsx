@@ -16,6 +16,7 @@ import { ProblemBanner } from '../staff/ProblemBanner';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
 import { capturePayeeAccount } from './api';
+import { verificationKey } from './codes';
 
 export interface PayeeAccountFormProps {
   claimId: string;
@@ -140,7 +141,9 @@ export function PayeeAccountForm({ claimId, partyId, onSaved }: PayeeAccountForm
               {
                 id: 'verification',
                 label: t('payee.verification'),
-                value: t(`payee.verificationStatus.${saved.verificationStatus}`),
+                value: t(`payee.verificationStatus.${verificationKey(saved.verificationStatus)}`, {
+                  defaultValue: saved.verificationStatus,
+                }),
               },
               {
                 id: 'cooling',

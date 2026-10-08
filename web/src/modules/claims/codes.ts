@@ -47,3 +47,8 @@ export const closeOutcomes = ['COMPLETED', 'WITHDRAWN', 'DUPLICATE', 'NO_PAYMENT
 
 /** Reasons the close guard reports per exposure (REQ-CLM-072). */
 export const closeGuardReasons = ['OPEN_RESERVE', 'PAYMENT_PENDING'] as const;
+
+/** CLM sends «VO_P_MATCHED», BIL «VoPMatched»: both normalise to «vopmatched», the key of the label. */
+export function verificationKey(status: string): string {
+  return status.replaceAll('_', '').toLowerCase();
+}

@@ -145,9 +145,10 @@
     "failed": "The set was not submitted",
     "result": {
       "approved": "The set was approved",
-      "approvedBody": "Within your authority: applied at once. A payment was sent for issue.",
+      "approvedBody": "Within your authority: applied at once.",
       "pending": "The set is waiting for approval",
       "pendingBody": "It is above your limit. It applies when every request in the checklist is approved.",
+      "paymentSent": "The payment was sent for issue.",
       "referrals": "Referrals",
       "referral": "Referred to {role} for {amount}"
     }

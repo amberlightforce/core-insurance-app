@@ -31,9 +31,9 @@ import { SimpleTable } from '../staff/SimpleTable';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
 import { buildSet, submitSet, useRefreshMoney } from './api';
-import { costCategories, costTypes, reserveReasons } from './codes';
+import { costCategories, costTypes, reserveReasons, verificationKey } from './codes';
 import { authorityHint } from './closeGuard';
-import { SetBody, SetTransactions } from './SetViews';
+import { SetTransactions } from './SetViews';
 
 type Preview = NonNullable<TransactionSetBuildResponse['preview']>[number];
 
@@ -41,6 +41,8 @@ export interface TransactionBuilderProps {
   claimId: string;
   exposures: readonly ExposureView[];
   accounts: readonly ClaimPayeeAccountView[];
+  /** Called with the id of a set that was submitted, so the set list can show it at once. */
+  onSubmitted?: (setId: string) => void;
 }
 
 /**
@@ -49,7 +51,12 @@ export interface TransactionBuilderProps {
  * submits it: APPROVED at once within authority, or PENDING_APPROVAL with an approval checklist (illustrative limits,
  * D-SL2-03 / D-SL2-13). The build and the submit each carry their own Idempotency-Key, reused on retry.
  */
-export function TransactionBuilder({ claimId, exposures, accounts }: TransactionBuilderProps) {
+export function TransactionBuilder({
+  claimId,
+  exposures,
+  accounts,
+  onSubmitted,
+}: TransactionBuilderProps) {
   const { t } = useTranslation('claims');
   const fmt = useFormat();
   const buildKey = useIdempotencyKey();
@@ -127,7 +134,10 @@ export function TransactionBuilder({ claimId, exposures, accounts }: Transaction
       submitKey.release();
       setResult(response);
       setPreview(null);
+      setAmount(null);
+      setReason(null);
       rememberRecent(`claimset.${claimId}`, { id: response.setId, label: response.status });
+      onSubmitted?.(response.setId);
       announce(t(`builder.result.${response.status === 'APPROVED' ? 'approved' : 'pending'}`));
       void refresh();
     },
@@ -209,7 +219,7 @@ export function TransactionBuilder({ claimId, exposures, accounts }: Transaction
           isRequired
           options={open.map((e) => ({
             id: e.exposureId,
-            label: `${e.exposureNumber} · ${t(`exposure.kinds.${e.kind}`)}`,
+            label: `${e.exposureNumber} · ${t(`exposure.kinds.${e.kind}`)} · ${e.coverageCode}`,
           }))}
           value={exposureId}
           onChange={(value) => {
@@ -289,7 +299,7 @@ export function TransactionBuilder({ claimId, exposures, accounts }: Transaction
             {...(accounts.length === 0 ? { helperText: t('builder.noAccounts') } : {})}
             options={accounts.map((a) => ({
               id: a.payeeAccountId,
-              label: `${a.maskedIban} · ${t(`payee.verificationStatus.${a.verificationStatus}`, { defaultValue: a.verificationStatus })}`,
+              label: `${a.maskedIban} · ${t(`payee.verificationStatus.${verificationKey(a.verificationStatus)}`, { defaultValue: a.verificationStatus })}`,
             }))}
             value={accountId}
             onChange={(value) => {
@@ -363,10 +373,10 @@ export function TransactionBuilder({ claimId, exposures, accounts }: Transaction
             title={t(`builder.result.${result.status === 'APPROVED' ? 'approved' : 'pending'}`)}
           >
             {t(`builder.result.${result.status === 'APPROVED' ? 'approvedBody' : 'pendingBody'}`)}
+            {result.status === 'APPROVED' && result.payments && result.payments.length > 0
+              ? ` ${t('builder.result.paymentSent')}`
+              : ''}
           </Banner>
-          {result.set ? (
-            <SetBody set={result.set} when={fmt.dateTime(result.set.createdAt)} />
-          ) : null}
           {result.status !== 'APPROVED' && !result.set?.approvals?.length ? (
             <ul className={styles.stack} aria-label={t('builder.result.referrals')}>
               {(result.authorityChecks ?? [])

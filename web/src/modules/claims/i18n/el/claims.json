@@ -295,12 +295,12 @@
       "ibanInvalid": "Το IBAN δεν είναι έγκυρο."
     },
     "verificationStatus": {
-      "Unverified": "Μη επαληθευμένος",
-      "VoPMatched": "Επαληθεύτηκε (ταυτίζεται)",
-      "VoPCloseMatch": "Επαληθεύτηκε (σχεδόν ταυτίζεται)",
-      "VoPNoMatch": "Δεν ταυτίζεται",
-      "VoPNotAvailable": "Η επαλήθευση δεν ήταν διαθέσιμη",
-      "Confirmed": "Επιβεβαιωμένος"
+      "unverified": "Μη επαληθευμένος",
+      "vopmatched": "Επαληθεύτηκε (ταυτίζεται)",
+      "vopclosematch": "Επαληθεύτηκε (σχεδόν ταυτίζεται)",
+      "vopnomatch": "Δεν ταυτίζεται",
+      "vopnotavailable": "Η επαλήθευση δεν ήταν διαθέσιμη",
+      "confirmed": "Επιβεβαιωμένος"
     }
   },
   "approvals": {
@@ -321,6 +321,7 @@
     },
     "type": {
       "CLM_RESERVE": "Αλλαγή αποθεματικού",
+      "CLM_CLAIM_PAYMENT": "Πληρωμή αποζημίωσης (έγκριση πληρωμής)",
       "CLM_PAYMENT": "Πληρωμή αποζημίωσης",
       "CLM_TRANSACTION_SET": "Σύνολο συναλλαγών ζημίας"
     },

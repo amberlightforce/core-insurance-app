@@ -41,17 +41,32 @@ export function diffRows(
   labels: { yes: string; no: string },
 ): DiffRow[] {
   if (!diff) return [];
-  const show = (value: unknown): string | null => {
+  const money = (key: string, value: string): string | null =>
+    /(amount|reserve|paid|incurred)/i.test(key) && /^-?\d+(\.\d+)?$/.test(value)
+      ? formatMoney({ amount: value, currency: 'EUR' })
+      : null;
+  // Nested values (a set's lines, authority checks) read as «key: value; key: value»; amounts are formatted.
+  const show = (value: unknown, key = ''): string | null => {
     if (value === null || value === undefined) return null;
     if (isMoney(value)) return formatMoney(value);
-    if (typeof value === 'string') return value;
+    if (typeof value === 'string') return money(key, value) ?? value;
     if (typeof value === 'boolean') return value ? labels.yes : labels.no;
+    if (typeof value === 'number') return String(value);
+    if (Array.isArray(value)) return value.map((item) => show(item, key)).join(' | ');
+    if (isRecord(value))
+      return Object.entries(value)
+        .map(([k, v]) => `${k}: ${show(v, k) ?? '—'}`)
+        .join('; ');
     return JSON.stringify(value);
   };
-  return Object.entries(diff).map(([key, raw]) => {
-    if (isRecord(raw) && ('from' in raw || 'to' in raw) && Object.keys(raw).length <= 2) {
-      return { id: key, label: key, from: show(raw.from), to: show(raw.to), value: null };
-    }
-    return { id: key, label: key, from: null, to: null, value: show(raw) };
-  });
+  // Identifiers and the content hash are shown in the request summary; they add nothing to the change itself.
+  const hidden = new Set(['setId', 'claimId', 'contentHash']);
+  return Object.entries(diff)
+    .filter(([key]) => !hidden.has(key))
+    .map(([key, raw]) => {
+      if (isRecord(raw) && ('from' in raw || 'to' in raw) && Object.keys(raw).length <= 2) {
+        return { id: key, label: key, from: show(raw.from), to: show(raw.to), value: null };
+      }
+      return { id: key, label: key, from: null, to: null, value: show(raw, key) };
+    });
 }

@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiRequest, isApiError } from '../../api/client';
+import { athensToday } from '../quote/time';
 import type {
   ApprovalDecideRequest,
   ApprovalDecideResponse,
   ApprovalGetResponse,
   ApprovalListPage,
+  ApprovalView,
   ClaimCloseRequest,
   ClaimCloseResponse,
   ClaimGetResponse,
@@ -22,6 +24,7 @@ import type {
   PayeeAccountCaptureResponse,
   PayeeAccountListPage,
   PaymentListPage,
+  PolicyGetResponse,
   PolicySearchPage,
   TransactionSetBuildRequest,
   TransactionSetBuildResponse,
@@ -38,6 +41,28 @@ export function searchPolicies(policyNumber: string, signal?: AbortSignal) {
     body: { policyNumber },
     query: { limit: 5 },
     ...(signal ? { signal } : {}),
+  });
+}
+
+/**
+ * The coverages selected on a policy (pol.Policy.get, as of today): the codes an exposure can use. The own-damage
+ * code is the selected one naming damage («OWN-DAMAGE» on the demo motor product), else none.
+ */
+export function usePolicyCoverages(policyId: string | null) {
+  return useQuery({
+    queryKey: ['pol', 'coverages', policyId],
+    enabled: policyId !== null,
+    queryFn: ({ signal }) =>
+      apiRequest<PolicyGetResponse>(`/api/pol/v1/policies/${encodeURIComponent(policyId ?? '')}`, {
+        query: { validAt: athensToday() },
+        signal,
+      }),
+    select: (data) => {
+      const codes = (data.riskTree?.coverages ?? [])
+        .filter((c) => c.selected)
+        .map((c) => c.coverageCode);
+      return { codes, ownDamage: codes.find((c) => c.toUpperCase().includes('DAMAGE')) ?? null };
+    },
   });
 }
 
@@ -136,13 +161,22 @@ export function fetchSet(setId: string, signal?: AbortSignal) {
 }
 
 /**
- * The transaction set an approval request is about: reserve approvals have the subject CLM/TransactionSet/
- * «setId/authorityType/costType»; payment approvals have the payment as subject and cannot be resolved to a claim.
+ * The transaction set and claim an approval request is about. CLM puts both ids in the request's diff
+ * (`setId`, `claimId`); otherwise only the subject tells: a reserve approval's is «setId/authorityType/costType»,
+ * a payment approval's is the payment (no set). Missing ids come back as null.
  */
-export function setIdOfSubject(ref: { module: string; type: string; id: string }): string | null {
+export function approvalSetId(request: ApprovalView): string | null {
+  const fromDiff = (request.diff as Record<string, unknown> | undefined)?.setId;
+  if (typeof fromDiff === 'string') return fromDiff;
+  const ref = request.objectRef;
   return ref.module === 'CLM' && ref.type === 'TransactionSet'
     ? (ref.id.split('/')[0] ?? null)
     : null;
+}
+
+export function approvalClaimId(request: ApprovalView): string | null {
+  const fromDiff = (request.diff as Record<string, unknown> | undefined)?.claimId;
+  return typeof fromDiff === 'string' ? fromDiff : null;
 }
 
 /** One transaction set; polled while it waits for approval (CLM applies the decisions from the worker). */

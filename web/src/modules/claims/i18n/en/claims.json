@@ -295,12 +295,12 @@
       "ibanInvalid": "The IBAN is not valid."
     },
     "verificationStatus": {
-      "Unverified": "Unverified",
-      "VoPMatched": "Verified (match)",
-      "VoPCloseMatch": "Verified (close match)",
-      "VoPNoMatch": "No match",
-      "VoPNotAvailable": "Verification was not available",
-      "Confirmed": "Confirmed"
+      "unverified": "Unverified",
+      "vopmatched": "Verified (match)",
+      "vopclosematch": "Verified (close match)",
+      "vopnomatch": "No match",
+      "vopnotavailable": "Verification was not available",
+      "confirmed": "Confirmed"
     }
   },
   "approvals": {
@@ -321,6 +321,7 @@
     },
     "type": {
       "CLM_RESERVE": "Reserve change",
+      "CLM_CLAIM_PAYMENT": "Claim payment (payment approval)",
       "CLM_PAYMENT": "Claim payment",
       "CLM_TRANSACTION_SET": "Claim transaction set"
     },

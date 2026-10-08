@@ -74,7 +74,7 @@ const exposure1 = {
   exposureId: 'e0000000-1111-4222-8333-000000000001',
   exposureNumber: 'CLM000000001-01',
   kind: 'OWN_DAMAGE' as const,
-  coverageCode: 'OD',
+  coverageCode: 'OWN-DAMAGE',
   claimantId: 'c0000000-1111-4222-8333-000000000001',
   claimantPartyId: insuredId,
   status: 'OPEN' as const,
@@ -191,7 +191,7 @@ const submitted: FnolSubmitResponse = {
   claimNumber: 'CLM000000001',
   claim: summary(),
   exposures: [exposure1],
-  coverageIndications: [{ coverageCode: 'OD', indication: 'COVERED' }],
+  coverageIndications: [{ coverageCode: 'OWN-DAMAGE', indication: 'COVERED' }],
   duplicateCandidates: [],
   handlingSegment: 'STANDARD',
 };
@@ -205,8 +205,26 @@ const valid = {
   duplicateCandidates: [],
 };
 
+/** pol.Policy.get: the selected coverages an exposure can use (the demo motor product). */
+const policyGet: MockRoute = {
+  method: 'GET',
+  path: `/api/pol/v1/policies/${policyId}`,
+  respond: () => ({
+    body: {
+      riskTree: {
+        coverages: [
+          { coverageCode: 'MTPL', selected: true },
+          { coverageCode: 'OWN-DAMAGE', selected: true },
+          { coverageCode: 'WINDSCREEN', selected: false },
+        ],
+      },
+    },
+  }),
+};
+
 function fnolRoutes(over: { validate?: MockRoute['respond']; submit?: MockRoute['respond'] } = {}) {
   return [
+    policyGet,
     {
       method: 'POST',
       path: '/api/pol/v1/policies/search',
@@ -309,7 +327,7 @@ describe('FnolPage', () => {
       channel: 'STAFF',
       receiptMedium: 'TELEPHONE',
       reporter: { partyId: insuredId, relationship: 'INSURED' },
-      exposures: [{ kind: 'OWN_DAMAGE', coverageCode: 'OD' }],
+      exposures: [{ kind: 'OWN_DAMAGE', coverageCode: 'OWN-DAMAGE' }],
     });
     const body = second?.body as { lossAt: string; noticeOn: string };
     expect(body.lossAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00Z$/);
@@ -435,6 +453,7 @@ describe('FnolPage', () => {
 
 function viewRoutes(state: { claim: ClaimView }, extra: MockRoute[] = []): MockRoute[] {
   return [
+    policyGet,
     {
       method: 'GET',
       path: `/api/clm/v1/claims/${claimId}`,
@@ -505,7 +524,7 @@ describe('ClaimViewPage', () => {
       claimId,
       expectedRecordVersion: 3,
       kind: 'OWN_DAMAGE',
-      coverageCode: 'OD',
+      coverageCode: 'OWN-DAMAGE',
     });
   });
 
