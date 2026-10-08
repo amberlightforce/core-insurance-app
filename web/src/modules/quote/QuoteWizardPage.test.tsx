@@ -115,8 +115,8 @@ async function chooseOption(user: User, label: RegExp, option: string) {
   await user.click(await screen.findByRole('option', { name: option }));
 }
 
-/** Walks policyholder → vehicle → driver → covers → questions and lands on the premium step. */
-async function walkToPremium(user: User) {
+/** Walks policyholder → vehicle → driver and lands on the covers step. */
+async function walkToCovers(user: User) {
   const nextButton = await screen.findByRole('button', { name: /Επόμενο/ });
   await waitFor(() => {
     expect(screen.getAllByText('Διεπαφής Δοκιμή').length).toBeGreaterThan(0);
@@ -142,6 +142,11 @@ async function walkToPremium(user: User) {
   await next(user);
 
   await screen.findByRole('heading', { level: 2, name: 'Καλύψεις' });
+}
+
+/** Walks policyholder → vehicle → driver → covers → questions and lands on the premium step. */
+async function walkToPremium(user: User) {
+  await walkToCovers(user);
   await chooseOption(user, /Σωματικές βλάβες ανά άτομο/, '1.300.000 €');
   await next(user);
 
@@ -402,5 +407,181 @@ describe('QuoteWizardPage', () => {
       'aria-disabled',
       'true',
     );
+  });
+
+  describe('vehicle value for Own damage (D-SLC-21)', () => {
+    const missing = 'Η αξία του οχήματος απαιτείται για την κάλυψη Ίδιες ζημιές.';
+
+    async function selectOwnDamage(user: User) {
+      await walkToCovers(user);
+      await chooseOption(user, /Σωματικές βλάβες ανά άτομο/, '1.300.000 €');
+      await user.click(screen.getByRole('checkbox', { name: /Ίδιες ζημιές/ }));
+      await user.type(screen.getByRole('textbox', { name: /Ασφαλιζόμενο ποσό/ }), '9000');
+      await chooseOption(user, /Απαλλαγή/, 'Χωρίς απαλλαγή');
+    }
+
+    it('does not leave the covers step without a vehicle value and says why', async () => {
+      mockApi(routes());
+      const { user, container } = renderScreen(<QuoteWizardPage />, {
+        path: '/policies/quotes/new',
+        url,
+      });
+      await selectOwnDamage(user);
+
+      expect(await screen.findByText(missing)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Επόμενο/ })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
+      await expectNoA11yViolations(container);
+
+      // Entering the value on the covers step lets the user go on.
+      await user.type(screen.getByRole('textbox', { name: /Αξία οχήματος/ }), '12000');
+      await user.tab();
+      await waitFor(() => {
+        expect(screen.queryByText(missing)).not.toBeInTheDocument();
+      });
+      expect(screen.getByRole('button', { name: /Επόμενο/ })).not.toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
+    });
+
+    it('does not require the value when Own damage is not selected', async () => {
+      mockApi(routes());
+      const { user } = renderScreen(<QuoteWizardPage />, { path: '/policies/quotes/new', url });
+      await walkToCovers(user);
+      await chooseOption(user, /Σωματικές βλάβες ανά άτομο/, '1.300.000 €');
+      expect(screen.queryByText(missing)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Επόμενο/ })).not.toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
+    });
+  });
+
+  describe('rating input errors in plain words', () => {
+    const cases: {
+      name: string;
+      detail: string;
+      what: RegExp;
+      step: string;
+      focus?: RegExp;
+    }[] = [
+      {
+        name: 'vehicle.vehicleValue',
+        detail: 'Rating failed: RAT-ERR-INPUT vehicle.vehicleValue is required to rate OWN-DAMAGE.',
+        what: /Λείπει η αξία του οχήματος, οπότε δεν μπορεί να τιμολογηθεί η κάλυψη «Ίδιες ζημιές»/,
+        step: 'Όχημα',
+        focus: /Αξία οχήματος/,
+      },
+      {
+        name: 'vehicle.firstRegistrationYear',
+        detail:
+          'Rating failed: RAT-ERR-INPUT segments[a].riskTree.vehicle.firstRegistrationYear: A whole number from 1950 to 2100 is expected.',
+        what: /Το έτος πρώτης κυκλοφορίας λείπει ή δεν είναι έγκυρο/,
+        step: 'Όχημα',
+        focus: /Έτος πρώτης κυκλοφορίας/,
+      },
+      {
+        name: 'vehicle.engineCapacityCc',
+        detail:
+          'Rating failed: RAT-ERR-INPUT segments[a].riskTree.vehicle.engineCapacityCc: A whole number from 1 to 20000 is expected.',
+        what: /Ο κυβισμός λείπει ή δεν είναι έγκυρος/,
+        step: 'Όχημα',
+        focus: /Κυβισμός/,
+      },
+      {
+        name: 'vehicle.usage',
+        detail: 'Rating failed: RAT-ERR-INPUT segments[a].riskTree.vehicle.usage: bad.',
+        what: /Η χρήση του οχήματος δεν είναι έγκυρη/,
+        step: 'Ερωτήσεις κινδύνου',
+      },
+      {
+        name: 'driver.dateOfBirth',
+        detail:
+          'Rating failed: RAT-ERR-INPUT segments[a].riskTree.driver.dateOfBirth: The value is required.',
+        what: /Ο οδηγός δεν έχει ημερομηνία γέννησης/,
+        step: 'Οδηγός',
+      },
+      {
+        name: 'driver.licenceIssueDate',
+        detail:
+          'Rating failed: RAT-ERR-INPUT segments[a].riskTree.driver.licenceIssueDate: A date is expected.',
+        what: /Η ημερομηνία απόκτησης διπλώματος λείπει ή δεν είναι έγκυρη/,
+        step: 'Οδηγός',
+        focus: /Έτος απόκτησης διπλώματος/,
+      },
+      {
+        name: 'driver.claimsLast5Years',
+        detail:
+          'Rating failed: RAT-ERR-INPUT segments[a].riskTree.driver.claimsLast5Years: A whole number from 0 to 50 is expected.',
+        what: /Ο αριθμός ζημιών δεν είναι έγκυρος/,
+        step: 'Ερωτήσεις κινδύνου',
+      },
+      {
+        name: 'coverages',
+        detail:
+          'Rating failed: RAT-ERR-INPUT segments[a].riskTree.coverages: Select at least one coverage.',
+        what: /Δεν έχει επιλεγεί καμία κάλυψη/,
+        step: 'Καλύψεις',
+      },
+      {
+        name: 'effectiveDate',
+        detail: 'Rating failed: RAT-ERR-INPUT effectiveDate: not in the validity of the artefact.',
+        what: /Η ημερομηνία έναρξης δεν είναι έγκυρη για την τιμολόγηση/,
+        step: 'Λήπτης και προϊόν',
+      },
+    ];
+
+    it.each(cases)(
+      'explains $name and the Go to button jumps to the step',
+      async ({ detail, what, step, focus }) => {
+        mockApi(
+          routes({ quote: () => problem(422, 'POL-ERR-RATING', 'Η τιμολόγηση απέτυχε', detail) }),
+        );
+        const { user, container } = renderScreen(<QuoteWizardPage />, {
+          path: '/policies/quotes/new',
+          url,
+        });
+        await walkToPremium(user);
+        await user.click(screen.getByRole('button', { name: 'Υπολογισμός ασφαλίστρου' }));
+
+        expect(await screen.findByText(what)).toBeInTheDocument();
+        // The code, trace id and the engine's own sentence are secondary, under "Technical details".
+        expect(screen.getByText('Τεχνικές λεπτομέρειες')).toBeInTheDocument();
+        expect(screen.getByText(/trace-0123456789abcdef/)).toBeInTheDocument();
+        await expectNoA11yViolations(container);
+
+        await user.click(screen.getByRole('button', { name: `Μετάβαση στο βήμα «${step}»` }));
+        await screen.findByRole('heading', { level: 2, name: step });
+        expect(screen.queryByText(what)).not.toBeInTheDocument();
+        if (focus) {
+          await waitFor(() => {
+            expect(screen.getByRole('textbox', { name: focus })).toHaveFocus();
+          });
+        }
+      },
+    );
+
+    it('falls back to a generic explanation for an input path it does not know', async () => {
+      mockApi(
+        routes({
+          quote: () =>
+            problem(
+              422,
+              'RAT-ERR-INPUT',
+              'Τα στοιχεία κινδύνου δεν είναι έγκυρα',
+              'something: odd',
+            ),
+        }),
+      );
+      const { user } = renderScreen(<QuoteWizardPage />, { path: '/policies/quotes/new', url });
+      await walkToPremium(user);
+      await user.click(screen.getByRole('button', { name: 'Υπολογισμός ασφαλίστρου' }));
+      expect(
+        await screen.findByText(/Η μηχανή τιμολόγησης απέρριψε ένα από τα στοιχεία/),
+      ).toBeInTheDocument();
+    });
   });
 });

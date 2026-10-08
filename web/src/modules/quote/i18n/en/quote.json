@@ -16,14 +16,17 @@
     "covers": "Fill in the required terms of the selected covers.",
     "questions": "Answer the required questions. A knock-out answer does not allow a quote.",
     "premium": "Calculate a current premium for the present details first.",
-    "bind": "The quote has not been bound."
+    "bind": "The quote has not been bound.",
+    "vehicleValue": "Enter the vehicle value: Own damage cover is priced on it."
   },
   "issues": {
     "required": "Fill in this field.",
     "plate": "The plate is not valid.",
     "year": "Enter a valid year.",
     "range": "Enter a valid number.",
-    "postcode": "The postcode has 5 digits."
+    "postcode": "The postcode has 5 digits.",
+    "valueForCover": "Vehicle value is required for Own damage cover.",
+    "integer": "Enter a whole number."
   },
   "policyholder": {
     "party": "Policyholder",
@@ -78,7 +81,8 @@
     "suggested": "Suggested cover",
     "optional": "Optional cover",
     "include": "Include: {cover}",
-    "illustrative": "illustrative"
+    "illustrative": "illustrative",
+    "valueHelp": "Own damage is priced on the value of the vehicle."
   },
   "questions": {
     "knockOutAnswer": "Does not allow insurance",
@@ -232,5 +236,60 @@
     "decision": "Underwriting"
   },
   "overline": "Policies · New quote",
-  "stepOf": "Step {step} of {total}"
+  "stepOf": "Step {step} of {total}",
+  "inputProblem": {
+    "goTo": "Go to {step}",
+    "technical": "Technical details",
+    "thisCover": "the selected cover",
+    "fields": {
+      "vehicleValue": {
+        "what": "The vehicle value is missing, so {cover} cannot be priced.",
+        "fix": "Enter the market value of the vehicle in euro in the field «{label}»."
+      },
+      "firstRegistrationYear": {
+        "what": "The year of first registration is missing or not valid.",
+        "fix": "Enter a year from 1950 to next year in the field «{label}»."
+      },
+      "engineCapacityCc": {
+        "what": "The engine capacity is missing or not valid.",
+        "fix": "Enter the engine capacity in cc (1 to 20,000) in the field «{label}»."
+      },
+      "vehicleDetails": {
+        "what": "The vehicle is missing its year of first registration or its engine capacity.",
+        "fix": "Fill in «{label}» and the engine capacity on the vehicle step."
+      },
+      "usage": {
+        "what": "The use of the vehicle is not valid.",
+        "fix": "Answer the question «{label}» again."
+      },
+      "dateOfBirth": {
+        "what": "The driver has no date of birth on the customer record, and the premium depends on the driver's age.",
+        "fix": "Open the driver's customer record and add the date of birth, or choose another driver, then calculate again."
+      },
+      "licenceDate": {
+        "what": "The date the licence was first issued is missing or not valid.",
+        "fix": "Enter the year in the field «{label}»."
+      },
+      "claims": {
+        "what": "The number of claims is not valid.",
+        "fix": "Enter a whole number from 0 to 50 for «{label}», or leave it empty for none."
+      },
+      "driver": {
+        "what": "The main driver of the vehicle is missing.",
+        "fix": "Choose the policyholder or another customer as the driver."
+      },
+      "coverages": {
+        "what": "No cover is selected, or a cover is selected twice.",
+        "fix": "Select at least one cover."
+      },
+      "effectiveDate": {
+        "what": "The start date is not valid for rating.",
+        "fix": "Choose a start date from today onwards in the field «{label}»."
+      },
+      "unknown": {
+        "what": "The premium engine rejected one of the details entered.",
+        "fix": "Check the details on each step, correct anything that looks wrong and calculate again. Give support the technical details below if it keeps happening."
+      }
+    }
+  }
 }

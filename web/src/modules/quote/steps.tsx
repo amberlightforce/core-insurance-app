@@ -31,10 +31,13 @@ import styles from '../staff/staff.module.css';
 import { useParty } from '../party/api';
 import {
   fuelTypes,
+  invalidAnswers,
   knockOuts,
   questionState,
   validateDriver,
   validateVehicle,
+  vehicleValueCovers,
+  vehicleValueIssue,
   type Draft,
   type FieldIssue,
   type PartyRef,
@@ -45,6 +48,11 @@ import type { UseQueryResult } from '@tanstack/react-query';
 type SetDraft = (update: (draft: Draft) => Draft) => void;
 
 const thisYear = () => new Date().getFullYear();
+
+/** `errorMessage` only when there is one (exactOptionalPropertyTypes). */
+function errorProp(message: string | undefined) {
+  return message ? { errorMessage: message } : {};
+}
 
 function issueText(t: TFunction<'quote'>, issue: FieldIssue | undefined): string | undefined {
   return issue ? t(`issues.${issue}`) : undefined;
@@ -196,7 +204,16 @@ function safeDate(value: string) {
 
 /* Step 2: vehicle ------------------------------------------------------------------------------------- */
 
-export function VehicleStep({ draft, setDraft }: { draft: Draft; setDraft: SetDraft }) {
+export function VehicleStep({
+  draft,
+  setDraft,
+  valueNeeded,
+}: {
+  draft: Draft;
+  setDraft: SetDraft;
+  /** An Own damage (or other vehicle-value rated) cover is selected: the value is required. */
+  valueNeeded: boolean;
+}) {
   const { t } = useTranslation('quote');
   const [touched, setTouched] = useState<ReadonlySet<keyof VehicleForm>>(new Set());
   const issues = validateVehicle(draft.vehicle, thisYear());
@@ -284,10 +301,12 @@ export function VehicleStep({ draft, setDraft }: { draft: Draft; setDraft: SetDr
           />
           <CurrencyField
             label={t('vehicle.value')}
+            isRequired={valueNeeded}
             value={v.value || null}
             onChange={(value) => {
               set('value')(value);
             }}
+            {...errorProp(issueText(t, vehicleValueIssue(v.value, valueNeeded)))}
           />
           <TextField
             label={t('vehicle.garaging')}
@@ -431,6 +450,18 @@ function CoverCard({
       >
         {t('covers.include', { cover: localised(cover.name) })}
       </Checkbox>
+      {selected && vehicleValueCovers.includes(cover.code) ? (
+        <CurrencyField
+          label={t('vehicle.value')}
+          description={t('covers.valueHelp')}
+          isRequired
+          value={draft.vehicle.value || null}
+          onChange={(value) => {
+            setDraft((d) => ({ ...d, vehicle: { ...d.vehicle, value: value ?? '' } }));
+          }}
+          {...errorProp(issueText(t, vehicleValueIssue(draft.vehicle.value, true)))}
+        />
+      ) : null}
       {selected
         ? cover.terms.map((term) => {
             const label = localised(term.name);
@@ -508,6 +539,7 @@ function QuestionField({
   const localised = useLocalised();
   const value = draft.answers[question.code] ?? '';
   const { required } = questionState(question, draft.answers);
+  const invalid = invalidAnswers([question], draft.answers)[question.code];
   const set = (next: string) => {
     setDraft((d) => ({ ...d, answers: { ...d.answers, [question.code]: next } }));
   };
@@ -537,6 +569,7 @@ function QuestionField({
       isRequired={required}
       value={value}
       onChange={set}
+      {...errorProp(issueText(t, invalid))}
       inputMode={
         question.answerType === 'INTEGER' || question.answerType === 'DECIMAL' ? 'numeric' : 'text'
       }
