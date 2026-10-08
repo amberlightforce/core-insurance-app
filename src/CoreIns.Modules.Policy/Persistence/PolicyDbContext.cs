@@ -48,6 +48,8 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
                 table.HasCheckConstraint("ck_job_record_version", "record_version >= 1");
                 table.HasCheckConstraint("ck_job_cancellation_kind", Codes.CheckSql<CancellationKind>("cancellation_kind"));
                 table.HasCheckConstraint("ck_job_sub_state", Codes.CheckSql<JobSubState>("sub_state"));
+                table.HasCheckConstraint("ck_job_target_term",
+                    "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
             });
             entity.HasKey(e => e.JobId).HasName("pk_job");
             entity.Property(e => e.JobId).HasColumnName("job_id");
