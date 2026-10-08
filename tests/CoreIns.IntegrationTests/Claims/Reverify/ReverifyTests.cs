@@ -1,5 +1,6 @@
 using System.Net;
 using CoreIns.Modules.Claims.Events;
+using CoreIns.SharedKernel;
 using Npgsql;
 using static CoreIns.IntegrationTests.Claims.ClaimsMoney;
 using static CoreIns.IntegrationTests.Claims.Reverify.ReverifyHarness;
@@ -385,7 +386,7 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         {
             await using var dataSource = NpgsqlDataSource.Create(database.SuperuserConnectionString);
             await using var command = dataSource.CreateCommand(sql);
-            return await Should.ThrowAsync<PostgresException>(async () => await command.ExecuteNonQueryAsync(Ct));
+            return await Should.ThrowAsync<PostgresException>(async () => await command.ExecuteNonQueryAsync(ClaimsSlice.Ct));
         }
 
         (await Refused($"UPDATE clm.reverification SET new_snapshot_ref = 'forged' WHERE claim_id = '{claim.ClaimId}'")).SqlState.ShouldBe("23001");
@@ -398,6 +399,6 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         // The app role has no DELETE on the table at all.
         await using var app = NpgsqlDataSource.Create(database.AppConnectionString);
         await using var privilege = app.CreateCommand("SELECT has_table_privilege('app', 'clm.reverification', 'DELETE')");
-        ((bool)(await privilege.ExecuteScalarAsync(Ct))!).ShouldBeFalse();
+        ((bool)(await privilege.ExecuteScalarAsync(ClaimsSlice.Ct))!).ShouldBeFalse();
     }
 }
