@@ -50,6 +50,25 @@ const moduleRoutes: RouteObject[] = [
     }),
   },
   {
+    path: 'policies/:policyId/change',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/servicing/ChangeWorkspacePage'))
+        .ChangeWorkspacePage,
+    }),
+  },
+  {
+    path: 'policies/:policyId/cancel',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/servicing/CancellationPage')).CancellationPage,
+    }),
+  },
+  {
+    path: 'policies/:policyId/renew',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/servicing/RenewalPage')).RenewalPage,
+    }),
+  },
+  {
     path: 'billing',
     lazy: async () => ({
       Component: (await import('./modules/billing/BillingHomePage')).BillingHomePage,
