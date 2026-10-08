@@ -1,141 +1,324 @@
-# HANDOVER — Greek P&C Core Insurance: Phase 0 + Phase 1 (Foundations)
+# HANDOVER — Greek P&C Core Insurance
 
-**Date:** 2026-10-07 · **Repo:** https://github.com/amberlightforce/core-insurance-app (private, branch `main`) ·
+**Updated:** 2026-10-08 · **Repo:** https://github.com/amberlightforce/core-insurance-app (private, branch `main`) ·
 **Live tracker:** https://claude.ai/artifact/QwQVP63L5vGPhUskFrAzaD
 
-**Status:** foundations are complete. All six foundation work packages (F-1a … F-1f) passed independent review and are merged; CI is green.
-**No product feature has been built yet.** The programme is **paused** at the user's request (D-USR-07). The next step, the thin end-to-end slice, starts only on the user's go-ahead.
+## 0. Status in one paragraph
 
-This document is for whoever picks the work up next, human or agent. Read it with `orchestration/PLAN.md`, `DECISIONS.md`
-(about 140 rulings) and `STATUS.md`. Those three files are the programme's memory.
+Foundations (Phase 1) and the **thin end-to-end slice** (Phase 2) are done. One motor product can be quoted, rated,
+underwritten and bound into a policy. Billing then:
+- invoices it, with a **stub** myDATA fiscal document;
+- takes an exact payment;
+- posts **balanced journals** in finance.
+
+All of it runs locally with `docker compose`. It is proven by an automated E2E-01 test, at API and browser level, that
+runs in GitHub CI, and it was accepted after a manual walkthrough in a real Chrome (D-SLC-21). CI on `main` is green.
+
+The rest of the Motor MVP is **not built**: renewals, changes, cancellations, claims, reinsurance, documents, portals,
+migration and reporting, plus the parts of every module the slice did not need. About 10–15% of the 3,711 Must
+requirements are covered, most of them partially.
+
+**The programme is waiting for the user to choose the next step** (§12).
+
+Read this with `orchestration/STATUS.md`, `PLAN.md`, `SLICE-PLAN.md` and `DECISIONS.md` (about 180 rulings). Those
+files are the programme's memory.
 
 ---
 
-## 1. What exists and what does not
+## 1. What exists
 
 | Area | State |
 |---|---|
-| Specifications | 18 PRDs + system contract (v1.12, frozen) + Aegean design guide + 2 infra specs, outside the repo in `../core-insurance-prds` and `../core-insurance-infra`. Each is summarised in `orchestration/digests/` |
-| Plan | `orchestration/PLAN.md`: inventory, dependency graph, waves W1–W9, shared contracts, conflicts |
-| Backlog | `orchestration/backlog/backlog.json` + `BACKLOG.md`: **134 work packages** (6 foundation, 116 feature of which 3 deferred, 12 E2E). Together they cover the **3,711** Motor-MVP Must requirements, each placed in exactly one WP |
-| Foundations | Built, reviewed, merged (§3) |
-| Feature modules (PTY, PFC, RAT, UW, POL, BIL, CLM, RI, FIN, DOC, CMP, CHN, WRK, DAT, MIG, MKT, PLT) | **Not started.** Each module has empty `CoreIns.Modules.<X>` and `<X>.Contracts` projects with generated contract types, and a schema constant |
-| Running system | The Host starts in api, worker and migrate roles. The web app shows the Aegean shell with placeholder module routes. No business screen or API works end to end yet |
+| Specifications | Outside the repo, in `../core-insurance-prds` and `../core-insurance-infra`: 18 PRDs, system contract v1.12 (frozen), Aegean design guide, 2 infra specs. Summaries are in `orchestration/digests/` |
+| Plan and backlog | `PLAN.md` (waves W1–W9); `backlog/backlog.json` + `BACKLOG.md` with 134 work packages that hold all 3,711 Must requirements; `SLICE-PLAN.md` for the slice |
+| Foundations | Built, reviewed, merged (§5) |
+| Slice modules | Party, Market, Product, Rating, Underwriting, Policy, Billing, Compliance (fiscal stub only), Finance. Each covers only what E2E-01 needs (§6) |
+| Staff UI | Greek-first React app with these screens: customer search/create/view, 7-step quote wizard, policy view, billing account/invoice/payment, journals |
+| Not started | Claims, Reinsurance, Documents, Work management, Channels/portals, Data/reporting, Migration. Their projects exist with generated contract types only |
+| Tests | 10 .NET test projects with about 1,700 tests, 297 of them Testcontainers integration tests; 1,200 web tests (Vitest + axe); Playwright E2E-01 (API + UI) |
 
-## 2. How to run, build and test
+### Modules and schemas
 
-**Toolchain:** .NET 10 SDK (10.0.401), Node 24, Docker, Python 3.12, Azure CLI with Bicep. Read `README.md` and `infra/README.md` in the repo.
+| Module | Schema | Slice scope |
+|---|---|---|
+| Platform | `plt` | Command pipeline, outbox, audit, idempotency, numbering, permissions, data keys, dev sign-in |
+| Party | `pty` | Person create/get/search (accent-insensitive, ELOT 743 Latin forms, AFM), masked P2 data with an audited reveal, intermediaries, producer codes |
+| Market | `mkt` | Legal entity GR-TEST, configuration resolver (configuration authority, D-SLC-15), rounding, GR pack values from the PRDs with legalStatus |
+| Product | `pfc` | Motor Private Car (MOTOR-GR 1.0): MTPL + own damage + windscreen, MOTOR-RISK question set, charge types, write-once versions resolved by date |
+| Rating | `rat` | Decision-table rating on the shared rule engine (illustrative tariff, D-SLC-04), IPT from MKT, content-addressed worksheets |
+| Underwriting | `uw` | PRE_QUOTE / PRE_BIND rule sets: accept, refer or decline (illustrative thresholds) |
+| Policy | `pol` | Submission → draft → quote → bind; policy/term/transaction/segment with bitemporal storage, exclusion constraints and append-only triggers; gapless policy numbers |
+| Billing | `bil` | Account, charge intake, ANNUAL invoice (gapless number), payment, allocation, sealed sub-ledger, `BillingEntryPosted` |
+| Compliance | `cmp` | Fiscal document request through the GR **stub** channel (never bound in Production) |
+| Finance | `fin` | Posting rules as data, intake from `BillingEntryPosted` only (D-SLC-12), balanced append-only sealed journals, gapless journal numbers |
 
-- **Local stack:** `infra/local/compose.yaml` (PostgreSQL 17.11, Azurite, Gotenberg 8.37, Mailpit, WireMock, Aspire dashboard; every port bound to 127.0.0.1). Copy `.env.example` to `.env`. The `migrate` job runs bootstrap and migrations. **No migration runs at start-up.**
-- **Backend:** `dotnet build CoreIns.sln -c Release` (warnings are errors). Tests use xunit.v3 on Microsoft.Testing.Platform: `dotnet test --project tests/<Project>`.
-- **Integration tests:** they use Testcontainers PostgreSQL 17 by default. Without Docker, set `COREINS_TEST_POSTGRES` (or `COREINS_TEST_PG` for the Greek search tests) to a superuser connection string; each test class then creates and drops its own database.
-- **Front end:** `cd web && npm ci`, then:
-  - `npm run dev` (port 5173, proxies `/api` to 5000)
-  - `lint`, `lint:css`, `lint:i18n`, `typecheck`, `test`, `build`, `build-storybook`
-- **E2E:** `tests/e2e` (Playwright) holds the shell accessibility test today.
-- **Contracts:**
-  - `python contracts/events/validate.py --require-jsonschema`
-  - `python contracts/openapi/validate.py --require-spec-validator`
-  - `dotnet run --project tools/CoreIns.ContractGen -- --check` (fails if generated C# is stale)
-- **CI:** `.github/workflows/ci.yml` runs the .NET build and tests including Testcontainers integration, the web gates, the Bicep build and Key Vault least-privilege guard, the container image build with a Trivy scan, SBOMs, and the contract checks. `codeql.yml` and Dependabot are also configured. `deploy.yml` is dispatch-only, using OIDC to Azure. It has never been run, and no Azure environment exists yet.
-- **Benchmarks:** `tools/CoreIns.Rules.Benchmark` (NFR-UW-001) and `tools/CoreIns.OutboxBenchmark`.
-- **npm lock files:** regenerate with the npm version CI uses (`npx npm@11.19.0 install --package-lock-only`). A Windows-generated lock broke `npm ci` in CI for several commits (D-ARC-29).
+## 2. How to run and test it
 
-### Dev machine (Windows 11): native toolchain (D-ARC-30)
-Everything runs natively on Windows: .NET SDK 10.0.401, Node 24, Docker Desktop (Testcontainers). The earlier problems (Docker would not start, App Control blocked new DLLs, no SDK) are resolved, and WSL is no longer used. If a native build is ever blocked again, stop and report it.
+### Toolchain (D-ARC-30)
+Everything runs **natively on Windows**: .NET SDK 10.0.401, Node 24 / npm 11, Docker Desktop and Python 3.12. WSL is no
+longer used. If Windows Smart App Control ever blocks a native build again, stop and report it.
 
-## 3. Foundations: what was built
+### Build and test
+```bash
+dotnet build CoreIns.sln -c Release          # warnings are errors
+dotnet test --project tests/CoreIns.IntegrationTests -c Release   # Testcontainers PostgreSQL 17 (Docker must run)
+cd web && npm ci && npm run format:check && npm run lint && npm run lint:css && npm run lint:i18n && npm run typecheck && npm test && npm run build
+dotnet run --project tools/CoreIns.ContractGen -- --check   # generated C# must match contracts/
+```
+- Test executables can hang on exit when their output is piped, so redirect it to a file.
+- To regenerate an npm lock file, use `npx npm@11.19.0 install --package-lock-only` (D-ARC-29).
 
-| WP | What | Where | Review |
-|---|---|---|---|
-| F-1a Scaffold | Modular monolith per infra §7. Host with `APP_ROLE` api, worker or migrate and health endpoints. 16 module + Contracts projects. Analysers COREINS001 (no float/double) and COREINS002 (no system clock). Architecture tests (NetArchTest + IL). Secure Azure DB bootstrap: shared idempotent SQL, SCRAM verifiers, per-secret Key Vault RBAC, dedicated bootstrap identity, CI guard script. Bicep for every §6.2 resource. CI/CD | `src/CoreIns.Host`, `infra/`, `.github/`, `tests/CoreIns.ArchitectureTests` | PASS on attempt 3 |
-| F-1b Shared kernel + platform | **SharedKernel:** Money (exact, precision-guarded), Currency, Rate, BusinessDate/Instant/DateRange/Bitemporal, 83 UUIDv7 typed ids, business number types, BusinessKeys, LocalizedText, Iban, StateMachine, RFC 8785 canonical JSON. **Platform:** IClock (shiftable test clock), DbSession unit of work shared across module DbContexts. Transactional **outbox**: one table, gap-free per-aggregate sequence, ordered starvation-safe dispatcher with leases, micro-batching (2,380 ev/s measured against a 2,000 target), dead letters, replay, archive. **Audit:** insert-only, hash-chained per day, chain head protected by a SECURITY DEFINER function. **Idempotency:** HTTP + command level. RFC 9457 Problem Details with `/problems/<CODE>` pages. Command pipeline (validation → transaction → idempotency → audit → authority → handler; no MediatR). Authority and configuration interfaces with simple default implementations. Contract state models | `src/CoreIns.SharedKernel`, `src/CoreIns.Platform`, `src/CoreIns.Modules.*.Contracts/StateModels.cs` | PASS on attempt 2 |
-| F-1c Contracts | **Events:** envelope + **304** JSON Schemas + `catalog.json` (consumers trimmed to real handlers, lineage business keys). **APIs:** OpenAPI 3.1 for **1,110** operations across 17 modules; the quote, bind, money and claims chains are fully typed; `x-maturity: pre-release`. **SPI catalogue:** `contracts/openapi/spi.md`, 40 SPIs. **C# generated:** 304 event records, 203 in-process interfaces (425 operations), 1,787 DTOs, 400 error constants, plus fakes (sandbox doubles) and a `RecordingEventPublisher` | `contracts/`, `tools/CoreIns.ContractGen`, `src/*/Generated`, `src/CoreIns.Platform.Contracts`, `tests/CoreIns.Testing.Contracts` | Events PASS on attempt 2; APIs PASS on attempt 2; C# PASS (light review) |
-| F-1d Design system | Aegean tokens unchanged plus extensions; self-hosted OFL fonts; light and dark themes. **35/39 components**, with 3 partial and 1 deferred (D-FE-24). App shell from the v3 mockup: rail, palette, help, notifications, el/en switch. Patterns: form layout, Wizard, DataTable, split workbench, maker-checker ApprovalPanel, states. Greek formatters: money «1.234,56 €», dates, amount in words, `toGreekUpper`, ELOT Greeklish search. react-i18next + ICU with a key lint. Stylelint gate allows token values only. 1,109 tests, each with axe | `web/src/design-system`, `web/src/app-shell`, `web/src/format`, `web/src/i18n` | PASS on attempt 2 |
-| F-1e Greek cross-cutting | SPI interfaces (IdValidator, NameTransliterator, AddressFormatter, TaxCalculator, FiscalDocumentChannel, BureauAdapter, StatutoryClockSet, Geocoder, NumberingScheme). **GR pack:** AFM mod-11, VAT EL, plates, **ELOT 743** with per-name-part search variants, Greek upper-casing and sorting, addresses. **CY stub.** Greek search SQL (ICU `el_gr_ci_ai`, search key function, `greek_unaccent_v1`) with C#↔SQL parity. **DataProtection:** DataClass, AES-256-GCM envelope encryption, replica-safe key rotation (two-step retirement, fail-closed long-transaction guard), Key Vault provider, HMAC blind index | `src/CoreIns.Modules.Market.Contracts/Spi`, `src/CoreIns.CountryPacks.*`, `infra/database/greek-search.sql`, `src/CoreIns.Platform.DataProtection` | PASS on attempt 3 |
-| F-1f Spikes and engines | **PDF/A:** Gotenberg Chromium route + in-house .NET finaliser gives PDF/A-3a, PDF/UA-1, byte-reproducible output and a PAdES seal (B-B); chunk documents over about 150 pages (`spikes/gotenberg-pdfa/FINDINGS.md`). **Rule engine:** CEL subset, decimal-only, decision tables (UNIQUE/FIRST/PRIORITY/COLLECT), cost/allocation/depth/time limits, hashes covering schema and limits, 883 tests. **Outbox throughput** proven (see F-1b) | `src/CoreIns.Rules`, `spikes/` | PASS on attempt 3 |
+### Local stack
+```bash
+cp infra/local/.env.example infra/local/.env         # set passwords; on this machine host ports are in the 25000 range
+docker compose -p coreins -f infra/local/compose.yaml up -d --build
+python infra/local/seed-demo.py http://127.0.0.1:25000   # optional demo data: one paid policy + one open quote
+docker compose -p coreins -f infra/local/compose.yaml down   # add -v to wipe the database
+```
+- **Start order:** postgres → bootstrap → migrate → api + worker. Migrations never run at api/worker start-up.
+- **Web app:** `http://localhost:<API port>`; on the dev machine that is http://localhost:25000.
+- **Other UIs:** Aspire dashboard (logs/traces) on :28888 and Mailpit on :28025 on the dev machine.
+- **Dev sign-in (D-SLC-03, Development only):** `/dev/sign-in`. Users:
 
-## 4. Architecture and rules every builder must follow
+  | User | Role | Can do |
+  |---|---|---|
+  | `underwriter` | Staff.Underwriter | Customers, quotes, bind, policy; reads invoices (D-SLC-20) |
+  | `billing` | Staff.Billing | Accounts, invoices, payments |
+  | `finance` | Staff.Finance | Journals |
+  | `admin` | Platform.Admin | Product import and the rest |
 
-- The infra specs are binding: .NET 10, PostgreSQL 17, EF Core + Dapper, Hangfire, outbox, React 19, Entra ID, Gotenberg, Azure Container Apps, Bicep.
-- **Translations of PRD wording (DECISIONS §B):**
+  The token is per tab and is invalidated when the api restarts; a 401 sends you back to sign-in.
+- `infra/local/smoke.sh` and `infra/local/README.md` have curl examples.
+- **Valid test AFMs:** 094123454, 112233441, 045678904, 135792468, 102030408. 123456783 is already taken by the smoke-test customer.
 
-  | PRD says | Build it as |
+### Automated E2E-01
+```bash
+tests/e2e/run-e2e01.sh          # fresh "coreins-e2e" stack (ports 26000+), API + Playwright UI specs, then down -v
+KEEP_STACK=1 tests/e2e/run-e2e01.sh   # leave it running;  SKIP_BUILD=1 reuses the image
+```
+- **Isolation:** own project name, image tag and env file, so it never touches a developer's `coreins` stack.
+- **What it asserts:** the full money path in integer cents (premium, IPT, total, invoice items = policy charge lines, PAID, every journal balanced, clearing accounts net to zero) and as-of reads.
+- **UI spec:** calls `alive(page)` after every navigation to catch render loops.
+
+### CI (`.github/workflows/`)
+- **`ci.yml`:**
+  - .NET build and tests (including Testcontainers), web gates (including Prettier `format:check`), Bicep plus the Key Vault least-privilege guard, container image and Trivy scan, SBOMs.
+  - **e2e01** job: compose stack plus Playwright Chromium.
+- **`codeql.yml`:** scans C#, TypeScript and Actions. Results go to a SARIF artifact, and the job fails on any finding of security-severity ≥ 7. GitHub code scanning is not enabled on this private repo (D-ARC-31).
+- **`deploy.yml`:** dispatch-only, OIDC to Azure. Never run; no Azure environment exists.
+- **Dependabot** is weekly. It ignores the Roslyn analyzer packages, which are pinned to the SDK.
+
+## 3. Demo: what you can click through
+
+1. **Customers:** search "ΝΙΚΟΛΑΟΥ" (no accents) or "papadakis". Create a person (AFM checked with mod-11). Personal data is masked; **Reveal** asks for a purpose and is audited.
+2. **Policies → New quote.** Steps:
+   1. Customer (single click) and product.
+   2. Vehicle (value needed for own damage).
+   3. Driver.
+   4. Covers. MTPL is compulsory at €1,300,000.
+   5. Questions. Business use is **referred**; hire or reward is **declined**; a driver under 21 is **referred at bind**.
+   6. Premium: €430.00 + IPT €64.51 = **€494.51** for the demo car, with the *illustrative tariff* and *provisional tax* banners.
+   7. Bind, after ticking the confirmation.
+3. **Policy view:** status (Scheduled / In force / Expired from "as of"), covers, charge lines, invoices.
+4. **Billing** (as `billing`): invoice with the **stub** fiscal document notice. Record an exact payment and it becomes **Paid**. Paying a different amount goes to suspense rather than being guessed.
+5. **Finance** (as `finance`): journals per policy number, each balanced. Accounts carry *Illustrative (PRD-09)* or *Technical placeholder* badges.
+
+## 4. Architecture rules every builder must follow
+
+- **The infra specs are binding:** .NET 10 modular monolith, PostgreSQL 17, EF Core + Dapper, Hangfire, transactional outbox (no broker), React 19, Entra ID (dev sign-in locally), Gotenberg, Azure Container Apps, Bicep.
+- **PRD wording → built as (DECISIONS §B):**
+
+  | PRD says | Built as |
   |---|---|
-  | message broker | outbox |
-  | workflow engine | state machines + deadline rows + Hangfire recurring scanners |
-  | own identity server | Entra ID / External ID |
-  | lakehouse | PostgreSQL `rpt_*` schemas |
+  | broker | outbox |
+  | workflow engine | state machines + deadline rows + Hangfire scanners |
+  | own IdP | Entra |
+  | lakehouse | `rpt_*` schemas |
   | in-house PDF engine | Gotenberg + finaliser |
-  | PostgreSQL 18 | PostgreSQL 17 exclusion constraints |
-- **Module boundaries:** one schema per module. A module never reads another module's tables, references only other modules' `*.Contracts`, `SharedKernel`, `Platform.*` and `Rules`, and calls other modules in-process through their generated interfaces. Architecture tests enforce all of this.
-- **Money:** `decimal`/`NUMERIC` only, rounding always explicit, precision loss raises an error. Calculations are pure functions. Ledgers are append-only. Every lifecycle is an explicit state machine. Every command carries an Idempotency-Key. Events are written in the same transaction as the change. Everything is audited.
-- **Contracts are interface-first and pre-release** until their first consumer merges (D-API-06/06a). Owners type their own operations. Names come from the owner PRD (D-API-03). Valid time is `validAt`, transaction time is `knownAt` (D-API-08).
-- **Regulatory values come only from the PRDs**, carry a `legalStatus`, and anything not Settled is refused in production (D-REG-01…07). Nothing has been invented. The open legal questions are in DECISIONS §G and must be closed by the commissioned legal opinion (D2) before go-live.
-- **UI:** design-system components only, token-only styling enforced by Stylelint, Greek-first with English, every screen has empty, loading and error states.
+  | PG18 | PG17 exclusion constraints |
 
-## 5. Known gaps and deferrals (carried into feature work)
-
-- **Design system (D-FE-16, 24):**
-  - Relationship graph (visx).
-  - AI agent-plan and streaming surfaces.
-  - pdf.js rendering in the document viewer.
-  - DataTable extras: saved views, inline edit, drag-reorder.
-  - Some microinteractions.
+- **The module pattern is `docs/module-pattern.md`; copy it:**
+  - Layout: one schema per module; a DbContext per module on the shared `DbSession`; per-module EF migrations applied only by the `migrate` role.
+  - Commands go through the platform pipeline: validation → transaction → idempotency → audit → authority → handler.
+  - Events go through the outbox in the same transaction.
+  - Modules call each other only through generated `*.Contracts` interfaces (architecture tests enforce this).
+- **Personal data (P2+):**
+  - Field-encrypted (AES-256-GCM) with a blind index for lookups. Masked by default; reveal needs a permission plus a purpose and is audited.
+  - **Never in URLs** (D-SLC-05): search terms go in POST bodies.
+  - **Never in the idempotency store:** audited reads use `Idempotent = false`.
+  - Never in events, ledger dimensions or rating worksheets (derived age bands only).
+- **Money:**
+  - `decimal`/`NUMERIC` only (analyser COREINS001 bans float/double); precision loss raises an error; rounding is explicit and comes from MKT rules.
+  - Ledgers are append-only and **sealed at their creating transaction** (D-ARC-34): a balance trigger, a seal trigger and app-role regression tests.
+  - FIN posts only from `BillingEntryPosted` (D-SLC-12).
+- **Time:**
+  - Only through `IClock` (COREINS002).
+  - Valid time is `validAt` and record time is `knownAt` (D-API-08).
+  - A date-form `validAt` means **end of that business day, Europe/Athens** (D-SLC-13).
+  - Bitemporal rows are protected by exclusion constraints and by triggers that refuse retroactive record closing.
+- **Concurrency:**
+  - Gapless numbers come from `INumberingService` inside the caller's transaction.
+  - Racing commands return `*-ERR-STALE`, never 500 or "illegal transition".
+  - Outbox handlers are idempotent and order-aware per aggregate (D-ARC-26).
+- **Regulatory and commercial values:**
+  - Only from the PRDs, each with a `legalStatus`; anything not Settled is refused in Production and flagged `provisional` elsewhere (D-REG-01..07).
+  - Contradictions stay absent and fail closed, e.g. the levy split (D-REG-06a).
+  - Tariffs and UW thresholds are marked **illustrative test data**.
 - **Contracts:**
-  - 220 minimal operations and 65 operation families need completing by their owning WPs.
-  - Lifecycle-chain operations get typed by W2-CMP, W5-BIL and W6-POL (D-API-06a).
-  - 15 events have minimal payloads.
-  - D-CON-34 lists the C# generation follow-ups.
+  - Interface-first and pre-release (D-API-06/06a); owners type their own operations; additive changes only during a wave; regenerate with ContractGen and keep `--check` green.
+  - MKT is the configuration authority, and the envelope hash equals the payload hash (D-SLC-15).
+- **UI:**
+  - Design-system components only; Stylelint enforces token-only styling.
+  - Greek and English, with empty, loading, error and no-permission states.
+  - No float maths on money (BigInt minor units).
+  - An Idempotency-Key per user action, reused on retry.
+  - Never pass a fresh array literal into DataTable props without memoising. The table now guards against render loops, but don't rely on it.
+
+## 5. Foundations (Phase 1)
+
+| WP | What | Review |
+|---|---|---|
+| F-1a Scaffold | Host roles api/worker/migrate, 16 module + Contracts projects, analysers, architecture tests, secure DB bootstrap, Bicep, CI/CD | PASS on attempt 3 |
+| F-1b Kernel + platform | Money/dates/ids/state machines, IClock, DbSession, outbox (2,380 ev/s), hash-chained audit, idempotency, Problem Details, command pipeline | PASS on attempt 2 |
+| F-1c Contracts | 304 event schemas, 1,113 OpenAPI operations, 40 SPIs, generated C# + fakes | PASS |
+| F-1d Design system | Aegean tokens, 35/39 components, app shell, Greek formatters, i18n, 1,100+ tests with axe | PASS on attempt 2 |
+| F-1e Greek cross-cutting | AFM, ELOT 743, Greek search SQL (ICU `el_gr_ci_ai`), field encryption + blind index + key rotation | PASS on attempt 3 |
+| F-1f Spikes + engines | PDF/A + PAdES via Gotenberg, CEL-subset decimal rule engine (883 tests), outbox throughput | PASS on attempt 3 |
+
+## 6. The thin slice (Phase 2): what each package delivered
+
+| WP | Model | Review outcome | Notable |
+|---|---|---|---|
+| SL-0 Platform wiring + Party | strongest | **FAIL → fixed.** Decrypted P2 was stored in plaintext in `plt.idempotency_record` on reveal; fixed with the `Idempotent` flag | Module pattern, dev sign-in, numbering, compose stack |
+| SL-FIX-WEB | Sonnet | Spot-check | Compact numbers independent of the ICU version |
+| SL-MKT | Sonnet | PASS (light) | 70/30 levy split removed (D-REG-06a) |
+| SL-PFC | Sonnet | PASS (light) | MTPL €1.3M from PRD-02, write-once artefacts |
+| SL-RAT-UW | Sonnet | **FAIL → fixed.** The IPT line claimed Settled although the motor class is Verify, and a missing class fell back to a default; now weakest-status-wins and fail-closed | Money hand-checked: 430.00 + 64.51 = 494.51 |
+| SL-POL | strongest | **FAIL → fixed.** (1) The app role could retroactively close record periods, a hidden delete; (2) Policy.get lost its status outside the term | Exactly one of 4 concurrent binds wins; numbers stay gapless |
+| SL-FIN | strongest | **FAIL → fixed.** Balanced lines could be appended to a posted journal | Became rule D-ARC-34 |
+| SL-BIL | strongest | **FAIL → fixed.** (1) The same appendable-ledger hole; (2) concurrent intake could strand a set unbilled | No over-allocation; stub never bound in Production |
+| SL-UI | Sonnet | PASS (light) | Screens. Render loops were found later in real Chrome and fixed in DataTable |
+| SL-E2E | Sonnet | Integration WP | MKT config authority, provisional tax onto invoices, typed ledger dimensions, quote warnings, E2E-01 API + UI, CI job |
+
+**Every deep first-round review found a real defect**, which justified the policy (D-USR-09). The light reviews found
+none that blocked, but **a real browser found two render-loop freezes that jsdom unit tests could not**. Hence the
+browser-level E2E and the `alive(page)` checks.
+
+## 7. Key decisions index (see DECISIONS.md for the full text)
+
+- **Programme and process:**
+  - D-USR-04..09: lighter reviews; Sonnet by default; deep review on the strongest model only for security, money and temporal code, first round only.
+  - D-USR-06/07/08: thin slice, pause rules, Docker.
+  - D-PRG-15: builders never spawn sub-agents.
+  - D-PRG-17/18: the merge gate is the build + **every** .NET test project + every web gate (including `format:check`), all before pushing.
+- **Environment:** D-ARC-29 (npm lock version), D-ARC-30 (native Windows), D-ARC-31 (CodeQL without code scanning), D-ARC-36 (wall-clock test bounds are sanity checks only).
+- **Slice rulings:** D-SLC-01..21. Among them:
+  - 05: no P2 in URLs;
+  - 10: ANNUAL plan;
+  - 12: FIN posts only from BIL;
+  - 13: as-of semantics;
+  - 15: MKT is the configuration authority;
+  - 16: one vehicle, one driver;
+  - 17: DECLINE stays Draft;
+  - 20: underwriter reads invoices;
+  - 21: acceptance and follow-ups.
+- **Architecture:** D-ARC-34 (ledger sealing), D-ARC-26 (outbox ordering), D-ARC-27 (Money precision), D-CON-08b/c (Job state model).
+- **Regulatory:** D-REG-01..07, D-REG-06a (levy split absent); §G lists the open legal questions.
+
+## 8. Known gaps, deferrals and follow-ups
+
+- **From slice acceptance (D-SLC-21):**
+  - The dev sign-in Select is intermittently unreliable under remote-driven clicks.
+  - "Open policy" after bind was not re-verified by hand.
+  - Rows on policy and billing pages open only by double-click.
+  - Tables at about 840 px wide scroll sideways and truncate status pills.
+  - The policy journal view omits the cash-receipt journal; it needs a billing-account view.
+  - A malformed bearer token returns 500 instead of 401.
+  - Customers with policies still show PROSPECT.
+  - The wizard should require vehicle value when own damage is selected.
 - **Platform:**
-  - Authority grants and the configuration resolver are simple defaults. The full models come in W1-PLT and W1-MKT.
-  - MSAL / OIDC sign-in is deferred to W1-PLT (D-FE-10).
-  - Retention durations are unset (D-REG-07).
-  - Identity is re-scoped to Entra ID (D-ARC-03).
-- **Data protection:**
-  - The Host still needs to register a durable data-key store, the Key Vault provider, the legal-entity catalogue and the retirement scans.
-  - Operating constraints for key rotation are in D-ARC-23a.
-- **Greek pack:** missing postcode list (D-ARC-22), the full ELOT 743 table (OI-MKT-18), and ID card, passport and plate formats. No tax, levy or clock values have been entered.
-- **Documents:** the chunk merge for 500+ page documents, PAdES long-term validation levels (B-T, B-LT, B-LTA), and the real seal key.
-- **Scope decisions:**
-  - Mobile apps are deferred (D-USR-01).
-  - OCR is deferred (D-USR-03).
-  - Bancassurance is out of P1 (D6).
-  - Motor RI is assumed to be XoL-only (A-01, to be confirmed).
-  - Migration is planned as scenario B.
+  - An out-of-range JSON number gives 500 (D-ARC-33).
+  - A failed nested idempotent command leaves an InProgress record (D-ARC-35).
+  - Ledger tampering raises no security event (D-SLC-18b).
+  - The Key Vault key provider and Azure.Identity are deferred (D-SLC-07); outside Development the Host refuses to start with only the local key provider.
+- **Slice simplifications:**
+  - ANNUAL only, no instalments or down payment.
+  - One vehicle and driver; annual terms only (no proration).
+  - DECLINE stays Draft, with no decline letter.
+  - The fiscal channel is a synchronous stub with placeholder codes (`UNMAPPED-OQ-012`, `STUB-`).
+  - Only the IFRS17 book (no Solvency II).
+  - EUR only.
+  - Product and rating artefacts are seeded, with no authoring or approval UI.
+  - Numbering prefixes (P, Q, POL, INV, BA, JNL) are technical defaults (D-SLC-08).
+- **Contracts:**
+  - Many operations outside the slice are still minimal, and owning WPs must type them.
+  - D-CON-34 follow-ups.
+  - PolicyBound `accountId` and `producerOfRecord` are optional until accounts and producer-of-record exist (D-SLC-14).
+- **Design system (D-FE-16/24):** relationship graph, AI surfaces, pdf.js viewer, DataTable extras; the Vite bundle has one chunk over 500 kB.
+- **Scope decisions:** mobile deferred (D-USR-01), OCR deferred (D-USR-03), bancassurance out of P1 (D6), motor RI assumed XoL-only (A-01), migration scenario B.
 
-## 6. What comes next (when the user says go)
+## 9. Open questions for the user or business
 
-**Agreed approach (D-USR-04…06):**
-1. **Thin end-to-end slice:** one motor product, quote → bind → invoice → payment → journal (the happy path of E2E-01). It cuts through MKT config/pack, PFC product, RAT rating, UW evaluate, PTY party/producer, POL quote/bind, BIL charges/invoice/payment, CMP fiscal stub, FIN posting and CHN or staff UI. Each module implements only the requirements the slice needs, as WP slices drawn from the backlog. Then widen wave by wave (W1 → W9).
-2. **Lighter reviews:** one pass, blocking only on blockers and majors. Deep adversarial review only for money/ledger, temporal and security code.
-3. **Model by risk:** Sonnet for routine WPs and reviews; the strongest model for POL bitemporal, BIL ledger, FIN posting, RAT, and security.
-4. Use the builder brief template (in the original orchestration instructions and reflected in `orchestration/briefs/`) and the reviewer template `orchestration/briefs/REVIEWER-TEMPLATE.md`. **Builders must not spawn sub-agents** (D-PRG-15). Run at most 4 agents at a time.
+- **Legal opinion D2 (the go-live gate):**
+  - IPT liability point and the **motor IPT class** (currently `Verify`).
+  - **Auxiliary Fund levy split.** PRD-17 says 4.2/1.8 (70/30); REQ-FIN-190 says 4.5/1.5 (75/25).
+  - Stamp-duty rate.
+  - Validity dates of the tax and levy values.
+  - **myDATA document types/codes** (OQ-012) and the Information Centre channel.
+  - 16 unverified statutory clock values; Friendly Settlement limits; retention durations (§G).
+- **Business/product:**
+  - The real Greek **chart of accounts** (ΕΛΠ) and GL mapping; the slice uses PRD-09 illustrative codes and placeholders.
+  - **Policy, invoice and customer number formats.**
+  - MTPL limits and indexation; regulatory codes for own damage and windscreen.
+  - Instalment plans and down payment; motor RI basis (XoL-only?); card acquirer and banks; aggregators.
+  - DPO confirmation of the PII classes on vehicle and driver fields.
+  - Glossary sign-off for 118 Greek status labels.
+  - Leap-day `ageAt` rule (OQ-ORC-01).
 
-**First things a W1/slice builder needs:** W1-PLT (identity on Entra, authority grants, numbering, calendars) and W1-MKT (six-layer configuration, GR pack values with legalStatus, SPI binding). Remember these are the platform that every module builds on.
+## 10. How the orchestration works
 
-## 7. How the orchestration works
-
-- **Memory:** `orchestration/STATUS.md` (current state, blockers, pending user requests), `PLAN.md`, `DECISIONS.md` (append rulings; never rewrite history; supersede with a new ID), `digests/` (the summarised specs), `backlog/`.
+- **Memory files:**
+  - `STATUS.md`: current state and per-WP status.
+  - `PLAN.md` and `SLICE-PLAN.md`.
+  - `DECISIONS.md`: append only; supersede with a new ID; never rewrite.
+  - `digests/` and `backlog/`.
+  - `briefs/BUILDER-TEMPLATE.md` and `briefs/REVIEWER-TEMPLATE.md`.
 - **Tracker:**
-  - `backlog/backlog.json` is the source of truth.
-  - `python orchestration/tracker/set_status.py <WP> <status> [owner] [blockers;…]` updates it.
-  - Push the change to the live page with ArtifactData `update` on collection `wps`, document = WP id, passing the `if_version` of the document as last read.
-  - `tracker/export_tracker.py` re-seeds everything.
-- **Work loop:**
-  1. A builder works in an isolated git worktree under `.claude/worktrees/`, which is git-ignored.
-  2. A separate reviewer passes or fails it.
-  3. On FAIL, the builder is resumed with the defect list. After 3 failures, escalate to the user.
-  4. Merge into `main` with `--no-ff`, push, and watch CI.
-  5. `CoreIns.sln` often conflicts on merges. Resolve by keeping both sides' project entries and checking project counts.
-- **Cost reality:** Phase 0 + Phase 1 consumed roughly 16–20M agent tokens. Deep reviews and fix rounds made up about a third of the foundation cost. They found real defects (data-loss in key rotation, event reordering, a security hole in the database bootstrap), but the lighter policy above is now in force.
+  - `backlog/backlog.json` is the source of truth; update it with `python orchestration/tracker/set_status.py <WP> <status> [owner] [blockers;…]`.
+  - Push to the live page with ArtifactData `update` on collection `wps` (doc = WP id) or `meta/summary`, passing `if_version`.
+- **Work loop per WP:**
+  1. Brief from the template.
+  2. The builder works in an isolated git worktree (`.claude/worktrees/`, git-ignored). It builds natively, merges main when told, and commits to its own branch only.
+  3. A separate reviewer gives PASS/FAIL. Light for routine code; deep (strongest model) on the first round for security, money and temporal code.
+  4. On FAIL, the builder is resumed with the defect list, and the fix is re-checked light. Escalate to the user after 3 failures.
+  5. Merge `--no-ff`, then run the **full gate** (D-PRG-17/18), then push and watch CI.
+  6. On solution or appsettings conflicts, keep both sides.
+  7. Tell running builders to merge main.
+- **Parallelism:** at most 4 agents. Start the next batch early on top of an unreviewed reference branch when the review's likely findings won't change the pattern being copied (this saved hours in the slice). Code against generated fakes (interface-first); an integration WP wires the real modules at the end.
+- **Lessons learned:**
+  - Deep reviews pay off on security, money and temporal code. Every one found a real defect, and two modules made the same ledger mistake, which became a rule.
+  - Unit tests with mocks miss real-data UI bugs. Test against the real stack in a real browser before calling UI done.
+  - Run every test project before merging; a skipped suite turned CI red twice.
+  - Keep wall-clock assertions loose; machine load caused flakes.
+  - Briefs must not contradict the PRD. The FIN posting source was wrong in the brief, and the builder caught it.
+- **Cost and time:**
+  - Foundations took about 16–20M agent tokens over about 1.5 days.
+  - The slice took about 6–7M sub-agent tokens over about 10–11 wall-clock hours: builders 300k–720k each, deep reviews about 150k–215k, light reviews about 70k–90k.
+  - The full MVP is still estimated at weeks of agent time and 100M+ tokens at the current rigour.
 
-## 8. Open questions for the user or business
-- **Legal opinion D2, the go-live gate:**
-  - IPT liability point; levy split (PRD-17 4.2/1.8 vs REQ-FIN-190 4.5/1.5); stamp duty rate.
-  - myDATA document types and codes; Information Centre channel and format.
-  - 16 unverified clock values; Friendly Settlement limits; retention durations.
-  - All of these are listed in DECISIONS §G.
-- **Product choices still open:** motor RI XoL-only confirmation; migration scenario B board confirmation; card acquirer and banks; aggregators.
-- **Glossary sign-off:** 118 Greek status labels marked `glossary: pending` (`web/src/design-system/README.md`).
-- **Leap-day birthdays:** does `ageAt` count 29 February as 28 Feb or 1 Mar in common years? (OQ-ORC-01)
+## 11. Dev-machine notes
+
+- The user's stack runs as compose project `coreins` with host ports 25000+ (`infra/local/.env`, git-ignored).
+- Several unrelated containers run on this machine: never stop them.
+- Claude in Chrome: remote-driven clicks on React Aria Select popovers are unreliable. Pick from the hidden native select via form input, or test with Playwright.
+- Chrome copies sessionStorage into tabs opened from an existing tab, so a new tab may carry a stale dev token.
+
+## 12. What comes next (the user decides)
+
+1. **Recommended: a second thin slice, claims (E2E-03/04 style).** FNOL → coverage check → reserve → payment → FIN posting. It proves money going out as well as coming in before widening. It touches CLM (new), DOC (minimal), WRK (activities), plus BIL/FIN disbursement.
+2. **Widen wave by wave (W1 → W9)** toward the full Motor MVP, finishing each backlog WP the slice touched (D-SLC-02 tracks partial coverage) and then the untouched modules.
+3. **Harden what exists:** the D-SLC-21 follow-ups, platform items (D-ARC-33/35), design-system polish, Azure environment and deploy.
+
+**To start any new slice:** write a `SLICE-PLAN`-style table (batches, models, review depth), brief builders from the
+template, point them at `docs/module-pattern.md`, and finish with an integration/E2E WP that adds a browser-level E2E
+test to CI.
