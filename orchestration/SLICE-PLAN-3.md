@@ -336,3 +336,19 @@ narrower 6-agent cut; this plan has 21 WPs against 8 in slice 2, and keeps every
   Refund approvals follow the **claims approvals inbox**. The re-verification banner uses the claim file's alert slot.
   Side-by-side screenshots go in `orchestration/ux/<wp>/` (D-USR-11).
 - Commit early (PITFALLS 34). Push your branch and open a PR. The orchestrator merges.
+
+## 10. Open business questions that block amounts, and how the slice handles them
+
+| Question | Source | Handling in slice 3 |
+|---|---|---|
+| IPT refund on cancellation and endorsement credits (ΠΟΛ 1028/2017 still valid after Law 5177/2025?) | OQ-011, F-218, D2 | GR treatment `KEEP_NOT_REDUCED`, PendingOpinion → `provisional`, refused in Production (D-SL3-05). The customer refund is premium-only |
+| Auxiliary Fund levy split and refund | OQ-010, OI-BIL-03, D-REG-06a | No levy lines exist; any levy line on a credit → `RULE_MISSING`, fail closed (D-SL3-06) |
+| IPT/levy on a distance-withdrawal void | F-401 | Out (E2E-08 in slice 4) |
+| Motor IPT class | GR-01 (Verify) | Unchanged: provisional on every IPT line |
+| myDATA credit-note document types and codes | OQ-012, OI-CMP-03 | Stub placeholders `UNMAPPED-OQ-012` (D-SL3-07) |
+| Day-count convention for Greek motor | PRD-03 §16 item 4 (confirm with finance) | TERM_RATIO, provisional, in MOTOR-GR 1.1 (D-SL3-04) |
+| Refund method per source; minimum premium; short-rate table | REQ-PFC-134 (pack default unspecified) | Policyholder ProRata, illustrative; other sources fail closed (D-SL3-08) |
+| Refund approval limits | PRD-06 §16.6 item 5 (business sign-off) | 500.00 / 5,000.00, illustrative (D-SL3-08) |
+| Renewal notice lead | PRD-17 §9b (UNVERIFIED placeholder) | No notice clock; manual renewal (D-SL3-10) |
+| Stamp duty rate | HANDOVER §9 | No stamp lines |
+| Instalment plans | HANDOVER §9 | ANNUAL only |
