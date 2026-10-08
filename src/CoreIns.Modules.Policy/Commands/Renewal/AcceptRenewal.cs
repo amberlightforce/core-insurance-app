@@ -210,7 +210,7 @@ internal sealed class AcceptRenewalHandler(
         var transactionId = PolicyTransactionId.New();
         var termRow = new ServicingTerm(job.EffectiveAt, job.ExpirationAt, currency, convention.Value, zone);
         var premiumLines = charges.Where(c => c.ChargeCategory == ChargeCategories.Premium).ToList();
-        var engine = new ServicingEngine(new ReferenceProration(), amount => OfferedAmount(premiumLines, amount));
+        var engine = new ServicingEngine(new FullTermProration(), amount => OfferedAmount(premiumLines, amount));
         var opened = engine.Apply(
             null,
             new NewTermIntent(
@@ -432,4 +432,17 @@ internal sealed class AcceptRenewalAuditor : ICommandAuditor<AcceptRenewal, Rene
             Changes = AuditDiff.Compute(null, new { state = response.State.ToString(), channel = command.Request.Channel, newTermNumber = response.NewTermNumber }),
         };
     }
+}
+
+/// <summary>
+/// The only proration a new term needs: the full term is the whole annual rate (fraction days/termDays = 1 for TERM_RATIO and
+/// ACT_365F alike). Anything else fails closed until the shared RAT proration is bound (SL3-POL-WIRING); this is not the
+/// test-only reference proration.
+/// </summary>
+internal sealed class FullTermProration : IProration
+{
+    public ProrationFraction Fraction(DayCountConvention convention, int days, int termDays) =>
+        days == termDays && termDays > 0
+            ? new ProrationFraction(1, 1)
+            : throw new InvalidOperationException("A new term is written for its full length only; partial proration needs the shared RAT proration.");
 }
