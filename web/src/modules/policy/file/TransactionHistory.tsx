@@ -65,7 +65,7 @@ function ChargesTable({ charges, label }: { charges: ChargeLineModel[]; label: s
           c.provisional === true ? (
             <StatusPill
               semantic="warning"
-              subLabel={t('file.charges.provisional')}
+              text={t('file.charges.provisional')}
               announceChanges={false}
             />
           ) : c.legalStatus ? (
@@ -116,7 +116,7 @@ function HistoryRow({
           {row.reversed ? (
             <StatusPill
               semantic="read-only"
-              subLabel={t('file.history.reversed')}
+              text={t('file.history.reversed')}
               announceChanges={false}
             />
           ) : null}

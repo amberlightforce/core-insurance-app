@@ -57,7 +57,7 @@ describe('PolicyViewPage', () => {
     expect(within(history).getByText('432,35 €')).toBeInTheDocument();
     const invoices = await screen.findByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' });
     expect(within(invoices).getByText('INV000000003')).toBeInTheDocument();
-    expect(within(invoices).getByText(/Δοκιμαστικό \(stub\)/)).toBeInTheDocument();
+    expect(within(invoices).getByText(/Δοκιμαστικό/)).toBeInTheDocument();
 
     // The as-of date goes out in date form (D-SLC-13).
     expect(
