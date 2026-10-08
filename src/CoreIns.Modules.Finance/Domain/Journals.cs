@@ -49,6 +49,9 @@ internal sealed record LineDimensions
 
     public Guid? DisbursementId { get; init; }
 
+    /// <summary>BIL policy refund: the refund payable nets to zero per refund (SL3-FIN-RULES, like GL-2510 per claim payment).</summary>
+    public Guid? RefundId { get; init; }
+
     public static LineDimensions None { get; } = new();
 }
 

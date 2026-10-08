@@ -38,6 +38,7 @@ internal sealed partial class Intake(
     FinanceDbContext db,
     ReferenceData reference,
     JournalWriter writer,
+    TaxTreatmentCheck taxCheck,
     ILegalEntityDirectory legalEntities,
     IEventPublisher events,
     DbSession session,
@@ -163,6 +164,18 @@ internal sealed partial class Intake(
         }
 
         var legalEntity = new LegalEntityId(row.LegalEntityId!.Value);
+
+        // REQ-FIN-182/-183 (D-SL3-05): a servicing entry may not move a tax or levy payable against the MKT treatment.
+        // Checked before the policy context is awaited, so a forged entry is suspended at once and never waits.
+        if (row.RegistryName == BillingEntryPosted)
+        {
+            var check = await taxCheck.CheckAsync(entry.EntryType, entry, legalEntity.Value, row.Jurisdiction, cancellationToken).ConfigureAwait(false);
+            if (!check.Passed)
+            {
+                await SuspendAsync(row, ExceptionReasons.TaxRuleViolation, check.Detail!, entry, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+        }
 
         var contexts = new Dictionary<(Guid?, Guid?), PolicyContext>();
         foreach (var policyRef in entry.NeedsPolicyContext ? EntryPosting.PolicyReferences(entry) : [])

@@ -42,6 +42,12 @@ internal static class ExceptionReasons
     public const string Unbalanced = "UNBALANCED";
     public const string Empty = "EMPTY";
     public const string PostingError = "POSTING_ERROR";
+
+    /// <summary>
+    /// A servicing entry whose tax or levy payable movement disagrees with <c>TaxCalculator.treatment</c>, whose treatment
+    /// is missing or cannot be obtained, or that lacks the dimensions the check needs (REQ-FIN-182, -183, D-SL3-05).
+    /// </summary>
+    public const string TaxRuleViolation = "TAX_RULE_VIOLATION";
 }
 
 /// <summary>Journal-line side.</summary>
@@ -100,6 +106,11 @@ internal static class LineDimensionKeys
     public const string CostType = "costType";
     public const string CostCategory = "costCategory";
     public const string ClaimPaymentId = "claimPaymentId";
+
+    /// <summary>Servicing dimensions of BIL entries (SL3-CONTRACTS, D-SL3-05): the POL transaction kind, the cancellation source and the MKT treatment rule.</summary>
+    public const string TransactionKind = "transactionKind";
+    public const string CancellationSource = "cancellationSource";
+    public const string TreatmentRuleId = "treatmentRuleId";
 }
 
 /// <summary>Disbursement source types FIN reads on BIL disbursement entries (PRD-06 source register, D-SL2-10b).</summary>
@@ -107,6 +118,40 @@ internal static class DisbursementSources
 {
     /// <summary>A CLM claim payment: the entry's <c>sourceId</c> is the claim payment id.</summary>
     public const string ClaimPayment = "CLM_CLAIM_PAYMENT";
+
+    /// <summary>A policy refund (SL3, D-SL3-14): the entry's <c>sourceId</c> is the refund id; FIN nets the refund payable per refund on it.</summary>
+    public const string BilRefund = "BIL_REFUND";
+}
+
+/// <summary>
+/// Servicing entry types of BIL (SL3-CONTRACTS, D-SL3-01): credits and refunds. They always carry the line dimension
+/// <c>transactionKind</c>, so their tax and levy movements can be checked against the MKT treatment (REQ-FIN-182).
+/// </summary>
+internal static class ServicingEntryTypes
+{
+    public const string CreditWritten = "CREDIT_WRITTEN";
+    public const string CreditBilled = "CREDIT_BILLED";
+    public const string RefundApproved = "REFUND_APPROVED";
+
+    public static readonly string[] All = [CreditWritten, CreditBilled, RefundApproved];
+
+    /// <summary>Entry types that carry the written or billed premium of a transaction; with a transaction kind (endorsement debit) they are checked too.</summary>
+    public static readonly string[] Premium = ["WRITTEN", "BILLED"];
+}
+
+/// <summary>
+/// BIL sub-ledger accounts whose movements are tax or levy payables (PRD-06 section 3.5): IPT payable LA-06, IPT written
+/// not yet due LA-27, levy payable LA-07 and other tax payable (stamp duty) LA-26. A debit on one of them reduces the
+/// authority liability (REQ-FIN-182).
+/// </summary>
+internal static class TaxPayableAccounts
+{
+    public static readonly string[] SubLedger = ["LA-06", "LA-27", "LA-07", "LA-26"];
+
+    /// <summary>Charge categories of tax, levy and stamp lines (the MKT <c>TaxCategory</c>).</summary>
+    public const string Tax = "TAX";
+    public const string Levy = "LEVY";
+    public const string Stamp = "STAMP";
 }
 
 /// <summary>

@@ -99,13 +99,13 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
     {
         var (policy, _, invoice, receipt) = await HappyPathAsync();
 
-        // One journal per BIL entry (7), all POSTED, in the IFRS17 book with the rule set in force, v2 (REQ-FIN-036, -059).
+        // One journal per BIL entry (7), all POSTED, in the IFRS17 book with the rule set in force, v3 from 2026-10-01 (REQ-FIN-036, -059).
         (await ScalarAsync<long>(_db, $"""
             SELECT count(DISTINCT j.journal_id) FROM fin.journal_entry j JOIN fin.journal_line l USING (journal_id)
              WHERE l.policy_number = '{policy.Number}' OR l.receipt_id = '{receipt}'
             """)).ShouldBe(7);
         (await ScalarAsync<long>(_db, $"""
-            SELECT count(*) FROM fin.journal_entry WHERE book <> 'IFRS17' OR rule_set_version <> 2 OR source_event_type <> 'BillingEntryPosted'
+            SELECT count(*) FROM fin.journal_entry WHERE book <> 'IFRS17' OR rule_set_version <> 3 OR source_event_type <> 'BillingEntryPosted'
             """)).ShouldBe(0);
 
         // Written premium per coverage on the LRC account derived from the PFC GL key (REQ-FIN-050, D-SLC-10b).

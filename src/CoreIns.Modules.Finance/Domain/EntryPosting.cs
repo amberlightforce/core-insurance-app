@@ -182,5 +182,6 @@ internal static class EntryPosting
         ClaimPaymentId = line.Id(LineDimensionKeys.ClaimPaymentId)
             ?? (line.Dimension(LineDimensionKeys.SourceType) == DisbursementSources.ClaimPayment ? line.Id(LineDimensionKeys.SourceId) : null),
         DisbursementId = line.Id(LineDimensionKeys.DisbursementId),
+        RefundId = line.Dimension(LineDimensionKeys.SourceType) == DisbursementSources.BilRefund ? line.Id(LineDimensionKeys.SourceId) : null,
     };
 }
