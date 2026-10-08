@@ -128,6 +128,6 @@ internal sealed class PolicyTermService(RequestContext context, ILegalEntityDire
         return response ?? throw new DomainException(JobSupport.NotFound("term"));
     }
 
-    public Task<TermTimelineResponse> TimelineAsync(ValidAt? validAt = null, Instant? knownAt = null, CancellationToken cancellationToken = default) =>
+    public Task<TermTimelineResponse> TimelineAsync(PolicyId policyId, ValidAt? validAt = null, Instant? knownAt = null, PolicyTermId? termId = null, CancellationToken cancellationToken = default) =>
         throw InProcess.NotAvailable("pol.Term.timeline");
 }

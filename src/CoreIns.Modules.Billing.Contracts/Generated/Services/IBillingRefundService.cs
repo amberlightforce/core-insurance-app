@@ -18,7 +18,7 @@ public interface IBillingRefundService
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: WRK.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: BIL-ERR-NO-CREDIT (422), PLT-ERR-SOD (403), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: BIL-ERR-NO-CREDIT (422), PLT-ERR-SOD (403), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409), BIL-ERR-NOT-FOUND (404), BIL-ERR-REFUND-STATE (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.RefundDecideResponse> DecideAsync(global::CoreIns.Modules.Billing.Contracts.Api.RefundDecideRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -28,7 +28,7 @@ public interface IBillingRefundService
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: CHN, DOC.</para>
-    /// <para>Errors: BIL-ERR-NO-CREDIT (422), PLT-ERR-SOD (403).</para>
+    /// <para>Errors: BIL-ERR-NO-CREDIT (422), PLT-ERR-SOD (403), BIL-ERR-NOT-FOUND (404).</para>
     /// </remarks>
     /// <param name="id">Identifier of the Refund (PRD input: "refund id")</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.RefundGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);
@@ -43,5 +43,8 @@ public interface IBillingRefundService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.RefundListPage> ListAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="billingAccountId">query parameter 'billingAccountId'</param>
+    /// <param name="policyId">query parameter 'policyId'</param>
+    /// <param name="state">query parameter 'state'</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.RefundListPage> ListAsync(string? cursor = null, int? limit = null, global::CoreIns.SharedKernel.Identifiers.BillingAccountId? billingAccountId = null, global::CoreIns.SharedKernel.Identifiers.PolicyId? policyId = null, global::CoreIns.Modules.Billing.Contracts.Api.RefundState? state = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

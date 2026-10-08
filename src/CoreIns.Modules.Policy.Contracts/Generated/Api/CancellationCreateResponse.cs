@@ -4,20 +4,27 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Cancellation.create result. PRD outputs: "jobId, refund preview"</summary>
+/// <summary>pol.Cancellation.create result. PRD outputs: "jobId, refund preview". The preview is the servicing preview with refundDue.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CancellationCreateResponse
 {
-    /// <summary>PRD: "jobId"</summary>
+    /// <summary>Contract member 'jobId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "refund preview"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("refundPreview")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RefundPreview { get; init; }
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>Contract member 'kind'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.CancellationKind Kind { get; init; }
+
+    /// <summary>The effective time used (the term start for FLAT)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveAt")]
+    public required global::CoreIns.SharedKernel.Instant EffectiveAt { get; init; }
+
+    /// <summary>Contract member 'servicingPreview'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("servicingPreview")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.ServicingPreview ServicingPreview { get; init; }
 }

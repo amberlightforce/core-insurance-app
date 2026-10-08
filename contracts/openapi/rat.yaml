@@ -3202,6 +3202,9 @@ components:
             ratingArtefactHash:
               $ref: ../events/common.schema.json#/$defs/Sha256
               description: SL-RAT-UW - optional. When absent, RAT resolves the artefact active for the product version on ratingBasisDate (REQ-RAT-064)
+            pinnedRatingArtefactHash:
+              $ref: ../events/common.schema.json#/$defs/Sha256
+              description: 'Required when mode is ENDORSEMENT (REQ-POL-093): the rating artefact pinned to the term. RAT rates under exactly this artefact, never under the currently active one; an unknown or mismatching hash is RAT-ERR-INPUT. Ignored in the other modes. With mode RENEWAL, ratingArtefactHash carries the artefact active at the new term start as resolved by the caller (REQ-POL-249).'
             configurationHash:
               $ref: ../events/common.schema.json#/$defs/Sha256
               description: SL-RAT-UW - optional. When absent, the current MKT configuration hash is used and recorded in the worksheet
@@ -3213,7 +3216,7 @@ components:
               - QUICK
               - RENEWAL
               - DRY_RUN
-              description: Rating mode (REQ-RAT-038..041; DRY_RUN per PRD-03 §9.1; CANDIDATE is RAT-internal, REQ-RAT-043)
+              description: 'Rating mode (REQ-RAT-038..041; DRY_RUN per PRD-03 §9.1; CANDIDATE is RAT-internal, REQ-RAT-043). ENDORSEMENT rates a mid-term change under pinnedRatingArtefactHash; RENEWAL rates the new term and takes priorRates.'
             transactionType:
               $ref: ../events/common.schema.json#/$defs/Code
             ratingBasisDate:
@@ -3658,50 +3661,177 @@ components:
         attachmentResult:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "attachment result"'
+    DayCountConvention:
+      type: string
+      enum:
+      - TERM_RATIO
+      - ACT_365F
+      - ACT_ACT
+      - THIRTY_E_360
+      description: 'Day-count convention (REQ-RAT-156). Slice 3 supports TERM_RATIO and ACT_365F; any other value, or one the product artefact does not
+        declare, is RAT-ERR-CONVENTION.'
+    ProrationAnnualRate:
+      type: object
+      description: One annual amount to prorate
+      properties:
+        segmentId:
+          type: string
+        elementLocator:
+          $ref: ../events/common.schema.json#/$defs/Text
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+        annualAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Annual amount for the full term
+        handling:
+          type: string
+          enum:
+          - FLAT
+          - PRORATABLE
+          - FULLY_EARNED
+          description: From PFC. FLAT is never prorated; FULLY_EARNED is returned in full for its segment (REQ-RAT-160).
+      required:
+      - segmentId
+      - elementLocator
+      - coverageCode
+      - chargeType
+      - chargeCategory
+      - annualAmount
+      - handling
+    ProrationPeriod:
+      type: object
+      description: A period of one segment
+      properties:
+        segmentId:
+          type: string
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+          description: Half-open [from, to) in Europe/Athens dates; `to` must not be null
+        reverse:
+          type: boolean
+          description: True for an exact reversal; the result is the exact negation of amounts and residuals (REQ-RAT-163). Defaults to false.
+      required:
+      - segmentId
+      - period
+    ProrationLine:
+      type: object
+      description: A prorated line. amount is signed (negative on reversal) and rounded through mkt.Rounding.apply; residual = unrounded - amount.
+      properties:
+        segmentId:
+          type: string
+        elementLocator:
+          $ref: ../events/common.schema.json#/$defs/Text
+        coverageCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        chargeCategory:
+          $ref: ../events/common.schema.json#/$defs/Code
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        days:
+          type: integer
+          minimum: 0
+          description: Whole Europe/Athens calendar days of the period
+        termDays:
+          type: integer
+          minimum: 1
+        fraction:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Fraction of the annual amount applied (days / termDays under TERM_RATIO)
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Rounded amount
+        residual:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Unrounded minus rounded, so the caller keeps cumulative amounts exact (REQ-RAT-159)
+        roundingRuleId:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Rounding rule that rounded the amount (always set)
+      required:
+      - segmentId
+      - elementLocator
+      - coverageCode
+      - chargeType
+      - chargeCategory
+      - period
+      - days
+      - termDays
+      - fraction
+      - amount
+      - residual
+      - roundingRuleId
     ProrationProrateRequest:
       type: object
-      description: 'rat.Proration.prorate request. PRD inputs: "annual rates, periods, term, convention, configuration hash,
-        order of operations, explain"'
+      description: 'rat.Proration.prorate request (REQ-RAT-004, REQ-RAT-155..165). Pure and deterministic. PRD inputs: "annual rates, periods, term,
+        convention, configuration hash, order of operations, explain". Days are whole Europe/Athens calendar dates; periods are half-open
+        (D-SL3-04).'
       properties:
         annualRates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "annual rates"'
-        periods:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "periods"'
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProrationAnnualRate'
+          description: Annual amounts per element x charge type x segment, as returned by rat.Rate.rate (the rate output carries the annual amount per line)
         term:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term"'
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+          description: The term period; its days are termDays (365 or 366). `to` must not be null.
+        periods:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProrationPeriod'
+          description: The periods to prorate per segment; contiguous periods of one segment sum exactly to the term under TERM_RATIO (REQ-RAT-158)
         convention:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "convention"'
+          $ref: '#/components/schemas/DayCountConvention'
+        productArtefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: The product artefact whose declared conventions are checked; an undeclared convention is RAT-ERR-CONVENTION (REQ-RAT-165)
         configurationHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "configuration hash"'
+          description: MKT configuration hash that fixes the rounding rules; recorded in the result
         orderOperations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "order of operations"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Value of cur.order_of_operations when the product overrides it (REQ-RAT-162); optional
         explain:
           type: boolean
-          description: 'PRD: "explain"'
+          description: Return the explanation
+      required:
+      - annualRates
+      - term
+      - periods
+      - convention
+      - productArtefactHash
+      - configurationHash
     ProrationProrateResponse:
       type: object
-      description: 'rat.Proration.prorate result. PRD outputs: "amounts, fractions, residuals, explanation"'
+      description: 'rat.Proration.prorate result. PRD outputs: "amounts, fractions, residuals, explanation". One line per annual rate x period, in request
+        order.'
       properties:
-        amounts:
+        lines:
           type: array
           items:
-            $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amounts"'
-        fractions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "fractions"'
-        residuals:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "residuals"'
+            $ref: '#/components/schemas/ProrationLine'
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Sum of the line amounts (signed)
+        convention:
+          $ref: '#/components/schemas/DayCountConvention'
+        configurationHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Echo of the configuration hash used
         explanation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "explanation"'
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Present when explain was requested
+      required:
+      - lines
+      - total
+      - convention
+      - configurationHash
     DayCountYearFractionRequest:
       type: object
       description: 'rat.DayCount.yearFraction request. PRD inputs: "annual rates, periods, term, convention, configuration

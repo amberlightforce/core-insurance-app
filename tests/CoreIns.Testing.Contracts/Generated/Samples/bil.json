@@ -265,7 +265,8 @@
               "currency": "EUR"
             }
           }
-        ]
+        ],
+        "originalInvoiceId": "01927587-c1f7-7cce-863d-60a3198a35e0"
       },
       "invoiceItems": [
         {
@@ -291,7 +292,10 @@
             "amount": "120.50",
             "currency": "EUR"
           },
-          "state": "PLANNED"
+          "state": "PLANNED",
+          "transactionKind": "sample",
+          "cancellationSource": "SAMPLE_CODE",
+          "treatmentRuleId": "SAMPLE_CODE"
         }
       ],
       "allocations": [
@@ -359,7 +363,8 @@
                   "currency": "EUR"
                 }
               }
-            ]
+            ],
+            "originalInvoiceId": "01925678-1d58-708c-8892-dd61c16fe757"
           },
           "fiscalStatus": {
             "status": "NOT_REQUESTED",
@@ -570,16 +575,184 @@
       "entryIdsOnRequest": "unspecified"
     },
     "bil.Refund.decide": {
-      "refund": "unspecified",
-      "disbursementIdOnApproval": "unspecified"
+      "refund": {
+        "refundId": "0192b442-7e68-7dda-8c64-453867acb996",
+        "billingAccountId": "019222cc-aa32-7ce1-861c-08539b8c312a",
+        "state": "PROPOSED",
+        "approvalState": "NOT_REQUIRED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "breakdown": [
+          {
+            "policyId": "01924e6c-3ecf-746b-86a3-87ed9010ec99",
+            "policyTermId": "0192b16a-9dfc-747d-839e-fc0da0db0e35",
+            "transactionId": "0192d2bb-e9e8-762c-8dc8-97b73a1d6400",
+            "creditNoteId": "0192ccb5-5928-7e1b-8541-ed7f180a2793",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "transactionKind": "sample",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "netting": [
+          {
+            "kind": "OPEN_INVOICE",
+            "invoiceId": "019252a3-87c8-7237-8537-8fe0efd1fcf7",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "payee": {
+          "payeePartyId": "01921a5d-062c-777c-895d-e40a94ae17fe",
+          "payeeAccountId": "0192f060-5817-730f-8907-c89b2b5eb575",
+          "maskedIban": "GR1601101250000000012300695",
+          "verificationStatus": "Unverified"
+        },
+        "payoutMethod": "SAMPLE_CODE",
+        "reasonCode": "SAMPLE_CODE",
+        "sourcePolicyIds": [
+          "0192c0cc-bcb9-7f6a-8e0d-81a54ac2faf0"
+        ],
+        "requestedBy": "01922208-45ae-7d47-812f-2875b1875a0c",
+        "decidedBy": "01920488-574d-7aee-825c-8d4b06750414",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "Sample text",
+        "disbursementId": "0192d2ab-29dd-7f09-892f-011fda0f1dc4",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "disbursementId": "0192494d-c451-7176-8dbc-37dcedec282a"
     },
     "bil.Refund.get": {
-      "refund": "unspecified"
+      "refund": {
+        "refundId": "019280e0-2d00-7ef4-89c0-b070d6cf4a87",
+        "billingAccountId": "01922676-5b6f-7c6a-8212-bac2658b692d",
+        "state": "PROPOSED",
+        "approvalState": "NOT_REQUIRED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "breakdown": [
+          {
+            "policyId": "01920847-0cd5-7d7a-8d8c-296592df975c",
+            "policyTermId": "01929425-51aa-70e0-85de-4444570c0e63",
+            "transactionId": "01928cbd-0b42-73ca-8b11-10612d3cfafd",
+            "creditNoteId": "0192a45d-97c1-731d-83bc-4968c45c4a2f",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "transactionKind": "sample",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "netting": [
+          {
+            "kind": "OPEN_INVOICE",
+            "invoiceId": "01928023-bf49-799d-8bc4-29168005f83f",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "payee": {
+          "payeePartyId": "01927740-b8c9-78b6-871b-9235125891bb",
+          "payeeAccountId": "01921413-3d99-7a3c-88af-ca9cb8d0ac26",
+          "maskedIban": "GR1601101250000000012300695",
+          "verificationStatus": "Unverified"
+        },
+        "payoutMethod": "SAMPLE_CODE",
+        "reasonCode": "SAMPLE_CODE",
+        "sourcePolicyIds": [
+          "01927b54-1faa-7abc-8716-383ec31a3e98"
+        ],
+        "requestedBy": "019271d2-99dd-73ce-8a99-3fd5529585d1",
+        "decidedBy": "0192ca5d-2402-7873-8d25-8ce4ca50478f",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "Sample text",
+        "disbursementId": "0192b1fe-6e10-7f80-8e63-8cb5f3ddf234",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
     },
     "bil.Refund.list": {
       "items": [
         {
-          "refund": "unspecified"
+          "refund": {
+            "refundId": "0192984d-11e3-7bbb-8ea9-0a6ad6ab2f6f",
+            "billingAccountId": "0192c2e3-0133-7e15-8f1e-211c693e37e3",
+            "state": "PROPOSED",
+            "approvalState": "NOT_REQUIRED",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "breakdown": [
+              {
+                "policyId": "01922fd7-f178-7351-8a9a-73c488e3ae64",
+                "policyTermId": "01925d00-27bb-7d4c-885f-eb88a4cfa8b1",
+                "transactionId": "01928f0b-b647-7a46-8006-31fc2d072519",
+                "creditNoteId": "01925364-c673-71dd-8b1d-b9e2b40020d4",
+                "chargeType": "SAMPLE_CODE",
+                "chargeCategory": "SAMPLE_CODE",
+                "transactionKind": "sample",
+                "cancellationSource": "SAMPLE_CODE",
+                "treatmentRuleId": "SAMPLE_CODE",
+                "legalStatus": "SAMPLE_CODE",
+                "provisional": true,
+                "amount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                }
+              }
+            ],
+            "netting": [
+              {
+                "kind": "OPEN_INVOICE",
+                "invoiceId": "01921537-6787-706e-8ea5-28fce57c482b",
+                "amount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                }
+              }
+            ],
+            "payee": {
+              "payeePartyId": "01921c72-ac83-7394-8728-ca9608e179db",
+              "payeeAccountId": "01922df7-9178-791c-8aa7-8fdaada6eb19",
+              "maskedIban": "GR1601101250000000012300695",
+              "verificationStatus": "Unverified"
+            },
+            "payoutMethod": "SAMPLE_CODE",
+            "reasonCode": "SAMPLE_CODE",
+            "sourcePolicyIds": [
+              "01928953-ab74-7060-8a48-a7c4b2990166"
+            ],
+            "requestedBy": "01925eeb-d16d-7bc6-8bdd-772114e5257f",
+            "decidedBy": "0192b161-46af-71a7-8160-a1fc6bc6d63f",
+            "decidedAt": "2026-10-07T09:00:00Z",
+            "decisionComment": "Sample text",
+            "disbursementId": "01927984-1551-7d14-83f4-19c146a1bbe1",
+            "proposedAt": "2026-10-07T09:00:00Z",
+            "recordVersion": 1
+          }
         }
       ],
       "nextCursor": "sample",
@@ -1314,7 +1487,8 @@
               "currency": "EUR"
             }
           }
-        ]
+        ],
+        "originalInvoiceId": "01925307-4f98-7348-8ee3-295c189055b7"
       },
       "invoiceItems": [
         {
@@ -1340,7 +1514,10 @@
             "amount": "120.50",
             "currency": "EUR"
           },
-          "state": "PLANNED"
+          "state": "PLANNED",
+          "transactionKind": "sample",
+          "cancellationSource": "SAMPLE_CODE",
+          "treatmentRuleId": "SAMPLE_CODE"
         }
       ],
       "allocations": [
@@ -1396,7 +1573,10 @@
         "amount": "120.50",
         "currency": "EUR"
       },
-      "state": "PLANNED"
+      "state": "PLANNED",
+      "transactionKind": "sample",
+      "cancellationSource": "SAMPLE_CODE",
+      "treatmentRuleId": "SAMPLE_CODE"
     },
     "InvoiceListItem": {
       "invoice": {
@@ -1431,7 +1611,8 @@
               "currency": "EUR"
             }
           }
-        ]
+        ],
+        "originalInvoiceId": "0192d4b4-9d9d-7057-80f6-766c3fd417d8"
       },
       "fiscalStatus": {
         "status": "NOT_REQUESTED",
@@ -1482,7 +1663,8 @@
                   "currency": "EUR"
                 }
               }
-            ]
+            ],
+            "originalInvoiceId": "01928eb9-380f-7fb4-8938-bb075cf448d6"
           },
           "fiscalStatus": {
             "status": "NOT_REQUESTED",
@@ -1546,7 +1728,8 @@
             "currency": "EUR"
           }
         }
-      ]
+      ],
+      "originalInvoiceId": "019270a4-e6c6-733f-8867-7a5643a6f068"
     },
     "LedgerBalanceResponse": {
       "entries": [
@@ -1930,45 +2113,473 @@
       "status": "unspecified",
       "breaks": "unspecified"
     },
+    "RefundBreakdownLine": {
+      "policyId": "0192cbc7-5307-7100-890f-a223bc3b76ed",
+      "policyTermId": "019215c9-5737-7458-8e54-c0504e9065d4",
+      "transactionId": "0192a1a3-bfbd-7e3e-8f70-8a6d3e041ac4",
+      "creditNoteId": "0192dead-3d9e-741a-82ea-6945f0152dba",
+      "chargeType": "SAMPLE_CODE",
+      "chargeCategory": "SAMPLE_CODE",
+      "transactionKind": "sample",
+      "cancellationSource": "SAMPLE_CODE",
+      "treatmentRuleId": "SAMPLE_CODE",
+      "legalStatus": "SAMPLE_CODE",
+      "provisional": true,
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
     "RefundDecideRequest": {
       "refundId": "01924500-cd90-7e3c-8b8e-58769b018b76",
-      "decision": "unspecified",
-      "comment": "unspecified"
+      "decision": "APPROVE",
+      "comment": "Sample text"
     },
     "RefundDecideResponse": {
-      "refund": "unspecified",
-      "disbursementIdOnApproval": "unspecified"
+      "refund": {
+        "refundId": "0192131d-02c6-7c6c-8e29-4c0836401011",
+        "billingAccountId": "01924ad2-cedf-72b5-87bb-dadff371fd29",
+        "state": "PROPOSED",
+        "approvalState": "NOT_REQUIRED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "breakdown": [
+          {
+            "policyId": "01922f9d-0f9e-7372-8980-32300ed61ac2",
+            "policyTermId": "0192dac1-733e-70b6-8a68-91474b2de6b6",
+            "transactionId": "0192d175-3eee-7ac0-824e-2977dab5d997",
+            "creditNoteId": "01923da6-e879-7602-83ac-d502d9b2ac1b",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "transactionKind": "sample",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "netting": [
+          {
+            "kind": "OPEN_INVOICE",
+            "invoiceId": "01923dba-bb44-7e28-8999-498268abe9d2",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "payee": {
+          "payeePartyId": "01922b67-ce96-7e0a-8e6d-c8298554c020",
+          "payeeAccountId": "0192c5a4-74b0-76d3-8bc3-424850f31345",
+          "maskedIban": "GR1601101250000000012300695",
+          "verificationStatus": "Unverified"
+        },
+        "payoutMethod": "SAMPLE_CODE",
+        "reasonCode": "SAMPLE_CODE",
+        "sourcePolicyIds": [
+          "01920216-00a4-7f81-832d-61223600f12c"
+        ],
+        "requestedBy": "0192cb78-50eb-79c6-8059-e9fb767bd3cc",
+        "decidedBy": "0192367d-3d11-7683-8f86-8fd52754426d",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "Sample text",
+        "disbursementId": "01923d62-03ac-7754-8cd5-2836d6a2935f",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "disbursementId": "01924691-62e9-7163-8657-dc79b6d7700c"
     },
     "RefundGetResponse": {
-      "refund": "unspecified"
+      "refund": {
+        "refundId": "01926083-2dae-7040-8450-72529df7dde8",
+        "billingAccountId": "0192c022-85d2-72f1-8a30-8f6c362d085f",
+        "state": "PROPOSED",
+        "approvalState": "NOT_REQUIRED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "breakdown": [
+          {
+            "policyId": "01927e4e-27af-79ca-8f1b-325c8f66c80b",
+            "policyTermId": "0192957e-c153-7e03-8082-aaea4e13713f",
+            "transactionId": "01925ac1-d924-7d06-8e23-f0cc11ad0c83",
+            "creditNoteId": "0192ec8d-12bd-7c06-8cdd-373c45f958c1",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "transactionKind": "sample",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "netting": [
+          {
+            "kind": "OPEN_INVOICE",
+            "invoiceId": "01925faa-a5ee-7150-8fc2-02321dd838e9",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "payee": {
+          "payeePartyId": "01927065-c1a1-7e6c-8d99-0cb58875147a",
+          "payeeAccountId": "01928ec8-f491-7cdc-818d-df94cfccf105",
+          "maskedIban": "GR1601101250000000012300695",
+          "verificationStatus": "Unverified"
+        },
+        "payoutMethod": "SAMPLE_CODE",
+        "reasonCode": "SAMPLE_CODE",
+        "sourcePolicyIds": [
+          "0192acf4-70e3-7c8d-8441-e6616e0aa00f"
+        ],
+        "requestedBy": "0192fc5f-6ec7-76ce-8f72-f6afb128f599",
+        "decidedBy": "0192409d-51ed-7537-86a0-08e65fbe59d2",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "Sample text",
+        "disbursementId": "01921b36-b4ad-78b1-8242-2f37750889aa",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
     },
     "RefundListItem": {
-      "refund": "unspecified"
+      "refund": {
+        "refundId": "01928fa0-4f8f-7897-8193-1e686d0e8a40",
+        "billingAccountId": "01924a25-6fb7-7715-88fe-e9cec22a5487",
+        "state": "PROPOSED",
+        "approvalState": "NOT_REQUIRED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "breakdown": [
+          {
+            "policyId": "01929b02-b676-78aa-8e98-47361859aca3",
+            "policyTermId": "0192c05c-916f-73d6-8f26-6865660a289b",
+            "transactionId": "019294b2-52b1-7332-8309-0caf8d15a93d",
+            "creditNoteId": "019267a1-5902-782c-8633-342cfa9e6721",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "transactionKind": "sample",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "netting": [
+          {
+            "kind": "OPEN_INVOICE",
+            "invoiceId": "01926536-458e-704c-85ac-4f2c5b263f95",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "payee": {
+          "payeePartyId": "019288b2-d5b6-7d99-87d4-a746c89ee83e",
+          "payeeAccountId": "01929cb9-4f57-7bfe-81a3-c1945aba671b",
+          "maskedIban": "GR1601101250000000012300695",
+          "verificationStatus": "Unverified"
+        },
+        "payoutMethod": "SAMPLE_CODE",
+        "reasonCode": "SAMPLE_CODE",
+        "sourcePolicyIds": [
+          "01928821-5259-7673-8f5b-a260064044c8"
+        ],
+        "requestedBy": "0192b84a-3d50-7226-808b-35d161d06fbc",
+        "decidedBy": "0192d01b-9958-7583-832d-de24260162a2",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "Sample text",
+        "disbursementId": "0192597a-c099-7dc6-8011-d148c140ff63",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
     },
     "RefundListPage": {
       "items": [
         {
-          "refund": "unspecified"
+          "refund": {
+            "refundId": "0192bf06-ea68-7793-8456-986497478d48",
+            "billingAccountId": "0192cfd2-7d69-75df-8700-147ea9a15cd6",
+            "state": "PROPOSED",
+            "approvalState": "NOT_REQUIRED",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "breakdown": [
+              {
+                "policyId": "01925141-63e4-7984-8e24-708addbcc658",
+                "policyTermId": "01926fab-0c44-7800-81e0-2c741c935310",
+                "transactionId": "019241e5-a558-7c51-8356-ea666a9204f3",
+                "creditNoteId": "01921644-8dc4-758d-856f-d81845875eba",
+                "chargeType": "SAMPLE_CODE",
+                "chargeCategory": "SAMPLE_CODE",
+                "transactionKind": "sample",
+                "cancellationSource": "SAMPLE_CODE",
+                "treatmentRuleId": "SAMPLE_CODE",
+                "legalStatus": "SAMPLE_CODE",
+                "provisional": true,
+                "amount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                }
+              }
+            ],
+            "netting": [
+              {
+                "kind": "OPEN_INVOICE",
+                "invoiceId": "0192831a-5eff-7aa7-82fa-5752c7e72349",
+                "amount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                }
+              }
+            ],
+            "payee": {
+              "payeePartyId": "01922c26-e513-7461-8357-8405fc73d205",
+              "payeeAccountId": "019256c4-4544-7e19-8c41-b30469861005",
+              "maskedIban": "GR1601101250000000012300695",
+              "verificationStatus": "Unverified"
+            },
+            "payoutMethod": "SAMPLE_CODE",
+            "reasonCode": "SAMPLE_CODE",
+            "sourcePolicyIds": [
+              "01921efd-1190-701f-88a8-051fadbf1a41"
+            ],
+            "requestedBy": "019254a3-f48a-7950-8e8f-7a093e1b0007",
+            "decidedBy": "019283d2-3710-72f4-829b-8a74f59eac7c",
+            "decidedAt": "2026-10-07T09:00:00Z",
+            "decisionComment": "Sample text",
+            "disbursementId": "0192c990-abfa-7b69-8207-ad70a3cd76dd",
+            "proposedAt": "2026-10-07T09:00:00Z",
+            "recordVersion": 1
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
+    "RefundNettingLine": {
+      "kind": "OPEN_INVOICE",
+      "invoiceId": "01921b58-9966-7c20-8f03-3c5b35e797c3",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "RefundPayee": {
+      "payeePartyId": "0192a5cb-9168-79e4-86a3-47d092af7096",
+      "payeeAccountId": "01926e1c-cc38-759e-80a3-4fd892bcb3e3",
+      "maskedIban": "GR1601101250000000012300695",
+      "verificationStatus": "Unverified"
+    },
     "RefundProposeRequest": {
-      "account": "unspecified",
-      "credits": "unspecified",
-      "decision": "unspecified"
+      "billingAccountId": "01925769-1bed-73a6-8900-4c8b4a4baaa6",
+      "credits": [
+        "0192f6cf-7afb-70f3-87da-a4dd70910a2e"
+      ],
+      "payeeAccountId": "019241a8-549a-7db0-8e27-b633e30bc6e3",
+      "reasonCode": "SAMPLE_CODE",
+      "comment": "Sample text"
     },
     "RefundProposeResponse": {
-      "refund": "unspecified"
+      "refund": {
+        "refundId": "01923ff3-8a0b-7bae-8bb2-fa793d580f48",
+        "billingAccountId": "01928a2e-1c42-7fd4-8d2e-999a052ca920",
+        "state": "PROPOSED",
+        "approvalState": "NOT_REQUIRED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "breakdown": [
+          {
+            "policyId": "01921bd0-f49d-784b-8f8a-2ccb7c99ca2a",
+            "policyTermId": "0192d3a1-0f81-7046-86ce-ade02f03fe0c",
+            "transactionId": "019280a8-7d13-7cbd-8fad-abe4b53e3393",
+            "creditNoteId": "0192db32-9c04-7f60-8bf6-f129c90211f7",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "transactionKind": "sample",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "netting": [
+          {
+            "kind": "OPEN_INVOICE",
+            "invoiceId": "01921622-89b3-7722-8830-de0f6745027e",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "payee": {
+          "payeePartyId": "019208b3-531e-7a94-831d-70954ef85201",
+          "payeeAccountId": "01921674-6494-7696-8687-77b9e949464c",
+          "maskedIban": "GR1601101250000000012300695",
+          "verificationStatus": "Unverified"
+        },
+        "payoutMethod": "SAMPLE_CODE",
+        "reasonCode": "SAMPLE_CODE",
+        "sourcePolicyIds": [
+          "019251d8-fd25-730b-8de0-74ffd8fd4124"
+        ],
+        "requestedBy": "0192e764-27fe-704d-8c7c-7fdb54defc1e",
+        "decidedBy": "0192aebe-53ec-7449-80c4-ce6293bea2bd",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "Sample text",
+        "disbursementId": "019272dd-d923-7cb4-8a27-5f4d53d7369a",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
     },
     "RefundResubmitRequest": {
-      "account": "unspecified",
-      "credits": "unspecified",
-      "decision": "unspecified"
+      "refundId": "0192cd66-25a6-7e58-80d7-fe601faee835",
+      "payeeAccountId": "01921aa0-ef42-7100-8fdb-e48966e052a5",
+      "comment": "Sample text"
     },
     "RefundResubmitResponse": {
-      "refund": "unspecified"
+      "refund": {
+        "refundId": "0192549a-493e-7c71-822d-6d0418e35007",
+        "billingAccountId": "01927b41-c60f-7aa8-85b0-4932a780a248",
+        "state": "PROPOSED",
+        "approvalState": "NOT_REQUIRED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "breakdown": [
+          {
+            "policyId": "0192b4c6-cafa-7bc3-892f-b869accdf8e0",
+            "policyTermId": "0192a68b-8d0f-76e9-8b64-3c8c02875251",
+            "transactionId": "01922211-8993-7ba1-8891-04943a644aa8",
+            "creditNoteId": "019218cb-acb1-78de-8a45-9294bb854132",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "transactionKind": "sample",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "netting": [
+          {
+            "kind": "OPEN_INVOICE",
+            "invoiceId": "0192639f-1069-7c30-872b-b164d21a5455",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "payee": {
+          "payeePartyId": "0192c16c-9662-751a-8685-c9cc28269d8e",
+          "payeeAccountId": "0192b55a-1027-7fdf-8236-9362e86ee5af",
+          "maskedIban": "GR1601101250000000012300695",
+          "verificationStatus": "Unverified"
+        },
+        "payoutMethod": "SAMPLE_CODE",
+        "reasonCode": "SAMPLE_CODE",
+        "sourcePolicyIds": [
+          "0192840a-d79a-78bc-887f-709b39fa59a6"
+        ],
+        "requestedBy": "0192b9cd-5b73-7b0e-8e1b-9f8dce1f038c",
+        "decidedBy": "0192a903-b6d1-7963-8b31-98c22266ae2f",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "Sample text",
+        "disbursementId": "0192d423-6043-7a87-8d37-677adb00c39b",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "RefundView": {
+      "refundId": "01927c6c-0224-746d-845a-0f7771772746",
+      "billingAccountId": "01929ddd-e508-7111-8072-f90634badcff",
+      "state": "PROPOSED",
+      "approvalState": "NOT_REQUIRED",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "breakdown": [
+        {
+          "policyId": "01923db7-9d7c-7ba3-81a1-422bb85a884c",
+          "policyTermId": "01923a0e-c16e-7455-8389-3d5a685afc93",
+          "transactionId": "019270b3-da60-7363-8aa1-bd92626bf722",
+          "creditNoteId": "019295d1-549b-74ca-89d4-f4f67985225a",
+          "chargeType": "SAMPLE_CODE",
+          "chargeCategory": "SAMPLE_CODE",
+          "transactionKind": "sample",
+          "cancellationSource": "SAMPLE_CODE",
+          "treatmentRuleId": "SAMPLE_CODE",
+          "legalStatus": "SAMPLE_CODE",
+          "provisional": true,
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "netting": [
+        {
+          "kind": "OPEN_INVOICE",
+          "invoiceId": "0192a375-2eeb-70eb-823c-c49d48ed8aa7",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "payee": {
+        "payeePartyId": "01924f62-adeb-7630-87da-328682abea5e",
+        "payeeAccountId": "0192f1b2-d437-7a35-8b91-2a920d5e582f",
+        "maskedIban": "GR1601101250000000012300695",
+        "verificationStatus": "Unverified"
+      },
+      "payoutMethod": "SAMPLE_CODE",
+      "reasonCode": "SAMPLE_CODE",
+      "sourcePolicyIds": [
+        "01922014-8b0b-76c3-8cec-7a505afbaa26"
+      ],
+      "requestedBy": "0192c86e-61ae-7650-8e9d-4cadccafa092",
+      "decidedBy": "01927431-e4d5-7bc9-8644-0ba4e85b1c81",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "decisionComment": "Sample text",
+      "disbursementId": "01920c3c-e404-7087-8707-560f9a77a61e",
+      "proposedAt": "2026-10-07T09:00:00Z",
+      "recordVersion": 1
     },
     "SuspenseListItem": {
       "items": [

@@ -8,11 +8,30 @@ namespace CoreIns.Modules.Policy.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RenewalCreateResponse
 {
-    /// <summary>PRD: "job"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("job")]
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>Contract member 'expiringTermId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expiringTermId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyTermId ExpiringTermId { get; init; }
+
+    /// <summary>Contract member 'renewalProductCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("renewalProductCode")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Job { get; init; }
+    public string? RenewalProductCode { get; init; }
+
+    /// <summary>Product version resolved at the new term start</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("renewalProductVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber? RenewalProductVersion { get; init; }
+
+    /// <summary>Present once the renewal has been rated</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("servicingPreview")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Policy.Contracts.Api.ServicingPreview? ServicingPreview { get; init; }
 }
