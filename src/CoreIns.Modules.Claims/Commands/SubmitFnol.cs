@@ -40,6 +40,9 @@ internal sealed class SubmitFnolValidator : AbstractValidator<SubmitFnol>
 /// <summary>Shape rules of an FNOL payload, shared with <c>clm.Fnol.validate</c>.</summary>
 internal sealed class FnolRequestValidator : AbstractValidator<FnolSubmitRequest>
 {
+    /// <summary>PFC coverage codes may contain hyphens (the seeded MOTOR-GR product's OWN-DAMAGE; found by the SL2-CLM-MONEY real-POL test).</summary>
+    internal const string CoverageCodePattern = "^[A-Z][A-Z0-9_-]{0,63}$";
+
     private const string CodePattern = "^[A-Z][A-Z0-9_]{0,63}$";
 
     public FnolRequestValidator()
@@ -62,7 +65,7 @@ internal sealed class FnolRequestValidator : AbstractValidator<FnolSubmitRequest
             incident.RuleForEach(i => i.DamageAreas).NotEmpty().Matches(CodePattern).WithErrorCode("CODE");
         });
         RuleFor(r => r.Exposures).Must(e => e is null || e.Count <= 10).WithErrorCode("TOO_MANY");
-        RuleForEach(r => r.Exposures).ChildRules(exposure => exposure.RuleFor(e => e.CoverageCode).NotEmpty().Matches(CodePattern).WithErrorCode("CODE"));
+        RuleForEach(r => r.Exposures).ChildRules(exposure => exposure.RuleFor(e => e.CoverageCode).NotEmpty().Matches(CoverageCodePattern).WithErrorCode("CODE"));
         RuleFor(r => r.Exposures).Must(e => e is null || e.Select(x => (x.Kind, x.CoverageCode)).Distinct().Count() == e.Count)
             .WithErrorCode("EXPOSURE_REPEATED").WithMessage("Each proposed exposure (kind, coverage) once; the claimant is the insured (REQ-CLM-063).");
         When(r => r.DuplicateDecision is not null, () =>
