@@ -61,4 +61,41 @@ public sealed record CashAllocatedV1 : global::CoreIns.Platform.Contracts.Events
     /// <summary>Contract member 'downPayment'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("downPayment")]
     public required bool DownPayment { get; init; }
+
+    /// <summary>BIL receivable the cash settled (D-SL4-06). Always set when the receipt pays a CLM receivable, null for policy cash</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'receivableId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receivableId")]
+    public global::System.Guid? ReceivableId { get; init; }
+
+    /// <summary>Amount allocated to the receivable. Always set when receivableId is set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receivableAmount")]
+    public global::CoreIns.SharedKernel.Money? ReceivableAmount { get; init; }
+
+    /// <summary>BIL allocation id: the evidence CLM records the recovery against. Always set when receivableId is set</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'allocationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("allocationId")]
+    public global::System.Guid? AllocationId { get; init; }
+
+    /// <summary>Claim of the receivable. Always set when receivableId is set and the receivable names a claim</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public global::CoreIns.SharedKernel.Identifiers.ClaimId? ClaimId { get; init; }
+
+    /// <summary>CLM recovery of the receivable. Always set for SALVAGE and SUBROGATION receivables</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'recoveryId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recoveryId")]
+    public global::System.Guid? RecoveryId { get; init; }
+
+    /// <summary>Friendly Settlement statement reference. Always set for FS_CLEARING receivables</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statementRef")]
+    public string? StatementRef { get; init; }
+
+    /// <summary>Receivable source type (CLM_CLAIM_PAYMENT or FS_CLEARING). Always set when receivableId is set</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceType")]
+    public string? SourceType { get; init; }
 }

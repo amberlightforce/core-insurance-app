@@ -13,19 +13,19 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
 | [POL](#pol) | 52 | 48 | 4 | 37 | 15 | 8 | 10 | 0 |
-| [BIL](#bil) | 87 | 87 | 0 | 55 | 32 | 6 | 5 | 1 |
-| [CLM](#clm) | 58 | 58 | 0 | 44 | 14 | 10 | 9 | 5 |
+| [BIL](#bil) | 90 | 90 | 0 | 56 | 34 | 6 | 5 | 1 |
+| [CLM](#clm) | 73 | 73 | 0 | 53 | 20 | 10 | 9 | 5 |
 | [RI](#ri) | 116 | 110 | 6 | 82 | 34 | 9 | 0 | 0 |
 | [FIN](#fin) | 88 | 80 | 8 | 55 | 33 | 10 | 0 | 3 |
 | [DOC](#doc) | 44 | 42 | 2 | 27 | 17 | 4 | 12 | 0 |
 | [CMP](#cmp) | 90 | 53 | 37 | 69 | 21 | 21 | 0 | 3 |
 | [CHN](#chn) | 84 | 60 | 24 | 56 | 28 | 3 | 25 | 2 |
 | [WRK](#wrk) | 58 | 23 | 35 | 40 | 18 | 9 | 3 | 14 |
-| [PLT](#plt) | 100 | 64 | 36 | 63 | 37 | 25 | 0 | 10 |
+| [PLT](#plt) | 100 | 64 | 36 | 63 | 37 | 26 | 0 | 10 |
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 20 | 20 | 0 | 12 | 8 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 32 | 16 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1119 | 901 | 218 | 729 | 390 | 128 | 69 | 65 |
+| **Total** | 1137 | 919 | 218 | 739 | 398 | 129 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -395,6 +395,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `bil.Delinquency.list` | GET `/api/bil/v1/delinquencies` | Q |  | ui |  | W5 | full | REQ-BIL-006, REQ-BIL-161..REQ-BIL-180 |
 | `bil.Delinquency.recordContact` | POST `/api/bil/v1/delinquencies/record-contact` | C |  | ui |  | W5 | full | REQ-BIL-006, REQ-BIL-161..REQ-BIL-180 |
 | `bil.Delinquency.releaseHold` | POST `/api/bil/v1/delinquencies/release-hold` | C |  | ui |  | W5 | full | REQ-BIL-006, REQ-BIL-161..REQ-BIL-180 |
+| `bil.Disbursement.approveRelease` | POST `/api/bil/v1/disbursements/approve-release` | C | yes | ui | CLM | W7 | full | REQ-BIL-199, REQ-BIL-206, REQ-BIL-357 |
 | `bil.Disbursement.get` | GET `/api/bil/v1/disbursements/{id}` | Q |  | ui | CLM, FIN, RI, WRK | W5 | full | REQ-BIL-009, REQ-BIL-197..REQ-BIL-214 |
 | `bil.Disbursement.list` | GET `/api/bil/v1/disbursements` | Q |  | ui | CLM, WRK | W5 | full | REQ-BIL-009, REQ-BIL-197..REQ-BIL-214 |
 | `bil.Disbursement.request` | POST `/api/bil/v1/disbursements/request` | C | yes | ui | CLM, CMP, FIN, RI, WRK | W5 | full | REQ-BIL-009, REQ-BIL-197..REQ-BIL-214 |
@@ -436,7 +437,9 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `bil.PaymentPlan.select` | POST `/api/bil/v1/payment-plans/select` | C | yes | ui, partner | CHN, POL | W5 | full | REQ-BIL-052, REQ-BIL-059 |
 | `bil.Receipt.get` | GET `/api/bil/v1/receipts/{id}` | Q |  | ui | DOC | W5 | full | REQ-BIL-004, REQ-BIL-145 |
 | `bil.Receipt.list` | GET `/api/bil/v1/receipts` | Q |  | ui |  | W5 | full | REQ-BIL-004, REQ-BIL-145 |
-| `bil.Receivable.register` | POST `/api/bil/v1/receivables/register` | C | yes | ui | CLM, RI | W7 | full | REQ-BIL-346, REQ-BIL-349, REQ-BIL-356 |
+| `bil.Receivable.get` | GET `/api/bil/v1/receivables/{id}` | Q |  | ui | CLM | W7 | full | REQ-BIL-346, REQ-BIL-354, REQ-BIL-355 … |
+| `bil.Receivable.list` | GET `/api/bil/v1/receivables` | Q |  | ui | CLM | W7 | full | REQ-BIL-346, REQ-BIL-354, REQ-BIL-355 … |
+| `bil.Receivable.register` | POST `/api/bil/v1/receivables/register` | C | yes | ui | CLM, RI | W7 | full | REQ-BIL-346, REQ-BIL-349, REQ-BIL-354 … |
 | `bil.Reconciliation.bank` | POST `/api/bil/v1/reconciliation/bank` | Q |  | ui |  | W5 | full | REQ-BIL-302..REQ-BIL-312, REQ-BIL-317..REQ-BIL-321 |
 | `bil.Reconciliation.fin` | POST `/api/bil/v1/reconciliation/fin` | Q |  | internal | FIN | W5 | full | REQ-BIL-011, REQ-BIL-314 |
 | `bil.Reconciliation.invariants` | POST `/api/bil/v1/reconciliation/invariants` | Q |  | ui |  | W5 | full | REQ-BIL-302..REQ-BIL-312, REQ-BIL-317..REQ-BIL-321 |
@@ -502,6 +505,14 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `clm.Fnol.submit` | POST `/api/clm/v1/fnol/submit` | C | yes | ui, partner | CHN | W7 | full | REQ-CLM-001 |
 | `clm.Fnol.validate` | POST `/api/clm/v1/fnol/validate` | Q |  | ui, partner | CHN | W7 | full | REQ-CLM-001 |
 | `clm.Fraud.score` | POST `/api/clm/v1/fraud/score` | C |  | internal |  | W7 | full | REQ-CLM-201..REQ-CLM-209 |
+| `clm.FriendlySettlement.approveNet` | POST `/api/clm/v1/friendly-settlements/approve-net` | C | yes | ui |  | W7 | full | REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 |
+| `clm.FriendlySettlement.evaluate` | POST `/api/clm/v1/friendly-settlements/evaluate` | C |  | ui |  | W7 | full | REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 |
+| `clm.FriendlySettlement.get` | GET `/api/clm/v1/friendly-settlements/{id}` | Q |  | ui |  | W7 | full | REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 |
+| `clm.FriendlySettlement.getStatement` | GET `/api/clm/v1/friendly-settlements/statements/{id}` | Q |  | ui |  | W7 | full | REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 |
+| `clm.FriendlySettlement.importStatement` | POST `/api/clm/v1/friendly-settlements/import-statement` | C |  | ui |  | W7 | full | REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 |
+| `clm.FriendlySettlement.list` | GET `/api/clm/v1/friendly-settlements` | Q |  | ui |  | W7 | full | REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 |
+| `clm.FriendlySettlement.openOwnSettlement` | POST `/api/clm/v1/friendly-settlements/open-own-settlement` | C | yes | ui |  | W7 | full | REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 |
+| `clm.FriendlySettlement.submit` | POST `/api/clm/v1/friendly-settlements/submit` | C |  | ui |  | W7 | full | REQ-CLM-155..REQ-CLM-160, REQ-CLM-264 |
 | `clm.Import.claim` | POST `/api/clm/v1/import/claim` | C | yes | internal | MIG | W9 | full | REQ-CLM-010, REQ-CLM-237, REQ-CLM-266 |
 | `clm.Import.convertCurrency` | POST `/api/clm/v1/import/convert-currency` | C | yes | internal |  | W9 | full | REQ-CLM-010, REQ-CLM-237, REQ-CLM-266 |
 | `clm.Import.financialHistory` | POST `/api/clm/v1/import/financial-history` | C | yes | internal | MIG | W9 | full | REQ-CLM-010, REQ-CLM-237, REQ-CLM-266 |
@@ -512,6 +523,12 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `clm.Payment.reissue` | POST `/api/clm/v1/payments/reissue` | C | yes | ui |  | W7 | full | REQ-CLM-004, REQ-CLM-125..REQ-CLM-127, REQ-CLM-136 |
 | `clm.Payment.stop` | POST `/api/clm/v1/payments/stop` | C | yes | ui |  | W7 | full | REQ-CLM-004, REQ-CLM-125..REQ-CLM-127, REQ-CLM-136 |
 | `clm.Payment.void` | POST `/api/clm/v1/payments/void` | C | yes | ui |  | W7 | full | REQ-CLM-004, REQ-CLM-125..REQ-CLM-127, REQ-CLM-136 |
+| `clm.Recovery.create` | POST `/api/clm/v1/recoveries` | C | yes | ui |  | W7 | full | REQ-CLM-143..REQ-CLM-151 |
+| `clm.Recovery.demand` | POST `/api/clm/v1/recoveries/demand` | C | yes | ui |  | W7 | full | REQ-CLM-143..REQ-CLM-151 |
+| `clm.Recovery.get` | GET `/api/clm/v1/recoveries/{id}` | Q |  | ui |  | W7 | full | REQ-CLM-143..REQ-CLM-151 |
+| `clm.Recovery.list` | GET `/api/clm/v1/recoveries` | Q |  | ui |  | W7 | full | REQ-CLM-143..REQ-CLM-151 |
+| `clm.Recovery.recordMilestone` | POST `/api/clm/v1/recoveries/record-milestone` | C |  | ui |  | W7 | full | REQ-CLM-143..REQ-CLM-151 |
+| `clm.Recovery.writeOff` | POST `/api/clm/v1/recoveries/write-off` | C | yes | ui |  | W7 | full | REQ-CLM-143..REQ-CLM-151 |
 | `clm.Redress.request` | POST `/api/clm/v1/redresses/request` | C | yes | ui | CMP | unscheduled | full | REQ-CLM-265 |
 | `clm.Service.cancel` | POST `/api/clm/v1/services/cancel` | C | yes | ui, partner |  | W7 | full | REQ-CLM-188..REQ-CLM-200 |
 | `clm.Service.request` | POST `/api/clm/v1/services/request` | C | yes | ui, partner | CHN | W7 | full | REQ-CLM-188..REQ-CLM-200 |
@@ -522,6 +539,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `clm.TransactionSet.approve` | POST `/api/clm/v1/transaction-sets/approve` | C | yes | ui | WRK | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
 | `clm.TransactionSet.build` | POST `/api/clm/v1/transaction-sets/build` | C | yes | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
 | `clm.TransactionSet.get` | GET `/api/clm/v1/transaction-sets/{id}` | Q |  | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-107..REQ-CLM-113 |
+| `clm.TransactionSet.list` | GET `/api/clm/v1/transaction-sets` | Q |  | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-107..REQ-CLM-113 |
 | `clm.TransactionSet.reject` | POST `/api/clm/v1/transaction-sets/reject` | C | yes | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
 | `clm.TransactionSet.return` | POST `/api/clm/v1/transaction-sets/return` | C | yes | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
 | `clm.TransactionSet.submit` | POST `/api/clm/v1/transaction-sets/submit` | C | yes | ui |  | W7 | full | REQ-CLM-003, REQ-CLM-004, REQ-CLM-107..REQ-CLM-113 |
@@ -584,7 +602,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `ri.Commission.adjust` | POST `/api/ri/v1/commission/adjust` | C | yes | ui |  | unscheduled | full | REQ-RI-160..REQ-RI-166 |
 | `ri.Commission.approve` | POST `/api/ri/v1/commission/approve` | C | yes | ui |  | unscheduled | full | REQ-RI-160..REQ-RI-166 |
 | `ri.Commission.history` | GET `/api/ri/v1/commission/history` | Q |  | ui |  | unscheduled | full | REQ-RI-160..REQ-RI-166 |
-| `ri.Contract.applicable` | GET `/api/ri/v1/contracts/applicable` | Q |  | ui |  | W7 | full | REQ-RI-001 |
+| `ri.Contract.applicable` | GET `/api/ri/v1/contracts/applicable` | Q |  | ui | CLM, FIN | W7 | full | REQ-RI-001 |
 | `ri.Contract.approve` | POST `/api/ri/v1/contracts/approve` | C | yes | ui |  | W7 | full | REQ-RI-031..REQ-RI-065 |
 | `ri.Contract.close` | POST `/api/ri/v1/contracts/close` | C | yes | ui |  | W7 | full | REQ-RI-031..REQ-RI-065 |
 | `ri.Contract.commute` | POST `/api/ri/v1/contracts/commute` | C | yes | ui |  | W7 | full | REQ-RI-031..REQ-RI-065 |
@@ -1119,7 +1137,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `plt.Approval.list` | GET `/api/plt/v1/approval` | Q |  | ui |  | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Approval.request` | POST `/api/plt/v1/approval/request` | C |  | internal | BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT, UW | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Approval.verifyForExecution` | POST `/api/plt/v1/approval/verify-for-execution` | Q |  | internal | BIL, CLM, MIG, MKT, PFC, PTY | W1 | full | REQ-PLT-117 |
-| `plt.Approval.withdraw` | POST `/api/plt/v1/approval/withdraw` | C |  | ui |  | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
+| `plt.Approval.withdraw` | POST `/api/plt/v1/approval/withdraw` | C |  | internal | CLM | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.ApprovalType.register` | POST `/api/plt/v1/approval-types/register` | C |  | internal | MKT | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Audit.append` | POST `/api/plt/v1/audit/append` | C |  | internal | BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT | W1 | minimal | REQ-PLT-002, REQ-PLT-124 |
 | `plt.Audit.export` | POST `/api/plt/v1/audit/export` | C |  | ui | CLM | W1 | full | REQ-PLT-128..REQ-PLT-131 |
@@ -1462,7 +1480,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-BIL-012 | `bil.Import.*` |  |
 | REQ-CLM-001 | `chn.PartnerClaim.report`, `clm.Fnol.get`, `clm.Fnol.saveDraft`, `clm.Fnol.submit` (+1) |  |
 | REQ-CLM-002 | `clm.Coverage.decide`, `clm.Coverage.reverify` | mapped by builder |
-| REQ-CLM-003 | `clm.TransactionSet.approve`, `clm.TransactionSet.build`, `clm.TransactionSet.get`, `clm.TransactionSet.reject` (+2) |  |
+| REQ-CLM-003 | `clm.TransactionSet.approve`, `clm.TransactionSet.build`, `clm.TransactionSet.get`, `clm.TransactionSet.list` (+3) |  |
 | REQ-CLM-004 | `clm.Payment.list`, `clm.Payment.reissue`, `clm.Payment.stop`, `clm.Payment.void` (+5) | mapped by builder |
 | REQ-CLM-005 | — | event contract (claim financial events in contracts/events/clm); secondary: clm.Financials.dailyTotals for FIN reconciliation |
 | REQ-CLM-006 | `clm.CatEvent.*` |  |

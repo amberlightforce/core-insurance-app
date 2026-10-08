@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Contract.applicable result. PRD outputs: "contracts, versions"</summary>
+/// <summary>ri.Contract.applicable result (REQ-RI-001, REQ-RI-116)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ContractApplicableResponse
 {
-    /// <summary>PRD: "contracts"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Active contracts of the legal entity whose period contains the loss instant (Europe/Athens, half-open) and whose scope contains the product and coverage code; empty when none applies</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("contracts")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Contracts { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractView> Contracts { get; init; }
 
-    /// <summary>PRD: "versions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("versions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Versions { get; init; }
+    /// <summary>The loss instant the lookup used</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validAt")]
+    public required global::CoreIns.SharedKernel.Instant ValidAt { get; init; }
 }
