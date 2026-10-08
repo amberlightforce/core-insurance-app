@@ -1,6 +1,6 @@
 # STATUS — Greek P&C core insurance build
 
-**Current phase:** 2 — Thin E2E slice (foundations complete; user go-ahead 2026-10-07, D-USR-08). Plan: `SLICE-PLAN.md`
+**Current phase:** 2 — Thin E2E slice **COMPLETE** (2026-10-08): all 10 slice WPs merged; E2E-01 passes on Docker (API + Playwright UI) and in GitHub CI; accepted after a real-Chrome walkthrough (D-SLC-21). Next: widening waves — awaiting user direction
 **Last updated:** 2026-10-07 (night)
 **Repo:** https://github.com/amberlightforce/core-insurance-app (private). GitHub push works (workflow scope fixed by user 2026-10-07). main pushed; first CI run GREEN (all jobs incl. Testcontainers integration tests + Trivy).
 **Live tracker:** https://claude.ai/artifact/QwQVP63L5vGPhUskFrAzaD. Source of truth: `orchestration/backlog/backlog.json`. Update it with `tracker/set_status.py`, then push the change with ArtifactData.
