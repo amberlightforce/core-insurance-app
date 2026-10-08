@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>Why the caller cannot decide now. SOD_CREATOR - created the job; SOD_PARTICIPANT - edited or otherwise worked on the job; SOD_PRODUCER - is the job's producer; SOD_EVALUATOR - ran or bound an evaluation of the job; NOT_HUMAN - the actor is not a person (REQ-UW-115); NO_AUTHORITY - UW.ISSUE_APPROVAL for the issue type is refused or refers up; NOT_OPEN - the issue is not Open. SOD-UW-02, BR-UW-013.</summary>
+/// <summary>Why the caller cannot decide now. SOD_CREATOR - created the job; SOD_PARTICIPANT - edited or otherwise worked on the job; SOD_PRODUCER - is the job's producer; SOD_EVALUATOR - ran or bound an evaluation of the job; NOT_HUMAN - the actor is not a person (REQ-UW-115); NO_AUTHORITY - UW.ISSUE_APPROVAL for the issue type is refused or refers up; NOT_OPEN - the issue is not Open; NEEDS_REEVALUATION - t…</summary>
 [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecidabilityReason>))]
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public enum DecidabilityReason
@@ -36,4 +36,8 @@ public enum DecidabilityReason
     /// <summary><c>NOT_OPEN</c></summary>
     [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NOT_OPEN")]
     NotOpen,
+
+    /// <summary><c>NEEDS_REEVALUATION</c></summary>
+    [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NEEDS_REEVALUATION")]
+    NeedsReevaluation,
 }
