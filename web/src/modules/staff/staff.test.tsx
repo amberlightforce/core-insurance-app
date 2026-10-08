@@ -54,6 +54,26 @@ describe('ProblemBanner', () => {
   });
 });
 
+describe('ProblemBanner 403', () => {
+  it('explains a body-less 403 with the signed-in role instead of a bare failure', async () => {
+    await i18n.changeLanguage('en');
+    sessionStorage.setItem(
+      'coreins.devSession',
+      JSON.stringify({
+        accessToken: 't',
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+        user: { id: 'billing', name: 'Billing', roles: ['Staff.Billing'] },
+      }),
+    );
+    renderWithDs(
+      <ProblemBanner error={new ApiError({ status: 403 })} title="Customer creation failed" />,
+    );
+    expect(screen.getByText('Customer creation failed')).toBeInTheDocument();
+    expect(screen.getByText(/Staff\.Billing.*does not allow this action/)).toBeInTheDocument();
+    sessionStorage.clear();
+  });
+});
+
 describe('recent records', () => {
   it('keeps the last records, newest first, without duplicates, and survives unavailable storage', () => {
     rememberRecent('policy', { id: '1', label: 'POL1' });
