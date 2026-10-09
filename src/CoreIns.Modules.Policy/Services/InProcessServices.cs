@@ -1,4 +1,5 @@
 using CoreIns.Modules.Policy.Commands;
+using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain;
@@ -51,7 +52,8 @@ internal sealed class PolicyJobService(
     RequestContext context,
     ICommandHandler<UpdateDraft, JobUpdateDraftResponse> updateDraft,
     ICommandHandler<QuoteJob, JobQuoteResponse> quote,
-    ICommandHandler<BindJob, JobBindResponse> bind) : IPolicyJobService
+    ICommandHandler<BindJob, JobBindResponse> bind,
+    ICommandHandler<WithdrawJob, JobWithdrawResponse> withdraw) : IPolicyJobService
 {
     public Task<JobUpdateDraftResponse> UpdateDraftAsync(JobUpdateDraftRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         InProcess.RunAsync(context, updateDraft, new UpdateDraft(request), options, cancellationToken);
@@ -70,7 +72,7 @@ internal sealed class PolicyJobService(
         throw InProcess.NotAvailable("pol.Job.newVersion");
 
     public Task<JobWithdrawResponse> WithdrawAsync(JobWithdrawRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("pol.Job.withdraw");
+        InProcess.RunAsync(context, withdraw, new WithdrawJob(request), options, cancellationToken);
 }
 
 /// <summary>The in-process contract <see cref="IPolicyPolicyService"/>: the bitemporal get (REQ-POL-002).</summary>
@@ -130,6 +132,10 @@ internal sealed class PolicyTermService(RequestContext context, ILegalEntityDire
         return response ?? throw new DomainException(JobSupport.NotFound("term"));
     }
 
-    public Task<TermTimelineResponse> TimelineAsync(PolicyId policyId, ValidAt? validAt = null, Instant? knownAt = null, PolicyTermId? termId = null, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("pol.Term.timeline");
+    public async Task<TermTimelineResponse> TimelineAsync(
+        PolicyId policyId, ValidAt? validAt = null, Instant? knownAt = null, PolicyTermId? termId = null, CancellationToken cancellationToken = default) =>
+        await reader.TimelineAsync(
+            JobSupport.LegalEntity(context, legalEntities), context.LegalEntity!.Value.Value, policyId.Value, termId?.Value,
+            InProcess.Valid(validAt, clock, options.Value), knownAt ?? clock.Now, cancellationToken).ConfigureAwait(false)
+        ?? throw new DomainException(JobSupport.NotFound("term"));
 }

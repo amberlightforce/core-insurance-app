@@ -13,7 +13,8 @@
         "pol.Policy.search": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "pol.PolicyChange.create": [ "Staff.Underwriter" ],
         "pol.change": [ "Staff.Underwriter" ],
-        "pol.Job.withdraw": [ "Staff.Underwriter" ]
+        "pol.Job.withdraw": [ "Staff.Underwriter" ],
+        "pol.Term.timeline": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Platform.Admin" ]
       }
     }
   }
