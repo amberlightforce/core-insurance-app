@@ -73,9 +73,13 @@ internal sealed class RatingDbContext(DbContextOptions<RatingDbContext> options)
             {
                 table.HasCheckConstraint("ck_rate_activation_status", "status IN ('Scheduled', 'Active', 'Superseded', 'Cancelled', 'RolledBack')");
                 table.HasCheckConstraint("ck_rate_activation_range", "effective_to IS NULL OR effective_to > effective_from");
+                table.HasCheckConstraint("ck_rate_activation_fallback", "(fallback_source_version IS NULL) = (source_event_id IS NULL)");
             });
             entity.HasKey(e => e.ActivationId).HasName("pk_rate_activation");
             entity.Property(e => e.ActivationId).HasColumnName("activation_id");
+            entity.Property(e => e.FallbackSourceVersion).HasColumnName("fallback_source_version");
+            entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
+            entity.HasIndex(e => e.SourceEventId).IsUnique().HasDatabaseName("ux_rate_activation_source_event");
             entity.Property(e => e.ArtefactHash).HasColumnName("artefact_hash").HasColumnType("char(64)");
             entity.Property(e => e.ProductCode).HasColumnName("product_code");
             entity.Property(e => e.ProductVersion).HasColumnName("product_version");

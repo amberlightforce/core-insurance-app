@@ -53,6 +53,137 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Product.Persistence.FallbackRequestRow", b =>
+                {
+                    b.Property<Guid>("FallbackId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("fallback_id");
+
+                    b.Property<Guid>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_reason");
+
+                    b.Property<Guid>("DefectiveVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("defective_version_id");
+
+                    b.Property<DateOnly>("FallbackDate")
+                        .HasColumnType("date")
+                        .HasColumnName("fallback_date");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("NewMajor")
+                        .HasColumnType("integer")
+                        .HasColumnName("new_major");
+
+                    b.Property<int>("NewMinor")
+                        .HasColumnType("integer")
+                        .HasColumnName("new_minor");
+
+                    b.Property<Guid?>("NewVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("new_version_id");
+
+                    b.Property<string>("PayloadHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .HasColumnName("payload_hash");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("requested_at");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<string>("RequestedByPrincipal")
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by_principal");
+
+                    b.Property<Guid>("SourceVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_version_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("FallbackId")
+                        .HasName("pk_fallback_request");
+
+                    b.HasIndex("ApprovalRequestId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_fallback_approval");
+
+                    b.HasIndex("DefectiveVersionId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_fallback_live_per_defective")
+                        .HasFilter("status <> 'REJECTED'");
+
+                    b.HasIndex("NewVersionId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SourceVersionId");
+
+                    b.ToTable("fallback_request", "pfc", t =>
+                        {
+                            t.HasCheckConstraint("ck_fallback_applied", "(status = 'APPLIED') = (new_version_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_fallback_decision", "(status = 'PENDING_APPROVAL') = (decided_at IS NULL AND decided_by IS NULL)");
+
+                            t.HasCheckConstraint("ck_fallback_hash", "payload_hash ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("ck_fallback_new_number", "new_major >= 0 AND new_minor >= 0");
+
+                            t.HasCheckConstraint("ck_fallback_reason", "char_length(reason) BETWEEN 20 AND 128");
+
+                            t.HasCheckConstraint("ck_fallback_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_fallback_sod", "decided_by IS NULL OR decided_by <> requested_by");
+
+                            t.HasCheckConstraint("ck_fallback_status", "status IN ('PENDING_APPROVAL', 'APPLIED', 'REJECTED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Product.Persistence.ProductRow", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -162,6 +293,10 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<Guid?>("FallbackOfVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("fallback_of_version_id");
+
                     b.Property<bool>("IsAbstract")
                         .HasColumnType("boolean")
                         .HasColumnName("is_abstract");
@@ -216,6 +351,10 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                         .HasColumnType("date")
                         .HasColumnName("renewal_to");
 
+                    b.Property<Guid?>("ReplacesVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("replaces_version_id");
+
                     b.Property<int>("SchemaVersion")
                         .HasColumnType("integer")
                         .HasColumnName("schema_version");
@@ -230,6 +369,10 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
 
                     b.HasIndex("ArtefactHash");
 
+                    b.HasIndex("FallbackOfVersionId");
+
+                    b.HasIndex("ReplacesVersionId");
+
                     b.HasIndex("LegalEntityId", "Status")
                         .HasDatabaseName("ix_product_version_resolution");
 
@@ -240,6 +383,8 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                     b.ToTable("product_version", "pfc", t =>
                         {
                             t.HasCheckConstraint("ck_product_version_channels", "cardinality(channels) >= 1");
+
+                            t.HasCheckConstraint("ck_product_version_fallback_pair", "(fallback_of_version_id IS NULL) = (replaces_version_id IS NULL)");
 
                             t.HasCheckConstraint("ck_product_version_hash", "artefact_hash ~ '^[0-9a-f]{64}$'");
 
@@ -257,6 +402,36 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Product.Persistence.FallbackRequestRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("DefectiveVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_fallback_defective");
+
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("NewVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_fallback_new_version");
+
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductRow", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_fallback_product");
+
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("SourceVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_fallback_source");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Product.Persistence.ProductVersionRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Product.Persistence.ArtifactRow", null)
@@ -266,12 +441,24 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_product_version_artifact");
 
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("FallbackOfVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_product_version_fallback_of");
+
                     b.HasOne("CoreIns.Modules.Product.Persistence.ProductRow", null)
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_product_version_product");
+
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("ReplacesVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_product_version_replaces");
                 });
 #pragma warning restore 612, 618
         }

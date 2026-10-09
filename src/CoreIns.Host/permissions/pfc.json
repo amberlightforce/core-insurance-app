@@ -2,15 +2,26 @@
   "Platform": {
     "Permissions": {
       "Grants": {
-        "pfc.ProductVersion.resolve": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pfc.ProductVersion.resolve": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pfc.ProductVersion.import": [ "Platform.Admin" ],
         "pfc.Artifact.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
-        "pfc.Catalogue.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "pfc.Catalogue.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pfc.Catalogue.getItem": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pfc.ChargeType.list": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pfc.QuestionSet.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
-        "pfc.QuestionSet.evaluate": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ]
+        "pfc.QuestionSet.evaluate": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        // SL5-PFC-FALLBACK (D-SL5-08/09; roles are illustrative): the release manager asks for a fall-back, the design authority decides it.
+        // Maker != checker (the maker's principal included) is enforced by plt.Approval; the checker also needs the PFC.EMERGENCY_CHANGE authority below.
+        "pfc.ProductVersion.fallback": [ "Platform.ReleaseManager" ],
+        "pfc.ProductVersion.decideFallback": [ "Platform.DesignAuthority" ]
       }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (PRD-02 12.2 PFC.EmergencyChange, written PFC.EMERGENCY_CHANGE; no approved matrix exists): the design authority may
+      // decide a fall-back for any product line and jurisdiction. Ignored in Production (fail closed: DENY), see D-SL2-03.
+      "Grants": [
+        { "Id": "pfc-design-authority-emergency-change-illustrative", "Role": "Platform.DesignAuthority", "Type": "PFC.EMERGENCY_CHANGE", "Illustrative": true }
+      ]
     }
   }
 }

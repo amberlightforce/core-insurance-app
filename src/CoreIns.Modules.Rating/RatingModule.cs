@@ -2,6 +2,9 @@ using CoreIns.Modules.Rating.Contracts;
 using CoreIns.Modules.Rating.Contracts.Servicing;
 using CoreIns.Modules.Rating.Persistence;
 using CoreIns.Modules.Rating.Services;
+using CoreIns.Modules.Product.Contracts.Events;
+using CoreIns.Modules.Rating.Events;
+using CoreIns.Platform.Events;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel.Identifiers;
@@ -35,6 +38,8 @@ public static class RatingModule
         services.AddOptions<RatingOptions>().Bind(configuration.GetSection(RatingOptions.Section));
         services.AddModuleDbContext<RatingDbContext>(Schema);
         services.AddScoped<RatingStore>();
+        services.AddEventHandler<ProductVersionPublishedV1, ProductVersionFallbackHandler>(
+            EventDescriptor.From(ProductVersionPublishedV1.Descriptor), "RAT.ProductVersionPublished.Fallback", ModuleCode.RAT);
 
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IRatingRateService, RatingRateService>();
