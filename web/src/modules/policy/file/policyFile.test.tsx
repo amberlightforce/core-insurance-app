@@ -31,17 +31,20 @@ function policyAt(validAt: string, state1 = 'IN_FORCE'): PolicyFileResponse {
   const term1 = { ...base.term, termId: term1Id, state: state1 } as unknown as NonNullable<
     PolicyFileResponse['term']
   >;
+  const term2 = {
+    ...term1,
+    termId: term2Id,
+    termNumber: 2,
+    state: 'SCHEDULED',
+    period: { from: '2027-10-08T00:00:00+03:00', to: '2028-10-08T00:00:00+03:00' },
+  } as unknown as NonNullable<PolicyFileResponse['term']>;
+  const terms = [term1, term2];
   if (validAt >= '2027-10-08') {
     return {
       ...base,
       policy: { ...base.policy, status: 'SCHEDULED' },
-      term: {
-        ...term1,
-        termId: term2Id,
-        termNumber: 2,
-        state: 'SCHEDULED',
-        period: { from: '2027-10-08T00:00:00+03:00', to: '2028-10-08T00:00:00+03:00' },
-      },
+      term: term2,
+      terms,
       transactions: [
         {
           transactionId: 'tx-r1',
@@ -61,6 +64,7 @@ function policyAt(validAt: string, state1 = 'IN_FORCE'): PolicyFileResponse {
   if (validAt < '2026-10-08') {
     return {
       policy: base.policy,
+      terms,
       transactions: [],
       charges: [],
       effectiveKnownAt: '2026-10-09T08:00:00Z',
@@ -70,6 +74,7 @@ function policyAt(validAt: string, state1 = 'IN_FORCE'): PolicyFileResponse {
     ...base,
     policy: { ...base.policy, status: state1 as 'IN_FORCE' },
     term: term1,
+    terms,
     transactions: [...base.transactions],
     charges: base.charges.map((c) => ({ ...c, transactionId: 'tx-1' })),
     effectiveKnownAt: '2026-10-09T08:00:00Z',
@@ -351,11 +356,11 @@ describe('Policy file (SL3-UI-POL-FILE)', () => {
     expect(screen.getAllByText(/Αντικαταστάθηκε/).length).toBeGreaterThan(0);
   });
 
-  it('keeps the page useful when the term timeline is forbidden (403): falls back to the policy transactions', async () => {
-    mockApi(routes({ timeline: () => problem(403, 'PLT-ERR-FORBIDDEN', 'Forbidden') }));
+  it('keeps the page useful when the term timeline is unavailable: falls back to the policy transactions', async () => {
+    mockApi(routes({ timeline: () => problem(500, 'PLT-ERR-INTERNAL', 'Σφάλμα') }));
     view();
     expect(
-      (await screen.findAllByText(/Δεν έχετε δικαίωμα να δείτε το πλήρες ιστορικό/)).length,
+      (await screen.findAllByText(/Το ιστορικό του όρου δεν είναι διαθέσιμο/)).length,
     ).toBeGreaterThan(0);
     expect((await screen.findAllByText('Νέα παραγωγή')).length).toBeGreaterThan(0);
   });

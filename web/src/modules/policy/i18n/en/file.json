@@ -58,7 +58,6 @@
       "showCharges": "Charges ({count})",
       "hideCharges": "Hide charges",
       "chargesOf": "Charges of transaction {sequence}",
-      "timelineDenied": "You do not have permission to see the full term history. The policy's own transactions are shown.",
       "timelineUnavailable": "The term history is not available right now. The policy's own transactions are shown."
     },
     "charges": {
