@@ -1666,6 +1666,8 @@ export interface components {
             charges: components["schemas"]["ChargeLine"][];
             /** @description The transaction-time instant the answer was resolved at: min(requested knownAt or now, the policy's record-time watermark). Always set; the UI shows it next to the as-of date (D-SL3-03). */
             effectiveKnownAt?: components["schemas"]["Instant"];
+            /** @description Every term of the policy known at effectiveKnownAt, by term number ascending, each with its state as of validAt (REQ-POL-002). Always set. `term` stays the one valid at validAt (or the nearest). */
+            terms?: components["schemas"]["TermView"][];
         };
         /** @description pol.Term.get result as of validAt / knownAt. PRD outputs: "policy, term, segment, risk tree" */
         TermGetResponse: {
@@ -1675,6 +1677,8 @@ export interface components {
             riskTree?: components["schemas"]["RiskTree"];
             transactions: components["schemas"]["TransactionView"][];
             charges: components["schemas"]["ChargeLine"][];
+            /** @description The transaction-time instant the answer was resolved at: min(requested knownAt or now, the policy's record-time watermark). Always set (D-SL3-03, D-SL3-22 follow-up). */
+            effectiveKnownAt?: components["schemas"]["Instant"];
         };
         /** @description pol.Job.withdraw request. PRD inputs: "jobId, reasonCode, text" */
         JobWithdrawRequest: {
@@ -2083,6 +2087,8 @@ export interface components {
             premiumSummary: components["schemas"]["PremiumSummary"];
             acceptanceMode: components["schemas"]["Code"];
             deadline: components["schemas"]["Instant"];
+            /** @description True when an open underwriting referral holds the offer back (the job is Quoted but not offered; no RenewalOffered was published) */
+            referred?: boolean;
             servicingPreview?: components["schemas"]["ServicingPreview"];
         };
         /** @description pol.Renewal.accept request (REQ-POL-253, explicit acceptance). Accepting binds the new term n+1 as Scheduled. */

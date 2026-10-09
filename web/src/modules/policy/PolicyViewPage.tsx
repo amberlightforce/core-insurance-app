@@ -6,7 +6,7 @@ import { useParams } from 'react-router';
 import { Banner, DatePicker, KeyValueList, StatusPill } from '../../design-system';
 import { InvoiceTable } from '../billing/InvoiceTable';
 import { useInvoices } from '../billing/api';
-import { athensToday, addDays } from '../quote/time';
+import { athensToday } from '../quote/time';
 import { LinkButton } from '../staff/LinkButton';
 import { PageHeader, Section, type PageFact } from '../staff/PageHeader';
 import { QueryView } from '../staff/QueryView';
@@ -28,30 +28,17 @@ import { TransactionHistory, type HistoryGroupInput } from './file/TransactionHi
 import { TermStatusPill } from './TermStatusPill';
 
 /**
- * The terms of the policy around the viewed one. pol has no «list terms» operation, so the neighbours are read
- * the way a user would: the policy as of two days before the term starts (the previous term) and as of the day the
- * term ends (the renewal term). `placeholderData` is off for these, so a stale neighbour is never shown.
+ * Every term of the policy, from `Policy.get` `terms[]` (known at effectiveKnownAt, by number, each with its state as
+ * of the viewed date). The viewed term carries the response itself; the others are read as of their own start date
+ * when their history group needs their charges.
  */
-function useNeighbourTerms(policyId: string, data: PolicyFileResponse, asOf: string) {
-  const term = data.term;
-  const prevAt = term ? addDays(athensToday(new Date(term.period.from)), -2) : asOf;
-  const nextAt = term?.period.to ? athensToday(new Date(term.period.to)) : asOf;
-  const prev = usePolicyAt(policyId, prevAt, { enabled: !!term });
-  const next = usePolicyAt(policyId, nextAt, { enabled: !!term?.period.to });
-  return useMemo(() => {
-    const own: HistoryGroupInput[] = term ? [{ term, policy: data, validAt: asOf }] : [];
-    const around = [
-      { result: prev.data, validAt: prevAt },
-      { result: next.data, validAt: nextAt },
-    ].flatMap(({ result, validAt }) =>
-      result?.term && result.term.termId !== term?.termId
-        ? [{ term: result.term, policy: result, validAt }]
-        : [],
-    );
-    return orderTerms([...own, ...around].map((g) => ({ ...g, ...g.term }))).map(
-      ({ term: t, policy: p, validAt }) => ({ term: t, policy: p, validAt }),
-    );
-  }, [term, data, asOf, prev.data, next.data, prevAt, nextAt]);
+function termGroups(data: PolicyFileResponse, asOf: string): HistoryGroupInput[] {
+  const terms = orderTerms(data.terms ?? (data.term ? [data.term] : []));
+  return terms.map((term) =>
+    term.termId === data.term?.termId
+      ? { term, policy: data, validAt: asOf }
+      : { term, validAt: athensToday(new Date(term.period.from)) },
+  );
 }
 
 function PolicyDetails({
@@ -69,7 +56,7 @@ function PolicyDetails({
   const fmt = useFormat();
   const { policy, term } = data;
   const invoices = useInvoices({ policyId: policy.policyId });
-  const groups = useNeighbourTerms(policy.policyId, data, asOf);
+  const groups = useMemo(() => termGroups(data, asOf), [data, asOf]);
   const timeline = useTermTimeline(policy.policyId, term?.termId ?? '', asOf, !!term);
   const snapshot = useSnapshotSupersession(policy.policyId, asOf, !!term);
 
@@ -182,7 +169,7 @@ function PolicyDetails({
           <Section
             title={t('file.history.title')}
             meta={t('file.history.meta')}
-            count={groups.reduce((n, g) => n + g.policy.transactions.length, 0)}
+            count={groups.length}
           >
             <TransactionHistory policyId={policy.policyId} groups={[...groups].reverse()} />
           </Section>

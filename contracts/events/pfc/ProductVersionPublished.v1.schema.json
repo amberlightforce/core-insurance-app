@@ -124,6 +124,30 @@
           "$ref": "../common.schema.json#/$defs/RatingSlotDeclaration",
           "description": "Rating-slot declaration carried by every ProductVersion* event (contract R-27, REQ-PFC-245)",
           "x-classification": "P0"
+        },
+        "fallbackOf": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/ProductVersionNumber"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0",
+          "description": "Version whose content this fall-back version copies (D-SL5-09, REQ-PFC-213); null when the version is not a fall-back. Always set, also when null (PITFALLS 12)."
+        },
+        "replaces": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/ProductVersionNumber"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P0",
+          "description": "Defective version whose new-business window this fall-back closes; null when the version is not a fall-back. Always set, also when null (PITFALLS 12)."
         }
       }
     }

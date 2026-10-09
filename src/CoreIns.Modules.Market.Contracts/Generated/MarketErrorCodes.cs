@@ -14,15 +14,57 @@ public static class MarketErrorCodes
     /// </remarks>
     public const string IdempotencyMismatch = "MKT-ERR-IDEMPOTENCY-MISMATCH";
 
+    /// <summary>MKT-ERR-PACK-ACTIVATION-STATE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): mkt.Pack.rollback, mkt.Pack.scheduleActivation.</para>
+    /// </remarks>
+    public const string PackActivationState = "MKT-ERR-PACK-ACTIVATION-STATE";
+
+    /// <summary>MKT-ERR-PACK-ALREADY-ACTIVE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): mkt.Pack.rollback, mkt.Pack.scheduleActivation.</para>
+    /// </remarks>
+    public const string PackAlreadyActive = "MKT-ERR-PACK-ALREADY-ACTIVE";
+
+    /// <summary>MKT-ERR-PACK-NOT-PUBLISHED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): mkt.Pack.rollback, mkt.Pack.scheduleActivation.</para>
+    /// </remarks>
+    public const string PackNotPublished = "MKT-ERR-PACK-NOT-PUBLISHED";
+
+    /// <summary>MKT-ERR-PACK-ROLLBACK-INSTANT (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): mkt.Pack.rollback, mkt.Pack.scheduleActivation.</para>
+    /// </remarks>
+    public const string PackRollbackInstant = "MKT-ERR-PACK-ROLLBACK-INSTANT";
+
+    /// <summary>MKT-ERR-PACK-VERSION-UNKNOWN (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): mkt.Pack.get, mkt.Pack.rollback, mkt.Pack.scheduleActivation.</para>
+    /// </remarks>
+    public const string PackVersionUnknown = "MKT-ERR-PACK-VERSION-UNKNOWN";
+
+    /// <summary>MKT-ERR-VALIDATION (HTTP 400).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): mkt.Pack.list.</para>
+    /// </remarks>
+    public const string Validation = "MKT-ERR-VALIDATION";
+
     /// <summary>The code prefix of this module.</summary>
     public const string Prefix = "MKT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [IdempotencyMismatch];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [IdempotencyMismatch, PackActivationState, PackAlreadyActive, PackNotPublished, PackRollbackInstant, PackVersionUnknown, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
     {
         [IdempotencyMismatch] = 409,
+        [PackActivationState] = 409,
+        [PackAlreadyActive] = 409,
+        [PackNotPublished] = 422,
+        [PackRollbackInstant] = 422,
+        [PackVersionUnknown] = 422,
+        [Validation] = 400,
     };
 }
