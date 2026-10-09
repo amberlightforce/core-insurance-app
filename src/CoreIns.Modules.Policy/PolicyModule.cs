@@ -1,4 +1,5 @@
 using CoreIns.Modules.Policy.Commands;
+using CoreIns.Modules.Policy.Commands.Renewal;
 using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
@@ -118,6 +119,9 @@ public static class PolicyModule
         services.AddScoped<IPolicyPolicyService, PolicyPolicyService>();
         services.AddScoped<IPolicyTermService, PolicyTermService>();
         services.AddScoped<IPolicySnapshotService, PolicySnapshotService>();
+
+        // SL3-POL-RENEW: manual renewal (create, offer, accept).
+        services.AddRenewalCommands(configuration);
 
         // UW decides declines; POL marks the job (REQ-POL-156).
         services.AddEventHandler<DeclineIssuedV1, DeclineIssuedHandler>(EventDescriptor.From(DeclineIssuedV1.Descriptor), DeclineIssuedHandler.Name, ModuleCode.POL);

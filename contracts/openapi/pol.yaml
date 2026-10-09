@@ -1946,6 +1946,10 @@ paths:
       - PRD-05 l.2129
       - PRD-05 l.789
       x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
+      - code: POL-ERR-VALIDATION
+        status: 422
       - code: POL-ERR-NOTICE-TOO-LATE
         status: 422
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
@@ -2031,6 +2035,8 @@ paths:
       - PRD-05 l.2129
       - PRD-05 l.789
       x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
       - code: POL-ERR-NOTICE-TOO-LATE
         status: 422
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
@@ -2116,6 +2122,12 @@ paths:
       - PRD-05 l.2129
       - PRD-05 l.789
       x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
+      - code: POL-ERR-REBASE-REQUIRED
+        status: 409
+      - code: POL-ERR-GATE-FAILED
+        status: 422
       - code: POL-ERR-NOTICE-TOO-LATE
         status: 422
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
@@ -5504,6 +5516,9 @@ components:
           $ref: ../events/common.schema.json#/$defs/Code
         deadline:
           $ref: ../events/common.schema.json#/$defs/Instant
+        referred:
+          type: boolean
+          description: True when an open underwriting referral holds the offer back (the job is Quoted but not offered; no RenewalOffered was published)
         servicingPreview:
           $ref: '#/components/schemas/ServicingPreview'
       required:
