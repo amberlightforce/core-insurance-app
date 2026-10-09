@@ -76,4 +76,23 @@ public sealed record PackActivatedV1 : global::CoreIns.Platform.Contracts.Events
     /// <summary>Contract member 'spisRebound'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("spisRebound")]
     public required global::System.Collections.Generic.IReadOnlyList<string> SpisRebound { get; init; }
+
+    /// <summary>Pack code (for example GR); the registry key of the pack. Always set (SL5-CONTRACTS-PACKS, D-SL5-08).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("pack")]
+    public required string Pack { get; init; }
+
+    /// <summary>The PackActivation that produced this state. Always set.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'activationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("activationId")]
+    public required global::System.Guid ActivationId { get; init; }
+
+    /// <summary>Instant the activation took effect; equals activationInstant. Always set.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("activatedAt")]
+    public required global::CoreIns.SharedKernel.Instant ActivatedAt { get; init; }
+
+    /// <summary>Configuration hash of the state this activation recorded; equals newHash. Always set (D-SL5-06).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("resultingHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ResultingHash { get; init; }
 }

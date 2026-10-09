@@ -9,10 +9,10 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | Module | Operations | Full | Minimal | Commands | Queries | In-process only | Partner-facing | Unexpanded families |
 |---|---|---|---|---|---|---|---|---|
 | [PTY](#pty) | 67 | 47 | 20 | 47 | 20 | 5 | 0 | 5 |
-| [PFC](#pfc) | 32 | 29 | 3 | 16 | 16 | 1 | 1 | 0 |
+| [PFC](#pfc) | 34 | 31 | 3 | 18 | 16 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
-| [POL](#pol) | 52 | 48 | 4 | 37 | 15 | 8 | 10 | 0 |
+| [POL](#pol) | 55 | 51 | 4 | 38 | 17 | 8 | 10 | 0 |
 | [BIL](#bil) | 90 | 90 | 0 | 56 | 34 | 6 | 5 | 1 |
 | [CLM](#clm) | 73 | 73 | 0 | 53 | 20 | 10 | 9 | 5 |
 | [RI](#ri) | 116 | 110 | 6 | 82 | 34 | 9 | 0 | 0 |
@@ -24,8 +24,8 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [PLT](#plt) | 100 | 64 | 36 | 63 | 37 | 26 | 0 | 10 |
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 20 | 20 | 0 | 12 | 8 | 5 | 0 | 13 |
-| [MKT](#mkt) | 48 | 32 | 16 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1137 | 919 | 218 | 739 | 398 | 129 | 69 | 65 |
+| [MKT](#mkt) | 48 | 36 | 12 | 17 | 31 | 1 | 0 | 5 |
+| **Total** | 1142 | 928 | 214 | 742 | 400 | 129 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -139,8 +139,10 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pfc.Product.describe` | POST `/api/pfc/v1/products/describe` | Q |  | ui, partner | BIL, CHN, POL | W2 | full | REQ-PFC-222 |
 | `pfc.ProductImport.import` | POST `/api/pfc/v1/product-imports/import` | C | yes | internal | MIG | W2 | full | REQ-PFC-240 |
 | `pfc.ProductVersion.cancelSchedule` | POST `/api/pfc/v1/product-versions/cancel-schedule` | C | yes | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
+| `pfc.ProductVersion.decideFallback` | POST `/api/pfc/v1/product-versions/decide-fallback` | C |  | ui |  | W2 | full | REQ-PFC-213 |
 | `pfc.ProductVersion.diff` | GET `/api/pfc/v1/product-versions/diff` | Q |  | ui |  | W2 | full | REQ-PFC-200 |
 | `pfc.ProductVersion.fallBack` | POST `/api/pfc/v1/product-versions/fall-back` | C | yes | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
+| `pfc.ProductVersion.fallback` | POST `/api/pfc/v1/product-versions/fallback` | C | yes | ui |  | W2 | full | REQ-PFC-213 |
 | `pfc.ProductVersion.import` | POST `/api/pfc/v1/product-versions/import` | C |  | ui |  | W2 | full | REQ-PFC-031, REQ-PFC-032, REQ-PFC-162 |
 | `pfc.ProductVersion.resolve` | POST `/api/pfc/v1/product-versions/resolve` | Q |  | ui | DOC, MIG, MKT, POL, RAT | W2 | full | REQ-PFC-001, REQ-PFC-167, REQ-PFC-221 |
 | `pfc.ProductVersion.schedule` | POST `/api/pfc/v1/product-versions/schedule` | C | yes | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
@@ -325,7 +327,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pol.Job.bind` | POST `/api/pol/v1/jobs/bind` | C | yes | ui, partner | CHN | W4 | full | REQ-POL-001, REQ-POL-003 |
 | `pol.Job.compareVersions` | POST `/api/pol/v1/jobs/compare-versions` | Q |  | ui |  | W4 | full | REQ-POL-150, REQ-POL-151 |
 | `pol.Job.copyVersion` | POST `/api/pol/v1/jobs/copy-version` | C |  | ui |  | W4 | full | REQ-POL-150, REQ-POL-151 |
-| `pol.Job.get` | GET `/api/pol/v1/jobs/{id}` | Q |  | ui |  | W4 | full | REQ-POL-331 |
+| `pol.Job.get` | GET `/api/pol/v1/jobs/{id}` | Q |  | ui | UW | W4 | full | REQ-POL-331 |
 | `pol.Job.lease` | POST `/api/pol/v1/jobs/lease` | C |  | ui |  | W4 | full | REQ-POL-055 |
 | `pol.Job.list` | GET `/api/pol/v1/jobs` | Q |  | ui | CHN, PTY | W4 | full | REQ-POL-331 |
 | `pol.Job.newVersion` | POST `/api/pol/v1/jobs/new-version` | C |  | ui, partner | CHN | W4 | full | REQ-POL-150, REQ-POL-151 |
@@ -337,6 +339,9 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pol.Job.resolveConflicts` | POST `/api/pol/v1/jobs/resolve-conflicts` | C |  | ui |  | W4 | full | REQ-POL-006, REQ-POL-100..REQ-POL-102 |
 | `pol.Job.updateDraft` | POST `/api/pol/v1/jobs/update-draft` | C | yes | ui, partner | CHN | W4 | full | REQ-POL-001, REQ-POL-010, REQ-POL-163 |
 | `pol.Job.withdraw` | POST `/api/pol/v1/jobs/withdraw` | C |  | ui | CHN | W4 | full | REQ-POL-073, REQ-POL-155 |
+| `pol.PackRollbackException.get` | GET `/api/pol/v1/pack-rollback-exceptions/{id}` | Q |  | ui |  | W6 | full | REQ-POL-354 |
+| `pol.PackRollbackException.list` | GET `/api/pol/v1/pack-rollback-exceptions` | Q |  | ui |  | W6 | full | REQ-POL-354 |
+| `pol.PackRollbackException.review` | POST `/api/pol/v1/pack-rollback-exceptions/review` | C |  | ui |  | W6 | full | REQ-POL-354 |
 | `pol.Policy.get` | GET `/api/pol/v1/policies/{id}` | Q |  | ui, partner | CHN, CLM, CMP, DAT, DOC, FIN, MIG, PTY, RI | W4 | full | REQ-POL-002, REQ-POL-010, REQ-POL-085 |
 | `pol.Policy.getMany` | GET `/api/pol/v1/policies/get-many` | Q |  | ui | DOC | unscheduled | full | REQ-POL-351 |
 | `pol.Policy.search` | GET `/api/pol/v1/policies/search` | Q |  | ui, partner | CHN, CLM, CMP, PFC | W4 | full | REQ-POL-014 |
@@ -1374,11 +1379,11 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `mkt.L10nUiLanguage.resolve` | POST `/api/mkt/v1/l10n-ui-languages/resolve` | Q |  | ui |  | W1 | full | REQ-MKT-005, REQ-MKT-333 |
 | `mkt.Pack.certify` | POST `/api/mkt/v1/packs/certify` | C |  | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
 | `mkt.Pack.deprecate` | POST `/api/mkt/v1/packs/deprecate` | C |  | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
-| `mkt.Pack.get` | GET `/api/mkt/v1/packs/{id}` | Q |  | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
-| `mkt.Pack.list` | GET `/api/mkt/v1/packs` | Q |  | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
+| `mkt.Pack.get` | GET `/api/mkt/v1/packs/{id}` | Q |  | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
+| `mkt.Pack.list` | GET `/api/mkt/v1/packs` | Q |  | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
 | `mkt.Pack.publish` | POST `/api/mkt/v1/packs/publish` | C |  | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
-| `mkt.Pack.rollback` | POST `/api/mkt/v1/packs/rollback` | C | yes | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
-| `mkt.Pack.scheduleActivation` | POST `/api/mkt/v1/packs/schedule-activation` | C |  | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
+| `mkt.Pack.rollback` | POST `/api/mkt/v1/packs/rollback` | C | yes | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
+| `mkt.Pack.scheduleActivation` | POST `/api/mkt/v1/packs/schedule-activation` | C | yes | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
 | `mkt.RegimeCode.crosswalk` | GET `/api/mkt/v1/regime-codes/crosswalk` | Q |  | ui |  | W1 | full | REQ-MKT-007, REQ-MKT-208 |
 | `mkt.RegimeCode.get` | GET `/api/mkt/v1/regime-codes/{id}` | Q |  | ui | DAT | W1 | full | REQ-MKT-007, REQ-MKT-208 |
 | `mkt.RegimeCode.list` | GET `/api/mkt/v1/regime-codes` | Q |  | ui | DAT, PFC | W1 | full | REQ-MKT-007, REQ-MKT-208 |

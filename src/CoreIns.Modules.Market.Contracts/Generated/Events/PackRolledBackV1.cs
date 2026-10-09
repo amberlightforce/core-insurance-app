@@ -69,7 +69,34 @@ public sealed record PackRolledBackV1 : global::CoreIns.Platform.Contracts.Event
     [global::System.Text.Json.Serialization.JsonPropertyName("hashesInWindow")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.Sha256Hash> HashesInWindow { get; init; }
 
-    /// <summary>Contract member 'reason'.</summary>
+    /// <summary>Reason entered by the maker (20 to 128 characters). No personal data. Always set.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     public required string Reason { get; init; }
+
+    /// <summary>Pack code (for example GR); the registry key of the pack. Always set (SL5-CONTRACTS-PACKS, D-SL5-08).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("pack")]
+    public required string Pack { get; init; }
+
+    /// <summary>Legal entity whose active pack version was rolled back. Always set.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalEntity")]
+    public required string LegalEntity { get; init; }
+
+    /// <summary>The PackActivation that produced this state. Always set.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'activationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("activationId")]
+    public required global::System.Guid ActivationId { get; init; }
+
+    /// <summary>Window during which the rolled-back version was the active one [from, to); equals affectedWindow. POL matches stored configuration hashes against hashesIssued (D-SL5-10). Always set.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("window")]
+    public required global::CoreIns.SharedKernel.InstantRange Window { get; init; }
+
+    /// <summary>Configuration hashes issued while the rolled-back version was active; equals hashesInWindow. Always set (empty list when none).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hashesIssued")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.Sha256Hash> HashesIssued { get; init; }
+
+    /// <summary>Configuration hash of the state recorded by the rollback (cause PACK_ROLLBACK, D-SL5-06). Always set.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("resultingHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ResultingHash { get; init; }
 }
