@@ -97,7 +97,9 @@ public static class PolicyModule
         // SL3-POL-CHANGE: in-sequence mid-term change (quote and bind of a change job are routed from pol.Job.quote / pol.Job.bind).
         services.AddOptions<ChangeOptions>().Bind(configuration.GetSection(ChangeOptions.Section));
         services.TryAddSingleton<IProration, UnavailableProration>();
-        services.TryAddScoped<IServicingTax, UnavailableServicingTax>();
+        // The production tax port: RAT servicing tax (MKT treatment), bound per term like the proration (SL3-E2E integration fix).
+        services.AddScoped<RatingServicingTaxAdapter>();
+        services.Replace(ServiceDescriptor.Scoped<IServicingTax>(sp => sp.GetRequiredService<RatingServicingTaxAdapter>()));
         services.AddScoped<ChangeHistory>();
         services.AddScoped<ChangeEngineFactory>();
         services.AddScoped<ChangeContextLoader>();

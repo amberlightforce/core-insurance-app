@@ -10,13 +10,8 @@ import {
 } from '../../../design-system';
 import { Section } from '../../staff/PageHeader';
 import styles from '../../staff/staff.module.css';
-import {
-  fuelTypes,
-  validateVehicle,
-  vehicleValueIssue,
-  type FieldIssue,
-  type VehicleForm,
-} from '../../quote/state';
+import { fuelTypes, vehicleValueIssue, type FieldIssue, type VehicleForm } from '../../quote/state';
+import { validateServicingVehicle } from './logic';
 
 export type VehicleMode = 'edit' | 'replace';
 
@@ -46,7 +41,7 @@ export function VehicleEditor({
   const { t } = useTranslation('policy');
   const q = useTranslation('quote').t;
   const [touched, setTouched] = useState<ReadonlySet<keyof VehicleForm>>(new Set());
-  const issues = validateVehicle(form, thisYear());
+  const issues = validateServicingVehicle(form, thisYear(), mode);
   const set = (field: keyof VehicleForm) => (value: string | null) => {
     onChange((f) => ({ ...f, [field]: value ?? '' }));
   };
@@ -143,6 +138,7 @@ export function VehicleEditor({
             label={q('vehicle.power')}
             inputMode="numeric"
             suffix="kW"
+            isReadOnly={identityReadOnly}
             value={form.powerKw}
             onChange={set('powerKw')}
             onBlur={touch('powerKw')}
@@ -150,6 +146,7 @@ export function VehicleEditor({
           />
           <Select
             label={q('vehicle.fuel')}
+            isDisabled={identityReadOnly}
             options={fuelTypes.map((f) => ({ id: f, label: q(`vehicle.fuelTypes.${f}`) }))}
             value={form.fuelType || null}
             onChange={set('fuelType')}
@@ -165,7 +162,8 @@ export function VehicleEditor({
           />
           <TextField
             label={q('vehicle.garaging')}
-            isRequired
+            isRequired={!identityReadOnly}
+            isReadOnly={identityReadOnly}
             inputMode="numeric"
             value={form.garagingPostcode}
             onChange={set('garagingPostcode')}

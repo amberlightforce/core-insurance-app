@@ -1,6 +1,6 @@
 # HANDOVER — Greek P&C Core Insurance
 
-> **Verified takeover status — 2026-10-09:** GitHub Actions is running and this repository is public. Claims re-verification UI #37 and refund backend #39 have merged after all checks passed. Servicing UI #28 and refund UI #34 have recovered fixes and remain under final review/CI. Pack history #43 failed independent adversarial review; corrections and release-manager/design-authority roles are being validated. Full servicing acceptance found a real RAT/MKT tax-code mismatch (GR-IPT versus IPT), now under repair, plus a test clock calendar-day error, already corrected. Slice 3 acceptance remains open. Slice 4/5 preserved work is being recovered; see [CODEX-TAKEOVER.md](CODEX-TAKEOVER.md) for current ownership, evidence and queue. Older status paragraphs below are historical and must not be used as the current state.
+> **Verified takeover checkpoint — 2026-10-09:** Claims #37, refunds #39/#34, servicing #28/#46, tax identity #44, and pack history/roles #43 have merged after all required checks. Expanded real servicing acceptance now passes all 8 tests; integration #45 has merged after all ten checks passed. Reinsurance #47/#48 and product fallback #49 are in independent review with corrections under test. See [CODEX-TAKEOVER.md](CODEX-TAKEOVER.md) for current evidence, ownership, dependencies and remaining work. Older paragraphs below are historical.
 
 
 **Updated:** 2026-10-08 · **Repo:** https://github.com/amberlightforce/core-insurance-app (private, branch `main`) ·
@@ -386,3 +386,5 @@ its exact subject, type and content.
 **To start any new slice:** write a `SLICE-PLAN`-style table (batches, models, review depth), brief builders from the
 template, point them at `docs/module-pattern.md`, and finish with an integration/E2E WP that adds a browser-level E2E
 test to CI.
+
+
