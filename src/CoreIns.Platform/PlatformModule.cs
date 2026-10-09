@@ -126,9 +126,14 @@ public static class PlatformModule
         services.AddCommandAuditor<DecideApproval, ApprovalDecideResponse, DecideApprovalAuditor>();
         services.AddCommand<DecideApproval, ApprovalDecideResponse, DecideApprovalHandler>(CommandDescriptor.For("plt.Approval.decide"));
 
+        services.AddScoped<IValidator<WithdrawApproval>, WithdrawApprovalValidator>();
+        services.AddCommandAuditor<WithdrawApproval, ApprovalWithdrawResponse, WithdrawApprovalAuditor>();
+        services.AddCommand<WithdrawApproval, ApprovalWithdrawResponse, WithdrawApprovalHandler>(CommandDescriptor.For("plt.Approval.withdraw"));
         services.TryAddScoped<ApprovalQueries>();
         services.TryAddSingleton<OwnerDecidedApprovalTypes>();
         services.TryAddScoped<IPlatformApprovalService, PlatformApprovalService>();
+        services.AddErrorDefinitions(ErrorDefinition.For(ModuleCode.PLT, "NOT-OWNER", 403, "Το αίτημα ανήκει σε άλλο τομέα", "The request belongs to another module")
+            .Describe("Μόνο εντολή του υπεύθυνου τομέα μπορεί να αποσύρει το αίτημα.", "Only a command of the owning module can withdraw the request."));
         services.AddErrorDefinitions(
             ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.SelfApproval, 403, "Δεν μπορείτε να εγκρίνετε δικό σας αίτημα", "You cannot decide your own request")
                 .Describe("Ο συντάκτης ενός αιτήματος δεν μπορεί να το αποφασίσει· απαιτείται άλλος εξουσιοδοτημένος χρήστης (τέσσερα μάτια).", "The maker of a request cannot decide it; another authorised user must (four eyes)."),

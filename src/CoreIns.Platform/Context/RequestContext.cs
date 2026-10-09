@@ -53,6 +53,9 @@ public static class EventOrigins
 /// </summary>
 public sealed class RequestContext
 {
+    /// <summary>Trusted registered command identity; restored across nested commands and never supplied by a DTO.</summary>
+    internal ModuleCode? CurrentCommandModule { get; set; }
+
     /// <summary>The acting user, service or AI agent. Defaults to the platform service identity.</summary>
     public ActorRef Actor { get; set; } = ActorRef.Service("coreins");
 

@@ -23,7 +23,16 @@ export const defaultNavItems: NavItem[] = [
   { id: 'underwriting', to: '/underwriting', roles: underwritingRoles },
   { id: 'claims', to: '/claims', roles: claimsRoles },
   { id: 'billing', to: '/billing' },
-  { id: 'reinsurance', to: '/reinsurance' },
+  {
+    id: 'reinsurance',
+    to: '/reinsurance',
+    roles: [
+      'Staff.ReinsuranceAccountant',
+      'Staff.ReinsuranceManager',
+      'Staff.RecoverySpecialist',
+      'Platform.Admin',
+    ],
+  },
   { id: 'finance', to: '/finance' },
   { id: 'documents', to: '/documents' },
   { id: 'compliance', to: '/compliance' },

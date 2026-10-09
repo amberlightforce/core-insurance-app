@@ -8,6 +8,8 @@ import { useMemo, useSyncExternalStore } from 'react';
  */
 export interface DevUser {
   id: string;
+  /** Server-derived canonical ActorKey; picker ids are not authenticated actor identities. */
+  actorKey?: string;
   name: string;
   roles: string[];
 }
