@@ -148,6 +148,7 @@ const implemented = new Set([
   '/finance',
   '/claims',
   '/underwriting',
+  '/reinsurance',
 ]);
 
 /** Placeholder routes for modules whose work packages have not landed, plus the thin-slice staff screens. */

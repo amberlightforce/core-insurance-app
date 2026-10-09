@@ -54,7 +54,8 @@
     "emptyBody": "When a reinsurance treaty is entered it appears here.",
     "noResultsTitle": "No treaty with this status",
     "noResultsBody": "Change or clear the status filter.",
-    "loadMore": "More treaties"
+    "loadMore": "More treaties",
+    "new": "New treaty"
   },
   "contract": {
     "kind": "Treaty",
@@ -68,7 +69,8 @@
       "placed": "Placed",
       "entity": "Legal entity",
       "treaty": "Stable treaty id"
-    }
+    },
+    "edit": "Edit draft"
   },
   "layers": {
     "title": "Layers",
@@ -143,7 +145,8 @@
       "CALCULATED": "Calculated",
       "POSTED": "Posted",
       "REVERSED": "Reversed"
-    }
+    },
+    "invalid": "Recovery data is inconsistent. Request a review before using these amounts."
   },
   "terms": {
     "title": "Terms",
@@ -249,5 +252,36 @@
     "emptyTitle": "No recoverables for this claim",
     "emptyBody": "The claim does not reach the layers of any active treaty, or has not been calculated yet.",
     "outstandingNote": "Outstanding recoverable is not shown per claim; it is a layer-year figure shown on the treaty."
+  },
+  "editor": {
+    "findOrganisation": "Find reinsurer",
+    "confirmBody": "The treaty is saved as a draft. Submit it afterwards for approval by a different user.",
+    "product": "Product",
+    "addLayer": "Add layer",
+    "organisationOnly": "Select an organisation as the reinsurer",
+    "signedTotal": "Signed lines total: {signed} % / {placed} %",
+    "role": "A reinsurance accountant role is required",
+    "confirmTitle": "Save treaty",
+    "to": "Period end",
+    "remove": "Remove",
+    "save": "Save draft",
+    "new": "New reinsurance treaty",
+    "goToFields": "Back to fields",
+    "draftOnly": "Only draft treaties can be edited",
+    "year": "Contract year",
+    "from": "Period start",
+    "fixFields": "Correct the fields before saving",
+    "edit": "Edit treaty",
+    "terms": "Treaty terms",
+    "placed": "Placed percentage (%)",
+    "validation": {
+      "year": "The year must be 1900 or later.",
+      "period": "The end must be after the start.",
+      "lead": "Select exactly one lead reinsurer.",
+      "signed": "Signed lines must sum to the placed percentage (above 0 and up to 100).",
+      "layers": "Enter positive limits and nonnegative retention per layer.",
+      "participants": "Select distinct reinsurers.",
+      "scope": "Select at least one product coverage."
+    }
   }
 }

@@ -167,3 +167,29 @@ export function useClaimRecoveries(claimId: string) {
   );
   return { query, rows };
 }
+
+export type ContractCreateRequest = Schemas['ContractCreateRequest'];
+export type ContractUpdateRequest = Schemas['ContractUpdateRequest'];
+
+export function createContract(request: ContractCreateRequest, idempotencyKey: string) {
+  return apiRequest<{ contract: ContractView }>(`${root}/contracts`, {
+    method: 'POST',
+    body: request,
+    idempotencyKey,
+  });
+}
+
+export function updateContract(
+  contractId: string,
+  request: ContractUpdateRequest,
+  idempotencyKey: string,
+) {
+  return apiRequest<{ contract: ContractView }>(
+    `${root}/contracts/${encodeURIComponent(contractId)}`,
+    {
+      method: 'PATCH',
+      body: request,
+      idempotencyKey,
+    },
+  );
+}

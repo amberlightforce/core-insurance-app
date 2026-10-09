@@ -15,8 +15,13 @@ import { LayersTable, ParticipantsTable } from './LayersAndParticipants';
 import styles from './Reinsurance.module.css';
 import { StageStrip } from './StageStrip';
 import { useRiFormat } from './useRiFormat';
+import { accountantRole, currentUser, hasRole } from './roles';
 
-function periodText(contract: ContractView, date: (value: string | null | undefined) => string, open: string) {
+function periodText(
+  contract: ContractView,
+  date: (value: string | null | undefined) => string,
+  open: string,
+) {
   return `${date(contract.period.from)} – ${contract.period.to ? date(contract.period.to) : open}`;
 }
 
@@ -37,18 +42,35 @@ function ContractDetails({ contract }: { contract: ContractView }) {
         {...(contract.contractNumber ? { recordId: contract.contractNumber } : {})}
         subtitle={<ContractStatusPill status={contract.status} />}
         facts={[
-          { id: 'period', label: t('contract.facts.period'), value: periodText(contract, fmt.date, t('contract.openEnded')) },
+          {
+            id: 'period',
+            label: t('contract.facts.period'),
+            value: periodText(contract, fmt.date, t('contract.openEnded')),
+          },
           { id: 'currency', label: t('contract.facts.currency'), value: contract.currency },
-          { id: 'placed', label: t('contract.facts.placed'), value: fmt.percent(contract.placedPct) },
+          {
+            id: 'placed',
+            label: t('contract.facts.placed'),
+            value: fmt.percent(contract.placedPct),
+          },
           { id: 'entity', label: t('contract.facts.entity'), value: contract.legalEntity },
           ...(contract.stableTreatyId
             ? [{ id: 'treaty', label: t('contract.facts.treaty'), value: contract.stableTreatyId }]
             : []),
         ]}
         actions={
-          <LinkButton variant="secondary" to="/reinsurance">
-            {t('contract.back')}
-          </LinkButton>
+          <>
+            {contract.status === 'DRAFT' &&
+            (hasRole(currentUser().roles, accountantRole) ||
+              hasRole(currentUser().roles, 'Platform.Admin')) ? (
+              <LinkButton to={`/reinsurance/contracts/${contract.contractId}/edit`}>
+                {t('contract.edit')}
+              </LinkButton>
+            ) : null}
+            <LinkButton variant="secondary" to="/reinsurance">
+              {t('contract.back')}
+            </LinkButton>
+          </>
         }
       >
         <StageStrip status={contract.status} />
@@ -58,7 +80,11 @@ function ContractDetails({ contract }: { contract: ContractView }) {
           <Section title={t('layers.title')} meta={t('layers.meta')} count={contract.layers.length}>
             <LayersTable layers={contract.layers} />
           </Section>
-          <Section title={t('participants.title')} meta={t('participants.meta')} count={contract.participations.length}>
+          <Section
+            title={t('participants.title')}
+            meta={t('participants.meta')}
+            count={contract.participations.length}
+          >
             <ParticipantsTable contract={contract} />
           </Section>
           <Section title={t('recoverables.title')} family="success" meta={t('recoverables.meta')}>
@@ -84,9 +110,15 @@ function ContractDetails({ contract }: { contract: ContractView }) {
                 {
                   id: 'coverages',
                   label: t('terms.coverages'),
-                  value: contract.scope.coverageCodes.map((c) => codeLabel('coverage', c)).join(', '),
+                  value: contract.scope.coverageCodes
+                    .map((c) => codeLabel('coverage', c))
+                    .join(', '),
                 },
-                { id: 'alae', label: t('terms.alae'), value: contract.clause.alaeIncluded ? yes : no },
+                {
+                  id: 'alae',
+                  label: t('terms.alae'),
+                  value: contract.clause.alaeIncluded ? yes : no,
+                },
                 {
                   id: 'interest',
                   label: t('terms.interest'),
@@ -104,8 +136,17 @@ function ContractDetails({ contract }: { contract: ContractView }) {
             <KeyValueList
               aria-label={t('history.title')}
               items={[
-                { id: 'maker', label: t('history.maker'), value: contract.maker ?? null, kind: 'mono' },
-                { id: 'created', label: t('history.created'), value: fmt.dateTime(contract.createdAt) },
+                {
+                  id: 'maker',
+                  label: t('history.maker'),
+                  value: contract.maker ?? null,
+                  kind: 'mono',
+                },
+                {
+                  id: 'created',
+                  label: t('history.created'),
+                  value: fmt.dateTime(contract.createdAt),
+                },
                 {
                   id: 'approval',
                   label: t('history.approval'),

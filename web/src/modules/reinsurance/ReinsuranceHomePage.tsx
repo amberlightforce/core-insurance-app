@@ -15,11 +15,13 @@ import {
 import { PageHeader, Section } from '../staff/PageHeader';
 import { QueryView } from '../staff/QueryView';
 import { SimpleTable } from '../staff/SimpleTable';
+import { LinkButton } from '../staff/LinkButton';
 import staff from '../staff/staff.module.css';
 import { contractStatuses, isContractStatus, useContractList, type ContractListItem } from './api';
 import { ContractStatusPill } from './ContractStatusPill';
 import styles from './Reinsurance.module.css';
 import { useRiFormat } from './useRiFormat';
+import { accountantRole, currentUser, hasRole } from './roles';
 
 const all = 'ALL';
 
@@ -49,16 +51,31 @@ export function ReinsuranceHomePage() {
         (c) => c.contractNumber ?? t('registry.noNumber'),
         { size: 170 },
       ),
-      textColumn<ContractListItem>('year', t('registry.columns.year'), (c) => String(c.contractYear), { size: 90 }),
-      textColumn<ContractListItem>('type', t('registry.columns.type'), (c) => t(`type.${c.contractType}`), { size: 200 }),
+      textColumn<ContractListItem>(
+        'year',
+        t('registry.columns.year'),
+        (c) => String(c.contractYear),
+        { size: 90 },
+      ),
+      textColumn<ContractListItem>(
+        'type',
+        t('registry.columns.type'),
+        (c) => t(`type.${c.contractType}`),
+        { size: 200 },
+      ),
       textColumn<ContractListItem>(
         'period',
         t('registry.columns.period'),
-        (c) => `${fmt.date(c.period.from)} – ${c.period.to ? fmt.date(c.period.to) : t('contract.openEnded')}`,
+        (c) =>
+          `${fmt.date(c.period.from)} – ${c.period.to ? fmt.date(c.period.to) : t('contract.openEnded')}`,
         { size: 230 },
       ),
-      textColumn<ContractListItem>('currency', t('registry.columns.currency'), (c) => c.currency, { size: 100 }),
-      percentColumn<ContractListItem>('placed', t('registry.columns.placed'), (c) => c.placedPct, { size: 120 }),
+      textColumn<ContractListItem>('currency', t('registry.columns.currency'), (c) => c.currency, {
+        size: 100,
+      }),
+      percentColumn<ContractListItem>('placed', t('registry.columns.placed'), (c) => c.placedPct, {
+        size: 120,
+      }),
       statusColumn<ContractListItem>(
         'status',
         t('registry.columns.status'),
@@ -77,6 +94,14 @@ export function ReinsuranceHomePage() {
         overline={t('overline')}
         title={t('registry.title')}
         description={t('registry.lead')}
+        actions={
+          hasRole(currentUser().roles, accountantRole) ||
+          hasRole(currentUser().roles, 'Platform.Admin') ? (
+            <LinkButton variant="primary" to="/reinsurance/contracts/new">
+              {t('registry.new')}
+            </LinkButton>
+          ) : undefined
+        }
       />
       <Section title={t('registry.section')} count={items.length} meta={t('registry.meta')}>
         <div className={styles.filters}>
@@ -106,7 +131,7 @@ export function ReinsuranceHomePage() {
                 }}
                 emptyState={
                   <EmptyState
-                    kind={status ? 'no-results' : 'first-use'}
+                    kind={status ? 'filtered' : 'first-use'}
                     headingLevel={3}
                     illustration={<></>}
                     headline={status ? t('registry.noResultsTitle') : t('registry.emptyTitle')}

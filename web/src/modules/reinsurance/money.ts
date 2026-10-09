@@ -3,27 +3,15 @@
  * units (cents); signed lines become millionths of a percent. Only layout proportions ever use `Number`.
  */
 
-/** «1234.5» → 123450n (two decimals; further digits truncate, the contract carries cents only). */
-export function toMinor(amount: string): bigint {
-  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(amount.trim());
-  if (!match) return 0n;
-  const [, sign, whole, fraction = ''] = match;
-  const cents = BigInt(`${whole ?? '0'}${fraction.padEnd(2, '0').slice(0, 2)}`);
-  return sign === '-' ? -cents : cents;
-}
-
-/** 123450n → «1234.50». */
-export function fromMinor(minor: bigint): string {
-  const negative = minor < 0n;
-  const digits = (negative ? -minor : minor).toString().padStart(3, '0');
-  return `${negative ? '-' : ''}${digits.slice(0, -2)}.${digits.slice(-2)}`;
-}
+export { toMinor, fromMinor } from '../../format/money-input';
 
 /** «37.5» → 37_500_000n (millionths of a percent), so signed lines sum exactly. */
 export function pctToMicro(pct: string): bigint {
   const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(pct.trim());
-  if (!match) return 0n;
+  if (!match) throw new RangeError('Invalid percentage');
   const [, sign, whole, fraction = ''] = match;
+  if (fraction.length > 6 && /[1-9]/.test(fraction.slice(6)))
+    throw new RangeError('Too many percentage decimals');
   const value = BigInt(`${whole ?? '0'}${fraction.padEnd(6, '0').slice(0, 6)}`);
   return sign === '-' ? -value : value;
 }
@@ -41,9 +29,15 @@ export function microToPct(micro: bigint): string {
  * `total` exactly (D-SL4-22). Ties go to the earlier index. With no weight at all the first share takes everything.
  */
 export function allocateLargestRemainder(total: bigint, weights: readonly bigint[]): bigint[] {
-  if (weights.length === 0) return [];
+  if (total < 0n || weights.some((weight) => weight < 0n))
+    throw new RangeError('Negative allocation');
+  if (weights.length === 0) {
+    if (total > 0n) throw new RangeError('Missing participants');
+    return [];
+  }
   const sum = weights.reduce((acc, weight) => acc + weight, 0n);
-  if (sum <= 0n || total <= 0n) return weights.map((_, index) => (index === 0 ? total : 0n));
+  if (sum <= 0n && total > 0n) throw new RangeError('Missing signed lines');
+  if (total === 0n) return weights.map(() => 0n);
   const floors = weights.map((weight) => (total * weight) / sum);
   const remainders = weights.map((weight, index) => ({ index, rest: (total * weight) % sum }));
   let left = total - floors.reduce((acc, share) => acc + share, 0n);

@@ -19,7 +19,12 @@ import { useContractRecoveries, type ContractView, type RecoveryRow } from './ap
 import { fromMinor, toMinor } from './money';
 import { PartyName } from './PartyName';
 import { RecoveryStatePill } from './RecoveryStatePill';
-import { money, recoverableTotals, type LayerYearTotal, type ParticipantYearTotal } from './recoverables';
+import {
+  money,
+  recoverableTotals,
+  type LayerYearTotal,
+  type ParticipantYearTotal,
+} from './recoverables';
 import styles from './Reinsurance.module.css';
 import { useRiFormat } from './useRiFormat';
 
@@ -40,7 +45,14 @@ function claimRows(rows: readonly RecoveryRow[]): ClaimLayerRow[] {
     const layerNo = row.layerNo ?? 0;
     const id = `${row.claimId}|${String(layerNo)}`;
     const entry = map.get(id) ?? {
-      row: { id, claimId: row.claimId, layerNo, incurred: '0.00', paid: '0.00', state: row.state ?? null },
+      row: {
+        id,
+        claimId: row.claimId,
+        layerNo,
+        incurred: '0.00',
+        paid: '0.00',
+        state: row.state ?? null,
+      },
       incurred: 0n,
       paid: 0n,
     };
@@ -49,7 +61,11 @@ function claimRows(rows: readonly RecoveryRow[]): ClaimLayerRow[] {
     map.set(id, entry);
   }
   return [...map.values()]
-    .map(({ row, incurred, paid }) => ({ ...row, incurred: fromMinor(incurred), paid: fromMinor(paid) }))
+    .map(({ row, incurred, paid }) => ({
+      ...row,
+      incurred: fromMinor(incurred),
+      paid: fromMinor(paid),
+    }))
     .sort((a, b) => a.layerNo - b.layerNo || a.claimId.localeCompare(b.claimId));
 }
 
@@ -63,24 +79,60 @@ export function ContractRecoverables({ contract }: { contract: ContractView }) {
   const fmt = useRiFormat();
   const { query, rows, partial } = useContractRecoveries(contract.contractId);
   const currency = contract.currency;
-  const totals = useMemo(
-    () => recoverableTotals(rows, contract.participations),
-    [rows, contract.participations],
-  );
-  const perClaim = useMemo(() => claimRows(rows), [rows]);
+  const calculated = useMemo(() => {
+    try {
+      return {
+        totals: recoverableTotals(rows, contract.participations),
+        perClaim: claimRows(rows),
+        invalid: false,
+      };
+    } catch {
+      return {
+        totals: { layers: [] as LayerYearTotal[], participants: [] as ParticipantYearTotal[] },
+        perClaim: [] as ClaimLayerRow[],
+        invalid: true,
+      };
+    }
+  }, [rows, contract.participations]);
+  const { totals, perClaim } = calculated;
 
   const layerColumns = useMemo<DataColumn<LayerYearTotal>[]>(
     () => [
-      textColumn<LayerYearTotal>('layer', t('recoverables.columns.layer'), (l) => t('layers.layerNo', { no: l.layerNo }), { size: 110 }),
-      moneyColumn<LayerYearTotal>('incurred', t('recoverables.columns.incurred'), (l) => fromMinor(l.incurred), { size: 170, currency }),
-      moneyColumn<LayerYearTotal>('paid', t('recoverables.columns.paid'), (l) => fromMinor(l.paid), { size: 170, currency }),
-      moneyColumn<LayerYearTotal>('outstanding', t('recoverables.columns.layerOutstanding'), (l) => fromMinor(l.outstanding), { size: 190, currency }),
+      textColumn<LayerYearTotal>(
+        'layer',
+        t('recoverables.columns.layer'),
+        (l) => t('layers.layerNo', { no: l.layerNo }),
+        { size: 110 },
+      ),
+      moneyColumn<LayerYearTotal>(
+        'incurred',
+        t('recoverables.columns.incurred'),
+        (l) => fromMinor(l.incurred),
+        { size: 170, currency },
+      ),
+      moneyColumn<LayerYearTotal>(
+        'paid',
+        t('recoverables.columns.paid'),
+        (l) => fromMinor(l.paid),
+        { size: 170, currency },
+      ),
+      moneyColumn<LayerYearTotal>(
+        'outstanding',
+        t('recoverables.columns.layerOutstanding'),
+        (l) => fromMinor(l.outstanding),
+        { size: 190, currency },
+      ),
     ],
     [t, currency],
   );
   const participantColumns = useMemo<DataColumn<ParticipantYearTotal>[]>(
     () => [
-      textColumn<ParticipantYearTotal>('layer', t('recoverables.columns.layer'), (p) => t('layers.layerNo', { no: p.layerNo }), { size: 110 }),
+      textColumn<ParticipantYearTotal>(
+        'layer',
+        t('recoverables.columns.layer'),
+        (p) => t('layers.layerNo', { no: p.layerNo }),
+        { size: 110 },
+      ),
       statusColumn<ParticipantYearTotal>(
         'reinsurer',
         t('recoverables.columns.reinsurer'),
@@ -88,9 +140,24 @@ export function ContractRecoverables({ contract }: { contract: ContractView }) {
         (p) => <PartyName partyId={p.participantId} />,
         { size: 240, enableSorting: false },
       ),
-      moneyColumn<ParticipantYearTotal>('incurred', t('recoverables.columns.incurred'), (p) => fromMinor(p.incurred), { size: 160, currency }),
-      moneyColumn<ParticipantYearTotal>('paid', t('recoverables.columns.paid'), (p) => fromMinor(p.paid), { size: 160, currency }),
-      moneyColumn<ParticipantYearTotal>('outstanding', t('recoverables.columns.allocatedOutstanding'), (p) => fromMinor(p.outstanding), { size: 190, currency }),
+      moneyColumn<ParticipantYearTotal>(
+        'incurred',
+        t('recoverables.columns.incurred'),
+        (p) => fromMinor(p.incurred),
+        { size: 160, currency },
+      ),
+      moneyColumn<ParticipantYearTotal>(
+        'paid',
+        t('recoverables.columns.paid'),
+        (p) => fromMinor(p.paid),
+        { size: 160, currency },
+      ),
+      moneyColumn<ParticipantYearTotal>(
+        'outstanding',
+        t('recoverables.columns.allocatedOutstanding'),
+        (p) => fromMinor(p.outstanding),
+        { size: 190, currency },
+      ),
     ],
     [t, currency],
   );
@@ -107,9 +174,22 @@ export function ContractRecoverables({ contract }: { contract: ContractView }) {
         ),
         { size: 330 },
       ),
-      textColumn<ClaimLayerRow>('layer', t('recoverables.columns.layer'), (r) => t('layers.layerNo', { no: r.layerNo }), { size: 110 }),
-      moneyColumn<ClaimLayerRow>('incurred', t('recoverables.columns.incurred'), (r) => r.incurred, { size: 160, currency }),
-      moneyColumn<ClaimLayerRow>('paid', t('recoverables.columns.paid'), (r) => r.paid, { size: 160, currency }),
+      textColumn<ClaimLayerRow>(
+        'layer',
+        t('recoverables.columns.layer'),
+        (r) => t('layers.layerNo', { no: r.layerNo }),
+        { size: 110 },
+      ),
+      moneyColumn<ClaimLayerRow>(
+        'incurred',
+        t('recoverables.columns.incurred'),
+        (r) => r.incurred,
+        { size: 160, currency },
+      ),
+      moneyColumn<ClaimLayerRow>('paid', t('recoverables.columns.paid'), (r) => r.paid, {
+        size: 160,
+        currency,
+      }),
       statusColumn<ClaimLayerRow>(
         'state',
         t('recoverables.columns.state'),
@@ -133,6 +213,7 @@ export function ContractRecoverables({ contract }: { contract: ContractView }) {
       />
     );
   }
+  if (calculated.invalid) return <Banner variant="danger" title={t('recoverables.invalid')} />;
   if (rows.length === 0) {
     return (
       <EmptyState

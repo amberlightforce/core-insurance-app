@@ -79,7 +79,11 @@ export function DecisionBar({ contract }: { contract: ContractView }) {
       {
         onSuccess: () => {
           done();
-          announce(t(decision === 'APPROVE' ? 'decision.announceApproved' : 'decision.announceReturned', { contract: label }));
+          announce(
+            t(decision === 'APPROVE' ? 'decision.announceApproved' : 'decision.announceReturned', {
+              contract: label,
+            }),
+          );
           toast.success({
             title: t(decision === 'APPROVE' ? 'decision.approvedToast' : 'decision.returnedToast'),
             description: label,
@@ -108,9 +112,11 @@ export function DecisionBar({ contract }: { contract: ContractView }) {
 
   const problem = mutation.isError ? problemOf(mutation.error) : null;
   const code = problem?.code;
-  const known = code && i18n.exists(`reinsurance:errors.codes.${code}`) ? t(`errors.codes.${code}`) : null;
+  const known =
+    code && i18n.exists(`reinsurance:errors.codes.${code}`) ? t(`errors.codes.${code}`) : null;
   const explained =
-    known ?? (problem?.status === 403 ? t('errors.forbidden') : (problem?.detail ?? t('errors.generic')));
+    known ??
+    (problem?.status === 403 ? t('errors.forbidden') : (problem?.detail ?? t('errors.generic')));
   const stale = code === 'RI-ERR-STALE';
 
   const error = problem ? (
@@ -218,13 +224,21 @@ export function DecisionBar({ contract }: { contract: ContractView }) {
             autoFocus
             value={reason}
             onChange={setReason}
-            helperText={t(mode === 'approve' ? 'decision.reasonApproveHelp' : 'decision.reasonReturnHelp')}
+            helperText={t(
+              mode === 'approve' ? 'decision.reasonApproveHelp' : 'decision.reasonReturnHelp',
+            )}
             errorMessage={
-              tried && mode === 'return' && reason.trim() === '' ? t('decision.reasonRequired') : undefined
+              tried && mode === 'return' && reason.trim() === ''
+                ? t('decision.reasonRequired')
+                : undefined
             }
           />
           <div className={styles.reasonActions}>
-            <Button type="submit" variant={mode === 'approve' ? 'commit' : 'primary'} isLoading={pending}>
+            <Button
+              type="submit"
+              variant={mode === 'approve' ? 'commit' : 'primary'}
+              isLoading={pending}
+            >
               {t(mode === 'approve' ? 'decision.confirmApprove' : 'decision.confirmReturn')}
             </Button>
             <Button variant="ghost" isDisabled={pending} onPress={cancel}>

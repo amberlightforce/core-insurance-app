@@ -27,12 +27,30 @@ export function LayersTable({ layers }: { layers: readonly ContractLayer[] }) {
   const rows = useMemo(() => [...layers].sort((a, b) => a.layerNo - b.layerNo), [layers]);
   const columns = useMemo<DataColumn<ContractLayer>[]>(
     () => [
-      textColumn<ContractLayer>('layer', t('layers.columns.layer'), (l) => t('layers.layerNo', { no: l.layerNo }), { size: 110 }),
-      textColumn<ContractLayer>('summary', t('layers.columns.summary'), (l) => summaryOf(l), { size: 190 }),
-      moneyColumn<ContractLayer>('attachment', t('layers.columns.attachment'), (l) => l.attachment.amount, { size: 150 }),
-      moneyColumn<ContractLayer>('limit', t('layers.columns.limit'), (l) => l.limit.amount, { size: 150 }),
-      moneyColumn<ContractLayer>('aad', t('layers.columns.aad'), (l) => l.aad.amount, { size: 130 }),
-      moneyColumn<ContractLayer>('aal', t('layers.columns.aal'), (l) => l.aal?.amount ?? null, { size: 150 }),
+      textColumn<ContractLayer>(
+        'layer',
+        t('layers.columns.layer'),
+        (l) => t('layers.layerNo', { no: l.layerNo }),
+        { size: 110 },
+      ),
+      textColumn<ContractLayer>('summary', t('layers.columns.summary'), (l) => summaryOf(l), {
+        size: 190,
+      }),
+      moneyColumn<ContractLayer>(
+        'attachment',
+        t('layers.columns.attachment'),
+        (l) => l.attachment.amount,
+        { size: 150 },
+      ),
+      moneyColumn<ContractLayer>('limit', t('layers.columns.limit'), (l) => l.limit.amount, {
+        size: 150,
+      }),
+      moneyColumn<ContractLayer>('aad', t('layers.columns.aad'), (l) => l.aad.amount, {
+        size: 130,
+      }),
+      moneyColumn<ContractLayer>('aal', t('layers.columns.aal'), (l) => l.aal?.amount ?? null, {
+        size: 150,
+      }),
     ],
     [t, summaryOf],
   );
@@ -54,7 +72,6 @@ export function LayersTable({ layers }: { layers: readonly ContractLayer[] }) {
     />
   );
 }
-
 
 /** SCR-RI-04 participations: reinsurer, lead, broker, signed line, with the Σ signed lines vs placed % check. */
 export function ParticipantsTable({ contract }: { contract: ContractView }) {
@@ -86,10 +103,20 @@ export function ParticipantsTable({ contract }: { contract: ContractView }) {
         'broker',
         t('participants.columns.broker'),
         (p) => p.brokerPartyId ?? '',
-        (p) => (p.brokerPartyId ? <PartyName partyId={p.brokerPartyId} /> : <span>{t('participants.direct')}</span>),
+        (p) =>
+          p.brokerPartyId ? (
+            <PartyName partyId={p.brokerPartyId} />
+          ) : (
+            <span>{t('participants.direct')}</span>
+          ),
         { size: 220, enableSorting: false },
       ),
-      percentColumn<ContractParticipation>('signedLine', t('participants.columns.signedLine'), (p) => p.signedLinePct, { size: 130 }),
+      percentColumn<ContractParticipation>(
+        'signedLine',
+        t('participants.columns.signedLine'),
+        (p) => p.signedLinePct,
+        { size: 130 },
+      ),
     ],
     [t],
   );

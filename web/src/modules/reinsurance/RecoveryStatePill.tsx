@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { StatusPill } from '../../design-system';
 
 /** Recovery record state (CALCULATED → POSTED → REVERSED) through the status map, in the module's own words. */
-export function RecoveryStatePill({ state }: { state: 'CALCULATED' | 'POSTED' | 'REVERSED' | null }) {
+export function RecoveryStatePill({
+  state,
+}: {
+  state: 'CALCULATED' | 'POSTED' | 'REVERSED' | null;
+}) {
   const { t } = useTranslation('reinsurance');
   if (state === null) return <span>—</span>;
   const text = t(`recoverables.state.${state}`);

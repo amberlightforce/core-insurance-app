@@ -67,7 +67,8 @@ export function recoverableTotals(
   const layerList = [...layers.values()].sort((a, b) => a.layerNo - b.layerNo);
   for (const layer of layerList) {
     const raw = layer.incurred - layer.paid;
-    layer.outstanding = raw < 0n ? 0n : raw;
+    if (raw < 0n) throw new RangeError('Layer-year paid exceeds incurred');
+    layer.outstanding = raw;
   }
 
   const participants: ParticipantYearTotal[] = [];
