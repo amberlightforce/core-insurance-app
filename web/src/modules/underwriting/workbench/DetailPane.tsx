@@ -13,14 +13,14 @@ import {
   useRegionFormat,
   type KeyValueItem,
 } from '../../../design-system';
-import { formatDateTime } from '../../../format';
+import { formatDateTime, formatMoney } from '../../../format';
 import { useIssueText } from '../../quote/uwIssues';
 import { PageHeader } from '../../staff/PageHeader';
 import { problemOf } from '../../staff/problem';
 import { useFormat } from '../../staff/useFormat';
 import { useReferral, type ReferralIssue, type ReferralReason, type ReferralView } from '../api';
 import { DecisionBar } from './DecisionBar';
-import { useIssueTypeLabel } from './helpers';
+import { formatIssueFigure, useIssueTypeLabel } from './helpers';
 import styles from './Workbench.module.css';
 
 type IssueStatus = ReferralIssue['issue']['status'];
@@ -64,11 +64,12 @@ function IssueCard({ entry, reason }: IssueCardProps) {
   const [showWhy, setShowWhy] = useState(false);
   const { issue } = entry;
   // A driver-rule value arrives as an age band code («FROM_18_TO_20»): shown in words.
-  const observed = reason?.observed
-    ? i18n.exists(`underwriting:detail.ageBand.${reason.observed}`)
-      ? t(`detail.ageBand.${reason.observed}`)
-      : reason.observed
-    : t('issue.noValue');
+  const money = (amount: string) => formatMoney(amount, { currency: 'EUR', region });
+  const figure = (value: string) =>
+    i18n.exists(`underwriting:detail.ageBand.${value}`)
+      ? t(`detail.ageBand.${value}`)
+      : formatIssueFigure(issue.issueType, value, t, money);
+  const observed = reason?.observed ? figure(reason.observed) : t('issue.noValue');
   const text = describe(issue);
   const limitReason = reason?.limitUnavailableReason;
 
@@ -83,7 +84,7 @@ function IssueCard({ entry, reason }: IssueCardProps) {
         <b className={styles.num}>{observed}</b>
         <span className={styles.faint}>{t('issue.limit')}</span>
         {reason?.limit ? (
-          <span className={styles.num}>{reason.limit}</span>
+          <span className={styles.num}>{figure(reason.limit)}</span>
         ) : (
           <Tooltip
             content={t(

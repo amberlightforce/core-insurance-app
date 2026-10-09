@@ -179,7 +179,8 @@ describe('WorkbenchPage', () => {
     expect(within(rail).getByText('11 από 19')).toBeInTheDocument();
     const grid = await screen.findByRole('grid', { name: 'Παραπομπές' });
     expect(within(grid).getByText(customerName)).toBeInTheDocument();
-    expect(within(grid).getByText('Παλαιό όχημα +1')).toBeInTheDocument();
+    expect(within(grid).getByText('Παλαιό όχημα')).toBeInTheDocument();
+    expect(within(grid).getByText('+1')).toBeInTheDocument();
     await expectNoA11yViolations(container);
   });
 
@@ -245,8 +246,8 @@ describe('WorkbenchPage', () => {
     expect(location).not.toContain('Νικολάου');
     expect(sessionStorage.getItem('coreins.devSession')).not.toContain(customerName);
     const card = screen.getByRole('article', { name: 'Παλαιό όχημα' });
-    expect(within(card).getByText('35')).toBeInTheDocument();
-    expect(within(card).getByText('20')).toBeInTheDocument();
+    expect(within(card).getByText('35 έτη')).toBeInTheDocument();
+    expect(within(card).getByText('20 έτη')).toBeInTheDocument();
     // The age band is readable and the missing limit says why.
     const driver = screen.getByRole('article', { name: 'Νέος οδηγός' });
     expect(within(driver).getByText('18–20 ετών')).toBeInTheDocument();
@@ -268,7 +269,7 @@ describe('WorkbenchPage', () => {
     signIn(['Staff.UnderwritingManager']);
     const api = routes();
     const { user } = render(`/underwriting?job=${jobRef}`);
-    await user.click(await screen.findByRole('button', { name: 'Έγκριση…' }));
+    await user.click(await screen.findByRole('button', { name: /^Έγκριση…/ }));
     const reason = await screen.findByRole('textbox', { name: /Αιτιολογία έγκρισης/ });
     await user.type(reason, '{Control>}{Enter}{/Control}');
     expect(api.callsTo('POST', '/api/uw/v1/issues/decide')).toHaveLength(0);
@@ -303,7 +304,7 @@ describe('WorkbenchPage', () => {
       }),
     });
     render(`/underwriting?job=${jobRef}`);
-    const approve = await screen.findByRole('button', { name: 'Έγκριση…' });
+    const approve = await screen.findByRole('button', { name: /^Έγκριση…/ });
     expect(approve).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: 'Απόρριψη…' })).toHaveAttribute(
       'aria-disabled',
@@ -349,7 +350,7 @@ describe('WorkbenchPage', () => {
     signIn(['Staff.UnderwritingManager']);
     routes({ decide: () => problem(409, 'UW-ERR-STALE', 'Stale') });
     const { user } = render(`/underwriting?job=${jobRef}`);
-    await user.click(await screen.findByRole('button', { name: 'Έγκριση…' }));
+    await user.click(await screen.findByRole('button', { name: /^Έγκριση…/ }));
     await user.type(await screen.findByRole('textbox', { name: /Αιτιολογία έγκρισης/ }), 'Ok');
     await user.keyboard('{Control>}{Enter}{/Control}');
     expect(await screen.findByText(/άλλαξε από κάποιον άλλον/)).toBeInTheDocument();

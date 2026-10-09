@@ -1,8 +1,9 @@
+import { ArrowLeft } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
-import { PermissionDenied, SplitView } from '../../../design-system';
+import { Button, PermissionDenied } from '../../../design-system';
 import { useDevSession } from '../../../dev-auth/devAuth';
 import {
   isReferralQueue,
@@ -52,17 +53,18 @@ function Workbench() {
     <div className={styles.root}>
       <div className={styles.screen}>
         <ViewsRail active={queue} counts={counts} onSelect={selectQueue} />
-        <div className={styles.main}>
-          <SplitView
-            listLabel={t('queue.label')}
-            detailLabel={t('detail.label')}
-            isDetailOpen={job !== null}
-            onCloseDetail={closeJob}
-            defaultListWidth={520}
-            storageKey="coreins.uw.listWidth"
-            list={<QueuePane queue={queue} onOpen={openJob} list={list} />}
-            detail={<DetailPane jobRef={job} />}
-          />
+        <div className={styles.panes} data-open={job !== null ? '' : undefined}>
+          <section className={styles.listPane} aria-label={t('queue.label')}>
+            <QueuePane queue={queue} onOpen={openJob} list={list} />
+          </section>
+          <section className={styles.detailPane} aria-label={t('detail.label')}>
+            <div className={styles.back}>
+              <Button variant="ghost" size="sm" icon={ArrowLeft} onPress={closeJob}>
+                {t('detail.back')}
+              </Button>
+            </div>
+            <DetailPane jobRef={job} />
+          </section>
         </div>
       </div>
     </div>

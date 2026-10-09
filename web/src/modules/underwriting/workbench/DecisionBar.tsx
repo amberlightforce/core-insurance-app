@@ -7,6 +7,7 @@ import { readSession } from '../../../dev-auth/devAuth';
 import {
   Banner,
   Button,
+  Kbd,
   TextField,
   announce,
   toast,
@@ -186,7 +187,7 @@ export function DecisionBar({ referral }: DecisionBarProps) {
             {t('decision.reject')}
           </Button>
           <Button
-            variant="primary"
+            variant="commit"
             isLoading={mutation.isPending}
             {...(!canDecide ? { disabledReason } : {})}
             onPress={() => {
@@ -194,6 +195,9 @@ export function DecisionBar({ referral }: DecisionBarProps) {
             }}
           >
             {t('decision.approve')}
+            <span className={styles.kbdHint}>
+              <Kbd shortcut="Mod+Enter" tone="subtle" />
+            </span>
           </Button>
         </div>
       ) : null}

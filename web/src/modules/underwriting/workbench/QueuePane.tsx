@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -9,14 +9,13 @@ import {
   LoadingState,
   moneyColumn,
   queueColumn,
+  statusColumn,
   textColumn,
-  useRegionFormat,
   type DataColumn,
 } from '../../../design-system';
-import { formatRelative } from '../../../format';
 import { problemOf } from '../../staff/problem';
 import { type ReferralListItem, type ReferralQueue, type useReferralList } from '../api';
-import { useIssueTypeLabel } from './helpers';
+import { useIssueTypeLabel, waitingSince } from './helpers';
 import styles from './Workbench.module.css';
 
 export interface QueuePaneProps {
@@ -33,9 +32,24 @@ export interface QueuePaneProps {
  */
 export function QueuePane({ queue, onOpen, list }: QueuePaneProps) {
   const { t } = useTranslation('underwriting');
-  const region = useRegionFormat();
   const typeLabel = useIssueTypeLabel();
   const { query, items, counts } = list;
+
+  // Below ~560 px the reason moves under the customer name instead of a column of its own (nothing is cut).
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const el = sheetRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width !== undefined) setNarrow(width < 560);
+    });
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   const columns = useMemo<DataColumn<ReferralListItem>[]>(
     () => [
@@ -45,37 +59,56 @@ export function QueuePane({ queue, onOpen, list }: QueuePaneProps) {
         (row) => ({
           primary: row.customer?.displayName ?? row.customer?.partyNumber ?? t('queue.noName'),
           ...(row.jobNumber ? { id: row.jobNumber } : {}),
-          ...(row.productCode ? { fact: row.productCode } : {}),
+          ...(narrow && row.reasons[0]
+            ? { fact: typeLabel(row.reasons[0].issueType) }
+            : row.productCode
+              ? { fact: row.productCode }
+              : {}),
         }),
-        { size: 180, enableSorting: false },
+        { size: narrow ? 200 : 220, enableSorting: false },
       ),
-      textColumn<ReferralListItem>(
-        'reason',
-        t('queue.columns.reason'),
-        (row) => {
-          const first = row.reasons[0];
-          if (!first) return null;
-          const label = typeLabel(first.issueType);
-          return row.reasons.length > 1
-            ? `${label} ${t('queue.extraReasons', { count: row.reasons.length - 1 })}`
-            : label;
-        },
-        { size: 120, enableSorting: false },
-      ),
+      ...(narrow
+        ? []
+        : [
+            statusColumn<ReferralListItem>(
+              'reason',
+              t('queue.columns.reason'),
+              (row) => row.reasons[0]?.issueType ?? null,
+              (row) => {
+                const first = row.reasons[0];
+                if (!first) return null;
+                const extra = row.reasons.length - 1;
+                // The «+n» badge stays outside the truncated text, so it is never cut.
+                return (
+                  <span className={styles.reasonCell}>
+                    <span className={styles.reasonText} title={typeLabel(first.issueType)}>
+                      {typeLabel(first.issueType)}
+                    </span>
+                    {extra > 0 ? (
+                      <span className={styles.more}>
+                        {t('queue.extraReasons', { count: extra })}
+                      </span>
+                    ) : null}
+                  </span>
+                );
+              },
+              { size: 170, enableSorting: false },
+            ),
+          ]),
       textColumn<ReferralListItem>(
         'waiting',
         t('queue.columns.waiting'),
-        (row) => formatRelative(row.raisedAt, { region }),
-        { size: 110, enableSorting: false },
+        (row) => waitingSince(row.raisedAt, t),
+        { size: 90, enableSorting: false },
       ),
       moneyColumn<ReferralListItem>(
         'premium',
         t('queue.columns.premium'),
         (row) => row.premiumTotal?.amount ?? null,
-        { currency: 'EUR', size: 90, enableSorting: false },
+        { currency: 'EUR', size: 100, enableSorting: false },
       ),
     ],
-    [t, region, typeLabel],
+    [t, typeLabel, narrow],
   );
 
   const getRowId = useMemo(() => (row: ReferralListItem) => row.jobRef, []);
@@ -159,7 +192,7 @@ export function QueuePane({ queue, onOpen, list }: QueuePaneProps) {
   }
 
   return (
-    <div className={styles.sheet}>
+    <div className={styles.sheet} ref={sheetRef}>
       <div className={styles.qhead}>
         <h2 className={styles.qtitle}>{t(`views.${queue}`)}</h2>
       </div>

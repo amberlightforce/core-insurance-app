@@ -20,7 +20,7 @@
     "columns": {
       "customer": "Customer",
       "reason": "Reason",
-      "waiting": "Waiting since",
+      "waiting": "Waiting",
       "premium": "Premium"
     },
     "noName": "Customer without a name",
@@ -37,7 +37,12 @@
       "DECIDED_BY_ME_TODAY": "The decisions you take today appear here.",
       "REJECTED": "Referrals with a standing rejection appear here."
     },
-    "mineUnknown": "Your referrals are not counted while many referrals are open. See the Team view."
+    "mineUnknown": "Your referrals are not counted while many referrals are open. See the Team view.",
+    "waiting": {
+      "minutes": "{count} min",
+      "hours": "{count} h",
+      "days": "{count} d"
+    }
   },
   "detail": {
     "label": "Referral details",
@@ -74,7 +79,8 @@
       "FROM_25_TO_29": "25–29",
       "FROM_30_TO_69": "30–69",
       "FROM_70": "70 and over"
-    }
+    },
+    "back": "Back to the list"
   },
   "issue": {
     "value": "Value",
@@ -87,7 +93,11 @@
       "other": "The limit is not available."
     },
     "decidedBy": "Decision: {name} · {time}",
-    "decisionReason": "Reason: {reason}"
+    "decisionReason": "Reason: {reason}",
+    "units": {
+      "years": "{count, plural, one {# year} other {# years}}",
+      "claims": "{count, plural, one {# claim} other {# claims}}"
+    }
   },
   "decision": {
     "label": "Decision",
