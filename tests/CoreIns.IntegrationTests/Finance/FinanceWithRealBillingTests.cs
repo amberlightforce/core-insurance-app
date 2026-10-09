@@ -81,12 +81,12 @@ public sealed class FinanceWithRealBillingTests(PostgresFixture database) : ICla
         (await _slice.ScalarAsync<long>($"SELECT count(*) FROM fin.journal_line WHERE billing_account_id = '{account}' AND account_code = 'GL-2110' AND (policy_number IS NULL OR gl_key IS NULL OR coverage_code IS NULL)"))
             .ShouldBe(0);
 
-        // The premium path posts under the rule set in force: v2 (SL2-FIN-CLM superseded v1 with the claims rules), and the
+        // The premium path posts under the rule set in force: v3 (SL3-FIN-RULES, effective 2026-10-01; its premium rules are v2's unchanged), and the
         // ALLOCATED entry is its own journal that clears GL-1210 against GL-2540 (E2E-01 read the ledger before it, 2026-10-08).
         (await _slice.ScalarAsync<string>($"""
             SELECT string_agg(DISTINCT je.rule_set_version::text, ',') FROM fin.journal_entry je
              WHERE EXISTS (SELECT 1 FROM fin.journal_line jl WHERE jl.journal_id = je.journal_id AND jl.billing_account_id = '{account}')
-            """)).ShouldBe("2");
+            """)).ShouldBe("3");
         (await _slice.ScalarAsync<string>($"""
             SELECT string_agg(jl.account_code || ' ' || jl.side, ',' ORDER BY jl.account_code, jl.side) FROM (
               SELECT DISTINCT jl.account_code, jl.side FROM fin.journal_line jl JOIN fin.journal_entry je USING (journal_id)

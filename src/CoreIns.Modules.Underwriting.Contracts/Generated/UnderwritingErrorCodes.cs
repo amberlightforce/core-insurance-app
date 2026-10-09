@@ -88,7 +88,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): uw.Issue.decide.</para>
+    /// <para>Declared by 2 operation(s): uw.Issue.decide, uw.Referral.get.</para>
     /// </remarks>
     public const string NotFound = "UW-ERR-NOT-FOUND";
 
@@ -112,7 +112,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-PERMISSION (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 11 operation(s): uw.Contingency.list, uw.DisclosureFinding.decide, uw.DisclosureFinding.get, uw.DisclosureFinding.list, uw.DisclosureFinding.record, uw.Issue.explain, uw.Issue.get, uw.Issue.list, uw.Issue.listForChannel, uw.RefusalRegister.export, uw.RefusalRegister.query.</para>
+    /// <para>Declared by 13 operation(s): uw.Contingency.list, uw.DisclosureFinding.decide, uw.DisclosureFinding.get, uw.DisclosureFinding.list, uw.DisclosureFinding.record, uw.Issue.explain, uw.Issue.get, uw.Issue.list, uw.Issue.listForChannel, uw.Referral.get, uw.Referral.list, uw.RefusalRegister.export, ….</para>
     /// </remarks>
     public const string Permission = "UW-ERR-PERMISSION";
 
@@ -202,7 +202,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 13 operation(s): uw.Issue.decide, uw.Issue.list, uw.RuleSet.approve, uw.RuleSet.create, uw.RuleSet.draft, uw.RuleSet.edit, uw.RuleSet.export, uw.RuleSet.import, uw.RuleSet.schedule, uw.RuleSet.simulate, uw.RuleSet.submit, uw.RuleSet.test, ….</para>
+    /// <para>Declared by 14 operation(s): uw.Issue.decide, uw.Issue.list, uw.Referral.list, uw.RuleSet.approve, uw.RuleSet.create, uw.RuleSet.draft, uw.RuleSet.edit, uw.RuleSet.export, uw.RuleSet.import, uw.RuleSet.schedule, uw.RuleSet.simulate, uw.RuleSet.submit, ….</para>
     /// </remarks>
     public const string Validation = "UW-ERR-VALIDATION";
 

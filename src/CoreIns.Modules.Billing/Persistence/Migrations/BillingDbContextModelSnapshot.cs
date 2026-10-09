@@ -183,6 +183,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("date")
                         .HasColumnName("booking_date");
 
+                    b.Property<string>("CancellationSource")
+                        .HasColumnType("text")
+                        .HasColumnName("cancellation_source");
+
                     b.Property<string>("ChargeCategory")
                         .IsRequired()
                         .HasColumnType("text")
@@ -285,6 +289,18 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("transaction_id");
 
+                    b.Property<string>("TransactionKind")
+                        .HasColumnType("text")
+                        .HasColumnName("transaction_kind");
+
+                    b.Property<string>("TreatmentRuleId")
+                        .HasColumnType("text")
+                        .HasColumnName("treatment_rule_id");
+
+                    b.Property<string>("TreatmentRuleVersion")
+                        .HasColumnType("text")
+                        .HasColumnName("treatment_rule_version");
+
                     b.Property<DateOnly>("ValidFrom")
                         .HasColumnType("date")
                         .HasColumnName("valid_from");
@@ -318,6 +334,84 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                             t.HasCheckConstraint("ck_charge_status", "status IN ('RECEIVED', 'WRITTEN', 'ACCRUED', 'SCHEDULED', 'QUARANTINED')");
 
                             t.HasCheckConstraint("ck_charge_valid", "valid_to IS NULL OR valid_to > valid_from");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.CreditApplicationRow", b =>
+                {
+                    b.Property<Guid>("CreditApplicationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("credit_application_id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actor");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<Guid>("CreditItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("credit_item_id");
+
+                    b.Property<Guid>("CreditNoteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("credit_note_id");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<Guid?>("TargetInvoiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_invoice_id");
+
+                    b.Property<Guid?>("TargetInvoiceItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_invoice_item_id");
+
+                    b.Property<string>("TargetKind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_kind");
+
+                    b.HasKey("CreditApplicationId")
+                        .HasName("pk_credit_application");
+
+                    b.HasIndex("BillingAccountId")
+                        .HasDatabaseName("ix_credit_application_account");
+
+                    b.HasIndex("CreditItemId")
+                        .HasDatabaseName("ix_credit_application_credit_item");
+
+                    b.HasIndex("TargetInvoiceItemId")
+                        .HasDatabaseName("ix_credit_application_target_item");
+
+                    b.ToTable("credit_application", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_credit_application_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_credit_application_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_credit_application_invoice_item", "target_kind <> 'INVOICE_ITEM' OR (target_invoice_id IS NOT NULL AND target_invoice_item_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_credit_application_target", "target_kind IN ('INVOICE_ITEM')");
                         });
                 });
 
@@ -567,6 +661,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("numeric(19,4)")
                         .HasColumnName("amount");
 
+                    b.Property<string>("CancellationSource")
+                        .HasColumnType("text")
+                        .HasColumnName("cancellation_source");
+
                     b.Property<string>("ChargeCategory")
                         .IsRequired()
                         .HasColumnType("text")
@@ -585,6 +683,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("coverage_code");
+
+                    b.Property<Guid?>("CreditsItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("credits_item_id");
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -635,6 +737,14 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("transaction_id");
 
+                    b.Property<string>("TransactionKind")
+                        .HasColumnType("text")
+                        .HasColumnName("transaction_kind");
+
+                    b.Property<string>("TreatmentRuleId")
+                        .HasColumnType("text")
+                        .HasColumnName("treatment_rule_id");
+
                     b.Property<DateOnly>("ValidFrom")
                         .HasColumnType("date")
                         .HasColumnName("valid_from");
@@ -648,10 +758,19 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("ChargeId")
                         .IsUnique()
-                        .HasDatabaseName("ux_invoice_item_charge");
+                        .HasDatabaseName("ux_invoice_item_charge")
+                        .HasFilter("credits_item_id IS NULL");
+
+                    b.HasIndex("CreditsItemId")
+                        .HasDatabaseName("ix_invoice_item_credits");
 
                     b.HasIndex("InvoiceId")
                         .HasDatabaseName("ix_invoice_item_invoice");
+
+                    b.HasIndex("ChargeId", "CreditsItemId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_credit_item_charge")
+                        .HasFilter("credits_item_id IS NOT NULL");
 
                     b.ToTable("invoice_item", "bil", t =>
                         {
@@ -757,6 +876,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("method");
 
+                    b.Property<Guid?>("OriginalInvoiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("original_invoice_id");
+
                     b.Property<Guid>("PolicyId")
                         .HasColumnType("uuid")
                         .HasColumnName("policy_id");
@@ -796,6 +919,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.HasIndex("FiscalDocumentId")
                         .HasDatabaseName("ix_invoice_fiscal_document");
 
+                    b.HasIndex("OriginalInvoiceId")
+                        .HasDatabaseName("ix_invoice_original");
+
                     b.HasIndex("PolicyId")
                         .HasDatabaseName("ix_invoice_policy");
 
@@ -805,7 +931,13 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("TransactionId", "Kind")
                         .IsUnique()
-                        .HasDatabaseName("ux_invoice_transaction");
+                        .HasDatabaseName("ux_invoice_transaction")
+                        .HasFilter("kind = 'INVOICE'");
+
+                    b.HasIndex("TransactionId", "OriginalInvoiceId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_credit_note_reference")
+                        .HasFilter("kind = 'CREDIT_NOTE'");
 
                     b.ToTable("invoice", "bil", t =>
                         {
@@ -814,6 +946,8 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                             t.HasCheckConstraint("ck_invoice_fiscal_status", "fiscal_status IN ('NOT_REQUESTED', 'PENDING', 'REGISTERED', 'REJECTED', 'REQUEST_FAILED')");
 
                             t.HasCheckConstraint("ck_invoice_kind", "kind IN ('INVOICE', 'CREDIT_NOTE')");
+
+                            t.HasCheckConstraint("ck_invoice_original", "(kind = 'CREDIT_NOTE') = (original_invoice_id IS NOT NULL)");
 
                             t.HasCheckConstraint("ck_invoice_record_version", "record_version >= 1");
 
@@ -972,6 +1106,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("billing_account_id");
 
+                    b.Property<string>("CancellationSource")
+                        .HasColumnType("text")
+                        .HasColumnName("cancellation_source");
+
                     b.Property<string>("ChargeCategory")
                         .HasColumnType("text")
                         .HasColumnName("charge_category");
@@ -1058,6 +1196,14 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.Property<Guid?>("TransactionId")
                         .HasColumnType("uuid")
                         .HasColumnName("transaction_id");
+
+                    b.Property<string>("TransactionKind")
+                        .HasColumnType("text")
+                        .HasColumnName("transaction_kind");
+
+                    b.Property<string>("TreatmentRuleId")
+                        .HasColumnType("text")
+                        .HasColumnName("treatment_rule_id");
 
                     b.HasKey("LineId")
                         .HasName("pk_ledger_line");
@@ -1315,6 +1461,14 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("bound_transaction_id");
 
+                    b.Property<string>("CancellationSource")
+                        .HasColumnType("text")
+                        .HasColumnName("cancellation_source");
+
+                    b.Property<DateOnly?>("CancelledEffective")
+                        .HasColumnType("date")
+                        .HasColumnName("cancelled_effective");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
@@ -1345,6 +1499,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("policy_number");
+
+                    b.Property<Guid?>("PredecessorTermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("predecessor_term_id");
 
                     b.Property<string>("ProductCode")
                         .IsRequired()
@@ -1392,6 +1550,8 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.ToTable("plan_instance", "bil", t =>
                         {
                             t.HasCheckConstraint("ck_plan_instance_bill_mode", "bill_mode IN ('DIRECT_BILL', 'AGENCY_BILL')");
+
+                            t.HasCheckConstraint("ck_plan_instance_cancelled", "(cancelled_effective IS NULL) = (cancellation_source IS NULL)");
 
                             t.HasCheckConstraint("ck_plan_instance_term", "term_to > term_from");
                         });
@@ -1522,6 +1682,29 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasConstraintName("fk_allocation_receipt");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.CreditApplicationRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("BillingAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_credit_application_account");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceItemRow", null)
+                        .WithMany()
+                        .HasForeignKey("CreditItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_credit_application_credit_item");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceItemRow", null)
+                        .WithMany()
+                        .HasForeignKey("TargetInvoiceItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_credit_application_target_item");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DisbursementRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Billing.Persistence.PayeeAccountRow", null)
@@ -1541,6 +1724,12 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_invoice_item_charge");
 
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceItemRow", null)
+                        .WithMany()
+                        .HasForeignKey("CreditsItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_invoice_item_credits");
+
                     b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceRow", null)
                         .WithMany()
                         .HasForeignKey("InvoiceId")
@@ -1557,6 +1746,12 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_invoice_account");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceRow", null)
+                        .WithMany()
+                        .HasForeignKey("OriginalInvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_invoice_original");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.LedgerLineRow", b =>

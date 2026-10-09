@@ -25,6 +25,7 @@ internal static class ClaimsPermissions
     public const string ClaimSearch = "clm.Claim.search";
     public const string ClaimClose = "clm.Claim.close";
     public const string ExposureCreate = "clm.Exposure.create";
+    public const string CoverageReverify = "clm.Coverage.reverify";
 }
 
 /// <summary>REST facade of <c>clm.Fnol.*</c> (contracts/openapi/clm.yaml): thin; commands through the pipeline.</summary>
@@ -110,6 +111,13 @@ internal sealed class ClaimsController : ControllerBase
             ? Results.Created($"/api/clm/v1/claims/{result.Value.Claim.ClaimId.Value}", result.Value)
             : HttpResults.Problem(result.Error!, HttpContext);
     }
+
+    /// <summary>clm.Coverage.reverify: keep or adopt the superseding POL snapshot (REQ-CLM-058).</summary>
+    [HttpPost("coverage/reverify")]
+    [Authorize(Policy = ClaimsPermissions.CoverageReverify)]
+    public async Task<IResult> ReverifyAsync(
+        [FromBody] CoverageReverifyRequest request, [FromServices] ICommandHandler<ReverifyCoverage, CoverageReverifyResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ReverifyCoverage(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     private async Task<IResult> RunSearchAsync(ClaimReader reader, ClaimSearchCriteria criteria, int? limit, string? cursor, CancellationToken cancellationToken)
     {

@@ -3,6 +3,7 @@ using CoreIns.Modules.Claims.Commands;
 using CoreIns.Modules.Claims.Contracts;
 using CoreIns.Modules.Claims.Contracts.Api;
 using CoreIns.Modules.Billing.Contracts.Events;
+using CoreIns.Modules.Policy.Contracts.Events;
 using CoreIns.Modules.Claims.Domain;
 using CoreIns.Modules.Claims.Events;
 using CoreIns.Modules.Claims.Persistence;
@@ -58,6 +59,9 @@ public static class ClaimsModule
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.reserve_line, {Schema}.transaction_set, {Schema}.claim_payment, {Schema}.payee_account_view TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.financial_transaction TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.set_approval TO {appRole}",
+
+                // Re-verification (SL3-CLM-REVERIFY): raised by the consumers, decided once, never deleted.
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.reverification TO {appRole}",
             ]),
     ];
 
@@ -108,6 +112,18 @@ public static class ClaimsModule
             EventDescriptor.From(DisbursementIssuedV1.Descriptor), DisbursementIssuedHandler.Name, ModuleCode.CLM);
         services.AddEventHandler<DisbursementClearedV1, DisbursementClearedHandler>(
             EventDescriptor.From(DisbursementClearedV1.Descriptor), DisbursementClearedHandler.Name, ModuleCode.CLM);
+
+        // Re-verification (SL3-CLM-REVERIFY, REQ-CLM-057/058): POL changes raise a demand, a human keeps or adopts (REQ-CLM-002).
+        services.AddCommandAuditor<RaiseReverification, int, RaiseReverificationAuditor>();
+        services.AddCommand<RaiseReverification, int, RaiseReverificationHandler>(
+            CommandDescriptor.For("clm.Reverification.raise") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddEventHandler<PolicyChangedV1, PolicyChangedHandler>(EventDescriptor.From(PolicyChangedV1.Descriptor), PolicyChangedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<PolicyCancelledV1, PolicyCancelledHandler>(
+            EventDescriptor.From(PolicyCancelledV1.Descriptor), PolicyCancelledHandler.Name, ModuleCode.CLM);
+        services.AddScoped<IValidator<ReverifyCoverage>, ReverifyCoverageValidator>();
+        services.AddCommandAuditor<ReverifyCoverage, CoverageReverifyResponse, ReverifyCoverageAuditor>();
+        services.AddCommand<ReverifyCoverage, CoverageReverifyResponse, ReverifyCoverageHandler>(
+            CommandDescriptor.For("clm.Coverage.reverify") with { SupportsDryRun = true });
 
         services.AddScoped<IValidator<SubmitFnol>, SubmitFnolValidator>();
         services.AddCommandAuditor<SubmitFnol, FnolSubmitResponse, SubmitFnolAuditor>();
@@ -170,6 +186,10 @@ public static class ClaimsModule
             .Describe("Μια κίνηση υπερβαίνει κάθε διαθέσιμο όριο εξουσιοδότησης.", "A transaction exceeds every available authority limit."),
         ErrorDefinition.For(ModuleCode.CLM, "PAYEE-NOT-ON-CLAIM", 422, "Ο δικαιούχος δεν συμμετέχει στη ζημιά", "The payee is not on the claim")
             .Describe("Ο δικαιούχος πρέπει να είναι ο ασφαλισμένος ή αιτών της ζημιάς.", "The payee must be the insured or a claimant of the claim."),
+        ErrorDefinition.For(ModuleCode.CLM, "SNAPSHOT-MISMATCH", 409, "Το στιγμιότυπο του ασφαλιστηρίου άλλαξε ξανά", "The policy snapshot changed again", retryable: true)
+            .Describe("Το νέο στιγμιότυπο δεν είναι πλέον ο διάδοχος του στιγμιοτύπου της ζημίας· φορτώστε ξανά τη ζημία και αποφασίστε με το τρέχον.", "The new snapshot is no longer the successor of the claim's snapshot; reload the claim and decide against the current one."),
+        ErrorDefinition.For(ModuleCode.CLM, "COVERAGE-IN-QUESTION", 422, "Η κάλυψη της έκθεσης αμφισβητείται", "The exposure's cover is in question")
+            .Describe("Το νέο στιγμιότυπο που υιοθετήθηκε δεν καλύπτει την έκθεση· δεν επιτρέπονται νέες πληρωμές μέχρι απόφαση κάλυψης.", "The adopted snapshot no longer covers the exposure; no new payments until a coverage decision."),
         ErrorDefinition.For(ModuleCode.CLM, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

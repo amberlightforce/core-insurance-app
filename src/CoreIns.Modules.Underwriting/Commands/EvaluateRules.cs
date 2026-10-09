@@ -99,7 +99,8 @@ internal sealed class EvaluateRulesHandler(
                     effectiveDate = effective.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
                     matchedRules = result.MatchedRuleIds,
                     stepsUsed = result.Trace.StepsUsed,
-                }), actor, command.ReconcileIssues ? [.. request.JobParticipants ?? []] : [], command.ReconcileIssues ? request.ProducerCode : null, cancellationToken).ConfigureAwait(false);
+                }), actor, command.ReconcileIssues ? [.. request.JobParticipants ?? []] : [], command.ReconcileIssues ? request.ProducerCode : null,
+                command.ReconcileIssues ? JsonSerializer.Serialize(risk.Derived(effective), RuleSetJson.Options) : null, cancellationToken).ConfigureAwait(false);
 
             // Reconcile with the job's non-terminal issues by issue key (REQ-UW-059, -092, -093; PRD-04 §7.3): a new key raises
             // an issue; an Open issue is kept; an approval holds while the facts are unchanged and is invalidated (new Open issue)

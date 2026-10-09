@@ -110,6 +110,11 @@
           "$ref": "../common.schema.json#/$defs/Code",
           "x-classification": "P0"
         },
+        "originalInvoiceId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "description": "For kind CREDIT_NOTE, the invoice it corrects (REQ-BIL-091). Always set for a credit note, absent for an INVOICE. Additive (SL3-BIL-CREDIT).",
+          "x-classification": "P0"
+        },
         "fiscalTriggerRef": {
           "oneOf": [
             {

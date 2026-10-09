@@ -35,6 +35,8 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
 
     public DbSet<SetApprovalRow> SetApprovals => Set<SetApprovalRow>();
 
+    public DbSet<ReverificationRow> Reverifications => Set<ReverificationRow>();
+
     protected override string Schema => ClaimsModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -200,6 +202,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
         });
 
         MapFinancials(modelBuilder);
+        ReverificationModel.Map(modelBuilder);
     }
 
     private static void MapFinancials(ModelBuilder modelBuilder) => ClaimsFinancialModel.Map(modelBuilder);
