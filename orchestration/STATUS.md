@@ -1,6 +1,6 @@
 # STATUS — Greek P&C core insurance build
 
-> **Verified takeover checkpoint — 2026-10-09:** Claims #37, refunds #39/#34, servicing #28/#46, tax identity #44, and pack history/roles #43 have merged after all required checks. Expanded real servicing acceptance now passes all 8 tests; integration #45 awaits final CI. Reinsurance #47/#48 and product fallback #49 are in independent review with corrections under test. See [CODEX-TAKEOVER.md](CODEX-TAKEOVER.md) for current evidence, ownership, dependencies and remaining work. Older paragraphs below are historical.
+> **Verified takeover checkpoint — 2026-10-09:** Claims #37, refunds #39/#34, servicing #28/#46, tax identity #44, and pack history/roles #43 have merged after all required checks. Expanded real servicing acceptance now passes all 8 tests; integration #45 has merged after all ten checks passed. Reinsurance #47/#48 and product fallback #49 are in independent review with corrections under test. See [CODEX-TAKEOVER.md](CODEX-TAKEOVER.md) for current evidence, ownership, dependencies and remaining work. Older paragraphs below are historical.
 
 
 **Current phase:** 3 — Claims slice (SLICE-PLAN-2.md, D-USR-10) **COMPLETE** (2026-10-08): all slice-2 WPs merged; E2E-02a passes at API and UI level locally and in GitHub CI (run 37813614543, all 6 jobs green on 9a08c1a). Next: slice 3 (W6 servicing) when the user says so. Phase 2 thin E2E slice **COMPLETE** (2026-10-08): all 10 slice WPs merged; E2E-01 passes on Docker (API + Playwright UI) and in GitHub CI; accepted after a real-Chrome walkthrough (D-SLC-21).
@@ -167,4 +167,5 @@ Plan: `SLICE-PLAN-4.md`. Decisions: D-SL4-01..20. Briefs: `briefs/sl4/` (waves 1
 - **Business questions raised overnight:** D-SL3-23 (Greek IPT rounding per line vs per invoice — servicing IPT refused in Production until confirmed); D-SL4-21 (RI outstanding shown per layer-year only).
 - Every deep review so far found real defects before merge; lessons are PITFALLS 36–48.
 | FU-BIL-REFUND-HARDEN | BIL + PLT | (1) Replace the literal 500.00 in `bil.guard_refund_insert` with evidence: frozen `authority_check_id` on `bil.refund`, trigger requires a `plt.authority_check` Allow for BIL.REFUND by `requested_by` covering the amount (limit lives in the grant, not the schema). (2) Trigger requires the referenced `plt.approval_request` Approved with checker = `decided_by` for PENDING→APPROVED. (3) PLT in-process `DecideAsync` refuses owner-decided types unless called by the owning module, or an architecture test that only BIL decides BIL.REFUND | SL3-BIL-REFUND re-check residuals (non-blocking) | deep (security) | planned |
+
 

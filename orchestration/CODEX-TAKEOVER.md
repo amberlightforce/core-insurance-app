@@ -13,7 +13,7 @@ The user authorized subagents to assess and recover Claude's interrupted work. T
 | Tax identity #44 | Merged ae43539; real RAT/MKT tax-code mismatch corrected without weakening verification. |
 | Pack history and roles #43 | Merged c85a424 after original independent review failures were fixed and rechecked. Unknown configuration pins and future knownAt fail closed; DB recovery and activation locking corrected. Release-manager/design-authority roles recovered; development sign-in refused outside Development. |
 | Servicing follow-up #46 | Merged 4bb59d7. Cancellation preview uses dryRun and writes only after confirmation. Issued Latin plates and preserved extension fields no longer block valid edits. |
-| Integration #45 | Ready for review, head fc79c7597364d175a6649762597fccdae47c9700; CI still running. Expanded isolated servicing acceptance passes all 8 tests with no cancellation/refund capability skips. |
+| Integration #45 | Merged cbd1e68 after all 10 checks passed on fc79c7597364d175a6649762597fccdae47c9700. Expanded isolated servicing acceptance passes all 8 tests with no cancellation/refund capability skips. |
 
 All merged PRs above passed all 10 required checks on their reviewed final heads.
 
@@ -25,10 +25,10 @@ Recovered production hardening in #45 binds rating results to the request, prese
 
 ## Active agents and review gates
 
-- Root: integration #45 CI/merge, independent review of fallback #49, programme documentation and cross-module acceptance.
+- Root: independent review of fallback #49, programme documentation and cross-module acceptance; integration #45 merged.
 - servicing_ui: reinsurance UI #47. Canonical USER actor keys and honest partial recovery totals corrected at head 99d1c6f; 13 focused tests, typecheck/lint/i18n pass. Fixture visual evidence exists; real backend acceptance remains required.
 - ri_registry_validation: reinsurance registry #48. Independent UI review found lookup permissions, actor-key and partial totals defects. Backend review found rejection of real hyphenated catalogue codes and missing layer adjacency validation. Fixes and exact-role HTTP regressions are under validation; no merge yet.
-- refund_backend: product fallback #49. Approval-instant Athens windows, frozen configuration/source, owner execution, maker/principal separation and proof consistency implemented. Fallback14, architecture198 and generated contracts/sample gates pass. Independent review found source selection must filter channel scope before choosing the predecessor; correction requested. CI/review/dependency gates remain.
+- refund_backend: product fallback #49. Approval-instant Athens windows, frozen configuration/source, owner execution, maker/principal separation and proof consistency implemented. Fallback14, architecture198 and generated contracts/sample gates pass. Independent review found source selection must filter channel scope before choosing the predecessor; corrected with two pure regressions (16 fallback tests now pass). CI/review/dependency gates remain.
 
 Reinsurance approval proof and fallback proof depend on trusted PLT producers. Their consistency checks do not authenticate arbitrary writes made with the full shared application database credential. The broader database trust boundary remains a documented limitation, not a completed hardening claim. FU-BIL-REFUND-HARDEN also remains open.
 
@@ -38,6 +38,7 @@ Before edits, all branches/tags were saved in a verified Git bundle and modified
 
 The shared checkout remains training-portal; root integration is in agent-af172971ee62c4fc1 (integ), main in orchestrator. No Claude worktrees were removed. The user's coreins stack remains untouched. The isolated coreins-e2e03 acceptance stack and its owned data were cleaned after the passing run.
 
-Next: finish #45 checks; close #47/#48 review findings and run real combined RI acceptance; finish #49 independent review and merge dependencies. Preserved pack/rollback UI (agent-a45575c6160f065bc) still needs recovery. MKT activation/rollback, RAT fallback activation, POL exceptions, E2E-12 and dependent slice-4 recoveries/receivables/finance/FS/payment work remain in the existing programme. A fallback product cannot quote until RAT activation exists.
+Next: close #47/#48 review findings and run real combined RI acceptance; finish #49 independent review and merge dependencies. SL4-PLT roles/dev users/approval withdrawal must land before a real RI walk; this is the refund agent's next package. Preserved pack/rollback UI (agent-a45575c6160f065bc) still needs recovery. MKT activation/rollback, RAT fallback activation, POL exceptions, E2E-12 and dependent slice-4 recoveries/receivables/finance/FS/payment work remain in the existing programme. A fallback product cannot quote until RAT activation exists.
 
 GitHub is public and Actions is operational. Original plans and fail-closed business defaults still govern scope. Production regulatory decisions, fiscal/bank stubs and deployment remain open; selected acceptance journeys do not prove every Must requirement.
+
