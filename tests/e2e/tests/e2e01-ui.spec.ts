@@ -208,13 +208,7 @@ test('E2E-01 through the staff screens', async ({ page }) => {
 
   // ---- Billing: the invoice, the stub fiscal MARK, the exact payment, PAID.
   await signInAs(page, 'Dev Billing Clerk (synthetic)');
-  // TEMP diagnostics (SL3-UI-POL-FILE): what the billing clerk's policy page does after load.
-  page.on('response', (r) => { if (r.status() >= 400) console.log('DIAG http', r.status(), r.url()); });
-  page.on('pageerror', (e) => console.log('DIAG pageerror', e.message));
-  page.on('framenavigated', (f) => console.log('DIAG navigated', f.url()));
   await go(page, policyUrl);
-  await page.waitForTimeout(3000);
-  console.log('DIAG url', page.url(), 'body', (await page.locator('body').innerText()).slice(500, 3500).replaceAll(String.fromCharCode(10), ' | '));
   await page.getByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' }).getByText(/^INV\d+/).first().dblclick();
   await expect(page.getByRole('heading', { level: 1, name: /^Τιμολόγιο INV/ })).toBeVisible();
   await alive(page);

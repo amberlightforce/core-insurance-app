@@ -186,6 +186,11 @@ function PolicyDetails({
           >
             <TransactionHistory policyId={policy.policyId} groups={[...groups].reverse()} />
           </Section>
+          <Section title={t('invoices.title')}>
+            <QueryView query={invoices}>
+              {(page) => <InvoiceTable items={page.items} label={t('invoices.title')} compact />}
+            </QueryView>
+          </Section>
           <div className={styles.grid}>
             <Section title={t('term.title')} family={status === 'IN_FORCE' ? 'success' : 'brand'}>
               {term ? (
@@ -281,11 +286,6 @@ function PolicyDetails({
               />
             </Section>
           ) : null}
-          <Section title={t('invoices.title')}>
-            <QueryView query={invoices}>
-              {(page) => <InvoiceTable items={page.items} label={t('invoices.title')} compact />}
-            </QueryView>
-          </Section>
         </div>
       </div>
     </>
