@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PartySearchItem } from '../../api/types';
 import * as fx from '../../test/fixtures';
 import { mockApi, problem, renderScreen, type MockRoute } from '../../test/mockApi';
 import { expectNoA11yViolations } from '../../test/axe';
@@ -92,6 +93,45 @@ describe('reinsurance registry and treaty editor', () => {
     expect(await screen.findByText('Διορθώστε τα πεδία πριν την αποθήκευση')).toBeInTheDocument();
     expect(api.callsTo('POST', '/api/ri/v1/contracts')).toHaveLength(0);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+  it('refuses a natural person as a reinsurer and leaves the signed lines unchanged', async () => {
+    mockApi([
+      ...catalogueRoutes,
+      {
+        method: 'GET',
+        path: `/api/ri/v1/contracts/${treaty.contractId}`,
+        respond: () => ({ body: { contract: treaty } }),
+      },
+      {
+        method: 'POST',
+        path: '/api/pty/v1/parties/search',
+        respond: () => ({
+          body: {
+            items: [
+              {
+                partyId: fx.partyId,
+                partyNumber: 'P000000021',
+                partyType: 'PERSON',
+                displayName: 'Φυσικό Πρόσωπο',
+                status: 'PROSPECT',
+                matchQuality: 'EXACT',
+                similarity: '1',
+              } satisfies PartySearchItem,
+            ],
+            nextCursor: null,
+          },
+        }),
+      },
+    ]);
+    const { user } = renderScreen(<EditContractPage />, {
+      path: '/reinsurance/contracts/:contractId/edit',
+      url: `/reinsurance/contracts/${treaty.contractId}/edit`,
+    });
+    const search = await screen.findByRole('searchbox', { name: 'Αναζήτηση αντασφαλιστή' });
+    await user.type(search, 'Φυσικό{Enter}');
+    await user.click(await screen.findByText('Φυσικό Πρόσωπο'));
+    expect(await screen.findByText('Επιλέξτε νομικό πρόσωπο ως αντασφαλιστή')).toBeInTheDocument();
+    expect(screen.getAllByRole('textbox', { name: /Υπογεγραμμένο ποσοστό/ })).toHaveLength(1);
   });
   it('saves a draft only after confirmation with optimistic-lock version and idempotency key', async () => {
     const api = mockApi([
