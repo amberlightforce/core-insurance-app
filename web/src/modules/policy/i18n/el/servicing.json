@@ -105,6 +105,9 @@
       "AUTO": "Αυτόματη",
       "IMPLICIT": "Σιωπηρή"
     },
+    "paymentPlan": {
+      "ANNUAL": "Ετήσιο"
+    },
     "refundMethod": {
       "ProRata": "Αναλογικά",
       "FullRefund": "Πλήρης επιστροφή",

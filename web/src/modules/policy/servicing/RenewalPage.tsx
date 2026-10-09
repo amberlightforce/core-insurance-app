@@ -318,7 +318,7 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
               </Banner>
             ) : null}
             {preview ? (
-              <ServicingPreviewView preview={preview} />
+              <ServicingPreviewView preview={preview} artefactHash={term.artefactHash} />
             ) : (
               <Banner
                 variant="warning"

@@ -215,7 +215,10 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
             {t('servicing.cancel.bound.body')}
           </Banner>
           {bound.servicingPreview ? (
-            <ServicingPreviewView preview={bound.servicingPreview} />
+            <ServicingPreviewView
+              preview={bound.servicingPreview}
+              artefactHash={term.artefactHash}
+            />
           ) : null}
           <div className={styles.actions}>
             <LinkButton variant="primary" to={`/policies/${policy.policyId}`}>
@@ -332,8 +335,9 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
                   {
                     id: 'plan',
                     label: t('term.plan'),
-                    value: term.paymentPlanRef,
-                    kind: 'mono',
+                    value: t(`servicing.paymentPlan.${term.paymentPlanRef}`, {
+                      defaultValue: term.paymentPlanRef,
+                    }),
                   },
                 ]}
               />
@@ -359,7 +363,7 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
                   </ul>
                 </Banner>
               ) : null}
-              <ServicingPreviewView preview={preview} />
+              <ServicingPreviewView preview={preview} artefactHash={term.artefactHash} />
               <div className={styles.actions}>
                 <Button
                   variant="danger"

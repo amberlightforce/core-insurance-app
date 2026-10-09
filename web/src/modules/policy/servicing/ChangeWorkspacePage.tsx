@@ -507,7 +507,7 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
                   <UnderwritingOutcome quote={quote.response} />
                   <DiffSection mode={mode} before={originalForm} after={form} diff={diff} />
                   {preview ? (
-                    <ServicingPreviewView preview={preview} />
+                    <ServicingPreviewView preview={preview} artefactHash={term.artefactHash} />
                   ) : (
                     <Banner
                       variant="warning"
@@ -530,6 +530,7 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
           ) : null}
           {stepId === 'confirm' ? (
             <ConfirmStep
+              artefactHash={term.artefactHash}
               policyId={policy.policyId}
               quote={quoteIsFresh ? quote.response : null}
               effectiveDate={effectiveDate}
@@ -692,12 +693,14 @@ const fieldKey: Record<DiffRow['field'], string> = {
 
 function ConfirmStep({
   policyId,
+  artefactHash,
   quote,
   effectiveDate,
   bound,
   gateFailure,
 }: {
   policyId: string;
+  artefactHash: string;
   quote: JobQuote | null;
   effectiveDate: string;
   bound: JobBind | null;
@@ -711,7 +714,9 @@ function ConfirmStep({
         <Banner variant="success" live="status" title={t('servicing.change.bound.title')}>
           {t('servicing.change.bound.body', { date: fmt.date(effectiveDate) })}
         </Banner>
-        {bound.servicingPreview ? <ServicingPreviewView preview={bound.servicingPreview} /> : null}
+        {bound.servicingPreview ? (
+          <ServicingPreviewView preview={bound.servicingPreview} artefactHash={artefactHash} />
+        ) : null}
         <div className={styles.actions}>
           <LinkButton variant="primary" to={`/policies/${policyId}`}>
             {t('servicing.openPolicy')}
@@ -746,7 +751,9 @@ function ConfirmStep({
           </ul>
         </Banner>
       ) : null}
-      {quote.servicingPreview ? <ServicingPreviewView preview={quote.servicingPreview} /> : null}
+      {quote.servicingPreview ? (
+        <ServicingPreviewView preview={quote.servicingPreview} artefactHash={artefactHash} />
+      ) : null}
     </div>
   );
 }

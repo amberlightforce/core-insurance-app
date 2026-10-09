@@ -105,6 +105,9 @@
       "AUTO": "Automatic",
       "IMPLICIT": "Implicit"
     },
+    "paymentPlan": {
+      "ANNUAL": "Annual"
+    },
     "refundMethod": {
       "ProRata": "Pro rata",
       "FullRefund": "Full refund",
