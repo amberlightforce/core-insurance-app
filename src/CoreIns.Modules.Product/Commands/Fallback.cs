@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CoreIns.Modules.Product.Authority;
 using CoreIns.Modules.Product.Contracts;
 using CoreIns.Modules.Product.Contracts.Api;
@@ -199,6 +200,7 @@ internal sealed class RequestFallbackHandler(
                     Type = ProductAuthorityTypes.FallbackApprovalType,
                     ObjectRef = FallbackSupport.Subject(fallbackId),
                     PayloadHash = hash,
+                    Diff = JsonSerializer.SerializeToElement(new { legalEntityId = legalEntity.Value }, SharedKernelJson.Options),
                     Authority = new ApprovalAuthority
                     {
                         Type = ProductAuthorityTypes.EmergencyChange.Value,

@@ -232,11 +232,38 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                 CREATE TRIGGER trg_fallback_request_guard BEFORE UPDATE ON pfc.fallback_request
                     FOR EACH ROW EXECUTE FUNCTION pfc.guard_fallback_request()
                 """);
+            // Deferred: the owner's successful command audit is appended after the handler's saves, in the same transaction.
+            // PLT owns all access to approval/audit tables; PFC receives only a boolean proof.
+            migrationBuilder.Sql(
+                """
+                CREATE FUNCTION pfc.verify_fallback_execution() RETURNS trigger LANGUAGE plpgsql AS $$
+                DECLARE
+                    request pfc.fallback_request%ROWTYPE;
+                    product_line text;
+                BEGIN
+                    SELECT * INTO request FROM pfc.fallback_request WHERE fallback_id = NEW.fallback_id;
+                    IF request.status = 'APPLIED' THEN
+                        SELECT line_code INTO product_line FROM pfc.product WHERE product_id = request.product_id;
+                        IF NOT plt.pfc_fallback_approval_verified(
+                            request.approval_request_id, request.legal_entity_id, request.fallback_id,
+                            request.payload_hash::text, request.decided_by, product_line, request.jurisdiction,
+                            request.decided_at, array_remove(ARRAY[request.requested_by, request.requested_by_principal], NULL)) THEN
+                            RAISE EXCEPTION 'product fall-back execution requires its frozen, audited PLT approval (REQ-PFC-213)'
+                                USING ERRCODE = 'integrity_constraint_violation';
+                        END IF;
+                    END IF;
+                    RETURN NULL;
+                END $$;
+                CREATE CONSTRAINT TRIGGER trg_fallback_execution_proof AFTER INSERT OR UPDATE ON pfc.fallback_request
+                    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION pfc.verify_fallback_execution();
+                """);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("DROP TRIGGER IF EXISTS trg_fallback_execution_proof ON pfc.fallback_request");
+            migrationBuilder.Sql("DROP FUNCTION IF EXISTS pfc.verify_fallback_execution()");
             migrationBuilder.Sql("DROP TRIGGER IF EXISTS trg_fallback_request_guard ON pfc.fallback_request");
             migrationBuilder.Sql("DROP FUNCTION IF EXISTS pfc.guard_fallback_request()");
             migrationBuilder.Sql("DROP TRIGGER IF EXISTS trg_locked_version_guard ON pfc.product_version");
