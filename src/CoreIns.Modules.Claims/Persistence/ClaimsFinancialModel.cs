@@ -88,7 +88,7 @@ internal static class ClaimsFinancialModel
                 table.HasCheckConstraint("ck_financial_transaction_kind", Codes.CheckSql<TransactionKind>("kind"));
                 table.HasCheckConstraint("ck_financial_transaction_amount", "amount <> 0");
                 table.HasCheckConstraint("ck_financial_transaction_payment_shape",
-                    "kind <> 'PAYMENT' OR (amount > 0 AND eroding IS NOT NULL AND payment_type IS NOT NULL AND claim_payment_id IS NOT NULL)");
+                    "kind <> 'PAYMENT' OR ((amount > 0 OR (amount < 0 AND reverses_txn_id IS NOT NULL)) AND eroding IS NOT NULL AND payment_type IS NOT NULL AND claim_payment_id IS NOT NULL)");
                 table.HasCheckConstraint("ck_financial_transaction_reserve_shape", "kind <> 'RESERVE' OR (eroding IS NULL AND payment_type IS NULL AND claim_payment_id IS NULL)");
                 table.HasCheckConstraint("ck_financial_transaction_recovery_shape", "kind NOT IN ('RECOVERY_RESERVE','RECOVERY') OR (recovery_id IS NOT NULL AND eroding IS NULL AND payment_type IS NULL AND claim_payment_id IS NULL)");
 
@@ -141,6 +141,7 @@ internal static class ClaimsFinancialModel
                 table.HasCheckConstraint("ck_claim_payment_hold_shape", "status <> 'ON_HOLD' OR hold_reason IS NOT NULL");
                 table.HasCheckConstraint("ck_claim_payment_submitted_shape", "status NOT IN ('SUBMITTED', 'ISSUED', 'CLEARED') OR disbursement_id IS NOT NULL OR (method = 'CLEARING' AND fs_statement_id IS NOT NULL)");
                 table.HasCheckConstraint("ck_claim_payment_clearing", "method <> 'CLEARING' OR disbursement_id IS NULL");
+                table.HasCheckConstraint("ck_claim_payment_clearing_counterparty", "method <> 'CLEARING' OR counterparty_insurer_party_id IS NOT NULL");
             });
             entity.HasKey(e => e.ClaimPaymentId).HasName("pk_claim_payment");
             entity.Property(e => e.ClaimPaymentId).HasColumnName("claim_payment_id");
@@ -153,10 +154,13 @@ internal static class ClaimsFinancialModel
             entity.Property(e => e.MaskedAccount).HasColumnName("masked_account");
             entity.Property(e => e.Method).HasColumnName("method");
             entity.Property(e => e.FsStatementId).HasColumnName("fs_statement_id");
+            entity.Property(e => e.CounterpartyInsurerPartyId).HasColumnName("counterparty_insurer_party_id");
             entity.Property(e => e.ReissueOf).HasColumnName("reissue_of");
             entity.Property(e => e.ReversalOf).HasColumnName("reversal_of");
             entity.Property(e => e.FiscalMark).HasColumnName("fiscal_mark");
             entity.HasIndex(e => e.ReissueOf).IsUnique().HasFilter("reissue_of IS NOT NULL").HasDatabaseName("ux_claim_payment_reissue");
+            entity.HasOne<ClaimPaymentRow>().WithMany().HasForeignKey(e => e.ReissueOf).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_claim_payment_reissue");
+            entity.HasOne<ClaimPaymentRow>().WithMany().HasForeignKey(e => e.ReversalOf).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_claim_payment_reversal");
             entity.Property(e => e.PaymentType).HasColumnName("payment_type");
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType(MoneyType);
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");

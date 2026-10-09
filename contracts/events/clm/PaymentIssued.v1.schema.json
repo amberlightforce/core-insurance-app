@@ -186,6 +186,18 @@
           ],
           "description": "Friendly Settlement statement a CLEARING payment belongs to. Always set when method is CLEARING, null otherwise",
           "x-classification": "P0"
+        },
+        "counterpartyInsurerPartyId": {
+          "description": "Always set for method CLEARING: insurer counterparty of the FS case, distinct from the clearing office cash payee. Null for ordinary disbursements.",
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-classification": "P1"
         }
       }
     }

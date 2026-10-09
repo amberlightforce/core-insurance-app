@@ -2,6 +2,7 @@ using CoreIns.Modules.Claims.Authority;
 using CoreIns.Modules.Claims.Domain;
 using CoreIns.Modules.Claims.Persistence;
 using CoreIns.Platform.Authority;
+using CoreIns.Platform.Context;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 
@@ -100,6 +101,20 @@ internal static class SetAuthority
     };
 
     public static Money MoneyOf(AuthorityRequirement requirement) => ClaimMoney.Of(requirement.Amount, requirement.Currency);
+
+    public static async Task<AuthorityCheckResult> CheckAsync(AuthorityRequirement requirement, TransactionSetRow set,
+        RequestContext context, IAuthorityService authority, Instant now, CancellationToken cancellationToken)
+    {
+        // A system principal has no standing money authority. Determine human eligibility against the manager's
+        // configured ceiling, then refer for every eligible reserve/payment; a configured ceiling never self-approves it.
+        var check = await authority.CheckAsync(new AuthorityCheckRequest(context.Actor,
+            set.EvidenceRef is null ? context.Roles : ["Staff.ClaimsManager"], requirement.Type, Dimensions(requirement),
+            ClaimApprovals.SetSubject(set.SetId), now), cancellationToken).ConfigureAwait(false);
+        check = RequireFourEyes(requirement, check);
+        return set.EvidenceRef is not null && check.Decision == AuthorityDecision.Allow
+            ? check with { Decision = AuthorityDecision.Refer, ReasonCode = "SYSTEM_SET_REQUIRES_APPROVER", ReferralTargets = [new ReferralTarget("ROLE", "Staff.ClaimsManager")] }
+            : check;
+    }
 
     // BR-CLM-010: even a manager's own authority cannot remove four-eyes for a large-loss set.
     public static AuthorityCheckResult RequireFourEyes(AuthorityRequirement requirement, AuthorityCheckResult check) =>

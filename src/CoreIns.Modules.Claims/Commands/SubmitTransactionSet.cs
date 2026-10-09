@@ -89,14 +89,7 @@ internal sealed class SubmitTransactionSetHandler(
         var checks = new List<(AuthorityRequirement Requirement, AuthorityCheckResult Check)>();
         foreach (var requirement in SetAuthority.Requirements(content, claimLines, approved))
         {
-            var check = await authority.CheckAsync(
-                new AuthorityCheckRequest(context.Actor, set.EvidenceRef is null ? context.Roles : ["Staff.ClaimsManager"], requirement.Type, SetAuthority.Dimensions(requirement), ClaimApprovals.SetSubject(set.SetId), now),
-                cancellationToken).ConfigureAwait(false);
-            check = SetAuthority.RequireFourEyes(requirement, check);
-            if (set.EvidenceRef is not null && check.Decision == AuthorityDecision.Allow)
-            {
-                check = check with { Decision = AuthorityDecision.Refer, ReasonCode = "SYSTEM_SET_REQUIRES_APPROVER", ReferralTargets = [new ReferralTarget("ROLE", "Staff.ClaimsManager")] };
-            }
+            var check = await SetAuthority.CheckAsync(requirement, set, context, authority, now, cancellationToken).ConfigureAwait(false);
             context.AuthorityChecks.Add(check);
             checks.Add((requirement, check));
         }
@@ -248,13 +241,13 @@ internal sealed class SubmitTransactionSetHandler(
 
     /// <summary>The PLT subject and bound hash of one approval bucket (shared with the execution check).</summary>
     public static (string Type, ObjectRef Subject, Sha256Hash Hash) SubjectOf(TransactionSetRow set, ClaimPaymentRow? payment, AuthorityRequirement bucket) =>
-        bucket.Type == ClaimsAuthorityTypes.Payment && payment is not null
+        bucket.Type == ClaimsAuthorityTypes.Payment && payment is not null && payment.Method != "CLEARING"
             ? (DisbursementApproval.ClaimPaymentType, DisbursementApproval.ClaimPaymentSubject(payment.ClaimPaymentId.Value.ToString("D")), Sha256Hash.Parse(payment.DisbursementContentHash))
             : (ClaimApprovals.TransactionSet, new ObjectRef(ModuleCode.CLM, "TransactionSet", $"{set.SetId.Value:D}/{bucket.Type.Value}/{bucket.CostType}"), Sha256Hash.Parse(set.ContentHash));
 
     private async Task<DomainError?> DuplicateAsync(SetContent content, CancellationToken cancellationToken)
     {
-        foreach (var payment in content.Payments)
+        foreach (var payment in content.Payments.Where(p => p.Method != "CLEARING"))
         {
             var rejected = Codes.Of(PaymentStatus.Rejected);
             var draft = Codes.Of(SetStatus.Draft);

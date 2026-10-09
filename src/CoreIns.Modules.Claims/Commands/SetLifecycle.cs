@@ -48,7 +48,21 @@ internal sealed partial class SetLifecycle(
         var exposures = await db.Exposures.AsNoTracking().Where(e => exposureIds.Contains(e.ExposureId)).ToListAsync(cancellationToken).ConfigureAwait(false);
         if (exposures.Any(e => e.Status != ClaimStates.Open))
         {
-            return "An exposure of the set is not open any more.";
+            var closed = exposures.Where(e => e.Status != ClaimStates.Open).Select(e => e.ExposureId).ToHashSet();
+            if (content.Transactions.Any(t => closed.Contains(t.ExposureId) && t.Kind != Codes.Of(TransactionKind.RecoveryReserve)))
+            {
+                return "An exposure of the set is not open any more.";
+            }
+        }
+
+        foreach (var transaction in content.Transactions.Where(t => t.RecoveryId is not null))
+        {
+            if (!await db.Recoveries.AnyAsync(r => r.RecoveryId == transaction.RecoveryId && r.ClaimId == claim.ClaimId
+                    && r.LegalEntityId == claim.LegalEntityId && (r.ExposureId == null || r.ExposureId == transaction.ExposureId)
+                    && r.Status != "CLOSED" && r.Status != "WRITTEN_OFF", cancellationToken).ConfigureAwait(false))
+            {
+                return "A recovery of the set is no longer open on this claim and exposure.";
+            }
         }
 
         // A re-verification adoption may have removed the cover of an exposure after the set was built (REQ-CLM-058).
@@ -241,10 +255,21 @@ internal sealed partial class SetLifecycle(
             var platform = await approvals.GetAsync(sibling.ApprovalRequestId.ToString("D"), cancellationToken).ConfigureAwait(false);
             if (platform.Request.Status == CoreIns.Platform.Contracts.Api.ApprovalStatus.PendingApproval)
             {
-                await approvals.WithdrawAsync(new CoreIns.Platform.Contracts.Api.ApprovalWithdrawRequest
+                try
                 {
-                    ApprovalRequestId = new ApprovalRequestId(sibling.ApprovalRequestId), Reason = reason,
-                }, CommandOptions.New(), cancellationToken).ConfigureAwait(false);
+                    await approvals.WithdrawAsync(new CoreIns.Platform.Contracts.Api.ApprovalWithdrawRequest
+                    {
+                        ApprovalRequestId = new ApprovalRequestId(sibling.ApprovalRequestId), Reason = reason,
+                    }, CommandOptions.New(), cancellationToken).ConfigureAwait(false);
+                }
+                catch (DomainException ex) when (ex.Error.Code.Value == "PLT-ERR-APPROVAL-STALE")
+                {
+                    var current = await approvals.GetAsync(sibling.ApprovalRequestId.ToString("D"), cancellationToken).ConfigureAwait(false);
+                    if (current.Request.Status == CoreIns.Platform.Contracts.Api.ApprovalStatus.PendingApproval)
+                    {
+                        throw;
+                    }
+                }
             }
             sibling.Status = "REJECTED";
             sibling.DecidedAt = now;

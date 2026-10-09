@@ -20,7 +20,8 @@ using Item = CoreIns.Modules.Claims.Contracts.Api.TransactionSetBuildRequest.Tra
 namespace CoreIns.Modules.Claims.Commands;
 
 /// <summary><c>clm.TransactionSet.build</c> as a command of the platform pipeline.</summary>
-internal sealed record BuildTransactionSet(TransactionSetBuildRequest Request, ClaimFinancialEvidence? Evidence = null) : ICommand<TransactionSetBuildResponse>;
+internal sealed record BuildTransactionSet(TransactionSetBuildRequest Request, ClaimFinancialEvidence? Evidence = null,
+    string PaymentMethod = "SEPA_CT", PartyId? CounterpartyInsurerPartyId = null) : ICommand<TransactionSetBuildResponse>;
 
 /// <summary>Shape rules (CLM-ERR-VALIDATION): EUR only (D-SL2-06), minor units, codes, at most 20 transactions.</summary>
 internal sealed class BuildTransactionSetValidator : AbstractValidator<BuildTransactionSet>
@@ -71,6 +72,11 @@ internal sealed class BuildTransactionSetHandler(
     public async Task<Result<TransactionSetBuildResponse>> HandleAsync(BuildTransactionSet command, CancellationToken cancellationToken)
     {
         var request = command.Request;
+        var clearing = command.PaymentMethod == "CLEARING";
+        if (clearing && (command.Evidence?.Kind != "FS_NOTIFICATION" || command.CounterpartyInsurerPartyId is null))
+        {
+            return DomainError.Of(ModuleCode.CLM, "NOT-AVAILABLE", "A CLEARING payment needs authoritative FS notification evidence and an insurer counterparty.");
+        }
         var legalEntity = protection.Current(context);
         var claim = await ClaimSupport.LoadAsync(db, legalEntity, request.ClaimId, cancellationToken).ConfigureAwait(false);
         if (claim is null)
@@ -89,6 +95,10 @@ internal sealed class BuildTransactionSetHandler(
         foreach (var (item, index) in request.Transactions.Select((t, i) => (t, i)))
         {
             var field = $"transactions[{index}]";
+            if (item.Kind is not (Item.KindValue.RecoveryReserve or Item.KindValue.Recovery) && item.RecoveryId is not null)
+            {
+                return FnolAssessment.Invalid(field + ".recoveryId", "RECOVERY_KIND", "A recovery id belongs only to a recovery transaction.");
+            }
             if (item.Kind == Item.KindValue.Recovery && command.Evidence is null)
             {
                 return DomainError.Of(ModuleCode.CLM, "NOT-AVAILABLE", "Received cash can only be recorded from authoritative evidence in a system set.");
@@ -144,7 +154,7 @@ internal sealed class BuildTransactionSetHandler(
                     reasons.Add("EXPOSURE_NOT_COVERED");
                 }
 
-                if (!await db.PayeeAccounts.AnyAsync(
+                if (!clearing && !await db.PayeeAccounts.AnyAsync(
                         a => a.ClaimId == claim.ClaimId && a.PayeeAccountId == item.PayeeAccountId!.Value && a.PartyId == item.PayeePartyId!.Value, cancellationToken)
                     .ConfigureAwait(false))
                 {
@@ -168,7 +178,7 @@ internal sealed class BuildTransactionSetHandler(
         }
 
         // REQ-CLM-129 / D-SL2-10 a: a live payment of the same amount to the same account on this claim is a duplicate.
-        if (drafts.SingleOrDefault(d => d.Kind == TransactionKind.Payment) is { } paymentDraft)
+        if (!clearing && drafts.SingleOrDefault(d => d.Kind == TransactionKind.Payment) is { } paymentDraft)
         {
             var account = paymentDraft.Source!.PayeeAccountId!.Value;
             var rejected = Codes.Of(PaymentStatus.Rejected);
@@ -260,14 +270,15 @@ internal sealed class BuildTransactionSetHandler(
             if (draft.Kind == TransactionKind.Payment)
             {
                 var source = draft.Source!;
-                var view = await db.PayeeAccounts.AsNoTracking()
+                var view = clearing ? null : await db.PayeeAccounts.AsNoTracking()
                     .FirstAsync(a => a.ClaimId == claim.ClaimId && a.PayeeAccountId == source.PayeeAccountId!.Value, cancellationToken).ConfigureAwait(false);
                 var id = ClaimPaymentId.New();
                 var amount = ClaimMoney.Of(draft.Amount, draft.Line.Currency);
                 payment = new ClaimPaymentRow
                 {
                     ClaimPaymentId = id, ClaimId = claim.ClaimId, SetId = set.SetId, ExposureId = draft.Line.ExposureId, PayeePartyId = source.PayeePartyId!.Value,
-                    PayeeAccountId = source.PayeeAccountId!.Value, MaskedAccount = view.MaskedIban, Method = DisbursementCodes.SepaCreditTransfer,
+                    PayeeAccountId = source.PayeeAccountId!.Value, MaskedAccount = view?.MaskedIban, Method = command.PaymentMethod,
+                    CounterpartyInsurerPartyId = command.CounterpartyInsurerPartyId,
                     PaymentType = Codes.Of(draft.PaymentType!.Value), Amount = draft.Amount, Currency = draft.Line.Currency, Status = Codes.Of(PaymentStatus.Pending),
                     DisbursementContentHash = DisbursementContent.Hash(DisbursementCodes.ClaimPayment, id.Value.ToString("D"), source.PayeePartyId!.Value, source.PayeeAccountId!.Value, amount).Value,
                     LegalEntityId = legalEntity, Jurisdiction = claim.Jurisdiction, CreatedAt = now, CreatedBy = actor, UpdatedAt = now,
@@ -304,9 +315,7 @@ internal sealed class BuildTransactionSetHandler(
             authorityPreview = [];
             foreach (var requirement in SetAuthority.Requirements(content, existingLines, approved))
             {
-                var check = await authority.CheckAsync(new AuthorityCheckRequest(context.Actor, context.Roles, requirement.Type,
-                    SetAuthority.Dimensions(requirement), ClaimApprovals.SetSubject(set.SetId), now), cancellationToken).ConfigureAwait(false);
-                check = SetAuthority.RequireFourEyes(requirement, check);
+                var check = await SetAuthority.CheckAsync(requirement, set, context, authority, now, cancellationToken).ConfigureAwait(false);
                 authorityPreview.Add(new AuthorityPreviewItem
                 {
                     Type = requirement.Type.Value, CostType = requirement.CostType, Amount = SetAuthority.MoneyOf(requirement),

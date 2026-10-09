@@ -143,6 +143,7 @@ internal sealed class FinancialTransactionRow : ClaimsRow
 /// <summary><c>clm.claim_payment</c>: one payment of a set (PRD-07 §7.1 ClaimPayment). No IBAN (R-38).</summary>
 internal sealed class ClaimPaymentRow : ClaimsRow
 {
+    public PartyId? CounterpartyInsurerPartyId { get; set; }
     public Guid? FsStatementId { get; set; }
     public ClaimPaymentId? ReissueOf { get; set; }
     public ClaimPaymentId? ReversalOf { get; set; }
