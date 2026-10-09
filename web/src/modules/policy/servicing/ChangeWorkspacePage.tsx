@@ -22,12 +22,7 @@ import {
   type StepItem,
 } from '../../../design-system';
 import { UnderwritingOutcome } from '../../quote/QuoteResult';
-import {
-  validateVehicle,
-  vehicleValueCovers,
-  vehicleValueIssue,
-  type VehicleForm,
-} from '../../quote/state';
+import { vehicleValueCovers, vehicleValueIssue, type VehicleForm } from '../../quote/state';
 import { athensToday } from '../../quote/time';
 import { LinkButton } from '../../staff/LinkButton';
 import { PageHeader, Section } from '../../staff/PageHeader';
@@ -55,6 +50,7 @@ import {
   vehicleDiff,
   type DiffRow,
 } from './logic';
+import { validateServicingVehicle } from './logic';
 import { ServicingPreviewView } from './ServicingPreviewView';
 import { ServicingProblem } from './ServicingProblem';
 import { VehicleEditor, type VehicleMode } from './VehicleEditor';
@@ -145,7 +141,7 @@ function ChangeWizard({ data }: { data: PolicyGetResponse }) {
   );
   const thisYear = new Date().getFullYear();
   const diff = vehicleDiff(originalForm, form);
-  const vehicleErrors = validateVehicle(form, thisYear);
+  const vehicleErrors = validateServicingVehicle(form, thisYear, mode);
   const valueMissing = vehicleValueIssue(form.value, valueNeeded) !== undefined;
   const vehicleValid = Object.keys(vehicleErrors).length === 0 && !valueMissing;
   const hasChange = mode === 'edit' ? diff.length > 0 : form.plate.trim() !== originalForm.plate;

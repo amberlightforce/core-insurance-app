@@ -1,7 +1,18 @@
 import { toMinor } from '../../../format';
-import { emptyVehicle, type VehicleForm } from '../../quote/state';
+import { emptyVehicle, validateVehicle, type VehicleForm } from '../../quote/state';
 import { addDays, athensMidnight, athensToday } from '../../quote/time';
 import type { DraftInstruction, ServicingPreview, Vehicle } from './api';
+
+/** An existing vehicle's read-only plate is its issued identity, not new user input. */
+export function validateServicingVehicle(
+  form: VehicleForm,
+  thisYear: number,
+  mode: 'edit' | 'replace',
+) {
+  const issues = validateVehicle(form, thisYear);
+  if (mode === 'edit') delete issues.plate;
+  return issues;
+}
 
 export type Due =
   | { kind: 'refund'; amount: ServicingPreview['refundDue'] }

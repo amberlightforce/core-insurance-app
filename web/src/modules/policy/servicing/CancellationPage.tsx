@@ -24,12 +24,10 @@ import styles from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
 import { TermStatusPill } from '../TermStatusPill';
 import {
-  bindServicingJob,
   createCancellation,
-  getServicingJob,
-  quoteServicingJob,
   type CancellationKind,
-  type JobBind,
+  type CancellationCreateRequest,
+  type CancellationCreateResponse,
   type ServicingPreview,
 } from './api';
 import { changeInstant } from './logic';
@@ -77,23 +75,21 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
   const [reason, setReason] = useState<string | null>(null);
   const [kind, setKind] = useState<CancellationKind>(scheduled ? 'FLAT' : 'STANDARD');
   const [requestRef, setRequestRef] = useState('');
-  const [job, setJob] = useState<{ jobId: string; versionNo: number } | null>(null);
+  const [previewRequest, setPreviewRequest] = useState<CancellationCreateRequest | null>(null);
   const [preview, setPreview] = useState<ServicingPreview | null>(null);
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<{ error: unknown; title: string } | null>(null);
-  const [bound, setBound] = useState<JobBind | null>(null);
-  const [gateFailure, setGateFailure] = useState<JobBind | null>(null);
+  const [bound, setBound] = useState<CancellationCreateResponse | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [touched, setTouched] = useState(false);
 
   const createKey = useIdempotencyKey();
-  const quoteKey = useIdempotencyKey();
   const bindKey = useIdempotencyKey();
   /** «Now» is fixed per request so that a retry sends an identical payload (same key). */
   const instant = useRef<string | null>(null);
 
-  const locked = job !== null;
+  const locked = previewRequest !== null;
   const reasonMissing = reason === null;
 
   const previewRefund = async () => {
@@ -111,15 +107,10 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
         kind,
         ...(requestRef.trim() ? { requestRef: requestRef.trim() } : {}),
       };
-      const created = await createCancellation(request, createKey.keyFor(request));
+      const created = await createCancellation(request, createKey.keyFor(request), true);
       createKey.release();
-      // The job is Draft until it is quoted: the quote freezes the version the bind confirms.
-      const { job: server } = await getServicingJob(created.jobId);
-      const quoteRequest = { jobId: created.jobId, versionNo: server.currentVersionNo };
-      const quoted = await quoteServicingJob(quoteRequest, quoteKey.keyFor(quoteRequest));
-      quoteKey.release();
-      setJob({ jobId: created.jobId, versionNo: quoted.versionNo });
-      setPreview(quoted.servicingPreview ?? created.servicingPreview);
+      setPreviewRequest(request);
+      setPreview(created.servicingPreview);
       announce(t('servicing.cancel.preview.ready'));
     } catch (cause) {
       setError({ error: cause, title: t('servicing.cancel.preview.failed') });
@@ -129,28 +120,17 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
   };
 
   const bind = async () => {
-    if (!job || !term) return;
+    if (!previewRequest || !term || !confirmed || busy !== null) return;
     setError(null);
     setBusy('bind');
     try {
-      const request = {
-        jobId: job.jobId,
-        versionNo: job.versionNo,
-        paymentPlanOption: term.paymentPlanRef,
-        confirmation: true,
-      };
-      const response = await bindServicingJob(request, bindKey.keyFor(request));
+      const response = await createCancellation(previewRequest, bindKey.keyFor(previewRequest));
       bindKey.release();
       setConfirmOpen(false);
       setConfirmed(false);
-      if (response.gateResults.every((g) => g.passed)) {
-        setBound(response);
-        setGateFailure(null);
-        rememberRecent('policy', policy.policyId);
-        announce(t('servicing.cancel.bound.title'));
-      } else {
-        setGateFailure(response);
-      }
+      setBound(response);
+      rememberRecent('policy', policy.policyId);
+      announce(t('servicing.cancel.bound.title'));
     } catch (cause) {
       setConfirmOpen(false);
       setConfirmed(false);
@@ -345,24 +325,6 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
           </div>
           {preview ? (
             <>
-              {gateFailure ? (
-                <Banner
-                  variant="danger"
-                  live="alert"
-                  title={t('servicing.change.confirm.gateFailedTitle')}
-                >
-                  <p>{t('servicing.change.confirm.gateFailedBody')}</p>
-                  <ul className={styles.problemList}>
-                    {gateFailure.gateResults.map((g) => (
-                      <li key={g.gate}>
-                        <strong>{t(`servicing.gate.${g.gate}`, { defaultValue: g.gate })}</strong>
-                        {': '}
-                        {g.passed ? t('servicing.gatePassed') : t('servicing.gateFailed')}
-                      </li>
-                    ))}
-                  </ul>
-                </Banner>
-              ) : null}
               <ServicingPreviewView preview={preview} artefactHash={term.artefactHash} />
               <div className={styles.actions}>
                 <Button
