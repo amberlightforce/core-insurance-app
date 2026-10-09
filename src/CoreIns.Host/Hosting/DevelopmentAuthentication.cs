@@ -130,7 +130,7 @@ internal static class DevelopmentAuthentication
     {
         var group = endpoints.MapGroup("/api/plt/v1/dev").AllowAnonymous().WithMetadata(new SkipIdempotencyAttribute());
         group.MapGet("/users", (IOptions<DevAuthenticationOptions> options) =>
-            Results.Ok(new { items = options.Value.Users.Select(u => new { id = u.Id, name = u.Name, roles = u.Roles }) }));
+            Results.Ok(new { items = options.Value.Users.Select(u => new { id = u.Id, actorKey = "USER:dev:" + u.Id, name = u.Name, roles = u.Roles }) }));
         group.MapPost("/sign-in", (DevSignInRequest request, IOptions<DevAuthenticationOptions> options, DevSigningKey key, IClock clock) =>
         {
             var user = options.Value.Users.FirstOrDefault(u => string.Equals(u.Id, request.UserId, StringComparison.Ordinal));
@@ -153,7 +153,7 @@ internal static class DevelopmentAuthentication
                 Expires = expires,
                 SigningCredentials = new SigningCredentials(key.Key, SecurityAlgorithms.HmacSha256),
             });
-            return Results.Ok(new { accessToken = token, tokenType = "Bearer", expiresAt = expires, user = new { id = user.Id, name = user.Name, roles = user.Roles } });
+            return Results.Ok(new { accessToken = token, tokenType = "Bearer", expiresAt = expires, user = new { id = user.Id, actorKey = "USER:dev:" + user.Id, name = user.Name, roles = user.Roles } });
         });
     }
 

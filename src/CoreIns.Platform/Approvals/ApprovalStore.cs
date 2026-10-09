@@ -223,6 +223,20 @@ internal static class ApprovalStore
         return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false) == 1;
     }
 
+    /// <summary>Explicit owning-module withdrawal preserves its audited reason.</summary>
+    public static async Task<bool> TryWithdrawWithReasonAsync(
+        NpgsqlConnection connection, NpgsqlTransaction transaction, Guid requestId, int version, Instant at, string reason, CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand(
+            "UPDATE plt.approval_request SET status = 'Withdrawn', decided_at = @at, decision_comment = @reason, version = version + 1 "
+            + "WHERE request_id = @id AND status = 'PendingApproval' AND version = @version", connection, transaction);
+        command.Parameters.AddWithValue("id", requestId);
+        command.Parameters.AddWithValue("version", version);
+        command.Parameters.AddWithValue("at", at.ToUtcDateTime());
+        command.Parameters.AddWithValue("reason", reason);
+        return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false) == 1;
+    }
+
     /// <summary>
     /// Records the decision only if the request is still pending at the version and content hash the checker saw:
     /// of two racing decisions the second finds no pending row after the first commits (READ COMMITTED re-check) and

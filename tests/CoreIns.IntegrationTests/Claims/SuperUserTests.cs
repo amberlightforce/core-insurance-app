@@ -29,7 +29,7 @@ public sealed class SuperUserTests(PostgresFixture database) : IClassFixture<Pos
             documentOptions: new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip })!["DevAuthentication"]!["Users"]!.AsArray();
         var roles = users.Single(u => u!["Id"]!.GetValue<string>() == "superuser")!["Roles"]!.AsArray().Select(r => r!.GetValue<string>()).ToList();
         roles.ShouldBe(
-            ["Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority"], ignoreOrder: true);
+            ["Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority", "Staff.RecoverySpecialist", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager"], ignoreOrder: true);
         _roles = string.Join(',', roles);
 
         _policy = new PolicySlice(
