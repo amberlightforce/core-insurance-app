@@ -175,7 +175,7 @@ public sealed class FinanceServicingRulesTests
         var reduced = await CheckAsync(Checker(), Entry("CREDIT_WRITTEN",
             Line("LA-06", "DEBIT", 43.29m, "DISTANCE_WITHDRAWAL_VOID", "DistanceWithdrawal", rule: "GR-TRT-IPT-WITHDRAWAL-VOID"),
             Line("LA-01", "CREDIT", 43.29m, "DISTANCE_WITHDRAWAL_VOID", null, null, null)));
-        reduced.Passed.ShouldBeTrue(reduced.Detail);
+        reduced.Passed.ShouldBeFalse("a REDUCE treatment consistent with the debit still cannot post: no IPT payable debit exists on any entry type (no remittance rule)");
     }
 
     [Fact]
@@ -256,6 +256,35 @@ public sealed class FinanceServicingRulesTests
             (await CheckAsync(Checker(), Entry(type, Line("LA-06", "DEBIT", 10m, kind: null), Line("LA-10", "CREDIT", 10m, kind: null, chargeType: null, category: null))))
                 .Passed.ShouldBeFalse(type);
         }
+    }
+
+    [Theory]
+    [InlineData("WRITTEN")]
+    [InlineData("BILLED")]
+    [InlineData("IPT_DUE")]
+    [InlineData("CREDIT_WRITTEN")]
+    public async Task N1_Q1_Q1b_a_debit_on_the_IPT_payable_netted_by_a_credit_on_LA_27_is_refused_on_every_entry_type_with_or_without_a_kind(string type)
+    {
+        // Dr LA-06 / Cr LA-27 nets to zero per group but moves liability out of IPT payable: never allowed (no remittance rule exists).
+        (await CheckAsync(Checker(), Entry(type, Line("LA-06", "DEBIT", 43.29m), Line("LA-27", "CREDIT", 43.29m)))).Passed.ShouldBeFalse("Q1: kind CANCELLATION, " + type);
+        (await CheckAsync(Checker(), Entry(type, Line("LA-06", "DEBIT", 43.29m, kind: null), Line("LA-27", "CREDIT", 43.29m, kind: null)))).Passed.ShouldBeFalse("Q1b: no kind, " + type);
+    }
+
+    [Fact]
+    public async Task BIL_REFUND_the_refund_approval_with_transactionKind_REFUND_and_no_tax_line_passes_without_asking_the_calculator()
+    {
+        var c = Checker();
+        var result = await CheckAsync(c, Entry("REFUND_APPROVED",
+            Line("LA-02", "DEBIT", 288.63m, "REFUND", null, null, null), Line("LA-12", "CREDIT", 288.63m, "REFUND", null, null, null)));
+        result.Passed.ShouldBeTrue(result.Detail);
+        c.Calculator.Requests.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task N1_Q1c_Q2_the_release_of_not_yet_due_IPT_into_the_payable_Dr_LA_27_Cr_LA_06_still_posts()
+    {
+        (await CheckAsync(Checker(), Entry("IPT_DUE", Line("LA-27", "DEBIT", 60m, kind: null), Line("LA-06", "CREDIT", 60m, kind: null)))).Passed.ShouldBeTrue();
+        (await CheckAsync(Checker(), Entry("IPT_DUE", Line("LA-27", "DEBIT", 3m, "ENDORSEMENT_DEBIT", null), Line("LA-06", "CREDIT", 3m, "ENDORSEMENT_DEBIT", null)))).Passed.ShouldBeTrue();
     }
 
     [Fact]

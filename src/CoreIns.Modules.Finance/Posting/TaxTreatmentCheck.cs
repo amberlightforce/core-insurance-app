@@ -44,7 +44,6 @@ internal sealed class TaxTreatmentCheck(IServiceProvider services)
 {
     private const PolicyholderType AssumedPolicyholder = PolicyholderType.Consumer;
     private const string AssumedBusinessBasis = "ESTABLISHMENT";
-    private const string IptDue = "IPT_DUE";
 
     /// <summary>A net movement of one tax, levy or stamp payable (credit positive).</summary>
     private sealed record Movement(TaxCategory Category, string? ChargeType, string? Kind, string? Source, decimal Net, string Account);
@@ -72,13 +71,14 @@ internal sealed class TaxTreatmentCheck(IServiceProvider services)
                 line.Dimension(LineDimensionKeys.TransactionKind), line.Dimension(LineDimensionKeys.CancellationSource)));
         }
 
-        if (entryType == IptDue && items.Any(i => i.Account == "LA-06" && i.Side == Sides.Debit))
-        {
-            return TaxCheckResult.Fail("IPT_DUE debits the IPT payable LA-06: it may only release the not-yet-due IPT into it (REQ-FIN-182).");
-        }
-
         var movements = Movements(items.Where(i => i.Category is not null).Select(i => (i.Account, i.Category!.Value, i.Side, i.Amount, i.ChargeType, i.Kind, i.Source)));
-        return await EvaluateAsync(entryType, movements, entry.AccountingDate, legalEntityId, jurisdiction, cancellationToken).ConfigureAwait(false);
+        var result = await EvaluateAsync(entryType, movements, entry.AccountingDate, legalEntityId, jurisdiction, cancellationToken).ConfigureAwait(false);
+
+        // Whatever the netting said: a debit on the IPT payable is never allowed on any entry type. There is no IPT remittance
+        // rule yet, and only the release of not-yet-due IPT (credit on LA-06) may touch it (REQ-FIN-182).
+        return !result.Passed || !items.Any(i => i.Account == "LA-06" && i.Side == Sides.Debit)
+            ? result
+            : TaxCheckResult.Fail($"{entryType} debits the IPT payable LA-06; no entry type may (there is no IPT remittance rule), IPT_DUE only releases the not-yet-due IPT into it (REQ-FIN-182).");
     }
 
     public async Task<TaxCheckResult> CheckJournalAsync(
@@ -88,12 +88,10 @@ internal sealed class TaxTreatmentCheck(IServiceProvider services)
         var items = draft.Lines.Where(l => ResolvedCategory(l.Account) is not null)
             .Select(l => (l.Account, ResolvedCategory(l.Account)!.Value, l.Side, l.Amount.Amount, l.Dimensions.ChargeType, l.Dimensions.TransactionKind, l.Dimensions.CancellationSource))
             .ToList();
-        if (entryType == IptDue && items.Any(i => i.Account == "GL-2410" && i.Side == Sides.Debit))
-        {
-            return TaxCheckResult.Fail("IPT_DUE debits the IPT payable GL-2410: it may only release the not-yet-due IPT into it (REQ-FIN-182).");
-        }
-
-        return await EvaluateAsync(entryType, Movements(items), draft.AccountingDate, legalEntityId, jurisdiction, cancellationToken).ConfigureAwait(false);
+        var result = await EvaluateAsync(entryType, Movements(items), draft.AccountingDate, legalEntityId, jurisdiction, cancellationToken).ConfigureAwait(false);
+        return !result.Passed || !items.Any(i => i.Account == "GL-2410" && i.Side == Sides.Debit)
+            ? result
+            : TaxCheckResult.Fail($"{entryType} debits the IPT payable GL-2410; no entry type may (there is no IPT remittance rule) (REQ-FIN-182).");
     }
 
     private static List<Movement> Movements(IEnumerable<(string Account, TaxCategory Category, string Side, decimal Amount, string? ChargeType, string? Kind, string? Source)> items) =>

@@ -187,6 +187,22 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
     }
 
     [Fact]
+    public async Task N1_Q1_a_WRITTEN_entry_moving_liability_out_of_IPT_payable_Dr_LA_06_Cr_LA_27_is_suspended_with_or_without_a_kind()
+    {
+        var policy = NewPolicy();
+        var account = Guid.CreateVersion7();
+        await _slice.PolicyBoundAsync(policy);
+        var withKind = await _slice.EntryAsync(account, "WRITTEN", Day,
+            Ipt("DEBIT", "43.29", policy, account), Ipt("CREDIT", "43.29", policy, account, account: "LA-27"));
+        var noKind = await _slice.EntryAsync(account, "WRITTEN", Day,
+            WithoutKind(Ipt("DEBIT", "43.29", policy, account)), WithoutKind(Ipt("CREDIT", "43.29", policy, account, account: "LA-27")));
+        await _slice.DrainAsync();
+        (await StatusAsync(withKind)).ShouldBe("SUSPENDED/TAX_RULE_VIOLATION");
+        (await StatusAsync(noKind)).ShouldBe("SUSPENDED/TAX_RULE_VIOLATION");
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_line WHERE billing_account_id = '{account}'")).ShouldBe(0);
+    }
+
+    [Fact]
     public async Task D1_P1_a_forged_IPT_DUE_without_a_kind_that_debits_the_IPT_payable_is_suspended()
     {
         var policy = NewPolicy();
@@ -321,7 +337,7 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
     /// BIL disbursement entry of a policy refund (SL3-BIL-REFUND, D-SL3-14): aggregate Disbursement, source type BIL_REFUND,
     /// sourceId = the refund id, no billing account and no claim.
     /// </summary>
-    private Task<EventEnvelope> RefundDisbursementEntryAsync(string entryType, string date, Guid disbursementId, Guid refundId, string amount, string debitAccount, string creditAccount)
+    private Task<EventEnvelope> RefundDisbursementEntryAsync(string entryType, string date, Guid disbursementId, Guid refundId, string amount, string debitAccount, string creditAccount, Guid? billingAccount = null)
     {
         var entryId = Guid.CreateVersion7();
         var payload = Sample("bil", "BillingEntryPosted");
@@ -339,7 +355,7 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
                 ["legalEntity"] = "GR-TEST",
                 ["jurisdiction"] = "GR",
                 ["ruleId"] = entryType == "DISBURSEMENT_RELEASED" ? "BLR-DISB-RELEASED-REFUND" : "BLR-DISB-CLEARED",
-                ["billingAccountId"] = null,
+                ["billingAccountId"] = billingAccount?.ToString(),
                 ["disbursementId"] = disbursementId.ToString(),
                 ["sourceType"] = "BIL_REFUND",
                 ["sourceId"] = refundId.ToString(),
@@ -402,8 +418,8 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
         var approved = await _slice.EntryAsync(account, "REFUND_APPROVED", Day,
             Servicing("LA-02", "DEBIT", Premium, policy, account, "REFUND", null, sourceType: "BIL_REFUND", sourceId: refund),
             Servicing("LA-12", "CREDIT", Premium, policy, account, "REFUND", null, sourceType: "BIL_REFUND", sourceId: refund));
-        var released = await RefundDisbursementEntryAsync("DISBURSEMENT_RELEASED", Day, disbursement, refund, Premium, "LA-12", "LA-13");
-        var cleared = await RefundDisbursementEntryAsync("DISBURSEMENT_CLEARED", Day, disbursement, refund, Premium, "LA-13", "LA-10");
+        var released = await RefundDisbursementEntryAsync("DISBURSEMENT_RELEASED", Day, disbursement, refund, Premium, "LA-12", "LA-13", account);
+        var cleared = await RefundDisbursementEntryAsync("DISBURSEMENT_CLEARED", Day, disbursement, refund, Premium, "LA-13", "LA-10", account);
         await _slice.DrainAsync();
 
         foreach (var envelope in new[] { written, billed, approved, released, cleared })
