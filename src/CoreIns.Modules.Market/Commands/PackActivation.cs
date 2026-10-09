@@ -84,7 +84,7 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
 
     private async Task<PackActivationPreview> PreviewAsync(PackActivationRow active, PackVersionRow target, bool rollback, Instant now, CancellationToken ct)
     {
-        if (now < active.ActivatedAt!.Value) throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "Retroactive activation is unsupported."));
+        if (now <= active.ActivatedAt!.Value) throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "Retroactive activation is unsupported."));
         var source = await db.PackVersions.AsNoTracking().SingleAsync(v => v.PackId == active.PackId && v.Version == active.Version, ct).ConfigureAwait(false);
         var states = rollback ? await db.ConfigStates.AsNoTracking().Where(s => s.ActivatedAt >= active.ActivatedAt!.Value && s.ActivatedAt < now).OrderBy(s => s.Seq).ToListAsync(ct).ConfigureAwait(false) : [];
         // Each state is checked against the source pack; no unrelated state is attributed to the affected window.
@@ -138,7 +138,7 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
 
     public async Task<PackActivationView> DecideAsync(PackActivationDecideRequest request, CancellationToken ct)
     {
-        if (request.Reason is null || request.Reason.Trim().Length == 0 || request.Reason.Length > 128)
+        if (!Enum.IsDefined(request.Decision) || request.Reason is null || request.Reason.Trim().Length == 0 || request.Reason.Length > 128)
             throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "A checker reason of 1 to 128 characters is required."));
         await LockAsync(ct).ConfigureAwait(false);
         var entity = context.LegalEntity?.Value ?? throw new InvalidOperationException("No authenticated legal entity.");
@@ -158,14 +158,15 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
         if (approve && (facts.State.Hash.Trim() != row.ParentHash.Trim() || facts.Active.Id != row.SupersedesId || facts.Active.Version != row.FromVersion || facts.Target.ContentDigest.Trim() != row.TargetDigest.Trim()))
             throw new DomainException(ActivationSupport.Refuse("STALE", "The parent state or activation changed; reject and request again."));
         var now = clock.Now;
-        var preview = await PreviewAsync(facts.Active, facts.Target, row.Kind == "ROLLBACK", now, ct).ConfigureAwait(false);
-        await approvals.DecideAsync(new ApprovalDecideRequest
+        var decision = await approvals.DecideAsync(new ApprovalDecideRequest
         {
             RequestId = row.ApprovalRequestId.Value, PayloadHash = proof.Hash,
             Decision = approve ? ApprovalDecideRequest.DecisionValue.Approve : ApprovalDecideRequest.DecisionValue.Reject, Comment = request.Reason,
         }, CommandOptions.New(), ct).ConfigureAwait(false);
+        now = decision.Decision.DecidedAt;
         if (approve)
         {
+            var preview = await PreviewAsync(facts.Active, facts.Target, row.Kind == "ROLLBACK", now, ct).ConfigureAwait(false);
             var verified = await approvals.VerifyForExecutionAsync(new ApprovalVerifyForExecutionRequest
             { RequestId = row.ApprovalRequestId.Value, Hash = proof.Hash, Type = ActivationSupport.ApprovalType, ObjectRef = ActivationSupport.Subject(row.Id) }, ct).ConfigureAwait(false);
             if (!verified.Ok || verified.Authority.Type != ActivationSupport.Authority || verified.Authority.Codes?.GetValueOrDefault("pack") != row.PackId || verified.Authority.Codes?.GetValueOrDefault("legalEntity") != entity)
@@ -175,6 +176,7 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
             var hash = await ConfigStateWriter.AppendAsync(session.Connection, session.Transaction!, manifest, now, row.Id, ct).ConfigureAwait(false);
             facts.Active.Status = "SUPERSEDED";
             facts.Active.RecordVersion++;
+            await db.SaveChangesAsync(ct).ConfigureAwait(false);
             row.Status = "ACTIVE"; row.ActivatedAt = now; row.ResultingHash = hash.ToString();
             row.WindowFrom = preview.Window.Start; row.WindowTo = preview.Window.End; row.HashesIssued = preview.HashesIssued.Select(h => h.ToString()).ToArray();
             var keys = BusinessKeys.Empty.With("stampId", entity).With("packId", PackRegistryService.IdOf(row.PackId).ToString("D"));
@@ -203,21 +205,33 @@ internal sealed class RequestPackRollbackHandler(PackActivationEngine engine) : 
 {
     public async Task<Result<PackRollbackResponse>> HandleAsync(RequestPackRollback c, CancellationToken ct)
     {
+        try
+        {
         var (preview, row) = await engine.RequestAsync(c.Request.Pack, c.Request.LegalEntity, c.Request.ToVersion, c.Request.Reason, true, ct).ConfigureAwait(false);
         return new PackRollbackResponse { DryRun = row is null, Preview = preview, ActivationId = row?.Id, Status = row is null ? null : PackActivationStatus.PendingApproval, ApprovalRequestId = row?.ApprovalRequestId is { } id ? new ApprovalRequestId(id) : null };
+        }
+        catch (DomainException ex) { return ex.Error; }
     }
 }
 internal sealed class RequestPackActivationHandler(PackActivationEngine engine) : ICommandHandler<RequestPackActivation, PackScheduleActivationResponse>
 {
     public async Task<Result<PackScheduleActivationResponse>> HandleAsync(RequestPackActivation c, CancellationToken ct)
     {
+        try
+        {
         var (preview, row) = await engine.RequestAsync(c.Request.Pack, c.Request.LegalEntity, c.Request.Version, c.Request.Reason, false, ct).ConfigureAwait(false);
         return new PackScheduleActivationResponse { DryRun = row is null, Preview = preview, ActivationId = row?.Id, Status = row is null ? null : PackActivationStatus.PendingApproval, ApprovalRequestId = row?.ApprovalRequestId is { } id ? new ApprovalRequestId(id) : null };
+        }
+        catch (DomainException ex) { return ex.Error; }
     }
 }
 internal sealed class DecidePackActivationHandler(PackActivationEngine engine) : ICommandHandler<DecidePackActivation, PackActivationDecideResponse>
 {
-    public async Task<Result<PackActivationDecideResponse>> HandleAsync(DecidePackActivation c, CancellationToken ct) => new PackActivationDecideResponse { Activation = await engine.DecideAsync(c.Request, ct).ConfigureAwait(false) };
+    public async Task<Result<PackActivationDecideResponse>> HandleAsync(DecidePackActivation c, CancellationToken ct)
+    {
+        try { return new PackActivationDecideResponse { Activation = await engine.DecideAsync(c.Request, ct).ConfigureAwait(false) }; }
+        catch (DomainException ex) { return ex.Error; }
+    }
 }
 internal sealed class RequestPackRollbackAuditor : ICommandAuditor<RequestPackRollback, PackRollbackResponse>
 {
@@ -232,5 +246,5 @@ internal sealed class RequestPackActivationAuditor : ICommandAuditor<RequestPack
 internal sealed class DecidePackActivationAuditor : ICommandAuditor<DecidePackActivation, PackActivationDecideResponse>
 {
     public CommandAuditFacts Describe(DecidePackActivation c, Result<PackActivationDecideResponse>? result) => new()
-    { ObjectRef = ActivationSupport.Subject(c.Request.ActivationId), BusinessKeys = BusinessKeys.Empty.With("activationId", c.Request.ActivationId.ToString("D")), Changes = result is { IsSuccess: true } ok ? AuditDiff.Compute(new { status = "PENDING_APPROVAL" }, new { status = ok.Value.Activation.Status.ToString() }) : null };
+    { ObjectRef = ActivationSupport.Subject(c.Request.ActivationId), BusinessKeys = BusinessKeys.Empty.With("activationId", c.Request.ActivationId.ToString("D")), Changes = result is { IsSuccess: true } ok ? AuditDiff.Compute(new { status = "PENDING_APPROVAL" }, new { status = ok.Value.Activation.Status.ToString() }) : [] };
 }

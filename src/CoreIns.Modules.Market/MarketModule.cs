@@ -1,16 +1,22 @@
 using CoreIns.Modules.Market.Contracts;
+using CoreIns.Modules.Market.Contracts.Api;
+using CoreIns.Modules.Market.Commands;
 using CoreIns.Modules.Market.Contracts.Spi;
 using CoreIns.Modules.Market.Domain;
 using CoreIns.Modules.Market.Persistence;
 using CoreIns.Modules.Market.Queries;
 using CoreIns.Modules.Market.Services;
 using CoreIns.Platform;
+using CoreIns.Platform.Approvals;
+using CoreIns.Platform.Authority;
+using CoreIns.Platform.Commands;
 using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Persistence;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -79,6 +85,17 @@ public static class MarketModule
             sp.GetRequiredService<IClock>()));
         services.AddHostedService<ConfigurationStatesStartup>();
         services.AddScoped<PackRegistryService>();
+        services.AddScoped<PackActivationEngine>();
+        services.AddAuthorityType(new AuthorityTypeDefinition(AuthorityTypeCode.Parse(ActivationSupport.Authority), ModuleCode.MKT,
+            new LocalizedText("Ενεργοποίηση πακέτου", "Pack activation"),
+            [new AuthorityDimensionDefinition("pack", DimensionKind.Code), new AuthorityDimensionDefinition("legalEntity", DimensionKind.Code)]));
+        services.AddOwnerDecidedApprovalType(ActivationSupport.ApprovalType);
+        services.AddCommandAuditor<RequestPackRollback, PackRollbackResponse, RequestPackRollbackAuditor>();
+        services.AddCommand<RequestPackRollback, PackRollbackResponse, RequestPackRollbackHandler>(CommandDescriptor.For("mkt.Pack.rollback") with { SupportsDryRun = true });
+        services.AddCommandAuditor<RequestPackActivation, PackScheduleActivationResponse, RequestPackActivationAuditor>();
+        services.AddCommand<RequestPackActivation, PackScheduleActivationResponse, RequestPackActivationHandler>(CommandDescriptor.For("mkt.Pack.scheduleActivation") with { SupportsDryRun = true });
+        services.AddCommandAuditor<DecidePackActivation, PackActivationDecideResponse, DecidePackActivationAuditor>();
+        services.AddCommand<DecidePackActivation, PackActivationDecideResponse, DecidePackActivationHandler>(CommandDescriptor.For("mkt.PackActivation.decide"));
 
         // MKT is the configuration authority (D-SLC-15): the platform's resolver, and so the hash pinned per request, is MKT's.
         services.RemoveAll<IConfigurationResolver>();
@@ -102,6 +119,9 @@ public static class MarketModule
     /// <summary>Status, bilingual title and description of every MKT-ERR code the slice raises (RFC 9457, D-API-15).</summary>
     internal static ErrorDefinition[] Errors { get; } =
     [
+        ErrorDefinition.For(ModuleCode.MKT, "PACK-VALIDATION", 422, "Μη έγκυρη ενεργοποίηση", "Invalid pack activation"),
+        ErrorDefinition.For(ModuleCode.MKT, "STALE", 409, "Το πακέτο άλλαξε", "The pack state changed"),
+        ErrorDefinition.For(ModuleCode.MKT, "SOD-VIOLATION", 403, "Παραβίαση διαχωρισμού καθηκόντων", "Separation of duties violation"),
         ErrorDefinition.For(ModuleCode.MKT, "CFG-VALIDATION", 422, "Μη έγκυρο αίτημα ρυθμίσεων", "The configuration request is invalid")
             .Describe("Ελέγξτε τα πεδία του αιτήματος.", "Check the request fields."),
         ErrorDefinition.For(ModuleCode.MKT, "CFG-UNKNOWN-KEY", 422, "Άγνωστο κλειδί ρυθμίσεων", "Unknown configuration key")
