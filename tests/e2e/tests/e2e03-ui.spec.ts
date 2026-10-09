@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { call, eventually, signIn, type Json } from './support/api.js';
-import { advanceTo, importProducts, issuePolicy, registerRefundAccount } from './support/servicing.js';
+import { advanceTo, importProducts, issuePolicy, registerRefundAccount, serverNow } from './support/servicing.js';
 import { alive, assertNoIbanInUrls, go, signInAs } from './support/ui.js';
 
 // Real browser interactions against the isolated shiftable stack. API setup creates each paid policy;
@@ -14,6 +14,7 @@ test('E2E-03 staff cancellation and refund proposal reach the paid refund', asyn
   const iban = 'GR1601101250000000012300695';
   await registerRefundAccount(request, policy.partyId, iban, 'Μαρία Παπαδοπούλου');
   await advanceTo(request, policy, 120);
+  await page.clock.setFixedTime(await serverNow(request));
   const noIban = assertNoIbanInUrls(page);
   await signInAs(page, 'Dev Underwriter (synthetic)');
   await go(page, `/policies/${policy.policyId}/cancel`);
@@ -62,6 +63,7 @@ test('E2E-04 staff renewal requires confirmation and binds the next term', async
   await importProducts(request);
   const policy = await issuePolicy(request, 'ui-renew');
   await advanceTo(request, policy, 335);
+  await page.clock.setFixedTime(await serverNow(request));
   await signInAs(page, 'Dev Underwriter (synthetic)');
   await go(page, `/policies/${policy.policyId}/renew`);
   await page.getByRole('button', { name: 'Ανανέωση τώρα', exact: true }).click();
@@ -86,6 +88,7 @@ test('staff change edits the vehicle, previews and explicitly applies the change
   await importProducts(request);
   const policy = await issuePolicy(request, 'ui-change');
   await advanceTo(request, policy, 30);
+  await page.clock.setFixedTime(await serverNow(request));
   await signInAs(page, 'Dev Underwriter (synthetic)');
   await go(page, `/policies/${policy.policyId}/change`);
   await page.getByRole('button', { name: /Επόμενο/ }).click();
