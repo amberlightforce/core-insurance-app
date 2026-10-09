@@ -361,7 +361,8 @@
             ],
             "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
             "quotedAt": "2026-10-07T09:00:00Z",
-            "validUntil": "2026-10-07T09:00:00Z"
+            "validUntil": "2026-10-07T09:00:00Z",
+            "staleReason": "PACK_ROLLBACK"
           }
         ],
         "createdAt": "2026-10-07T09:00:00Z"
@@ -1900,7 +1901,8 @@
             ],
             "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
             "quotedAt": "2026-10-07T09:00:00Z",
-            "validUntil": "2026-10-07T09:00:00Z"
+            "validUntil": "2026-10-07T09:00:00Z",
+            "staleReason": "PACK_ROLLBACK"
           }
         ],
         "createdAt": "2026-10-07T09:00:00Z"
@@ -2382,7 +2384,8 @@
           ],
           "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
           "quotedAt": "2026-10-07T09:00:00Z",
-          "validUntil": "2026-10-07T09:00:00Z"
+          "validUntil": "2026-10-07T09:00:00Z",
+          "staleReason": "PACK_ROLLBACK"
         }
       ],
       "createdAt": "2026-10-07T09:00:00Z"
@@ -2394,6 +2397,69 @@
     },
     "JobWithdrawResponse": {
       "job": "unspecified"
+    },
+    "PackRollbackExceptionListPage": {
+      "items": [
+        {
+          "exceptionId": "0192197a-5026-74d3-8c46-d78df140c6a0",
+          "activationId": "0192c994-0ea7-70f3-88a7-a96390b68494",
+          "pack": "SAMPLE_CODE",
+          "fromVersion": "1",
+          "toVersion": "1",
+          "policyId": "0192f812-c400-7e5d-86e2-045c78218a41",
+          "policyNumber": "SAMPLE-000001",
+          "termId": "0192e1d4-fa1d-7dec-811d-ac400719f22f",
+          "transactionId": "019251ef-2b0d-71b5-8aba-f6bd74b397ff",
+          "transactionKind": "SAMPLE_CODE",
+          "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "productVersion": "1.0",
+          "identifiedAt": "2026-10-07T09:00:00Z",
+          "status": "OPEN",
+          "wrkActivity": "NOT_CREATED_WRK_NOT_BUILT",
+          "review": {
+            "outcome": "NO_ACTION",
+            "reason": "sample",
+            "reviewedBy": "Sample text",
+            "reviewedAt": "2026-10-07T09:00:00Z"
+          }
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PackRollbackExceptionReview": {
+      "outcome": "NO_ACTION",
+      "reason": "sample",
+      "reviewedBy": "Sample text",
+      "reviewedAt": "2026-10-07T09:00:00Z"
+    },
+    "PackRollbackExceptionReviewRequest": {
+      "exceptionId": "01926726-d4c6-723d-89ca-9ce91a044662",
+      "outcome": "NO_ACTION",
+      "reason": "sample"
+    },
+    "PackRollbackExceptionView": {
+      "exceptionId": "0192fe63-18e4-7a52-800a-d2933609fd4d",
+      "activationId": "0192ca18-d24c-71f7-8b42-0921c5e7e28d",
+      "pack": "SAMPLE_CODE",
+      "fromVersion": "1",
+      "toVersion": "1",
+      "policyId": "019219ae-6716-722a-8670-b38f8b9eefc3",
+      "policyNumber": "SAMPLE-000001",
+      "termId": "01924ed3-a2d9-70e6-84a2-514841c4fa75",
+      "transactionId": "0192c831-dd1a-74dd-87de-213f67f8a84f",
+      "transactionKind": "SAMPLE_CODE",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "productVersion": "1.0",
+      "identifiedAt": "2026-10-07T09:00:00Z",
+      "status": "OPEN",
+      "wrkActivity": "NOT_CREATED_WRK_NOT_BUILT",
+      "review": {
+        "outcome": "NO_ACTION",
+        "reason": "sample",
+        "reviewedBy": "Sample text",
+        "reviewedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "PolicyChangeCreateRequest": {
       "policyId": "019278f6-5773-7001-8558-06137c29d5d9",
@@ -2745,7 +2811,8 @@
       ],
       "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "quotedAt": "2026-10-07T09:00:00Z",
-      "validUntil": "2026-10-07T09:00:00Z"
+      "validUntil": "2026-10-07T09:00:00Z",
+      "staleReason": "PACK_ROLLBACK"
     },
     "ReactivationCreateRequest": {
       "termId": "019295fd-9b8d-74f6-8a76-66f446a50ed6",

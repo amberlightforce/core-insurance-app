@@ -40,6 +40,7 @@ tags:
 - name: EffectiveDate
 - name: Import
 - name: Dsar
+- name: PackRollbackException
 paths:
   /api/pol/v1/submissions:
     post:
@@ -3765,6 +3766,206 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/pack-rollback-exceptions:
+    get:
+      operationId: pol.PackRollbackException.list
+      summary: Pack rollback exceptions
+      description: |-
+        Pack rollback exceptions
+
+        Lists the exceptions raised when a PackRolledBack event found bound transactions recorded under a rolled-back pack version (D-SL5-10).
+        Filters: status, activationId. Newest first.
+      tags:
+      - PackRollbackException
+      x-requirement:
+      - REQ-POL-354
+      x-anchor:
+      - REQ-POL-354
+      x-wave: W6
+      x-work-packages:
+      - SL5-CONTRACTS-PACKS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (D-SL5-10)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: pol.PackRollbackException.list
+      x-error-codes:
+      - code: POL-ERR-VALIDATION
+        note: 'unknown filter value'
+        status: 400
+      x-source:
+      - PRD-05 §8.2
+      - PRD-05 REQ-POL-354
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: status
+        in: query
+        required: false
+        description: Exception status filter
+        schema:
+          type: string
+          enum:
+          - OPEN
+          - REVIEWED
+      - name: activationId
+        in: query
+        required: false
+        description: Filter by the PackActivation of the rollback (uuid)
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackRollbackExceptionListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/pack-rollback-exceptions/{id}:
+    get:
+      operationId: pol.PackRollbackException.get
+      summary: Pack rollback exception
+      description: |-
+        Pack rollback exception
+
+        One exception with the transaction, the configuration hash and the review.
+      tags:
+      - PackRollbackException
+      x-requirement:
+      - REQ-POL-354
+      x-anchor:
+      - REQ-POL-354
+      x-wave: W6
+      x-work-packages:
+      - SL5-CONTRACTS-PACKS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (D-SL5-10)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: pol.PackRollbackException.get
+      x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-05 §8.2
+      - PRD-05 REQ-POL-354
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the exception
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackRollbackExceptionView'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/pack-rollback-exceptions/review:
+    post:
+      operationId: pol.PackRollbackException.review
+      summary: Review a pack rollback exception
+      description: |-
+        Review a pack rollback exception
+
+        A reviewer (Staff.UnderwritingManager, illustrative grant) records NO_ACTION or CORRECTION_REQUIRED with a reason. Audited. No segment, charge
+        or term is touched and nothing is re-rated (D-SL5-10); a correction goes through a reviewed out-of-sequence change, which is out of slice 5. Idempotency-Key required.
+      tags:
+      - PackRollbackException
+      x-requirement:
+      - REQ-POL-354
+      x-anchor:
+      - REQ-POL-354
+      x-wave: W6
+      x-work-packages:
+      - SL5-CONTRACTS-PACKS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (D-SL5-10)
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: pol.PackRollbackException.review
+      x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        note: 'the exception is already REVIEWED'
+        status: 422
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: 'contract §3.5.3 (replay with a different payload)'
+        status: 409
+      x-source:
+      - PRD-05 §8.2
+      - PRD-05 REQ-POL-354
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackRollbackExceptionReviewRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackRollbackExceptionView'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 components:
   securitySchemes:
     entra:
@@ -4531,6 +4732,13 @@ components:
           $ref: ../events/common.schema.json#/$defs/Instant
         validUntil:
           $ref: ../events/common.schema.json#/$defs/Instant
+        staleReason:
+          oneOf:
+          - type: string
+            enum:
+            - PACK_ROLLBACK
+          - type: 'null'
+          description: PACK_ROLLBACK when the version was recorded under a rolled-back pack version (D-SL5-10); bind refuses it with QUOTE-STALE. Null when not stale; treat an absent member as null.
       required:
       - quoteId
       - versionNo
@@ -6072,3 +6280,120 @@ components:
         retentionConflicts:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "retention conflicts"'
+    PackRollbackExceptionStatus:
+      type: string
+      enum:
+      - OPEN
+      - REVIEWED
+    PackRollbackExceptionReview:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum:
+          - NO_ACTION
+          - CORRECTION_REQUIRED
+        reason:
+          type: string
+        reviewedBy:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Reviewer, as an opaque principal reference
+        reviewedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - outcome
+      - reason
+      - reviewedBy
+      - reviewedAt
+    PackRollbackExceptionView:
+      type: object
+      description: One exception row per transaction recorded under a rolled-back pack version (D-SL5-10). Every field is always set; review is null until reviewed.
+      properties:
+        exceptionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        activationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The PackActivation (kind ROLLBACK) that raised the exception
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        fromVersion:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+          description: The version rolled back
+        toVersion:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        transactionKind:
+          $ref: ../events/common.schema.json#/$defs/Code
+        configurationHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Hash stored with the transaction; it is one of the hashesIssued of the PackRolledBack event
+        productVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        identifiedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        status:
+          $ref: '#/components/schemas/PackRollbackExceptionStatus'
+        wrkActivity:
+          type: string
+          enum:
+          - NOT_CREATED_WRK_NOT_BUILT
+          description: WRK is not built in slice 5, so no review activity is created (D-SL5-10)
+        review:
+          oneOf:
+          - $ref: '#/components/schemas/PackRollbackExceptionReview'
+          - type: 'null'
+          description: Null while OPEN
+      required:
+      - exceptionId
+      - activationId
+      - pack
+      - fromVersion
+      - toVersion
+      - policyId
+      - policyNumber
+      - termId
+      - transactionId
+      - transactionKind
+      - configurationHash
+      - productVersion
+      - identifiedAt
+      - status
+      - wrkActivity
+      - review
+    PackRollbackExceptionListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PackRollbackExceptionView'
+      description: Page of pol.PackRollbackException.list results (cursor pagination, contract §3.5.5)
+    PackRollbackExceptionReviewRequest:
+      type: object
+      description: pol.PackRollbackException.review request
+      properties:
+        exceptionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - NO_ACTION
+          - CORRECTION_REQUIRED
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Reviewer's reason. No personal data.
+      required:
+      - exceptionId
+      - outcome
+      - reason

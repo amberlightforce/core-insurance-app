@@ -68,7 +68,13 @@
         "toVersion",
         "affectedWindow",
         "hashesInWindow",
-        "reason"
+        "reason",
+        "pack",
+        "legalEntity",
+        "activationId",
+        "window",
+        "hashesIssued",
+        "resultingHash"
       ],
       "properties": {
         "packId": {
@@ -96,7 +102,41 @@
         },
         "reason": {
           "$ref": "../common.schema.json#/$defs/Code",
-          "x-classification": "P0"
+          "x-classification": "P0",
+          "description": "Reason entered by the maker (20 to 128 characters). No personal data. Always set."
+        },
+        "pack": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0",
+          "description": "Pack code (for example GR); the registry key of the pack. Always set (SL5-CONTRACTS-PACKS, D-SL5-08)."
+        },
+        "legalEntity": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0",
+          "description": "Legal entity whose active pack version was rolled back. Always set."
+        },
+        "activationId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0",
+          "description": "The PackActivation that produced this state. Always set."
+        },
+        "window": {
+          "$ref": "../common.schema.json#/$defs/TimeWindow",
+          "x-classification": "P0",
+          "description": "Window during which the rolled-back version was the active one [from, to); equals affectedWindow. POL matches stored configuration hashes against hashesIssued (D-SL5-10). Always set."
+        },
+        "hashesIssued": {
+          "type": "array",
+          "items": {
+            "$ref": "../common.schema.json#/$defs/Sha256"
+          },
+          "x-classification": "P0",
+          "description": "Configuration hashes issued while the rolled-back version was active; equals hashesInWindow. Always set (empty list when none)."
+        },
+        "resultingHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0",
+          "description": "Configuration hash of the state recorded by the rollback (cause PACK_ROLLBACK, D-SL5-06). Always set."
         }
       }
     }
