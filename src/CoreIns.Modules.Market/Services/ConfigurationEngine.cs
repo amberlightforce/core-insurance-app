@@ -42,7 +42,8 @@ internal sealed class ConfigurationEngine(
 
     /// <summary>
     /// Selects the state: the request's hash if given (CFG-HASH-UNKNOWN when it was never recorded), else the state current at
-    /// <paramref name="knownAt"/> (NOT-AVAILABLE before the first state), else the unit of work's <paramref name="pinned"/> hash, else the current state.
+    /// <paramref name="knownAt"/> (NOT-AVAILABLE before the first state), else the unit of work's <paramref name="pinned"/> hash when it names a recorded state,
+    /// else the current state.
     /// </summary>
     public async Task<ConfigurationCatalogue> StateAsync(
         ConfigurationHash? hash, Instant? knownAt, ConfigurationHash? pinned, CancellationToken cancellationToken)
@@ -59,10 +60,11 @@ internal sealed class ConfigurationEngine(
                 ?? throw Error("NOT-AVAILABLE", "knownAt is earlier than the first recorded configuration state.");
         }
 
-        if (pinned is { } unitOfWork)
+        // The pin is honoured when it names a recorded state (REQ-MKT-051). A pin that was never recorded (a hash stamped before states were
+        // persisted, or a test's placeholder) names no state to stay faithful to, so the current state answers, and every result says which hash it used.
+        if (pinned is { } unitOfWork && await states.ByHashAsync(unitOfWork, cancellationToken).ConfigureAwait(false) is { } pinnedState)
         {
-            return await states.ByHashAsync(unitOfWork, cancellationToken).ConfigureAwait(false)
-                ?? throw Error("CFG-HASH-UNKNOWN", $"The configuration state {unitOfWork} pinned for this unit of work was never recorded by this stamp.");
+            return pinnedState;
         }
 
         return await states.CurrentAsync(cancellationToken).ConfigureAwait(false);

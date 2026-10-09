@@ -344,13 +344,19 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
     }
 
     [Fact]
-    public async Task A_pinned_hash_that_was_never_recorded_is_refused_not_replaced_by_the_current_state()
+    public async Task A_pin_that_names_no_recorded_state_falls_back_to_the_current_state_and_the_response_says_which_hash_it_used()
     {
-        var (_, engine, _) = Build();
-        var service = new MarketConfigurationService(engine, new RequestContext { ConfigurationHash = new ConfigurationHash(Sha256Hash.ComputeUtf8("pre-slice-5 hash")) });
+        var (states, engine, _) = Build();
+        var unrecorded = new ConfigurationHash(Sha256Hash.ComputeUtf8("pre-slice-5 hash"));
+        var service = new MarketConfigurationService(engine, new RequestContext { ConfigurationHash = unrecorded });
 
-        var refused = await Should.ThrowAsync<DomainException>(async () => await service.ResolveAsync(Request(), cancellationToken: Ct));
+        var resolved = await service.ResolveAsync(Request(), cancellationToken: Ct);
 
+        resolved.ConfigurationHash.ShouldBe((await states.CurrentAsync(Ct)).Hash);
+        resolved.ConfigurationHash.ShouldNotBe(unrecorded);
+
+        // An explicit hash is never replaced: asking for a state that was never recorded is an error.
+        var refused = await Should.ThrowAsync<DomainException>(async () => await service.ResolveAsync(Request(unrecorded), cancellationToken: Ct));
         refused.Error.Code.ToString().ShouldBe("MKT-ERR-CFG-HASH-UNKNOWN");
     }
 
