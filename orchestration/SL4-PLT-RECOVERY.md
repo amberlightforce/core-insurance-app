@@ -67,3 +67,9 @@ provided to root for its real RI browser journey.
 PITFALLS 3/5: owning module/principal SoD; 4/6: typed SPI and no REST; 15: conditional state transition;
 30: unique display names; 38/39: Windows native, two MSBuild workers, server/node reuse disabled; 45: verify pushed HEAD.
 Root owns final integration, independent review and merging. No user Docker stack was altered.
+
+CI at initial PR head e8eca669 ran 1,040 integration tests: 1,039 passed, with the sole failure a stale exact-role
+expectation in Claims/SuperUserTests.InitializeAsync. Updated that complete expectation with the three SL4 roles;
+no production behavior changed. Native integration Release rebuild zero warnings/errors and the focused real
+SuperUser journey passed (one test). Evidence: `.logs/sl4-plt-ci-superuser-{build,tests}.log` and original
+`.logs/sl4-plt-ci-failure.log`. Exact-head CI is restarted by the ensuing push; earlier green gates remain above.
