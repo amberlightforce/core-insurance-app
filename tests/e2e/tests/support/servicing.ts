@@ -136,11 +136,21 @@ export async function issuePolicy(request: APIRequestContext, tag: string, optio
 export async function advanceTo(request: APIRequestContext, policy: Issued, daysAfterStart: number): Promise<Date> {
   const { advanceClock } = await import('./time.js');
   const now = await serverNow(request);
-  const elapsedDays = Math.floor((now.getTime() - policy.startAt.getTime()) / 86_400_000);
+  // Day-count uses Athens calendar dates. A policy starting 20 seconds ahead is still on today's
+  // business date; flooring an instant difference incorrectly counted it as day -1 and advanced
+  // one extra day. Calendar dates also keep the helper correct across Athens DST changes.
+  const businessDay = (date: Date): number => {
+    const parts = new Intl.DateTimeFormat('en', { timeZone: 'Europe/Athens', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
+    const value = (type: string): number => Number(parts.find(part => part.type === type)!.value);
+    return Date.UTC(value('year'), value('month') - 1, value('day')) / 86_400_000;
+  };
+  const elapsedDays = businessDay(now) - businessDay(policy.startAt);
   const days = daysAfterStart - elapsedDays;
-  expect(days, 'the clock only moves forward').toBeGreaterThan(0);
-  await advanceClock(request, { days });
-  return serverNow(request);
+  expect(days, 'the clock only moves forward').toBeGreaterThanOrEqual(0);
+  if (days > 0) await advanceClock(request, { days });
+  const after = await serverNow(request);
+  expect(businessDay(after) - businessDay(policy.startAt), 'the requested Athens business day').toBe(daysAfterStart);
+  return after;
 }
 
 /** True when the route exists (the API answers with anything but the empty 404 of an unmapped route). */
