@@ -14,13 +14,17 @@ using CoreIns.SharedKernel.Identifiers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace CoreIns.Modules.Market;
 
 /// <summary>
 /// Composition entry point of the Market module (PRD-17 Multi-market). The Host calls <see cref="AddMarketModule"/>;
-/// the migrate job applies <see cref="Databases"/>. Slice scope (SL-MKT): the legal-entity registry, the configuration
-/// resolver over core defaults and country-pack data, rounding, and the Production gate for non-Settled values.
+/// the migrate job applies <see cref="Databases"/>. Scope so far: the legal-entity registry, the configuration resolver over core defaults
+/// and country-pack data, rounding, the Production gate for non-Settled values, tax treatment and calculation, and (SL5-MKT-STATE) the persisted
+/// append-only configuration states with the pack-version registry and resolution by any recorded hash.
 /// </summary>
 public static class MarketModule
 {
@@ -30,9 +34,25 @@ public static class MarketModule
     /// <summary>All PostgreSQL schemas owned by this module, created by the migrate job.</summary>
     public static IReadOnlyList<string> Schemas { get; } = [Schema];
 
-    /// <summary>The module database for the migrate job: EF Core migrations of <c>mkt</c>, then SELECT/INSERT/UPDATE for the app role (no DELETE).</summary>
+    /// <summary>
+    /// The module database for the migrate job: EF Core migrations of <c>mkt</c>, then least-privilege grants for the app role. The legal-entity
+    /// registry and the pack activations move (SELECT, INSERT, UPDATE); the pack versions and the configuration states are append-only
+    /// (SELECT, INSERT: a state or a version can never be rewritten, and triggers refuse UPDATE and DELETE for every role). Nothing gets DELETE.
+    /// </summary>
     public static IReadOnlyList<ModuleDatabaseDefinition> Databases { get; } =
-        [ModuleDbContextRegistration.Define<MarketDbContext>(ModuleCode.MKT, Schema)];
+    [
+        new(
+            ModuleCode.MKT,
+            Schema,
+            connectionString => ModuleDbContextRegistration.CreateForMigration<MarketDbContext>(connectionString, Schema),
+            appRole =>
+            [
+                $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.legal_entity, {Schema}.pack_activation TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.pack_version, {Schema}.config_state TO {appRole}",
+                $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
+            ]),
+    ];
 
     /// <summary>Registers the module's services: DbContext, registry, resolver, in-process contracts, error definitions.</summary>
     public static IServiceCollection AddMarketModule(this IServiceCollection services, IConfiguration configuration)
@@ -47,9 +67,17 @@ public static class MarketModule
         services.RemoveAll<ILegalEntityDirectory>();
         services.AddSingleton<ILegalEntityDirectory, MarketLegalEntityDirectory>();
 
-        // Configuration state: core defaults plus the data of every bound pack source (bound by the Host).
-        services.TryAddSingleton(sp => new ConfigurationCatalogue(sp.GetServices<IPackConfigurationSource>(), sp.GetRequiredService<IClock>().Now));
-        services.TryAddSingleton<ConfigurationEngine>();
+        // Configuration states (SL5-MKT-STATE, D-SL5-06): persisted, append-only, built from the pack versions registered from the data this
+        // release ships (bound by the Host). Genesis is written under an advisory lock when the host starts, or on first read.
+        services.TryAddSingleton(sp => new PersistedConfigurationStates(
+            sp.GetRequiredService<NpgsqlDataSource>(), sp.GetServices<IPackConfigurationSource>(), sp.GetRequiredService<IClock>(),
+            sp.GetRequiredService<ILogger<PersistedConfigurationStates>>()));
+        services.TryAddSingleton<IConfigurationStates>(sp => sp.GetRequiredService<PersistedConfigurationStates>());
+        services.TryAddSingleton(sp => new ConfigurationEngine(
+            sp.GetRequiredService<IConfigurationStates>(), sp.GetRequiredService<LegalEntityRegistry>(), sp.GetRequiredService<IHostEnvironment>(),
+            sp.GetRequiredService<IClock>()));
+        services.AddHostedService<ConfigurationStatesStartup>();
+        services.AddScoped<PackRegistryService>();
 
         // MKT is the configuration authority (D-SLC-15): the platform's resolver, and so the hash pinned per request, is MKT's.
         services.RemoveAll<IConfigurationResolver>();
@@ -61,9 +89,10 @@ public static class MarketModule
         services.AddScoped<MarketRoundingService>();
         services.AddScoped<IMarketRoundingService>(sp => sp.GetRequiredService<MarketRoundingService>());
 
-        // SPI 4 treatment (SL3-MKT-TREATMENT): rows are pack data in the catalogue, the calculator holds no default.
-        services.TryAddSingleton<MarketTaxCalculator>();
-        services.TryAddSingleton<ITaxCalculator>(sp => sp.GetRequiredService<MarketTaxCalculator>());
+        // SPI 4 treatment (SL3-MKT-TREATMENT): rows are pack data in the state, the calculator holds no default. Scoped: it prices under the
+        // configuration hash pinned for the unit of work (REQ-MKT-051).
+        services.TryAddScoped<MarketTaxCalculator>();
+        services.TryAddScoped<ITaxCalculator>(sp => sp.GetRequiredService<MarketTaxCalculator>());
 
         services.AddErrorDefinitions(Errors);
         return services;
@@ -90,6 +119,8 @@ public static class MarketModule
             .Describe("Ελέγξτε τον τύπο συναλλαγής και την πηγή ακύρωσης.", "Check the transaction kind and the cancellation source."),
         ErrorDefinition.For(ModuleCode.MKT, "SPI-RULE-MISSING", 422, "Λείπει κανόνας SPI", "An SPI rule is missing")
             .Describe("Δεν υπάρχει κανόνας μεταχείρισης φόρου· η λειτουργία αποτυγχάνει κλειστά.", "No tax treatment rule exists; the operation fails closed."),
+        ErrorDefinition.For(ModuleCode.MKT, "PACK-NOT-FOUND", 404, "Άγνωστο πακέτο χώρας", "Unknown pack")
+            .Describe("Δεν υπάρχει καταχωρισμένο πακέτο με αυτό το αναγνωριστικό.", "No pack with this id is registered."),
         ErrorDefinition.For(ModuleCode.MKT, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

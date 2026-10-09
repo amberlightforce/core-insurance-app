@@ -18,6 +18,8 @@ internal static class MarketPermissions
     public const string ConfigurationResolve = "mkt.Configuration.resolve";
     public const string ConfigurationCurrentHash = "mkt.Configuration.currentHash";
     public const string RoundingApply = "mkt.Rounding.apply";
+    public const string PackList = "mkt.Pack.list";
+    public const string PackGet = "mkt.Pack.get";
 }
 
 /// <summary>REST facade of <c>mkt.Configuration.resolve</c> and <c>mkt.Configuration.currentHash</c> (W1-MKT-01 subset).</summary>
@@ -98,4 +100,22 @@ internal sealed class RoundingController(MarketRoundingService service) : Contro
     [Authorize(Policy = MarketPermissions.RoundingApply)]
     public async Task<IResult> ApplyAsync([FromBody] RoundingApplyRequest request, CancellationToken cancellationToken) =>
         Results.Ok(await service.ApplyAsync(request, cancellationToken).ConfigureAwait(false));
+}
+
+/// <summary>REST facade of <c>mkt.Pack.list</c> and <c>mkt.Pack.get</c> (REQ-MKT-003 registry subset; SL5-MKT-STATE).</summary>
+[ApiController]
+[Route("api/mkt/v1/packs")]
+internal sealed class PackController(PackRegistryService service) : ControllerBase
+{
+    /// <summary>mkt.Pack.list: the registered packs with versions and activations (keyset paging by pack id).</summary>
+    [HttpGet]
+    [Authorize(Policy = MarketPermissions.PackList)]
+    public async Task<IResult> ListAsync([FromQuery] string? cursor, [FromQuery] int? limit, CancellationToken cancellationToken) =>
+        Results.Ok(await service.ListAsync(cursor, limit, cancellationToken).ConfigureAwait(false));
+
+    /// <summary>mkt.Pack.get: one pack by id.</summary>
+    [HttpGet("{id}")]
+    [Authorize(Policy = MarketPermissions.PackGet)]
+    public async Task<IResult> GetAsync(string id, CancellationToken cancellationToken) =>
+        Results.Ok(await service.GetAsync(id, cancellationToken).ConfigureAwait(false));
 }

@@ -10,13 +10,19 @@ namespace CoreIns.CountryPacks.GR.Configuration;
 /// the stamp-duty rate (stated nowhere) and any road-safety or other levy (no PRD names one). Greek rounding rules
 /// per tax class are also absent (PRD-17 section 16.5 decision 10: no Greek value is given).
 /// </summary>
-public sealed class GrPackConfiguration : IPackConfigurationSource
+public sealed class GrPackConfiguration : IVersionedPackConfigurationSource
 {
     private const string Ipt = "PRD-17 GR-01 / REQ-MKT-257 / section 9.4.4; Law 5177/2025 Art. 43 (peer-verified, PRD-06 S-3, PRD-09 S-07)";
     private const string AuxFund = "PRD-17 GR-02 / REQ-MKT-322 / REQ-MKT-331(b); Law 5113/2024 Art. 14 amending P.D. 237/1986 Art. 20";
 
-    /// <summary>Version of this pack data (semantic, REQ-MKT-129).</summary>
-    public const string Version = "0.1.0";
+    /// <summary>
+    /// The first version: exactly the values shipped before the treatment rows of SL3-MKT-TREATMENT (D-SL5-07). Nothing was added,
+    /// removed or changed to make it: it is the <c>Core</c> list below, unchanged since the D-REG-06a commit.
+    /// </summary>
+    public const string FirstVersion = "0.1.0";
+
+    /// <summary>Newest version of this pack data (semantic, REQ-MKT-129): 0.1.0 plus the treatment rows (MINOR).</summary>
+    public const string Version = "0.2.0";
 
     /// <inheritdoc />
     public string PackId => GrPack.PackId;
@@ -29,6 +35,13 @@ public sealed class GrPackConfiguration : IPackConfigurationSource
 
     /// <inheritdoc />
     public IReadOnlyList<PackConfigValue> Values { get; } = [.. Core, .. GrTreatmentRules.Values];
+
+    /// <inheritdoc />
+    public IReadOnlyList<PackVersionData> Versions { get; } =
+    [
+        new(FirstVersion, Core),
+        new(Version, [.. Core, .. GrTreatmentRules.Values]),
+    ];
 
     private static IReadOnlyList<PackConfigValue> Core { get; } =
     [
