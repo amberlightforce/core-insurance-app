@@ -30,7 +30,7 @@ internal sealed class TableRecord
 }
 
 /// <summary>An artefact as found in the database.</summary>
-internal sealed record ArtefactRecord(string ArtefactHash, string ProductCode, string ProductVersion, string DataStatus);
+internal sealed record ArtefactRecord(string ArtefactHash, string ProductCode, string ProductVersion, string DataStatus, string ActivationProductVersion);
 
 internal sealed record FallbackActivationResult(string? ArtefactHash, bool Created, string? Refusal);
 
@@ -114,7 +114,8 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
         args.Add("basis", basisDate, DbType.Date);
         return await connection.QueryFirstOrDefaultAsync<ArtefactRecord>(new CommandDefinition(
             """
-            SELECT a.artefact_hash AS ArtefactHash, a.product_code AS ProductCode, a.product_version AS ProductVersion, a.data_status AS DataStatus
+            SELECT a.artefact_hash AS ArtefactHash, a.product_code AS ProductCode, a.product_version AS ProductVersion, a.data_status AS DataStatus,
+                r.product_version AS ActivationProductVersion
               FROM rat.rate_activation r JOIN rat.rating_artifact a ON a.artefact_hash = r.artefact_hash
              WHERE r.product_code = @product AND (@version::text IS NULL OR r.product_version = @version)
                AND r.status = 'Active' AND r.effective_from <= @basis AND (r.effective_to IS NULL OR r.effective_to > @basis)

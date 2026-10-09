@@ -57,6 +57,17 @@ internal sealed class RatingRateService(
         var basis = envelope.RatingBasisDate.Value;
         var version = envelope.ProductVersion?.ToString();
         var artefact = await ResolveArtefactAsync(envelope, version, basis, cancellationToken).ConfigureAwait(false);
+        var ratedProductVersion = version ?? artefact.Definition.ProductVersion;
+        if (version is null && envelope.RatingArtefactHash is null && mode != RateRateRequest.EnvelopeDetail.ModeValue.Endorsement)
+        {
+            var activation = await store.ResolveAsync(envelope.ProductCode, null, basis, cancellationToken).ConfigureAwait(false);
+            if (activation?.ArtefactHash == artefact.Hash.Value)
+            {
+                ratedProductVersion = activation.ActivationProductVersion;
+            }
+        }
+        // The worksheet/event identify the rated product; the immutable tariff still identifies its source version.
+        envelope = envelope with { ProductVersion = ProductVersionNumber.Parse(ratedProductVersion) };
         if (!string.Equals(envelope.Currency.Code, artefact.Definition.Currency, StringComparison.Ordinal))
         {
             throw Error("CURRENCY", $"The artefact rates in {artefact.Definition.Currency}, not {envelope.Currency.Code}.");
@@ -210,7 +221,7 @@ internal sealed class RatingRateService(
                     JobId = envelope.Lineage?.JobId,
                     TransactionId = envelope.Lineage?.TransactionId,
                     ProductCode = envelope.ProductCode,
-                    ProductVersion = ProductVersionNumber.Parse(artefact.Definition.ProductVersion),
+                    ProductVersion = envelope.ProductVersion!.Value,
                     Slot = artefact.Definition.Code,
                     Mode = RatingModes.EventMode(mode),
                     Channel = envelope.Channel ?? "DIRECT",
@@ -349,7 +360,7 @@ internal sealed class RatingRateService(
                 ["legalEntity"] = envelope.LegalEntity,
                 ["jurisdiction"] = envelope.Jurisdiction,
                 ["productCode"] = envelope.ProductCode,
-                ["productVersion"] = artefact.Definition.ProductVersion,
+                ["productVersion"] = envelope.ProductVersion?.ToString() ?? artefact.Definition.ProductVersion,
                 ["productArtefactHash"] = envelope.ProductArtefactHash.ToString(),
                 ["ratingArtefactHash"] = artefact.Hash.ToString(),
                 ["ratingArtefact"] = artefact.Definition.Code + " " + artefact.Definition.Label,
@@ -452,7 +463,7 @@ internal sealed class RatingRatingArtifactService(RatingStore store) : IRatingRa
         return new RatingArtifactResolveResponse
         {
             ArtefactHash = Sha256Hash.Parse(found.ArtefactHash),
-            ActivationRecord = JsonSerializer.SerializeToElement(new { found.ProductCode, found.ProductVersion, found.DataStatus }),
+            ActivationRecord = JsonSerializer.SerializeToElement(new { found.ProductCode, ProductVersion = found.ActivationProductVersion, found.DataStatus }),
         };
     }
 }

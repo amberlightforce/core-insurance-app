@@ -10,6 +10,7 @@ using CoreIns.SharedKernel.Identifiers;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using CoreIns.SharedKernel;
 using static CoreIns.IntegrationTests.Rating.RatingTestSupport;
 
 namespace CoreIns.IntegrationTests.Rating.Fallback;
@@ -27,13 +28,13 @@ public sealed class RatingFallbackTests(PostgresFixture database) : IClassFixtur
     }
     public async ValueTask DisposeAsync() { await _factory.DisposeAsync(); await _base.DisposeAsync(); }
 
-    private async Task<RateRateResponse> RateAsync(string version, string? pin = null, string basis = "2026-11-01")
+    private async Task<RateRateResponse> RateAsync(string? version, string? pin = null, string basis = "2026-11-01")
     {
         var request = RateRequest(mode: pin is null ? "FULL" : "ENDORSEMENT", basisDate: basis,
             periodEnd: pin is null ? DateOnly.Parse(basis).AddYears(1).ToString("yyyy-MM-dd") : "2027-02-01");
         request = request with { Envelope = request.Envelope with
         {
-            ProductVersion = ProductVersionNumber.Parse(version),
+            ProductVersion = version is null ? null : ProductVersionNumber.Parse(version),
             PinnedRatingArtefactHash = pin is null ? null : Sha256Hash.Parse(pin),
         } };
         await using var scope = Scope(_factory.Services);
@@ -82,6 +83,19 @@ public sealed class RatingFallbackTests(PostgresFixture database) : IClassFixtur
         (await RateAsync("1.2", pin)).RatingArtefactHash.ShouldBe(original.RatingArtefactHash);
         (await ScalarAsync<string>($"SELECT body->'header'->>'ratingArtefactHash' FROM rat.worksheet WHERE worksheet_id='{fallback.WorksheetId.Value}'"))
             .ShouldBe(pin);
+        (await ScalarAsync<string>($"SELECT body->'header'->>'productVersion' FROM rat.worksheet WHERE worksheet_id='{fallback.WorksheetId.Value}'"))
+            .ShouldBe("1.2");
+        (await ScalarAsync<string>($"SELECT payload->>'productVersion' FROM plt.outbox_message WHERE event_type='RatingCalculated' AND payload->>'worksheetId'='{fallback.WorksheetId.Value}'"))
+            .ShouldBe("1.2");
+        (await RateAsync(null)).RatingArtefactHash.ShouldBe(original.RatingArtefactHash);
+        await using (var scope = Scope(_factory.Services))
+        {
+            var resolution = await scope.ServiceProvider.GetRequiredService<IRatingRatingArtifactService>().ResolveAsync(
+                new RatingArtifactResolveRequest { ProductCode = MotorProduct, ProductVersion = ProductVersionNumber.Parse("1.2") },
+                ValidAt.From(BusinessDate.Parse("2026-11-01")), cancellationToken: TestContext.Current.CancellationToken);
+            resolution.ArtefactHash.Value.ShouldBe(pin);
+            resolution.ActivationRecord.GetProperty("ProductVersion").GetString().ShouldBe("1.2");
+        }
         (await _factory.Services.GetRequiredService<OutboxReplayService>().ReplayAsync("RAT.ProductVersionPublished.Fallback",
             new ReplayFilter { EventIds = [envelope.EventId.Value] }, TestContext.Current.CancellationToken)).ShouldBe(1);
         (await ScalarAsync<long>("SELECT count(*) FROM rat.rate_activation WHERE product_code='MOTOR-GR' AND product_version='1.2'"))
