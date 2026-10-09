@@ -56,26 +56,23 @@ const moduleRoutes: RouteObject[] = [
       Component: (await import('./modules/policy/PolicyViewPage')).PolicyViewPage,
     }),
   },
-  // Servicing entry points of the policy file (SL3-UI-POL-FILE); SL3-UI-POL-JOBS swaps these three elements.
   {
     path: 'policies/:policyId/change',
     lazy: async () => ({
-      Component: (await import('./modules/policy/file/ServicingPlaceholderPage'))
-        .PolicyChangePlaceholder,
+      Component: (await import('./modules/policy/servicing/ChangeWorkspacePage'))
+        .ChangeWorkspacePage,
     }),
   },
   {
     path: 'policies/:policyId/cancel',
     lazy: async () => ({
-      Component: (await import('./modules/policy/file/ServicingPlaceholderPage'))
-        .PolicyCancelPlaceholder,
+      Component: (await import('./modules/policy/servicing/CancellationPage')).CancellationPage,
     }),
   },
   {
     path: 'policies/:policyId/renew',
     lazy: async () => ({
-      Component: (await import('./modules/policy/file/ServicingPlaceholderPage'))
-        .PolicyRenewPlaceholder,
+      Component: (await import('./modules/policy/servicing/RenewalPage')).RenewalPage,
     }),
   },
   {
