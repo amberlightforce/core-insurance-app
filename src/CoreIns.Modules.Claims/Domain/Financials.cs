@@ -10,6 +10,8 @@ namespace CoreIns.Modules.Claims.Domain;
 internal enum TransactionKind
 {
     Reserve,
+    RecoveryReserve,
+    Recovery,
     Payment,
 }
 
@@ -93,7 +95,7 @@ internal static class ClaimApprovals
 /// <param name="Reserved">Σ approved reserve transactions.</param>
 /// <param name="Paid">Σ approved payments (eroding and non-eroding).</param>
 /// <param name="ErodingPaid">Σ approved eroding payments.</param>
-internal readonly record struct LineAmounts(decimal Reserved, decimal Paid, decimal ErodingPaid)
+internal readonly record struct LineAmounts(decimal Reserved, decimal Paid, decimal ErodingPaid, decimal RecoveryReserved = 0m, decimal Recovered = 0m)
 {
     public static LineAmounts Zero => default;
 
@@ -106,13 +108,20 @@ internal readonly record struct LineAmounts(decimal Reserved, decimal Paid, deci
     /// <summary>Incurred = paid + open reserve (REQ-CLM-096).</summary>
     public decimal Incurred => Paid + OpenReserve;
 
+    public decimal OpenRecoveryReserve => Math.Max(0m, RecoveryReserved - Recovered);
+
+    public decimal NetIncurred => Incurred - Recovered - OpenRecoveryReserve;
+
     public LineAmounts Apply(TransactionKind kind, decimal amount, bool eroding) => kind switch
     {
         TransactionKind.Reserve => this with { Reserved = Reserved + amount },
-        _ => this with { Paid = Paid + amount, ErodingPaid = eroding ? ErodingPaid + amount : ErodingPaid },
+        TransactionKind.RecoveryReserve => this with { RecoveryReserved = RecoveryReserved + amount },
+        TransactionKind.Recovery => this with { Recovered = Recovered + amount },
+        TransactionKind.Payment => this with { Paid = Paid + amount, ErodingPaid = eroding ? ErodingPaid + amount : ErodingPaid },
+        _ => throw new ArgumentOutOfRangeException(nameof(kind)),
     };
 
-    public LineAmounts Plus(LineAmounts other) => new(Reserved + other.Reserved, Paid + other.Paid, ErodingPaid + other.ErodingPaid);
+    public LineAmounts Plus(LineAmounts other) => new(Reserved + other.Reserved, Paid + other.Paid, ErodingPaid + other.ErodingPaid, RecoveryReserved + other.RecoveryReserved, Recovered + other.Recovered);
 }
 
 /// <summary>The identity of a reserve line (REQ-CLM-093): exposure × cost type × cost category × currency.</summary>
@@ -187,13 +196,20 @@ internal static class SetHashing
         var lineNodes = new JsonArray();
         foreach (var (line, amounts) in lines.Where(l => l.Amounts != LineAmounts.Zero).OrderBy(l => l.Line.ToString(), StringComparer.Ordinal))
         {
-            lineNodes.Add(new JsonObject
+            var node = new JsonObject
             {
                 ["line"] = line.ToString(),
                 ["reserved"] = Fixed(amounts.Reserved),
                 ["paid"] = Fixed(amounts.Paid),
                 ["erodingPaid"] = Fixed(amounts.ErodingPaid),
-            });
+            };
+            if (amounts.RecoveryReserved != 0m || amounts.Recovered != 0m)
+            {
+                node["recoveryReserved"] = Fixed(amounts.RecoveryReserved);
+                node["recovered"] = Fixed(amounts.Recovered);
+            }
+
+            lineNodes.Add(node);
         }
 
         return CanonicalJson.Hash(new JsonObject { ["claim"] = claimState, ["exposures"] = exposureNodes, ["lines"] = lineNodes });

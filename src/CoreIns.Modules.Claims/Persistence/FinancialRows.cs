@@ -30,6 +30,9 @@ internal sealed class ReserveLineRow : ClaimsRow
 /// </summary>
 internal sealed class TransactionSetRow : ClaimsRow
 {
+    public string? EvidenceKind { get; set; }
+    public string? EvidenceRef { get; set; }
+
     public ClaimTransactionSetId SetId { get; set; }
 
     public ClaimId ClaimId { get; set; }
@@ -89,6 +92,8 @@ internal sealed class TransactionSetRow : ClaimsRow
 /// </summary>
 internal sealed class FinancialTransactionRow : ClaimsRow
 {
+    public RecoveryId? RecoveryId { get; set; }
+
     public Guid TxnId { get; set; }
 
     public ClaimTransactionSetId SetId { get; set; }
@@ -138,6 +143,11 @@ internal sealed class FinancialTransactionRow : ClaimsRow
 /// <summary><c>clm.claim_payment</c>: one payment of a set (PRD-07 §7.1 ClaimPayment). No IBAN (R-38).</summary>
 internal sealed class ClaimPaymentRow : ClaimsRow
 {
+    public Guid? FsStatementId { get; set; }
+    public ClaimPaymentId? ReissueOf { get; set; }
+    public ClaimPaymentId? ReversalOf { get; set; }
+    public string? FiscalMark { get; set; }
+
     public ClaimPaymentId ClaimPaymentId { get; set; }
 
     public ClaimId ClaimId { get; set; }

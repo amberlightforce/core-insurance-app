@@ -23,6 +23,13 @@ internal abstract class ClaimsRow
 /// <summary><c>clm.claim</c>: the claim header (PRD-07 §7.1, REQ-CLM-061).</summary>
 internal sealed class ClaimRow : ClaimsRow
 {
+    public decimal? FaultInsuredPct { get; set; }
+    public string? FaultSource { get; set; }
+    public PartyId? CounterpartyInsurerPartyId { get; set; }
+    public bool? JointAccidentReport { get; set; }
+    public int? VehicleCount { get; set; }
+    public bool? AccidentInGreece { get; set; }
+
     public ClaimId ClaimId { get; set; }
 
     public ClaimNumber ClaimNumber { get; set; }
@@ -159,6 +166,8 @@ internal sealed class IncidentRow : ClaimsRow
 /// <summary><c>clm.exposure</c>: one coverage × one claimant (REQ-CLM-062).</summary>
 internal sealed class ExposureRow : ClaimsRow
 {
+    public string StatutoryClocks { get; set; } = "NOT_TRACKED";
+
     public ExposureId ExposureId { get; set; }
 
     public ClaimId ClaimId { get; set; }
