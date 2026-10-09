@@ -1,5 +1,8 @@
 # HANDOVER — Greek P&C Core Insurance
 
+> **Verified takeover status — 2026-10-09:** GitHub Actions is running and this repository is public. Claims re-verification UI #37 and refund backend #39 have merged after all checks passed. Servicing UI #28 and refund UI #34 have recovered fixes and remain under final review/CI. Pack history #43 failed independent adversarial review; corrections and release-manager/design-authority roles are being validated. Full servicing acceptance found a real RAT/MKT tax-code mismatch (GR-IPT versus IPT), now under repair, plus a test clock calendar-day error, already corrected. Slice 3 acceptance remains open. Slice 4/5 preserved work is being recovered; see [CODEX-TAKEOVER.md](CODEX-TAKEOVER.md) for current ownership, evidence and queue. Older status paragraphs below are historical and must not be used as the current state.
+
+
 **Updated:** 2026-10-08 · **Repo:** https://github.com/amberlightforce/core-insurance-app (private, branch `main`) ·
 **Live tracker:** https://claude.ai/artifact/QwQVP63L5vGPhUskFrAzaD
 

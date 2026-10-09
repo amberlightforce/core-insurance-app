@@ -1,5 +1,8 @@
 # STATUS — Greek P&C core insurance build
 
+> **Verified takeover status — 2026-10-09:** GitHub Actions is running and this repository is public. Claims re-verification UI #37 and refund backend #39 have merged after all checks passed. Servicing UI #28 and refund UI #34 have recovered fixes and remain under final review/CI. Pack history #43 failed independent adversarial review; corrections and release-manager/design-authority roles are being validated. Full servicing acceptance found a real RAT/MKT tax-code mismatch (GR-IPT versus IPT), now under repair, plus a test clock calendar-day error, already corrected. Slice 3 acceptance remains open. Slice 4/5 preserved work is being recovered; see [CODEX-TAKEOVER.md](CODEX-TAKEOVER.md) for current ownership, evidence and queue. Older status paragraphs below are historical and must not be used as the current state.
+
+
 **Current phase:** 3 — Claims slice (SLICE-PLAN-2.md, D-USR-10) **COMPLETE** (2026-10-08): all slice-2 WPs merged; E2E-02a passes at API and UI level locally and in GitHub CI (run 37813614543, all 6 jobs green on 9a08c1a). Next: slice 3 (W6 servicing) when the user says so. Phase 2 thin E2E slice **COMPLETE** (2026-10-08): all 10 slice WPs merged; E2E-01 passes on Docker (API + Playwright UI) and in GitHub CI; accepted after a real-Chrome walkthrough (D-SLC-21).
 **Last updated:** 2026-10-07 (night)
 **Repo:** https://github.com/amberlightforce/core-insurance-app (private). GitHub push works (workflow scope fixed by user 2026-10-07). main pushed; first CI run GREEN (all jobs incl. Testcontainers integration tests + Trivy).
