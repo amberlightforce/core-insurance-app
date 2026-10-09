@@ -6,7 +6,7 @@ internal static class PackActivationSql
     public const string Up = """
         CREATE UNIQUE INDEX ux_pack_activation_active ON mkt.pack_activation(legal_entity_id, pack_id) WHERE status = 'ACTIVE';
         CREATE UNIQUE INDEX ux_pack_activation_pending ON mkt.pack_activation(legal_entity_id, pack_id) WHERE status = 'PENDING_APPROVAL';
-        CREATE FUNCTION mkt.guard_pack_activation() RETURNS trigger LANGUAGE plpgsql AS $$
+        CREATE FUNCTION mkt.guard_pack_activation_frozen() RETURNS trigger LANGUAGE plpgsql AS $$
         BEGIN
           IF TG_OP = 'INSERT' THEN
             IF NEW.requested_by = 'system:genesis' AND NEW.decided_by = 'system:genesis' AND NEW.status = 'ACTIVE'
@@ -51,7 +51,7 @@ internal static class PackActivationSql
           RETURN NEW;
         END $$;
         CREATE TRIGGER tr_pack_activation_frozen BEFORE INSERT OR UPDATE ON mkt.pack_activation
-          FOR EACH ROW EXECUTE FUNCTION mkt.guard_pack_activation();
+          FOR EACH ROW EXECUTE FUNCTION mkt.guard_pack_activation_frozen();
 
         CREATE FUNCTION mkt.verify_pack_activation_execution() RETURNS trigger LANGUAGE plpgsql AS $$
         DECLARE r mkt.pack_activation%ROWTYPE; entity_code text; state mkt.config_state%ROWTYPE; source mkt.pack_activation%ROWTYPE;
@@ -82,8 +82,9 @@ internal static class PackActivationSql
         DROP TRIGGER tr_pack_activation_proof ON mkt.pack_activation;
         DROP FUNCTION mkt.verify_pack_activation_execution();
         DROP TRIGGER tr_pack_activation_frozen ON mkt.pack_activation;
-        DROP FUNCTION mkt.guard_pack_activation();
+        DROP FUNCTION mkt.guard_pack_activation_frozen();
         DROP INDEX mkt.ux_pack_activation_active;
         DROP INDEX mkt.ux_pack_activation_pending;
         """;
 }
+
