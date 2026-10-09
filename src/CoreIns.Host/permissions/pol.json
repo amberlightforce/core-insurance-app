@@ -14,7 +14,10 @@
         "pol.renewal.manage": [ "Staff.Underwriter" ],
         "pol.Renewal.create": [ "Staff.Underwriter" ],
         "pol.Renewal.offer": [ "Staff.Underwriter" ],
-        "pol.Renewal.accept": [ "Staff.Underwriter" ]
+        "pol.Renewal.accept": [ "Staff.Underwriter" ],
+        "pol.PolicyChange.create": [ "Staff.Underwriter" ],
+        "pol.change": [ "Staff.Underwriter" ],
+        "pol.Job.withdraw": [ "Staff.Underwriter" ]
       }
     }
   }

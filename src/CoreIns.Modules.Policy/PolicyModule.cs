@@ -1,8 +1,10 @@
 using CoreIns.Modules.Policy.Commands;
 using CoreIns.Modules.Policy.Commands.Renewal;
+using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain;
+using CoreIns.Modules.Policy.Domain.Servicing;
 using CoreIns.Modules.Policy.Events;
 using CoreIns.Modules.Policy.Persistence;
 using CoreIns.Modules.Policy.Queries;
@@ -17,6 +19,7 @@ using CoreIns.SharedKernel.Identifiers;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CoreIns.Modules.Policy;
 
@@ -89,6 +92,26 @@ public static class PolicyModule
         services.AddScoped<IValidator<BindJob>, BindJobValidator>();
         services.AddCommandAuditor<BindJob, JobBindResponse, BindJobAuditor>();
         services.AddCommand<BindJob, JobBindResponse, BindJobHandler>(CommandDescriptor.For("pol.Job.bind") with { SupportsDryRun = true });
+
+        // SL3-POL-CHANGE: in-sequence mid-term change (quote and bind of a change job are routed from pol.Job.quote / pol.Job.bind).
+        services.AddOptions<ChangeOptions>().Bind(configuration.GetSection(ChangeOptions.Section));
+        services.TryAddSingleton<IProration, UnavailableProration>();
+        services.TryAddScoped<IServicingTax, UnavailableServicingTax>();
+        services.AddScoped<ChangeHistory>();
+        services.AddScoped<ChangeEngineFactory>();
+        services.AddScoped<ChangeContextLoader>();
+        services.AddScoped<ChangePricer>();
+        services.AddScoped<ChangeQuoteService>();
+        services.AddScoped<ChangeBindService>();
+        services.AddScoped<ChangePreviewService>();
+        services.AddScoped<IValidator<CreatePolicyChange>, CreatePolicyChangeValidator>();
+        services.AddCommandAuditor<CreatePolicyChange, PolicyChangeCreateResponse, CreatePolicyChangeAuditor>();
+        services.AddCommand<CreatePolicyChange, PolicyChangeCreateResponse, CreatePolicyChangeHandler>(
+            CommandDescriptor.For("pol.PolicyChange.create") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<WithdrawJob>, WithdrawJobValidator>();
+        services.AddCommandAuditor<WithdrawJob, JobWithdrawResponse, WithdrawJobAuditor>();
+        services.AddCommand<WithdrawJob, JobWithdrawResponse, WithdrawJobHandler>(CommandDescriptor.For("pol.Job.withdraw"));
+        services.AddErrorDefinitions(ChangeErrors.Definitions);
 
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IPolicySubmissionService, PolicySubmissionService>();
