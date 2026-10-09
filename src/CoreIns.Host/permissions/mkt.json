@@ -4,7 +4,9 @@
       "Grants": {
         "mkt.Configuration.resolve": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "mkt.Configuration.currentHash": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
-        "mkt.Rounding.apply": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ]
+        "mkt.Rounding.apply": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "mkt.Pack.list": [ "Platform.ReleaseManager", "Platform.DesignAuthority", "Platform.Admin" ],
+        "mkt.Pack.get": [ "Platform.ReleaseManager", "Platform.DesignAuthority", "Platform.Admin" ]
       }
     }
   }

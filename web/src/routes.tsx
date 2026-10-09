@@ -90,6 +90,27 @@ const moduleRoutes: RouteObject[] = [
     lazy: async () => ({ Component: (await import('./modules/billing/InvoicePage')).InvoicePage }),
   },
   {
+    // Refund screens: billing roles see them, everyone else the no-permission state (RequireRefundRole).
+    path: 'billing/refunds',
+    lazy: async () => ({
+      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/refunds/RefundsInboxPage')).RefundsInboxPage,
+        }),
+      },
+      {
+        path: ':refundId',
+        lazy: async () => ({
+          Component: (await import('./modules/billing/refunds/RefundDetailPage')).RefundDetailPage,
+        }),
+      },
+    ],
+  },
+  {
     // Claims screens: a claims role sees them, everyone else the no-permission state (RequireClaimsRole).
     path: 'claims',
     lazy: async () => ({

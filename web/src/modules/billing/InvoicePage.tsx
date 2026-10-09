@@ -45,6 +45,12 @@ function InvoiceDetails({ data }: { data: InvoiceGetResponse }) {
         size: 160,
       }),
       textColumn<Item>('category', t('lines.columns.category'), (i) => i.chargeCategory),
+      textColumn<Item>(
+        'txKind',
+        t('refunds.lines.transactionKind'),
+        (i) => i.transactionKind ?? null,
+      ),
+      textColumn<Item>('rule', t('refunds.lines.rule'), (i) => i.treatmentRuleId ?? null),
       statusColumn<Item>(
         'legal',
         t('lines.columns.legalStatus'),
@@ -113,6 +119,16 @@ function InvoiceDetails({ data }: { data: InvoiceGetResponse }) {
           </>
         }
       />
+      {invoice.kind === 'CREDIT_NOTE' ? (
+        <Banner variant="info" title={t('refunds.creditNote.bannerTitle')}>
+          <p>{t('refunds.creditNote.bannerBody')}</p>
+          {invoice.originalInvoiceId ? (
+            <LinkButton variant="secondary" to={`/billing/invoices/${invoice.originalInvoiceId}`}>
+              {t('refunds.creditNote.openOriginal')}
+            </LinkButton>
+          ) : null}
+        </Banner>
+      ) : null}
       <div className={styles.grid}>
         <Section title={t('invoice.totals')}>
           <KeyValueList

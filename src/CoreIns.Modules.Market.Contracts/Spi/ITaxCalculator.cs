@@ -80,6 +80,12 @@ public sealed record TaxCalculationRequest
     /// ReverseAsVoid, so a credit that treatment would KEEP never receives a credit tax.
     /// </summary>
     public TreatmentAction? TreatmentAction { get; init; }
+
+    /// <summary>
+    /// The configuration state to calculate under (SL5-MKT-STATE, REQ-MKT-048): any state this stamp recorded. Null reads the hash pinned for the
+    /// unit of work (REQ-MKT-051), else the current state. A hash never recorded is refused (CFG-HASH-UNKNOWN). Optional so existing producers compile.
+    /// </summary>
+    public string? ConfigurationHash { get; init; }
 }
 
 /// <summary>Kind of a charge line to tax (PRD-17 section 9.4.4). IPT is priced only on Premium.</summary>
@@ -207,6 +213,12 @@ public sealed record TaxTreatmentRequest
     public required PolicyholderType PolicyholderType { get; init; }
 
     public required string BusinessBasis { get; init; }
+
+    /// <summary>
+    /// The configuration state to calculate under (SL5-MKT-STATE, REQ-MKT-048): any state this stamp recorded. Null reads the hash pinned for the
+    /// unit of work (REQ-MKT-051), else the current state. A hash never recorded is refused (CFG-HASH-UNKNOWN). Optional so existing producers compile.
+    /// </summary>
+    public string? ConfigurationHash { get; init; }
 }
 
 /// <summary>Treatment action (REQ-MKT-330).</summary>
