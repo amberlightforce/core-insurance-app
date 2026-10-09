@@ -14,6 +14,8 @@ internal sealed class BillingAccountRow
 
     public string AccountNumber { get; set; } = string.Empty;
 
+    public string AccountType { get; set; } = "PREMIUM";
+
     public PartyId PayerPartyId { get; set; }
 
     public string Currency { get; set; } = string.Empty;
@@ -479,6 +481,12 @@ internal sealed class LedgerLineRow
 
     public ClaimId? ClaimId { get; set; }
 
+    public Guid? RecoveryId { get; set; }
+
+    public string? StatementRef { get; set; }
+
+    public PartyId? CounterpartyPartyId { get; set; }
+
     /// <summary>Transaction kind dimension (servicing entries, always set there).</summary>
     public string? TransactionKind { get; set; }
 
@@ -684,3 +692,5 @@ internal sealed class RefundNettingRow
 
     public string Currency { get; set; } = string.Empty;
 }
+
+

@@ -53,7 +53,7 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.billing_account, {Schema}.plan_instance, {Schema}.charge, {Schema}.invoice, {Schema}.invoice_item, {Schema}.receipt, {Schema}.intake_exception TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.payee_account, {Schema}.disbursement, {Schema}.refund TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.refund_credit, {Schema}.refund_netting TO {appRole}",
-                $"GRANT SELECT, INSERT ON {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.receivable, {Schema}.receivable_allocation, {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -72,6 +72,12 @@ public static class BillingModule
         services.AddScoped<TermBilling>();
         services.AddScoped<Allocator>();
         services.AddScoped<BillingReader>();
+        services.AddScoped<ReceivableReader>();
+        services.AddScoped<ReceivableMatching>();
+        services.AddScoped<IBillingReceivableService, ReceivableService>();
+        services.AddScoped<IValidator<RegisterReceivable>, RegisterReceivableValidator>();
+        services.AddCommandAuditor<RegisterReceivable, ReceivableRegisterResponse, RegisterReceivableAuditor>();
+        services.AddCommand<RegisterReceivable, ReceivableRegisterResponse, RegisterReceivableHandler>(CommandDescriptor.For("bil.Receivable.register") with { SupportsDryRun = true });
 
         // Internal commands run by the event handlers (audited; no Idempotency-Key: they are idempotent on the charge,
         // term and fiscal document themselves).
@@ -207,7 +213,9 @@ public static class BillingModule
             .Describe("Η επιστροφή πληρώνεται μόνο σε επαληθευμένο λογαριασμό του πληρωτή.", "A refund is paid only to the payer's verified bank account."),
         ErrorDefinition.For(ModuleCode.BIL, "NOT-PERMITTED", 403, "Δεν έχετε εξουσιοδότηση για αυτό το ποσό", "No authority for this amount")
             .Describe("Δεν υπάρχει εξουσιοδότηση επιστροφής για αυτό το ποσό.", "No refund authority covers this amount."),
+        ErrorDefinition.For(ModuleCode.BIL, "FISCAL-TREATMENT-OPEN", 422, "Ανοικτή φορολογική μεταχείριση", "Fiscal treatment is open"),
         ErrorDefinition.For(ModuleCode.BIL, "DUPLICATE", 409, "Πιθανή διπλή πληρωμή", "Possible duplicate payment")
             .Describe("Υπάρχει ήδη πληρωμή για την ίδια πηγή ή με τον ίδιο λογαριασμό, ποσό και αναφορά.", "A payment already exists for the same source or with the same account, amount and reference."),
     ];
 }
+

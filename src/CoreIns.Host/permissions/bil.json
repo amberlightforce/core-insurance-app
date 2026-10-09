@@ -5,6 +5,9 @@
         "bil.BillingAccount.get": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
         "bil.Invoice.get": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
         "bil.Invoice.list": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
+        "bil.Receivable.register": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "bil.Receivable.get": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "bil.Receivable.list": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "bil.Payment.take": [ "Staff.Billing" ],
         "bil.Receipt.get": [ "Staff.Billing", "Platform.Admin" ],
         "bil.Allocation.allocate": [ "Staff.Billing" ],
@@ -39,6 +42,22 @@
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
         }
       ]
+    }
+  },
+  "Billing": {
+    "Sources": {
+      "CLM_CLAIM_PAYMENT": {
+        "CallingModule": "CLM", "Direction": "both", "AllowedMethods": [ "SEPA_CT", "BANK_TRANSFER", "CASHIER" ],
+        "ApprovalEvidenceType": "CLM transaction-set approval for out; CLM recovery demand for in",
+        "LedgerRuleRows": [ "BLR-RECV-CLM", "BLR-COLLECT-CLM", "BLR-DISB-RELEASED-CLAIM" ],
+        "FinancePostingRuleReference": "FIN-V4 claim payment and recovery rules"
+      },
+      "FS_CLEARING": {
+        "CallingModule": "CLM", "Direction": "both", "AllowedMethods": [ "CLEARING" ],
+        "ApprovalEvidenceType": "CLM FS net approval",
+        "LedgerRuleRows": [ "BLR-RECV-FS", "BLR-COLLECT-FS" ],
+        "FinancePostingRuleReference": "FIN-V4 FS clearing by counterparty and statement"
+      }
     }
   }
 }

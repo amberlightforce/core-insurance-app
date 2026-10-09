@@ -141,6 +141,9 @@ internal sealed class LedgerWriter(
                 SourceType = d.SourceType,
                 SourceId = d.SourceId,
                 ClaimId = d.ClaimId,
+                RecoveryId = d.RecoveryId,
+                StatementRef = d.StatementRef,
+                CounterpartyPartyId = d.CounterpartyPartyId,
                 TransactionKind = d.TransactionKind,
                 CancellationSource = d.CancellationSource,
                 TreatmentRuleId = d.TreatmentRuleId,
@@ -191,8 +194,13 @@ internal sealed class LedgerWriter(
         SourceType = d.SourceType,
         SourceId = d.SourceId,
         ClaimId = d.ClaimId,
+        RecoveryId = d.RecoveryId,
+        StatementRef = d.StatementRef,
+        CounterpartyPartyId = d.CounterpartyPartyId,
         TransactionKind = d.TransactionKind is null ? null : TransactionKinds.ToDimension(d.TransactionKind),
         CancellationSource = d.CancellationSource,
         TreatmentRuleId = d.TreatmentRuleId,
     };
 }
+
+

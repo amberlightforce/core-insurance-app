@@ -48,7 +48,8 @@ internal sealed class TakePaymentHandler(
     INumberingService numbering,
     IEventPublisher events,
     LedgerWriter ledger,
-    Allocator allocator) : ICommandHandler<TakePayment, PaymentTakeResponse>
+    Allocator allocator,
+    ReceivableMatching receivables) : ICommandHandler<TakePayment, PaymentTakeResponse>
 {
     public async Task<Result<PaymentTakeResponse>> HandleAsync(TakePayment command, CancellationToken cancellationToken)
     {
@@ -69,6 +70,14 @@ internal sealed class TakePaymentHandler(
         if (request.Amount.Currency.Code != account.Currency)
         {
             return DomainError.Of(ModuleCode.BIL, "CURRENCY", $"The account is kept in {account.Currency}.");
+        }
+
+        ReceivableRow? receivable = null;
+        if (request.ReceivableId is not null || request.PaymentReference is not null || (account.AccountType == "CLEARING" && request.BankReference is not null))
+        {
+            var found = await receivables.ResolveAsync(request, legalEntity, cancellationToken).ConfigureAwait(false);
+            if (found.IsFailure) return found.Error!;
+            receivable = found.Value;
         }
 
         InvoiceRow? referenced = null;
@@ -139,6 +148,13 @@ internal sealed class TakePaymentHandler(
         if (request.AutoAllocate == false)
         {
             return Respond(receipt, [], PaymentTakeResponse.AllocationOutcomeValue.NotRequested);
+        }
+
+        if (receivable is not null)
+        {
+            var allocatedReceivable = await receivables.AllocateAsync(receipt, receivable, cancellationToken).ConfigureAwait(false);
+            if (allocatedReceivable.IsFailure) return allocatedReceivable.Error!;
+            return new PaymentTakeResponse { Receipt = BillingReader.Receipt(receipt, allocatedReceivable.Value), Allocations = [], AllocationOutcome = allocatedReceivable.Value > 0 ? PaymentTakeResponse.AllocationOutcomeValue.Allocated : PaymentTakeResponse.AllocationOutcomeValue.Suspense };
         }
 
         var (match, ruleId, reason) = await MatchAsync(account, referenced, request.Amount, cancellationToken).ConfigureAwait(false);
@@ -327,3 +343,5 @@ internal static class BillingErrors
 {
     public static DomainError NotFound(string what) => DomainError.Of(ModuleCode.BIL, "NOT-FOUND", $"The {what} does not exist in your legal entity.");
 }
+
+
