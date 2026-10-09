@@ -214,8 +214,7 @@ test('E2E-01 through the staff screens', async ({ page }) => {
   page.on('framenavigated', (f) => console.log('DIAG navigated', f.url()));
   await go(page, policyUrl);
   await page.waitForTimeout(3000);
-  console.log('DIAG url', page.url(), 'body', (await page.locator('body').innerText()).slice(0, 600).replaceAll('
-', ' | '));
+  console.log('DIAG url', page.url(), 'body', (await page.locator('body').innerText()).slice(0, 600).replaceAll(String.fromCharCode(10), ' | '));
   await page.getByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' }).getByText(/^INV\d+/).first().dblclick();
   await expect(page.getByRole('heading', { level: 1, name: /^Τιμολόγιο INV/ })).toBeVisible();
   await alive(page);
