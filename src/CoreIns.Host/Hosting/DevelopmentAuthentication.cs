@@ -77,6 +77,15 @@ internal static class DevelopmentAuthentication
         services.AddOptions<DevAuthenticationOptions>().Bind(configuration.GetSection(DevAuthenticationOptions.Section));
         var key = new SymmetricSecurityKey(RandomNumberGenerator.GetBytes(32)) { KeyId = "dev-" + Guid.NewGuid().ToString("N")[..8] };
         services.AddSingleton(new DevSigningKey(key));
+        // The token times come from IClock (the shiftable dev clock, D-SL3-12), so the lifetime is checked against the same clock;
+        // the library default would compare against the real clock and reject every token issued after a dev clock advance.
+        services.AddOptions<JwtBearerOptions>(Scheme).Configure<IClock>((options, clock) =>
+            options.TokenValidationParameters.LifetimeValidator = (notBefore, expires, _, parameters) =>
+            {
+                var now = clock.Now.ToUtcDateTime();
+                var skew = parameters.ClockSkew;
+                return (notBefore is null || notBefore.Value <= now + skew) && (expires is null || expires.Value >= now - skew);
+            });
         return builder.AddJwtBearer(Scheme, options =>
         {
             options.MapInboundClaims = false;
