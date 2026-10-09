@@ -79,7 +79,8 @@ test('E2E-04 renewal: renew now inside the window, offer, explicit acceptance, t
     expect(term.status, term.text).toBe(200);
     expect(term.body['term']['termNumber']).toBe(2);
     expect(term.body['term']['productVersion']).toBe('1.1');
-    expect(Date.parse(term.body['term']['period']['from'])).toBe(Date.parse(policy.startAt.toISOString()) + 365 * 86_400_000);
+    const term1 = await call(request, underwriter, 'GET', `/api/pol/v1/terms/${policy.termId}`);
+    expect(term.body['term']['period']['from'], 'term 2 starts where term 1 ends').toBe(term1.body['term']['period']['to']);
   });
 
   await test.step('accepting twice does not bind a third term', async () => {
@@ -121,7 +122,9 @@ test('E2E-04 renewal: renew now inside the window, offer, explicit acceptance, t
     const lines = all.flatMap((j) => j['lines'] as Json[]);
     const written = sum(lines.filter((l) => l['account'] === 'GL-2110').map((l) => (l['side'] === 'DEBIT' ? cents(l['amount']) : -cents(l['amount']))));
     const rules = new Set(all.flatMap((j) => j['ruleCodes'] as string[]).map((c) => c.split('-')[0]));
-    return written === -(policy.premium + term2Premium) && ['WR', 'BL', 'ID'].every((f) => rules.has(f)) && all.length >= 8 ? all : undefined;
+    const unbilled = sum(lines.filter((l) => l['account'] === 'GL-1215').map((l) => (l['side'] === 'DEBIT' ? cents(l['amount']) : -cents(l['amount']))));
+    const payable = sum(lines.filter((l) => l['account'] === 'GL-2410').map((l) => (l['side'] === 'DEBIT' ? cents(l['amount']) : -cents(l['amount']))));
+    return written === -(policy.premium + term2Premium) && unbilled === 0n && payable === -(policy.tax + term2Tax) && ['WR', 'BL', 'ID'].every((f) => rules.has(f)) ? all : undefined;
   });
   for (const journal of journals) {
     const lines = journal['lines'] as Json[];
@@ -131,4 +134,6 @@ test('E2E-04 renewal: renew now inside the window, offer, explicit acceptance, t
   const net = (account: string) => sum(journals.flatMap((j) => j['lines'] as Json[]).filter((l) => l['account'] === account).map((l) => (l['side'] === 'DEBIT' ? cents(l['amount']) : -cents(l['amount']))));
   expect(net('GL-2110'), 'written premium of term 1 and term 2').toBe(-(policy.premium + term2Premium));
   expect(net('GL-2410'), 'IPT payable of term 1 and term 2').toBe(-(policy.tax + term2Tax));
+  expect(net('GL-2411'), 'IPT due clears into IPT payable').toBe(0n);
+  expect(net('GL-1215'), 'unbilled receivable nets to zero once both terms are billed').toBe(0n);
 });
