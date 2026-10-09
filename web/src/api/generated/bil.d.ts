@@ -1973,6 +1973,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/bil/v1/receivables/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Receivable
+         * @description One receivable (slice addition, D-SL4-06).
+         *
+         *     PRD inputs: receivable id
+         *     PRD outputs: receivable
+         */
+        get: operations["bil.Receivable.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bil/v1/receivables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Receivables
+         * @description Receivables by account, counterparty, claim, recovery, statement or status (slice addition, D-SL4-06).
+         *
+         *     PRD inputs: filters
+         *     PRD outputs: receivables
+         */
+        get: operations["bil.Receivable.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bil/v1/disbursements/approve-release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve the release of a disbursement
+         * @description Release approval by a second user (slice addition, D-SL4-12). Every FS_CLEARING disbursement needs it, whatever the amount; reissues to a changed account need it too (REQ-BIL-199).
+         *
+         *     PRD inputs: disbursement, decision, reason
+         *     PRD outputs: disbursement
+         */
+        post: operations["bil.Disbursement.approveRelease"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2289,6 +2358,8 @@ export interface components {
             /** @description total − paid */
             open: components["schemas"]["Money"];
             totalsByCategory: components["schemas"]["CategoryTotal"][];
+            /** @description For kind CREDIT_NOTE, the invoice it corrects. Always set for a credit note, absent for an INVOICE. A credit note has its own gapless series (technical prefix CN) and negative-direction semantics; total is the positive credited amount. */
+            originalInvoiceId?: components["schemas"]["Uuid"];
         };
         /** @description Invoice item traced to its POL charge (REQ-BIL-067) */
         InvoiceItemView: {
@@ -2310,6 +2381,12 @@ export interface components {
             open: components["schemas"]["Money"];
             /** @enum {string} */
             state: "PLANNED" | "BILLED" | "OPEN" | "SETTLED" | "CANCELLED" | "WRITTEN_OFF";
+            /** @description Transaction kind of the source POL charge (servicing items; always set there) */
+            transactionKind?: string;
+            /** @description Cancellation source (items from a cancellation) */
+            cancellationSource?: components["schemas"]["Code"];
+            /** @description Treatment rule of a tax or levy item on a servicing transaction (always set there) */
+            treatmentRuleId?: components["schemas"]["Code"];
         };
         /** @description One allocation row of a receipt to an invoice item (REQ-BIL-130) */
         AllocationView: {
@@ -2598,13 +2675,26 @@ export interface components {
              * @default true
              */
             autoAllocate: boolean;
+            /** @description Payment reference of a receivable (D-SL4-06): matches the cash to the receivable instead of an invoice. billingAccountId must be the receivable's account; a reference that matches no receivable of the account is BIL-ERR-NOT-FOUND */
+            paymentReference?: string;
+            /** @description Receivable the payer referenced (alternative to paymentReference); the amount must equal its open amount (BIL-ERR-AMOUNT-MISMATCH, REQ-BIL-135) */
+            receivableId?: components["schemas"]["Uuid"];
         };
         /** @description Typed from REQ-BIL-004, REQ-BIL-129, REQ-BIL-135. PRD outputs: "receipt or link, allocation preview". An amount that does not equal the matched invoice's open amount is never allocated: it stays as unapplied cash in suspense with a reason (REQ-BIL-135). */
         PaymentTakeResponse: {
             receipt: components["schemas"]["ReceiptView"];
             allocations: components["schemas"]["AllocationView"][];
             /** @enum {string} */
-            allocationOutcome: "ALLOCATED" | "SUSPENSE" | "NOT_REQUESTED";
+            allocationOutcome: "ALLOCATED" | "SUSPENSE" | "NOT_REQUESTED" | "RECEIVABLE_ALLOCATED";
+            /** @description Set (outcome RECEIVABLE_ALLOCATED) when the cash settled a receivable; allocations is then empty. Publishes CashAllocated with the receivable, claim, recovery and statement references */
+            receivableAllocation?: {
+                receivableId: components["schemas"]["Uuid"];
+                /** @description The BIL allocation id: the evidence CLM records the recovery against */
+                allocationId: components["schemas"]["Uuid"];
+                amount: components["schemas"]["Money"];
+                openAmountAfter: components["schemas"]["Money"];
+                status: components["schemas"]["ReceivableStatus"];
+            } | null;
         };
         /** @description A receipt (incoming payment, REQ-BIL-126) */
         ReceiptView: {
@@ -2851,67 +2941,140 @@ export interface components {
             /** @description PRD: "process" */
             process?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Refund.propose request. PRD inputs: "account, credits / decision" */
+        /**
+         * @description Refund lifecycle (PRD-06 §6): Proposed or PendingApproval -> Rejected; Approved -> Held (refund-hold window) -> Approved; Disbursing -> AwaitingProof (refund via an intermediary) -> Paid; Disbursing -> Returned -> Proposed. PAID is reached at the paid point (ISSUED in Greece, D-SL3-09).
+         * @enum {string}
+         */
+        RefundState: "PROPOSED" | "PENDING_APPROVAL" | "APPROVED" | "HELD" | "DISBURSING" | "AWAITING_PROOF" | "PAID" | "REJECTED" | "RETURNED";
+        /**
+         * @description NOT_REQUIRED up to the auto-approval limit (500.00 default, illustrative, D-SL3-08); PENDING until the approver decides; four-eyes at the maker-checker limit. The requester or an editor can never approve (SoD).
+         * @enum {string}
+         */
+        RefundApprovalState: "NOT_REQUIRED" | "PENDING" | "APPROVED" | "REJECTED";
+        /** @description The part of a refund that comes from one charge type of one policy transaction (REQ-BIL-187). Tax and levy lines carry the treatment that decided them; a refund is never net of tax for a distance-withdrawal void. */
+        RefundBreakdownLine: {
+            policyId: components["schemas"]["Uuid"];
+            policyTermId: components["schemas"]["Uuid"];
+            /** @description The POL transaction that produced the credit */
+            transactionId: components["schemas"]["Uuid"];
+            /** @description The credit note (bil invoice of kind CREDIT_NOTE) the amount came from */
+            creditNoteId?: components["schemas"]["Uuid"];
+            chargeType: components["schemas"]["Code"];
+            chargeCategory: components["schemas"]["Code"];
+            /** @description Transaction kind of the credit (CANCELLATION, ENDORSEMENT_CREDIT, ...) */
+            transactionKind?: string;
+            /** @description Cancellation source when the credit comes from a cancellation */
+            cancellationSource?: components["schemas"]["Code"];
+            /** @description Treatment rule of a tax or levy line */
+            treatmentRuleId?: components["schemas"]["Code"];
+            legalStatus?: components["schemas"]["Code"];
+            /** @description True when the line rests on a value that is not Settled (D-REG-02) */
+            provisional?: boolean;
+            /** @description Positive amount refunded for this line */
+            amount: components["schemas"]["Money"];
+        };
+        /** @description Netting against amounts the customer owes on the same account (REQ-BIL-187). A refund is the account credit left after netting. */
+        RefundNettingLine: {
+            /**
+             * @description OPEN_INVOICE = an unpaid invoice the credit was applied to; OFFSET_CREDIT = another credit on the account
+             * @enum {string}
+             */
+            kind: "OPEN_INVOICE" | "OFFSET_CREDIT";
+            invoiceId?: components["schemas"]["Uuid"];
+            /** @description Positive amount netted */
+            amount: components["schemas"]["Money"];
+        };
+        /** @description The payee of a refund. The IBAN is P2 and is never returned; only the masked form is shown (REQ-BIL-345). */
+        RefundPayee: {
+            payeePartyId: components["schemas"]["Uuid"];
+            /** @description A verified bil.PayeeAccount with purpose REFUND (D-SL3-14) */
+            payeeAccountId: components["schemas"]["Uuid"];
+            /** @description IBAN masked except the last four characters */
+            maskedIban: string;
+            verificationStatus: components["schemas"]["PayeeVerificationStatus"];
+        };
+        /** @description A refund (PRD-06 §7, REQ-BIL-187..190). One open refund per billing account (D-SL3-14), so authority is checked on the total. */
+        RefundView: {
+            refundId: components["schemas"]["Uuid"];
+            billingAccountId: components["schemas"]["Uuid"];
+            state: components["schemas"]["RefundState"];
+            approvalState: components["schemas"]["RefundApprovalState"];
+            /** @description Amount payable to the payee after netting; equals the sum of breakdown minus the sum of netting */
+            amount: components["schemas"]["Money"];
+            /** @description Per charge type (always set) */
+            breakdown: components["schemas"]["RefundBreakdownLine"][];
+            /** @description Always set; empty when nothing was netted */
+            netting: components["schemas"]["RefundNettingLine"][];
+            payee: components["schemas"]["RefundPayee"];
+            payoutMethod: components["schemas"]["Code"];
+            reasonCode?: components["schemas"]["Code"];
+            sourcePolicyIds: components["schemas"]["Uuid"][];
+            /** @description User who proposed the refund */
+            requestedBy: components["schemas"]["Uuid"];
+            /** @description User who approved or rejected; absent until decided */
+            decidedBy?: components["schemas"]["Uuid"];
+            decidedAt?: components["schemas"]["Instant"];
+            decisionComment?: components["schemas"]["Text"];
+            /** @description Set once the refund is approved and a disbursement exists */
+            disbursementId?: components["schemas"]["Uuid"];
+            proposedAt: components["schemas"]["Instant"];
+            recordVersion: number;
+        };
+        /** @description bil.Refund.propose request (REQ-BIL-187). PRD inputs: "account, credits / decision". With dryRun it returns the refund that would be proposed. Refused when the account has no credit left after netting (BIL-ERR-NO-CREDIT) or an open refund already exists. */
         RefundProposeRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "credits" */
-            credits?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            /** @description PRD "account" */
+            billingAccountId: components["schemas"]["Uuid"];
+            /** @description Credit notes (invoice ids of kind CREDIT_NOTE) to refund. Empty or absent = the whole credit left on the account. */
+            credits?: components["schemas"]["Uuid"][];
+            /** @description Verified payee account with purpose REFUND; defaults to the payer's verified account */
+            payeeAccountId?: components["schemas"]["Uuid"];
+            reasonCode: components["schemas"]["Code"];
+            comment?: components["schemas"]["Text"];
         };
         /** @description bil.Refund.propose result. PRD outputs: "refund" */
         RefundProposeResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
         };
         /** @description bil.Refund.get result. PRD outputs: "refund" */
         RefundGetResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
         };
         /** @description bil.Refund.list result. PRD outputs: "refund" */
         RefundListItem: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
         };
         /** @description Page of bil.Refund.list results (cursor pagination, contract §3.5.5) */
         RefundListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["RefundListItem"][];
         };
-        /** @description bil.Refund.decide request. PRD inputs: "refund id, decision, comment" */
+        /** @description bil.Refund.decide request (REQ-BIL-188, REQ-BIL-189). PRD inputs: "refund id, decision, comment". The requester, an editor or the maker can never decide (PLT-ERR-SOD); the BIL.Refund authority is checked on the refund total (D-SL3-14). */
         RefundDecideRequest: {
-            /** @description PRD: "refund id" */
-            refundId?: components["schemas"]["Uuid"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
-            /** @description PRD: "comment" */
-            comment?: components["schemas"]["Unspecified"];
+            refundId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            /** @description Required for REJECT */
+            comment?: components["schemas"]["Text"];
         };
-        /** @description bil.Refund.decide result. PRD outputs: "refund, disbursement id on approval" */
+        /** @description bil.Refund.decide result. PRD outputs: "refund, disbursement id on approval". APPROVE publishes RefundApproved; REJECT publishes RefundRejected. */
         RefundDecideResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
-            /** @description PRD: "disbursement id on approval" */
-            disbursementIdOnApproval?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
+            /** @description Present on APPROVE (PRD "disbursement id on approval") */
+            disbursementId?: components["schemas"]["Uuid"];
         };
-        /** @description bil.Refund.resubmit request. PRD inputs: "account, credits / decision" */
+        /** @description bil.Refund.resubmit request: puts a refund in state RETURNED (bank return) or REJECTED back to PROPOSED, optionally with a corrected payee. */
         RefundResubmitRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "credits" */
-            credits?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            refundId: components["schemas"]["Uuid"];
+            /** @description New verified payee account; absent keeps the payee */
+            payeeAccountId?: components["schemas"]["Uuid"];
+            comment?: components["schemas"]["Text"];
         };
         /** @description bil.Refund.resubmit result. PRD outputs: "refund" */
         RefundResubmitResponse: {
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
+            refund: components["schemas"]["RefundView"];
         };
         /** @description Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method, approval evidence, statement or return reference". SL2-BIL-DISB serves source type CLM_CLAIM_PAYMENT (method SEPA_CT, EUR, payeePartyId with payeeAccountId); other sources are refused with BIL-ERR-SOURCE. */
         DisbursementRequestRequest: {
-            /** @description Open code (D-CON-24), registered in the source register (REQ-BIL-354) */
+            /** @description Open code (D-CON-24), registered in the source register (REQ-BIL-354). Served: CLM_CLAIM_PAYMENT (SEPA_CT) and FS_CLEARING (method CLEARING only, D-SL4-02); others are refused with BIL-ERR-SOURCE */
             sourceType: components["schemas"]["DisbursementSourceType"];
             /** @description Id of the source object */
             sourceId: string;
@@ -2920,7 +3083,7 @@ export interface components {
             adHocPayee?: components["schemas"]["OpenObject"];
             coPayees?: components["schemas"]["Uuid"][];
             amount: components["schemas"]["Money"];
-            /** @description REQ-BIL-209; defaults from the source */
+            /** @description REQ-BIL-209; defaults from the source. CLEARING is valid only for source FS_CLEARING (BIL-ERR-SOURCE otherwise) and is the only method for it */
             method: components["schemas"]["Code"];
             /** @description BIL payee account (REQ-BIL-343) */
             payeeAccountId?: components["schemas"]["Uuid"];
@@ -2935,9 +3098,19 @@ export interface components {
             /** @description CLM sources only (required for CLM_CLAIM_PAYMENT) - the claim the payment belongs to; the source reference of the duplicate key (payee account, amount, claim; REQ-BIL-202) and a ledger dimension for FIN (D-SL2-08); not part of the content hash */
             claimId?: components["schemas"]["Uuid"];
             purposeText?: string;
+            /** @description Statement reference. Required for FS_CLEARING (the FS statement reference shared with CLM); also carried on its ledger entries and events */
             statementReference?: string;
             returnReference?: string;
+            /** @description FS_CLEARING only: claim-level lines [claim id, fs case id, amount] that must sum to amount (BIL-ERR-LINES-MISMATCH). Lines are the audit trail of the net; no per-claimant VoP is made (D-SL4-12) */
+            lines?: components["schemas"]["FsClearingLine"][];
         } & (unknown | unknown);
+        /** @description Claim-level line of an FS_CLEARING disbursement (D-SL4-02): the lines must sum to the net amount (BIL-ERR-LINES-MISMATCH). */
+        FsClearingLine: {
+            claimId: components["schemas"]["Uuid"];
+            fsCaseId: components["schemas"]["Uuid"];
+            /** @description Signed contribution of the claim to the net: positive payable, negative receivable */
+            amount: components["schemas"]["Money"];
+        };
         /** @description Disbursement (REQ-BIL-009, REQ-BIL-213) Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD outputs: "disbursement" */
         DisbursementRequestResponse: {
             disbursementId: components["schemas"]["Uuid"];
@@ -2969,6 +3142,18 @@ export interface components {
             releasedAt?: components["schemas"]["Instant"];
             issuedAt?: components["schemas"]["Instant"];
             clearedAt?: components["schemas"]["Instant"];
+            /** @description FS_CLEARING statement reference; always set for FS_CLEARING */
+            statementReference?: string | null;
+            /** @description Release approval state. Always set for FS_CLEARING; the disbursement stays PendingApproval until bil.Disbursement.approveRelease */
+            releaseApproval?: {
+                /** @description True for every FS_CLEARING disbursement, whatever the amount (D-SL4-12) */
+                required: boolean;
+                approvalRequestId?: components["schemas"]["Uuid"] | null;
+                /** @description Requester (cannot approve the release) */
+                requestedBy?: string;
+            } | null;
+            /** @description FS_CLEARING lines as accepted; always set for FS_CLEARING */
+            lines?: components["schemas"]["FsClearingLine"][] | null;
         };
         /** @description Typed from REQ-BIL-213 (SL2-BIL-DISB). PRD outputs: "disbursement": state, dates, method and masked payee account. */
         DisbursementGetResponse: {
@@ -3042,27 +3227,78 @@ export interface components {
             reversalEntries?: components["schemas"]["Unspecified"][];
             sourcePayableRestored?: components["schemas"]["Money"];
         };
-        /** @description bil.Receivable.register request. PRD inputs: "source, counterparty, references, amount, currency, due date" */
+        /** @description bil.Receivable.register request (REQ-BIL-346, -356). Typed by SL4-CONTRACTS. Missing source-specific members are BIL-ERR-VALIDATION; the counterparty account is created on first use. Idempotent on the Idempotency-Key and on (sourceType, sourceId). */
         ReceivableRegisterRequest: {
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "counterparty" */
-            counterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "references" */
-            references?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amount" */
-            amount?: components["schemas"]["Money"];
-            /** @description PRD: "currency" */
+            sourceType: components["schemas"]["ReceivableSourceType"];
+            /** @description Id of the source object; with sourceType it is the duplicate key (BIL-ERR-DUPLICATE) */
+            sourceId: string;
+            /** @description PTY party that owes the money */
+            counterpartyPartyId: components["schemas"]["Uuid"];
+            /** @description Required for CLM_CLAIM_PAYMENT */
+            claimId?: components["schemas"]["Uuid"] | null;
+            /** @description Required for CLM_CLAIM_PAYMENT */
+            recoveryId?: components["schemas"]["Uuid"] | null;
+            /** @description Required for FS_CLEARING */
+            statementRef?: components["schemas"]["Text"] | null;
+            purpose: components["schemas"]["ReceivablePurpose"];
+            /** @description Amount owed (positive, EUR in slice 4) */
+            amount: components["schemas"]["Money"];
+            /** @description Redundant with amount.currency; when sent it must equal it (kept from the PRD input list) */
             currency?: components["schemas"]["CurrencyCode"];
-            /** @description PRD: "due date" */
-            dueDate?: components["schemas"]["LocalDate"];
+            dueDate: components["schemas"]["LocalDate"];
         };
         /** @description bil.Receivable.register result. PRD outputs: "receivable id, payment reference" */
         ReceivableRegisterResponse: {
             /** @description PRD: "receivable id" */
-            receivableId?: components["schemas"]["Uuid"];
+            receivableId: components["schemas"]["Uuid"];
+            /** @description Counterparty billing account */
+            billingAccountId: components["schemas"]["Uuid"];
             /** @description PRD: "payment reference" */
-            paymentReference?: components["schemas"]["Unspecified"];
+            paymentReference: string;
+            /** @description The registered receivable; always set */
+            receivable?: components["schemas"]["ReceivableView"];
+        };
+        /**
+         * @description Source of a receivable (source register, REQ-BIL-354, direction "in"). Slice 4 serves CLM_CLAIM_PAYMENT (salvage and subrogation recoveries, D-SL4-06) and FS_CLEARING (Friendly Settlement net receivable, D-SL4-02). RI_SETTLEMENT and the deductible purpose are refused with BIL-ERR-SOURCE until their work packages land.
+         * @enum {string}
+         */
+        ReceivableSourceType: "CLM_CLAIM_PAYMENT" | "FS_CLEARING";
+        /**
+         * @description What the money is for; FS_NET is valid only for source FS_CLEARING, SALVAGE and SUBROGATION only for CLM_CLAIM_PAYMENT
+         * @enum {string}
+         */
+        ReceivablePurpose: "SALVAGE" | "SUBROGATION" | "FS_NET";
+        /**
+         * @description Receivable state; PAID is reached when cash is allocated in full (CashAllocated)
+         * @enum {string}
+         */
+        ReceivableStatus: "OPEN" | "PARTIALLY_PAID" | "PAID" | "CANCELLED";
+        /** @description A BIL receivable (REQ-BIL-346, -356). No fiscal document is requested (fiscal treatment open): Production refuses CLM receivables with BIL-ERR-FISCAL-TREATMENT-OPEN (D-SL4-06). */
+        ReceivableView: {
+            receivableId: components["schemas"]["Uuid"];
+            sourceType: components["schemas"]["ReceivableSourceType"];
+            /** @description Id of the source object (CLM recovery id for CLM_CLAIM_PAYMENT, the FS statement id for FS_CLEARING) */
+            sourceId: string;
+            /** @description PTY party that owes the money (organisation party for insurers and the clearing office) */
+            counterpartyPartyId: components["schemas"]["Uuid"];
+            /** @description Always set for CLM_CLAIM_PAYMENT */
+            claimId?: components["schemas"]["Uuid"] | null;
+            /** @description Always set for CLM_CLAIM_PAYMENT */
+            recoveryId?: components["schemas"]["Uuid"] | null;
+            /** @description Always set for FS_CLEARING */
+            statementRef?: components["schemas"]["Text"] | null;
+            purpose: components["schemas"]["ReceivablePurpose"];
+            amount: components["schemas"]["Money"];
+            /** @description Amount not yet allocated; always set */
+            openAmount: components["schemas"]["Money"];
+            status: components["schemas"]["ReceivableStatus"];
+            dueDate: components["schemas"]["LocalDate"];
+            /** @description Counterparty billing account (type CLAIM_RECOVERY for CLM sources, CLEARING for FS_CLEARING) */
+            billingAccountId: components["schemas"]["Uuid"];
+            /** @description Reference the payer quotes; unique; bil.Payment.take matches on it */
+            paymentReference: string;
+            registeredAt: components["schemas"]["Instant"];
+            recordVersion: number;
         };
         /** @description bil.DisbursementBatch.prepare request. PRD inputs: "bank account, value date" */
         DisbursementBatchPrepareRequest: {
@@ -3382,6 +3618,28 @@ export interface components {
             /** @description PRD: "per-object outcome (erased, restricted with reason)" */
             perObjectOutcome?: components["schemas"]["Unspecified"];
         };
+        /** @description bil.Receivable.get result (slice addition, D-SL4-06) */
+        ReceivableGetResponse: {
+            receivable: components["schemas"]["ReceivableView"];
+        };
+        /** @description Page of bil.Receivable.list results (cursor pagination, contract §3.5.5) */
+        ReceivableListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ReceivableView"][];
+        };
+        /** @description bil.Disbursement.approveRelease request (slice addition, D-SL4-12; REQ-BIL-206, -357). The approver must hold Staff.BillingManager and must not be the requester or the user who changed the payee account (BIL-ERR-SOD, REQ-BIL-199). */
+        DisbursementApproveReleaseRequest: {
+            disbursementId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            /** @description Required for REJECT */
+            reason?: components["schemas"]["Text"];
+        };
+        /** @description bil.Disbursement.approveRelease result: APPROVE moves the disbursement to Approved/Released; REJECT to Rejected (DisbursementRejected, rejecting party APPROVER). */
+        DisbursementApproveReleaseResponse: {
+            disbursement: components["schemas"]["DisbursementRequestResponse"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+        };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
         /**
@@ -3482,8 +3740,9 @@ export interface components {
             [key: string]: components["schemas"]["OpenValue"];
         };
         /**
-         * @description Disbursement source (contract D1/D4, D-CON-21): refund (BIL), claim payment (CLM; CLM_CLAIM_PAYMENT in the PRD-06 source register, REQ-BIL-354), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change.
+         * @description Disbursement source (contract D1/D4, D-CON-21): refund (BIL; BIL_REFUND for policy refunds from slice 3, BIL for earlier refund sources), claim payment (CLM; CLM_CLAIM_PAYMENT in the PRD-06 source register, REQ-BIL-354), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change.
          * @example BIL
+         * @example BIL_REFUND
          * @example CLM
          * @example CLM_CLAIM_PAYMENT
          * @example RI_SETTLEMENT
@@ -5095,6 +5354,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             429: components["responses"]["TooManyRequests"];
@@ -6006,6 +6266,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -6055,6 +6316,9 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                billingAccountId?: components["schemas"]["Uuid"];
+                policyId?: components["schemas"]["Uuid"];
+                state?: components["schemas"]["RefundState"];
             };
             header?: {
                 /**
@@ -6132,6 +6396,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -6183,6 +6448,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -6234,6 +6500,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -6362,6 +6629,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -6413,6 +6681,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -6464,6 +6733,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -7587,6 +7857,139 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "bil.Receivable.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the id */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceivableGetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "bil.Receivable.list": {
+        parameters: {
+            query?: {
+                billingAccountId?: components["schemas"]["Uuid"];
+                counterpartyPartyId?: components["schemas"]["Uuid"];
+                claimId?: components["schemas"]["Uuid"];
+                recoveryId?: components["schemas"]["Uuid"];
+                statementRef?: string;
+                paymentReference?: string;
+                sourceType?: components["schemas"]["ReceivableSourceType"];
+                status?: components["schemas"]["ReceivableStatus"];
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceivableListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "bil.Disbursement.approveRelease": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DisbursementApproveReleaseRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisbursementApproveReleaseResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

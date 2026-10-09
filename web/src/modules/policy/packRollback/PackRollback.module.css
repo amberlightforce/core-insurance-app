@@ -1,0 +1,82 @@
+/* Pack-rollback exception queue: wrapping rows, nothing clipped at 1440 or 840 px. */
+
+.hash {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.hash > span {
+  overflow-wrap: anywhere;
+  font-size: 0.8125rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-0);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.row:last-child {
+  border-block-end: 0;
+}
+
+.rowHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+}
+
+.policyNumber {
+  font: var(--type-label-lg);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-0);
+}
+
+.facts > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.facts dt {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.facts dd {
+  margin: var(--space-0);
+  overflow-wrap: anywhere;
+}
+
+.arrow {
+  white-space: nowrap;
+}
+
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}

@@ -2610,23 +2610,19 @@ export interface components {
             /** @description PRD: "decision" */
             decision: components["schemas"]["ApprovalDecisionView"];
         };
-        /** @description plt.Approval.withdraw request. PRD inputs: "type, object ref, payload hash, diff" */
+        /** @description plt.Approval.withdraw request (SL4-CONTRACTS, D-SL4-14). In-process only: IPlatformApprovalService.WithdrawAsync(request, options). Callable only by the module that created the request (PLT-ERR-NOT-OWNER); no REST route is mapped by the host. */
         ApprovalWithdrawRequest: {
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "object ref" */
-            objectRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payload hash" */
-            payloadHash?: components["schemas"]["Sha256"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            /** @description The pending approval request to withdraw */
+            approvalRequestId: components["schemas"]["Uuid"];
+            /** @description Why it is withdrawn (e.g. APPROVAL_WITHDRAWN: the set was rejected or went stale); audited */
+            reason: components["schemas"]["Text"];
         };
-        /** @description plt.Approval.withdraw result. PRD outputs: "request; decision" */
+        /** @description plt.Approval.withdraw result. Publishes ApprovalDecided with decision WITHDRAWN once. Withdrawing an already withdrawn request is a no-op returning the same result. */
         ApprovalWithdrawResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            approvalRequestId: components["schemas"]["Uuid"];
+            /** @description Withdrawn */
+            status: components["schemas"]["ApprovalStatus"];
+            withdrawnAt: components["schemas"]["Instant"];
         };
         /** @description plt.Approval.get result. PRD outputs: "request; decision" */
         ApprovalGetResponse: {
@@ -3510,6 +3506,7 @@ export interface components {
         OpenObject: {
             [key: string]: components["schemas"]["OpenValue"];
         };
+        Text: string;
         /** @description BCP 47 language tag (el, en, el-GR). */
         LanguageCode: string;
     };
@@ -4773,6 +4770,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

@@ -20,6 +20,8 @@
     "compliance": "Compliance",
     "reports": "Reports",
     "products": "Products",
+    "packs": "Market packs",
+    "packRollback": "Pack-rollback exceptions",
     "admin": "Administration",
     "more": "More",
     "expand": "Expand navigation",
