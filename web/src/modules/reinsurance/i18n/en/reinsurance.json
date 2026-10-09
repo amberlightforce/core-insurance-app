@@ -1,0 +1,253 @@
+{
+  "overline": "Reinsurance",
+  "status": {
+    "DRAFT": "Draft",
+    "PENDING_APPROVAL": "Pending approval",
+    "APPROVED": "Approved",
+    "ACTIVE": "Active",
+    "EXPIRED": "Expired",
+    "CLOSED": "Closed"
+  },
+  "type": {
+    "XOL_PER_RISK": "Excess of loss per risk",
+    "QUOTA_SHARE": "Quota share",
+    "SURPLUS": "Surplus",
+    "FAC_PROPORTIONAL": "Facultative proportional",
+    "FAC_XOL": "Facultative excess of loss",
+    "AUTO_FAC": "Automatic facultative",
+    "XOL_PER_EVENT": "Excess of loss per event",
+    "CAT_XOL": "Catastrophe excess of loss",
+    "AGGREGATE_XOL": "Aggregate excess of loss",
+    "STOP_LOSS": "Stop loss"
+  },
+  "stage": {
+    "label": "Treaty stages",
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "active": "Active",
+    "expired": "Expired",
+    "state": {
+      "done": "completed",
+      "current": "current stage",
+      "todo": "upcoming stage"
+    }
+  },
+  "registry": {
+    "title": "Reinsurance treaties",
+    "lead": "The excess-of-loss reinsurance contracts: year, period, placed percentage and status. Open a treaty for its layers, participations and recoverables.",
+    "section": "Treaty registry",
+    "meta": "all treaties",
+    "filterStatus": "Status",
+    "allStatuses": "All statuses",
+    "noNumber": "No number (draft)",
+    "columns": {
+      "number": "Contract number",
+      "year": "Year",
+      "type": "Type",
+      "period": "Period",
+      "currency": "Currency",
+      "placed": "Placed %",
+      "status": "Status"
+    },
+    "emptyTitle": "No treaties yet",
+    "emptyBody": "When a reinsurance treaty is entered it appears here.",
+    "noResultsTitle": "No treaty with this status",
+    "noResultsBody": "Change or clear the status filter.",
+    "loadMore": "More treaties"
+  },
+  "contract": {
+    "kind": "Treaty",
+    "draftTitle": "Draft treaty",
+    "openEnded": "open-ended",
+    "back": "Reinsurance treaties",
+    "notFound": "The treaty was not found.",
+    "facts": {
+      "period": "Period",
+      "currency": "Currency",
+      "placed": "Placed",
+      "entity": "Legal entity",
+      "treaty": "Stable treaty id"
+    }
+  },
+  "layers": {
+    "title": "Layers",
+    "meta": "limit excess of retention",
+    "diagram": "Layer diagram",
+    "diagramLayer": "Layer {no}: {summary}",
+    "layerNo": "Layer {no}",
+    "range": "{from} – {to}",
+    "retention": "Retention",
+    "emptyTitle": "No layers",
+    "emptyBody": "The treaty has no layers entered.",
+    "columns": {
+      "layer": "Layer",
+      "summary": "Limit xs retention",
+      "attachment": "Retention (attachment)",
+      "limit": "Limit per risk",
+      "aad": "Annual deductible (AAD)",
+      "aal": "Annual limit (AAL)"
+    }
+  },
+  "participants": {
+    "title": "Participations",
+    "meta": "reinsurers and signed lines",
+    "lead": "Lead",
+    "follower": "Participant",
+    "direct": "Direct",
+    "emptyTitle": "No participations",
+    "emptyBody": "The treaty has no reinsurers.",
+    "columns": {
+      "reinsurer": "Reinsurer",
+      "role": "Role",
+      "broker": "Broker",
+      "signedLine": "Signed line"
+    },
+    "check": {
+      "ok": "Consistent",
+      "bad": "Inconsistent",
+      "sum": "Signed lines total {signed} · placed {placed} · leads: {leads}"
+    }
+  },
+  "recoverables": {
+    "title": "Recoverables",
+    "meta": "from the insured claims",
+    "loading": "Loading recoverables…",
+    "failed": "The recoverables did not load",
+    "emptyTitle": "No recoverables yet",
+    "emptyBody": "Recoverables appear when a claim reaches the layers of the treaty.",
+    "partialTitle": "Part of the recoverables is shown",
+    "partialBody": "There are more records than are loaded here; the totals are not complete.",
+    "totals": {
+      "incurred": "Incurred recoverable",
+      "paid": "Recoverable on paid",
+      "outstanding": "Outstanding recoverable (layer-year)"
+    },
+    "outstandingNote": "Outstanding is a layer-year figure: total incurred minus total paid. It is not calculated per claim.",
+    "byLayer": "By layer",
+    "byParticipant": "By reinsurer",
+    "byClaim": "By claim",
+    "allocatedNote": "A reinsurer's outstanding is the layer outstanding allocated across the participants; it can differ by cents from incurred minus paid.",
+    "perClaimNote": "Per claim only the incurred and the paid recoverable are shown.",
+    "columns": {
+      "layer": "Layer",
+      "incurred": "Incurred recoverable",
+      "paid": "Recoverable on paid",
+      "layerOutstanding": "Layer-year outstanding",
+      "reinsurer": "Reinsurer",
+      "allocatedOutstanding": "Outstanding (allocated)",
+      "claim": "Claim",
+      "state": "State"
+    },
+    "state": {
+      "CALCULATED": "Calculated",
+      "POSTED": "Posted",
+      "REVERSED": "Reversed"
+    }
+  },
+  "terms": {
+    "title": "Terms",
+    "products": "Products",
+    "coverages": "Coverages",
+    "alae": "ALAE in ultimate net loss",
+    "interest": "Statutory interest in ultimate net loss",
+    "inure": "Recoveries that reduce the loss",
+    "yes": "Yes",
+    "no": "No",
+    "inureValue": {
+      "REALISED_ONLY": "Realised recoveries only"
+    }
+  },
+  "history": {
+    "title": "History",
+    "maker": "Entered by",
+    "created": "Created",
+    "approval": "Approval request",
+    "activated": "Activated",
+    "version": "Treaty version"
+  },
+  "codes": {
+    "product": {
+      "MOTOR_TPL": "Motor third-party liability"
+    },
+    "coverage": {
+      "MTPL_PD": "Third-party property damage",
+      "MTPL_BI": "Third-party bodily injury"
+    }
+  },
+  "decision": {
+    "title": "Approval",
+    "submit": "Submit for approval…",
+    "confirmSubmitTitle": "Submit the treaty for approval?",
+    "confirmSubmitBody": "After submission the treaty does not change until another manager approves or returns it.",
+    "confirmSubmit": "Submit",
+    "cancel": "Cancel",
+    "draftHelp": "The treaty is a draft. It is submitted for approval by a reinsurance manager.",
+    "draftReadOnly": "The treaty is a draft and has not been submitted yet.",
+    "pendingHelp": "Entered by {maker}. Approve it, or return it with a reason.",
+    "managerOnly": "The treaty is waiting for approval by a reinsurance manager.",
+    "sodTitle": "You cannot approve your own entry",
+    "sodBody": "You entered this treaty. Another reinsurance manager must review it (separation of duties).",
+    "approve": "Approve…",
+    "return": "Return for correction…",
+    "reasonApprove": "Approval comment (optional)",
+    "reasonApproveHelp": "Recorded in the approval history.",
+    "reasonReturn": "Reason for returning",
+    "reasonReturnHelp": "Say what must be corrected; the treaty goes back to draft.",
+    "reasonRequired": "A reason is required to return the treaty.",
+    "confirmApprove": "Confirm approval",
+    "confirmReturn": "Return the treaty",
+    "announceApproved": "Treaty {contract} was approved.",
+    "announceReturned": "Treaty {contract} was returned for correction.",
+    "announceSubmitted": "Treaty {contract} was submitted for approval.",
+    "approvedToast": "Treaty approved",
+    "returnedToast": "Treaty returned for correction",
+    "submittedToast": "Treaty submitted for approval",
+    "final": {
+      "APPROVED": "Approved; it becomes active at the start of the period.",
+      "ACTIVE": "The treaty is active.",
+      "EXPIRED": "The treaty has expired.",
+      "CLOSED": "The treaty is closed."
+    }
+  },
+  "errors": {
+    "title": "The action failed",
+    "sodTitle": "Separation of duties",
+    "forbidden": "Your role does not allow this action.",
+    "generic": "The action did not complete. Try again.",
+    "reload": "Reload",
+    "trace": "Reference: {id}",
+    "codes": {
+      "RI-ERR-SOD": "You cannot approve a treaty you entered yourself. Ask another reinsurance manager to review it.",
+      "RI-ERR-STATE": "The treaty is no longer at the stage that expects this action. Reload the page.",
+      "RI-ERR-STALE": "Another user changed the treaty. Reload to see its current state.",
+      "RI-ERR-NOT-FOUND": "The treaty was not found.",
+      "RI-ERR-VALIDATION": "The details are not valid. Check the reason and try again.",
+      "RI-ERR-SIGNED-LINES": "The signed lines do not add up to the placed percentage, or there is not exactly one lead.",
+      "RI-ERR-IDEMPOTENCY-MISMATCH": "The request was repeated with different content. Reload and try again."
+    }
+  },
+  "claim": {
+    "title": "Reinsurance recoverables of a claim",
+    "openClaim": "Claim file",
+    "notFound": "The claim was not found.",
+    "section": "Recoverables by treaty and layer",
+    "meta": "incurred and paid",
+    "totals": {
+      "incurred": "Incurred recoverable",
+      "paid": "Recoverable on paid"
+    },
+    "columns": {
+      "contract": "Treaty",
+      "layer": "Layer",
+      "reinsurer": "Reinsurer",
+      "incurred": "Incurred recoverable",
+      "paid": "Recoverable on paid",
+      "state": "State"
+    },
+    "contractLink": "Treaty {year}",
+    "emptyTitle": "No recoverables for this claim",
+    "emptyBody": "The claim does not reach the layers of any active treaty, or has not been calculated yet.",
+    "outstandingNote": "Outstanding recoverable is not shown per claim; it is a layer-year figure shown on the treaty."
+  }
+}
