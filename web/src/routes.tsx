@@ -40,7 +40,14 @@ const moduleRoutes: RouteObject[] = [
   {
     path: 'policies/referrals',
     lazy: async () => ({
-      Component: (await import('./modules/policy/ReferralsPage')).ReferralsPage,
+      Component: (await import('./modules/underwriting/workbench/WorkbenchPage')).WorkbenchPage,
+    }),
+  },
+  {
+    // The «Ανάληψη κινδύνου» rail entry opens the same referral workbench (SL5-UI-UW-WB).
+    path: 'underwriting',
+    lazy: async () => ({
+      Component: (await import('./modules/underwriting/workbench/WorkbenchPage')).WorkbenchPage,
     }),
   },
   {
@@ -134,7 +141,14 @@ const moduleRoutes: RouteObject[] = [
   },
 ];
 
-const implemented = new Set(['/parties', '/policies', '/billing', '/finance', '/claims']);
+const implemented = new Set([
+  '/parties',
+  '/policies',
+  '/billing',
+  '/finance',
+  '/claims',
+  '/underwriting',
+]);
 
 /** Placeholder routes for modules whose work packages have not landed, plus the thin-slice staff screens. */
 export const routes: RouteObject[] = [
