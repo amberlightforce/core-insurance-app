@@ -12,7 +12,10 @@
         "pol.Snapshot.get": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "pol.Policy.search": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "pol.cancel": [ "Staff.Underwriter" ],
-        "pol.Cancellation.create": [ "Staff.Underwriter" ]
+        "pol.Cancellation.create": [ "Staff.Underwriter" ],
+        "pol.PolicyChange.create": [ "Staff.Underwriter" ],
+        "pol.change": [ "Staff.Underwriter" ],
+        "pol.Job.withdraw": [ "Staff.Underwriter" ]
       }
     }
   }
