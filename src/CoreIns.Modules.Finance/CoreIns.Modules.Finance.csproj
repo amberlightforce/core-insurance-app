@@ -19,6 +19,7 @@
     <ProjectReference Include="..\CoreIns.Modules.Finance.Contracts\CoreIns.Modules.Finance.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Billing.Contracts\CoreIns.Modules.Billing.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Claims.Contracts\CoreIns.Modules.Claims.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
@@ -29,6 +30,7 @@
     <!-- Versioned reference data (chart, derivations, catalogue, rule set) applied by the migrations; immutable once applied. -->
     <EmbeddedResource Include="Seed\gr-test.finance.v1.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v1.json" />
     <EmbeddedResource Include="Seed\gr-test.finance.v2.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v2.json" />
+    <EmbeddedResource Include="Seed\gr-test.finance.v3.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v3.json" />
   </ItemGroup>
 
   <ItemGroup>
