@@ -170,7 +170,7 @@ public sealed class SupportAuthorityTests
 
         registry.TryGet(SupportAuthorityTypes.Refund, out var refund).ShouldBeTrue();
         refund.OwningModule.ShouldBe(ModuleCode.BIL);
-        refund.Dimensions.Select(d => d.Name).ShouldBe(["amount", "currency", "payeeChanged", "reason"]);
+        refund.Dimensions.Select(d => d.Name).ShouldBe(["amount", "currency", "payeeChanged", "reason", "product"]);
         registry.TryGet(SupportAuthorityTypes.EffectiveDateOverride, out var overrideType).ShouldBeTrue();
         overrideType.OwningModule.ShouldBe(ModuleCode.POL);
         overrideType.Dimensions.Select(d => d.Name).ShouldBe(["product", "transactionType", "days"]);

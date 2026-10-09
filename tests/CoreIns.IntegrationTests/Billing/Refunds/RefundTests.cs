@@ -238,13 +238,8 @@ public sealed class RefundNettingTests(PostgresFixture database) : IClassFixture
     public async Task REQ_BIL_182_open_debit_is_netted_against_the_credit_before_the_refund()
     {
         _h.DebitOpen.ShouldBeGreaterThan(0m);
+        (_h.Credit - _h.DebitOpen).ShouldBeGreaterThanOrEqualTo(5m, $"the scenario must leave a refundable rest above the debit (credit {_h.Credit}, debit {_h.DebitOpen})");
         var (response, body) = await _h.ProposeAsync("alice");
-        if (_h.Credit - _h.DebitOpen < 5m)
-        {
-            // Not enough credit is left above the debit: nothing is refunded and nothing is netted by the refund command.
-            response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableContent, body?.ToJsonString());
-            return;
-        }
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         var refund = body!["refund"]!;

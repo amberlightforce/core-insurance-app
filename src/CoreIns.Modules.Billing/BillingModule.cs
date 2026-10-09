@@ -9,6 +9,7 @@ using CoreIns.Modules.Billing.Services;
 using CoreIns.Modules.Compliance.Contracts.Events;
 using CoreIns.Modules.Policy.Contracts.Events;
 using CoreIns.Platform;
+using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
@@ -111,6 +112,9 @@ public static class BillingModule
         services.AddCommandAuditor<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementAuditor>();
         services.AddCommand<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementHandler>(
             CommandDescriptor.For("bil.Disbursement.request") with { SupportsDryRun = true });
+
+        // BIL.REFUND approvals are decided by bil.Refund.decide (it also executes the refund), never in the generic approvals inbox.
+        services.AddOwnerDecidedApprovalType(DisbursementApproval.RefundType);
 
         // SL3-BIL-REFUND: refunds of the credit balance (REQ-BIL-007, -181…-191), paid through the disbursement service (BIL_REFUND).
         services.AddScoped<RefundCredits>();
