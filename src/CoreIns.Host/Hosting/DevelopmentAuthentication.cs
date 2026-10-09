@@ -82,9 +82,7 @@ internal static class DevelopmentAuthentication
         services.AddOptions<JwtBearerOptions>(Scheme).PostConfigure<IClock>((options, clock) =>
             options.TokenValidationParameters.LifetimeValidator = (notBefore, expires, _, parameters) =>
             {
-                var now = clock.Now.ToUtcDateTime();
-                var skew = parameters.ClockSkew;
-                return (notBefore is null || notBefore.Value <= now + skew) && (expires is null || expires.Value >= now - skew);
+                return ValidateLifetime(notBefore, expires, parameters, clock.Now.ToUtcDateTime());
             });
         return builder.AddJwtBearer(Scheme, options =>
         {
@@ -100,6 +98,17 @@ internal static class DevelopmentAuthentication
                 ClockSkew = TimeSpan.FromSeconds(30),
             };
         });
+    }
+
+    internal static bool ValidateLifetime(DateTime? notBefore, DateTime? expires, TokenValidationParameters parameters, DateTime now)
+    {
+        if ((expires is null && parameters.RequireExpirationTime) || (notBefore is not null && expires is not null && notBefore > expires))
+        {
+            return false;
+        }
+
+        var skew = parameters.ClockSkew;
+        return (notBefore is null || notBefore.Value <= now + skew) && (expires is null || expires.Value >= now - skew);
     }
 
     /// <summary>True when the request's bearer token was issued by the dev sign-in (routing only; the scheme validates it).</summary>
