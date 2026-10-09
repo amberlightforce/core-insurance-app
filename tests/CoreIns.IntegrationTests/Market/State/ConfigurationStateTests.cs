@@ -210,7 +210,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
     [Fact]
     public async Task REQ_MKT_048_knownAt_resolves_the_state_that_was_current_at_that_instant()
     {
-        var (states, engine, _) = Build();
+        var (states, engine, clock) = Build();
         var genesis = (await states.ByHashAsync(await GenesisHashAsync(), Ct))!;
         await Task.Delay(20, Ct);
         var h2 = await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.1.0");
@@ -218,6 +218,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         await Task.Delay(20, Ct);
         var h3 = await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.2.0", StateCauses.PackActivation);
         var third = (await states.ByHashAsync(h3, Ct))!;
+        clock.Set(third.ActivatedAt);
 
         (await states.AtAsync(genesis.ActivatedAt, Ct))!.Hash.ShouldBe(genesis.Hash);
         (await states.AtAsync(second.ActivatedAt.Minus(TimeSpan.FromTicks(10)), Ct))!.Hash.ShouldNotBe(h2);
@@ -344,16 +345,14 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
     }
 
     [Fact]
-    public async Task A_pin_that_names_no_recorded_state_falls_back_to_the_current_state_and_the_response_says_which_hash_it_used()
+    public async Task A_pin_that_names_no_recorded_state_fails_closed_like_an_explicit_hash()
     {
         var (states, engine, _) = Build();
         var unrecorded = new ConfigurationHash(Sha256Hash.ComputeUtf8("pre-slice-5 hash"));
         var service = new MarketConfigurationService(engine, new RequestContext { ConfigurationHash = unrecorded });
 
-        var resolved = await service.ResolveAsync(Request(), cancellationToken: Ct);
-
-        resolved.ConfigurationHash.ShouldBe((await states.CurrentAsync(Ct)).Hash);
-        resolved.ConfigurationHash.ShouldNotBe(unrecorded);
+        var implicitRefusal = await Should.ThrowAsync<DomainException>(async () => await service.ResolveAsync(Request(), cancellationToken: Ct));
+        implicitRefusal.Error.Code.ToString().ShouldBe("MKT-ERR-CFG-HASH-UNKNOWN");
 
         // An explicit hash is never replaced: asking for a state that was never recorded is an error.
         var refused = await Should.ThrowAsync<DomainException>(async () => await service.ResolveAsync(Request(unrecorded), cancellationToken: Ct));

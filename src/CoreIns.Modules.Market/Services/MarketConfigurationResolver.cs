@@ -1,12 +1,9 @@
-using System.Net.Sockets;
 using System.Text.Json.Nodes;
 using CoreIns.Modules.Market.Contracts.Api;
 using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Contracts;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
-using Microsoft.Extensions.Logging;
-using Npgsql;
 
 namespace CoreIns.Modules.Market.Services;
 
@@ -16,7 +13,7 @@ namespace CoreIns.Modules.Market.Services;
 /// serves, and modules can hand that hash back to <c>mkt.Configuration.resolve</c> without CFG-HASH-UNKNOWN.
 /// <c>knownAt</c> selects the state that was current at that instant (REQ-MKT-048); before the first state it is refused.
 /// </summary>
-internal sealed partial class MarketConfigurationResolver(ConfigurationEngine engine, ILogger<MarketConfigurationResolver> logger) : IConfigurationResolver
+internal sealed class MarketConfigurationResolver(ConfigurationEngine engine) : IConfigurationResolver
 {
     /// <inheritdoc />
     public async Task<ConfigurationHash> CurrentHashAsync(Instant? knownAt, CancellationToken cancellationToken)
@@ -26,17 +23,7 @@ internal sealed partial class MarketConfigurationResolver(ConfigurationEngine en
             return (await engine.StateAsync(null, known, null, cancellationToken).ConfigureAwait(false)).Hash;
         }
 
-        try
-        {
-            return (await engine.States.CurrentAsync(cancellationToken).ConfigureAwait(false)).Hash;
-        }
-        catch (Exception ex) when (ex is NpgsqlException or TimeoutException or SocketException or IOException)
-        {
-            // The request middleware pins a hash on every request, health probes included, so an unreachable database must not fail the probe.
-            // The hash returned is the one this release writes as genesis; any read of configuration still goes to the database and fails there.
-            CurrentStateUnreadable(logger, ex);
-            return engine.States.ExpectedGenesisHash;
-        }
+        return (await engine.States.CurrentAsync(cancellationToken).ConfigureAwait(false)).Hash;
     }
 
     /// <inheritdoc />
@@ -70,9 +57,6 @@ internal sealed partial class MarketConfigurationResolver(ConfigurationEngine en
         return new ConfigurationResolution(
             values, [.. response.MissingKeys.Select(ConfigKey.Parse)], response.ConfigurationHash, validAt, knownAt ?? state.ActivatedAt);
     }
-
-    [LoggerMessage(Level = LogLevel.Warning, Message = "The current configuration state cannot be read; pinning the release's genesis hash for this request.")]
-    private static partial void CurrentStateUnreadable(ILogger logger, Exception exception);
 
     private static LayerNode NodeOf(string node) => node switch
     {

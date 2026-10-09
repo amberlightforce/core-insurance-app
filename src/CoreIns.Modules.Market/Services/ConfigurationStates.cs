@@ -29,7 +29,7 @@ internal interface IConfigurationStates
     /// <summary>The state that was current at <paramref name="knownAt"/> (the newest with <c>activated_at</c> at or before it), or null before the first state.</summary>
     Task<ConfigurationCatalogue?> AtAsync(Instant knownAt, CancellationToken cancellationToken);
 
-    /// <summary>The hash the genesis state of this release has, for the moment the database cannot be reached (health probes need a hash to pin).</summary>
+    /// <summary>The expected genesis hash of this release (diagnostics and genesis validation).</summary>
     ConfigurationHash ExpectedGenesisHash { get; }
 }
 
@@ -71,6 +71,7 @@ internal sealed partial class PersistedConfigurationStates : IConfigurationState
     private readonly ConcurrentDictionary<string, PackVersionContent> _packs = new(StringComparer.Ordinal);
     private readonly SemaphoreSlim _refresh = new(1, 1);
     private Snapshot? _snapshot;
+    private volatile bool _registered;
 
     public PersistedConfigurationStates(
         NpgsqlDataSource dataSource, IEnumerable<IPackConfigurationSource> sources, IClock clock, ILogger<PersistedConfigurationStates> logger)
@@ -94,6 +95,7 @@ internal sealed partial class PersistedConfigurationStates : IConfigurationState
 
     public async Task<ConfigurationCatalogue> CurrentAsync(CancellationToken cancellationToken)
     {
+        await EnsureRegisteredAsync(cancellationToken).ConfigureAwait(false);
         if (Fresh(_snapshot, _clock.Now) is { } hit)
         {
             return hit;
@@ -130,6 +132,7 @@ internal sealed partial class PersistedConfigurationStates : IConfigurationState
 
     public async Task<ConfigurationCatalogue?> ByHashAsync(ConfigurationHash hash, CancellationToken cancellationToken)
     {
+        await EnsureRegisteredAsync(cancellationToken).ConfigureAwait(false);
         var key = hash.ToString();
         if (_byHash.TryGetValue(key, out var cached))
         {
@@ -171,6 +174,7 @@ internal sealed partial class PersistedConfigurationStates : IConfigurationState
 
     public async Task<ConfigurationCatalogue?> AtAsync(Instant knownAt, CancellationToken cancellationToken)
     {
+        await EnsureRegisteredAsync(cancellationToken).ConfigureAwait(false);
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await using var command = new NpgsqlCommand("SELECT hash FROM mkt.config_state WHERE activated_at <= @at ORDER BY seq DESC LIMIT 1", connection);
         command.Parameters.AddWithValue("at", NpgsqlDbType.TimestampTz, knownAt.ToUtcDateTime());
@@ -206,7 +210,11 @@ internal sealed partial class PersistedConfigurationStates : IConfigurationState
         }
 
         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+        _registered = true;
     }
+
+    private Task EnsureRegisteredAsync(CancellationToken cancellationToken) =>
+        _registered ? Task.CompletedTask : EnsureGenesisAsync(cancellationToken);
 
     private static async Task WriteGenesisActivationsAsync(
         NpgsqlConnection connection, NpgsqlTransaction transaction, CatalogueState genesis, ConfigurationHash hash, Instant now, CancellationToken cancellationToken)

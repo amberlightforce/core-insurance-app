@@ -50,6 +50,7 @@ public static class MarketModule
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.legal_entity, {Schema}.pack_activation TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.pack_version, {Schema}.config_state TO {appRole}",
+                $"GRANT UPDATE ON {Schema}.config_state_writer_lock TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
     ];

@@ -24,9 +24,13 @@ internal static class MarketStateSql
     public const int LockObject = 1;
 
     /// <summary>The statement every writer of a state runs first, inside its transaction.</summary>
-    public const string TakeLock = "SELECT pg_advisory_xact_lock(1296192512, 1)";
+    public const string TakeLock = "SELECT pg_advisory_xact_lock(1296192512, 1); LOCK TABLE mkt.config_state_writer_lock IN EXCLUSIVE MODE";
 
     public const string Up = """
+        -- Empty lock target: relation locks are transaction-scoped, unlike advisory locks which can also be session-scoped.
+        -- UPDATE is granted only to allow LOCK TABLE; the immutable state and version tables retain SELECT/INSERT-only grants.
+        CREATE TABLE mkt.config_state_writer_lock (unused integer);
+
         CREATE FUNCTION mkt.reject_state_change() RETURNS trigger LANGUAGE plpgsql AS $fn$
         BEGIN
             RAISE LOG 'SECURITY: % on append-only table mkt.% refused for role % (D-SL5-06)', TG_OP, TG_TABLE_NAME, current_user;
@@ -50,10 +54,17 @@ internal static class MarketStateSql
         BEGIN
             IF NOT EXISTS (
                 SELECT 1 FROM pg_locks
-                 WHERE locktype = 'advisory' AND pid = pg_backend_pid() AND granted
+                 WHERE locktype = 'advisory' AND pid = pg_backend_pid() AND granted AND mode = 'ExclusiveLock'
                    AND objsubid = 2 AND classid = 1296192512::oid AND objid = 1::oid) THEN
                 RAISE LOG 'SECURITY: mkt.config_state insert without the state lock by role %', current_user;
                 RAISE EXCEPTION 'mkt.config_state is written only under the state advisory lock of the same transaction (D-SL5-06)'
+                    USING ERRCODE = 'restrict_violation';
+            END IF;
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_locks
+                 WHERE locktype = 'relation' AND pid = pg_backend_pid() AND granted AND mode = 'ExclusiveLock'
+                   AND relation = 'mkt.config_state_writer_lock'::regclass) THEN
+                RAISE EXCEPTION 'mkt.config_state requires the exclusive writer lock of the same transaction (D-SL5-06)'
                     USING ERRCODE = 'restrict_violation';
             END IF;
 
@@ -151,5 +162,6 @@ internal static class MarketStateSql
         DROP TRIGGER IF EXISTS tr_pack_version_no_truncate ON mkt.pack_version;
         DROP TRIGGER IF EXISTS tr_pack_version_append_only ON mkt.pack_version;
         DROP FUNCTION IF EXISTS mkt.reject_state_change();
+        DROP TABLE IF EXISTS mkt.config_state_writer_lock;
         """;
 }
