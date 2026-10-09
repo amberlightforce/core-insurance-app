@@ -101,6 +101,34 @@ internal sealed class RefundHarness : IAsyncDisposable
         return this;
     }
 
+    /// <summary>The open amount of the second invoice (a premium-only mid-term debit left unpaid), see <see cref="WithNettingAsync"/>.</summary>
+    public decimal DebitOpen { get; private set; }
+
+    /// <summary>The second invoice's id.</summary>
+    public string SecondInvoiceId { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Paid invoice 1, an unpaid premium-only debit on one line (invoice 2), then a policyholder cancellation crediting every other line:
+    /// the credit sits on the account (invoice 1 was paid) while invoice 2 is open, so the refund first nets against it (REQ-BIL-182).
+    /// </summary>
+    public async Task<RefundHarness> WithNettingAsync()
+    {
+        Scenario = await CreditScenario.BilledAsync(Slice);
+        await Scenario.PayAsync(Scenario.Policy.Total);
+        var first = Scenario.Deltas.First(d => CreditScenario.CategoryOf(d) != CreditScenario.TaxCategory);
+        var firstId = first.Payload["chargeId"]!.GetValue<string>();
+        var (debit, debitAmount, debitTx) = Scenario.ServicingSet("ENDORSEMENT_DEBIT", null, 0.2m, choose: p => p["chargeId"]!.GetValue<string>() == firstId);
+        await Scenario.DeliverAsync(debit);
+        DebitOpen = debitAmount;
+        SecondInvoiceId = (await Scenario.DocumentsAsync()).Single(d => d.Text("invoice.transactionId") == debitTx.ToString()).Text("invoice.invoiceId");
+        var (set, credit, transaction) = Scenario.ServicingSet("CANCELLATION", "Policyholder", -0.6m, choose: p => p["chargeId"]!.GetValue<string>() != firstId);
+        (await Slice.InvokeAsync("BIL.PolicyCancelled.StopBilling", Scenario.Cancelled(transaction))).ShouldBeTrue();
+        await Scenario.DeliverAsync(set);
+        Credit = -credit;
+        await RegisterPayeeAsync("alice");
+        return this;
+    }
+
     /// <summary>Registers (or changes) the payer's REFUND account as <paramref name="user"/>; returns the response.</summary>
     public async Task<JsonNode> RegisterPayeeAsync(string user)
     {

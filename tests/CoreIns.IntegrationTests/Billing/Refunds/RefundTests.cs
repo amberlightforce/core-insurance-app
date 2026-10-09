@@ -223,3 +223,48 @@ public sealed class RefundAutoApprovalTests(PostgresFixture database) : IClassFi
         lines.SqlState.ShouldBe("BL002");
     }
 }
+
+/// <summary>
+/// SL3-BIL-REFUND, netting (REQ-BIL-182, REQ-BIL-184): the credit is first set against the account's open debit items and only the rest is
+/// refunded; the breakdown shows the netting. The credit transfer moves no cash and posts no ledger entry (both sides are in LA-02).
+/// </summary>
+public sealed class RefundNettingTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncLifetime
+{
+    private RefundHarness _h = null!;
+
+    public async ValueTask InitializeAsync() => _h = await (await RefundHarness.StartAsync(database)).WithNettingAsync();
+
+    public async ValueTask DisposeAsync() => await _h.DisposeAsync();
+
+    [Fact]
+    public async Task REQ_BIL_182_open_debit_is_netted_against_the_credit_before_the_refund()
+    {
+        _h.DebitOpen.ShouldBeGreaterThan(0m);
+        var (response, body) = await _h.ProposeAsync("alice");
+        if (_h.Credit - _h.DebitOpen < 5m)
+        {
+            // Not enough credit is left above the debit: nothing is refunded and nothing is netted by the refund command.
+            response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableContent, body?.ToJsonString());
+            return;
+        }
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        var refund = body!["refund"]!;
+        refund.Text("state").ShouldBe("PAID");
+        RefundHarness.Money(refund["amount"]).ShouldBe(_h.Credit - _h.DebitOpen);
+        var netting = refund["netting"]!.AsArray().ShouldHaveSingleItem()!;
+        netting.Text("kind").ShouldBe("OPEN_INVOICE");
+        netting.Text("invoiceId").ShouldBe(_h.SecondInvoiceId);
+        RefundHarness.Money(netting["amount"]).ShouldBe(_h.DebitOpen);
+
+        // Invoice 2 is settled by the credit (no cash), the account is square, and only the refunded part reached LA-12.
+        var second = (await _h.Scenario.DocumentsAsync()).Single(d => d.Text("invoice.invoiceId") == _h.SecondInvoiceId);
+        RefundHarness.Money(second["invoice"]!["open"]).ShouldBe(0m);
+        second.Text("invoice.state").ShouldBe("PAID");
+        (await _h.CreditOnAccountAsync()).ShouldBe(0m);
+        (await _h.LinesAsync("REFUND_APPROVED")).Where(l => l.StartsWith("LA-12 CREDIT", StringComparison.Ordinal))
+            .Sum(l => decimal.Parse(l.Split(' ')[2], System.Globalization.CultureInfo.InvariantCulture)).ShouldBe(_h.Credit - _h.DebitOpen);
+        (await _h.Slice.ScalarAsync<long>($"SELECT count(*) FROM bil.credit_application WHERE refund_id = '{refund.Text("refundId")}' AND target_kind = 'NETTING'")).ShouldBeGreaterThan(0);
+        await _h.Slice.AllEntriesBalanceAsync();
+    }
+}
