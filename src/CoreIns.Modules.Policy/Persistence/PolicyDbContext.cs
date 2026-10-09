@@ -46,6 +46,10 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
                 table.HasCheckConstraint("ck_job_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
                 table.HasCheckConstraint("ck_job_currency", "currency ~ '^[A-Z]{3}$'");
                 table.HasCheckConstraint("ck_job_record_version", "record_version >= 1");
+                table.HasCheckConstraint("ck_job_cancellation_kind", Codes.CheckSql<CancellationKind>("cancellation_kind"));
+                table.HasCheckConstraint("ck_job_sub_state", Codes.CheckSql<JobSubState>("sub_state"));
+                table.HasCheckConstraint("ck_job_target_term",
+                    "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
             });
             entity.HasKey(e => e.JobId).HasName("pk_job");
             entity.Property(e => e.JobId).HasColumnName("job_id");
@@ -78,6 +82,23 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.Participants).HasColumnName("participants").HasColumnType("text[]").HasDefaultValueSql("'{}'::text[]");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.TargetTermId).HasColumnName("target_term_id");
+            entity.Property(e => e.CancellationSource).HasColumnName("cancellation_source");
+            entity.Property(e => e.CancellationKind).HasColumnName("cancellation_kind");
+            entity.Property(e => e.RefundMethod).HasColumnName("refund_method");
+            entity.Property(e => e.ReasonCode).HasColumnName("reason_code");
+            entity.Property(e => e.BaseTransactionId).HasColumnName("base_transaction_id");
+            entity.Property(e => e.ExpiringTermId).HasColumnName("expiring_term_id");
+            entity.Property(e => e.AcceptanceChannel).HasColumnName("acceptance_channel");
+            entity.Property(e => e.AcceptedAt).HasColumnName("accepted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.AcceptedBy).HasColumnName("accepted_by");
+            entity.Property(e => e.SubState).HasColumnName("sub_state");
+
+            // At most one open (Draft, Quoted or Scheduled) servicing job of each type per term (D-SL3-03 slice-3 schema).
+            entity.HasIndex(e => new { e.JobType, e.TargetTermId }).IsUnique().HasDatabaseName("ux_job_open_servicing")
+                .HasFilter("job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND state IN ('DRAFT', 'QUOTED', 'SCHEDULED')");
+            entity.HasIndex(e => e.ExpiringTermId).IsUnique().HasDatabaseName("ux_job_open_renewal")
+                .HasFilter("job_type = 'RENEWAL' AND state IN ('DRAFT', 'QUOTED', 'SCHEDULED')");
             entity.HasIndex(e => new { e.LegalEntityId, e.JobNumber }).IsUnique().HasDatabaseName("ux_job_number");
             entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_job_policy");
             entity.HasIndex(e => new { e.LegalEntityId, e.PolicyholderPartyId }).HasDatabaseName("ix_job_policyholder");
@@ -133,6 +154,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.Property(e => e.LastRecordedAt).HasColumnName("last_recorded_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.LegalEntityId, e.PolicyNumber }).IsUnique().HasDatabaseName("ux_policy_number");
             entity.HasIndex(e => new { e.LegalEntityId, e.PolicyholderPartyId }).HasDatabaseName("ix_policy_policyholder");
         });
@@ -164,6 +186,8 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.WrittenDate).HasColumnName("written_date");
             entity.Property(e => e.HeadTransactionId).HasColumnName("head_transaction_id");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.PredecessorTermId).HasColumnName("predecessor_term_id");
+            entity.Property(e => e.CancelledAt).HasColumnName("cancelled_at").HasColumnType("timestamptz");
 
             // One current version per term; (policy, term number) of current versions is unique (REQ-POL-032).
             entity.HasIndex(e => e.TermId).IsUnique().HasFilter("recorded_to IS NULL").HasDatabaseName("ux_policy_term_current");
@@ -236,6 +260,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
                 table.HasCheckConstraint("ck_charge_line_set", "set_index >= 1 AND set_index <= set_size");
                 table.HasCheckConstraint("ck_charge_line_valid", "valid_to > valid_from");
                 table.HasCheckConstraint("ck_charge_line_currency", "currency ~ '^[A-Z]{3}$'");
+                table.HasCheckConstraint("ck_charge_line_transaction_kind", Codes.CheckSql<TaxTransactionKind>("transaction_kind"));
             });
             entity.HasKey(e => e.ChargeId).HasName("pk_charge_line");
             entity.Property(e => e.ChargeId).HasColumnName("charge_id");
@@ -261,6 +286,10 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.LegalStatus).HasColumnName("legal_status");
             entity.Property(e => e.Provisional).HasColumnName("provisional");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.Property(e => e.TransactionKind).HasColumnName("transaction_kind");
+            entity.Property(e => e.CancellationSource).HasColumnName("cancellation_source");
+            entity.Property(e => e.TreatmentRuleId).HasColumnName("treatment_rule_id");
+            entity.Property(e => e.TreatmentRuleVersion).HasColumnName("treatment_rule_version");
             entity.HasIndex(e => new { e.TransactionId, e.SetIndex }).IsUnique().HasDatabaseName("ux_charge_line_set");
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_charge_line_term");
             entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)

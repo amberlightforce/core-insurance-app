@@ -9,6 +9,7 @@ using CoreIns.Platform.Persistence;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Json;
 using CoreIns.SharedKernel.Results;
 using Dapper;
 
@@ -17,12 +18,25 @@ namespace CoreIns.Modules.Policy.Queries;
 /// <summary>What a snapshot request names: exactly one of a policy id, a policy number or a snapshot reference.</summary>
 internal sealed record SnapshotQuery(Guid? PolicyId, string? PolicyNumber, string? SnapshotRef, Instant? ValidAt, Instant? KnownAt);
 
+/// <summary>A snapshot answer with the effective knownAt it was given at and its live supersession metadata.</summary>
+internal sealed record SnapshotResult(SnapshotGetResponse Snapshot, Instant EffectiveKnownAt, SnapshotSupersession Supersession);
+
 /// <summary>
 /// pol.Snapshot.get (REQ-POL-007): the immutable view of the policy, term and segment in force at a valid-time instant as
 /// known at a record-time instant. The reference is <c>PS1.{policyId}.{segmentId|0}.{validAt}.{knownAt}</c> with the
-/// instants in microseconds since the Unix epoch; every row read is immutable once recorded at or before knownAt, so the same
-/// reference always yields the same bytes (POL P5). A knownAt in the future is refused: it is the one case where the same
-/// question could get a different answer later.
+/// instants in microseconds since the Unix epoch.
+/// <para>
+/// The knownAt is always the <b>effective</b> one, <c>min(requested or now, the policy's committed record-time watermark)</c>
+/// (D-SL3-03 a): every row that commits later is stamped above the watermark, so the same reference always yields the same
+/// bytes (POL P5), whatever the clock skew between replicas and however long a concurrent writer takes. A reference whose
+/// knownAt is above the current watermark was never issued by POL and is refused as forged; a requested knownAt after both
+/// the clock and the watermark is refused too (PITFALLS 13).
+/// </para>
+/// <para>
+/// <see cref="SnapshotResult.Supersession"/> is computed on read by comparing the content at (validAt, current watermark) with
+/// the content of the reference: a new segment id with identical content is not superseded (a split elsewhere in the term
+/// leaves the days before it unchanged).
+/// </para>
 /// </summary>
 internal sealed class PolicySnapshots(PolicyReader reader, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock)
 {
@@ -30,6 +44,12 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
     private const long TicksPerMicrosecond = 10;
 
     public async Task<Result<SnapshotGetResponse>> GetAsync(SnapshotQuery query, CancellationToken cancellationToken)
+    {
+        var result = await GetDetailedAsync(query, cancellationToken).ConfigureAwait(false);
+        return result.IsFailure ? result.Error! : result.Value.Snapshot with { EffectiveKnownAt = result.Value.EffectiveKnownAt, Supersession = result.Value.Supersession };
+    }
+
+    public async Task<Result<SnapshotResult>> GetDetailedAsync(SnapshotQuery query, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(query);
         var named = (query.PolicyId is null ? 0 : 1) + (query.PolicyNumber is null ? 0 : 1) + (query.SnapshotRef is null ? 0 : 1);
@@ -46,7 +66,9 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
         Guid? policyId = query.PolicyId;
         Guid? expectedSegment = null;
         Instant validAt;
-        Instant knownAt;
+        Instant? referenceKnownAt = null;
+        var now = PolicyWriteLock.Truncate(clock.Now);
+        Instant requestedKnownAt = now;
         if (query.SnapshotRef is { } snapshotRef)
         {
             if (query.ValidAt is not null || query.KnownAt is not null)
@@ -54,29 +76,52 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
                 return Invalid("validAt and knownAt are encoded in the snapshotRef; do not give them with it.");
             }
 
-            if (!TryParseRef(snapshotRef, out var parsedPolicy, out expectedSegment, out validAt, out knownAt))
+            if (!TryParseRef(snapshotRef, out var parsedPolicy, out expectedSegment, out validAt, out var refKnownAt))
             {
                 return Invalid("The snapshotRef is malformed.");
             }
 
             policyId = parsedPolicy;
+            referenceKnownAt = refKnownAt;
         }
         else
         {
-            var now = Truncate(clock.Now);
-            validAt = query.ValidAt is { } valid ? Truncate(valid) : now;
-            knownAt = query.KnownAt is { } known ? Truncate(known) : now;
-        }
-
-        // Also for a (possibly forged) reference: a future knownAt could answer differently once later changes are recorded.
-        if (knownAt > Truncate(clock.Now))
-        {
-            return Invalid("knownAt cannot be in the future: a snapshot must stay the same when it is read again.");
+            validAt = query.ValidAt is { } valid ? PolicyWriteLock.Truncate(valid) : now;
+            if (query.KnownAt is { } known)
+            {
+                requestedKnownAt = PolicyWriteLock.Truncate(known);
+            }
         }
 
         var legalEntity = JobSupport.LegalEntity(context, legalEntities);
-        var found = await reader.ReadSnapshotAsync(
-            legalEntity, context.LegalEntity!.Value.Value, policyId, query.PolicyNumber, validAt, knownAt, cancellationToken).ConfigureAwait(false);
+        if (await reader.ResolvePolicyAsync(legalEntity, policyId, query.PolicyNumber, cancellationToken).ConfigureAwait(false) is not var (resolvedPolicy, watermark))
+        {
+            return JobSupport.NotFound("policy");
+        }
+
+        Instant knownAt;
+        if (referenceKnownAt is { } fromReference)
+        {
+            // Only POL issues references and only at an effective knownAt, which never exceeds the watermark. One above it is forged.
+            if (fromReference > watermark)
+            {
+                return Invalid("The snapshotRef is above the policy's record-time watermark: it was not issued by this system.");
+            }
+
+            knownAt = fromReference;
+        }
+        else
+        {
+            // A requested knownAt after both the clock and everything recorded is the one question that could get a different answer later.
+            if (requestedKnownAt > now && requestedKnownAt > watermark)
+            {
+                return Invalid("knownAt cannot be in the future: a snapshot must stay the same when it is read again.");
+            }
+
+            knownAt = PolicyReader.EffectiveKnownAt(requestedKnownAt, watermark);
+        }
+
+        var found = await reader.ReadSnapshotAsync(legalEntity, context.LegalEntity!.Value.Value, resolvedPolicy, validAt, knownAt, cancellationToken).ConfigureAwait(false);
         if (found is null)
         {
             return JobSupport.NotFound("policy");
@@ -88,14 +133,71 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
             return Invalid("The snapshotRef does not match the recorded segment.");
         }
 
-        return found with { SnapshotRef = MakeRef(found.Policy.PolicyId.Value, segmentId, validAt, knownAt) };
+        var snapshot = found with { SnapshotRef = MakeRef(found.Policy.PolicyId.Value, segmentId, validAt, knownAt) };
+        var supersession = await SupersessionAsync(legalEntity, snapshot, resolvedPolicy, watermark, cancellationToken).ConfigureAwait(false);
+        return new SnapshotResult(snapshot, knownAt, supersession);
     }
 
-    private static DomainError Invalid(string message) => DomainError.Of(ModuleCode.POL, "VALIDATION", message);
+    /// <summary>
+    /// Compares the content at the same valid-time instant as known at the current watermark with the content of
+    /// <paramref name="snapshot"/>. Different content is superseded; <c>supersededAt</c> is the first record time, after the
+    /// snapshot's knownAt, at which the content differed.
+    /// </summary>
+    private async Task<SnapshotSupersession> SupersessionAsync(
+        LegalEntityId legalEntity, SnapshotGetResponse snapshot, Guid policyId, Instant watermark, CancellationToken cancellationToken)
+    {
+        if (snapshot.KnownAt >= watermark)
+        {
+            return new SnapshotSupersession { Superseded = false };
+        }
 
-    /// <summary>Instants are compared and stored to the microsecond (the column precision).</summary>
-    private static Instant Truncate(Instant instant) =>
-        Instant.FromUtcDateTime(new DateTime(instant.ToUtcDateTime().Ticks / TicksPerMicrosecond * TicksPerMicrosecond, DateTimeKind.Utc));
+        var code = context.LegalEntity!.Value.Value;
+        var current = await reader.ReadSnapshotAsync(legalEntity, code, policyId, snapshot.ValidAt, watermark, cancellationToken).ConfigureAwait(false);
+        var hash = SnapshotContentHash(snapshot);
+        if (current is null || SnapshotContentHash(current) == hash)
+        {
+            return new SnapshotSupersession { Superseded = false };
+        }
+
+        // The first record instant after the snapshot's knownAt at which the content differs (the last candidate is the watermark itself).
+        var supersededAt = watermark;
+        foreach (var candidate in await reader.RecordInstantsAsync(legalEntity, policyId, snapshot.KnownAt, watermark, cancellationToken).ConfigureAwait(false))
+        {
+            var at = await reader.ReadSnapshotAsync(legalEntity, code, policyId, snapshot.ValidAt, candidate, cancellationToken).ConfigureAwait(false);
+            if (at is null || SnapshotContentHash(at) != hash)
+            {
+                supersededAt = candidate;
+                break;
+            }
+        }
+
+        var successor = MakeRef(policyId, current.Content?.Segment.SegmentId.Value, snapshot.ValidAt, watermark);
+        return new SnapshotSupersession { Superseded = true, SuccessorRef = successor, SupersededAt = supersededAt };
+    }
+
+    /// <summary>
+    /// SHA-256 of what a snapshot says about the risk, independent of how the record is cut: the term facts, the status and the
+    /// hash of the segment's risk tree, but not segment or transaction ids, the segment's own valid period or any record time.
+    /// </summary>
+    internal static string SnapshotContentHash(SnapshotGetResponse snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+        var content = snapshot.Content;
+        return CanonicalJson.HashOf(new
+        {
+            snapshot.InForce,
+            snapshot.Status,
+            snapshot.NotInForceReason,
+            Term = content is null ? null : content.Term with { RecordedAt = default },
+            content?.ProductVersion,
+            RiskHash = content?.Segment.SnapshotHash,
+            content?.Vehicles,
+            content?.Drivers,
+            content?.Coverages,
+        }).Value;
+    }
+
+    private static DomainError Invalid(string message) => DomainError.Of(ModuleCode.POL, PolicyErrorNames.Validation, message);
 
     private static long Micros(Instant instant) => (instant.ToUtcDateTime().Ticks - DateTime.UnixEpoch.Ticks) / TicksPerMicrosecond;
 
@@ -130,27 +232,15 @@ internal sealed class PolicySnapshots(PolicyReader reader, RequestContext contex
 internal sealed partial class PolicyReader
 {
     /// <summary>
-    /// The snapshot at <paramref name="validAt"/> as known at <paramref name="knownAt"/>; null when the policy (by id or number, in
-    /// the caller's legal entity) was not known then. The reference is filled in by <see cref="PolicySnapshots"/>.
+    /// The snapshot at <paramref name="validAt"/> as known at <paramref name="knownAt"/> (the caller passes the effective knownAt,
+    /// never above the policy's watermark); null when the policy (in the caller's legal entity) was not known then. The
+    /// reference is filled in by <see cref="PolicySnapshots"/>.
     /// </summary>
     public async Task<SnapshotGetResponse?> ReadSnapshotAsync(
-        LegalEntityId legalEntity, string legalEntityCode, Guid? policyId, string? policyNumber, Instant validAt, Instant knownAt, CancellationToken cancellationToken)
+        LegalEntityId legalEntity, string legalEntityCode, Guid policyId, Instant validAt, Instant knownAt, CancellationToken cancellationToken)
     {
         var args = Args(legalEntity, validAt, knownAt);
-        if (policyId is null)
-        {
-            args.Add("number", policyNumber);
-            var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-            policyId = await connection.QuerySingleOrDefaultAsync<Guid?>(new CommandDefinition(
-                "SELECT policy_id FROM pol.policy WHERE legal_entity_id = @le AND policy_number = @number AND recorded_at <= @knownAt",
-                args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
-            if (policyId is null)
-            {
-                return null;
-            }
-        }
-
-        args.Add("policyId", policyId.Value);
+        args.Add("policyId", policyId);
         var policy = await PolicyAsync(args, cancellationToken).ConfigureAwait(false);
         if (policy is null)
         {
@@ -226,6 +316,32 @@ internal sealed partial class PolicyReader
     }
 
     /// <summary>
+    /// The distinct record instants of the policy's term versions, segments and transactions in the half-open range
+    /// (<paramref name="after"/>, <paramref name="upTo"/>], ascending, always ending with <paramref name="upTo"/>: the instants at
+    /// which what is known about the policy changed.
+    /// </summary>
+    public async Task<IReadOnlyList<Instant>> RecordInstantsAsync(
+        LegalEntityId legalEntity, Guid policyId, Instant after, Instant upTo, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var instants = (await connection.QueryAsync<DateTime>(new CommandDefinition(
+            """
+            SELECT recorded_from FROM pol.policy_term WHERE policy_id = @policyId AND legal_entity_id = @le AND recorded_from > @after AND recorded_from <= @upTo
+            UNION SELECT recorded_from FROM pol.segment WHERE policy_id = @policyId AND legal_entity_id = @le AND recorded_from > @after AND recorded_from <= @upTo
+            UNION SELECT recorded_at FROM pol.policy_transaction WHERE policy_id = @policyId AND legal_entity_id = @le AND recorded_at > @after AND recorded_at <= @upTo
+            ORDER BY 1
+            """,
+            new { policyId, le = legalEntity.Value, after = after.ToUtcDateTime(), upTo = upTo.ToUtcDateTime() }, session.Transaction,
+            cancellationToken: cancellationToken)).ConfigureAwait(false)).Select(JobReader.Time).ToList();
+        if (instants.Count == 0 || instants[^1] != upTo)
+        {
+            instants.Add(upTo);
+        }
+
+        return instants;
+    }
+
+    /// <summary>
     /// pol.Policy.search subset (REQ-POL-014): by policy number and/or insured (policyholder) party, ordered by policy number,
     /// keyset-paged after <paramref name="afterNumber"/>. Status is as of validAt, known at knownAt.
     /// </summary>
@@ -262,15 +378,20 @@ internal sealed partial class PolicyReader
         IEnumerable<TermRecord> termRows = [];
         if (policies.Count > 0)
         {
+            // Each policy is read as known at min(knownAt, its own watermark) (D-SL3-03 a).
             termRows = await connection.QueryAsync<TermRecord>(new CommandDefinition(
-                $"""
-                 SELECT term_id AS TermId, policy_id AS PolicyId, term_number AS TermNumber, valid_from AS ValidFrom, valid_to AS ValidTo,
-                        recorded_from AS RecordedFrom, state AS State, product_version AS ProductVersion, artefact_hash AS ArtefactHash,
-                        rating_artefact_hash AS RatingArtefactHash, resolution_hash AS ResolutionHash, configuration_hash AS ConfigurationHash,
-                        currency AS Currency, producer_code AS ProducerCode, payment_plan_ref AS PaymentPlanRef, written_date::text AS WrittenDate
-                   FROM pol.policy_term
-                  WHERE legal_entity_id = @le AND policy_id = ANY(@ids) AND {Known}
-                 """,
+                """
+                SELECT t.term_id AS TermId, t.policy_id AS PolicyId, t.term_number AS TermNumber, t.valid_from AS ValidFrom, t.valid_to AS ValidTo,
+                       t.recorded_from AS RecordedFrom, t.state AS State, t.product_version AS ProductVersion, t.artefact_hash AS ArtefactHash,
+                       t.rating_artefact_hash AS RatingArtefactHash, t.resolution_hash AS ResolutionHash, t.configuration_hash AS ConfigurationHash,
+                       t.currency AS Currency, t.producer_code AS ProducerCode, t.payment_plan_ref AS PaymentPlanRef, t.written_date::text AS WrittenDate,
+                       t.cancelled_at AS CancelledAt
+                  FROM pol.policy_term t
+                  JOIN pol.policy p ON p.policy_id = t.policy_id
+                 WHERE t.legal_entity_id = @le AND t.policy_id = ANY(@ids)
+                   AND t.recorded_from <= LEAST(@knownAt, p.last_recorded_at)
+                   AND (t.recorded_to IS NULL OR t.recorded_to > LEAST(@knownAt, p.last_recorded_at))
+                """,
                 new DynamicParameters(args).AddValue("ids", policies.Select(p => p.PolicyId).ToArray()), session.Transaction,
                 cancellationToken: cancellationToken)).ConfigureAwait(false);
         }
