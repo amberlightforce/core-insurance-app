@@ -58,20 +58,29 @@ internal sealed class TransactionDecorator<TCommand, TResult>(
             return new DomainError(ErrorCode.For(descriptor.Module, PlatformErrors.Validation), $"{descriptor.Operation} does not support dry-run.");
         }
 
-        var transaction = await session.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using (transaction.ConfigureAwait(false))
+        var previousModule = context.CurrentCommandModule;
+        context.CurrentCommandModule = descriptor.Module;
+        try
         {
-            var result = await inner.HandleAsync(command, cancellationToken).ConfigureAwait(false);
-            if (result.IsSuccess && !context.DryRun)
+            var transaction = await session.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+            await using (transaction.ConfigureAwait(false))
             {
-                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
-            }
+                var result = await inner.HandleAsync(command, cancellationToken).ConfigureAwait(false);
+                if (result.IsSuccess && !context.DryRun)
+                {
+                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                }
 
-            return result;
+                return result;
+            }
+        }
+        finally
+        {
+            context.CurrentCommandModule = previousModule;
         }
     }
 }
