@@ -1,0 +1,167 @@
+/* Pack registry: pack cards, version timeline and activation history. Wrapping rows, nothing clipped. */
+
+.hash {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.hash > span {
+  overflow-wrap: anywhere;
+  font: var(--type-caption);
+  font-family: var(--font-mono);
+}
+
+.packCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.packHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: baseline;
+}
+
+.packCode {
+  margin: var(--space-0);
+  font: var(--type-heading-3);
+}
+
+.entityList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.entity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: center;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.version {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-inline-size: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-inline-start-width: var(--border-width-thick);
+  border-radius: var(--radius-md);
+}
+
+.version[data-state='ROLLED_BACK'] {
+  border-color: var(--color-status-warning-border);
+  border-inline-start-color: var(--color-status-warning-solid);
+  background-color: var(--color-status-warning-bg);
+}
+
+.version[data-state='ACTIVE'] {
+  border-inline-start-color: var(--color-status-success-solid);
+}
+
+.versionHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+}
+
+.versionName {
+  font: var(--type-label-lg);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-0);
+}
+
+.facts > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.facts dt {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.facts dd {
+  margin: var(--space-0);
+  overflow-wrap: anywhere;
+}
+
+.history {
+  display: flex;
+  flex-direction: column;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.historyRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-0);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.historyRow:last-child {
+  border-block-end: 0;
+}
+
+.diff {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.diff li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.diffKey {
+  overflow-wrap: anywhere;
+}
+
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+.arrow {
+  white-space: nowrap;
+}

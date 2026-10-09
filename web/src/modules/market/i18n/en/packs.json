@@ -1,0 +1,171 @@
+{
+  "packs": {
+    "overline": "Market packs",
+    "copyHash": "Copy: {label}",
+    "copied": "Hash copied.",
+    "scope": {
+      "REGION": "Region",
+      "GROUP": "Group",
+      "COUNTRY": "Country"
+    },
+    "kind": {
+      "ACTIVATE": "Activation",
+      "ROLLBACK": "Rollback"
+    },
+    "change": {
+      "ADDED": "Added",
+      "REMOVED": "Removed",
+      "CHANGED": "Changed"
+    },
+    "activationStatus": {
+      "REQUESTED": "Requested",
+      "PENDING_APPROVAL": "Awaiting approval",
+      "SCHEDULED": "Scheduled",
+      "ACTIVE": "In force",
+      "SUPERSEDED": "Superseded",
+      "WITHDRAWN": "Withdrawn",
+      "REJECTED": "Rejected"
+    },
+    "versionStatus": {
+      "BUILT": "Built",
+      "SIGNED": "Signed",
+      "CERTIFIED": "Certified",
+      "REJECTED": "Rejected",
+      "PUBLISHED": "Published",
+      "DEPRECATED": "Deprecated",
+      "REMOVED": "Removed"
+    },
+    "errors": {
+      "generic": "The action did not complete. Try again.",
+      "network": "Cannot reach the server.",
+      "forbidden": "Your role does not allow this action.",
+      "MKT-ERR-VALIDATION": "The request is not valid. Check the version and the reason.",
+      "MKT-ERR-PACK-VERSION-UNKNOWN": "The pack or the version is not in the version registry.",
+      "MKT-ERR-PACK-NOT-PUBLISHED": "The target version is not published and cannot be activated.",
+      "MKT-ERR-PACK-ALREADY-ACTIVE": "This version is already active for the legal entity. There is nothing to change.",
+      "MKT-ERR-PACK-ROLLBACK-INSTANT": "The rollback cannot take effect before the activation of the version it replaces.",
+      "MKT-ERR-PACK-ACTIVATION-STATE": "The request is no longer pending. Refresh the page.",
+      "MKT-ERR-IDEMPOTENCY-MISMATCH": "This request was already sent with different details. Reopen the dialog.",
+      "MKT-ERR-SOD-VIOLATION": "This decision is not allowed: the checker must hold Platform.DesignAuthority and be a different person from whoever made the request.",
+      "PLT-ERR-SELF-APPROVAL": "You cannot approve or reject a request that you or your principal made. Another checker is needed."
+    },
+    "registry": {
+      "title": "Pack registry",
+      "subtitle": "The market packs with their versions and the active version per legal entity.",
+      "emptyTitle": "No packs",
+      "more": "Load more packs",
+      "emptyBody": "No market pack is registered yet.",
+      "open": "Open pack {pack}",
+      "versions": "{count, plural, one {# version} other {# versions}} · {published} published",
+      "neverActivated": "Never activated for any legal entity.",
+      "activePerEntity": "Active version per legal entity",
+      "activeVersion": "Active {version}",
+      "since": "since {date}"
+    },
+    "detail": {
+      "back": "All packs",
+      "rollback": "Roll back…",
+      "activate": "Activate version…",
+      "rollbackUnavailable": "There is no active version or no other version to roll back to.",
+      "activateUnavailable": "There is no published version to activate.",
+      "readOnlyTitle": "View only",
+      "readOnlyBody": "Activation and rollback requests are made by Platform.ReleaseManager. You can see the versions and the history.",
+      "pending": "Pending requests",
+      "pendingMeta": "need a checker",
+      "noPending": "No request is waiting for approval.",
+      "notFound": "The pack was not found."
+    },
+    "timeline": {
+      "title": "Versions",
+      "emptyTitle": "No versions",
+      "emptyBody": "The pack has no versions in the registry.",
+      "publishedAt": "Published {date}",
+      "notPublished": "Not published",
+      "digest": "Content digest",
+      "active": "{entity} · Active",
+      "activeSince": "Active since",
+      "configurationHash": "Configuration hash",
+      "rolledBack": "{entity} · Rolled back",
+      "window": "Window in force",
+      "hashesIssued": "Hash issued in the window",
+      "noHash": "Not recorded",
+      "rolledBackNote": "Transactions carrying this hash are reviewed in the policy exception queue.",
+      "superseded": "{entity} · Superseded"
+    },
+    "history": {
+      "title": "Activation history",
+      "emptyTitle": "No history",
+      "emptyBody": "No activation or rollback has happened yet.",
+      "open": "Open request",
+      "kind": "Kind",
+      "entity": "Legal entity",
+      "requestedBy": "Requested by",
+      "decidedBy": "Decided by",
+      "notDecided": "Not decided",
+      "time": "Effective time",
+      "reason": "Reason",
+      "resultingHash": "Resulting hash"
+    },
+    "dialog": {
+      "rollbackTitle": "Roll back a version",
+      "activateTitle": "Activate a version",
+      "makerChecker": "The request changes nothing until another user holding Platform.DesignAuthority approves it.",
+      "entity": "Legal entity",
+      "entityHelp": "The legal-entity code, for example GR-LE.",
+      "currentVersion": "Current active version",
+      "none": "none",
+      "rollbackTo": "Roll back to version",
+      "activateVersion": "Version to activate",
+      "publishedOn": "published {date}",
+      "noTargets": "There is no other published version.",
+      "reason": "Reason",
+      "reasonHelp": "At least {min} characters. Recorded in the audit trail.",
+      "reasonShort": "The reason needs at least {min} characters.",
+      "preview": "Preview",
+      "previewNeeds": "Choose the entity and version and write a reason of at least 20 characters.",
+      "previewHint": "The preview shows the window, the hashes and the keys that change, without submitting the request.",
+      "submit": "Submit request",
+      "submitNeedsPreview": "Run the preview first, for exactly these details.",
+      "submitted": "The request was submitted and awaits approval.",
+      "cancel": "Cancel"
+    },
+    "preview": {
+      "title": "Preview",
+      "fromTo": "From → to",
+      "window": "Window in force",
+      "windowOpen": "open",
+      "hashes": "{count, plural, one {Hash issued} other {Hashes issued}}",
+      "hashLabel": "hash",
+      "noHashes": "No hash was issued in the window.",
+      "keyDiff": "Key changes",
+      "diffCounts": "{added} added, {removed} removed, {changed} changed",
+      "noDiff": "No key changes."
+    },
+    "activation": {
+      "title": "{kind} · {pack}",
+      "back": "Back to the pack",
+      "summary": "Request details",
+      "move": "Version",
+      "notFound": "The request was not found."
+    },
+    "decide": {
+      "title": "Checker decision",
+      "reason": "Reason for the decision",
+      "reasonHelp": "Required for approval and for rejection.",
+      "reasonRequired": "Write the reason for the decision.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "The request was approved",
+      "rejected": "The request was rejected",
+      "doneBody": "The decision is recorded in the pack history.",
+      "failed": "The decision was not recorded",
+      "waitingTitle": "Waiting for a checker",
+      "waitingBody": "You made this request, so you cannot decide it. Another user holding Platform.DesignAuthority will review it.",
+      "notCheckerTitle": "You cannot decide",
+      "unknownMakerBody": "Your authenticated actor identity or the maker identity could not be verified. The request remains read-only; sign in again. The server requires a different checker from every maker and delegated principal.",
+      "notCheckerBody": "The decision belongs to the Platform.DesignAuthority role. You can read the request.",
+      "notPendingTitle": "The request is not waiting for a decision",
+      "notPendingBody": "It has already been decided or withdrawn."
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "packRollback": {
+    "overline": "Policies · Pack rollback",
+    "copyHash": "Copy configuration hash",
+    "copied": "Hash copied.",
+    "status": {
+      "OPEN": "Open",
+      "REVIEWED": "Reviewed"
+    },
+    "outcome": {
+      "NO_ACTION": "No action",
+      "CORRECTION_REQUIRED": "Correction required"
+    },
+    "kind": {
+      "ISSUANCE": "Issuance",
+      "CHANGE": "Policy change",
+      "REWRITE": "Rewrite",
+      "RENEWAL": "Renewal",
+      "CARRY_FORWARD": "Carry-forward",
+      "SUSPENSION": "Suspension",
+      "REACTIVATION": "Reactivation",
+      "REVERSAL": "Reversal",
+      "NEW_BUSINESS": "New business",
+      "ENDORSEMENT_DEBIT": "Endorsement (debit)",
+      "ENDORSEMENT_CREDIT": "Endorsement (credit)",
+      "CANCELLATION": "Cancellation",
+      "DISTANCE_WITHDRAWAL_VOID": "Withdrawal cancellation",
+      "VOID": "Void",
+      "RETURN_PREMIUM": "Return premium",
+      "REINSTATEMENT": "Reinstatement",
+      "FEE": "Fee",
+      "REFUND": "Refund"
+    },
+    "wrk": {
+      "NOT_CREATED_WRK_NOT_BUILT": "Not created (work management is not built yet)"
+    },
+    "fields": {
+      "policyNumber": "Policy number",
+      "transactionKind": "Transaction kind",
+      "productVersion": "Product version",
+      "configurationHash": "Configuration hash",
+      "pack": "Pack",
+      "fromTo": "From → to",
+      "identifiedAt": "Identified",
+      "wrkActivity": "Work activity"
+    },
+    "queue": {
+      "title": "Pack-rollback exceptions",
+      "more": "Load more exceptions",
+      "subtitle": "Transactions bound under a pack configuration that a rollback has since replaced. Review each case and record the outcome.",
+      "section": "Exceptions",
+      "filter": "Exception status",
+      "open": "Open",
+      "emptyOpenTitle": "No open exceptions",
+      "emptyOpenBody": "No transaction is waiting for review after a pack rollback.",
+      "emptyReviewedTitle": "No reviewed exceptions",
+      "emptyReviewedBody": "No exception has been reviewed yet."
+    },
+    "detail": {
+      "title": "Pack-rollback exception",
+      "back": "All exceptions",
+      "openPolicy": "Open policy",
+      "transaction": "Transaction",
+      "rollback": "Pack rollback",
+      "review": "Review outcome",
+      "notFound": "The exception was not found.",
+      "noCorrectionTitle": "Correction is not available yet",
+      "noCorrectionBody": "Recording «Correction required» notes the need but changes nothing on the policy: re-rating is not supported yet. Nothing is re-rated silently."
+    },
+    "review": {
+      "open": "Review…",
+      "noRole": "The Underwriting Manager does the review.",
+      "title": "Review exception · {policy}",
+      "note": "The outcome is recorded with the reason in the audit trail. It does not change any segment, charge or term of the policy.",
+      "outcome": "Outcome",
+      "outcomeRequired": "Choose an outcome.",
+      "reason": "Reason",
+      "reasonRequired": "Write the reason.",
+      "submit": "Record review",
+      "cancel": "Cancel",
+      "done": "The review was recorded.",
+      "failed": "The review was not recorded.",
+      "forbidden": "Your role does not allow this review.",
+      "conflict": "This exception has already been reviewed. Refresh the page.",
+      "by": "Reviewed by",
+      "at": "Reviewed at"
+    }
+  }
+}

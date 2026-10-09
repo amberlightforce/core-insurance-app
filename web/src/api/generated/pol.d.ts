@@ -1193,6 +1193,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/pol/v1/pack-rollback-exceptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pack rollback exceptions
+         * @description Pack rollback exceptions
+         *
+         *     Lists the exceptions raised when a PackRolledBack event found bound transactions recorded under a rolled-back pack version (D-SL5-10).
+         *     Filters: status, activationId. Newest first.
+         */
+        get: operations["pol.PackRollbackException.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pol/v1/pack-rollback-exceptions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pack rollback exception
+         * @description Pack rollback exception
+         *
+         *     One exception with the transaction, the configuration hash and the review.
+         */
+        get: operations["pol.PackRollbackException.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pol/v1/pack-rollback-exceptions/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Review a pack rollback exception
+         * @description Review a pack rollback exception
+         *
+         *     A reviewer (Staff.UnderwritingManager, illustrative grant) records NO_ACTION or CORRECTION_REQUIRED with a reason. Audited. No segment, charge
+         *     or term is touched and nothing is re-rated (D-SL5-10); a correction goes through a reviewed out-of-sequence change, which is out of slice 5. Idempotency-Key required.
+         */
+        post: operations["pol.PackRollbackException.review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1572,6 +1640,8 @@ export interface components {
             worksheetId?: components["schemas"]["Sha256"];
             quotedAt?: components["schemas"]["Instant"];
             validUntil?: components["schemas"]["Instant"];
+            /** @description PACK_ROLLBACK when the version was recorded under a rolled-back pack version (D-SL5-10); bind refuses it with QUOTE-STALE. Null when not stale; treat an absent member as null. */
+            staleReason?: "PACK_ROLLBACK" | null;
         };
         /** @description A job with its quote versions (REQ-POL-331) */
         JobView: {
@@ -2398,6 +2468,55 @@ export interface components {
             /** @description PRD: "retention conflicts" */
             retentionConflicts?: components["schemas"]["Unspecified"];
         };
+        /** @enum {string} */
+        PackRollbackExceptionStatus: "OPEN" | "REVIEWED";
+        PackRollbackExceptionReview: {
+            /** @enum {string} */
+            outcome: "NO_ACTION" | "CORRECTION_REQUIRED";
+            reason: string;
+            /** @description Reviewer, as an opaque principal reference */
+            reviewedBy: components["schemas"]["Text"];
+            reviewedAt: components["schemas"]["Instant"];
+        };
+        /** @description One exception row per transaction recorded under a rolled-back pack version (D-SL5-10). Every field is always set; review is null until reviewed. */
+        PackRollbackExceptionView: {
+            exceptionId: components["schemas"]["Uuid"];
+            /** @description The PackActivation (kind ROLLBACK) that raised the exception */
+            activationId: components["schemas"]["Uuid"];
+            pack: components["schemas"]["Code"];
+            /** @description The version rolled back */
+            fromVersion: components["schemas"]["VersionLabel"];
+            toVersion: components["schemas"]["VersionLabel"];
+            policyId: components["schemas"]["Uuid"];
+            policyNumber: components["schemas"]["BusinessNumber"];
+            termId: components["schemas"]["Uuid"];
+            transactionId: components["schemas"]["Uuid"];
+            transactionKind: components["schemas"]["Code"];
+            /** @description Hash stored with the transaction; it is one of the hashesIssued of the PackRolledBack event */
+            configurationHash: components["schemas"]["Sha256"];
+            productVersion: components["schemas"]["ProductVersionNumber"];
+            identifiedAt: components["schemas"]["Instant"];
+            status: components["schemas"]["PackRollbackExceptionStatus"];
+            /**
+             * @description WRK is not built in slice 5, so no review activity is created (D-SL5-10)
+             * @enum {string}
+             */
+            wrkActivity: "NOT_CREATED_WRK_NOT_BUILT";
+            /** @description Null while OPEN */
+            review: components["schemas"]["PackRollbackExceptionReview"] | null;
+        };
+        /** @description Page of pol.PackRollbackException.list results (cursor pagination, contract §3.5.5) */
+        PackRollbackExceptionListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["PackRollbackExceptionView"][];
+        };
+        /** @description pol.PackRollbackException.review request */
+        PackRollbackExceptionReviewRequest: {
+            exceptionId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "NO_ACTION" | "CORRECTION_REQUIRED";
+            /** @description Reviewer's reason. No personal data. */
+            reason: string;
+        };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
         /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
@@ -2513,6 +2632,7 @@ export interface components {
             from: components["schemas"]["Instant"];
             to: components["schemas"]["Instant"] | null;
         };
+        VersionLabel: string;
     };
     responses: {
         /** @description Malformed request or failed schema validation. */
@@ -5106,6 +5226,128 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pol.PackRollbackException.list": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description Exception status filter */
+                status?: "OPEN" | "REVIEWED";
+                /** @description Filter by the PackActivation of the rollback (uuid) */
+                activationId?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackRollbackExceptionListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pol.PackRollbackException.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the exception */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackRollbackExceptionView"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pol.PackRollbackException.review": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PackRollbackExceptionReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackRollbackExceptionView"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
