@@ -321,7 +321,7 @@ internal sealed class BuildTransactionSetHandler(
                     Type = requirement.Type.Value, CostType = requirement.CostType, Amount = SetAuthority.MoneyOf(requirement),
                     Basis = Enum.Parse<AuthorityPreviewItem.BasisValue>(requirement.Basis.Replace("_", string.Empty, StringComparison.Ordinal), true),
                     Outcome = check.Decision switch { AuthorityDecision.Allow => AuthorityPreviewItem.OutcomeValue.Within, AuthorityDecision.Refer => AuthorityPreviewItem.OutcomeValue.Refer, _ => AuthorityPreviewItem.OutcomeValue.Deny },
-                    Role = check.ReferralTargets.FirstOrDefault()?.Id,
+                    Role = check.ReferralTargets.Count == 0 ? null : check.ReferralTargets[0].Id,
                 });
             }
         }
