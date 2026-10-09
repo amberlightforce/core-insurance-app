@@ -32,6 +32,8 @@ internal sealed class TableRecord
 /// <summary>An artefact as found in the database.</summary>
 internal sealed record ArtefactRecord(string ArtefactHash, string ProductCode, string ProductVersion, string DataStatus);
 
+internal sealed record FallbackActivationResult(string? ArtefactHash, bool Created, string? Refusal);
+
 /// <summary>
 /// Reads and writes the rat schema through Dapper on the scope's connection (inside the caller's transaction when one is
 /// open). Tables, artefacts and worksheets are content-addressed: an identical insert is a no-op, so concurrent
@@ -117,6 +119,74 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
              WHERE r.product_code = @product AND (@version::text IS NULL OR r.product_version = @version)
                AND r.status = 'Active' AND r.effective_from <= @basis AND (r.effective_to IS NULL OR r.effective_to > @basis)
              ORDER BY r.effective_from DESC, r.product_version DESC LIMIT 1
+            """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+    }
+
+    /// <summary>Records a source-tariff activation without cloning or changing immutable artefacts.</summary>
+    public async Task<FallbackActivationResult> ActivateFallbackAsync(
+        string productCode, string sourceVersion, string newVersion, DateOnly fromDate, Guid sourceEventId, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var replayArgs = new DynamicParameters(new { sourceEventId, productCode, sourceVersion, newVersion });
+        replayArgs.Add("fromDate", fromDate, DbType.Date);
+        var prior = await connection.ExecuteScalarAsync<string?>(new CommandDefinition(
+            """
+            SELECT artefact_hash FROM rat.rate_activation WHERE source_event_id = @sourceEventId
+                AND product_code = @productCode AND product_version = @newVersion
+                AND fallback_source_version = @sourceVersion AND effective_from = @fromDate
+            """, replayArgs, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        if (prior is not null)
+        {
+            // Replaying the publication preserves its original source hash, even after later tariff changes.
+            return new(prior, false, null);
+        }
+
+        var source = await ResolveAsync(productCode, sourceVersion, fromDate, cancellationToken).ConfigureAwait(false);
+        if (source is null)
+        {
+            return new(null, false, "The fallback source has no active rating artefact; no other tariff is substituted.");
+        }
+
+        var args = new DynamicParameters(new
+        {
+            id = Guid.CreateVersion7(), hash = source.ArtefactHash, product = productCode, version = newVersion,
+            sourceVersion, sourceEventId, now = clock.Now.ToUtcDateTime(), actor = context.Actor.ToString(),
+        });
+        args.Add("fromDate", fromDate, DbType.Date);
+        var inserted = await connection.ExecuteAsync(new CommandDefinition(
+            """
+            INSERT INTO rat.rate_activation (activation_id, artefact_hash, product_code, product_version, effective_from,
+                effective_to, status, created_at, created_by, fallback_source_version, source_event_id)
+            VALUES (@id, @hash, @product, @version, @fromDate, NULL, 'Active', @now, @actor, @sourceVersion, @sourceEventId)
+            ON CONFLICT DO NOTHING
+            """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        if (inserted == 1)
+        {
+            return new(source.ArtefactHash, true, null);
+        }
+
+        var same = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            """
+            SELECT EXISTS (SELECT 1 FROM rat.rate_activation WHERE product_code = @product AND product_version = @version
+                AND effective_from = @fromDate AND artefact_hash = @hash AND fallback_source_version = @sourceVersion
+                AND source_event_id IS NOT NULL AND status = 'Active')
+            """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        return same ? new(source.ArtefactHash, false, null) : new(null, false, "The new version already has a different activation; it is never overwritten.");
+    }
+
+    /// <summary>Only a persisted fallback activation can alias an immutable source artefact to another product version.</summary>
+    public async Task<bool> HasFallbackBindingAsync(string product, string version, string hash, DateOnly? activeAt, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var args = new DynamicParameters(new { product, version, hash });
+        args.Add("basis", activeAt, DbType.Date);
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            """
+            SELECT EXISTS (SELECT 1 FROM rat.rate_activation WHERE product_code = @product AND product_version = @version
+                AND artefact_hash = @hash AND fallback_source_version IS NOT NULL AND source_event_id IS NOT NULL
+                AND ((@basis::date IS NULL AND status IN ('Active', 'Superseded', 'RolledBack'))
+                  OR (@basis::date IS NOT NULL AND status = 'Active' AND effective_from <= @basis
+                    AND (effective_to IS NULL OR effective_to > @basis))))
             """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 

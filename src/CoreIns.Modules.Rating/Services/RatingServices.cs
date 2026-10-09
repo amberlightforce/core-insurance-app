@@ -283,7 +283,8 @@ internal sealed class RatingRateService(
         var artefact = await store.LoadAsync(hash, cancellationToken).ConfigureAwait(false)
             ?? throw Error("UNKNOWN-ARTEFACT", "The named rating artefact does not exist.");
         if (!string.Equals(artefact.Definition.ProductCode, envelope.ProductCode, StringComparison.Ordinal)
-            || (version is not null && !string.Equals(artefact.Definition.ProductVersion, version, StringComparison.Ordinal)))
+            || (version is not null && !string.Equals(artefact.Definition.ProductVersion, version, StringComparison.Ordinal)
+                && !await store.HasFallbackBindingAsync(envelope.ProductCode, version, hash, basis, cancellationToken).ConfigureAwait(false)))
         {
             throw Error("INCOMPATIBLE-ARTEFACT", "The rating artefact is not bound to this product version.");
         }
