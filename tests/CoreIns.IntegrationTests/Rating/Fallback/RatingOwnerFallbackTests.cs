@@ -55,9 +55,9 @@ public sealed class RatingOwnerFallbackTests(PostgresFixture database) : IClassF
         var original = await Rate("1.0");
         var defective = await Rate("1.1");
         var (import10, body10) = await ProductApi.ImportAsync(client, JsonNode.Parse(ProductSeeds.MotorPrivateCarJson())!.AsObject());
-        import10.StatusCode.ShouldBe(HttpStatusCode.OK, body10?.ToJsonString());
+        import10.StatusCode.ShouldBe(HttpStatusCode.Created, body10?.ToJsonString());
         var (import11, body11) = await ProductApi.ImportAsync(client, JsonNode.Parse(ProductSeeds.MotorPrivateCar11Json())!.AsObject());
-        import11.StatusCode.ShouldBe(HttpStatusCode.OK, body11?.ToJsonString());
+        import11.StatusCode.ShouldBe(HttpStatusCode.Created, body11?.ToJsonString());
         var request = await OwnerPost("/api/pfc/v1/product-versions/fallback", "dev:releasemgr", "Platform.ReleaseManager",
             new { productCode = MotorProduct, defectiveVersion = "1.1", reason = "Synthetic defect: restore the previous locked content." });
         var decision = await OwnerPost("/api/pfc/v1/product-versions/decide-fallback", "dev:designauth", "Platform.DesignAuthority",
