@@ -373,12 +373,7 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
               </div>
             </>
           ) : (
-            <EmptyState
-              kind="first-use"
-              headingLevel={2}
-              headline={t('servicing.cancel.preview.emptyTitle')}
-              description={t('servicing.cancel.preview.emptyBody')}
-            />
+            <p className={styles.muted}>{t('servicing.cancel.preview.emptyBody')}</p>
           )}
         </>
       )}

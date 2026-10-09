@@ -24,7 +24,7 @@ function ProvisionalPill() {
   return (
     <StatusPill
       semantic="warning"
-      subLabel={t('servicing.preview.provisional')}
+      text={t('servicing.preview.provisional')}
       announceChanges={false}
     />
   );
@@ -76,37 +76,31 @@ export function ServicingPreviewView({ preview }: { preview: ServicingPreview })
         'cover',
         t('servicing.preview.columns.cover'),
         (l) => l.coverageCode,
-        { size: 150 },
+        { size: 90 },
       ),
       identifierColumn<ServicingProratedLine>(
         'chargeType',
         t('servicing.preview.columns.charge'),
         (l) => l.chargeType,
-        { size: 170 },
+        { size: 120 },
       ),
       textColumn<ServicingProratedLine>(
         'period',
         t('servicing.preview.columns.period'),
         (l) => `${fmt.date(l.period.from)} – ${fmt.date(l.period.to)}`,
-        { size: 210 },
+        { size: 190 },
       ),
       textColumn<ServicingProratedLine>(
         'days',
         t('servicing.preview.columns.days'),
         (l) => `${String(l.days)} / ${String(l.termDays)}`,
-        { size: 110 },
+        { size: 90 },
       ),
       textColumn<ServicingProratedLine>(
         'fraction',
         t('servicing.preview.columns.fraction'),
         (l) => l.fraction,
-        { size: 110 },
-      ),
-      moneyColumn<ServicingProratedLine>(
-        'annual',
-        t('servicing.preview.columns.annual'),
-        (l) => l.annualAmount.amount,
-        { currency },
+        { size: 100 },
       ),
       moneyColumn<ServicingProratedLine>(
         'amount',
@@ -124,26 +118,33 @@ export function ServicingPreviewView({ preview }: { preview: ServicingPreview })
         'chargeType',
         t('servicing.preview.columns.charge'),
         (l) => l.chargeType,
-        { size: 170 },
+        { size: 90 },
       ),
       textColumn<ServicingTaxLine>(
         'treatment',
         t('servicing.preview.columns.treatment'),
         (l) => t(`servicing.treatment.${l.treatmentAction}`, { defaultValue: l.treatmentAction }),
-        { size: 280 },
+        { size: 210 },
       ),
       textColumn<ServicingTaxLine>(
         'rule',
         t('servicing.preview.columns.rule'),
         (l) => `${l.ruleId} v${l.ruleVersion}`,
-        { size: 200 },
+        { size: 160 },
       ),
       statusColumn<ServicingTaxLine>(
         'legal',
         t('servicing.preview.columns.legalStatus'),
         (l) => l.legalStatus,
-        (l) => (l.provisional ? <ProvisionalPill /> : <span>{l.legalStatus}</span>),
-        { size: 220 },
+        (l) =>
+          l.provisional ? (
+            <ProvisionalPill />
+          ) : (
+            <span>
+              {t(`servicing.legalStatus.${l.legalStatus}`, { defaultValue: l.legalStatus })}
+            </span>
+          ),
+        { size: 150 },
       ),
       moneyColumn<ServicingTaxLine>(
         'amount',

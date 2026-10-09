@@ -238,7 +238,7 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
               value: (
                 <StatusPill
                   semantic={stage === 'accepted' ? 'success' : 'info'}
-                  subLabel={t(`servicing.renew.stage.${stage}`)}
+                  text={t(`servicing.renew.stage.${stage}`)}
                   announceChanges={false}
                 />
               ),
@@ -302,7 +302,7 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
       ) : null}
       {quote && !accepted ? (
         <>
-          <Section title={t('servicing.renew.rated.title')}>
+          <div className={styles.stack}>
             <p className={styles.muted}>{t('servicing.renew.rated.body')}</p>
             <UnderwritingOutcome quote={quote} />
             {referred ? (
@@ -328,7 +328,7 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
                 {t('servicing.change.preview.noPreviewBody')}
               </Banner>
             )}
-          </Section>
+          </div>
           <Section title={t('servicing.renew.offer.title')}>
             {offer ? (
               <>
@@ -357,8 +357,9 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
                     {
                       id: 'mode',
                       label: t('servicing.renew.offer.mode'),
-                      value: offer.acceptanceMode,
-                      kind: 'mono',
+                      value: t(`servicing.acceptanceMode.${offer.acceptanceMode}`, {
+                        defaultValue: offer.acceptanceMode,
+                      }),
                     },
                   ]}
                 />
@@ -395,12 +396,7 @@ function RenewalPanel({ data }: { data: PolicyGetResponse }) {
         </>
       ) : null}
       {!quote && !accepted ? (
-        <EmptyState
-          kind="first-use"
-          headingLevel={2}
-          headline={t('servicing.renew.emptyTitle')}
-          description={t('servicing.renew.emptyBody')}
-        />
+        <p className={styles.muted}>{t('servicing.renew.emptyBody')}</p>
       ) : null}
       <Dialog
         title={t('servicing.renew.accept.dialog.title')}

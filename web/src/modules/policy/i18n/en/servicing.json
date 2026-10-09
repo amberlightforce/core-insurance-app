@@ -78,21 +78,32 @@
         "cover": "Cover",
         "charge": "Charge",
         "period": "Affected period",
-        "days": "Days / term days",
+        "days": "Days",
         "fraction": "Fraction",
         "annual": "Annual amount",
         "amount": "Amount",
         "treatment": "Treatment",
         "rule": "Rule",
-        "legalStatus": "Legal status"
+        "legalStatus": "Status"
       }
     },
     "treatment": {
       "APPLY": "Tax applied",
-      "REDUCE_PRO_RATA": "Tax reduced pro rata",
-      "REVERSE_AS_VOID": "Tax reversed (void)",
-      "KEEP_NOT_REDUCED": "IPT not refunded (kept, not reduced)",
-      "INSURER_BEARS": "Insurer bears the tax"
+      "REDUCE_PRO_RATA": "Reduced pro rata",
+      "REVERSE_AS_VOID": "Reversed (void)",
+      "KEEP_NOT_REDUCED": "IPT not refunded",
+      "INSURER_BEARS": "Insurer bears it"
+    },
+    "legalStatus": {
+      "Settled": "Settled",
+      "Pending": "Pending",
+      "PendingOpinion": "Pending opinion",
+      "Unverified": "Unverified"
+    },
+    "acceptanceMode": {
+      "EXPLICIT": "Explicit acceptance",
+      "AUTO": "Automatic",
+      "IMPLICIT": "Implicit"
     },
     "refundMethod": {
       "ProRata": "Pro rata",

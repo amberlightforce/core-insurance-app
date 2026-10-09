@@ -179,7 +179,7 @@ describe('ServicingPreviewView', () => {
     expect(within(prorated).getByText('245 / 365')).toBeInTheDocument();
     expect(within(prorated).getByText('0.6712')).toBeInTheDocument();
     const tax = screen.getByRole('grid', { name: 'Γραμμές φόρων' });
-    expect(within(tax).getByText('Ο φόρος ασφαλίστρων (ΦΑΑ) δεν επιστρέφεται')).toBeInTheDocument();
+    expect(within(tax).getByText('ΦΑΑ: δεν επιστρέφεται')).toBeInTheDocument();
     expect(within(tax).getByText(/Προσωρινό/)).toBeInTheDocument();
     expect(screen.getByText('Προσωρινή φορολογική μεταχείριση')).toBeInTheDocument();
     await expectNoA11yViolations(container);
@@ -247,7 +247,7 @@ describe('CancellationPage', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Ακύρωση ασφαλιστηρίου' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Δεν υπάρχει ακόμη προεπισκόπηση επιστροφής')).toBeInTheDocument();
+    expect(screen.getByText(/Επιλέξτε την αιτία και δείτε/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Προεπισκόπηση επιστροφής' }));
     expect(await screen.findByText('Επιλέξτε την αιτία της ακύρωσης.')).toBeInTheDocument();
@@ -267,7 +267,7 @@ describe('CancellationPage', () => {
     });
     expect(created?.headers.get('Idempotency-Key')).toBeTruthy();
     expect(api.callsTo('POST', '/api/pol/v1/jobs/quote')[0]?.body).toEqual({ jobId, versionNo: 1 });
-    expect(screen.getByText(/Ο φόρος ασφαλίστρων \(ΦΑΑ\) δεν επιστρέφεται/)).toBeInTheDocument();
+    expect(screen.getByText(/ΦΑΑ: δεν επιστρέφεται/)).toBeInTheDocument();
     await expectNoA11yViolations(container);
 
     await user.click(screen.getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου' }));
@@ -404,7 +404,7 @@ describe('RenewalPage', () => {
     const api = mockApi(renewRoutes());
     const { user, container } = page();
     expect(await screen.findByRole('heading', { level: 1, name: 'Ανανέωση' })).toBeInTheDocument();
-    expect(screen.getByText('Δεν έχει ξεκινήσει ανανέωση')).toBeInTheDocument();
+    expect(screen.getByText(/Χρησιμοποιήστε το Ανανέωση τώρα/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Ανανέωση τώρα' }));
     expect(await screen.findByText('Ασφάλιστρο ανανέωσης')).toBeInTheDocument();

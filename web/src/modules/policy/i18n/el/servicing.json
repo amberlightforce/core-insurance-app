@@ -78,21 +78,32 @@
         "cover": "Κάλυψη",
         "charge": "Χρέωση",
         "period": "Περίοδος που αφορά",
-        "days": "Ημέρες / ημέρες περιόδου",
+        "days": "Ημέρες",
         "fraction": "Κλάσμα",
         "annual": "Ετήσιο ποσό",
         "amount": "Ποσό",
         "treatment": "Μεταχείριση",
         "rule": "Κανόνας",
-        "legalStatus": "Νομικό καθεστώς"
+        "legalStatus": "Καθεστώς"
       }
     },
     "treatment": {
       "APPLY": "Εφαρμογή φόρου",
-      "REDUCE_PRO_RATA": "Αναλογική μείωση φόρου",
-      "REVERSE_AS_VOID": "Αντιλογισμός φόρου (ακύρωση)",
-      "KEEP_NOT_REDUCED": "Ο φόρος ασφαλίστρων (ΦΑΑ) δεν επιστρέφεται",
-      "INSURER_BEARS": "Τον φόρο επιβαρύνεται ο ασφαλιστής"
+      "REDUCE_PRO_RATA": "Αναλογική μείωση",
+      "REVERSE_AS_VOID": "Αντιλογισμός (ακύρωση)",
+      "KEEP_NOT_REDUCED": "ΦΑΑ: δεν επιστρέφεται",
+      "INSURER_BEARS": "Επιβάρυνση ασφαλιστή"
+    },
+    "legalStatus": {
+      "Settled": "Οριστικό",
+      "Pending": "Εκκρεμεί",
+      "PendingOpinion": "Αναμένει γνωμοδότηση",
+      "Unverified": "Μη επαληθευμένο"
+    },
+    "acceptanceMode": {
+      "EXPLICIT": "Ρητή αποδοχή",
+      "AUTO": "Αυτόματη",
+      "IMPLICIT": "Σιωπηρή"
     },
     "refundMethod": {
       "ProRata": "Αναλογικά",
