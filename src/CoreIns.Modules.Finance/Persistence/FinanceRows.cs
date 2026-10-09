@@ -387,4 +387,6 @@ internal sealed class JournalLineRow
     public Guid? ClaimPaymentId { get; set; }
 
     public Guid? DisbursementId { get; set; }
+
+    public Guid? RefundId { get; set; }
 }

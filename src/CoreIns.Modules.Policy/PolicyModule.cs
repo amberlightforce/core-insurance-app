@@ -1,7 +1,10 @@
 using CoreIns.Modules.Policy.Commands;
+using CoreIns.Modules.Policy.Commands.Renewal;
+using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain;
+using CoreIns.Modules.Policy.Domain.Servicing;
 using CoreIns.Modules.Policy.Events;
 using CoreIns.Modules.Policy.Persistence;
 using CoreIns.Modules.Policy.Queries;
@@ -16,6 +19,7 @@ using CoreIns.SharedKernel.Identifiers;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CoreIns.Modules.Policy;
 
@@ -49,6 +53,8 @@ public static class PolicyModule
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line TO {appRole}",
+                // The policy row is frozen (trigger); the one thing a command changes is the record-time watermark (D-SL3-03).
+                $"GRANT UPDATE (last_recorded_at, record_version) ON {Schema}.policy TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
     ];
@@ -87,12 +93,35 @@ public static class PolicyModule
         services.AddCommandAuditor<BindJob, JobBindResponse, BindJobAuditor>();
         services.AddCommand<BindJob, JobBindResponse, BindJobHandler>(CommandDescriptor.For("pol.Job.bind") with { SupportsDryRun = true });
 
+        // SL3-POL-CHANGE: in-sequence mid-term change (quote and bind of a change job are routed from pol.Job.quote / pol.Job.bind).
+        services.AddOptions<ChangeOptions>().Bind(configuration.GetSection(ChangeOptions.Section));
+        services.TryAddSingleton<IProration, UnavailableProration>();
+        services.TryAddScoped<IServicingTax, UnavailableServicingTax>();
+        services.AddScoped<ChangeHistory>();
+        services.AddScoped<ChangeEngineFactory>();
+        services.AddScoped<ChangeContextLoader>();
+        services.AddScoped<ChangePricer>();
+        services.AddScoped<ChangeQuoteService>();
+        services.AddScoped<ChangeBindService>();
+        services.AddScoped<ChangePreviewService>();
+        services.AddScoped<IValidator<CreatePolicyChange>, CreatePolicyChangeValidator>();
+        services.AddCommandAuditor<CreatePolicyChange, PolicyChangeCreateResponse, CreatePolicyChangeAuditor>();
+        services.AddCommand<CreatePolicyChange, PolicyChangeCreateResponse, CreatePolicyChangeHandler>(
+            CommandDescriptor.For("pol.PolicyChange.create") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<WithdrawJob>, WithdrawJobValidator>();
+        services.AddCommandAuditor<WithdrawJob, JobWithdrawResponse, WithdrawJobAuditor>();
+        services.AddCommand<WithdrawJob, JobWithdrawResponse, WithdrawJobHandler>(CommandDescriptor.For("pol.Job.withdraw"));
+        services.AddErrorDefinitions(ChangeErrors.Definitions);
+
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IPolicySubmissionService, PolicySubmissionService>();
         services.AddScoped<IPolicyJobService, PolicyJobService>();
         services.AddScoped<IPolicyPolicyService, PolicyPolicyService>();
         services.AddScoped<IPolicyTermService, PolicyTermService>();
         services.AddScoped<IPolicySnapshotService, PolicySnapshotService>();
+
+        // SL3-POL-RENEW: manual renewal (create, offer, accept).
+        services.AddRenewalCommands(configuration);
 
         // UW decides declines; POL marks the job (REQ-POL-156).
         services.AddEventHandler<DeclineIssuedV1, DeclineIssuedHandler>(EventDescriptor.From(DeclineIssuedV1.Descriptor), DeclineIssuedHandler.Name, ModuleCode.POL);
@@ -134,6 +163,8 @@ public static class PolicyModule
             .Describe("Ένας έλεγχος πριν από τη σύναψη δεν ολοκληρώθηκε.", "A check before binding could not be completed."),
         ErrorDefinition.For(ModuleCode.POL, "DEPENDENCY-UNAVAILABLE", 503, "Μια απαραίτητη υπηρεσία δεν είναι διαθέσιμη", "A required service is not available", retryable: true)
             .Describe("Η λειτουργία χρειάζεται υπηρεσία άλλης ενότητας που δεν έχει ακόμη συνδεθεί.", "The operation needs another module's service that is not wired yet."),
+        ErrorDefinition.For(ModuleCode.POL, PolicyErrorNames.OutOfSequence, 422, "Η ενέργεια προηγείται της τελευταίας δεσμευμένης συναλλαγής του όρου", "The effective time is earlier than the term's latest bound transaction")
+            .Describe("Η ενέργεια ισχύει από ημερομηνία πριν από την τελευταία δεσμευμένη συναλλαγή του όρου. Επιλέξτε μεταγενέστερη ημερομηνία ή ξεκινήστε από τη νεότερη κατάσταση.", "The action takes effect before the term's latest bound transaction. Choose a later date or start again from the latest state."),
         ErrorDefinition.For(ModuleCode.POL, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

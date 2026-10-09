@@ -141,6 +141,9 @@ internal sealed class LedgerWriter(
                 SourceType = d.SourceType,
                 SourceId = d.SourceId,
                 ClaimId = d.ClaimId,
+                TransactionKind = d.TransactionKind,
+                CancellationSource = d.CancellationSource,
+                TreatmentRuleId = d.TreatmentRuleId,
             });
             published.Add(new LedgerLine
             {
@@ -188,5 +191,8 @@ internal sealed class LedgerWriter(
         SourceType = d.SourceType,
         SourceId = d.SourceId,
         ClaimId = d.ClaimId,
+        TransactionKind = d.TransactionKind is null ? null : TransactionKinds.ToDimension(d.TransactionKind),
+        CancellationSource = d.CancellationSource,
+        TreatmentRuleId = d.TreatmentRuleId,
     };
 }

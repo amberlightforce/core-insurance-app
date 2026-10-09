@@ -51,6 +51,7 @@ public static class FinanceModule
         services.AddScoped<ReferenceData>();
         services.AddScoped<JournalWriter>();
         services.AddScoped<JournalReversal>();
+        services.AddScoped<TaxTreatmentCheck>();
         services.AddScoped<Intake>();
         services.AddScoped<JournalReader>();
         services.AddScoped<PostingRuleReader>();

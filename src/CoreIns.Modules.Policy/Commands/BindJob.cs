@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CoreIns.Modules.Market.Contracts;
+using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Contracts.Events;
@@ -65,6 +66,7 @@ internal sealed class BindJobHandler(
     Dependency<IUnderwritingRulesService> underwriting,
     RatingInput ratingInput,
     Dependency<IMarketConfigurationService> marketConfiguration,
+    ChangeBindService changeBind,
     IOptions<PolicyOptions> options) : ICommandHandler<BindJob, JobBindResponse>
 {
     private const string Block = "BLOCK";
@@ -72,7 +74,14 @@ internal sealed class BindJobHandler(
     public async Task<Result<JobBindResponse>> HandleAsync(BindJob command, CancellationToken cancellationToken)
     {
         var request = command.Request;
-        var now = clock.Now;
+        if (await changeBind.IsChangeJobAsync(request.JobId, cancellationToken).ConfigureAwait(false))
+        {
+            // A mid-term change job binds through SL3-POL-CHANGE: lock first, then stamp (it takes the policy lock itself).
+            return await changeBind.BindAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        // One record time for every row of the bind; the new policy's watermark starts at it (D-SL3-03, lock-then-stamp: the insert is the lock).
+        var now = PolicyWriteLock.ForNewPolicy(clock);
         var zone = options.Value.Zone;
         if (request.Confirmation != true)
         {
@@ -182,7 +191,7 @@ internal sealed class BindJobHandler(
         {
             PolicyId = job.PolicyId, LegalEntityId = job.LegalEntityId, Jurisdiction = job.Jurisdiction, PolicyNumber = policyNumber,
             ProductCode = job.ProductCode, PolicyholderPartyId = job.PolicyholderPartyId, AccountId = job.AccountId, RecordedAt = now,
-            CreatedBy = actor, RecordVersion = 1,
+            CreatedBy = actor, RecordVersion = 1, LastRecordedAt = now,
         });
         db.Terms.Add(new PolicyTermRow
         {
@@ -224,6 +233,7 @@ internal sealed class BindJobHandler(
                 DeltaKind = DeltaKinds.Net, AnnualRate = line.AnnualRate, Amount = line.Amount.Amount, Currency = job.Currency,
                 ValidFrom = period.Start, ValidTo = period.End!.Value, BookingDate = today, CorrelationKey = transactionId.Value.ToString(),
                 SetIndex = i + 1, SetSize = charges.Count, RecordedAt = now, LegalStatus = line.LegalStatus, Provisional = line.Provisional,
+                TransactionKind = Codes.Of(TaxTransactionKind.NewBusiness),
             });
             frozen.Add(line with { ChargeId = chargeId, TransactionId = transactionId });
             events.Publish(new OutgoingEvent(

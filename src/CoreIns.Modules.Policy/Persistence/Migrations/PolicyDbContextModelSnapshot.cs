@@ -42,6 +42,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .HasColumnType("date")
                         .HasColumnName("booking_date");
 
+                    b.Property<string>("CancellationSource")
+                        .HasColumnType("text")
+                        .HasColumnName("cancellation_source");
+
                     b.Property<string>("ChargeCategory")
                         .IsRequired()
                         .HasColumnType("text")
@@ -117,6 +121,19 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("transaction_id");
 
+                    b.Property<string>("TransactionKind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("transaction_kind");
+
+                    b.Property<string>("TreatmentRuleId")
+                        .HasColumnType("text")
+                        .HasColumnName("treatment_rule_id");
+
+                    b.Property<string>("TreatmentRuleVersion")
+                        .HasColumnType("text")
+                        .HasColumnName("treatment_rule_version");
+
                     b.Property<DateOnly>("ValidFrom")
                         .HasColumnType("date")
                         .HasColumnName("valid_from");
@@ -141,6 +158,8 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_charge_line_set", "set_index >= 1 AND set_index <= set_size");
 
+                            t.HasCheckConstraint("ck_charge_line_transaction_kind", "transaction_kind IN ('NEW_BUSINESS', 'ENDORSEMENT_DEBIT', 'ENDORSEMENT_CREDIT', 'CANCELLATION', 'DISTANCE_WITHDRAWAL_VOID', 'VOID', 'RETURN_PREMIUM', 'REINSTATEMENT', 'FEE', 'REFUND')");
+
                             t.HasCheckConstraint("ck_charge_line_valid", "valid_to > valid_from");
                         });
                 });
@@ -151,6 +170,18 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("job_id");
 
+                    b.Property<string>("AcceptanceChannel")
+                        .HasColumnType("text")
+                        .HasColumnName("acceptance_channel");
+
+                    b.Property<DateTime?>("AcceptedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("accepted_at");
+
+                    b.Property<string>("AcceptedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("accepted_by");
+
                     b.Property<Guid?>("AccountId")
                         .HasColumnType("uuid")
                         .HasColumnName("account_id");
@@ -160,9 +191,21 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("artefact_hash");
 
+                    b.Property<Guid?>("BaseTransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("base_transaction_id");
+
                     b.Property<Guid?>("BoundTransactionId")
                         .HasColumnType("uuid")
                         .HasColumnName("bound_transaction_id");
+
+                    b.Property<string>("CancellationKind")
+                        .HasColumnType("text")
+                        .HasColumnName("cancellation_kind");
+
+                    b.Property<string>("CancellationSource")
+                        .HasColumnType("text")
+                        .HasColumnName("cancellation_source");
 
                     b.Property<string>("Channel")
                         .IsRequired()
@@ -198,6 +241,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.Property<DateTime>("ExpirationAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("expiration_at");
+
+                    b.Property<Guid?>("ExpiringTermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("expiring_term_id");
 
                     b.Property<string>("JobNumber")
                         .IsRequired()
@@ -256,6 +303,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("rating_artefact_hash");
 
+                    b.Property<string>("ReasonCode")
+                        .HasColumnType("text")
+                        .HasColumnName("reason_code");
+
                     b.Property<int>("RecordVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("integer")
@@ -264,6 +315,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.Property<bool>("Referred")
                         .HasColumnType("boolean")
                         .HasColumnName("referred");
+
+                    b.Property<string>("RefundMethod")
+                        .HasColumnType("text")
+                        .HasColumnName("refund_method");
 
                     b.Property<string>("ResolutionHash")
                         .IsRequired()
@@ -280,6 +335,14 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("state");
 
+                    b.Property<string>("SubState")
+                        .HasColumnType("text")
+                        .HasColumnName("sub_state");
+
+                    b.Property<Guid?>("TargetTermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_term_id");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("updated_at");
@@ -287,8 +350,18 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.HasKey("JobId")
                         .HasName("pk_job");
 
+                    b.HasIndex("ExpiringTermId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_job_open_renewal")
+                        .HasFilter("job_type = 'RENEWAL' AND state IN ('DRAFT', 'QUOTED', 'SCHEDULED')");
+
                     b.HasIndex("PolicyId")
                         .HasDatabaseName("ix_job_policy");
+
+                    b.HasIndex("JobType", "TargetTermId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_job_open_servicing")
+                        .HasFilter("job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND state IN ('DRAFT', 'QUOTED', 'SCHEDULED')");
 
                     b.HasIndex("LegalEntityId", "JobNumber")
                         .IsUnique()
@@ -299,6 +372,8 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
 
                     b.ToTable("job", "pol", t =>
                         {
+                            t.HasCheckConstraint("ck_job_cancellation_kind", "cancellation_kind IN ('STANDARD', 'FLAT')");
+
                             t.HasCheckConstraint("ck_job_currency", "currency ~ '^[A-Z]{3}$'");
 
                             t.HasCheckConstraint("ck_job_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
@@ -311,7 +386,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_job_state", "state IN ('DRAFT', 'QUOTED', 'BOUND', 'SCHEDULED', 'RESCINDED', 'WITHDRAWN', 'DECLINED', 'NOT_TAKEN', 'EXPIRED')");
 
-                            t.HasCheckConstraint("ck_job_type", "job_type IN ('SUBMISSION')");
+                            t.HasCheckConstraint("ck_job_sub_state", "sub_state IN ('QUICK_QUOTE', 'CONVERTING', 'OFFERED', 'ACCEPTED')");
+                            t.HasCheckConstraint("ck_job_target_term", "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_job_type", "job_type IN ('SUBMISSION', 'POLICY_CHANGE', 'CANCELLATION', 'RENEWAL')");
                         });
                 });
 
@@ -334,6 +412,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("char(2)")
                         .HasColumnName("jurisdiction");
+
+                    b.Property<DateTime>("LastRecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("last_recorded_at");
 
                     b.Property<Guid>("LegalEntityId")
                         .HasColumnType("uuid")
@@ -390,6 +472,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("artefact_hash");
 
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("cancelled_at");
+
                     b.Property<string>("ConfigurationHash")
                         .IsRequired()
                         .HasColumnType("text")
@@ -421,6 +507,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.Property<Guid>("PolicyId")
                         .HasColumnType("uuid")
                         .HasColumnName("policy_id");
+
+                    b.Property<Guid?>("PredecessorTermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("predecessor_term_id");
 
                     b.Property<string>("ProducerCode")
                         .HasColumnType("text")

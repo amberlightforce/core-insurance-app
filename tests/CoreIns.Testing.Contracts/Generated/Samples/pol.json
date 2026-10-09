@@ -738,7 +738,28 @@
           "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ],
-      "effectiveKnownAt": "2026-10-07T09:00:00Z"
+      "effectiveKnownAt": "2026-10-07T09:00:00Z",
+      "terms": [
+        {
+          "termId": "01925efd-91fb-7f99-8f58-39296146bf45",
+          "termNumber": 1,
+          "period": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "state": "SCHEDULED",
+          "productVersion": "1.0",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "currency": "EUR",
+          "producerCode": "SAMPLE_CODE",
+          "paymentPlanRef": "Sample text",
+          "writtenDate": "2026-10-07",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "pol.Policy.getMany": {
       "policies": "unspecified"
@@ -923,6 +944,7 @@
       },
       "acceptanceMode": "SAMPLE_CODE",
       "deadline": "2026-10-07T09:00:00Z",
+      "referred": true,
       "servicingPreview": {
         "annualBefore": {
           "amount": "120.50",
@@ -1285,7 +1307,8 @@
           "treatmentRuleId": "SAMPLE_CODE",
           "treatmentRuleVersion": "SAMPLE_CODE"
         }
-      ]
+      ],
+      "effectiveKnownAt": "2026-10-07T09:00:00Z"
     },
     "pol.Term.timeline": {
       "policy": {
@@ -2529,7 +2552,28 @@
           "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ],
-      "effectiveKnownAt": "2026-10-07T09:00:00Z"
+      "effectiveKnownAt": "2026-10-07T09:00:00Z",
+      "terms": [
+        {
+          "termId": "0192f0d2-cffc-7815-8ba0-61039165e526",
+          "termNumber": 1,
+          "period": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "state": "SCHEDULED",
+          "productVersion": "1.0",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "currency": "EUR",
+          "producerCode": "SAMPLE_CODE",
+          "paymentPlanRef": "Sample text",
+          "writtenDate": "2026-10-07",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "PolicyMoveExecuteRequest": {
       "policyIds": [
@@ -2892,6 +2936,7 @@
       },
       "acceptanceMode": "SAMPLE_CODE",
       "deadline": "2026-10-07T09:00:00Z",
+      "referred": true,
       "servicingPreview": {
         "annualBefore": {
           "amount": "120.50",
@@ -3578,7 +3623,8 @@
           "treatmentRuleId": "SAMPLE_CODE",
           "treatmentRuleVersion": "SAMPLE_CODE"
         }
-      ]
+      ],
+      "effectiveKnownAt": "2026-10-07T09:00:00Z"
     },
     "TermTimelineResponse": {
       "policy": {

@@ -37,7 +37,18 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
             .GroupBy(a => a.InvoiceItemId).Select(g => new { Item = g.Key, Sum = g.Sum(a => a.Amount) })
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var sums = allocated.ToDictionary(a => a.Item, a => a.Sum);
-        return items.ToDictionary(i => i.InvoiceItemId, i => i.Amount - sums.GetValueOrDefault(i.InvoiceItemId));
+        var credited = await CreditedByItemAsync(ids, cancellationToken).ConfigureAwait(false);
+        return items.ToDictionary(i => i.InvoiceItemId, i => i.Amount - sums.GetValueOrDefault(i.InvoiceItemId) - credited.GetValueOrDefault(i.InvoiceItemId));
+    }
+
+    /// <summary>Credit applied against each invoice item by credit notes (REQ-BIL-073): the part of the item the original invoice no longer asks for.</summary>
+    public async Task<Dictionary<Guid, decimal>> CreditedByItemAsync(IReadOnlyCollection<Guid> itemIds, CancellationToken cancellationToken)
+    {
+        var rows = await db.CreditApplications.AsNoTracking()
+            .Where(c => c.TargetInvoiceItemId != null && itemIds.Contains(c.TargetInvoiceItemId.Value))
+            .GroupBy(c => c.TargetInvoiceItemId!.Value).Select(g => new { Item = g.Key, Sum = g.Sum(c => c.Amount) })
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return rows.ToDictionary(r => r.Item, r => r.Sum);
     }
 
     /// <summary>Open amount of an invoice.</summary>
@@ -120,22 +131,24 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
                 rows.Add(row);
                 item.State = Codes.Of(InvoiceItemState.Settled);
                 termsTouched.Add(item.TermId);
-                legs.Add(new PostingLeg(rule.Value, new Money(itemOpen, currency), new LineDimensions
-                {
-                    BillingAccountId = receipt.BillingAccountId,
-                    PolicyId = invoice.PolicyId,
-                    PolicyTermId = item.TermId,
-                    TransactionId = item.TransactionId,
-                    ChargeId = item.ChargeId,
-                    ChargeType = item.ChargeType,
-                    ChargeCategory = item.ChargeCategory,
-                    CoverageCode = item.CoverageCode,
-                    BillMode = PaymentPlans.DirectBill,
-                    InvoiceId = invoice.InvoiceId,
-                    InvoiceItemId = item.InvoiceItemId,
-                    ReceiptId = receipt.ReceiptId,
-                    AllocationId = row.AllocationId,
-                }));
+                legs.Add(new PostingLeg(rule.Value, new Money(itemOpen, currency), ServicingDimensions.Apply(
+                    new LineDimensions
+                    {
+                        BillingAccountId = receipt.BillingAccountId,
+                        PolicyId = invoice.PolicyId,
+                        PolicyTermId = item.TermId,
+                        TransactionId = item.TransactionId,
+                        ChargeId = item.ChargeId,
+                        ChargeType = item.ChargeType,
+                        ChargeCategory = item.ChargeCategory,
+                        CoverageCode = item.CoverageCode,
+                        BillMode = PaymentPlans.DirectBill,
+                        InvoiceId = invoice.InvoiceId,
+                        InvoiceItemId = item.InvoiceItemId,
+                        ReceiptId = receipt.ReceiptId,
+                        AllocationId = row.AllocationId,
+                    },
+                    item.TransactionKind, item.CancellationSource, item.TreatmentRuleId)));
             }
 
             invoice.State = Codes.Of(paid.Value);
@@ -202,7 +215,8 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
             .GroupBy(a => a.InvoiceItemId).Select(g => new { Item = g.Key, Sum = g.Sum(a => a.Amount) })
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var sums = allocated.ToDictionary(a => a.Item, a => a.Sum);
-        return items.GroupBy(i => i.TermId).ToDictionary(g => g.Key, g => g.Sum(i => i.Amount - sums.GetValueOrDefault(i.InvoiceItemId)));
+        var credited = await CreditedByItemAsync(ids, cancellationToken).ConfigureAwait(false);
+        return items.GroupBy(i => i.TermId).ToDictionary(g => g.Key, g => g.Sum(i => i.Amount - sums.GetValueOrDefault(i.InvoiceItemId) - credited.GetValueOrDefault(i.InvoiceItemId)));
     }
 
     /// <summary>

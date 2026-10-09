@@ -175,6 +175,19 @@ internal static class FinanceSeed
     /// <summary>The seed of migration ClaimsPostings: v1 plus the claims chart, catalogue and rule set v2 (SL2-FIN-CLM, D-SL2-08).</summary>
     public const string GrTestV2 = "gr-test.finance.v2";
 
+    /// <summary>
+    /// The seed of migration ServicingPostings: v2 plus the credit, refund and refund-disbursement postings (SL3-FIN-RULES,
+    /// D-SL3-05). Rule set v3 is effective from 2026-10-01 (the MOTOR-GR 1.1 opening, D-SL3-15); v2 stays Active and
+    /// governs the earlier accounting dates, so nothing of slice 2 is superseded or rewritten.
+    /// </summary>
+    public const string GrTestV3 = "gr-test.finance.v3";
+
+    /// <summary>Migration Down of ServicingPostings: v3 superseded (rule rows are append-only, REQ-FIN-070); v2 governs every date again.</summary>
+    public const string SupersedeV3 = """
+        UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 3;
+        """;
+
     /// <summary>Rule set v2 replaces v1 (same effective date, REQ-FIN-052): v1 becomes Superseded; its rows stay (append-only).</summary>
     public const string SupersedeV1 = """
         UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'

@@ -1946,6 +1946,10 @@ paths:
       - PRD-05 l.2129
       - PRD-05 l.789
       x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
+      - code: POL-ERR-VALIDATION
+        status: 422
       - code: POL-ERR-NOTICE-TOO-LATE
         status: 422
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
@@ -2031,6 +2035,8 @@ paths:
       - PRD-05 l.2129
       - PRD-05 l.789
       x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
       - code: POL-ERR-NOTICE-TOO-LATE
         status: 422
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
@@ -2116,6 +2122,12 @@ paths:
       - PRD-05 l.2129
       - PRD-05 l.789
       x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
+      - code: POL-ERR-REBASE-REQUIRED
+        status: 409
+      - code: POL-ERR-GATE-FAILED
+        status: 422
       - code: POL-ERR-NOTICE-TOO-LATE
         status: 422
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
@@ -4763,6 +4775,12 @@ components:
           $ref: ../events/common.schema.json#/$defs/Instant
           description: 'The transaction-time instant the answer was resolved at: min(requested knownAt or now, the policy''s record-time watermark). Always
             set; the UI shows it next to the as-of date (D-SL3-03).'
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermView'
+          description: 'Every term of the policy known at effectiveKnownAt, by term number ascending, each with its state as of validAt (REQ-POL-002).
+            Always set. `term` stays the one valid at validAt (or the nearest).'
       required:
       - policy
       - transactions
@@ -4787,6 +4805,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ChargeLine'
+        effectiveKnownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'The transaction-time instant the answer was resolved at: min(requested knownAt or now, the policy''s record-time watermark). Always
+            set (D-SL3-03, D-SL3-22 follow-up).'
       required:
       - policy
       - term
@@ -5504,6 +5526,9 @@ components:
           $ref: ../events/common.schema.json#/$defs/Code
         deadline:
           $ref: ../events/common.schema.json#/$defs/Instant
+        referred:
+          type: boolean
+          description: True when an open underwriting referral holds the offer back (the job is Quoted but not offered; no RenewalOffered was published)
         servicingPreview:
           $ref: '#/components/schemas/ServicingPreview'
       required:

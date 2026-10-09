@@ -29,6 +29,16 @@ internal sealed class BillingOptions
     [Range(0, 365)]
     public int PayeeCoolingOffDays { get; set; } = 30;
 
+    /// <summary>
+    /// Policyholder type sent with <c>TaxCalculator.treatment</c> (REQ-BIL-079). A technical default: the consumed events
+    /// carry no policyholder type, and the Greece treatment rows do not depend on it.
+    /// </summary>
+    public Market.Contracts.Spi.PolicyholderType TreatmentPolicyholderType { get; set; } = Market.Contracts.Spi.PolicyholderType.Consumer;
+
+    /// <summary>Business basis code sent with <c>TaxCalculator.treatment</c>; technical default, see <see cref="TreatmentPolicyholderType"/>.</summary>
+    [Required]
+    public string TreatmentBusinessBasis { get; set; } = "ESTABLISHMENT";
+
     /// <summary>The configured zone.</summary>
     public TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
 

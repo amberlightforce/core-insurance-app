@@ -35,7 +35,13 @@ internal sealed record PolicySnapshotFacts(
     Guid InsuredPartyId,
     Guid? SegmentId,
     IReadOnlyList<string> CoverageCodes,
-    Guid? TermId = null);
+    Guid? TermId = null,
+    SnapshotSupersessionFacts? Supersession = null);
+
+/// <summary>POL's live <c>supersession</c> metadata of a snapshot ref (D-SL3-03 c): whether a later record replaced the content valid at the same instant, and the successor ref.</summary>
+/// <param name="Superseded">True when the content valid at the same instant now differs.</param>
+/// <param name="SuccessorRef">The ref now valid at that instant (set when superseded).</param>
+internal sealed record SnapshotSupersessionFacts(bool Superseded, string? SuccessorRef);
 
 /// <summary>Outcome of a snapshot read.</summary>
 internal enum SnapshotReadOutcome
@@ -65,6 +71,27 @@ internal interface ICoverageSource
 {
     /// <summary>The snapshot of <paramref name="policyId"/> valid at <paramref name="lossAt"/> and known at <paramref name="knownAt"/>.</summary>
     Task<SnapshotRead> ReadAsync(Guid policyId, Instant lossAt, Instant knownAt, CancellationToken cancellationToken);
+
+    /// <summary>The snapshot a stored <paramref name="snapshotRef"/> names, with POL's live supersession metadata (re-verification, REQ-CLM-057).</summary>
+    Task<SnapshotRead> ReadByRefAsync(string snapshotRef, CancellationToken cancellationToken);
+}
+
+/// <summary>The payment gate of an exposure whose cover is in question (REQ-CLM-049, REQ-CLM-058).</summary>
+internal static class CoverageGuard
+{
+    /// <summary>
+    /// True when the exposure's cover is IN_QUESTION on a claim flagged coverage-in-question and no coverage decision was
+    /// taken: new payments on it are refused. Nothing here clears the state (PITFALLS 6): a coverage decision (a later
+    /// work package, with the owning module's real stored data) is the only way out.
+    /// </summary>
+    public static bool IsInQuestion(Persistence.ClaimRow claim, Persistence.ExposureRow exposure)
+    {
+        ArgumentNullException.ThrowIfNull(claim);
+        ArgumentNullException.ThrowIfNull(exposure);
+        return claim.CoverageInQuestion
+               && exposure.CoverageIndication == Codes.Of(CoverageIndicationCode.InQuestion)
+               && exposure.CoverageDecision == Codes.Of(CoverageDecisionCode.Pending);
+    }
 }
 
 /// <summary>Coverage indications from a snapshot (REQ-CLM-048, REQ-CLM-049).</summary>

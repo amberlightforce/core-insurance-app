@@ -33,7 +33,8 @@ internal sealed class PolicySlice : IAsyncDisposable
     private Sha256Hash? _configurationHash;
 
     public PolicySlice(
-        string connectionString, bool realRatingAndUnderwriting = false, bool allowMissingDraftValidation = true, IReadOnlyDictionary<string, string?>? settings = null)
+        string connectionString, bool realRatingAndUnderwriting = false, bool allowMissingDraftValidation = true, IReadOnlyDictionary<string, string?>? settings = null,
+        Action<IServiceCollection>? configureServices = null)
     {
         var all = new Dictionary<string, string?>(settings ?? new Dictionary<string, string?>()) { ["Policy:AllowMissingDraftValidation"] = allowMissingDraftValidation ? "true" : "false" };
         _root = new ApiHostFactory(connectionString, settings: all);
@@ -46,6 +47,11 @@ internal sealed class PolicySlice : IAsyncDisposable
                 services.AddSingleton<IRatingRateService>(Rating);
                 services.AddSingleton<IUnderwritingRulesService>(Underwriting);
             }));
+        if (configureServices is not null)
+        {
+            Factory = Factory.WithWebHostBuilder(builder => builder.ConfigureTestServices(configureServices));
+        }
+
         Client = Factory.CreateClient();
         Rating.Setup("rat.Rate.rate", call => Rate((RateRateRequest)call.Arguments[0]!));
         AcceptAll();

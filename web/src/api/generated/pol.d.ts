@@ -1346,6 +1346,16 @@ export interface components {
             legalStatus?: components["schemas"]["Code"];
             /** @description True when the tax or levy value is not Settled (refused in production, D-REG-02) */
             provisional?: boolean;
+            /** @description Transaction kind of the line (servicing jobs; always set once frozen on a servicing transaction) */
+            transactionKind?: components["schemas"]["TransactionKindCode"];
+            /** @description Cancellation source (cancellation transactions only) */
+            cancellationSource?: components["schemas"]["CancellationSourceCode"];
+            /** @description Treatment action of a tax or levy line on a servicing transaction */
+            treatmentAction?: components["schemas"]["TreatmentActionCode"];
+            /** @description Treatment rule id (tax and levy lines of servicing transactions; always set there) */
+            treatmentRuleId?: components["schemas"]["Code"];
+            /** @description Treatment rule version (always set with treatmentRuleId) */
+            treatmentRuleVersion?: components["schemas"]["Code"];
         };
         /** @description UW issue as returned by evaluate (REQ-UW-001) */
         UwIssue: {
@@ -1427,6 +1437,8 @@ export interface components {
                 /** @description Text in the request language */
                 message: components["schemas"]["Text"];
             }[];
+            /** @description Present for servicing jobs (change, cancellation, renewal); absent for new business */
+            servicingPreview?: components["schemas"]["ServicingPreview"];
         };
         /** @description pol.Job.requote request. PRD inputs: "jobId, versionNo" */
         JobRequoteRequest: {
@@ -1537,6 +1549,8 @@ export interface components {
             }[];
             /** @description doc.ProofOfCover.issue result */
             coverNoteDocumentId?: components["schemas"]["Uuid"];
+            /** @description The preview the transaction was bound with (servicing jobs only); equals the frozen charge lines */
+            servicingPreview?: components["schemas"]["ServicingPreview"];
         };
         /**
          * @description PolicyTerm state (contract §3.2.4, D-CON-02); Scheduled → InForce is derived on read (REQ-POL-131)
@@ -1650,6 +1664,8 @@ export interface components {
             transactions: components["schemas"]["TransactionView"][];
             /** @description Charge lines of the term as known at knownAt */
             charges: components["schemas"]["ChargeLine"][];
+            /** @description The transaction-time instant the answer was resolved at: min(requested knownAt or now, the policy's record-time watermark). Always set; the UI shows it next to the as-of date (D-SL3-03). */
+            effectiveKnownAt?: components["schemas"]["Instant"];
         };
         /** @description pol.Term.get result as of validAt / knownAt. PRD outputs: "policy, term, segment, risk tree" */
         TermGetResponse: {
@@ -1741,41 +1757,165 @@ export interface components {
         JobListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["JobListItem"][];
         };
-        /** @description pol.PolicyChange.create request. PRD inputs: "policyId, effectiveAt, description" */
+        /**
+         * @description Cancellation source (REQ-POL-205, shared code list R-84, held by MKT as the code list `mkt.cancellation_source`, constants in `CoreIns.Modules.Market.Contracts.CancellationSources`). An open Code, so a pack can add a source. The source decides the refund method (PFC REQ-PFC-134) and the tax treatment (`TaxCalculator.treatment`).
+         * @example Policyholder
+         * @example Insurer
+         * @example NonPayment
+         * @example DistanceWithdrawal
+         * @example LongTermWithdrawal
+         * @example Objection
+         * @example Statutory
+         */
+        CancellationSourceCode: string;
+        /**
+         * @description STANDARD = cancellation from effectiveAt with the refund method of the source. FLAT = flat cancellation at the term start, allowed only while the term is Scheduled (REQ-POL-217); the credit equals the written amount exactly. VOID (withdrawal) is a separate operation and is not created here.
+         * @enum {string}
+         */
+        CancellationKind: "STANDARD" | "FLAT";
+        /**
+         * @description Transaction kind of a charge or servicing line: the MKT `TaxTransactionKind` values (PRD-17 Â§9.4.4). `ENDORSEMENT` alone is invalid. A renewal term bound by POL is NEW_BUSINESS.
+         * @enum {string}
+         */
+        TransactionKindCode: "NEW_BUSINESS" | "ENDORSEMENT_DEBIT" | "ENDORSEMENT_CREDIT" | "CANCELLATION" | "DISTANCE_WITHDRAWAL_VOID" | "VOID" | "RETURN_PREMIUM" | "REINSTATEMENT" | "FEE" | "REFUND";
+        /**
+         * @description Tax treatment action returned by MKT `TaxCalculator.treatment` (REQ-MKT-330)
+         * @enum {string}
+         */
+        TreatmentActionCode: "APPLY" | "REDUCE_PRO_RATA" | "REVERSE_AS_VOID" | "KEEP_NOT_REDUCED" | "INSURER_BEARS";
+        /** @description One prorated line of a servicing preview: a charge of one element and charge type, prorated over the affected period (D-SL3-04, `rat.Proration.prorate`). The amount is signed: negative for a credit. */
+        ServicingProratedLine: {
+            elementLocator: components["schemas"]["Text"];
+            coverageCode: components["schemas"]["Code"];
+            chargeType: components["schemas"]["Code"];
+            /** @description PREMIUM, TAX or LEVY */
+            chargeCategory: components["schemas"]["Code"];
+            /** @description The affected period (half-open, Europe/Athens dates) */
+            period: components["schemas"]["DatePeriod"];
+            /** @description Whole Europe/Athens calendar days of the affected period */
+            days: number;
+            /** @description Days of the term (365 or 366) */
+            termDays: number;
+            /** @description days / termDays, the fraction applied to the annual amount */
+            fraction: components["schemas"]["Decimal"];
+            /** @description The annual amount that was prorated */
+            annualAmount: components["schemas"]["Money"];
+            /** @description Prorated amount, signed (negative = credit), rounded by the MKT premium rule */
+            amount: components["schemas"]["Money"];
+        };
+        /** @description One tax or levy line of a servicing preview with its treatment (PRD-17 Â§7.5). Always carries the rule that decided it. A line whose rule is not Settled is `provisional` (refused in Production, D-REG-02). */
+        ServicingTaxLine: {
+            elementLocator: components["schemas"]["Text"];
+            chargeType: components["schemas"]["Code"];
+            /** @description TAX, LEVY or STAMP */
+            chargeCategory: components["schemas"]["Code"];
+            /** @description Signed amount after the treatment (negative = credit; zero when the action keeps the tax) */
+            amount: components["schemas"]["Money"];
+            treatmentAction: components["schemas"]["TreatmentActionCode"];
+            /** @description Treatment rule id from MKT (always set) */
+            ruleId: components["schemas"]["Code"];
+            /** @description Treatment rule version from MKT (always set) */
+            ruleVersion: components["schemas"]["Code"];
+            /** @description Legal status of the rule (Settled, Pending or PendingOpinion; always set) */
+            legalStatus: components["schemas"]["Code"];
+            /** @description True when legalStatus is not Settled (always set) */
+            provisional: boolean;
+            legalSourceRef?: components["schemas"]["Text"];
+        };
+        /** @description What a servicing job (change, cancellation, renewal) would do to the premium (REQ-POL-190, REQ-POL-206). Present on the quote and bind responses of servicing jobs and on `pol.Cancellation.create`; absent for new business. All money fields share one currency. Exactly one of refundDue and additionalDue is non-zero unless the change is neutral; both are always set. */
+        ServicingPreview: {
+            /** @description Annual premium before the change */
+            annualBefore: components["schemas"]["Money"];
+            /** @description Annual premium after the change */
+            annualAfter: components["schemas"]["Money"];
+            /** @description Prorated charge lines per element x charge type */
+            proratedLines: components["schemas"]["ServicingProratedLine"][];
+            taxLines: components["schemas"]["ServicingTaxLine"][];
+            /** @description Signed sum of the premium lines */
+            premiumChange: components["schemas"]["Money"];
+            /** @description Signed sum of the tax and levy lines after treatment */
+            taxChange: components["schemas"]["Money"];
+            /** @description premiumChange + taxChange, signed */
+            totalChange: components["schemas"]["Money"];
+            /** @description Amount due back to the customer (zero when none); the credit before BIL netting */
+            refundDue: components["schemas"]["Money"];
+            /** @description Additional amount due from the customer (zero when none) */
+            additionalDue: components["schemas"]["Money"];
+            transactionKind?: components["schemas"]["TransactionKindCode"];
+            cancellationSource?: components["schemas"]["CancellationSourceCode"];
+            /** @description Refund method of the source from the term's pinned artefact (cancellation only) */
+            refundMethod?: components["schemas"]["Code"];
+            /** @description MKT configuration hash the tax lines were resolved under */
+            configurationHash?: components["schemas"]["Sha256"];
+            /** @description True when any tax line is provisional (always set) */
+            provisional: boolean;
+        };
+        /** @description A transaction of the term in the timeline (REQ-POL-002, REQ-POL-085) */
+        TimelineTransaction: {
+            transactionId: components["schemas"]["Uuid"];
+            /** @description Transaction kind (ISSUANCE, CHANGE, CANCELLATION, ...) */
+            kind: components["schemas"]["Code"];
+            /** @description Gap-free sequence within the term */
+            sequence: number;
+            /** @description Valid time of the transaction */
+            effectiveAt: components["schemas"]["Instant"];
+            /** @description Transaction time (knownAt) of the transaction */
+            recordedAt: components["schemas"]["Instant"];
+            /** @description Signed premium change of the transaction */
+            premiumChange: components["schemas"]["Money"];
+            /** @description True when a later transaction reversed this one */
+            reversed: boolean;
+            jobId?: components["schemas"]["Uuid"];
+        };
+        /** @description Live metadata beside the immutable snapshot content (REQ-POL-007, D-SL3-03c). Computed at read time by comparing the content hash at (validAt, current watermark) with the content hash of the ref; a different segment id with identical content is NOT superseded. Only this object can change between two reads of the same ref. */
+        SnapshotSupersession: {
+            /** @description Always set */
+            superseded: boolean;
+            /** @description Snapshot ref of the content now valid at validAt; present only when superseded */
+            successorRef?: string;
+            /** @description Transaction time at which the content was superseded; present only when superseded */
+            supersededAt?: components["schemas"]["Instant"];
+        };
+        /** @description pol.PolicyChange.create request (REQ-POL-190). PRD inputs: "policyId, effectiveAt, description". Effective-date limits and the in-sequence guard apply (D-SL3-02). */
         PolicyChangeCreateRequest: {
-            /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "description" */
-            description?: components["schemas"]["Unspecified"];
+            policyId: components["schemas"]["Uuid"];
+            /** @description Effective time of the change (valid time) */
+            effectiveAt: components["schemas"]["Instant"];
+            /** @description Free-text description of the change; no personal data */
+            description?: components["schemas"]["Text"];
         };
-        /** @description pol.PolicyChange.create result. PRD outputs: "jobId" */
+        /** @description pol.PolicyChange.create result. PRD outputs: "jobId". The job is the change draft; it is edited with updateDraft, priced with quote and bound with bind. */
         PolicyChangeCreateResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
+            jobId: components["schemas"]["Uuid"];
+            /** @description DRAFT on creation (always set) */
+            state: components["schemas"]["JobStateCode"];
+            /** @description The term the change applies to */
+            termId: components["schemas"]["Uuid"];
+            /** @description Head transaction the job was based on; bind refuses with POL-ERR-PREEMPTED when the head moved */
+            baseTransactionId: components["schemas"]["Uuid"];
         };
-        /** @description pol.Cancellation.create request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef" */
+        /** @description pol.Cancellation.create request (REQ-POL-012, REQ-POL-205..211). PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef". With dryRun it returns the servicing preview and creates nothing. */
         CancellationCreateRequest: {
-            /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "evidenceRefs" */
-            evidenceRefs?: components["schemas"]["Unspecified"];
-            /** @description PRD: "requestRef" */
-            requestRef?: components["schemas"]["Unspecified"];
+            policyId: components["schemas"]["Uuid"];
+            source: components["schemas"]["CancellationSourceCode"];
+            /** @description Reason code from the configured list (REQ-POL-205); PRD name "reason" */
+            reasonCode: components["schemas"]["Code"];
+            /** @description Effective time of the cancellation. Ignored for kind FLAT, which takes the term start. */
+            effectiveAt: components["schemas"]["Instant"];
+            kind: components["schemas"]["CancellationKind"];
+            /** @description Evidence references (document ids); no personal data */
+            evidenceRefs?: components["schemas"]["Text"][];
+            /** @description Reference of the customer request (channel message or document id); no personal data */
+            requestRef?: components["schemas"]["Text"];
         };
-        /** @description pol.Cancellation.create result. PRD outputs: "jobId, refund preview" */
+        /** @description pol.Cancellation.create result. PRD outputs: "jobId, refund preview". The preview is the servicing preview with refundDue. */
         CancellationCreateResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "refund preview" */
-            refundPreview?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            state: components["schemas"]["JobStateCode"];
+            kind: components["schemas"]["CancellationKind"];
+            /** @description The effective time used (the term start for FLAT) */
+            effectiveAt: components["schemas"]["Instant"];
+            servicingPreview: components["schemas"]["ServicingPreview"];
         };
         /** @description pol.Cancellation.schedule request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef" */
         CancellationScheduleRequest: {
@@ -1907,53 +2047,71 @@ export interface components {
             /** @description PRD: "jobId" */
             jobId?: components["schemas"]["Uuid"];
         };
-        /** @description pol.Renewal.create request. PRD inputs: "termId; offer; acceptance evidence; reason" */
+        /** @description pol.Renewal.create request (REQ-POL-245, REQ-POL-246). Creates the renewal job of the expiring term ("Renew now" inside the renewal window). PRD inputs: "termId; offer; acceptance evidence; reason", narrowed per operation. */
         RenewalCreateRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description The expiring term */
+            termId: components["schemas"]["Uuid"];
+            /** @description Reason or note; no personal data */
+            reason?: components["schemas"]["Text"];
         };
         /** @description pol.Renewal.create result. PRD outputs: "job" */
         RenewalCreateResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            state: components["schemas"]["JobStateCode"];
+            expiringTermId: components["schemas"]["Uuid"];
+            renewalProductCode?: components["schemas"]["Code"];
+            /** @description Product version resolved at the new term start */
+            renewalProductVersion?: components["schemas"]["ProductVersionNumber"];
+            /** @description Present once the renewal has been rated */
+            servicingPreview?: components["schemas"]["ServicingPreview"];
         };
-        /** @description pol.Renewal.offer request. PRD inputs: "termId; offer; acceptance evidence; reason" */
+        /** @description pol.Renewal.offer request (REQ-POL-249, REQ-POL-250). Issues the offer of a rated renewal job. */
         RenewalOfferRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description The renewal job */
+            jobId: components["schemas"]["Uuid"];
+            /** @description The expiring term */
+            termId: components["schemas"]["Uuid"];
+            /** @description Acceptance mode; defaults to the configured mode */
+            acceptanceMode?: components["schemas"]["Code"];
+            reason?: components["schemas"]["Text"];
         };
-        /** @description pol.Renewal.offer result. PRD outputs: "job" */
+        /** @description pol.Renewal.offer result. PRD outputs: "job". Mirrors the RenewalOffered event. */
         RenewalOfferResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            state: components["schemas"]["JobStateCode"];
+            offerVersion: components["schemas"]["NonNegativeInt"];
+            premiumSummary: components["schemas"]["PremiumSummary"];
+            acceptanceMode: components["schemas"]["Code"];
+            deadline: components["schemas"]["Instant"];
+            servicingPreview?: components["schemas"]["ServicingPreview"];
         };
-        /** @description pol.Renewal.accept request. PRD inputs: "termId; offer; acceptance evidence; reason" */
+        /** @description pol.Renewal.accept request (REQ-POL-253, explicit acceptance). Accepting binds the new term n+1 as Scheduled. */
         RenewalAcceptRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description The renewal job */
+            jobId: components["schemas"]["Uuid"];
+            /** @description The expiring term */
+            termId: components["schemas"]["Uuid"];
+            /** @description Channel of the acceptance (STAFF in slice 3) */
+            channel: components["schemas"]["Code"];
+            /** @description When the customer accepted (business time) */
+            acceptedAt: components["schemas"]["Instant"];
+            /** @description Evidence reference (document or message id); no personal data */
+            acceptanceEvidence?: components["schemas"]["Text"];
+            reason?: components["schemas"]["Text"];
         };
-        /** @description pol.Renewal.accept result. PRD outputs: "job" */
+        /** @description pol.Renewal.accept result. PRD outputs: "job". The new term is bound; mirrors the RenewalBound event. */
         RenewalAcceptResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            state: components["schemas"]["JobStateCode"];
+            newTermId: components["schemas"]["Uuid"];
+            newTermNumber: number;
+            /** @description The expiring term */
+            predecessorTermId: components["schemas"]["Uuid"];
+            transactionId: components["schemas"]["Uuid"];
+            /** @description SCHEDULED until the term start */
+            termState: components["schemas"]["TermStateCode"];
+            recordedAt: components["schemas"]["Instant"];
+            chargeDeltas?: components["schemas"]["ChargeLine"][];
         };
         /** @description pol.Renewal.decline request. PRD inputs: "termId; offer; acceptance evidence; reason" */
         RenewalDeclineRequest: {
@@ -2043,16 +2201,14 @@ export interface components {
             /** @description PRD: "re-point map" */
             rePointMap?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Term.timeline result. PRD outputs: "policy, term, segment, risk tree" */
+        /** @description pol.Term.timeline result (REQ-POL-002, REQ-POL-085): the term and its transactions in sequence order, as known at effectiveKnownAt. */
         TermTimelineResponse: {
-            /** @description PRD: "policy" */
-            policy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "term" */
-            term?: components["schemas"]["Unspecified"];
-            /** @description PRD: "segment" */
-            segment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "risk tree" */
-            riskTree?: components["schemas"]["Unspecified"];
+            policy: components["schemas"]["PolicyView"];
+            term: components["schemas"]["TermView"];
+            /** @description Ordered by sequence ascending */
+            transactions: components["schemas"]["TimelineTransaction"][];
+            /** @description min(requested knownAt or now, the policy's record-time watermark); always set (D-SL3-03) */
+            effectiveKnownAt: components["schemas"]["Instant"];
         };
         /** @description pol.Snapshot.get result (REQ-POL-007): snapshot ref + content. content is absent when the policy is not in force at validAt. */
         SnapshotGetResponse: {
@@ -2073,6 +2229,10 @@ export interface components {
             notInForceReason?: "NO_TERM_AT_INSTANT" | "TERM_NOT_IN_FORCE";
             policy: components["schemas"]["SnapshotPolicy"];
             content?: components["schemas"]["SnapshotContent"];
+            /** @description min(requested knownAt or now, the policy's record-time watermark). Always set; equals knownAt, which is the effective value and is encoded in snapshotRef. Outside `content`. */
+            effectiveKnownAt?: components["schemas"]["Instant"];
+            /** @description Always set, outside `content` and its hash (D-SL3-03c) */
+            supersession?: components["schemas"]["SnapshotSupersession"];
         };
         SnapshotPolicy: {
             policyId: components["schemas"]["Uuid"];
@@ -2313,6 +2473,13 @@ export interface components {
          * @enum {string}
          */
         BlockingPoint: "PRE_QUOTE" | "PRE_BIND" | "PRE_ISSUE" | "NON_BLOCKING";
+        /** Format: date */
+        LocalDate: string;
+        /** @description Date period; `to` is null when open-ended. */
+        DatePeriod: {
+            from: components["schemas"]["LocalDate"];
+            to: components["schemas"]["LocalDate"] | null;
+        };
         /**
          * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
          *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
@@ -2326,8 +2493,13 @@ export interface components {
             nextCursor: string | null;
             limit?: number;
         };
-        /** Format: date */
-        LocalDate: string;
+        NonNegativeInt: number;
+        /** @description PRD-05 §8.1: premium, taxes, total. */
+        PremiumSummary: {
+            premium: components["schemas"]["Money"];
+            taxes: components["schemas"]["Money"];
+            total: components["schemas"]["Money"];
+        };
         /** @description ISO 3166-1 alpha-2 code. */
         CountryCode: string;
         /** @description Time window [from, to); `to` is null when open-ended. */
@@ -3254,6 +3426,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             429: components["responses"]["TooManyRequests"];
@@ -3306,10 +3479,12 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     "pol.Cancellation.schedule": {
@@ -3715,6 +3890,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -3766,6 +3942,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -3817,6 +3994,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -4206,7 +4384,7 @@ export interface operations {
     };
     "pol.Term.timeline": {
         parameters: {
-            query?: {
+            query: {
                 /**
                  * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
                  *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
@@ -4218,6 +4396,9 @@ export interface operations {
                  *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
                  */
                 knownAt?: components["parameters"]["KnownAt"];
+                policyId: components["schemas"]["Uuid"];
+                /** @description The term; defaults to the term valid at validAt */
+                termId?: components["schemas"]["Uuid"];
             };
             header?: {
                 /**
