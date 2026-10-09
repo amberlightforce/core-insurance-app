@@ -10,7 +10,9 @@ import {
   KeyValueList,
   TextField,
   announce,
+  type KeyValueItem,
 } from '../../../design-system';
+import { currencyFractionDigits, fromMinor, toMinor } from '../../../format';
 import { LinkButton } from '../../staff/LinkButton';
 import { PageHeader, Section } from '../../staff/PageHeader';
 import { ProblemBanner } from '../../staff/ProblemBanner';
@@ -204,7 +206,11 @@ function RefundDetails({ refund }: { refund: RefundView }) {
   const [outcome, setOutcome] = useState<RefundDecideResponse | null>(null);
   const [resubmitted, setResubmitted] = useState(false);
   const decided = refund.decidedAt !== undefined || refund.disbursementId !== undefined;
-  const nettedTotal = refund.netting.reduce((sum, l) => sum + Number(l.amount.amount), 0);
+  const fractionDigits = currencyFractionDigits(currency);
+  const nettedTotal = refund.netting.reduce(
+    (sum, l) => sum + toMinor(l.amount.amount, fractionDigits),
+    0n,
+  );
 
   return (
     <div className={styles.stack}>
@@ -227,63 +233,67 @@ function RefundDetails({ refund }: { refund: RefundView }) {
         <Section title={t('refunds.detail.summary')}>
           <KeyValueList
             aria-label={t('refunds.detail.summary')}
-            items={[
-              {
-                id: 'amount',
-                label: t('refunds.detail.amount'),
-                value: fmt.money(refund.amount),
-                kind: 'money',
-              },
-              {
-                id: 'approval',
-                label: t('refunds.detail.approvalState'),
-                value: t(`refunds.approval.${refund.approvalState}`),
-              },
-              {
-                id: 'reason',
-                label: t('refunds.detail.reason'),
-                value: refund.reasonCode
-                  ? t(`refunds.propose.reasons.${refund.reasonCode}`, { defaultValue: refund.reasonCode })
-                  : null,
-              },
-              {
-                id: 'method',
-                label: t('refunds.detail.payoutMethod'),
-                value: refund.payoutMethod,
-                kind: 'mono',
-              },
-              {
-                id: 'requestedBy',
-                label: t('refunds.detail.requestedBy'),
-                value: refund.requestedBy,
-              },
-              {
-                id: 'proposedAt',
-                label: t('refunds.detail.proposedAt'),
-                value: fmt.dateTime(refund.proposedAt),
-              },
-              {
-                id: 'decidedBy',
-                label: t('refunds.detail.decidedBy'),
-                value: refund.decidedBy ?? null,
-              },
-              {
-                id: 'decidedAt',
-                label: t('refunds.detail.decidedAt'),
-                value: refund.decidedAt ? fmt.dateTime(refund.decidedAt) : null,
-              },
-              {
-                id: 'comment',
-                label: t('refunds.detail.decisionComment'),
-                value: refund.decisionComment ?? null,
-              },
-              {
-                id: 'disbursement',
-                label: t('refunds.detail.disbursement'),
-                value: refund.disbursementId ?? null,
-                kind: 'mono',
-              },
-            ].filter((item) => decided || !decisionIds.includes(item.id))}
+            items={(
+              [
+                {
+                  id: 'amount',
+                  label: t('refunds.detail.amount'),
+                  value: fmt.money(refund.amount),
+                  kind: 'money',
+                },
+                {
+                  id: 'approval',
+                  label: t('refunds.detail.approvalState'),
+                  value: t(`refunds.approval.${refund.approvalState}`),
+                },
+                {
+                  id: 'reason',
+                  label: t('refunds.detail.reason'),
+                  value: refund.reasonCode
+                    ? t(`refunds.propose.reasons.${refund.reasonCode}`, {
+                        defaultValue: refund.reasonCode,
+                      })
+                    : null,
+                },
+                {
+                  id: 'method',
+                  label: t('refunds.detail.payoutMethod'),
+                  value: refund.payoutMethod,
+                  kind: 'mono',
+                },
+                {
+                  id: 'requestedBy',
+                  label: t('refunds.detail.requestedBy'),
+                  value: refund.requestedBy,
+                },
+                {
+                  id: 'proposedAt',
+                  label: t('refunds.detail.proposedAt'),
+                  value: fmt.dateTime(refund.proposedAt),
+                },
+                {
+                  id: 'decidedBy',
+                  label: t('refunds.detail.decidedBy'),
+                  value: refund.decidedBy ?? null,
+                },
+                {
+                  id: 'decidedAt',
+                  label: t('refunds.detail.decidedAt'),
+                  value: refund.decidedAt ? fmt.dateTime(refund.decidedAt) : null,
+                },
+                {
+                  id: 'comment',
+                  label: t('refunds.detail.decisionComment'),
+                  value: refund.decisionComment ?? null,
+                },
+                {
+                  id: 'disbursement',
+                  label: t('refunds.detail.disbursement'),
+                  value: refund.disbursementId ?? null,
+                  kind: 'mono',
+                },
+              ] satisfies KeyValueItem[]
+            ).filter((item) => decided || !decisionIds.includes(item.id))}
           />
         </Section>
         <Section title={t('refunds.detail.payee')}>
@@ -315,7 +325,8 @@ function RefundDetails({ refund }: { refund: RefundView }) {
         <NettingTable lines={refund.netting} currency={currency} />
         {refund.netting.length > 0 ? (
           <p className={styles.muted}>
-            {t('refunds.netting.total')}: {fmt.money({ amount: nettedTotal.toFixed(2), currency })}
+            {t('refunds.netting.total')}:{' '}
+            {fmt.money({ amount: fromMinor(nettedTotal, fractionDigits), currency })}
           </p>
         ) : null}
       </Section>
