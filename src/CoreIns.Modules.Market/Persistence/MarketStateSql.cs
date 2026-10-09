@@ -30,6 +30,8 @@ internal static class MarketStateSql
         -- Empty lock target: relation locks are transaction-scoped, unlike advisory locks which can also be session-scoped.
         -- UPDATE is granted only to allow LOCK TABLE; the immutable state and version tables retain SELECT/INSERT-only grants.
         CREATE TABLE mkt.config_state_writer_lock (unused integer);
+        -- Seals genesis activation rows to the transaction that actually creates genesis, not any later caller of the app role.
+        ALTER TABLE mkt.config_state ADD COLUMN created_txid bigint NOT NULL DEFAULT txid_current();
 
         CREATE FUNCTION mkt.reject_state_change() RETURNS trigger LANGUAGE plpgsql AS $fn$
         BEGIN
@@ -77,6 +79,8 @@ internal static class MarketStateSql
                 RAISE EXCEPTION 'mkt.config_state activation instants never run backwards (% < %)', NEW.activated_at, newest_at
                     USING ERRCODE = 'restrict_violation';
             END IF;
+            -- Never trust a supplied transaction marker.
+            NEW.created_txid := txid_current();
             RETURN NEW;
         END
         $fn$;
@@ -99,7 +103,15 @@ internal static class MarketStateSql
                 -- The one row born active: the genesis activation the release writes for the state it created, never an approval.
                 IF NEW.status = 'ACTIVE' AND NEW.kind = 'ACTIVATE' AND NEW.requested_by = 'system:genesis' AND NEW.decided_by = 'system:genesis'
                    AND NEW.approval_request_id IS NULL AND NEW.activated_at IS NOT NULL AND NEW.supersedes_id IS NULL
-                   AND EXISTS (SELECT 1 FROM mkt.config_state WHERE hash = NEW.resulting_hash AND cause = 'GENESIS') THEN
+                   AND EXISTS (
+                       SELECT 1 FROM mkt.config_state s
+                        WHERE s.hash = NEW.resulting_hash AND s.cause = 'GENESIS'
+                          AND s.created_txid = txid_current() AND s.activated_at = NEW.activated_at
+                          AND s.manifest->'packVersions' @> jsonb_build_array(jsonb_build_object('packId', NEW.pack_id, 'version', NEW.version)))
+                   AND EXISTS (SELECT 1 FROM mkt.legal_entity e WHERE e.legal_entity_id = NEW.legal_entity_id AND e.pack_id = NEW.pack_id)
+                   AND NOT EXISTS (
+                       SELECT 1 FROM mkt.pack_activation a
+                        WHERE a.legal_entity_id = NEW.legal_entity_id AND a.pack_id = NEW.pack_id AND a.requested_by = 'system:genesis') THEN
                     RETURN NEW;
                 END IF;
                 RAISE LOG 'SECURITY: mkt.pack_activation inserted as % (kind %) by role % refused', NEW.status, NEW.kind, current_user;

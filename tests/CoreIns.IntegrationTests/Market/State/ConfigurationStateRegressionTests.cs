@@ -74,6 +74,29 @@ public sealed class ConfigurationStateRegressionTests(PostgresFixture database) 
     }
 
     [Theory]
+    [InlineData("0.2.0")]
+    [InlineData("0.1.0")]
+    public async Task Genesis_exception_cannot_be_reused_to_fabricate_active_rows_later(string version)
+    {
+        using var states = StateHarness.States(database.AppConnectionString);
+        await states.EnsureGenesisAsync(Ct);
+        await using var source = NpgsqlDataSource.Create(database.AppConnectionString);
+        await using (var count = source.CreateCommand("SELECT count(*) FROM mkt.pack_activation WHERE requested_by = 'system:genesis' AND status = 'ACTIVE'"))
+        {
+            ((long)(await count.ExecuteScalarAsync(Ct))!).ShouldBeGreaterThan(0, "legitimate initial genesis activations succeeded");
+        }
+        await using var forged = source.CreateCommand("""
+            INSERT INTO mkt.pack_activation
+                (id, legal_entity_id, pack_id, version, kind, status, requested_by, decided_by, activated_at, resulting_hash, created_at)
+            SELECT gen_random_uuid(), legal_entity_id, pack_id, @version, 'ACTIVATE', 'ACTIVE', 'system:genesis', 'system:genesis', activated_at, resulting_hash, created_at
+            FROM mkt.pack_activation WHERE requested_by = 'system:genesis' AND pack_id = 'gr' LIMIT 1
+            """);
+        forged.Parameters.AddWithValue("version", version);
+        var ex = await Should.ThrowAsync<PostgresException>(async () => await forged.ExecuteNonQueryAsync(Ct));
+        ex.SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation);
+    }
+
+    [Theory]
     [InlineData("/health/live", true)]
     [InlineData("/health/ready", true)]
     [InlineData("/api/pol/v1/jobs", false)]
