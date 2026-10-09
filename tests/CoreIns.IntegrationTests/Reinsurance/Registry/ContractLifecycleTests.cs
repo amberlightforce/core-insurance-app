@@ -55,6 +55,66 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
         decimal.Parse(item.Text("layers.1.limit.amount"), CultureInfo.InvariantCulture).ShouldBe(750000m);
     }
 
+    [Theory]
+    [InlineData(Accountant)]
+    [InlineData(Manager)]
+    public async Task Exact_RI_roles_can_read_the_real_catalogue_and_reinsurer_picker_without_write_permissions(string role)
+    {
+        var slice = new RegistrySlice(database);
+        await using var _ = slice;
+        var leadName = "Synthetic RI Read " + Guid.NewGuid().ToString("N")[..6];
+        var lead = await slice.OrganisationAsync(leadName);
+        var follow = await slice.OrganisationAsync("Synthetic RI Follow " + Guid.NewGuid().ToString("N")[..6]);
+        var (imported, import) = await Product.ProductApi.ImportAsync(slice.Client, Product.ProductApi.Seed());
+        imported.StatusCode.ShouldBeOneOf(HttpStatusCode.Created, HttpStatusCode.OK);
+        var (resolved, resolution) = await Product.ProductApi.ResolveAsync(slice.Client, "MOTOR-GR", "STAFF", "2026-02-10", roles: role);
+        resolved.StatusCode.ShouldBe(HttpStatusCode.OK, resolution?.ToJsonString());
+        resolution.Text("artefactHash").ShouldBe(import.Text("artefactHash"));
+        var (catalogued, catalogue) = await slice.SendAsync(HttpMethod.Get, $"/api/pfc/v1/catalogue/{resolution.Text("artefactHash")}?scope=coverages", roles: role);
+        catalogued.StatusCode.ShouldBe(HttpStatusCode.OK, catalogue?.ToJsonString());
+        catalogue!["coverages"]!.AsArray().Select(coverage => coverage!.Text("code")).ShouldContain("OWN-DAMAGE");
+        var (found, search) = await slice.SendAsync(HttpMethod.Post, "/api/pty/v1/parties/search", new { name = leadName }, roles: role);
+        found.StatusCode.ShouldBe(HttpStatusCode.OK, search?.ToJsonString());
+        search!["items"]!.AsArray().Select(party => party!.Text("partyId")).ShouldContain(lead);
+        (await slice.SendAsync(HttpMethod.Get, $"/api/pty/v1/parties/{lead}", roles: role)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        // Read grants must never turn the RI roles into product importers or party writers.
+        (await Product.ProductApi.ImportAsync(slice.Client, Product.ProductApi.Seed("DENIED-RI"), roles: role)).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        (await slice.SendAsync(HttpMethod.Post, "/api/pty/v1/parties", new { partyType = "ORGANISATION", organisation = new { legalName = "Denied RI Writer" } }, roles: role)).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        if (role == Accountant)
+        {
+            var (_, _, created) = await slice.CreateAsync(Body("MOTOR-GR", "OWN-DAMAGE", lead, follow));
+            created.Text("contract.scope.productCodes.0").ShouldBe("MOTOR-GR");
+            created.Text("contract.scope.coverageCodes.0").ShouldBe("OWN-DAMAGE");
+        }
+    }
+
+    [Theory]
+    [InlineData("700000.00")]
+    [InlineData("800000.00")]
+    public async Task REQ_RI_037_Non_contiguous_layers_are_refused_on_create_and_draft_update(string attachment)
+    {
+        var (slice, lead, follow) = await NewSliceAsync();
+        await using var _ = slice;
+        var body = Body(NewProduct(), "OD", lead, follow);
+        var first = body["layers"]![0]!.DeepClone();
+        first["attachment"] = Money("250000.00");
+        var second = first.DeepClone();
+        second["layerNo"] = 2;
+        second["attachment"] = Money(attachment);
+        var layers = new JsonArray(first, second);
+        var invalid = body.DeepClone().AsObject();
+        invalid["layers"] = layers.DeepClone();
+        var (refused, error) = await slice.SendAsync(HttpMethod.Post, "/api/ri/v1/contracts", invalid);
+        refused.StatusCode.ShouldBe(HttpStatusCode.BadRequest, error?.ToJsonString());
+        error.Text("code").ShouldBe("RI-ERR-VALIDATION");
+        var (id, version, _) = await slice.CreateAsync(body);
+        var (update, updateError) = await slice.SendAsync(HttpMethod.Patch, $"/api/ri/v1/contracts/{id}", new { expectedRecordVersion = version, layers });
+        update.StatusCode.ShouldBe(HttpStatusCode.BadRequest, updateError?.ToJsonString());
+        updateError.Text("code").ShouldBe("RI-ERR-VALIDATION");
+        (await slice.GetAsync(id)).Text("contract.recordVersion").ShouldBe(version.ToString(CultureInfo.InvariantCulture));
+    }
+
     [Fact]
     public async Task REQ_RI_030_031_032_056_057_058_231_Create_submit_and_approve_by_another_person_activates_the_treaty()
     {

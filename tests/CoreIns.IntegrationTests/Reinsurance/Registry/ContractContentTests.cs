@@ -21,6 +21,29 @@ public sealed class ContractContentTests
         ContractRules.Validate(Valid()).ShouldBeNull();
     }
 
+    [Theory]
+    [InlineData(700_000, false)]
+    [InlineData(800_000, false)]
+    [InlineData(750_000, true)]
+    public void REQ_RI_037_Adjacent_layers_must_meet_exactly_when_non_contiguous_is_not_declared(int attachment, bool valid)
+    {
+        var content = Valid() with
+        {
+            Layers = [new ContentLayer(2, attachment, 500_000m, 0m, null), new ContentLayer(1, 250_000m, 500_000m, 0m, null)],
+        };
+        var error = ContractRules.Validate(content);
+        if (valid)
+        {
+            error.ShouldBeNull();
+        }
+        else
+        {
+            error.ShouldNotBeNull();
+            error.Code.Name.ShouldBe("VALIDATION");
+            error.FieldErrors.ShouldContain(field => field.Code == "LAYERS_NOT_CONTIGUOUS");
+        }
+    }
+
     [Fact]
     public void REQ_RI_046_047_Signed_lines_must_equal_the_placed_share_with_exactly_one_lead()
     {
@@ -42,7 +65,7 @@ public sealed class ContractContentTests
         ContractRules.Validate(Valid() with { Currency = "USD" })!.Code.Name.ShouldBe("VALIDATION");
         ContractRules.Validate(Valid() with { RecoveriesInure = "INCLUDING_RESERVES" })!.Code.Name.ShouldBe("VALIDATION");
         ContractRules.Validate(Valid() with { ContractYear = 2025 })!.Code.Name.ShouldBe("VALIDATION");
-        ContractRules.Validate(Valid() with { ProductCodes = ["lower"] })!.Code.Name.ShouldBe("VALIDATION");
+        ContractRules.Validate(Valid() with { ProductCodes = ["has space"] })!.Code.Name.ShouldBe("VALIDATION");
         ContractRules.Validate(Valid() with { CoverageCodes = ["OD", "OD"] })!.Code.Name.ShouldBe("VALIDATION");
         ContractRules.Validate(Valid() with { Layers = [new ContentLayer(1, 0m, 100.00001m, 0m, null)] })!.Code.Name.ShouldBe("VALIDATION");
         ContractRules.Validate(Valid() with { Layers = [new ContentLayer(1, 0m, 100m, 0m, null), new ContentLayer(1, 100m, 100m, 0m, null)] })!.Code.Name.ShouldBe("VALIDATION");
@@ -78,5 +101,18 @@ public sealed class ContractContentTests
         // Bound to the contract and the version: it cannot be replayed elsewhere.
         Valid().Hash(RiContractId.New(), 1).ShouldNotBe(baseline);
         Valid().Hash(id, 2).ShouldNotBe(baseline);
+    }
+
+    [Fact]
+    public void REQ_RI_057_Configuration_owned_codes_cannot_make_distinct_scopes_share_a_hash()
+    {
+        var id = RiContractId.New();
+        var content = Valid();
+        (content with { ProductCodes = ["A,B", "C"] }).Hash(id, 1)
+            .ShouldNotBe((content with { ProductCodes = ["A", "B,C"] }).Hash(id, 1));
+        (content with { CoverageCodes = ["A,B", "C"] }).Hash(id, 1)
+            .ShouldNotBe((content with { CoverageCodes = ["A", "B,C"] }).Hash(id, 1));
+        (content with { ProductCodes = ["A,B", "C"] }).Hash(id, 1)
+            .ShouldBe((content with { ProductCodes = ["C", "A,B"] }).Hash(id, 1));
     }
 }
