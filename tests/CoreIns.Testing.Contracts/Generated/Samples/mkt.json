@@ -277,6 +277,92 @@
       "source": "unspecified",
       "allowedLanguages": "unspecified"
     },
+    "PackActivationDecideRequest": {
+      "activationId": "0192e2c2-b9d7-7ca8-89f0-34f75ce0b7ab",
+      "decision": "APPROVE",
+      "reason": "sample"
+    },
+    "PackActivationDecideResponse": {
+      "activation": {
+        "activationId": "01921e69-c330-715f-811a-2c8779d91821",
+        "pack": "SAMPLE_CODE",
+        "legalEntity": "SAMPLE_CODE",
+        "kind": "ACTIVATE",
+        "from": "1",
+        "to": "1",
+        "status": "REQUESTED",
+        "reason": "sample",
+        "requestedBy": "Sample text",
+        "decidedBy": "Sample text",
+        "approvalRequestId": "0192bee9-ffd2-730e-8c75-8435c50b3ff7",
+        "activatedAt": "2026-10-07T09:00:00Z",
+        "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      }
+    },
+    "PackActivationKeyDiff": {
+      "key": "Sample text",
+      "change": "ADDED"
+    },
+    "PackActivationListPage": {
+      "items": [
+        {
+          "activationId": "019220e5-9efb-77f9-8aa3-44debbf88322",
+          "pack": "SAMPLE_CODE",
+          "legalEntity": "SAMPLE_CODE",
+          "kind": "ACTIVATE",
+          "from": "1",
+          "to": "1",
+          "status": "REQUESTED",
+          "reason": "sample",
+          "requestedBy": "Sample text",
+          "decidedBy": "Sample text",
+          "approvalRequestId": "0192100a-9af1-75d4-8cd1-c4b2c5125b01",
+          "activatedAt": "2026-10-07T09:00:00Z",
+          "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PackActivationPreview": {
+      "fromVersion": "1",
+      "toVersion": "1",
+      "window": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "hashesIssued": [
+        "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      ],
+      "keyDiff": [
+        {
+          "key": "Sample text",
+          "change": "ADDED"
+        }
+      ]
+    },
+    "PackActivationView": {
+      "activationId": "01920e73-9a49-7b7e-84df-2567153aa888",
+      "pack": "SAMPLE_CODE",
+      "legalEntity": "SAMPLE_CODE",
+      "kind": "ACTIVATE",
+      "from": "1",
+      "to": "1",
+      "status": "REQUESTED",
+      "reason": "sample",
+      "requestedBy": "Sample text",
+      "decidedBy": "Sample text",
+      "approvalRequestId": "01928112-1190-7cc6-8073-070b483c5469",
+      "activatedAt": "2026-10-07T09:00:00Z",
+      "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "PackActiveVersionView": {
+      "legalEntity": "SAMPLE_CODE",
+      "version": "1",
+      "activationId": "0192d253-4245-7be0-8a71-8188d6be7446",
+      "activeSince": "2026-10-07T09:00:00Z",
+      "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
     "PackCertifyResponse": {
       "packVersionActivation": "unspecified"
     },
@@ -284,14 +370,91 @@
       "packVersionActivation": "unspecified"
     },
     "PackGetResponse": {
-      "packVersionActivation": "unspecified"
+      "packId": "019274ae-5551-7bb9-8340-ee3678666a24",
+      "pack": "SAMPLE_CODE",
+      "scope": "REGION",
+      "versions": [
+        {
+          "version": "1",
+          "status": "BUILT",
+          "contentDigest": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "publishedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "activeVersions": [
+        {
+          "legalEntity": "SAMPLE_CODE",
+          "version": "1",
+          "activationId": "01927711-b180-734e-8fd2-0aa6c72b8dd3",
+          "activeSince": "2026-10-07T09:00:00Z",
+          "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        }
+      ],
+      "packVersionActivation": "unspecified",
+      "activationHistory": [
+        {
+          "activationId": "019200c8-850d-70dd-851f-f45a30b36e0c",
+          "pack": "SAMPLE_CODE",
+          "legalEntity": "SAMPLE_CODE",
+          "kind": "ACTIVATE",
+          "from": "1",
+          "to": "1",
+          "status": "REQUESTED",
+          "reason": "sample",
+          "requestedBy": "Sample text",
+          "decidedBy": "Sample text",
+          "approvalRequestId": "019258e2-1b93-7e50-8e1c-bb318cd51e6d",
+          "activatedAt": "2026-10-07T09:00:00Z",
+          "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        }
+      ]
     },
     "PackListItem": {
+      "packId": "0192489c-9d82-743c-8539-8ca507a21f4c",
+      "pack": "SAMPLE_CODE",
+      "scope": "REGION",
+      "versions": [
+        {
+          "version": "1",
+          "status": "BUILT",
+          "contentDigest": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "publishedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "activeVersions": [
+        {
+          "legalEntity": "SAMPLE_CODE",
+          "version": "1",
+          "activationId": "019253be-8a38-7563-84ef-d397c6e317d6",
+          "activeSince": "2026-10-07T09:00:00Z",
+          "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        }
+      ],
       "packVersionActivation": "unspecified"
     },
     "PackListPage": {
       "items": [
         {
+          "packId": "019294e8-1b97-79a7-8a25-f951e8c34b3e",
+          "pack": "SAMPLE_CODE",
+          "scope": "REGION",
+          "versions": [
+            {
+              "version": "1",
+              "status": "BUILT",
+              "contentDigest": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "publishedAt": "2026-10-07T09:00:00Z"
+            }
+          ],
+          "activeVersions": [
+            {
+              "legalEntity": "SAMPLE_CODE",
+              "version": "1",
+              "activationId": "0192da9c-1633-7028-870e-1ed3d920c67b",
+              "activeSince": "2026-10-07T09:00:00Z",
+              "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+            }
+          ],
           "packVersionActivation": "unspecified"
         }
       ],
@@ -301,11 +464,71 @@
     "PackPublishResponse": {
       "packVersionActivation": "unspecified"
     },
+    "PackRollbackRequest": {
+      "pack": "SAMPLE_CODE",
+      "legalEntity": "SAMPLE_CODE",
+      "toVersion": "1",
+      "reason": "samplexxxxxxxxxxxxxx"
+    },
     "PackRollbackResponse": {
+      "dryRun": true,
+      "preview": {
+        "fromVersion": "1",
+        "toVersion": "1",
+        "window": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "hashesIssued": [
+          "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        ],
+        "keyDiff": [
+          {
+            "key": "Sample text",
+            "change": "ADDED"
+          }
+        ]
+      },
+      "activationId": "0192ffb8-41bf-76e7-8074-fb6a03036a54",
+      "status": "REQUESTED",
+      "approvalRequestId": "01922c23-32c0-77e4-8a81-063906b1414a",
       "packVersionActivation": "unspecified"
     },
+    "PackScheduleActivationRequest": {
+      "pack": "SAMPLE_CODE",
+      "legalEntity": "SAMPLE_CODE",
+      "version": "1",
+      "reason": "samplexxxxxxxxxxxxxx"
+    },
     "PackScheduleActivationResponse": {
+      "dryRun": true,
+      "preview": {
+        "fromVersion": "1",
+        "toVersion": "1",
+        "window": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "hashesIssued": [
+          "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        ],
+        "keyDiff": [
+          {
+            "key": "Sample text",
+            "change": "ADDED"
+          }
+        ]
+      },
+      "activationId": "0192e6db-5d86-72d9-883a-adc0b86b6c21",
+      "status": "REQUESTED",
+      "approvalRequestId": "01929e21-c5ba-7ebf-8d16-451e4791f4ff",
       "packVersionActivation": "unspecified"
+    },
+    "PackVersionView": {
+      "version": "1",
+      "status": "BUILT",
+      "contentDigest": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "publishedAt": "2026-10-07T09:00:00Z"
     },
     "RegimeCodeCrosswalkResponse": {
       "codes": "unspecified",

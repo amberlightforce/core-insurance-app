@@ -268,7 +268,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-SELF-APPROVAL (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 11 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register, rat.RatingArtifact.build, rat.RatingArtifact.cancelSchedule, rat.RatingArtifact.return, rat.RatingArtifact.rollback, rat.RatingArtifact.schedule, rat.RatingArtifact.submit.</para>
+    /// <para>Declared by 12 operation(s): pfc.ProductVersion.decideFallback, plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register, rat.RatingArtifact.build, rat.RatingArtifact.cancelSchedule, rat.RatingArtifact.return, rat.RatingArtifact.rollback, rat.RatingArtifact.schedule, rat.RatingArtifact.submit.</para>
     /// </remarks>
     public const string SelfApproval = "PLT-ERR-SELF-APPROVAL";
 
