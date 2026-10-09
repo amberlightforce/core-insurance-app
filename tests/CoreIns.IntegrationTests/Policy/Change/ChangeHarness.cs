@@ -189,6 +189,14 @@ internal sealed class ChangeHarness : IAsyncDisposable
     {
         var instant = Instant.FromUtcDateTime(DateTime.SpecifyKind(policy.Start.AddDays(days), DateTimeKind.Utc));
         Clock.Set(instant);
+        // The record-time watermark may not run more than a day (plus the dev clock offset) ahead of the database clock (POL-TEMPORAL):
+        // tell the database how far this test's clock runs ahead, as the dev clock endpoint would.
+        var ahead = (long)(instant.ToUtcDateTime() - DateTime.UtcNow).TotalMicroseconds;
+        if (ahead > 0)
+        {
+            ExecuteAsync($"UPDATE plt.dev_clock SET offset_micros = {ahead}, version = version + 1, updated_at = now() WHERE offset_micros < {ahead}").GetAwaiter().GetResult();
+        }
+
         return instant;
     }
 
