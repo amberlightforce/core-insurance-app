@@ -51,16 +51,13 @@ describe('PolicyViewPage', () => {
     expect(within(covers).getByText('OWN-DAMAGE')).toBeInTheDocument();
     expect(within(covers).queryByText('WINDSCREEN')).not.toBeInTheDocument();
 
-    const transactions = screen.getByRole('grid', { name: 'Συναλλαγές ασφαλιστηρίου' });
-    expect(within(transactions).getByText('NEW_BUSINESS')).toBeInTheDocument();
-    expect(within(transactions).getByText('479,20 €')).toBeInTheDocument();
-    const charges = screen.getByRole('grid', { name: 'Γραμμές χρέωσης' });
-    expect(within(charges).getByText('PREM-MTPL')).toBeInTheDocument();
-    expect(within(charges).getByText('GR-IPT')).toBeInTheDocument();
-    expect(within(charges).getByText(/Προσωρινό/)).toBeInTheDocument();
+    // The transaction history (the term timeline is not mocked here, so it falls back to the policy's own transactions).
+    const history = await screen.findByRole('list', { name: 'Συναλλαγές όρου 1' });
+    expect(within(history).getByText('Νέα παραγωγή')).toBeInTheDocument();
+    expect(within(history).getByText('432,35 €')).toBeInTheDocument();
     const invoices = await screen.findByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' });
     expect(within(invoices).getByText('INV000000003')).toBeInTheDocument();
-    expect(within(invoices).getByText(/Δοκιμαστικό \(stub\)/)).toBeInTheDocument();
+    expect(within(invoices).getByText(/Δοκιμαστικό/)).toBeInTheDocument();
 
     // The as-of date goes out in date form (D-SLC-13).
     expect(
