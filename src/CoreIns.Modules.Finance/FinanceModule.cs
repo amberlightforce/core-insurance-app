@@ -59,6 +59,8 @@ public static class FinanceModule
         // Intake (worker): the posting source, the policy context and the context-only events (REQ-FIN-001, -036).
         services.AddEventHandler<JsonElement, BillingEntryPostedHandler>(Descriptor(BillingEntryPostedV1.Descriptor), "FIN.Intake.BillingEntryPosted", ModuleCode.FIN);
         services.AddEventHandler<PolicyBoundContext, PolicyBoundHandler>(Descriptor(PolicyBoundV1.Descriptor), "FIN.Intake.PolicyBound", ModuleCode.FIN);
+        services.AddScoped<PolicyBoundHandler>();
+        services.AddEventHandler<RenewalBoundContext, RenewalBoundHandler>(Descriptor(RenewalBoundV1.Descriptor), "FIN.Intake.RenewalBound", ModuleCode.FIN);
         services.AddEventHandler<JsonElement, ContextEventHandler>(Descriptor(ChargeDeltaEmittedV1.Descriptor), "FIN.Intake.ChargeDeltaEmitted", ModuleCode.FIN);
         services.AddEventHandler<JsonElement, ContextEventHandler>(Descriptor(InvoiceIssuedV1.Descriptor), "FIN.Intake.InvoiceIssued", ModuleCode.FIN);
         services.AddEventHandler<JsonElement, ContextEventHandler>(Descriptor(PaymentReceivedV1.Descriptor), "FIN.Intake.PaymentReceived", ModuleCode.FIN);
