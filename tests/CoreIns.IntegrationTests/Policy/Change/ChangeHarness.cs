@@ -116,9 +116,7 @@ internal sealed class ChangeHarness : IAsyncDisposable
             services.RemoveAll<IServicingTax>();
             services.AddSingleton(Tax);
             services.AddScoped<IServicingTax, ScriptedServicingTax>();
-            // The production default fails closed; the reference proration is test-only.
-            services.RemoveAll<IProration>();
-            services.AddSingleton<IProration, ReferenceProration>();
+            // IProration is the production binding: RAT's proration behind POL's port (RatingProrationAdapter), bound per term.
         }));
         Client = _factory.CreateClient();
     }

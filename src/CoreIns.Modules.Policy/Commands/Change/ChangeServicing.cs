@@ -74,6 +74,10 @@ internal sealed class ChangeEngineFactory(
             return rule.Error!;
         }
 
+        // The production proration (RAT behind POL's port) is told which term and pinned artefact it prorates for; test doubles are not bound.
+        (proration as Cancellation.IBoundProration)?.Bind(
+            term.ArtefactHash, ConfigurationHash.Parse(term.ConfigurationHash),
+            new ServicingTerm(term.ValidFrom, term.ValidTo, Currency.FromCode(term.Currency.Trim()), convention.Value, zone));
         return new ChangeEngine(new ServicingEngine(proration, rule.Value), convention.Value, rule.Value);
     }
 
