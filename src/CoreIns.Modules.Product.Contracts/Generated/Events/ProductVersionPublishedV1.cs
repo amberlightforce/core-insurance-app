@@ -89,4 +89,12 @@ public sealed record ProductVersionPublishedV1 : global::CoreIns.Platform.Contra
     /// <summary>Rating-slot declaration carried by every ProductVersion* event (contract R-27, REQ-PFC-245)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("ratingSlotDeclaration")]
     public required global::CoreIns.Platform.Contracts.Common.RatingSlotDeclaration RatingSlotDeclaration { get; init; }
+
+    /// <summary>Version whose content this fall-back version copies (D-SL5-09, REQ-PFC-213); null when the version is not a fall-back. Always set, also when null (PITFALLS 12).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fallbackOf")]
+    public global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber? FallbackOf { get; init; }
+
+    /// <summary>Defective version whose new-business window this fall-back closes; null when the version is not a fall-back. Always set, also when null (PITFALLS 12).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("replaces")]
+    public global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber? Replaces { get; init; }
 }

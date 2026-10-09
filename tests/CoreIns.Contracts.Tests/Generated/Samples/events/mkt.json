@@ -355,7 +355,11 @@
       "newHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "spisRebound": [
         "SAMPLE_CODE"
-      ]
+      ],
+      "pack": "SAMPLE_CODE",
+      "activationId": "0192f314-037b-7ee1-816b-9e0f0f8d1722",
+      "activatedAt": "2026-10-07T09:00:00Z",
+      "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     }
   },
   {
@@ -393,7 +397,11 @@
       "newHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "spisRebound": [
         "SAMPLE_CODE"
-      ]
+      ],
+      "pack": "SAMPLE_CODE",
+      "activationId": "0192a374-73b0-748b-8192-51540d7970d6",
+      "activatedAt": "2026-10-07T09:00:00Z",
+      "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     }
   },
   {
@@ -495,7 +503,18 @@
       "hashesInWindow": [
         "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
       ],
-      "reason": "SAMPLE_CODE"
+      "reason": "SAMPLE_CODE",
+      "pack": "SAMPLE_CODE",
+      "legalEntity": "SAMPLE_CODE",
+      "activationId": "01921091-00e2-7ee9-8d24-31d9ad238e88",
+      "window": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "hashesIssued": [
+        "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      ],
+      "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     }
   },
   {
@@ -535,7 +554,18 @@
       "hashesInWindow": [
         "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
       ],
-      "reason": "SAMPLE_CODE"
+      "reason": "SAMPLE_CODE",
+      "pack": "SAMPLE_CODE",
+      "legalEntity": "SAMPLE_CODE",
+      "activationId": "01921be7-3d7c-7ae0-82e4-63bc1964d5ed",
+      "window": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "hashesIssued": [
+        "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      ],
+      "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     }
   },
   {
