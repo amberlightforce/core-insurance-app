@@ -470,6 +470,25 @@ public sealed class FallbackTests(PostgresFixture database) : IClassFixture<Post
     }
 
     [Fact]
+    public async Task A_retired_locked_version_keeps_immutable_content_and_cannot_be_resurrected()
+    {
+        var (code, sourceHash, _) = await SeedAsync("MOTOR-FB-RETIRED");
+        var where = $"product_id = (SELECT product_id FROM pfc.product WHERE code = '{code}') AND major = 1 AND minor = 0";
+        // Retirement itself remains legitimate. It cannot turn written history back into an editable draft.
+        await ExecuteAsync($"UPDATE pfc.product_version SET status = 'RETIRED', lifecycle_substate = NULL WHERE {where}", database.AppConnectionString);
+        (await VersionColumnAsync(code, "1.0", "status")).ShouldBe("RETIRED");
+        foreach (var change in new[] { "contract_currency = 'USD'", "status = 'LOCKED'", "status = 'DRAFT'" })
+        {
+            var refused = await Should.ThrowAsync<PostgresException>(() => ExecuteAsync($"UPDATE pfc.product_version SET {change} WHERE {where}", database.AppConnectionString));
+            refused.SqlState.ShouldBe(PostgresErrorCodes.IntegrityConstraintViolation);
+        }
+
+        (await VersionColumnAsync(code, "1.0", "status")).ShouldBe("RETIRED");
+        (await VersionColumnAsync(code, "1.0", "artefact_hash")).ShouldBe(sourceHash);
+        (await VersionColumnAsync(code, "1.0", "contract_currency")).ShouldBe("EUR");
+    }
+
+    [Fact]
     public async Task PITFALLS_17_47_the_app_role_cannot_rewrite_a_locked_version_or_reopen_a_closed_window()
     {
         var (code, _, _) = await SeedAsync("MOTOR-FB-N");

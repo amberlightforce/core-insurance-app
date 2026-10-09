@@ -174,8 +174,8 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                        OR NEW.replaces_version_id IS DISTINCT FROM OLD.replaces_version_id THEN
                         RAISE EXCEPTION 'pfc.product_version fall-back links are write-once (REQ-PFC-213)' USING ERRCODE = 'integrity_constraint_violation';
                     END IF;
-                    IF OLD.status = 'LOCKED' THEN
-                        IF NEW.status NOT IN ('LOCKED', 'RETIRED')
+                    IF OLD.status IN ('LOCKED', 'RETIRED') THEN
+                        IF NEW.status NOT IN ('LOCKED', 'RETIRED') OR (OLD.status = 'RETIRED' AND NEW.status <> 'RETIRED')
                            OR NEW.product_id <> OLD.product_id OR NEW.legal_entity_id <> OLD.legal_entity_id
                            OR NEW.jurisdiction <> OLD.jurisdiction OR NEW.major <> OLD.major OR NEW.minor <> OLD.minor
                            OR NEW.is_abstract <> OLD.is_abstract OR NEW.channels <> OLD.channels
