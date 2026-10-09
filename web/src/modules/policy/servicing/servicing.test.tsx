@@ -274,7 +274,7 @@ describe('CancellationPage', () => {
     expect(created?.headers.get('Idempotency-Key')).toBeTruthy();
     expect(api.callsTo('POST', '/api/pol/v1/jobs/quote')[0]?.body).toEqual({ jobId, versionNo: 1 });
     expect(screen.getByText(/ΦΑΑ: δεν επιστρέφεται/)).toBeInTheDocument();
-    expect(screen.getByText('Αστική ευθύνη αυτοκινήτου')).toBeInTheDocument();
+    expect(await screen.findByText('Αστική ευθύνη αυτοκινήτου')).toBeInTheDocument();
     expect(screen.getByText('Ετήσιο')).toBeInTheDocument();
     await expectNoA11yViolations(container);
 
