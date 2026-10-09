@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Domain.Servicing;
@@ -33,6 +34,35 @@ public sealed class PolicyChangeTests(PostgresFixture database) : IClassFixture<
 
     private static JsonNode Line(JsonNode? body, string array, string chargeType) =>
         body![array]!.AsArray().Single(l => l!["chargeType"]!.GetValue<string>() == chargeType)!;
+
+    [Fact]
+    public async Task The_servicing_UI_must_preserve_unsupported_extension_fields_when_editing_typed_rating_fields()
+    {
+        var policy = await _h.IssueAsync();
+        _h.SetDay(policy, 200);
+        var job = await _h.NewChangeAsync(policy);
+        var vehicle = JsonSerializer.SerializeToNode(ChangeHarness.Vehicle(policy, capacity: 1600))!.AsObject();
+        vehicle["fields"] = new JsonObject { ["garagingPostcode"] = "10558", ["ownerType"] = "PERSON" };
+        var (edited, edit) = await _h.EditAsync(job, [new { op = "SET_VEHICLE", vehicle }]);
+        edited.StatusCode.ShouldBe(HttpStatusCode.OK, edit?.ToJsonString());
+
+        var (quoted, quote) = await _h.QuoteAsync(job);
+
+        quoted.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, quote?.ToJsonString());
+        quote!["errors"]!.AsArray().Select(e => e!["code"]!.GetValue<string>()).ShouldContain("CHANGE_NOT_ALLOWED");
+
+        // Editing the allowed typed fields succeeds when the original absence of extension fields is preserved.
+        var (withdrawn, withdrawal) = await _h.WithdrawAsync(job);
+        withdrawn.StatusCode.ShouldBe(HttpStatusCode.OK, withdrawal?.ToJsonString());
+        var allowedJob = await _h.NewChangeAsync(policy);
+        await _h.EditVehicleAsync(allowedJob, policy, capacity: 1600);
+        var (allowed, allowedQuote) = await _h.QuoteAsync(allowedJob);
+        allowed.StatusCode.ShouldBe(HttpStatusCode.OK, allowedQuote?.ToJsonString());
+        var rated = (Modules.Rating.Contracts.Api.RateRateRequest)_h.Slice.Rating.CallsTo("rat.Rate.rate")[^1].Arguments[0]!;
+        var input = rated.Segments.Single().RiskTree.GetProperty("vehicle");
+        input.GetProperty("firstRegistrationYear").GetInt32().ShouldBe(2021);
+        input.GetProperty("engineCapacityCc").GetInt32().ShouldBe(1600);
+    }
 
     [Fact]
     public async Task REQ_POL_190_192_193_005_119_122_129_197_change_at_day_200_preview_equals_bind_and_deltas_sum_to_written()
