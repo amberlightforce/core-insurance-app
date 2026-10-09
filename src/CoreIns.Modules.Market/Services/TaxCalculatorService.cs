@@ -178,7 +178,9 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
         return new TaxLine
         {
             Element = line.Element,
-            ChargeType = "IPT",
+            // Product and rating charge identities are jurisdiction-qualified (for example GR-IPT).
+            // Keep that identity even for a zero base so servicing can match the calculated line and its evidence.
+            ChargeType = $"{request.RiskJurisdiction}-IPT",
             Category = TaxCategory.Tax,
             TaxClass = line.TaxClass,
             Base = line.PremiumAmount,

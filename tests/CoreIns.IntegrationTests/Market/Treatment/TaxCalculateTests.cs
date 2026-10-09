@@ -88,7 +88,7 @@ public sealed class TaxCalculateTests
         line.Amount.Amount.ShouldBe(10.50m);
         line.Amount.Amount.ShouldBe(QuoteTime(70.00m, 0.15m));
         line.Rate.ShouldBe(0.15m);
-        line.ChargeType.ShouldBe("IPT");
+        line.ChargeType.ShouldBe("GR-IPT");
         line.Category.ShouldBe(TaxCategory.Tax);
         line.Element.ShouldBe("MTPL");
         result.DocumentLines.ShouldBeEmpty();
