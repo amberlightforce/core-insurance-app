@@ -12,10 +12,10 @@ import {
   textColumn,
   type DataColumn,
 } from '../../../design-system';
-import { problemOf } from '../../staff/problem';
 import { SimpleTable } from '../../staff/SimpleTable';
 import { useFormat } from '../../staff/useFormat';
 import {
+  usePolicyAt,
   useTermTimeline,
   type ChargeLineModel,
   type PolicyFileResponse,
@@ -164,18 +164,21 @@ function HistoryRow({
 
 export interface HistoryGroupInput {
   term: TermViewModel;
-  policy: PolicyFileResponse;
+  /** The policy as read for this term; absent for other terms, which are read here on demand. */
+  policy?: PolicyFileResponse;
   validAt: string;
 }
 
 /** One term's transactions, newest first. The timeline is the source; the policy's own transactions are the fallback. */
 function TermHistoryGroup({ policyId, group }: { policyId: string; group: HistoryGroupInput }) {
   const { t } = useTranslation('policy');
-  const { term, policy, validAt } = group;
+  const { term, validAt } = group;
+  const fetched = usePolicyAt(policyId, validAt, { enabled: !group.policy });
+  const policy = group.policy ?? fetched.data;
   const timeline = useTermTimeline(policyId, term.termId, validAt);
   const rows = useMemo<TimelineTransaction[]>(() => {
     if (timeline.data) return orderHistory(timeline.data.transactions);
-    if (timeline.isPending) return [];
+    if (timeline.isPending || !policy) return [];
     return orderHistory(
       policy.transactions.map((x) => ({
         transactionId: x.transactionId,
@@ -188,8 +191,7 @@ function TermHistoryGroup({ policyId, group }: { policyId: string; group: Histor
         ...(x.jobId ? { jobId: x.jobId } : {}),
       })),
     );
-  }, [timeline.data, timeline.isPending, policy.transactions]);
-  const denied = timeline.isError && problemOf(timeline.error).status === 403;
+  }, [timeline.data, timeline.isPending, policy]);
 
   return (
     <li>
@@ -204,9 +206,7 @@ function TermHistoryGroup({ policyId, group }: { policyId: string; group: Histor
       ) : (
         <>
           {timeline.isError ? (
-            <p className={styles.muted}>
-              {denied ? t('file.history.timelineDenied') : t('file.history.timelineUnavailable')}
-            </p>
+            <p className={styles.muted}>{t('file.history.timelineUnavailable')}</p>
           ) : null}
           {rows.length > 0 ? (
             <ol
@@ -218,7 +218,7 @@ function TermHistoryGroup({ policyId, group }: { policyId: string; group: Histor
                   key={row.transactionId}
                   row={row}
                   term={term}
-                  charges={chargesOf(policy.charges, row.transactionId)}
+                  charges={chargesOf(policy?.charges ?? [], row.transactionId)}
                 />
               ))}
             </ol>
