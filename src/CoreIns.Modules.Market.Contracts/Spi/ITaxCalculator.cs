@@ -73,6 +73,23 @@ public sealed record TaxCalculationRequest
 
     /// <summary>Business basis (for example establishment or freedom of services), code-list value.</summary>
     public required string BusinessBasis { get; init; }
+
+    /// <summary>
+    /// The action <c>treatment</c> returned for this charge (single-call rule, REQ-MKT-332). <c>calculate</c> prices only Apply,
+    /// ReduceProRata and ReverseAsVoid; null is read as Apply. A credit (negative) base is accepted only for ReduceProRata or
+    /// ReverseAsVoid, so a credit that treatment would KEEP never receives a credit tax.
+    /// </summary>
+    public TreatmentAction? TreatmentAction { get; init; }
+}
+
+/// <summary>Kind of a charge line to tax (PRD-17 section 9.4.4). IPT is priced only on Premium.</summary>
+public enum ChargeLineCategory
+{
+    Premium,
+    Fee,
+    Tax,
+    Levy,
+    Stamp,
 }
 
 /// <summary>A charge line to tax (PRD-17 §9.4.4).</summary>
@@ -82,6 +99,12 @@ public sealed record TaxChargeLine
     public required string Element { get; init; }
 
     public required string ChargeType { get; init; }
+
+    /// <summary>
+    /// Kind of the charge. Allow-list: only Premium is taxed with IPT; every other kind has no rate row and is RULE_MISSING (fail closed).
+    /// Null is a VALIDATION error: the kind is never guessed from the charge type name.
+    /// </summary>
+    public ChargeLineCategory? ChargeCategory { get; init; }
 
     public required string ProductLine { get; init; }
 

@@ -20,14 +20,12 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
     public ValueTask<TaxCalculationResult> CalculateAsync(TaxCalculationRequest request, CancellationToken cancellationToken = default) =>
         ValueTask.FromResult(Calculate(request));
 
-    /// <summary>Transaction types whose negative (credit) base may carry a credit tax: only a reducing treatment (REDUCE_PRO_RATA, REVERSE_AS_VOID).</summary>
-    private static readonly HashSet<string> ReducingTransactionTypes = new(StringComparer.OrdinalIgnoreCase) { "VOID", "REDUCE_PRO_RATA" };
-
     /// <summary>
-    /// <c>calculate</c> (REQ-MKT-332, PRD-17 7.5): IPT = base x <c>tax.ipt.rate.&lt;taxClass&gt;</c> at the tax point, rounded half-up to the
-    /// currency minor unit (the quote-time rule of the rating tax plan GR-IPT, so a servicing delta prices exactly like a quote). Fail
-    /// closed: no rate row, and every levy and stamp (no rows exist, D-REG-06a), is <c>RULE_MISSING</c>; Production refuses a row that is
-    /// not exactly Settled (PITFALLS 36). A credit base yields a credit tax only for a reducing transaction type.
+    /// <c>calculate</c> (REQ-MKT-332, PRD-17 7.5): IPT = base x <c>tax.ipt.rate.&lt;taxClass&gt;</c> at the tax point, exact multiply (refused on
+    /// precision loss), rounded by the configured tax-line rounding rule (<c>cur.rounding.tax.&lt;class&gt;</c>, else <c>cur.rounding.tax.line</c>,
+    /// else the default; the order of <c>mkt.Rounding.apply</c>). Fail closed: only a Premium charge is taxed, every other kind and any missing row
+    /// is <c>RULE_MISSING</c>. The line's legal status is the weaker of the rate and the rounding rule, and Production refuses anything not exactly
+    /// Settled (PITFALLS 36). The sign follows the treatment action: a credit base only for ReduceProRata or ReverseAsVoid.
     /// </summary>
     internal TaxCalculationResult Calculate(TaxCalculationRequest request)
     {
@@ -42,16 +40,27 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
             throw Validation("JURISDICTION_REQUIRED", nameof(request.RiskJurisdiction));
         }
 
+        if (request.TaxPointDate == default)
+        {
+            throw Validation("TAX_POINT_DATE_REQUIRED", nameof(request.TaxPointDate));
+        }
+
+        var action = request.TreatmentAction ?? TreatmentAction.Apply;
+        if (action is not (TreatmentAction.Apply or TreatmentAction.ReduceProRata or TreatmentAction.ReverseAsVoid))
+        {
+            throw Validation("TREATMENT_ACTION_NOT_CALCULABLE", nameof(request.TreatmentAction));
+        }
+
         var lines = new List<TaxLine>(request.ChargeLines.Count);
         foreach (var line in request.ChargeLines)
         {
-            lines.Add(CalculateLine(request, line));
+            lines.Add(CalculateLine(request, action, line));
         }
 
         return new TaxCalculationResult(lines, []);
     }
 
-    private TaxLine CalculateLine(TaxCalculationRequest request, TaxChargeLine line)
+    private TaxLine CalculateLine(TaxCalculationRequest request, TreatmentAction action, TaxChargeLine line)
     {
         if (string.IsNullOrWhiteSpace(line.TaxClass))
         {
@@ -61,6 +70,11 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
         if (string.IsNullOrWhiteSpace(line.Element) || string.IsNullOrWhiteSpace(line.ChargeType))
         {
             throw Validation("CHARGE_LINE_INCOMPLETE", nameof(line.Element));
+        }
+
+        if (line.ChargeCategory is not { } category || !Enum.IsDefined(category))
+        {
+            throw Validation("CHARGE_CATEGORY_REQUIRED", nameof(line.ChargeCategory));
         }
 
         if (line.PeriodEnd < line.PeriodStart)
@@ -73,34 +87,75 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
             throw Validation("CURRENCY_UNKNOWN", nameof(line.PremiumAmount));
         }
 
-        // Levy and stamp have no rows (D-REG-06a, D-SL3-06): fail closed, never a default.
-        var taxClass = line.TaxClass.Trim().ToLowerInvariant();
-        if (taxClass.StartsWith("levy", StringComparison.Ordinal) || taxClass.StartsWith("stamp", StringComparison.Ordinal)
-            || line.ChargeType.Contains("LEVY", StringComparison.OrdinalIgnoreCase) || line.ChargeType.Contains("STAMP", StringComparison.OrdinalIgnoreCase))
+        var at = new BusinessDate(request.TaxPointDate);
+
+        // Allow-list: IPT is priced on a Premium charge only. Levy, stamp, fee and tax lines have no settled rate row (D-REG-06a, D-SL3-06).
+        if (category != ChargeLineCategory.Premium)
         {
-            throw RuleMissing($"No rate rule for a levy or stamp (tax class {line.TaxClass}) in {request.RiskJurisdiction}; none is settled (D-REG-06a), the core holds no default (fail closed).");
+            throw RuleMissing($"No rate rule for a {category} charge in {request.RiskJurisdiction}; only Premium is taxed with IPT and the core holds no default (fail closed).");
         }
 
+        // The jurisdiction's currency roles (cur.transaction, cur.functional): a line in any other currency is refused.
+        var roles = CurrencyRoleKeys
+            .Select(k => engine.Catalogue.Find(k, request.RiskJurisdiction, at))
+            .Where(e => e is not null)
+            .Select(e => e!.Value)
+            .ToList();
+        if (roles.Count == 0)
+        {
+            throw RuleMissing($"No currency role (cur.transaction, cur.functional) for {request.RiskJurisdiction}; fail closed.");
+        }
+
+        if (!roles.Contains(line.PremiumAmount.Currency, StringComparer.Ordinal))
+        {
+            throw Validation("CURRENCY_MISMATCH", nameof(line.PremiumAmount));
+        }
+
+        var taxClass = line.TaxClass.Trim().ToLowerInvariant();
         var key = IptRatePrefix + taxClass;
-        var entry = ConfigKeys.Find(key) is null
-            ? null
-            : engine.Catalogue.Find(key, request.RiskJurisdiction, new BusinessDate(request.TaxPointDate));
+        var entry = ConfigKeys.Find(key) is null ? null : engine.Catalogue.Find(key, request.RiskJurisdiction, at);
         if (entry is null)
         {
             throw RuleMissing($"No IPT rate {key} in {request.RiskJurisdiction} on {request.TaxPointDate:yyyy-MM-dd}; the core holds no default (fail closed).");
         }
 
-        if (engine.EnforceSettled && entry.LegalStatus != LegalStatus.Settled)
+        // Rounding rule, same precedence as mkt.Rounding.apply (BR-MKT-027): tax-class rule, tax.line purpose rule, currency default.
+        ConfigEntry? roundingEntry = null;
+        foreach (var candidate in new[] { ConfigKeys.RoundingTaxPrefix + taxClass, ConfigKeys.RoundingPrefix + "tax.line", ConfigKeys.RoundingDefault })
+        {
+            if (ConfigKeys.Find(candidate) is not null && engine.Catalogue.Find(candidate, request.RiskJurisdiction, at) is { } found)
+            {
+                roundingEntry = found;
+                break;
+            }
+        }
+
+        if (roundingEntry is null)
+        {
+            throw RuleMissing($"No tax-line rounding rule in {request.RiskJurisdiction}, not even the currency default; fail closed.");
+        }
+
+        // The weaker of the rate and the rounding rule is the status of the line. A NotRegulatory rounding rule (a core default) does not weaken it.
+        var weakest = entry.LegalStatus != LegalStatus.Settled ? entry
+            : roundingEntry.LegalStatus is LegalStatus.Settled or LegalStatus.NotRegulatory ? entry
+            : roundingEntry;
+        if (engine.EnforceSettled && weakest.LegalStatus != LegalStatus.Settled)
         {
             throw new DomainException(DomainError.Of(
                 ModuleCode.MKT, "CFG-NOT-SETTLED",
-                $"Production refuses values that are not Settled (D-REG-02, REQ-MKT-343): {entry.Key} ({entry.LegalStatus})."));
+                $"Production refuses values that are not Settled (D-REG-02, REQ-MKT-343): {weakest.Key} ({weakest.LegalStatus})."));
         }
 
         var amount = line.PremiumAmount.Amount;
-        if (amount < 0m && !ReducingTransactionTypes.Contains(line.TransactionType ?? string.Empty))
+        var reducing = action is TreatmentAction.ReduceProRata or TreatmentAction.ReverseAsVoid;
+        if (amount < 0m && !reducing)
         {
-            throw Validation("CREDIT_BASE_NOT_REDUCING", nameof(line.TransactionType));
+            throw Validation("CREDIT_BASE_NOT_REDUCING", nameof(line.PremiumAmount));
+        }
+
+        if (amount > 0m && reducing)
+        {
+            throw Validation("DEBIT_BASE_UNDER_REDUCING_TREATMENT", nameof(line.PremiumAmount));
         }
 
         if (!decimal.TryParse(entry.Value, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var rate) || rate < 0m || rate > 1m)
@@ -108,14 +163,16 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
             throw RuleMissing($"{entry.Key} does not hold a rate between 0 and 1; refused (fail closed).");
         }
 
+        var rule = RoundingRule.Parse(roundingEntry.ToJsonElement());
         decimal tax;
         try
         {
-            tax = Math.Round(amount * rate, currency.MinorUnits, MidpointRounding.AwayFromZero);
+            // The exact multiply of the quote-time path (Money.Multiply): precision loss is refused, never silently rounded.
+            tax = rule.Apply(ExactDecimal.Multiply(amount, rate), rule.Scale ?? currency.MinorUnits);
         }
-        catch (OverflowException)
+        catch (Exception ex) when (ex is OverflowException or InvalidOperationException or ArgumentException or PrecisionLossException)
         {
-            throw Validation("AMOUNT_OUT_OF_RANGE", nameof(line.PremiumAmount));
+            throw Validation("AMOUNT_NOT_REPRESENTABLE", nameof(line.PremiumAmount));
         }
 
         return new TaxLine
@@ -127,16 +184,18 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
             Base = line.PremiumAmount,
             Rate = rate,
             Amount = new SpiMoney(tax, line.PremiumAmount.Currency),
-            RoundingRuleId = "GR-IPT-ROUND-HALF_UP-MINOR_UNIT",
+            RoundingRuleId = rule.IdFor(roundingEntry.Key).ToString(),
             RuleId = entry.Key,
             RuleVersion = entry.VersionId.ToString(),
-            LegalSourceRef = entry.SourceRef,
-            LegalStatus = entry.LegalStatus,
+            LegalSourceRef = $"{entry.SourceRef}; rounding {roundingEntry.Key} ({roundingEntry.LegalStatus})",
+            LegalStatus = weakest.LegalStatus,
             ConfigurationHash = engine.Catalogue.Hash.Hash.ToString(),
         };
     }
 
     private const string IptRatePrefix = "tax.ipt.rate.";
+
+    private static readonly string[] CurrencyRoleKeys = ["cur.transaction", "cur.functional"];
 
     private static SpiException RuleMissing(string message) =>
         new(new SpiError(SpiErrorCategory.RuleMissing, "RULE_MISSING"), message);
