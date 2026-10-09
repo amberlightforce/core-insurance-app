@@ -115,6 +115,11 @@ public sealed class RenewalTests(PostgresFixture database) : IClassFixture<Postg
                 $"SELECT sum((payload->'netAmount'->>'amount')::numeric) FROM plt.outbox_message WHERE event_type = 'ChargeDeltaEmitted' AND set_id = '{transaction}'"))
             .ShouldBe(total);
         (await _renewal.CountEventsAsync("RenewalBound")).ShouldBe(1);
+        // BIL derives the term period from the deltas: they are in the outbox, in order, before RenewalBound.
+        (await _renewal.ScalarAsync<bool>(
+                $"SELECT (SELECT min(aggregate_sequence) FROM plt.outbox_message WHERE event_type = 'RenewalBound' AND aggregate_id = '{_renewal.PolicyId}')"
+                + $" > (SELECT max(aggregate_sequence) FROM plt.outbox_message WHERE event_type = 'ChargeDeltaEmitted' AND set_id = '{transaction}')"))
+            .ShouldBeTrue();
         var bound = JsonNode.Parse(await _renewal.ScalarAsync<string>(
             $"SELECT payload::text FROM plt.outbox_message WHERE event_type = 'RenewalBound' AND aggregate_id = '{_renewal.PolicyId}'"))!;
         bound.Text("newTermId").ShouldBe(term2);
