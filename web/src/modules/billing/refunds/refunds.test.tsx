@@ -167,6 +167,22 @@ describe('RefundsInboxPage', () => {
 });
 
 describe('RefundDetailPage', () => {
+  it('preserves cents when summing netting amounts beyond floating-point precision', async () => {
+    mockApi([
+      getRoute(
+        refund({
+          netting: [
+            { kind: 'OPEN_INVOICE', invoiceId: fx.invoiceId, amount: eur('90071992547409.91') },
+            { kind: 'OPEN_INVOICE', invoiceId: 'invoice-2', amount: eur('0.02') },
+          ],
+        }),
+      ),
+    ]);
+    detail();
+    await screen.findByRole('heading', { level: 1, name: 'Επιστροφή' });
+    expect(screen.getByText(/90\.071\.992\.547\.409,93/)).toBeInTheDocument();
+  });
+
   it('shows summary, masked payee, breakdown by charge type with treatment rule, provisional marker and netting', async () => {
     mockApi([getRoute(refund())]);
     const { container } = detail();
