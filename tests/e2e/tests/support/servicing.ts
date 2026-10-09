@@ -8,6 +8,9 @@ import { readClock } from './time.js';
 // journeys all start from the E2E-01 policy: a MOTOR-GR private car with MTPL and own damage, ANNUAL plan, invoiced and paid in full.
 
 export const PRODUCT = 'MOTOR-GR';
+/** The illustrative tariff prices this car at MTPL 121.50 + own damage 308.50 = 430.00 a year (SLICE-PLAN-3 §3.1: 430.00 x 245/365 = 288.63). */
+export const VEHICLE_VALUE = '16323.00';
+export const ANNUAL_PREMIUM = 43_000n;
 const SEED_DIR = resolve(import.meta.dirname, '../../../../src/CoreIns.Modules.Product/Seed');
 export const SEED_10 = process.env['E2E_PRODUCT_SEED'] ?? resolve(SEED_DIR, 'motor-gr.product.json');
 export const SEED_11 = process.env['E2E_PRODUCT_SEED_11'] ?? resolve(SEED_DIR, 'motor-gr-1.1.product.json');
@@ -76,7 +79,7 @@ export async function issuePolicy(request: APIRequestContext, tag: string, optio
   const first = await call(request, underwriter, 'POST', '/api/pol/v1/jobs/update-draft', {
     jobId, versionNo: 1, expectedDraftVersion: 0,
     instructions: [
-      { op: 'SET_VEHICLE', vehicle: { plate: options.plate ?? 'ikx-1234', make: 'Toyota', model: 'Yaris', firstRegistrationYear: 2021, engineCapacityCc: 1400, use: 'PRIVATE', value: { amount: '15000.00', currency: 'EUR' } } },
+      { op: 'SET_VEHICLE', vehicle: { plate: options.plate ?? 'ikx-1234', make: 'Toyota', model: 'Yaris', firstRegistrationYear: 2021, engineCapacityCc: 1400, use: 'PRIVATE', value: { amount: VEHICLE_VALUE, currency: 'EUR' } } },
       { op: 'SET_ANSWERS', questionSet: { questionSetCode: 'MOTOR-RISK', questionSetVersion: '1', answers: { 'Q-USAGE': 'PRIVATE', 'Q-HIRE-REWARD': 'NO' } } },
     ],
   });
@@ -125,15 +128,38 @@ export async function issuePolicy(request: APIRequestContext, tag: string, optio
   };
 }
 
-/** Moves the dev clock forward so that the server's now is `days` after the policy's start (plus a few seconds). */
+/**
+ * Moves the dev clock forward by whole days so that the server's now is `daysAfterStart` days (plus the seconds the test has
+ * already spent) after the policy's start. Whole days only: the time of day of the start stays, so the Athens calendar day of
+ * "now" is exactly start day + daysAfterStart (day counts, e.g. 245/365 on day 120, do not depend on the hour).
+ */
 export async function advanceTo(request: APIRequestContext, policy: Issued, daysAfterStart: number): Promise<Date> {
   const { advanceClock } = await import('./time.js');
   const now = await serverNow(request);
-  const target = policy.startAt.getTime() + daysAfterStart * 86_400_000 + 5_000;
-  const deltaMs = target - now.getTime();
-  expect(deltaMs, 'the clock only moves forward').toBeGreaterThan(0);
-  const days = Math.floor(deltaMs / 86_400_000);
-  const hours = Math.ceil((deltaMs - days * 86_400_000) / 3_600_000);
-  await advanceClock(request, { days, hours });
+  const elapsedDays = Math.floor((now.getTime() - policy.startAt.getTime()) / 86_400_000);
+  const days = daysAfterStart - elapsedDays;
+  expect(days, 'the clock only moves forward').toBeGreaterThan(0);
+  await advanceClock(request, { days });
   return serverNow(request);
+}
+
+/** True when the route exists (the API answers with anything but the empty 404 of an unmapped route). */
+export async function routeExists(request: APIRequestContext, token: string, method: 'GET' | 'POST', path: string): Promise<boolean> {
+  const probe = await call(request, token, method, path, method === 'POST' ? {} : undefined);
+  return !(probe.status === 404 && probe.text === '');
+}
+
+/** Registers and verifies the refund payee account of the policyholder (the IBAN travels in the request body only). */
+export async function registerRefundAccount(request: APIRequestContext, partyId: string, iban: string, holderName: string): Promise<string> {
+  const billing = await signIn(request, 'billing');
+  const created = await call(request, billing, 'POST', '/api/bil/v1/payee-accounts', {
+    partyId, purpose: 'REFUND', iban, holderName, source: 'STAFF', evidenceRef: 'e2e-iban-letter',
+  });
+  expect(created.status, created.text).toBe(201);
+  const id = (created.body['payeeAccount']?.['payeeAccountId'] ?? created.body['payeeAccountId']) as string;
+  expect(id, created.text).toBeTruthy();
+  expect(created.text, 'the IBAN is never returned').not.toContain(iban);
+  const checked = await call(request, billing, 'POST', '/api/bil/v1/payee-accounts/verify', { payeeAccountId: id });
+  expect(checked.status, checked.text).toBe(200);
+  return id;
 }
