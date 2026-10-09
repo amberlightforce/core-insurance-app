@@ -42,7 +42,7 @@ internal sealed class ScriptedServicingTax(TaxBehaviour behaviour) : IServicingT
 
         var lines = request.PremiumDeltas.Select(delta =>
         {
-            var debit = delta.Amount > 0m;
+            var debit = delta.TransactionKind == TransactionKind.EndorsementDebit;
             return new PricedTaxLine(
                 delta.Key, delta.Key.CoverageCode, "GR-IPT", ChargeCategories.Tax, 0.15m,
                 debit ? decimal.Round(delta.Amount * 0.15m, 2, MidpointRounding.AwayFromZero) : behaviour.Mode == "credit-tax" ? decimal.Round(delta.Amount * 0.15m, 2, MidpointRounding.AwayFromZero) : 0m,

@@ -315,6 +315,8 @@ internal sealed class ChangeQuoteService(
                         ProductArtefactHash = Sha256Hash.Parse(job.ArtefactHash),
                         ProductVersion = ProductVersionNumber.Parse(job.ProductVersion),
                         RatingArtefactHash = job.RatingArtefactHash is null ? null : Sha256Hash.Parse(job.RatingArtefactHash),
+                        // RAT requires the pin in ENDORSEMENT mode (RAT-ERR-INPUT otherwise): the term's own rating artefact (SL3-E2E integration fix).
+                        PinnedRatingArtefactHash = job.RatingArtefactHash is null ? null : Sha256Hash.Parse(job.RatingArtefactHash),
                         Mode = RateRateRequest.EnvelopeDetail.ModeValue.Endorsement,
                         TransactionType = "Endorsement",
                         RatingBasisDate = job.EffectiveAt.ToBusinessDate(zone),

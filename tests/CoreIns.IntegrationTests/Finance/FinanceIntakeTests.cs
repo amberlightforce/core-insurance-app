@@ -4,6 +4,8 @@ using CoreIns.IntegrationTests.Party;
 using CoreIns.IntegrationTests.Product;
 using CoreIns.Modules.Billing.Contracts.Events;
 using CoreIns.Modules.Policy.Contracts.Events;
+using CoreIns.Modules.Finance.Posting;
+using Microsoft.Extensions.DependencyInjection;
 using CoreIns.SharedKernel.Identifiers;
 using Npgsql;
 using static CoreIns.IntegrationTests.Finance.FinanceSlice;
@@ -44,6 +46,58 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
     }
 
     private Policy NewPolicy() => Policy.New($"POL{Random.Shared.Next(100_000_000, 999_999_999)}", "MOTOR-FIN", _artefactHash!);
+
+    [Fact]
+    public async Task Renewal_context_keeps_the_predecessors_policy_and_entity_and_is_never_journalised()
+    {
+        var policy = NewPolicy();
+        await _slice.PolicyBoundAsync(policy);
+        await _slice.DrainAsync();
+        var term = Guid.CreateVersion7();
+        var transaction = Guid.CreateVersion7();
+        var payload = Sample("pol", "RenewalBound");
+        payload["newTermId"] = term.ToString();
+        payload["transactionId"] = transaction.ToString();
+        payload["predecessorTermId"] = policy.TermId.ToString();
+        payload["productCode"] = policy.ProductCode;
+        payload["productVersion"] = "1.0";
+        payload["artefactHash"] = policy.ArtefactHash;
+        var envelope = await _slice.PublishAsync(RenewalBoundV1.Descriptor, "Policy", policy.PolicyId.ToString(), payload,
+            BusinessKeys.Empty.With("policyId", policy.PolicyId.ToString()).With("newTermId", term.ToString()).With("transactionId", transaction.ToString()));
+        await _slice.DrainAsync();
+
+        (await ScalarAsync<Guid>(_db, $"SELECT policy_id FROM fin.policy_context WHERE policy_term_id = '{term}'")).ShouldBe(policy.PolicyId);
+        (await ScalarAsync<Guid>(_db, $"SELECT legal_entity_id FROM fin.policy_context WHERE policy_term_id = '{term}'")).ShouldBe(Guid.Parse(ApiHostFactory.LegalEntityId));
+        (await ScalarAsync<string>(_db, $"SELECT status FROM fin.business_event WHERE source_event_id = '{envelope.EventId.Value}'")).ShouldBe("NO_POSTING");
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_entry WHERE '{envelope.EventId.Value}'::uuid = ANY(source_event_ids)")).ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task A_renewal_cannot_copy_context_from_another_entity_or_policy(bool foreignEntity)
+    {
+        var policy = NewPolicy();
+        var envelope = await _slice.PolicyBoundAsync(policy);
+        await _slice.DrainAsync();
+        if (foreignEntity)
+        {
+            await using var update = _db.CreateCommand($"UPDATE fin.policy_context SET legal_entity_id = '{Guid.CreateVersion7()}' WHERE policy_term_id = '{policy.TermId}'");
+            await update.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        }
+
+        var term = Guid.CreateVersion7();
+        envelope = envelope with { AggregateId = (foreignEntity ? policy.PolicyId : Guid.CreateVersion7()).ToString() };
+        await using var scope = _factory.Services.CreateAsyncScope();
+        await Should.ThrowAsync<InvalidOperationException>(() => scope.ServiceProvider.GetRequiredService<RenewalBoundHandler>().HandleAsync(
+            envelope, new RenewalBoundContext
+            {
+                NewTermId = term, TransactionId = Guid.CreateVersion7(), PredecessorTermId = policy.TermId,
+                ProductCode = policy.ProductCode, ProductVersion = "1.0", ArtefactHash = policy.ArtefactHash,
+            }, TestContext.Current.CancellationToken));
+
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.policy_context WHERE policy_term_id = '{term}'")).ShouldBe(0);
+    }
 
     /// <summary>The E2E-01 money path for one annual motor policy: written (per coverage + IPT), billed, IPT due, received, allocated.</summary>
     private async Task<(Policy Policy, Guid Account, Guid Invoice, Guid Receipt)> HappyPathAsync(bool policyFirst = true)
