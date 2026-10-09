@@ -1,0 +1,29 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        // Treaty maker (D-SL4-16): the reinsurance accountant enters, edits and submits; the reinsurance manager is the checker.
+        "ri.Contract.create": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Contract.update": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Contract.submit": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Contract.approve": [ "Staff.ReinsuranceManager" ],
+        // Reads: the reinsurance roles and, for get / applicable, the claims roles (SL4-RI-RECOVERY looks up the treaty for a loss).
+        "ri.Contract.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "ri.Contract.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Platform.Admin" ],
+        "ri.Contract.applicable": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+      }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (D-SL4-04, D-SL4-16; PRD-08 §11 authority matrix is not approved): the reinsurance manager may
+      // approve (or return) a per-risk XoL treaty. Never presented as an approved limit; "Illustrative": true grants are
+      // ignored in Production (fail closed: DENY). Separation of duties is not configuration: the maker, the editors and the
+      // submitter can never approve their own treaty.
+      "Grants": [
+        {
+          "Id": "ri-manager-contract-approve-illustrative", "Role": "Staff.ReinsuranceManager", "Type": "RI.CONTRACT_APPROVE", "Illustrative": true,
+          "Limits": [ { "Dimension": "contractType", "Comparison": "InSet", "Codes": [ "XOL_PER_RISK" ] } ]
+        }
+      ]
+    }
+  }
+}
