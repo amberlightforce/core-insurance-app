@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
 import { call, cents, eventually, signIn, sum, type Json } from './support/api.js';
-import { advanceTo, importProducts, issuePolicy, iso, registerRefundAccount, routeExists, serverNow } from './support/servicing.js';
+import { advanceTo, importProducts, issuePolicy, iso, registerRefundAccount, serverNow } from './support/servicing.js';
 
 // E2E-03 policyholder cancellation -> pro-rata credit -> fiscal credit note -> refund payout -> FIN journals, at API level
 // (SLICE-PLAN-3 §3.1). The E2E-01 policy (annual premium 430.00, IPT 64.50, paid in full at day 0), the dev clock at day 120:
 // 430.00 x 245/365 = 288.63 credited (TERM_RATIO, illustrative), the IPT kept (KEEP_NOT_REDUCED, PendingOpinion, provisional:
 // D-SL3-05, D-SL3-23). Runs through tests/e2e/run-e2e03.sh (Shiftable clock, D-SL3-12). The steps that need POL-CANCEL and
-// BIL-REFUND skip with a reason until those are on the stack under test.
+// BIL-REFUND are required: a missing capability fails the journey rather than skipping its money path.
 
 const FIRST_IBAN = 'GR9608100010000001234567890';
 const IBAN = 'GR1601101250000000012300695'; // the changed account the refund is paid to
@@ -25,14 +25,10 @@ const prorate = (lines: bigint[], days: bigint, termDays: bigint): bigint => sum
 
 test('E2E-03 cancellation: day-120 credit 288.63, IPT kept, credit note, fiscal CREDIT, refund payout, journals', async ({ request }) => {
   test.setTimeout(420_000);
-  const admin = await signIn(request, 'admin');
   const underwriter = await signIn(request, 'underwriter');
-  test.skip(!(await routeExists(request, underwriter, 'POST', '/api/pol/v1/cancellations')), 'POST /api/pol/v1/cancellations is not available yet (SL3-POL-CANCEL not merged)');
-  void admin;
   const billing = await signIn(request, 'billing');
   const billingManager = await signIn(request, 'billingmgr');
   const finance = await signIn(request, 'finance');
-  const refundsAvailable = await routeExists(request, billing, 'GET', '/api/bil/v1/refunds');
 
   await importProducts(request);
   const policy = await issuePolicy(request, 'e2e03');
@@ -44,8 +40,8 @@ test('E2E-03 cancellation: day-120 credit 288.63, IPT kept, credit note, fiscal 
   const bodies: string[] = [];
   // The policyholder registers an account and then changes it: a refund to a changed payee is referred to the billing manager
   // (REQ-BIL-188/189, D-SL3-14). The cooling-off of the change has passed long before the day-120 refund.
-  if (refundsAvailable) await registerRefundAccount(request, policy.partyId, FIRST_IBAN, 'Μαρία Παπαδοπούλου');
-  const payeeAccountId = refundsAvailable ? await registerRefundAccount(request, policy.partyId, IBAN, 'Μαρία Παπαδοπούλου') : undefined;
+  await registerRefundAccount(request, policy.partyId, FIRST_IBAN, 'Μαρία Παπαδοπούλου');
+  const payeeAccountId = await registerRefundAccount(request, policy.partyId, IBAN, 'Μαρία Παπαδοπούλου');
 
   // ---- 1-3. Cancel now at day 120 (source Policyholder): preview, then the cancellation itself.
   await advanceTo(request, policy, 120);
@@ -122,8 +118,6 @@ test('E2E-03 cancellation: day-120 credit 288.63, IPT kept, credit note, fiscal 
   const original = (await call(request, billing, 'GET', `/api/bil/v1/invoices/${policy.invoiceId}`)).body['fiscalStatus'] as Json;
   expect(fiscal['mark'], 'a credit document of its own').not.toBe(original['mark']);
 
-  test.skip(!refundsAvailable, 'GET /api/bil/v1/refunds is not available yet (SL3-BIL-REFUND not merged); the payout steps are skipped');
-
   // ---- 7-8. Refund of the credit: proposed by billing, decided by the billing manager, paid to the masked IBAN.
   const proposed = await call(request, billing, 'POST', '/api/bil/v1/refunds/propose', {
     billingAccountId: policy.accountId, payeeAccountId, reasonCode: 'POLICY_CANCELLED',
@@ -136,13 +130,9 @@ test('E2E-03 cancellation: day-120 credit 288.63, IPT kept, credit note, fiscal 
   expect(refund['payee']['maskedIban']).not.toBe(IBAN);
   expect(refund['payee']['payeeAccountId']).toBe(payeeAccountId);
   expect(refund['approvalState'], 'a changed payee is referred up to the billing manager').toBe('PENDING');
-  if (refund['approvalState'] === 'PENDING') {
-    const decided = await call(request, billingManager, 'POST', '/api/bil/v1/refunds/decide', { refundId: refund['refundId'], decision: 'APPROVE', comment: 'e2e03' });
-    expect(decided.status, decided.text).toBe(200);
-    bodies.push(decided.text);
-  } else {
-    expect(refund['approvalState'], 'auto-approved within the limit (illustrative)').toBe('NOT_REQUIRED');
-  }
+  const decided = await call(request, billingManager, 'POST', '/api/bil/v1/refunds/decide', { refundId: refund['refundId'], decision: 'APPROVE', comment: 'e2e03' });
+  expect(decided.status, decided.text).toBe(200);
+  bodies.push(decided.text);
   refund = await eventually('the refund to be PAID', async () => {
     const read = await call(request, billing, 'GET', `/api/bil/v1/refunds/${refund['refundId']}`);
     expect(read.status, read.text).toBe(200);
