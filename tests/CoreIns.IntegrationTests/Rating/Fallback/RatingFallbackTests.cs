@@ -93,8 +93,8 @@ public sealed class RatingFallbackTests(PostgresFixture database) : IClassFixtur
             var resolution = await scope.ServiceProvider.GetRequiredService<IRatingRatingArtifactService>().ResolveAsync(
                 new RatingArtifactResolveRequest { ProductCode = MotorProduct, ProductVersion = ProductVersionNumber.Parse("1.2") },
                 ValidAt.From(BusinessDate.Parse("2026-11-01")), cancellationToken: TestContext.Current.CancellationToken);
-            resolution.ArtefactHash.Value.ShouldBe(pin);
-            resolution.ActivationRecord.GetProperty("ProductVersion").GetString().ShouldBe("1.2");
+            resolution.ArtefactHash!.Value.Value.ShouldBe(pin);
+            resolution.ActivationRecord!.Value.GetProperty("ProductVersion").GetString().ShouldBe("1.2");
         }
         (await _factory.Services.GetRequiredService<OutboxReplayService>().ReplayAsync("RAT.ProductVersionPublished.Fallback",
             new ReplayFilter { EventIds = [envelope.EventId.Value] }, TestContext.Current.CancellationToken)).ShouldBe(1);
