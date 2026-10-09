@@ -10,7 +10,11 @@ export function validateServicingVehicle(
   mode: 'edit' | 'replace',
 ) {
   const issues = validateVehicle(form, thisYear);
-  if (mode === 'edit') delete issues.plate;
+  if (mode === 'edit') {
+    delete issues.plate;
+    delete issues.powerKw;
+    delete issues.garagingPostcode;
+  }
   return issues;
 }
 
@@ -102,14 +106,13 @@ export function vehicleChangeInstruction(
   existing: Vehicle | undefined,
   keepLocator: boolean,
 ): DraftInstruction {
-  const base = keepLocator ? (existing?.fields ?? {}) : {};
-  const fields: Record<string, unknown> = { ...(base as Record<string, unknown>) };
-  fields.garagingPostcode = form.garagingPostcode.trim();
-  if (form.powerKw.trim()) fields.powerKw = Number(form.powerKw);
-  else delete fields.powerKw;
-  if (form.fuelType) fields.fuelType = form.fuelType;
-  else delete fields.fuelType;
-  fields.ownerType ??= 'PERSON';
+  const fields: Record<string, unknown> = {};
+  if (!keepLocator) {
+    fields.garagingPostcode = form.garagingPostcode.trim();
+    if (form.powerKw.trim()) fields.powerKw = Number(form.powerKw);
+    if (form.fuelType) fields.fuelType = form.fuelType;
+    fields.ownerType = 'PERSON';
+  }
   return {
     op: 'SET_VEHICLE',
     vehicle: {
@@ -122,7 +125,11 @@ export function vehicleChangeInstruction(
       engineCapacityCc: Number(form.engineCapacityCc),
       use: existing?.use ?? 'PRIVATE',
       ...(form.value ? { value: { amount: form.value, currency: 'EUR' } } : {}),
-      fields: fields,
+      ...(keepLocator
+        ? existing?.fields !== undefined
+          ? { fields: existing.fields }
+          : {}
+        : { fields }),
     },
   };
 }

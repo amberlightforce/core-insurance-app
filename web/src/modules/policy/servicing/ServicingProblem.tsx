@@ -67,6 +67,16 @@ export function ServicingProblem({ error, title, onGoToVehicle, onRetry }: Servi
     </details>
   );
 
+  if (problem.errors?.some((field) => field.code === 'CHANGE_NOT_ALLOWED')) {
+    return (
+      <Banner variant="danger" live="alert" title={title}>
+        <p>{t('servicing.problems.changeNotAllowed.what')}</p>
+        <p>{t('servicing.problems.changeNotAllowed.fix')}</p>
+        {technical}
+      </Banner>
+    );
+  }
+
   if (explained.has(code)) {
     const earliest = extensionText(problem, 'earliest', 'earliestAt', 'from');
     const latest = extensionText(problem, 'latest', 'latestAt', 'to');

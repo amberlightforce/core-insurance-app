@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { PolicyGetResponse } from '../../../api/types';
+import { ApiError } from '../../../api/client';
 import { expectNoA11yViolations } from '../../../test/axe';
 import * as fx from '../../../test/fixtures';
 import { mockApi, problem, renderScreen, type MockRoute } from '../../../test/mockApi';
@@ -9,9 +10,10 @@ import { addDays, athensToday } from '../../quote/time';
 import type { ServicingPreview } from './api';
 import { CancellationPage } from './CancellationPage';
 import { ChangeWorkspacePage } from './ChangeWorkspacePage';
-import { dueOf, vehicleDiff, formOf } from './logic';
+import { dueOf, vehicleDiff, formOf, vehicleChangeInstruction } from './logic';
 import { RenewalPage } from './RenewalPage';
 import { ServicingPreviewView } from './ServicingPreviewView';
+import { ServicingProblem } from './ServicingProblem';
 
 vi.setConfig({ testTimeout: 60_000 });
 
@@ -121,7 +123,7 @@ function cancellationPreview(): ServicingPreview {
     additionalDue: eur('0.00'),
     transactionKind: 'CANCELLATION',
     cancellationSource: 'Policyholder',
-    refundMethod: 'ProRata',
+    refundMethod: 'PRO_RATA',
     provisional: true,
   };
 }
@@ -171,9 +173,39 @@ describe('dueOf and vehicleDiff', () => {
     expect(vehicleDiff(before, after).map((r) => r.field)).toEqual(['engineCapacityCc', 'value']);
     expect(before.garagingPostcode).toBe('10431');
   });
+  it('preserves issued extension fields exactly during an edit, even when form extensions differ', () => {
+    const existing = policyFx().riskTree?.vehicles[0];
+    expect(existing).toBeDefined();
+    const form = {
+      ...formOf(existing),
+      garagingPostcode: '99999',
+      powerKw: '120',
+      fuelType: 'DIESEL',
+    };
+    const instruction = vehicleChangeInstruction(form, existing, true);
+    expect(instruction.vehicle?.fields).toEqual(existing?.fields);
+  });
 });
 
 describe('ServicingPreviewView', () => {
+  it('explains a protected-field refusal without claiming that rating inputs are missing', () => {
+    renderScreen(
+      <ServicingProblem
+        title="Η αλλαγή απέτυχε"
+        onGoToVehicle={vi.fn()}
+        error={
+          new ApiError({
+            status: 422,
+            code: 'POL-ERR-VALIDATION',
+            errors: [{ field: 'riskTree.vehicles[v1].fields', code: 'CHANGE_NOT_ALLOWED' }],
+          })
+        }
+      />,
+      { path: '/', url: '/' },
+    );
+    expect(screen.getByText(/προστατευμένου στοιχείου/)).toBeInTheDocument();
+    expect(screen.getByText(/Κρατήστε τα στοιχεία όπως εκδόθηκαν/)).toBeInTheDocument();
+  });
   it('shows days, fraction and amount per prorated line and marks the provisional tax line', async () => {
     const { container } = renderScreen(<ServicingPreviewView preview={cancellationPreview()} />, {
       path: '/',
@@ -187,6 +219,8 @@ describe('ServicingPreviewView', () => {
     expect(within(tax).getByText('ΦΑΑ: δεν επιστρέφεται')).toBeInTheDocument();
     expect(within(tax).getByText(/Προσωρινό/)).toBeInTheDocument();
     expect(screen.getByText('Προσωρινή φορολογική μεταχείριση')).toBeInTheDocument();
+    expect(screen.getByText('Αναλογικά')).toBeInTheDocument();
+    expect(screen.queryByText('PRO_RATA')).not.toBeInTheDocument();
     await expectNoA11yViolations(container);
   });
 
@@ -484,9 +518,13 @@ describe('ChangeWorkspacePage', () => {
     });
 
   const changeRoutes = (
-    overrides: { create?: MockRoute['respond']; preview?: ServicingPreview } = {},
+    overrides: {
+      create?: MockRoute['respond'];
+      preview?: ServicingPreview;
+      policy?: PolicyGetResponse;
+    } = {},
   ): MockRoute[] => [
-    policyRoute(policyFx()),
+    policyRoute(overrides.policy ?? policyFx()),
     catalogueRoute,
     {
       method: 'POST',
@@ -546,7 +584,11 @@ describe('ChangeWorkspacePage', () => {
     user.click(screen.getByRole('button', { name: /Επόμενο/ }));
 
   it('walks date, vehicle edit, premium preview with diff, and the explicit confirmation', async () => {
-    const api = mockApi(changeRoutes());
+    const issued = policyFx();
+    const vehicle = issued.riskTree?.vehicles[0];
+    if (!vehicle) throw new Error('Vehicle fixture is missing');
+    delete vehicle.fields;
+    const api = mockApi(changeRoutes({ policy: issued }));
     const { user, container } = page();
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Αλλαγή εντός περιόδου' }),
@@ -560,7 +602,10 @@ describe('ChangeWorkspacePage', () => {
     expect(created?.body).toMatchObject({ policyId: fx.policyId });
     expect(created?.headers.get('Idempotency-Key')).toBeTruthy();
 
-    // Required inputs are required: the garaging postcode is on the policy, so clear it and the step blocks.
+    expect(
+      screen.getByRole('textbox', { name: /Ταχυδρομικός κώδικας στάθμευσης/ }),
+    ).toHaveAttribute('readonly');
+    // Editable rating inputs remain required; issued extensions are immutable and may be absent.
     const engine = screen.getByRole('textbox', { name: /Κυβισμός/ });
     await user.clear(engine);
     expect(screen.getByRole('button', { name: /Επόμενο/ })).toHaveAttribute(
@@ -583,6 +628,7 @@ describe('ChangeWorkspacePage', () => {
       op: 'SET_VEHICLE',
       vehicle: { locator: 'v1', plate: 'ikx-1234', engineCapacityCc: 1800 },
     });
+    expect(update.instructions[0]?.vehicle).not.toHaveProperty('fields');
     const diff = screen.getByRole('grid', { name: 'Αλλαγμένα στοιχεία οχήματος' });
     expect(within(diff).getByText('1500')).toBeInTheDocument();
     expect(within(diff).getByText('1800')).toBeInTheDocument();

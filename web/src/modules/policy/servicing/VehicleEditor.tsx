@@ -138,6 +138,7 @@ export function VehicleEditor({
             label={q('vehicle.power')}
             inputMode="numeric"
             suffix="kW"
+            isReadOnly={identityReadOnly}
             value={form.powerKw}
             onChange={set('powerKw')}
             onBlur={touch('powerKw')}
@@ -145,6 +146,7 @@ export function VehicleEditor({
           />
           <Select
             label={q('vehicle.fuel')}
+            isDisabled={identityReadOnly}
             options={fuelTypes.map((f) => ({ id: f, label: q(`vehicle.fuelTypes.${f}`) }))}
             value={form.fuelType || null}
             onChange={set('fuelType')}
@@ -160,7 +162,8 @@ export function VehicleEditor({
           />
           <TextField
             label={q('vehicle.garaging')}
-            isRequired
+            isRequired={!identityReadOnly}
+            isReadOnly={identityReadOnly}
             inputMode="numeric"
             value={form.garagingPostcode}
             onChange={set('garagingPostcode')}
