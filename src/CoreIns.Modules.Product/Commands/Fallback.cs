@@ -38,10 +38,10 @@ internal static class FallbackSupport
 
     public static string ActorKey(ActorRef actor) => $"{actor.KindCode}:{actor.Id}";
 
-    /// <summary>The content hash the PLT approval is bound to: product, defective, source (with artefact hashes), new version, date, reason.</summary>
+    /// <summary>The frozen configuration PLT approves. Effective windows are derived from the checker's decision instant.</summary>
     public static Sha256Hash ContentHash(
         string legalEntity, string jurisdiction, string productCode, ProductVersionNumber defective, string defectiveArtefactHash,
-        ProductVersionNumber source, string sourceArtefactHash, ProductVersionNumber newVersion, BusinessDate fallbackDate, string reason) =>
+        ProductVersionNumber source, string sourceArtefactHash, ProductVersionNumber newVersion, string reason) =>
         CanonicalJson.HashOf(
             new
             {
@@ -54,7 +54,6 @@ internal static class FallbackSupport
                 source = source.ToString(),
                 sourceArtefactHash,
                 newVersion = newVersion.ToString(),
-                fallbackDate = fallbackDate.ToString(),
                 reason,
             },
             SharedKernelJson.Options);
@@ -190,7 +189,7 @@ internal sealed class RequestFallbackHandler(
         var fallbackId = EntityIds.NewGuid();
         var hash = FallbackSupport.ContentHash(
             caller.Value, product.Jurisdiction, product.Code, plan.Defective.Number, plan.Defective.ArtefactHash,
-            plan.Source.Number, plan.Source.ArtefactHash, plan.NewVersion, fallbackDate, request.Reason);
+            plan.Source.Number, plan.Source.ArtefactHash, plan.NewVersion, request.Reason);
         ApprovalRequestResponse approval;
         try
         {
@@ -210,7 +209,7 @@ internal sealed class RequestFallbackHandler(
                         },
                     },
                     ReferralRole = ProductAuthorityTypes.CheckerRole,
-                    Reason = $"Fall-back of {product.Code} {plan.Defective.Number} to a copy of {plan.Source.Number} ({plan.NewVersion}) from {fallbackDate}.",
+                    Reason = $"Fall-back of {product.Code} {plan.Defective.Number} to a copy of {plan.Source.Number} ({plan.NewVersion}), effective on the approval's Athens business date.",
                 },
                 CommandOptions.New(),
                 cancellationToken).ConfigureAwait(false);
@@ -346,7 +345,7 @@ internal sealed partial class DecideFallbackHandler(
         // 1. The stored content must still be the content the approval was requested for (a changed row is a tampered request).
         var hash = FallbackSupport.ContentHash(
             caller.Value, product.Jurisdiction, product.Code, defectiveNumber, defective.ArtefactHash, sourceNumber, source.ArtefactHash,
-            newNumber, row.FallbackDate, row.Reason);
+            newNumber, row.Reason);
         if (hash.Value != row.PayloadHash)
         {
             LogRefused(logger, row.FallbackId, "stored content no longer hashes to the bound hash");
@@ -485,8 +484,8 @@ internal sealed partial class DecideFallbackHandler(
             return Sod("The approval is not decided under the emergency-change authority for this product line and jurisdiction.");
         }
 
-        // 5. The plan at the decision instant must be the bound plan (same Athens date, source, number).
-        var replanned = await ReplanAsync(row, product.ProductId, now, cancellationToken).ConfigureAwait(false);
+        // 5. The source and number remain frozen; the business date is the actual approval instant in Athens.
+        var replanned = await ReplanAsync(row, product.ProductId, decidedAt, cancellationToken).ConfigureAwait(false);
         if (replanned.IsFailure)
         {
             return replanned.Error;
@@ -498,12 +497,6 @@ internal sealed partial class DecideFallbackHandler(
     private async Task<Result<FallbackPlan>> ReplanAsync(FallbackRequestRow row, ProductId productId, Instant now, CancellationToken cancellationToken)
     {
         var today = FallbackPlanner.AthensDate(now);
-        if (today != row.FallbackDate)
-        {
-            return DomainError.Of(ModuleCode.PFC, "FALLBACK-STATE",
-                $"The fall-back was requested for {row.FallbackDate} and it is {today} (Europe/Athens); reject it and request again.");
-        }
-
         var facts = await FallbackSupport.LoadFactsAsync(db, productId, cancellationToken).ConfigureAwait(false);
         var defectiveFacts = facts.FirstOrDefault(f => f.Id == row.DefectiveVersionId);
         if (defectiveFacts is null)
@@ -599,6 +592,7 @@ internal sealed partial class DecideFallbackHandler(
         }).Entity;
 
         row.Status = FallbackSupport.Applied;
+        row.FallbackDate = plan.NewBusinessWindow.Start;
         row.DecidedBy = decidedBy;
         row.DecidedAt = decidedAt;
         row.DecisionReason = decisionReason;

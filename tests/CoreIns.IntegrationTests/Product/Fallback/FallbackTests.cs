@@ -261,10 +261,10 @@ public sealed class FallbackTests(PostgresFixture database) : IClassFixture<Post
         body!["dryRun"]!.GetValue<bool>().ShouldBeTrue();
         body.Text("preview.newVersion").ShouldBe("1.2");
         body.Text("preview.source.artefactHash").ShouldBe(hash10);
-        body.Text("preview.newBusinessWindow.start").ShouldContain("2026-10-08T21:00:00");
+        body.Text("preview.newBusinessWindow.from").ShouldContain("2026-10-08T21:00:00");
         body["fallbackId"].ShouldBeNull();
         (await ScalarAsync<long>($"SELECT count(*) FROM pfc.fallback_request f JOIN pfc.product p USING (product_id) WHERE p.code = '{code}'")).ShouldBe(0);
-        (await ScalarAsync<long>($"SELECT count(*) FROM plt.approval_request WHERE approval_type = 'PFC.Fallback' AND object_id IN (SELECT fallback_id::text FROM pfc.fallback_request)")).ShouldBe(0);
+        (await ScalarAsync<long>($"SELECT count(*) FROM plt.approval_request WHERE approval_type = 'PFC.Fallback' AND object_id IN (SELECT f.fallback_id::text FROM pfc.fallback_request f JOIN pfc.product p USING (product_id) WHERE p.code = '{code}')")).ShouldBe(0);
         (await ScalarAsync<long>($"SELECT count(*) FROM pfc.product_version v JOIN pfc.product p USING (product_id) WHERE p.code = '{code}'")).ShouldBe(2);
     }
 
@@ -307,6 +307,7 @@ public sealed class FallbackTests(PostgresFixture database) : IClassFixture<Post
         context.Roles = [CheckerRole];
         context.LegalEntity = LegalEntityCode.Parse("GR-TEST");
         context.Jurisdiction = Jurisdiction.Parse("GR");
+        using var commandContext = context.Use(IdempotencyKey.New(), dryRun: false);
         var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<DecideFallback, ProductVersionDecideFallbackResponse>>();
 
         var result = await handler.HandleAsync(
@@ -417,46 +418,55 @@ public sealed class FallbackTests(PostgresFixture database) : IClassFixture<Post
 
         // 1.0 has no predecessor: nothing to fall back to.
         var (noSource, noSourceBody) = await RequestAsync(code, "1.0");
-        noSource.StatusCode.ShouldBe(HttpStatusCode.UnprocessableContent, noSourceBody?.ToJsonString());
-        noSourceBody.Text("code").ShouldBe("PFC-ERR-FALLBACK-SOURCE");
+        noSource.StatusCode.ShouldBe(HttpStatusCode.Conflict, noSourceBody?.ToJsonString());
+        noSourceBody.Text("code").ShouldBe("PFC-ERR-FALLBACK-STATE");
         var (unknown, unknownBody) = await RequestAsync(code, "7.0");
         unknown.StatusCode.ShouldBe(HttpStatusCode.UnprocessableContent, unknownBody?.ToJsonString());
         unknownBody.Text("code").ShouldBe("PFC-ERR-NO-VERSION");
     }
 
     [Fact]
-    public async Task An_approval_after_the_athens_day_has_rolled_over_is_refused_so_the_bound_date_is_the_executed_date()
+    public async Task Approval_on_the_next_athens_day_preserves_the_frozen_configuration_and_opens_windows_on_the_decision_date()
     {
         var (code, _, _) = await SeedAsync("MOTOR-FB-L");
         var fallbackId = await RequestOkAsync(code);
+        var boundHash = await ScalarAsync<string>($"SELECT payload_hash FROM pfc.fallback_request WHERE fallback_id = '{fallbackId}'");
+        var sourceBefore = await VersionColumnAsync(code, "1.0", "artefact_hash");
+        var defectiveBefore = await VersionColumnAsync(code, "1.1", "artefact_hash");
 
         _clock.Freeze(Instant.Parse("2026-10-09T21:30:00Z")); // 2026-10-10 00:30 Athens
         var (late, lateBody) = await DecideAsync(fallbackId);
 
-        late.StatusCode.ShouldBe(HttpStatusCode.Conflict, lateBody?.ToJsonString());
-        lateBody.Text("code").ShouldBe("PFC-ERR-FALLBACK-STATE");
-        (await VersionColumnAsync(code, "1.2", "status")).ShouldBeNull();
-        (await DecideAsync(fallbackId, "REJECT")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        late.StatusCode.ShouldBe(HttpStatusCode.OK, lateBody?.ToJsonString());
+        lateBody.Text("fallback.status").ShouldBe("APPLIED");
+        (await ScalarAsync<string>($"SELECT payload_hash FROM pfc.fallback_request WHERE fallback_id = '{fallbackId}'")).ShouldBe(boundHash);
+        (await VersionColumnAsync(code, "1.2", "new_business_from")).ShouldBe("2026-10-10");
+        (await VersionColumnAsync(code, "1.1", "new_business_to")).ShouldBe("2026-10-10");
+        (await VersionColumnAsync(code, "1.0", "artefact_hash")).ShouldBe(sourceBefore);
+        (await VersionColumnAsync(code, "1.1", "artefact_hash")).ShouldBe(defectiveBefore);
+        (await ResolveVersionAsync(code, "2026-10-09T09:00:00Z")).ShouldBe("1.1");
+        (await ResolveVersionAsync(code, "2026-10-10T09:00:00Z")).ShouldBe("1.2");
     }
 
     [Fact]
-    public async Task PITFALL_48_a_request_approved_in_the_plt_inbox_is_executed_by_a_different_checker_and_never_stranded()
+    public async Task PITFALL_48_the_generic_plt_inbox_refuses_fallback_and_the_owner_decides_and_executes_it()
     {
         var (code, _, _) = await SeedAsync("MOTOR-FB-M");
         var (_, request) = await RequestAsync(code);
         var fallbackId = request.Text("fallbackId");
         var hash = await ScalarAsync<string>($"SELECT payload_hash FROM pfc.fallback_request WHERE fallback_id = '{fallbackId}'");
 
-        var (inbox, inboxBody) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/decide", Checker, CheckerRole + ",Platform.Admin",
+        var (inbox, inboxBody) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/decide", Checker, CheckerRole + ",Staff.ClaimsManager",
             new { requestId = request.Text("approvalRequestId"), decision = "Approve", payloadHash = hash, comment = "ok" });
-        inbox.StatusCode.ShouldBe(HttpStatusCode.OK, inboxBody?.ToJsonString());
+        inbox.StatusCode.ShouldBe(HttpStatusCode.Conflict, inboxBody?.ToJsonString());
+        inboxBody.Text("code").ShouldBe("PLT-ERR-OWNER-DECIDED");
 
         // The maker cannot use the inbox approval to execute their own request; another checker can.
         (await DecideAsync(fallbackId, user: Maker, roles: CheckerRole + "," + MakerRole)).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
         var (executed, body) = await DecideAsync(fallbackId, user: Checker2);
         executed.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body.Text("fallback.status").ShouldBe("APPLIED");
-        body.Text("fallback.decidedBy").ShouldBe("USER:" + Checker);
+        body.Text("fallback.decidedBy").ShouldBe("USER:" + Checker2);
     }
 
     [Fact]

@@ -210,7 +210,7 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                     END IF;
                     IF NEW.fallback_id <> OLD.fallback_id OR NEW.legal_entity_id <> OLD.legal_entity_id OR NEW.product_id <> OLD.product_id
                        OR NEW.defective_version_id <> OLD.defective_version_id OR NEW.source_version_id <> OLD.source_version_id
-                       OR NEW.new_major <> OLD.new_major OR NEW.new_minor <> OLD.new_minor OR NEW.fallback_date <> OLD.fallback_date
+                       OR NEW.new_major <> OLD.new_major OR NEW.new_minor <> OLD.new_minor
                        OR NEW.reason <> OLD.reason OR NEW.payload_hash <> OLD.payload_hash
                        OR NEW.approval_request_id <> OLD.approval_request_id OR NEW.requested_by <> OLD.requested_by
                        OR NEW.requested_by_principal IS DISTINCT FROM OLD.requested_by_principal OR NEW.requested_at <> OLD.requested_at THEN
@@ -219,6 +219,10 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                     IF NEW.status NOT IN ('APPLIED', 'REJECTED') OR NEW.decided_by IS NULL OR NEW.decided_at IS NULL
                        OR NEW.decided_by = OLD.requested_by OR NEW.decided_by IS NOT DISTINCT FROM OLD.requested_by_principal THEN
                         RAISE EXCEPTION 'a fall-back request is decided once, by someone other than its maker (PITFALLS 5)' USING ERRCODE = 'integrity_constraint_violation';
+                    END IF;
+                    IF (NEW.status = 'APPLIED' AND NEW.fallback_date <> (NEW.decided_at AT TIME ZONE 'Europe/Athens')::date)
+                       OR (NEW.status = 'REJECTED' AND NEW.fallback_date <> OLD.fallback_date) THEN
+                        RAISE EXCEPTION 'the fall-back business date is derived from approval in Athens (REQ-PFC-213)' USING ERRCODE = 'integrity_constraint_violation';
                     END IF;
                     RETURN NEW;
                 END $$;

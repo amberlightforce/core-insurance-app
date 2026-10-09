@@ -6,6 +6,7 @@ using CoreIns.Modules.Product.Persistence;
 using CoreIns.Modules.Product.Queries;
 using CoreIns.Modules.Product.Services;
 using CoreIns.Platform;
+using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Persistence;
@@ -53,6 +54,7 @@ public static class ProductModule
 
         // REQ-PFC-213 / D-SL5-09: emergency fall-back with maker-checker (PLT approval PFC.Fallback, authority PFC.EMERGENCY_CHANGE).
         services.AddProductAuthorityTypes();
+        services.AddOwnerDecidedApprovalType(ProductAuthorityTypes.FallbackApprovalType);
         services.AddScoped<IValidator<RequestFallback>, RequestFallbackValidator>();
         services.AddCommandAuditor<RequestFallback, ProductVersionEmergencyFallbackResponse, RequestFallbackAuditor>();
         services.AddCommand<RequestFallback, ProductVersionEmergencyFallbackResponse, RequestFallbackHandler>(CommandDescriptor.For("pfc.ProductVersion.fallback") with { SupportsDryRun = true });
