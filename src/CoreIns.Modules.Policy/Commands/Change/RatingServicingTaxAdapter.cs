@@ -132,6 +132,12 @@ internal sealed class RatingServicingTaxAdapter(
             return DomainError.Of(ModuleCode.POL, "RATING", $"Servicing tax lines failed: {ex.Error}");
         }
 
+        return MapLines(items, result);
+    }
+
+    internal static Result<IReadOnlyList<PricedTaxLine>> MapLines(
+        IReadOnlyList<(Domain.Servicing.ServicingDelta Delta, RatDelta Rat)> items, ServicingTaxLinesResult result)
+    {
         if (result.Lines.Count != items.Count)
         {
             return Refused("RAT returned a different number of tax lines than deltas");
@@ -141,13 +147,40 @@ internal sealed class RatingServicingTaxAdapter(
         for (var i = 0; i < items.Count; i++)
         {
             var line = result.Lines[i];
+            var expected = items[i].Rat;
+            if (line.DeltaRef != expected.DeltaRef || line.Element != expected.Element || line.TaxChargeType != expected.TaxChargeType
+                || line.Category != expected.Category || line.TaxClass != expected.TaxClass || line.Base != expected.Delta
+                || line.Amount.Currency != expected.Delta.Currency)
+            {
+                return Refused("RAT returned a tax line that does not match its premium delta");
+            }
+
+            if (!Enum.IsDefined(line.TreatmentAction))
+            {
+                return Refused("RAT returned an unknown treatment action");
+            }
+
+            var calculable = line.TreatmentAction is ServicingTreatmentAction.Apply or ServicingTreatmentAction.ReduceProRata or ServicingTreatmentAction.ReverseAsVoid;
+            if (calculable && (line.Rate is null || line.Rate < 0m || line.Rate > 1m
+                || string.IsNullOrWhiteSpace(line.CalculationRuleId) || string.IsNullOrWhiteSpace(line.CalculationRuleVersion)))
+            {
+                return Refused("RAT returned a calculated tax without rate or rule evidence");
+            }
+
+            if (string.IsNullOrWhiteSpace(line.TreatmentRuleId) || string.IsNullOrWhiteSpace(line.TreatmentRuleVersion)
+                || string.IsNullOrWhiteSpace(line.LegalStatus) || line.Provisional != (line.LegalStatus != "Settled"))
+            {
+                return Refused("RAT returned incomplete or inconsistent treatment evidence");
+            }
+
             var action = line.TreatmentAction switch
             {
                 ServicingTreatmentAction.Apply => TreatmentActionCode.Apply,
                 ServicingTreatmentAction.KeepNotReduced => TreatmentActionCode.KeepNotReduced,
                 ServicingTreatmentAction.ReduceProRata => TreatmentActionCode.ReduceProRata,
                 ServicingTreatmentAction.ReverseAsVoid => TreatmentActionCode.ReverseAsVoid,
-                _ => TreatmentActionCode.InsurerBears,
+                ServicingTreatmentAction.InsurerBears => TreatmentActionCode.InsurerBears,
+                _ => throw new InvalidOperationException("The treatment action was validated above."),
             };
             lines.Add(new PricedTaxLine(
                 items[i].Delta.Key, items[i].Delta.Key.CoverageCode, line.TaxChargeType, "TAX", line.Rate ?? 0m, line.Amount.Amount, action,

@@ -346,7 +346,7 @@ internal sealed class ChangePricer(IServicingTax tax, RequestContext context)
     /// Fail closed on the tax port (PITFALLS 10): every premium delta has exactly one tax line, a debit applies the tax, a credit keeps it
     /// not reduced with 0.00 (D-SL3-05), and amounts are in minor units.
     /// </summary>
-    private static DomainError? CheckTax(IReadOnlyList<ServicingDelta> deltas, IReadOnlyList<PricedTaxLine> lines)
+    internal static DomainError? CheckTax(IReadOnlyList<ServicingDelta> deltas, IReadOnlyList<PricedTaxLine> lines)
     {
         foreach (var delta in deltas)
         {
@@ -357,8 +357,11 @@ internal sealed class ChangePricer(IServicingTax tax, RequestContext context)
             }
 
             var line = own[0];
-            var debit = delta.Amount > 0m;
-            var wrongAction = debit ? line.Action != TreatmentActionCode.Apply : line.Action != TreatmentActionCode.KeepNotReduced || line.Amount != 0m;
+            var debit = delta.TransactionKind == TransactionKind.EndorsementDebit;
+            var credit = delta.TransactionKind == TransactionKind.EndorsementCredit;
+            var wrongAction = (!debit && !credit) || (debit
+                ? delta.Amount < 0m || line.Action != TreatmentActionCode.Apply || (delta.Amount == 0m && line.Amount != 0m)
+                : delta.Amount > 0m || line.Action != TreatmentActionCode.KeepNotReduced || line.Amount != 0m);
             if (wrongAction || decimal.Round(line.Amount, 2) != line.Amount)
             {
                 return DomainError.Of(
