@@ -149,7 +149,7 @@ internal sealed class AdvanceDevClockValidator : AbstractValidator<AdvanceDevClo
     }
 }
 
-internal sealed class AdvanceDevClockHandler(DbSession session, DevClockStore store, IClock clock)
+internal sealed class AdvanceDevClockHandler(DbSession session)
     : ICommandHandler<AdvanceDevClock, DevClockState>
 {
     public async Task<Result<DevClockState>> HandleAsync(AdvanceDevClock command, CancellationToken cancellationToken)
@@ -162,8 +162,10 @@ internal sealed class AdvanceDevClockHandler(DbSession session, DevClockStore st
             return DomainError.Of(ModuleCode.PLT, PlatformErrors.Validation, "The dev clock cannot be advanced that far (limit: 100 years in total).");
         }
 
-        store.Invalidate();
-        return new DevClockState(moved.Value.After / 1_000_000, clock.Now.ToDateTimeOffset());
+        // The new offset is not committed yet (and the shared cache is refreshed by the endpoint after the commit), so the answer
+        // is computed from the new total rather than read back from the clock.
+        var now = SystemClock.Instance.Now.Plus(TimeSpan.FromTicks(moved.Value.After * 10));
+        return new DevClockState(moved.Value.After / 1_000_000, now.ToDateTimeOffset());
     }
 }
 
