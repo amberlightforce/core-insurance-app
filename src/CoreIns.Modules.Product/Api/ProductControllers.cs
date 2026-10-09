@@ -21,6 +21,8 @@ internal static class ProductPermissions
 {
     public const string Resolve = "pfc.ProductVersion.resolve";
     public const string Import = "pfc.ProductVersion.import";
+    public const string Fallback = "pfc.ProductVersion.fallback";
+    public const string DecideFallback = "pfc.ProductVersion.decideFallback";
     public const string ArtifactGet = "pfc.Artifact.get";
     public const string CatalogueGet = "pfc.Catalogue.get";
     public const string CatalogueGetItem = "pfc.Catalogue.getItem";
@@ -83,16 +85,34 @@ internal sealed class ProductVersionsController : ControllerBase
             : Results.Ok(result.Value);
     }
 
+    /// <summary>pfc.ProductVersion.fallback: the maker's emergency fall-back request (dry run previews). The server derives source, number and dates.</summary>
+    [HttpPost("fallback")]
+    [Authorize(Policy = ProductPermissions.Fallback)]
+    public async Task<IResult> FallbackAsync(
+        [FromBody] ProductVersionEmergencyFallbackRequest request,
+        [FromServices] ICommandHandler<RequestFallback, ProductVersionEmergencyFallbackResponse> handler,
+        CancellationToken cancellationToken) =>
+        this.Respond(await handler.HandleAsync(new RequestFallback(request), cancellationToken).ConfigureAwait(false));
+
+    /// <summary>pfc.ProductVersion.decideFallback: the checker's decision; APPROVE executes the fall-back in the same transaction.</summary>
+    [HttpPost("decide-fallback")]
+    [Authorize(Policy = ProductPermissions.DecideFallback)]
+    public async Task<IResult> DecideFallbackAsync(
+        [FromBody] ProductVersionDecideFallbackRequest request,
+        [FromServices] ICommandHandler<DecideFallback, ProductVersionDecideFallbackResponse> handler,
+        CancellationToken cancellationToken) =>
+        this.Respond(await handler.HandleAsync(new DecideFallback(request), cancellationToken).ConfigureAwait(false));
+
     private static bool TryTime(IClock clock, string? validAt, string? knownAt, out BusinessDate valid, out Instant known)
     {
         var now = clock.Now;
-        valid = new BusinessDate(DateOnly.FromDateTime(now.ToUtcDateTime()));
+        valid = Domain.FallbackPlanner.AthensDate(now);
         known = now;
         if (validAt is not null)
         {
             if (Instant.TryParse(validAt, out var instant))
             {
-                valid = new BusinessDate(DateOnly.FromDateTime(instant.ToUtcDateTime()));
+                valid = Domain.FallbackPlanner.AthensDate(instant);
             }
             else if (DateOnly.TryParseExact(validAt, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
             {
