@@ -163,11 +163,81 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                 principalTable: "product_version",
                 principalColumn: "product_version_id",
                 onDelete: ReferentialAction.Restrict);
+
+            // PITFALLS 17/47: a Locked version is write-once. The app role has UPDATE on the table, so a trigger refuses every
+            // change to a Locked row except setting or shortening the new-business end (and retiring).
+            migrationBuilder.Sql(
+                """
+                CREATE FUNCTION pfc.guard_locked_version() RETURNS trigger LANGUAGE plpgsql AS $$
+                BEGIN
+                    IF NEW.fallback_of_version_id IS DISTINCT FROM OLD.fallback_of_version_id
+                       OR NEW.replaces_version_id IS DISTINCT FROM OLD.replaces_version_id THEN
+                        RAISE EXCEPTION 'pfc.product_version fall-back links are write-once (REQ-PFC-213)' USING ERRCODE = 'integrity_constraint_violation';
+                    END IF;
+                    IF OLD.status = 'LOCKED' THEN
+                        IF NEW.status NOT IN ('LOCKED', 'RETIRED')
+                           OR NEW.product_id <> OLD.product_id OR NEW.legal_entity_id <> OLD.legal_entity_id
+                           OR NEW.jurisdiction <> OLD.jurisdiction OR NEW.major <> OLD.major OR NEW.minor <> OLD.minor
+                           OR NEW.is_abstract <> OLD.is_abstract OR NEW.channels <> OLD.channels
+                           OR NEW.contract_currency <> OLD.contract_currency OR NEW.artefact_hash <> OLD.artefact_hash
+                           OR NEW.schema_version <> OLD.schema_version OR NEW.new_business_from <> OLD.new_business_from
+                           OR NEW.renewal_from <> OLD.renewal_from OR NEW.renewal_to IS DISTINCT FROM OLD.renewal_to
+                           OR NEW.created_at <> OLD.created_at OR NEW.created_by <> OLD.created_by
+                           OR NEW.locked_at IS DISTINCT FROM OLD.locked_at THEN
+                            RAISE EXCEPTION 'a Locked pfc.product_version is write-once (REQ-PFC-197, REQ-PFC-213)' USING ERRCODE = 'integrity_constraint_violation';
+                        END IF;
+                        IF NEW.new_business_to IS DISTINCT FROM OLD.new_business_to
+                           AND OLD.new_business_to IS NOT NULL AND (NEW.new_business_to IS NULL OR NEW.new_business_to >= OLD.new_business_to) THEN
+                            RAISE EXCEPTION 'a new-business end can only be set or shortened, never extended (REQ-PFC-178)' USING ERRCODE = 'integrity_constraint_violation';
+                        END IF;
+                    END IF;
+                    RETURN NEW;
+                END $$;
+                """);
+            migrationBuilder.Sql(
+                """
+                CREATE TRIGGER trg_locked_version_guard BEFORE UPDATE ON pfc.product_version
+                    FOR EACH ROW EXECUTE FUNCTION pfc.guard_locked_version()
+                """);
+
+            // PITFALLS 47: fall-back requests move only PENDING_APPROVAL -> APPLIED | REJECTED, once, by someone other than the maker.
+            migrationBuilder.Sql(
+                """
+                CREATE FUNCTION pfc.guard_fallback_request() RETURNS trigger LANGUAGE plpgsql AS $$
+                BEGIN
+                    IF OLD.status <> 'PENDING_APPROVAL' THEN
+                        RAISE EXCEPTION 'a decided fall-back request is final (REQ-PFC-213)' USING ERRCODE = 'integrity_constraint_violation';
+                    END IF;
+                    IF NEW.fallback_id <> OLD.fallback_id OR NEW.legal_entity_id <> OLD.legal_entity_id OR NEW.product_id <> OLD.product_id
+                       OR NEW.defective_version_id <> OLD.defective_version_id OR NEW.source_version_id <> OLD.source_version_id
+                       OR NEW.new_major <> OLD.new_major OR NEW.new_minor <> OLD.new_minor OR NEW.fallback_date <> OLD.fallback_date
+                       OR NEW.reason <> OLD.reason OR NEW.payload_hash <> OLD.payload_hash
+                       OR NEW.approval_request_id <> OLD.approval_request_id OR NEW.requested_by <> OLD.requested_by
+                       OR NEW.requested_by_principal IS DISTINCT FROM OLD.requested_by_principal OR NEW.requested_at <> OLD.requested_at THEN
+                        RAISE EXCEPTION 'the bound content of a fall-back request cannot change (REQ-PFC-213)' USING ERRCODE = 'integrity_constraint_violation';
+                    END IF;
+                    IF NEW.status NOT IN ('APPLIED', 'REJECTED') OR NEW.decided_by IS NULL OR NEW.decided_at IS NULL
+                       OR NEW.decided_by = OLD.requested_by OR NEW.decided_by IS NOT DISTINCT FROM OLD.requested_by_principal THEN
+                        RAISE EXCEPTION 'a fall-back request is decided once, by someone other than its maker (PITFALLS 5)' USING ERRCODE = 'integrity_constraint_violation';
+                    END IF;
+                    RETURN NEW;
+                END $$;
+                """);
+            migrationBuilder.Sql(
+                """
+                CREATE TRIGGER trg_fallback_request_guard BEFORE UPDATE ON pfc.fallback_request
+                    FOR EACH ROW EXECUTE FUNCTION pfc.guard_fallback_request()
+                """);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("DROP TRIGGER IF EXISTS trg_fallback_request_guard ON pfc.fallback_request");
+            migrationBuilder.Sql("DROP FUNCTION IF EXISTS pfc.guard_fallback_request()");
+            migrationBuilder.Sql("DROP TRIGGER IF EXISTS trg_locked_version_guard ON pfc.product_version");
+            migrationBuilder.Sql("DROP FUNCTION IF EXISTS pfc.guard_locked_version()");
+
             migrationBuilder.DropForeignKey(
                 name: "fk_product_version_fallback_of",
                 schema: "pfc",

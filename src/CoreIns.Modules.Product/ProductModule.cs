@@ -1,3 +1,4 @@
+using CoreIns.Modules.Product.Authority;
 using CoreIns.Modules.Product.Commands;
 using CoreIns.Modules.Product.Contracts;
 using CoreIns.Modules.Product.Contracts.Api;
@@ -50,6 +51,15 @@ public static class ProductModule
         services.AddCommandAuditor<ImportProductVersion, ProductVersionImportResponse, ImportProductVersionAuditor>();
         services.AddCommand<ImportProductVersion, ProductVersionImportResponse, ImportProductVersionHandler>(CommandDescriptor.For("pfc.ProductVersion.import"));
 
+        // REQ-PFC-213 / D-SL5-09: emergency fall-back with maker-checker (PLT approval PFC.Fallback, authority PFC.EMERGENCY_CHANGE).
+        services.AddProductAuthorityTypes();
+        services.AddScoped<IValidator<RequestFallback>, RequestFallbackValidator>();
+        services.AddCommandAuditor<RequestFallback, ProductVersionEmergencyFallbackResponse, RequestFallbackAuditor>();
+        services.AddCommand<RequestFallback, ProductVersionEmergencyFallbackResponse, RequestFallbackHandler>(CommandDescriptor.For("pfc.ProductVersion.fallback") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<DecideFallback>, DecideFallbackValidator>();
+        services.AddCommandAuditor<DecideFallback, ProductVersionDecideFallbackResponse, DecideFallbackAuditor>();
+        services.AddCommand<DecideFallback, ProductVersionDecideFallbackResponse, DecideFallbackHandler>(CommandDescriptor.For("pfc.ProductVersion.decideFallback"));
+
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IProductProductVersionService, ProductProductVersionService>();
         services.AddScoped<IProductCatalogueService, ProductCatalogueService>();
@@ -82,6 +92,16 @@ public static class ProductModule
             .Describe("Οι κλειδωμένες εκδόσεις είναι αμετάβλητες. Δημοσιεύστε νέα έκδοση.", "Locked versions are immutable. Publish a new version."),
         ErrorDefinition.For(ModuleCode.PFC, "WINDOW-OVERLAP", 409, "Επικάλυψη παραθύρων", "Windows overlap")
             .Describe("Άλλη κλειδωμένη έκδοση καλύπτει μέρος του παραθύρου νέων εργασιών.", "Another Locked version covers part of the new-business window."),
+        ErrorDefinition.For(ModuleCode.PFC, "FALLBACK-SOURCE", 422, "Δεν υπάρχει έγκυρη έκδοση πηγής", "No valid fall-back source")
+            .Describe("Δεν υπάρχει προηγούμενη δημοσιευμένη έκδοση με το ίδιο εύρος καναλιών για αντιγραφή.", "There is no earlier published version with the same channel scope to copy."),
+        ErrorDefinition.For(ModuleCode.PFC, "FALLBACK-STATE", 409, "Η επαναφορά δεν είναι σε κατάλληλη κατάσταση", "The fall-back is not in a valid state")
+            .Describe("Η έκδοση έχει ήδη αντικατασταθεί ή εκκρεμεί επαναφορά, ή η επαναφορά δεν είναι σε αναμονή έγκρισης.", "The version is already replaced or has a fall-back pending, or the fall-back is not awaiting approval."),
+        ErrorDefinition.For(ModuleCode.PFC, "FALLBACK-NOT-FOUND", 404, "Άγνωστη επαναφορά", "Unknown fall-back")
+            .Describe("Η αίτηση επαναφοράς δεν υπάρχει.", "The fall-back request does not exist."),
+        ErrorDefinition.For(ModuleCode.PFC, "SOD", 403, "Παραβίαση διαχωρισμού καθηκόντων", "Separation of duties")
+            .Describe("Η έγκριση δεν δεσμεύει το περιεχόμενο αυτής της επαναφοράς ή δεν δόθηκε με την απαιτούμενη εξουσιοδότηση.", "The approval does not bind this fall-back's content or was not decided under the required authority."),
+        ErrorDefinition.For(ModuleCode.PFC, "STALE", 409, "Το προϊόν άλλαξε", "The product changed")
+            .Describe("Το προϊόν τροποποιήθηκε ταυτόχρονα. Φορτώστε ξανά και δοκιμάστε πάλι.", "The product was changed concurrently. Reload and retry."),
         ErrorDefinition.For(ModuleCode.PFC, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];
