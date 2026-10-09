@@ -19,8 +19,8 @@ namespace CoreIns.IntegrationTests.Rating.Proration;
 
 /// <summary>
 /// SL3-RAT-PRORATE: <c>IRatingServicingTax</c> against the real MKT <c>TaxCalculator.treatment</c> over the Greece pack rows
-/// (SL3-MKT-TREATMENT). MKT does not bind <c>calculate</c> yet, so the calculator under test is the real treatment plus a test-only
-/// <c>calculate</c> that applies the IPT rate the real MKT configuration resolves (<c>tax.ipt.rate.general</c>). No database.
+/// (SL3-MKT-TREATMENT). The calculator under test is the real MKT
+/// <c>TaxCalculator</c> (treatment and calculate, SL3-MKT-CALCULATE). No database.
 /// </summary>
 public sealed class ServicingTaxRealMarketTests
 {
@@ -87,59 +87,55 @@ public sealed class ServicingTaxRealMarketTests
         string id, decimal amount, ServicingTransactionKind kind, string? source = null, ServicingTaxCategory category = ServicingTaxCategory.Tax) =>
         new(id, "MTPL", "PREM-MTPL", "IPT", category, "general", new Money(amount, Currency.EUR), TaxPoint, TaxPoint.AddDays(100), kind, source);
 
-    private static RatingServicingTax Service(string environment = "Development")
+    private static RatingServicingTax Service(string environment = "Development", params PackConfigValue[] extraRows)
     {
         var entity = new LegalEntityInfo(new LegalEntityId(EntityId), LegalEntityCode.Parse("GR-TEST"), "GR", "gr", "EUR", "Europe/Athens", "ACTIVE", true);
         var clock = new ManualClock(Instant.FromUtc(2026, 10, 8));
-        var catalogue = new ConfigurationCatalogue([new GrPackConfiguration()], clock.Now);
+        IPackConfigurationSource[] sources = extraRows.Length == 0 ? [new GrPackConfiguration()] : [new GrPackConfiguration(), new ExtraRows(extraRows)];
+        var catalogue = new ConfigurationCatalogue(sources, clock.Now);
         var engine = new ConfigurationEngine(catalogue, new LegalEntityRegistry([entity]), new Env(environment), clock);
         return new RatingServicingTax(
-            new RealTreatmentWithConfiguredRate(new MarketTaxCalculator(engine), engine),
+            new MarketTaxCalculator(engine), // the real treatment and the real calculate (SL3-MKT-CALCULATE)
             new RequestContext { LegalEntity = LegalEntityCode.Parse("GR-TEST") },
             new Directory(),
             new Env(environment));
     }
 
-    /// <summary>The real MKT treatment, and a test-only calculate at the IPT rate the real configuration resolves.</summary>
-    private sealed class RealTreatmentWithConfiguredRate(MarketTaxCalculator real, ConfigurationEngine engine) : ITaxCalculator
-    {
-        public ValueTask<TaxTreatmentResult> TreatmentAsync(TaxTreatmentRequest request, CancellationToken cancellationToken = default) =>
-            real.TreatmentAsync(request, cancellationToken);
+    private static PackConfigValue TreatmentRow(string kindAndSource, string action) =>
+        new($"tax.treatment.rule.TAX.{kindAndSource}", ConfigValueType.Json, $$"""{"action":"{{action}}","ruleId":"TEST-{{action}}","ruleVersion":"1"}""",
+            LegalStatus.PendingOpinion, "test treatment row", false);
 
-        public ValueTask<TaxCalculationResult> CalculateAsync(TaxCalculationRequest request, CancellationToken cancellationToken = default)
-        {
-            var resolved = engine.Resolve(
-                new ConfigurationResolveRequest
-                {
-                    LegalEntity = "GR-TEST",
-                    Jurisdiction = "GR",
-                    Keys = ["tax.ipt.rate.general"],
-                    TimeBasisDates = new Dictionary<string, BusinessDate> { [TimeBases.TaxPointDate] = new BusinessDate(request.TaxPointDate) },
-                },
-                ValidAt.From(new BusinessDate(request.TaxPointDate)),
-                null).Values.Single();
-            var rate = decimal.Parse(resolved.Value.GetString()!, System.Globalization.CultureInfo.InvariantCulture);
-            var line = request.ChargeLines.Single();
-            return ValueTask.FromResult(new TaxCalculationResult(
-                [
-                    new TaxLine
-                    {
-                        Element = line.Element,
-                        ChargeType = "IPT",
-                        Category = TaxCategory.Tax,
-                        TaxClass = line.TaxClass,
-                        Base = line.PremiumAmount,
-                        Rate = rate,
-                        Amount = new SpiMoney(decimal.Round(line.PremiumAmount.Amount * rate, 2, MidpointRounding.AwayFromZero), line.PremiumAmount.Currency),
-                        RoundingRuleId = "cur.rounding.tax.line",
-                        RuleId = "tax.ipt.rate.general",
-                        RuleVersion = resolved.ValueVersionId.ToString(),
-                        LegalSourceRef = resolved.LegalSourceRef ?? string.Empty,
-                        LegalStatus = Enum.Parse<CoreIns.Modules.Market.Contracts.Spi.LegalStatus>(resolved.LegalStatus.ToString()),
-                    },
-                ],
-                []));
-        }
+    [Fact]
+    public async Task D1_a_reduce_pro_rata_cancellation_credit_of_minus_100_00_gets_a_credit_IPT_of_minus_15_00()
+    {
+        var line = (await Service("Development", TreatmentRow("CANCELLATION.Insurer", "REDUCE_PRO_RATA"))
+            .LinesAsync(Request(Delta("c", -100.00m, ServicingTransactionKind.Cancellation, "Insurer")))).Lines.Single();
+
+        line.TreatmentAction.ShouldBe(ServicingTreatmentAction.ReduceProRata);
+        line.Amount.Amount.ShouldBe(-15.00m);
+        line.Rate.ShouldBe(0.15m);
+        line.CalculationRuleId.ShouldBe("tax.ipt.rate.general");
+    }
+
+    [Fact]
+    public async Task D1_a_reverse_as_void_credit_gets_a_credit_IPT_and_the_credit_note_treatment()
+    {
+        var line = (await Service("Development", TreatmentRow("VOID.Insurer", "REVERSE_AS_VOID"))
+            .LinesAsync(Request(Delta("v", -70.00m, ServicingTransactionKind.Void, "Insurer")))).Lines.Single();
+
+        line.TreatmentAction.ShouldBe(ServicingTreatmentAction.ReverseAsVoid);
+        line.Amount.Amount.ShouldBe(-10.50m);
+    }
+
+    private sealed class ExtraRows(IReadOnlyList<PackConfigValue> rows) : IPackConfigurationSource
+    {
+        public string PackId => "test-rows";
+
+        public string PackVersion => "0.0.1";
+
+        public string Country => "GR";
+
+        public IReadOnlyList<PackConfigValue> Values => rows;
     }
 
     private sealed class Directory : ILegalEntityDirectory

@@ -155,6 +155,12 @@
       "nextCursor": "sample",
       "limit": 1
     },
+    "AuthorityPreview": {
+      "type": "sample",
+      "issueType": "SAMPLE_CODE",
+      "outcome": "ALLOW",
+      "sourceGrantId": "sample"
+    },
     "ContingencyApplyConsequenceResponse": {
       "contingency": "unspecified"
     },
@@ -417,6 +423,18 @@
     "IssueCloseResponse": {
       "issue": "unspecified"
     },
+    "IssueDecidability": {
+      "canDecide": true,
+      "reasons": [
+        "SOD_CREATOR"
+      ],
+      "authority": {
+        "type": "sample",
+        "issueType": "SAMPLE_CODE",
+        "outcome": "ALLOW",
+        "sourceGrantId": "sample"
+      }
+    },
     "IssueDecideRequest": {
       "issueIds": [
         "019262ca-33aa-7930-856f-894677c676f1"
@@ -624,20 +642,270 @@
       "hold": "unspecified",
       "impactCounts": "unspecified"
     },
+    "ReferralCustomer": {
+      "partyId": "01926d34-09fe-7adc-8f0d-2f9515f41170",
+      "partyNumber": "sample",
+      "displayName": "sample"
+    },
+    "ReferralDecidability": {
+      "canDecide": true,
+      "reasons": [
+        "SOD_CREATOR"
+      ]
+    },
+    "ReferralDriverFacts": {
+      "youngestAgeBand": "UNDER_18",
+      "claimsLast5Years": 1
+    },
     "ReferralGetResponse": {
-      "referral": "unspecified"
+      "referral": {
+        "summary": {
+          "jobRef": "01929198-1e60-7754-861a-acb710c85e90",
+          "jobNumber": "sample",
+          "jobState": "sample",
+          "productCode": "sample",
+          "customer": {
+            "partyId": "01921c06-e6be-7bab-88e0-838af9654f22",
+            "partyNumber": "sample",
+            "displayName": "sample"
+          },
+          "premiumTotal": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "effectiveDate": "2026-10-07",
+          "referralStatus": "Open",
+          "reasons": [
+            {
+              "issueId": "0192590c-28e2-75ee-8fbe-77cabc7155af",
+              "issueType": "SAMPLE_CODE",
+              "ruleId": "sample",
+              "status": "Open",
+              "observed": "sample",
+              "limit": "sample",
+              "limitUnavailableReason": "sample"
+            }
+          ],
+          "raisedAt": "2026-10-07T09:00:00Z",
+          "lastDecidedAt": "2026-10-07T09:00:00Z",
+          "lastDecidedBy": "sample",
+          "callerWorkedOnJob": true
+        },
+        "productVersion": "sample",
+        "expirationDate": "2026-10-07",
+        "producerCode": "sample",
+        "quoteVersionNo": 1,
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxes": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "facts": {
+          "evaluatedAt": "2026-10-07T09:00:00Z",
+          "effectiveDate": "2026-10-07",
+          "ruleSetCode": "sample",
+          "ruleSetVersion": "sample",
+          "dataStatus": "sample",
+          "vehicle": {
+            "make": "sample",
+            "model": "sample",
+            "firstRegistrationYear": 1,
+            "ageYears": 1,
+            "value": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "engineCapacityCc": 1,
+            "usage": "sample"
+          },
+          "driver": {
+            "youngestAgeBand": "UNDER_18",
+            "claimsLast5Years": 1
+          }
+        },
+        "issues": [
+          {
+            "issue": {
+              "id": "019290b4-6d8d-7b15-8e6f-cf4071615eeb",
+              "jobRef": "01929b2b-2ecb-7894-8d05-b34595762504",
+              "issueType": "SAMPLE_CODE",
+              "issueKey": "sample",
+              "ruleId": "sample",
+              "severity": "SAMPLE_CODE",
+              "blockingPoint": "PRE_QUOTE",
+              "lane": "SAMPLE_CODE",
+              "status": "Open",
+              "recordVersion": 1,
+              "messageEn": "sample",
+              "messageEl": "sample",
+              "raisedAt": "2026-10-07T09:00:00Z",
+              "raisedBy": "sample",
+              "decision": {
+                "decision": "APPROVE",
+                "decidedBy": "sample",
+                "decidedAt": "2026-10-07T09:00:00Z",
+                "reason": "sample",
+                "message": "sample",
+                "authorityCheckId": "0192204a-b2fd-7061-8830-672190d08226"
+              },
+              "closeReason": "sample"
+            },
+            "decidability": {
+              "canDecide": true,
+              "reasons": [
+                "SOD_CREATOR"
+              ],
+              "authority": {
+                "type": "sample",
+                "issueType": "SAMPLE_CODE",
+                "outcome": "ALLOW",
+                "sourceGrantId": "sample"
+              }
+            }
+          }
+        ],
+        "decidability": {
+          "canDecide": true,
+          "reasons": [
+            "SOD_CREATOR"
+          ]
+        }
+      }
+    },
+    "ReferralIssue": {
+      "issue": {
+        "id": "0192069a-fbc1-7b82-8027-32a86c7ab31a",
+        "jobRef": "019275d8-d296-7421-8963-2a13240fdbec",
+        "issueType": "SAMPLE_CODE",
+        "issueKey": "sample",
+        "ruleId": "sample",
+        "severity": "SAMPLE_CODE",
+        "blockingPoint": "PRE_QUOTE",
+        "lane": "SAMPLE_CODE",
+        "status": "Open",
+        "recordVersion": 1,
+        "messageEn": "sample",
+        "messageEl": "sample",
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "raisedBy": "sample",
+        "decision": {
+          "decision": "APPROVE",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "reason": "sample",
+          "message": "sample",
+          "authorityCheckId": "01920357-6a2b-7576-86dc-3ee3b9ffef4c"
+        },
+        "closeReason": "sample"
+      },
+      "decidability": {
+        "canDecide": true,
+        "reasons": [
+          "SOD_CREATOR"
+        ],
+        "authority": {
+          "type": "sample",
+          "issueType": "SAMPLE_CODE",
+          "outcome": "ALLOW",
+          "sourceGrantId": "sample"
+        }
+      }
     },
     "ReferralListItem": {
-      "referral": "unspecified"
+      "jobRef": "0192648c-646e-7915-84b1-59b601416480",
+      "jobNumber": "sample",
+      "jobState": "sample",
+      "productCode": "sample",
+      "customer": {
+        "partyId": "0192fd9e-29f3-7283-8f6b-c06326e2f233",
+        "partyNumber": "sample",
+        "displayName": "sample"
+      },
+      "premiumTotal": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "effectiveDate": "2026-10-07",
+      "referralStatus": "Open",
+      "reasons": [
+        {
+          "issueId": "0192365d-be75-7a35-8656-584fdcb8b241",
+          "issueType": "SAMPLE_CODE",
+          "ruleId": "sample",
+          "status": "Open",
+          "observed": "sample",
+          "limit": "sample",
+          "limitUnavailableReason": "sample"
+        }
+      ],
+      "raisedAt": "2026-10-07T09:00:00Z",
+      "lastDecidedAt": "2026-10-07T09:00:00Z",
+      "lastDecidedBy": "sample",
+      "callerWorkedOnJob": true
     },
     "ReferralListPage": {
       "items": [
         {
-          "referral": "unspecified"
+          "jobRef": "019228a5-d13f-7d71-891a-1b7e6465e83b",
+          "jobNumber": "sample",
+          "jobState": "sample",
+          "productCode": "sample",
+          "customer": {
+            "partyId": "01929075-1f76-7814-832d-26ea684b7953",
+            "partyNumber": "sample",
+            "displayName": "sample"
+          },
+          "premiumTotal": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "effectiveDate": "2026-10-07",
+          "referralStatus": "Open",
+          "reasons": [
+            {
+              "issueId": "0192d724-ec0b-7f3c-8fdd-f49122221493",
+              "issueType": "SAMPLE_CODE",
+              "ruleId": "sample",
+              "status": "Open",
+              "observed": "sample",
+              "limit": "sample",
+              "limitUnavailableReason": "sample"
+            }
+          ],
+          "raisedAt": "2026-10-07T09:00:00Z",
+          "lastDecidedAt": "2026-10-07T09:00:00Z",
+          "lastDecidedBy": "sample",
+          "callerWorkedOnJob": true
         }
       ],
       "nextCursor": "sample",
-      "limit": 1
+      "limit": 1,
+      "counts": {
+        "open": 1,
+        "approvedToday": 1,
+        "rejected": 1,
+        "decidedByMeToday": 1,
+        "mine": 1
+      }
+    },
+    "ReferralQueueCounts": {
+      "open": 1,
+      "approvedToday": 1,
+      "rejected": 1,
+      "decidedByMeToday": 1,
+      "mine": 1
+    },
+    "ReferralReason": {
+      "issueId": "01926ba6-3fbe-720c-8623-705f04cc585b",
+      "issueType": "SAMPLE_CODE",
+      "ruleId": "sample",
+      "status": "Open",
+      "observed": "sample",
+      "limit": "sample",
+      "limitUnavailableReason": "sample"
     },
     "ReferralReferUpRequest": {
       "jobRef": "unspecified",
@@ -671,6 +939,157 @@
     },
     "ReferralRequestResponse": {
       "referral": "unspecified"
+    },
+    "ReferralRiskFacts": {
+      "evaluatedAt": "2026-10-07T09:00:00Z",
+      "effectiveDate": "2026-10-07",
+      "ruleSetCode": "sample",
+      "ruleSetVersion": "sample",
+      "dataStatus": "sample",
+      "vehicle": {
+        "make": "sample",
+        "model": "sample",
+        "firstRegistrationYear": 1,
+        "ageYears": 1,
+        "value": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "engineCapacityCc": 1,
+        "usage": "sample"
+      },
+      "driver": {
+        "youngestAgeBand": "UNDER_18",
+        "claimsLast5Years": 1
+      }
+    },
+    "ReferralVehicleFacts": {
+      "make": "sample",
+      "model": "sample",
+      "firstRegistrationYear": 1,
+      "ageYears": 1,
+      "value": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "engineCapacityCc": 1,
+      "usage": "sample"
+    },
+    "ReferralView": {
+      "summary": {
+        "jobRef": "01927822-04f1-7880-821e-1c8a50de4a96",
+        "jobNumber": "sample",
+        "jobState": "sample",
+        "productCode": "sample",
+        "customer": {
+          "partyId": "01928508-4004-705c-885f-e1d9366aa97a",
+          "partyNumber": "sample",
+          "displayName": "sample"
+        },
+        "premiumTotal": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "effectiveDate": "2026-10-07",
+        "referralStatus": "Open",
+        "reasons": [
+          {
+            "issueId": "0192d8b1-ba53-7d50-8532-709226314e09",
+            "issueType": "SAMPLE_CODE",
+            "ruleId": "sample",
+            "status": "Open",
+            "observed": "sample",
+            "limit": "sample",
+            "limitUnavailableReason": "sample"
+          }
+        ],
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "lastDecidedAt": "2026-10-07T09:00:00Z",
+        "lastDecidedBy": "sample",
+        "callerWorkedOnJob": true
+      },
+      "productVersion": "sample",
+      "expirationDate": "2026-10-07",
+      "producerCode": "sample",
+      "quoteVersionNo": 1,
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "taxes": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "facts": {
+        "evaluatedAt": "2026-10-07T09:00:00Z",
+        "effectiveDate": "2026-10-07",
+        "ruleSetCode": "sample",
+        "ruleSetVersion": "sample",
+        "dataStatus": "sample",
+        "vehicle": {
+          "make": "sample",
+          "model": "sample",
+          "firstRegistrationYear": 1,
+          "ageYears": 1,
+          "value": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "engineCapacityCc": 1,
+          "usage": "sample"
+        },
+        "driver": {
+          "youngestAgeBand": "UNDER_18",
+          "claimsLast5Years": 1
+        }
+      },
+      "issues": [
+        {
+          "issue": {
+            "id": "01922b62-d00e-7aff-8cdd-fb83f57aed7b",
+            "jobRef": "0192612a-0e78-70c7-8a1d-b68e6ebf5620",
+            "issueType": "SAMPLE_CODE",
+            "issueKey": "sample",
+            "ruleId": "sample",
+            "severity": "SAMPLE_CODE",
+            "blockingPoint": "PRE_QUOTE",
+            "lane": "SAMPLE_CODE",
+            "status": "Open",
+            "recordVersion": 1,
+            "messageEn": "sample",
+            "messageEl": "sample",
+            "raisedAt": "2026-10-07T09:00:00Z",
+            "raisedBy": "sample",
+            "decision": {
+              "decision": "APPROVE",
+              "decidedBy": "sample",
+              "decidedAt": "2026-10-07T09:00:00Z",
+              "reason": "sample",
+              "message": "sample",
+              "authorityCheckId": "019253aa-750d-76a2-844f-95d919a96eec"
+            },
+            "closeReason": "sample"
+          },
+          "decidability": {
+            "canDecide": true,
+            "reasons": [
+              "SOD_CREATOR"
+            ],
+            "authority": {
+              "type": "sample",
+              "issueType": "SAMPLE_CODE",
+              "outcome": "ALLOW",
+              "sourceGrantId": "sample"
+            }
+          }
+        }
+      ],
+      "decidability": {
+        "canDecide": true,
+        "reasons": [
+          "SOD_CREATOR"
+        ]
+      }
     },
     "ReferralWithdrawRequest": {
       "jobRef": "unspecified",

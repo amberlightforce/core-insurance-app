@@ -64,6 +64,12 @@ internal sealed class EvaluationRow
     /// <summary>Producer code on the job, as POL reported it (SOD-UW-02).</summary>
     public string? ProducerCode { get; set; }
 
+    /// <summary>
+    /// The risk facts the rules read, in a derived form without personal data (vehicle facts, the youngest driver's age band,
+    /// claims count; never a birth date), for the referral workbench. POL's in-process evaluations only; null before D-USR-13.
+    /// </summary>
+    public string? Facts { get; set; }
+
     public Instant CreatedAt { get; set; }
 
     public string CreatedBy { get; set; } = string.Empty;
@@ -189,6 +195,7 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.Property(e => e.Trace).HasColumnName("trace").HasColumnType("jsonb");
             entity.Property(e => e.JobParticipants).HasColumnName("job_participants").HasColumnType("text[]").HasDefaultValueSql("'{}'::text[]");
             entity.Property(e => e.ProducerCode).HasColumnName("producer_code");
+            entity.Property(e => e.Facts).HasColumnName("facts").HasColumnType("jsonb");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.HasIndex(e => new { e.JobId, e.CreatedAt }).HasDatabaseName("ix_evaluation_job");

@@ -74,6 +74,14 @@ public sealed record InvoiceIssuedV1 : global::CoreIns.Platform.Contracts.Events
     [global::System.Text.Json.Serialization.JsonPropertyName("method")]
     public required string Method { get; init; }
 
+    /// <summary>For kind CREDIT_NOTE, the invoice it corrects (REQ-BIL-091). Always set for a credit note, absent for an INVOICE. Additive (SL3-BIL-CREDIT).</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'originalInvoiceId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("originalInvoiceId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? OriginalInvoiceId { get; init; }
+
     /// <summary>Contract member 'fiscalTriggerRef'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("fiscalTriggerRef")]
     public string? FiscalTriggerRef { get; init; }

@@ -38,6 +38,8 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<LedgerLineRow> LedgerLines => Set<LedgerLineRow>();
 
+    public DbSet<CreditApplicationRow> CreditApplications => Set<CreditApplicationRow>();
+
     public DbSet<IntakeExceptionRow> IntakeExceptions => Set<IntakeExceptionRow>();
 
     public DbSet<PayeeAccountRow> PayeeAccounts => Set<PayeeAccountRow>();
@@ -82,6 +84,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.ToTable("plan_instance", table =>
             {
                 table.HasCheckConstraint("ck_plan_instance_term", "term_to > term_from");
+                table.HasCheckConstraint("ck_plan_instance_cancelled", "(cancelled_effective IS NULL) = (cancellation_source IS NULL)");
                 table.HasCheckConstraint("ck_plan_instance_bill_mode", "bill_mode IN ('DIRECT_BILL', 'AGENCY_BILL')");
             });
             entity.HasKey(e => e.TermId).HasName("pk_plan_instance");
@@ -104,6 +107,9 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
             entity.Property(e => e.SourceSequence).HasColumnName("source_sequence");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.PredecessorTermId).HasColumnName("predecessor_term_id");
+            entity.Property(e => e.CancelledEffective).HasColumnName("cancelled_effective");
+            entity.Property(e => e.CancellationSource).HasColumnName("cancellation_source");
             entity.HasIndex(e => e.PlanInstanceId).IsUnique().HasDatabaseName("ux_plan_instance_id");
             entity.HasIndex(e => e.BillingAccountId).HasDatabaseName("ix_plan_instance_account");
             entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_plan_instance_policy");
@@ -151,6 +157,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.LegalStatus).HasColumnName("legal_status");
             entity.Property(e => e.Provisional).HasColumnName("provisional").HasDefaultValue(false);
             entity.Property(e => e.WrittenEntryId).HasColumnName("written_entry_id");
+            entity.Property(e => e.TransactionKind).HasColumnName("transaction_kind");
+            entity.Property(e => e.CancellationSource).HasColumnName("cancellation_source");
+            entity.Property(e => e.TreatmentRuleId).HasColumnName("treatment_rule_id");
+            entity.Property(e => e.TreatmentRuleVersion).HasColumnName("treatment_rule_version");
             entity.HasIndex(e => new { e.SetId, e.SetIndex }).IsUnique().HasDatabaseName("ux_charge_set_member");
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_charge_term");
         });
@@ -165,6 +175,9 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
                 table.HasCheckConstraint("ck_invoice_total", "total > 0");
                 table.HasCheckConstraint("ck_invoice_currency", "currency ~ '^[A-Z]{3}$'");
                 table.HasCheckConstraint("ck_invoice_record_version", "record_version >= 1");
+
+                // A credit note always references the invoice it corrects; an invoice never does (REQ-BIL-091).
+                table.HasCheckConstraint("ck_invoice_original", "(kind = 'CREDIT_NOTE') = (original_invoice_id IS NOT NULL)");
             });
             entity.HasKey(e => e.InvoiceId).HasName("pk_invoice");
             entity.Property(e => e.InvoiceId).HasColumnName("invoice_id");
@@ -191,6 +204,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.FiscalMark).HasColumnName("fiscal_mark");
             entity.Property(e => e.FiscalUid).HasColumnName("fiscal_uid");
             entity.Property(e => e.FiscalRejectionCodes).HasColumnName("fiscal_rejection_codes");
+            entity.Property(e => e.OriginalInvoiceId).HasColumnName("original_invoice_id");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
@@ -198,7 +212,15 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.HasIndex(e => new { e.LegalEntityId, e.InvoiceNumber }).IsUnique().HasDatabaseName("ux_invoice_number");
 
             // One invoice per bound transaction in the ANNUAL slice: a replayed set can never bill twice.
-            entity.HasIndex(e => new { e.TransactionId, e.Kind }).IsUnique().HasDatabaseName("ux_invoice_transaction");
+            entity.HasIndex(e => new { e.TransactionId, e.Kind }).IsUnique().HasFilter("kind = 'INVOICE'").HasDatabaseName("ux_invoice_transaction");
+
+            // One credit note per source transaction and original invoice (PITFALLS 9: the business reference, not a key that
+            // contains the credit note's own id). A transaction crediting two original invoices gets two credit notes.
+            entity.HasIndex(e => new { e.TransactionId, e.OriginalInvoiceId }).IsUnique().HasFilter("kind = 'CREDIT_NOTE'")
+                .HasDatabaseName("ux_credit_note_reference");
+            entity.HasIndex(e => e.OriginalInvoiceId).HasDatabaseName("ix_invoice_original");
+            entity.HasOne<InvoiceRow>().WithMany().HasForeignKey(e => e.OriginalInvoiceId)
+                .HasConstraintName("fk_invoice_original").OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(e => e.BillingAccountId).HasDatabaseName("ix_invoice_account");
             entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_invoice_policy");
             entity.HasIndex(e => e.FiscalDocumentId).HasDatabaseName("ix_invoice_fiscal_document");
@@ -234,9 +256,19 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
             entity.Property(e => e.State).HasColumnName("state");
             entity.Property(e => e.LineNo).HasColumnName("line_no");
+            entity.Property(e => e.TransactionKind).HasColumnName("transaction_kind");
+            entity.Property(e => e.CancellationSource).HasColumnName("cancellation_source");
+            entity.Property(e => e.TreatmentRuleId).HasColumnName("treatment_rule_id");
+            entity.Property(e => e.CreditsItemId).HasColumnName("credits_item_id");
 
-            // An ANNUAL charge is billed exactly once (REQ-BIL-002: one set of scheduled items).
-            entity.HasIndex(e => e.ChargeId).IsUnique().HasDatabaseName("ux_invoice_item_charge");
+            // A charge is billed exactly once (REQ-BIL-002: one set of scheduled items). A credit charge is split over the
+            // original items it credits, once per original item.
+            entity.HasIndex(e => e.ChargeId).IsUnique().HasFilter("credits_item_id IS NULL").HasDatabaseName("ux_invoice_item_charge");
+            entity.HasIndex(e => new { e.ChargeId, e.CreditsItemId }).IsUnique().HasFilter("credits_item_id IS NOT NULL")
+                .HasDatabaseName("ux_credit_item_charge");
+            entity.HasIndex(e => e.CreditsItemId).HasDatabaseName("ix_invoice_item_credits");
+            entity.HasOne<InvoiceItemRow>().WithMany().HasForeignKey(e => e.CreditsItemId)
+                .HasConstraintName("fk_invoice_item_credits").OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(e => e.InvoiceId).HasDatabaseName("ix_invoice_item_invoice");
             entity.HasOne<InvoiceRow>().WithMany().HasForeignKey(e => e.InvoiceId)
                 .HasConstraintName("fk_invoice_item_invoice").OnDelete(DeleteBehavior.Restrict);
@@ -412,6 +444,9 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.SourceType).HasColumnName("source_type");
             entity.Property(e => e.SourceId).HasColumnName("source_id");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.TransactionKind).HasColumnName("transaction_kind");
+            entity.Property(e => e.CancellationSource).HasColumnName("cancellation_source");
+            entity.Property(e => e.TreatmentRuleId).HasColumnName("treatment_rule_id");
             entity.HasIndex(e => new { e.EntryId, e.LineNo }).IsUnique().HasDatabaseName("ux_ledger_line_no");
             entity.HasIndex(e => new { e.BillingAccountId, e.AccountCode }).HasDatabaseName("ix_ledger_line_account");
             entity.HasOne<LedgerEntryRow>().WithMany().HasForeignKey(e => e.EntryId)
@@ -433,6 +468,39 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
             entity.Property(e => e.RaisedAt).HasColumnName("raised_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.Kind, e.Subject, e.ReasonCode }).IsUnique().HasDatabaseName("ux_intake_exception");
+        });
+
+        modelBuilder.Entity<CreditApplicationRow>(entity =>
+        {
+            entity.ToTable("credit_application", table =>
+            {
+                table.HasCheckConstraint("ck_credit_application_amount", "amount > 0");
+                table.HasCheckConstraint("ck_credit_application_currency", "currency ~ '^[A-Z]{3}$'");
+                table.HasCheckConstraint("ck_credit_application_target", "target_kind IN ('INVOICE_ITEM')");
+                table.HasCheckConstraint("ck_credit_application_invoice_item", "target_kind <> 'INVOICE_ITEM' OR (target_invoice_id IS NOT NULL AND target_invoice_item_id IS NOT NULL)");
+            });
+            entity.HasKey(e => e.CreditApplicationId).HasName("pk_credit_application");
+            entity.Property(e => e.CreditApplicationId).HasColumnName("credit_application_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
+            entity.Property(e => e.CreditNoteId).HasColumnName("credit_note_id");
+            entity.Property(e => e.CreditItemId).HasColumnName("credit_item_id");
+            entity.Property(e => e.TargetKind).HasColumnName("target_kind");
+            entity.Property(e => e.TargetInvoiceId).HasColumnName("target_invoice_id");
+            entity.Property(e => e.TargetInvoiceItemId).HasColumnName("target_invoice_item_id");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.Actor).HasColumnName("actor");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.CreditItemId).HasDatabaseName("ix_credit_application_credit_item");
+            entity.HasIndex(e => e.TargetInvoiceItemId).HasDatabaseName("ix_credit_application_target_item");
+            entity.HasIndex(e => e.BillingAccountId).HasDatabaseName("ix_credit_application_account");
+            entity.HasOne<InvoiceItemRow>().WithMany().HasForeignKey(e => e.CreditItemId)
+                .HasConstraintName("fk_credit_application_credit_item").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<InvoiceItemRow>().WithMany().HasForeignKey(e => e.TargetInvoiceItemId)
+                .HasConstraintName("fk_credit_application_target_item").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<BillingAccountRow>().WithMany().HasForeignKey(e => e.BillingAccountId)
+                .HasConstraintName("fk_credit_application_account").OnDelete(DeleteBehavior.Restrict);
         });
 
         ConfigurePayeeAccounts(modelBuilder);

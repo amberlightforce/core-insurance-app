@@ -18,6 +18,7 @@ internal sealed class ClaimProtection(FieldEncryptor encryptor, ILegalEntityDire
     public const string DescriptionField = "clm.claim.description";
     public const string LossLocationField = "clm.claim.loss_location";
     public const string FnolPayloadField = "clm.fnol_snapshot.payload";
+    public const string ReverificationCommentField = "clm.reverification.comment";
 
     public SkLegalEntityId Current(RequestContext context) =>
         legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));

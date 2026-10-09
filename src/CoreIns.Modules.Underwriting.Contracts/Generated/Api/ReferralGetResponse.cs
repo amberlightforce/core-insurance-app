@@ -9,10 +9,6 @@ namespace CoreIns.Modules.Underwriting.Contracts.Api;
 public sealed record ReferralGetResponse
 {
     /// <summary>PRD: "referral"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("referral")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Referral { get; init; }
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralView Referral { get; init; }
 }

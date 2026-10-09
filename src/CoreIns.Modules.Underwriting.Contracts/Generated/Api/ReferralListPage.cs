@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>Page of uw.Referral.list results (cursor pagination, contract §3.5.5)</summary>
+/// <summary>Page of uw.Referral.list results (cursor pagination, contract §3.5.5) with the queue counts</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReferralListPage
 {
@@ -20,4 +20,8 @@ public sealed record ReferralListPage
     [global::System.Text.Json.Serialization.JsonPropertyName("limit")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public int? Limit { get; init; }
+
+    /// <summary>Contract member 'counts'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("counts")]
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralQueueCounts Counts { get; init; }
 }

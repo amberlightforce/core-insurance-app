@@ -52,6 +52,37 @@ internal sealed class PolicyBoundHandler(ICommandHandler<AttachTerm, IntakeOutco
     }
 }
 
+/// <summary><c>pol.PolicyCancelled</c> → <c>bil.Term.stopBilling</c>: stops the term's planned items from the effective date (REQ-BIL-074). Idempotent.</summary>
+internal sealed class PolicyCancelledHandler(ICommandHandler<StopTermBilling, IntakeOutcome> stop) : IEventHandler<PolicyCancelledV1>
+{
+    public const string Name = "BIL.PolicyCancelled.StopBilling";
+
+    public async Task HandleAsync(EventEnvelope envelope, PolicyCancelledV1 payload, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(envelope);
+        ArgumentNullException.ThrowIfNull(payload);
+        ChargeDeltaEmittedHandler.Unwrap(await stop.HandleAsync(
+            new StopTermBilling(payload, new EventSource(envelope.EventId.Value, envelope.AggregateSequence, envelope.Set)), cancellationToken).ConfigureAwait(false));
+    }
+}
+
+/// <summary><c>pol.RenewalBound</c> → <c>bil.BillingAccount.attachRenewalTerm</c>: term n+1 on the same account, invoiced like a new bind (REQ-BIL-002). Idempotent on the term id.</summary>
+internal sealed class RenewalBoundHandler(ICommandHandler<AttachRenewalTerm, IntakeOutcome> attach) : IEventHandler<RenewalBoundV1>
+{
+    public const string Name = "BIL.RenewalBound.AttachTerm";
+
+    public async Task HandleAsync(EventEnvelope envelope, RenewalBoundV1 payload, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(envelope);
+        ArgumentNullException.ThrowIfNull(payload);
+        var policyId = envelope.BusinessKeys.TryGetValue("policyId", out var value) && Guid.TryParse(value, out var id)
+            ? new PolicyId(id)
+            : throw new InvalidOperationException("RenewalBound without the policyId business key (catalogue x-business-keys).");
+        ChargeDeltaEmittedHandler.Unwrap(await attach.HandleAsync(
+            new AttachRenewalTerm(payload, policyId, new EventSource(envelope.EventId.Value, envelope.AggregateSequence, envelope.Set)), cancellationToken).ConfigureAwait(false));
+    }
+}
+
 /// <summary><c>cmp.FiscalDocRegistered</c> → store the MARK on the invoice (REQ-BIL-098).</summary>
 internal sealed class FiscalDocRegisteredHandler(ICommandHandler<RecordFiscalOutcome, int> record) : IEventHandler<FiscalDocRegisteredV1>
 {

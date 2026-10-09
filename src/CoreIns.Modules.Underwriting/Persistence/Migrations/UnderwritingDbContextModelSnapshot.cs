@@ -45,6 +45,10 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<string>("Facts")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("facts");
+
                     b.Property<Guid>("JobId")
                         .HasColumnType("uuid")
                         .HasColumnName("job_id");
