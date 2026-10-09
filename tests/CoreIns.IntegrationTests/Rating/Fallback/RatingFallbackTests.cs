@@ -3,6 +3,7 @@ using CoreIns.Modules.Product.Contracts.Events;
 using CoreIns.Modules.Rating.Contracts;
 using CoreIns.Modules.Rating.Contracts.Api;
 using CoreIns.Platform.Context;
+using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
 using CoreIns.Platform.Persistence;
