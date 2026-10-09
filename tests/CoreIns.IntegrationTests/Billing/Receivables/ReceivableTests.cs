@@ -135,6 +135,24 @@ public sealed class ReceivableTests(PostgresFixture database) : IClassFixture<Po
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
     }
 
+    [Fact]
+    public async Task REQ_BIL_356_statement_reference_selects_only_the_matching_item_among_multiple_on_one_account()
+    {
+        var firstRequest = Request(8150m, true);
+        var secondRequest = Request(500m, true) with { CounterpartyPartyId = firstRequest.CounterpartyPartyId };
+        var first = (await RegisterAsync(firstRequest)).Value;
+        var second = (await RegisterAsync(secondRequest)).Value;
+        second.BillingAccountId.ShouldBe(first.BillingAccountId);
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/bil/v1/payments/take");
+        request.Headers.Add(TestAuthHandler.RolesHeader, "Staff.Billing"); request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        request.Content = JsonContent.Create(new { billingAccountId = first.BillingAccountId.Value, bankReference = firstRequest.StatementRef, amount = new { amount = "8100.00", currency = "EUR" }, method = "BANK_TRANSFER" });
+        using var response = await _client.SendAsync(request, Ct);
+        response.IsSuccessStatusCode.ShouldBeTrue(await response.Content.ReadAsStringAsync(Ct));
+        await using var scope = Scope();
+        var service = scope.ServiceProvider.GetRequiredService<IBillingReceivableService>();
+        (await service.GetAsync(first.ReceivableId.ToString("D"), Ct)).Receivable.OpenAmount.Amount.ShouldBe(50m);
+        (await service.GetAsync(second.ReceivableId.ToString("D"), Ct)).Receivable.OpenAmount.Amount.ShouldBe(500m);
+    }
     public sealed record ClmRegister(ReceivableRegisterRequest Request) : ICommand<ReceivableRegisterResponse>;
     public sealed class ClmRegisterHandler(IBillingReceivableService billing, RequestContext context) : ICommandHandler<ClmRegister, ReceivableRegisterResponse>
     {
@@ -146,5 +164,3 @@ public sealed class ReceivableTests(PostgresFixture database) : IClassFixture<Po
         }
     }
 }
-
-

@@ -17,7 +17,8 @@ internal sealed class ReceivableMatching(BillingDbContext db, LedgerWriter ledge
     public async Task<Result<ReceivableRow>> ResolveAsync(PaymentTakeRequest r, LegalEntityId entity, CancellationToken ct)
     {
         if (r.InvoiceId is not null) return DomainError.Of(ModuleCode.BIL, "VALIDATION", "Receivable matching cannot also reference an invoice.");
-        var reference = r.PaymentReference ?? r.BankReference;
+        var reference = r.PaymentReference ?? (r.ReceivableId is null ? r.BankReference : null);
+        if (r.ReceivableId is null && string.IsNullOrWhiteSpace(reference)) return DomainError.Of(ModuleCode.BIL, "VALIDATION", "A receivable id, RF reference or FS statement reference is required.");
         var matches = await db.Receivables.Where(x => x.LegalEntityId == entity && x.BillingAccountId == r.BillingAccountId
             && (r.ReceivableId == null || x.ReceivableId == r.ReceivableId)
             && (reference == null || x.PaymentReference == reference || (x.SourceType == "FS_CLEARING" && x.StatementRef == reference)))
@@ -42,7 +43,7 @@ internal sealed class ReceivableMatching(BillingDbContext db, LedgerWriter ledge
         if (amount <= 0) return 0m;
         var rule = await ledger.RuleAsync(ledger.Key("RECEIVABLE_COLLECTED", RuleQualifiers.Any, row.SourceType), ct).ConfigureAwait(false);
         if (rule.IsFailure) return rule.Error!;
-        var allocation = new ReceivableAllocationRow { AllocationId = Guid.CreateVersion7(), LegalEntityId = row.LegalEntityId, ReceiptId = receipt.ReceiptId, ReceivableId = row.ReceivableId, Amount = amount, Currency = row.Currency, AllocatedAt = clock.Now };
+        var allocation = new ReceivableAllocationRow { AllocationId = Guid.CreateVersion7(), LegalEntityId = row.LegalEntityId, ReceiptId = receipt.ReceiptId, ReceivableId = row.ReceivableId, Amount = amount, Currency = row.Currency, AllocatedAt = clock.Now, RuleId = rule.Value.RuleId, Actor = ledger.Actor };
         db.ReceivableAllocations.Add(allocation);
         var money = new Money(amount, Currency.FromCode(row.Currency));
         var keys = BusinessKeys.Empty.With("receiptId", receipt.ReceiptId.Value.ToString("D")).With("billingAccountId", row.BillingAccountId.Value.ToString("D")).With("receivableId", row.ReceivableId.ToString("D")).With("allocationId", allocation.AllocationId.ToString("D"));
@@ -60,5 +61,3 @@ internal sealed class ReceivableMatching(BillingDbContext db, LedgerWriter ledge
         return amount;
     }
 }
-
-

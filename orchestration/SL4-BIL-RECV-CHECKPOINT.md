@@ -9,9 +9,9 @@ Implemented source:
 - Receivable rows, immutable allocation rows, dedicated CLAIM_RECOVERY/CLEARING billing account types, compound duplicate key, entity-scoped reads and cursor paging.
 - ISO 11649 RF checksum from an opaque UUID hash, 21-character body and 25-character total; DB unique reference is authoritative for the improbable hash collision.
 - Payment matching by id/RF reference and FS statement reference on the counterparty account; bounded partial allocation; surplus remains unapplied. Receipt reads include receivable allocation sums.
-- Data-driven ledger rules and security SQL, typed `CashAllocated` with all recovery/statement evidence. New LA-28 non-premium receivable asset avoids repurposing LA-23 (reinsurer receivable).
+- Data-driven ledger rules and security SQL, typed `CashAllocated` with all recovery/statement evidence. New **illustrative proposed placeholder** LA-28 non-premium receivable asset avoids repurposing LA-23 (reinsurer receivable).
 - Future FSOUT columns modeled now: statement_ref, lines jsonb, release_approval_request_id, release_approved_by. Existing FSOUT request remains refused by existing disbursement source guard.
-- Real-host integration test source with registered CLM caller probe, cash allocation, partial/overpayment, FS partial receipt, duplicate/replay, actor spoof and HTTP origin refusal. RF pure tests check size and mod97.
+- Real-host integration test source with registered CLM caller probe, cash allocation, partial/overpayment, FS partial receipt, multiple statements on one account, duplicate/replay, actor spoof and HTTP origin refusal. RF pure tests check size and mod97.
 
 Authoritative semantics:
 - Full `C:/Users/Karl/Projects/coreinsurance/core-insurance-prds/PRD-06-billing-collections.md` REQ-BIL-130 bounds receipt/item allocation; -133 leaves overpayment credit; -356 explicitly specifies EUR8150 FS receivable plus EUR8100 cash leaves EUR50 open. Exact-only receivable wording in the pre-release OpenAPI contradicts those rows and SL4-BIL-RECV. Owner contract documentation now states bounded partial allocation/surplus; regenerate all generated files before validation.

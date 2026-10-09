@@ -165,6 +165,9 @@ internal sealed class LedgerWriter(
     }
 
     /// <summary>The request's legal entity.</summary>
+    /// <summary>The authenticated actor that records a receivable allocation.</summary>
+    public string Actor => context.Actor.ToString();
+
     public LegalEntityId LegalEntityId => legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
 
     /// <summary>The request's jurisdiction.</summary>
@@ -202,5 +205,3 @@ internal sealed class LedgerWriter(
         TreatmentRuleId = d.TreatmentRuleId,
     };
 }
-
-

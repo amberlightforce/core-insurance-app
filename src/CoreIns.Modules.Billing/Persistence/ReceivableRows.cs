@@ -32,5 +32,7 @@ internal sealed class ReceivableAllocationRow
     public PaymentId ReceiptId { get; set; }
     public decimal Amount { get; set; }
     public string Currency { get; set; } = string.Empty;
+    public string RuleId { get; set; } = string.Empty;
+    public string Actor { get; set; } = string.Empty;
     public Instant AllocatedAt { get; set; }
 }
