@@ -19,6 +19,8 @@ import type { ServicingPreview, ServicingProratedLine, ServicingTaxLine } from '
 import { dueOf } from './logic';
 import { useCoverNames } from './useCoverNames';
 
+type LocalisedProratedLine = ServicingProratedLine & { coverageName: string };
+
 /** Marks a tax or levy line whose rule is not Settled; it appears wherever the line does. */
 function ProvisionalPill() {
   const { t } = useTranslation('policy');
@@ -79,40 +81,40 @@ export function ServicingPreviewView({
   const currency = preview.totalChange.currency;
   const coverNames = useCoverNames(artefactHash);
 
-  const proratedColumns = useMemo<DataColumn<ServicingProratedLine>[]>(
+  const proratedColumns = useMemo<DataColumn<LocalisedProratedLine>[]>(
     () => [
-      textColumn<ServicingProratedLine>(
+      textColumn<LocalisedProratedLine>(
         'cover',
         t('servicing.preview.columns.cover'),
-        (l) => coverNames.get(l.coverageCode) ?? l.coverageCode,
+        (l) => l.coverageName,
         { size: 170 },
       ),
-      identifierColumn<ServicingProratedLine>(
+      identifierColumn<LocalisedProratedLine>(
         'chargeType',
         t('servicing.preview.columns.charge'),
         (l) => l.chargeType,
         { size: 110 },
       ),
-      textColumn<ServicingProratedLine>(
+      textColumn<LocalisedProratedLine>(
         'period',
         t('servicing.preview.columns.period'),
         (l) => `${fmt.date(l.period.from)} – ${fmt.date(l.period.to)}`,
         { size: 175 },
       ),
-      textColumn<ServicingProratedLine>(
+      textColumn<LocalisedProratedLine>(
         'days',
         t('servicing.preview.columns.days'),
         (l) => `${String(l.days)} / ${String(l.termDays)} · ${l.fraction}`,
         { size: 160 },
       ),
-      moneyColumn<ServicingProratedLine>(
+      moneyColumn<LocalisedProratedLine>(
         'amount',
         t('servicing.preview.columns.amount'),
         (l) => l.amount.amount,
         { currency },
       ),
     ],
-    [t, fmt, currency, coverNames],
+    [t, fmt, currency],
   );
 
   const taxColumns = useMemo<DataColumn<ServicingTaxLine>[]>(
@@ -161,7 +163,11 @@ export function ServicingPreviewView({
 
   // Table accessors cache values by row identity; refresh rows when catalogue labels change.
   const prorated = useMemo(
-    () => preview.proratedLines.map((line) => ({ ...line })),
+    () =>
+      preview.proratedLines.map((line) => ({
+        ...line,
+        coverageName: coverNames.get(line.coverageCode) ?? line.coverageCode,
+      })),
     [preview.proratedLines, coverNames],
   );
   const tax = preview.taxLines;
@@ -223,7 +229,7 @@ export function ServicingPreviewView({
       </Section>
       <Section title={t('servicing.preview.prorated')} headingLevel={3}>
         {prorated.length > 0 ? (
-          <SimpleTable<ServicingProratedLine>
+          <SimpleTable<LocalisedProratedLine>
             aria-label={t('servicing.preview.proratedTable')}
             columns={proratedColumns}
             data={prorated}
