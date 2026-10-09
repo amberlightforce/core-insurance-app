@@ -44,9 +44,10 @@ export function ActivationDialog({
   const targets = targetVersions(pack.versions, active);
   const [version, setVersion] = useState<string | null>(null);
   const [reason, setReason] = useState('');
-  const [preview, setPreview] = useState<{ fingerprint: string; value: PackActivationPreview } | null>(
-    null,
-  );
+  const [preview, setPreview] = useState<{
+    fingerprint: string;
+    value: PackActivationPreview;
+  } | null>(null);
   const [error, setError] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
 
@@ -100,7 +101,8 @@ export function ActivationDialog({
     }
   };
 
-  const title = kind === 'ROLLBACK' ? t('packs.dialog.rollbackTitle') : t('packs.dialog.activateTitle');
+  const title =
+    kind === 'ROLLBACK' ? t('packs.dialog.rollbackTitle') : t('packs.dialog.activateTitle');
   const noTargets = targets.length === 0;
 
   return (
@@ -158,7 +160,9 @@ export function ActivationDialog({
           <span className="ds-mono">{active?.version ?? t('packs.dialog.none')}</span>
         </p>
         <Select
-          label={kind === 'ROLLBACK' ? t('packs.dialog.rollbackTo') : t('packs.dialog.activateVersion')}
+          label={
+            kind === 'ROLLBACK' ? t('packs.dialog.rollbackTo') : t('packs.dialog.activateVersion')
+          }
           options={targets.map((v) => ({
             id: v.version,
             label: `${v.version} · ${t('packs.dialog.publishedOn', { date: fmt.date(v.publishedAt) })}`,

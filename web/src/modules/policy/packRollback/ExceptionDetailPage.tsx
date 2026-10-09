@@ -4,7 +4,15 @@ import { useParams } from 'react-router';
 
 import { useIdempotencyKey } from '../../../api/idempotency';
 import type { PackRollbackExceptionView } from '../../../api/types';
-import { Banner, Button, Dialog, KeyValueList, Select, TextField, announce } from '../../../design-system';
+import {
+  Banner,
+  Button,
+  Dialog,
+  KeyValueList,
+  Select,
+  TextField,
+  announce,
+} from '../../../design-system';
 import { problemOf } from '../../staff/problem';
 import { LinkButton } from '../../staff/LinkButton';
 import { PageHeader, Section } from '../../staff/PageHeader';
@@ -14,7 +22,6 @@ import { useFormat } from '../../staff/useFormat';
 import { useCanReview, useException, useReviewException } from './api';
 import { useKindLabel } from './kinds';
 import { ExceptionStatusPill, HashText } from './parts';
-import rollbackStyles from './PackRollback.module.css';
 
 type Outcome = 'NO_ACTION' | 'CORRECTION_REQUIRED';
 const reasonMax = 500;
@@ -91,7 +98,9 @@ function ReviewDialog({
           onChange={(value) => {
             setOutcome(value === 'NO_ACTION' || value === 'CORRECTION_REQUIRED' ? value : null);
           }}
-          errorMessage={tried && missingOutcome ? t('packRollback.review.outcomeRequired') : undefined}
+          errorMessage={
+            tried && missingOutcome ? t('packRollback.review.outcomeRequired') : undefined
+          }
         />
         <TextField
           label={t('packRollback.review.reason')}
@@ -102,7 +111,9 @@ function ReviewDialog({
           isRequired
           value={reason}
           onChange={setReason}
-          errorMessage={tried && missingReason ? t('packRollback.review.reasonRequired') : undefined}
+          errorMessage={
+            tried && missingReason ? t('packRollback.review.reasonRequired') : undefined
+          }
         />
       </div>
     </Dialog>
@@ -167,15 +178,33 @@ function ExceptionDetail({ exception }: { exception: PackRollbackExceptionView }
           <KeyValueList
             aria-label={t('packRollback.detail.transaction')}
             items={[
-              { id: 'policy', label: t('packRollback.fields.policyNumber'), value: exception.policyNumber, kind: 'mono' },
-              { id: 'kind', label: t('packRollback.fields.transactionKind'), value: kindLabel(exception.transactionKind) },
-              { id: 'pv', label: t('packRollback.fields.productVersion'), value: exception.productVersion, kind: 'mono' },
+              {
+                id: 'policy',
+                label: t('packRollback.fields.policyNumber'),
+                value: exception.policyNumber,
+                kind: 'mono',
+              },
+              {
+                id: 'kind',
+                label: t('packRollback.fields.transactionKind'),
+                value: kindLabel(exception.transactionKind),
+              },
+              {
+                id: 'pv',
+                label: t('packRollback.fields.productVersion'),
+                value: exception.productVersion,
+                kind: 'mono',
+              },
               {
                 id: 'hash',
                 label: t('packRollback.fields.configurationHash'),
                 value: <HashText value={exception.configurationHash} />,
               },
-              { id: 'at', label: t('packRollback.fields.identifiedAt'), value: fmt.dateTime(exception.identifiedAt) },
+              {
+                id: 'at',
+                label: t('packRollback.fields.identifiedAt'),
+                value: fmt.dateTime(exception.identifiedAt),
+              },
             ]}
           />
         </Section>
@@ -183,7 +212,12 @@ function ExceptionDetail({ exception }: { exception: PackRollbackExceptionView }
           <KeyValueList
             aria-label={t('packRollback.detail.rollback')}
             items={[
-              { id: 'pack', label: t('packRollback.fields.pack'), value: exception.pack, kind: 'mono' },
+              {
+                id: 'pack',
+                label: t('packRollback.fields.pack'),
+                value: exception.pack,
+                kind: 'mono',
+              },
               {
                 id: 'move',
                 label: t('packRollback.fields.fromTo'),
@@ -207,10 +241,22 @@ function ExceptionDetail({ exception }: { exception: PackRollbackExceptionView }
           <KeyValueList
             aria-label={t('packRollback.detail.review')}
             items={[
-              { id: 'outcome', label: t('packRollback.review.outcome'), value: t(`packRollback.outcome.${exception.review.outcome}`) },
-              { id: 'reason', label: t('packRollback.review.reason'), value: exception.review.reason },
+              {
+                id: 'outcome',
+                label: t('packRollback.review.outcome'),
+                value: t(`packRollback.outcome.${exception.review.outcome}`),
+              },
+              {
+                id: 'reason',
+                label: t('packRollback.review.reason'),
+                value: exception.review.reason,
+              },
               { id: 'by', label: t('packRollback.review.by'), value: exception.review.reviewedBy },
-              { id: 'when', label: t('packRollback.review.at'), value: fmt.dateTime(exception.review.reviewedAt) },
+              {
+                id: 'when',
+                label: t('packRollback.review.at'),
+                value: fmt.dateTime(exception.review.reviewedAt),
+              },
             ]}
           />
         </Section>

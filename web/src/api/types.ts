@@ -113,7 +113,9 @@ export type FinancialBalance = Clm['schemas']['FinancialBalance'];
 
 // Market packs (mkt.yaml, SL5-UI-PACKS)
 export type PackListItem = Mkt['schemas']['PackListItem'];
-export type PackListPage = Mkt['schemas']['PackListPage'];
+export type PackListPage = Omit<Mkt['schemas']['PackListPage'], 'items'> & {
+  items: PackListItem[];
+};
 export type PackGetResponse = Mkt['schemas']['PackGetResponse'];
 export type PackVersionView = Mkt['schemas']['PackVersionView'];
 export type PackActiveVersionView = Mkt['schemas']['PackActiveVersionView'];
@@ -130,6 +132,9 @@ export type PackScheduleActivationResponse = Mkt['schemas']['PackScheduleActivat
 
 // Pack-rollback exceptions (pol.yaml, SL5-UI-PACKS)
 export type PackRollbackExceptionView = Pol['schemas']['PackRollbackExceptionView'];
-export type PackRollbackExceptionListPage = Pol['schemas']['PackRollbackExceptionListPage'];
+export type PackRollbackExceptionListPage = Omit<
+  Pol['schemas']['PackRollbackExceptionListPage'],
+  'items'
+> & { items: PackRollbackExceptionView[] };
 export type PackRollbackExceptionReviewRequest =
   Pol['schemas']['PackRollbackExceptionReviewRequest'];

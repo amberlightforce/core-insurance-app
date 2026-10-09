@@ -161,6 +161,7 @@
       "waitingTitle": "Waiting for a checker",
       "waitingBody": "You made this request, so you cannot decide it. Another user holding Platform.DesignAuthority will review it.",
       "notCheckerTitle": "You cannot decide",
+      "unknownMakerBody": "The maker identity could not be verified. The request remains read-only; the server requires a different checker from every maker and delegated principal.",
       "notCheckerBody": "The decision belongs to the Platform.DesignAuthority role. You can read the request.",
       "notPendingTitle": "The request is not waiting for a decision",
       "notPendingBody": "It has already been decided or withdrawn."

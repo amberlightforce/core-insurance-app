@@ -37,7 +37,9 @@ function DecisionForm({ activation }: { activation: PackActivationView }) {
       {
         onSuccess: () => {
           release();
-          announce(decision === 'APPROVE' ? t('packs.decide.approved') : t('packs.decide.rejected'));
+          announce(
+            decision === 'APPROVE' ? t('packs.decide.approved') : t('packs.decide.rejected'),
+          );
           void refresh();
         },
       },
@@ -108,14 +110,20 @@ function DecisionForm({ activation }: { activation: PackActivationView }) {
   );
 }
 
-function ActivationDetail({ activation, packId }: { activation: PackActivationView; packId: string }) {
+function ActivationDetail({
+  activation,
+  packId,
+}: {
+  activation: PackActivationView;
+  packId: string;
+}) {
   const { t } = useTranslation('market');
   const fmt = useFormat();
   const caller = useCaller();
   const pending = isPending(activation);
   // The maker sees the request read-only. The server also refuses the maker's principal (PITFALLS 3-6).
-  const isMaker =
-    caller.id !== '' && (activation.requestedBy === caller.id || activation.requestedBy === caller.name);
+  const isMaker = caller.id !== '' && activation.requestedBy === `USER:${caller.id}`;
+  const makerIsKnown = /^USER:[^\s:]+$/.test(activation.requestedBy);
   const kind = t(`packs.kind.${activation.kind}`);
 
   return (
@@ -163,7 +171,10 @@ function ActivationDetail({ activation, packId }: { activation: PackActivationVi
               id: 'hash',
               label: t('packs.history.resultingHash'),
               value: activation.resultingHash ? (
-                <HashText value={activation.resultingHash} label={t('packs.history.resultingHash')} />
+                <HashText
+                  value={activation.resultingHash}
+                  label={t('packs.history.resultingHash')}
+                />
               ) : null,
             },
           ]}
@@ -171,9 +182,9 @@ function ActivationDetail({ activation, packId }: { activation: PackActivationVi
       </Section>
       {pending ? (
         <Section title={t('packs.decide.title')}>
-          {isMaker ? (
+          {isMaker || !makerIsKnown ? (
             <Banner variant="info" live="none" title={t('packs.decide.waitingTitle')}>
-              {t('packs.decide.waitingBody')}
+              {t(makerIsKnown ? 'packs.decide.waitingBody' : 'packs.decide.unknownMakerBody')}
             </Banner>
           ) : !caller.canDecide ? (
             <Banner variant="info" live="none" title={t('packs.decide.notCheckerTitle')}>

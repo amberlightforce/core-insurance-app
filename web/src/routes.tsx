@@ -159,7 +159,61 @@ const moduleRoutes: RouteObject[] = [
   },
 ];
 
+moduleRoutes.push(
+  {
+    path: 'admin/packs',
+    lazy: async () => ({
+      Component: (await import('./modules/market/packs/RequirePackRole')).RequirePackRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/market/packs/PackRegistryPage')).PackRegistryPage,
+        }),
+      },
+      {
+        path: ':packId',
+        lazy: async () => ({
+          Component: (await import('./modules/market/packs/PackDetailPage')).PackDetailPage,
+        }),
+      },
+      {
+        path: ':packId/activations/:activationId',
+        lazy: async () => ({
+          Component: (await import('./modules/market/packs/ActivationPage')).ActivationPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'policies/pack-rollback',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/packRollback/RequireReviewerRole'))
+        .RequireReviewerRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/policy/packRollback/ExceptionQueuePage'))
+            .ExceptionQueuePage,
+        }),
+      },
+      {
+        path: ':exceptionId',
+        lazy: async () => ({
+          Component: (await import('./modules/policy/packRollback/ExceptionDetailPage'))
+            .ExceptionDetailPage,
+        }),
+      },
+    ],
+  },
+);
+
 const implemented = new Set([
+  '/admin/packs',
+  '/policies/pack-rollback',
   '/parties',
   '/policies',
   '/billing',

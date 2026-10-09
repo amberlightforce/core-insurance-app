@@ -36,7 +36,10 @@ export function versionLifecycle(
   history: readonly PackActivationView[],
 ): EntityLifecycle[] {
   const out: EntityLifecycle[] = [];
-  const entities = new Set([...active.map((a) => a.legalEntity), ...history.map((h) => h.legalEntity)]);
+  const entities = new Set([
+    ...active.map((a) => a.legalEntity),
+    ...history.map((h) => h.legalEntity),
+  ]);
   for (const legalEntity of entities) {
     const current = active.find((a) => a.legalEntity === legalEntity);
     if (current?.version === version) {

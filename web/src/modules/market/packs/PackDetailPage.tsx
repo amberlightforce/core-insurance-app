@@ -44,7 +44,9 @@ function PackDetail({ pack }: { pack: PackGetResponse }) {
               <>
                 <Button
                   variant="secondary"
-                  {...(!canRollBack ? { disabledReason: t('packs.detail.rollbackUnavailable') } : {})}
+                  {...(!canRollBack
+                    ? { disabledReason: t('packs.detail.rollbackUnavailable') }
+                    : {})}
                   onPress={() => {
                     setDialog('ROLLBACK');
                   }}
@@ -53,7 +55,9 @@ function PackDetail({ pack }: { pack: PackGetResponse }) {
                 </Button>
                 <Button
                   variant="primary"
-                  {...(!hasTargets ? { disabledReason: t('packs.detail.activateUnavailable') } : {})}
+                  {...(!hasTargets
+                    ? { disabledReason: t('packs.detail.activateUnavailable') }
+                    : {})}
                   onPress={() => {
                     setDialog('ACTIVATE');
                   }}
