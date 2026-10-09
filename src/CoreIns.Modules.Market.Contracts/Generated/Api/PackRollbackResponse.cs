@@ -4,11 +4,34 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.Pack.rollback result. PRD outputs: "pack/version/activation"</summary>
+/// <summary>mkt.Pack.rollback result: the preview on a dry run, otherwise the PENDING_APPROVAL activation</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PackRollbackResponse
 {
-    /// <summary>PRD: "pack/version/activation"</summary>
+    /// <summary>True when the call was a dry run; then preview is set and activationId, status and approvalRequestId are null</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dryRun")]
+    public required bool DryRun { get; init; }
+
+    /// <summary>The preview; always set on a dry run, null otherwise</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("preview")]
+    public required global::CoreIns.Modules.Market.Contracts.Api.PackActivationPreview? Preview { get; init; }
+
+    /// <summary>The new PackActivation; null on a dry run</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'activationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("activationId")]
+    public required global::System.Guid? ActivationId { get; init; }
+
+    /// <summary>PENDING_APPROVAL for a real call; null on a dry run</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required global::CoreIns.Modules.Market.Contracts.Api.PackActivationStatus? Status { get; init; }
+
+    /// <summary>The in-process PLT approval request (type MKT.PackActivation, authority MKT_PACK_ACTIVATION); null on a dry run</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId? ApprovalRequestId { get; init; }
+
+    /// <summary>PRD: "pack/version/activation" (superseded by the typed members above)</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
