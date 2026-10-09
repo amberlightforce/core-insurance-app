@@ -47,7 +47,7 @@ internal sealed class RequestApprovalValidator : AbstractValidator<RequestApprov
         RuleFor(c => c.Request.ReferralRole).NotEmpty().MaximumLength(128).When(c => c.Request is not null);
         RuleFor(c => c.Request.Reason).MaximumLength(1024).When(c => c.Request is not null);
         RuleForEach(c => c.Request.Editors).NotEmpty().MaximumLength(256)
-            .Matches("^(USER|SERVICE|AI_AGENT):[^\\s:]+$").When(c => c.Request?.Editors is not null);
+            .Matches("^(USER|SERVICE|AI_AGENT):[^\\s]+$").When(c => c.Request?.Editors is not null);
         RuleFor(c => c.Request.Authority).NotNull().When(c => c.Request is not null);
         RuleFor(c => c.Request.Authority.Type).NotEmpty().When(c => c.Request?.Authority is not null);
         RuleFor(c => c.Request.Authority)
