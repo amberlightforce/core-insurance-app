@@ -22,6 +22,7 @@ tags:
 - name: ConfigChangeRequest
 - name: Spi
 - name: Pack
+- name: PackActivation
 - name: Capability
 - name: L10n
 - name: L10nUiLanguage
@@ -43,6 +44,9 @@ paths:
         Effective values
 
         PRD inputs: entity, jurisdiction(+subdivision), product, channel, dates by time basis, hash or knownAt, keys/namespace
+        Since slice 5 (D-SL5-06) configuration states are persisted and append-only: `configurationHash` accepts the hash of any state recorded since
+        slice 5, including the states recorded by pack activations and rollbacks, and returns the values of that state. Hashes of earlier states stay
+        CFG-HASH-UNKNOWN. No schema change.
         PRD outputs: values with source, version, validity, final, trace; hash
       tags:
       - Configuration
@@ -1136,7 +1140,8 @@ paths:
       description: |-
         Pack lifecycle
 
-        PRD inputs: per operation
+        Lists the packs with their versions {version, status, contentDigest, publishedAt} and the active version per legal entity.
+        Optional filter: pack (code).
         PRD outputs: pack/version/activation
       tags:
       - Pack
@@ -1150,8 +1155,9 @@ paths:
       x-wave: W1
       x-work-packages:
       - W1-MKT-03
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (REQ-MKT-144, D-SL5-06, D-SL5-08)
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -1160,7 +1166,10 @@ paths:
       x-exposure:
       - ui
       x-permission: mkt.Pack.list
-      x-error-codes: []
+      x-error-codes:
+      - code: MKT-ERR-VALIDATION
+        note: 'unknown filter value'
+        status: 400
       x-source:
       - PRD-17 §9.1 l.1510
       parameters:
@@ -1168,6 +1177,12 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: pack
+        in: query
+        required: false
+        description: Pack code filter (for example GR)
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -1190,7 +1205,8 @@ paths:
       description: |-
         Pack lifecycle
 
-        PRD inputs: per operation
+        One pack with its versions, the active version per legal entity and the activation history (newest first).
+        The id is the pack id or the pack code.
         PRD outputs: pack/version/activation
       tags:
       - Pack
@@ -1204,8 +1220,9 @@ paths:
       x-wave: W1
       x-work-packages:
       - W1-MKT-03
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (REQ-MKT-144, D-SL5-06, D-SL5-08)
       x-io-shared: 7
       x-operation-kind: query
       x-idempotency: none
@@ -1214,7 +1231,10 @@ paths:
       x-exposure:
       - ui
       x-permission: mkt.Pack.get
-      x-error-codes: []
+      x-error-codes:
+      - code: MKT-ERR-PACK-VERSION-UNKNOWN
+        note: 'no such pack'
+        status: 404
       x-source:
       - PRD-17 §9.1 l.1510
       parameters:
@@ -1382,7 +1402,9 @@ paths:
       description: |-
         Pack lifecycle
 
-        PRD inputs: per operation
+        Activates a Published pack version for one legal entity. Maker-checker (D-SL5-08): the call creates a PackActivation of kind ACTIVATE in
+        PENDING_APPROVAL with an in-process PLT approval; it takes effect when mkt.PackActivation.decide approves it.
+        With dryRun it returns the preview and creates nothing. Idempotency-Key required.
         PRD outputs: pack/version/activation
       tags:
       - Pack
@@ -1396,19 +1418,35 @@ paths:
       x-wave: W1
       x-work-packages:
       - W1-MKT-03
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (REQ-MKT-137..139, REQ-MKT-144, D-SL5-08)
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
+      x-dry-run: true
       x-dry-run-note: 'PRD dry-run: schedule, rollback'
       x-exposure:
       - ui
       x-permission: mkt.Pack.scheduleActivation
       x-error-codes:
+      - code: MKT-ERR-PACK-VERSION-UNKNOWN
+        note: 'the pack or the target version is not in the pack-version registry'
+        status: 422
+      - code: MKT-ERR-PACK-NOT-PUBLISHED
+        note: 'the target version is not Published (REQ-MKT-137)'
+        status: 422
+      - code: MKT-ERR-PACK-ALREADY-ACTIVE
+        note: 'the target version is already the active version for the legal entity (no-op activation or rollback)'
+        status: 409
+      - code: MKT-ERR-PACK-ROLLBACK-INSTANT
+        note: 'the rollback instant is before the activation of the version rolled back (REQ-MKT-139)'
+        status: 422
+      - code: MKT-ERR-PACK-ACTIVATION-STATE
+        note: 'the activation is not in a state that allows the call (for example already decided or withdrawn)'
+        status: 409
       - code: MKT-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
+        note: 'contract §3.5.3 (replay with a different payload)'
         status: 409
       x-source:
       - PRD-17 §9.1 l.1510
@@ -1416,6 +1454,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -1435,6 +1474,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -1448,7 +1489,10 @@ paths:
       description: |-
         Pack lifecycle
 
-        PRD inputs: per operation
+        Rolls the active pack version of one legal entity back to an earlier Published version. Maker-checker (D-SL5-08): the call creates a
+        PackActivation of kind ROLLBACK in PENDING_APPROVAL with an in-process PLT approval; a new configuration state is recorded only when
+        mkt.PackActivation.decide approves it (states are never rewritten, D-SL5-06). With dryRun it returns the preview and creates nothing.
+        Idempotency-Key required.
         PRD outputs: pack/version/activation
       tags:
       - Pack
@@ -1462,8 +1506,9 @@ paths:
       x-wave: W1
       x-work-packages:
       - W1-MKT-03
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (REQ-MKT-137..139, REQ-MKT-144, D-SL5-08)
       x-io-shared: 7
       x-operation-kind: command
       x-idempotency: required
@@ -1473,8 +1518,23 @@ paths:
       - ui
       x-permission: mkt.Pack.rollback
       x-error-codes:
+      - code: MKT-ERR-PACK-VERSION-UNKNOWN
+        note: 'the pack or the target version is not in the pack-version registry'
+        status: 422
+      - code: MKT-ERR-PACK-NOT-PUBLISHED
+        note: 'the target version is not Published (REQ-MKT-137)'
+        status: 422
+      - code: MKT-ERR-PACK-ALREADY-ACTIVE
+        note: 'the target version is already the active version for the legal entity (no-op activation or rollback)'
+        status: 409
+      - code: MKT-ERR-PACK-ROLLBACK-INSTANT
+        note: 'the rollback instant is before the activation of the version rolled back (REQ-MKT-139)'
+        status: 422
+      - code: MKT-ERR-PACK-ACTIVATION-STATE
+        note: 'the activation is not in a state that allows the call (for example already decided or withdrawn)'
+        status: 409
       - code: MKT-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
+        note: 'contract §3.5.3 (replay with a different payload)'
         status: 409
       x-source:
       - PRD-17 §9.1 l.1510
@@ -1502,6 +1562,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -3123,6 +3185,244 @@ x-excluded:
   - REQ-MKT-087
   - REQ-MKT-330
   reason: SPI, reached through mkt.Spi.bind in-process; documented in spi.md
+  /api/mkt/v1/pack-activations:
+    get:
+      operationId: mkt.PackActivation.list
+      summary: Pack activations
+      description: |-
+        Pack activations
+
+        Lists PackActivations (kind ACTIVATE or ROLLBACK), newest first. Filters: pack, legalEntity, status, kind.
+        PRD outputs: activation
+      tags:
+      - PackActivation
+      x-requirement:
+      - REQ-MKT-137
+      - REQ-MKT-138
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-144
+      x-wave: W1
+      x-work-packages:
+      - SL5-CONTRACTS-PACKS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (D-SL5-08)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.PackActivation.list
+      x-error-codes:
+      - code: MKT-ERR-VALIDATION
+        note: 'unknown filter value'
+        status: 400
+      x-source:
+      - PRD-17 §9.1 l.1510
+      - PRD-17 §7.3
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: pack
+        in: query
+        required: false
+        description: Pack code filter
+        schema:
+          type: string
+      - name: legalEntity
+        in: query
+        required: false
+        description: Legal entity code filter
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: Activation status filter
+        schema:
+          type: string
+          enum:
+          - REQUESTED
+          - PENDING_APPROVAL
+          - SCHEDULED
+          - ACTIVE
+          - SUPERSEDED
+          - WITHDRAWN
+          - REJECTED
+      - name: kind
+        in: query
+        required: false
+        description: Activation kind filter
+        schema:
+          type: string
+          enum:
+          - ACTIVATE
+          - ROLLBACK
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackActivationListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/pack-activations/{id}:
+    get:
+      operationId: mkt.PackActivation.get
+      summary: Pack activation
+      description: |-
+        Pack activation
+
+        One PackActivation with its approval request and resulting hash.
+        PRD outputs: activation
+      tags:
+      - PackActivation
+      x-requirement:
+      - REQ-MKT-137
+      - REQ-MKT-138
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-144
+      x-wave: W1
+      x-work-packages:
+      - SL5-CONTRACTS-PACKS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (D-SL5-08)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.PackActivation.get
+      x-error-codes:
+      - code: MKT-ERR-PACK-ACTIVATION-STATE
+        note: 'no such activation'
+        status: 404
+      x-source:
+      - PRD-17 §9.1 l.1510
+      - PRD-17 §7.3
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the PackActivation
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackActivationView'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mkt/v1/pack-activations/decide:
+    post:
+      operationId: mkt.PackActivation.decide
+      summary: Decide a pack activation
+      description: |-
+        Decide a pack activation
+
+        The checker approves or rejects a PENDING_APPROVAL activation or rollback (D-SL5-08). The checker must hold Platform.DesignAuthority and must
+        be neither the maker nor the maker's principal (PITFALLS 3-6). Approval verifies subject, type and the content hash of {pack, entity, from, to, kind, reason}
+        (verifyForExecution). On APPROVE one transaction records the new configuration state and the outbox event (PackActivated or PackRolledBack).
+        Idempotency-Key required.
+        PRD outputs: activation
+      tags:
+      - PackActivation
+      x-requirement:
+      - REQ-MKT-137
+      - REQ-MKT-138
+      - REQ-MKT-144
+      x-anchor:
+      - REQ-MKT-144
+      x-wave: W1
+      x-work-packages:
+      - SL5-CONTRACTS-PACKS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (D-SL5-08)
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.PackActivation.decide
+      x-error-codes:
+      - code: PLT-ERR-SELF-APPROVAL
+        note: 'the checker is the maker or the maker''s principal'
+        status: 403
+      - code: MKT-ERR-SOD-VIOLATION
+        note: 'the checker lacks Platform.DesignAuthority or the approval is not bound to this activation content'
+        status: 403
+      - code: MKT-ERR-PACK-ACTIVATION-STATE
+        note: 'the activation is not PENDING_APPROVAL'
+        status: 409
+      - code: MKT-ERR-PACK-ROLLBACK-INSTANT
+        note: 'the rollback instant is before the activation of the version rolled back (REQ-MKT-139)'
+        status: 422
+      - code: MKT-ERR-IDEMPOTENCY-MISMATCH
+        note: 'contract §3.5.3 (replay with a different payload)'
+        status: 409
+      x-source:
+      - PRD-17 §9.1 l.1510
+      - PRD-17 §7.3
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackActivationDecideRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackActivationDecideResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 components:
   securitySchemes:
     entra:
@@ -3480,9 +3780,35 @@ components:
       type: object
       description: 'mkt.Pack.list result. PRD outputs: "pack/version/activation"'
       properties:
+        packId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Pack code (for example GR)
+        scope:
+          type: string
+          enum:
+          - REGION
+          - GROUP
+          - COUNTRY
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackVersionView'
+        activeVersions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackActiveVersionView'
+          description: The active version per legal entity (empty when never activated)
         packVersionActivation:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack/version/activation"'
+          description: 'PRD: "pack/version/activation" (superseded by the typed members above)'
+      required:
+      - packId
+      - pack
+      - scope
+      - versions
+      - activeVersions
     PackListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -3497,9 +3823,41 @@ components:
       type: object
       description: 'mkt.Pack.get result. PRD outputs: "pack/version/activation"'
       properties:
+        packId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Pack code (for example GR)
+        scope:
+          type: string
+          enum:
+          - REGION
+          - GROUP
+          - COUNTRY
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackVersionView'
+        activeVersions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackActiveVersionView'
+          description: The active version per legal entity (empty when never activated)
         packVersionActivation:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack/version/activation"'
+          description: 'PRD: "pack/version/activation" (superseded by the typed members above)'
+        activationHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackActivationView'
+          description: Activations and rollbacks of the pack, newest first
+      required:
+      - packId
+      - pack
+      - scope
+      - versions
+      - activeVersions
+      - activationHistory
     PackCertifyRequest:
       type: object
       description: 'mkt.Pack.certify request. PRD inputs: "per operation"'
@@ -3524,26 +3882,118 @@ components:
           description: 'PRD: "pack/version/activation"'
     PackScheduleActivationRequest:
       type: object
-      description: 'mkt.Pack.scheduleActivation request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: mkt.Pack.scheduleActivation request (D-SL5-08). The activation takes effect at the checker's decision instant (immediate instant only in slice 5).
+      properties:
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+          description: Published version to activate
+        reason:
+          type: string
+          minLength: 20
+          maxLength: 128
+          description: Why the maker requests this (20 to 128 characters; it is carried into the event and the audit). No personal data.
+      required:
+      - pack
+      - legalEntity
+      - version
+      - reason
     PackScheduleActivationResponse:
       type: object
-      description: 'mkt.Pack.scheduleActivation result. PRD outputs: "pack/version/activation"'
+      description: 'mkt.Pack.scheduleActivation result: the preview on a dry run, otherwise the PENDING_APPROVAL activation'
       properties:
+        dryRun:
+          type: boolean
+          description: True when the call was a dry run; then preview is set and activationId, status and approvalRequestId are null
+        preview:
+          oneOf:
+          - $ref: '#/components/schemas/PackActivationPreview'
+          - type: 'null'
+          description: The preview; always set on a dry run, null otherwise
+        activationId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The new PackActivation; null on a dry run
+        status:
+          oneOf:
+          - $ref: '#/components/schemas/PackActivationStatus'
+          - type: 'null'
+          description: PENDING_APPROVAL for a real call; null on a dry run
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The in-process PLT approval request (type MKT.PackActivation, authority MKT_PACK_ACTIVATION); null on a dry run
         packVersionActivation:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack/version/activation"'
+          description: 'PRD: "pack/version/activation" (superseded by the typed members above)'
+      required:
+      - dryRun
+      - preview
+      - activationId
+      - status
+      - approvalRequestId
     PackRollbackRequest:
       type: object
-      description: 'mkt.Pack.rollback request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: mkt.Pack.rollback request (D-SL5-08). The rollback takes effect at the checker's decision instant. Refused when the instant would be before the activation of the version rolled back (REQ-MKT-139).
+      properties:
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        toVersion:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+          description: Earlier Published version to return to
+        reason:
+          type: string
+          minLength: 20
+          maxLength: 128
+          description: Why the maker requests this (20 to 128 characters; it is carried into the event and the audit). No personal data.
+      required:
+      - pack
+      - legalEntity
+      - toVersion
+      - reason
     PackRollbackResponse:
       type: object
-      description: 'mkt.Pack.rollback result. PRD outputs: "pack/version/activation"'
+      description: 'mkt.Pack.rollback result: the preview on a dry run, otherwise the PENDING_APPROVAL activation'
       properties:
+        dryRun:
+          type: boolean
+          description: True when the call was a dry run; then preview is set and activationId, status and approvalRequestId are null
+        preview:
+          oneOf:
+          - $ref: '#/components/schemas/PackActivationPreview'
+          - type: 'null'
+          description: The preview; always set on a dry run, null otherwise
+        activationId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The new PackActivation; null on a dry run
+        status:
+          oneOf:
+          - $ref: '#/components/schemas/PackActivationStatus'
+          - type: 'null'
+          description: PENDING_APPROVAL for a real call; null on a dry run
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The in-process PLT approval request (type MKT.PackActivation, authority MKT_PACK_ACTIVATION); null on a dry run
         packVersionActivation:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack/version/activation"'
+          description: 'PRD: "pack/version/activation" (superseded by the typed members above)'
+      required:
+      - dryRun
+      - preview
+      - activationId
+      - status
+      - approvalRequestId
     PackDeprecateRequest:
       type: object
       description: 'mkt.Pack.deprecate request. PRD inputs: "per operation"'
@@ -3961,3 +4411,209 @@ components:
         values:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "values"'
+    PackActivationKeyDiff:
+      type: object
+      description: One configuration key whose effective value differs between the two versions (key names only, no values)
+      properties:
+        key:
+          $ref: ../events/common.schema.json#/$defs/Text
+        change:
+          type: string
+          enum:
+          - ADDED
+          - REMOVED
+          - CHANGED
+      required:
+      - key
+      - change
+    PackActivationPreview:
+      type: object
+      description: Dry-run preview of an activation or rollback. Nothing is created. Every field is always set.
+      properties:
+        fromVersion:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/VersionLabel
+          - type: 'null'
+          description: Version active now for the legal entity (null when the pack has never been activated for it)
+        toVersion:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        window:
+          $ref: ../events/common.schema.json#/$defs/TimeWindow
+          description: For a rollback, the window during which fromVersion was active [from, to) (REQ-MKT-139); for an activation, [now, null)
+        hashesIssued:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Configuration hashes issued while fromVersion was active within the window (empty for an activation)
+        keyDiff:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackActivationKeyDiff'
+      required:
+      - fromVersion
+      - toVersion
+      - window
+      - hashesIssued
+      - keyDiff
+    PackActivationStatus:
+      type: string
+      description: PackActivation states (PRD-17 §7.3). REJECTED is the checker's refusal in slice 5 (D-SL5-08).
+      enum:
+      - REQUESTED
+      - PENDING_APPROVAL
+      - SCHEDULED
+      - ACTIVE
+      - SUPERSEDED
+      - WITHDRAWN
+      - REJECTED
+    PackVersionStatus:
+      type: string
+      description: Pack version states (PRD-17 §7.3.2)
+      enum:
+      - BUILT
+      - SIGNED
+      - CERTIFIED
+      - REJECTED
+      - PUBLISHED
+      - DEPRECATED
+      - REMOVED
+    PackVersionView:
+      type: object
+      properties:
+        version:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        status:
+          $ref: '#/components/schemas/PackVersionStatus'
+        contentDigest:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: SHA-256 of the content inventory of the version
+        publishedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: Always set; null until Published
+      required:
+      - version
+      - status
+      - contentDigest
+      - publishedAt
+    PackActiveVersionView:
+      type: object
+      description: The version active now for one legal entity
+      properties:
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        activationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        activeSince:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        configurationHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Hash of the current configuration state of the legal entity
+      required:
+      - legalEntity
+      - version
+      - activationId
+      - activeSince
+      - configurationHash
+    PackActivationView:
+      type: object
+      description: One PackActivation (kind ACTIVATE or ROLLBACK). Every field is always set; the nullable ones are null until known.
+      properties:
+        activationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        kind:
+          type: string
+          enum:
+          - ACTIVATE
+          - ROLLBACK
+        from:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/VersionLabel
+          - type: 'null'
+        to:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        status:
+          $ref: '#/components/schemas/PackActivationStatus'
+        reason:
+          type: string
+          description: The maker's reason (20 to 128 characters)
+        requestedBy:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Maker, as an opaque principal reference
+        decidedBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: Checker; null until decided
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        activatedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: Null until the state is recorded
+        resultingHash:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Sha256
+          - type: 'null'
+          description: Configuration hash of the state this activation recorded; null until then
+      required:
+      - activationId
+      - pack
+      - legalEntity
+      - kind
+      - from
+      - to
+      - status
+      - reason
+      - requestedBy
+      - decidedBy
+      - approvalRequestId
+      - activatedAt
+      - resultingHash
+    PackActivationListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PackActivationView'
+      description: Page of mkt.PackActivation.list results (cursor pagination, contract §3.5.5)
+    PackActivationDecideRequest:
+      type: object
+      description: mkt.PackActivation.decide request
+      properties:
+        activationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Reason of the checker (required for REJECT, recommended for APPROVE). No personal data.
+      required:
+      - activationId
+      - decision
+      - reason
+    PackActivationDecideResponse:
+      type: object
+      properties:
+        activation:
+          $ref: '#/components/schemas/PackActivationView'
+      required:
+      - activation

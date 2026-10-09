@@ -38,6 +38,18 @@ public static class ProductErrorCodes
     /// </remarks>
     public const string DataUnavailable = "PFC-ERR-DATA-UNAVAILABLE";
 
+    /// <summary>PFC-ERR-FALLBACK-SOURCE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): pfc.ProductVersion.decideFallback, pfc.ProductVersion.fallback.</para>
+    /// </remarks>
+    public const string FallbackSource = "PFC-ERR-FALLBACK-SOURCE";
+
+    /// <summary>PFC-ERR-FALLBACK-STATE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): pfc.ProductVersion.decideFallback, pfc.ProductVersion.fallback.</para>
+    /// </remarks>
+    public const string FallbackState = "PFC-ERR-FALLBACK-STATE";
+
     /// <summary>PFC-ERR-FORBIDDEN (HTTP 403).</summary>
     /// <remarks>
     /// <para>Declared by 8 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.create, pfc.ChangeSet.edit, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.Pog.recordReview, pfc.Pog.recordTest, pfc.Pog.update.</para>
@@ -46,7 +58,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 16 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.create, pfc.ChangeSet.edit, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.ImpactAnalysis.run, pfc.Pog.recordReview, pfc.Pog.recordTest, pfc.Pog.update, pfc.ProductImport.import, pfc.ProductVersion.cancelSchedule, pfc.ProductVersion.fallBack, ….</para>
+    /// <para>Declared by 18 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.create, pfc.ChangeSet.edit, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.ImpactAnalysis.run, pfc.Pog.recordReview, pfc.Pog.recordTest, pfc.Pog.update, pfc.ProductImport.import, pfc.ProductVersion.cancelSchedule, pfc.ProductVersion.decideFallback, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "PFC-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -82,13 +94,13 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-NO-VERSION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): pfc.Product.describe, pfc.ProductVersion.resolve.</para>
+    /// <para>Declared by 3 operation(s): pfc.Product.describe, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
     /// </remarks>
     public const string NoVersion = "PFC-ERR-NO-VERSION";
 
     /// <summary>PFC-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pfc.ProductVersion.cancelSchedule, pfc.ProductVersion.fallBack, pfc.ProductVersion.schedule.</para>
+    /// <para>Declared by 4 operation(s): pfc.ProductVersion.cancelSchedule, pfc.ProductVersion.decideFallback, pfc.ProductVersion.fallBack, pfc.ProductVersion.schedule.</para>
     /// </remarks>
     public const string Sod = "PFC-ERR-SOD";
 
@@ -106,7 +118,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-UNKNOWN-PRODUCT (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): pfc.ProductVersion.resolve.</para>
+    /// <para>Declared by 2 operation(s): pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
     /// </remarks>
     public const string UnknownProduct = "PFC-ERR-UNKNOWN-PRODUCT";
 
@@ -126,7 +138,7 @@ public static class ProductErrorCodes
     public const string Prefix = "PFC-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Abstract, Authority, ChecksFailed, Conflict, DataUnavailable, Forbidden, IdempotencyMismatch, ImportInvalid, InvalidDefinition, MakerIsChecker, NoConversionRules, NoRating, NoVersion, Sod, UnknownHash, UnknownItem, UnknownProduct, VersionExists, WindowOverlap];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Abstract, Authority, ChecksFailed, Conflict, DataUnavailable, FallbackSource, FallbackState, Forbidden, IdempotencyMismatch, ImportInvalid, InvalidDefinition, MakerIsChecker, NoConversionRules, NoRating, NoVersion, Sod, UnknownHash, UnknownItem, UnknownProduct, VersionExists, WindowOverlap];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -136,6 +148,8 @@ public static class ProductErrorCodes
         [ChecksFailed] = 422,
         [Conflict] = 409,
         [DataUnavailable] = 503,
+        [FallbackSource] = 422,
+        [FallbackState] = 409,
         [Forbidden] = 403,
         [IdempotencyMismatch] = 409,
         [ImportInvalid] = 422,

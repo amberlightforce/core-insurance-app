@@ -68,7 +68,11 @@
         "legalEntity",
         "activationInstant",
         "newHash",
-        "spisRebound"
+        "spisRebound",
+        "pack",
+        "activationId",
+        "activatedAt",
+        "resultingHash"
       ],
       "properties": {
         "packId": {
@@ -108,6 +112,26 @@
             "$ref": "../common.schema.json#/$defs/Code"
           },
           "x-classification": "P0"
+        },
+        "pack": {
+          "$ref": "../common.schema.json#/$defs/Code",
+          "x-classification": "P0",
+          "description": "Pack code (for example GR); the registry key of the pack. Always set (SL5-CONTRACTS-PACKS, D-SL5-08)."
+        },
+        "activationId": {
+          "$ref": "../common.schema.json#/$defs/Uuid",
+          "x-classification": "P0",
+          "description": "The PackActivation that produced this state. Always set."
+        },
+        "activatedAt": {
+          "$ref": "../common.schema.json#/$defs/Instant",
+          "x-classification": "P0",
+          "description": "Instant the activation took effect; equals activationInstant. Always set."
+        },
+        "resultingHash": {
+          "$ref": "../common.schema.json#/$defs/Sha256",
+          "x-classification": "P0",
+          "description": "Configuration hash of the state this activation recorded; equals newHash. Always set (D-SL5-06)."
         }
       }
     }
