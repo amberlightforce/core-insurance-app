@@ -4,7 +4,9 @@ import { Link } from 'react-aria-components';
 import { useParams } from 'react-router';
 
 import {
+  Banner,
   EmptyState,
+  LoadingState,
   moneyColumn,
   statusColumn,
   textColumn,
@@ -31,7 +33,8 @@ export function ClaimRecoveriesPage() {
   const { t } = useTranslation('reinsurance');
   const fmt = useRiFormat();
   const { claimId = '' } = useParams();
-  const { query, rows } = useClaimRecoveries(claimId);
+  const { query, rows, partial } = useClaimRecoveries(claimId);
+  const limited = query.hasNextPage;
 
   const columns = useMemo<DataColumn<ClaimRecoveryRow>[]>(
     () => [
@@ -115,16 +118,27 @@ export function ClaimRecoveriesPage() {
       <QueryView query={query} notFoundMessage={t('claim.notFound')}>
         {() => (
           <Section title={t('claim.section')} family="success" meta={t('claim.meta')}>
+            {partial ? (
+              <Banner variant="warning" live="status" title={t('recoverables.partialTitle')}>
+                {t('recoverables.partialBody')}
+              </Banner>
+            ) : limited ? (
+              <LoadingState immediate>{t('recoverables.loading')}</LoadingState>
+            ) : null}
             {rows.length > 0 ? (
               <dl className={styles.tiles}>
                 <div className={styles.tile}>
-                  <dt className={styles.tileLabel}>{t('claim.totals.incurred')}</dt>
+                  <dt className={styles.tileLabel}>
+                    {t(limited ? 'claim.totals.loadedIncurred' : 'claim.totals.incurred')}
+                  </dt>
                   <dd className={styles.tileValue}>
                     {fmt.money({ amount: fromMinor(totals.incurred), currency })}
                   </dd>
                 </div>
                 <div className={styles.tile}>
-                  <dt className={styles.tileLabel}>{t('claim.totals.paid')}</dt>
+                  <dt className={styles.tileLabel}>
+                    {t(limited ? 'claim.totals.loadedPaid' : 'claim.totals.paid')}
+                  </dt>
                   <dd className={styles.tileValue}>
                     {fmt.money({ amount: fromMinor(totals.paid), currency })}
                   </dd>

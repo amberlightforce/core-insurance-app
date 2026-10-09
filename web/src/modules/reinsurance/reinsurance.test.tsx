@@ -9,6 +9,8 @@ import { EditContractPage, NewContractPage } from './ContractEditorPage';
 import { RequireReinsuranceRole } from './RequireReinsuranceRole';
 import { ReinsuranceHomePage } from './ReinsuranceHomePage';
 import { treaty } from './fixtures';
+import { ClaimRecoveriesPage } from './ClaimRecoveriesPage';
+import { maxRecoveryPages, type ClaimRecoveryRow } from './api';
 
 vi.setConfig({ testTimeout: 60_000 });
 function signIn(id: string, roles: string[]) {
@@ -177,7 +179,7 @@ describe('reinsurance registry and treaty editor', () => {
   });
 });
 describe('maker-checker treaty approval', () => {
-  it('hides approval from the treaty enterer even when they hold the manager role', () => {
+  it('hides approval for the API USER:maker actor key when the session user holds the manager role', () => {
     signIn('maker', ['Staff.ReinsuranceManager']);
     mockApi([]);
     renderScreen(<DecisionBar contract={{ ...treaty, status: 'PENDING_APPROVAL' }} />, {
@@ -207,5 +209,43 @@ describe('maker-checker treaty approval', () => {
     expect(
       await screen.findByText(/Δεν μπορείτε να εγκρίνετε σύμβαση που καταχωρήσατε εσείς/),
     ).toBeInTheDocument();
+  });
+});
+
+describe('claim recoverable completeness', () => {
+  it('marks capped pagination and loaded totals explicitly instead of showing complete financial totals', async () => {
+    const path = '/api/ri/v1/recoveries/list-by-claim';
+    const api = mockApi([
+      {
+        method: 'GET',
+        path,
+        respond: (request) => {
+          const page = Number(request.url.searchParams.get('cursor') ?? '0');
+          const row: ClaimRecoveryRow = {
+            contractId: treaty.contractId,
+            recoveryId: `33333333-3333-4333-8333-${String(page).padStart(12, '0')}`,
+            contractYear: 2026,
+            layerNo: 1,
+            state: 'CALCULATED',
+            recoverableIncurred: { amount: '1.00', currency: 'EUR' },
+            recoverablePaid: { amount: '0.00', currency: 'EUR' },
+            recoverableOutstanding: { amount: '1.00', currency: 'EUR' },
+          };
+          return { body: { items: [row], nextCursor: String(page + 1) } };
+        },
+      },
+    ]);
+    renderScreen(<ClaimRecoveriesPage />, {
+      path: '/reinsurance/claims/:claimId',
+      url: `/reinsurance/claims/${fx.policyId}`,
+    });
+    expect(await screen.findByText('Εμφανίζεται μέρος των ανακτήσεων')).toBeInTheDocument();
+    expect(api.callsTo('GET', path)).toHaveLength(maxRecoveryPages);
+    expect(screen.getByText('Ανάκτηση επί επισυμβασών — φορτωμένες εγγραφές')).toBeInTheDocument();
+    expect(screen.getByText('25,00 €')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Ανακτήσιμο (επιβαρύνσεις)', { selector: 'dt' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/τα σύνολα δεν είναι πλήρη/)).toBeInTheDocument();
   });
 });

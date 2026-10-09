@@ -238,6 +238,8 @@
     "section": "Recoverables by treaty and layer",
     "meta": "incurred and paid",
     "totals": {
+      "loadedIncurred": "Incurred recoverable — loaded records",
+      "loadedPaid": "Recoverable on paid — loaded records",
       "incurred": "Incurred recoverable",
       "paid": "Recoverable on paid"
     },

@@ -165,7 +165,7 @@ export function useClaimRecoveries(claimId: string) {
     () => pages?.flatMap((page) => page.items) ?? [],
     [pages],
   );
-  return { query, rows };
+  return { query, rows, partial: hasNextPage && pageCount >= maxRecoveryPages };
 }
 
 export type ContractCreateRequest = Schemas['ContractCreateRequest'];

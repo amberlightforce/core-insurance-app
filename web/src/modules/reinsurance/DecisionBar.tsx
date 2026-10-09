@@ -44,7 +44,7 @@ export function DecisionBar({ contract }: { contract: ContractView }) {
   const mutation = mode === 'submit' ? submit : decide;
   const pending = submit.isPending || decide.isPending;
 
-  const isEnterer = contract.maker !== undefined && contract.maker === user.id;
+  const isEnterer = contract.maker === `USER:${user.id}`;
   const isManager = hasRole(user.roles, managerRole);
   const isAccountant = hasRole(user.roles, accountantRole) || hasRole(user.roles, 'Platform.Admin');
 
