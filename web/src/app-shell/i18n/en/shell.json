@@ -85,6 +85,7 @@
   "roles": {
     "underwriter": "Underwriting",
     "billing": "Billing and collections",
+    "billingManager": "Billing manager",
     "finance": "Finance",
     "claimsHandler": "Claims handler",
     "claimsManager": "Claims manager",

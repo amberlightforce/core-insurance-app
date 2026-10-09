@@ -21,6 +21,7 @@ export function firstName(name: string): string {
 export const roleKeys = {
   'Staff.Underwriter': 'roles.underwriter',
   'Staff.Billing': 'roles.billing',
+  'Staff.BillingManager': 'roles.billingManager',
   'Staff.Finance': 'roles.finance',
   'Staff.ClaimsHandler': 'roles.claimsHandler',
   'Staff.ClaimsManager': 'roles.claimsManager',
