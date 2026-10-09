@@ -40,4 +40,9 @@ public sealed record ApprovalRequestRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? Reason { get; init; }
+
+    /// <summary>Authoritative participant actor keys supplied by the owning module in process; added to inherited editors and frozen on submission</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("editors")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<string>? Editors { get; init; }
 }
