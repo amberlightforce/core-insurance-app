@@ -14,7 +14,10 @@ import { SimpleTable } from '../../staff/SimpleTable';
 import styles from '../../staff/staff.module.css';
 import type { RefundBreakdownLine, RefundNettingLine, RefundState } from './api';
 
-const transactionKinds: Record<string, string> = { ENDORSEMENT_DEBIT: 'CHANGE', ENDORSEMENT_CREDIT: 'CHANGE' };
+const transactionKinds: Record<string, string> = {
+  ENDORSEMENT_DEBIT: 'CHANGE',
+  ENDORSEMENT_CREDIT: 'CHANGE',
+};
 
 type DisbursementState = EntityState<'disbursement'>;
 
@@ -53,8 +56,11 @@ export function BreakdownTable({
           defaultValue: line.chargeCategory,
         }),
         transactionKind: line.transactionKind
-          ? t(`policy:file.kind.${transactionKinds[line.transactionKind] ?? line.transactionKind}`, { defaultValue: line.transactionKind })
-          : undefined,
+          ? t(
+              `policy:file.kind.${transactionKinds[line.transactionKind] ?? line.transactionKind}`,
+              { defaultValue: line.transactionKind },
+            )
+          : '',
       })),
     [lines, t],
   );
