@@ -2,6 +2,14 @@
 
 The user authorized subagents to carry out the recovery assessment and next steps. This file records verified outcomes and the active queue; the older HANDOVER and STATUS phase tables contain stale entries.
 
+## Latest verified checkpoint
+
+- Merged #28 (servicing UI) as b501f88, #34 (refund UI) as 5dd4336, and #44 (jurisdiction-qualified MKT tax identity) as ae43539. Each had all 10 checks green on its final head and independent review.
+- Real expanded SL3 acceptance: 3 passed / 5 failed on the second run. The real browser caught cancellation preview mutating immediately through POST /cancellations; the mocked draft-job assumption was incorrect. A follow-up fixes preview to dryRun=true and delays the actual POST until confirmation. It also fixes validation of the existing read-only Latin plate. Both are in the next isolated run.
+- Test fixes now check all credit notes belonging to the change transaction, use keyboard checkbox activation, and capture traces/screenshots on failure. API renewal and cancellation/refund pass; claims re-verification remains under diagnosis.
+- Draft #45 publishes the recovered integration and expanded real-browser acceptance. Independent review added strict RAT result correlation and restored Development JWT expiration/lifetime-order checks. No merge until remaining defects and exact-head acceptance/CI are resolved.
+- #43 corrected head 04bdc3d has Release/Market166/Rating39/sign-in8/superuser1/architecture198/ContractGen2852/samples2423 passing; final CI E2E jobs remain pending. Original review failures and corrected adversarial probes are preserved.
+- RI UI is preserved at a checkpoint while urgent servicing fixes finish. RI registry recovery is active, including list-layer summaries and a reproduced raw DB approval bypass; a PLT-owned proof predicate is being developed for independent review.
 ## Preserved work
 
 Before edits, all local branches/tags were saved in a verified Git bundle and modified/untracked source files and screenshots were copied to:

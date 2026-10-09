@@ -3,9 +3,11 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using CoreIns.Modules.Market.Contracts.Api;
+using CoreIns.Modules.Market.Contracts;
 using CoreIns.Modules.Rating.Contracts;
 using CoreIns.Modules.Rating.Contracts.Api;
 using CoreIns.Platform.Contracts;
+using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel;
@@ -331,13 +333,17 @@ public sealed class RatingApiTests(PostgresFixture database) : IClassFixture<Pos
     public async Task Rating_works_against_the_real_market_configuration_service()
     {
         await using var scope = Scope(_baseFactory.Services);
+        // The fake-market helper pins a placeholder; the real service requires a recorded unit-of-work state.
+        var current = await scope.ServiceProvider.GetRequiredService<IMarketConfigurationService>().CurrentHashAsync(TestContext.Current.CancellationToken);
+        var currentHash = new ConfigurationHash(current.Hash ?? throw new InvalidOperationException("The real MKT fixture must have a current hash."));
+        scope.ServiceProvider.GetRequiredService<RequestContext>().ConfigurationHash = currentHash;
 
         var response = await scope.ServiceProvider.GetRequiredService<IRatingRateService>().RateAsync(RateRequest(RiskTree(value: "91000.00")), TestContext.Current.CancellationToken);
 
         response.Taxes!.First(t => t.ChargeType == "GR-IPT").Rate.ShouldBe(0.15m);
         response.Taxes!.First(t => t.ChargeType == "GR-IPT").Provisional.ShouldBe(true); // the real pack marks the motor class Verify
         response.Taxes!.First(t => t.ChargeType == "GR-IPT").LegalStatus.ShouldBe("Verify");
-        response.ConfigurationHash.ShouldNotBeNull();
+        response.ConfigurationHash.ShouldBe(currentHash);
     }
 
     [Fact]
