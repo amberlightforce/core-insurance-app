@@ -11,11 +11,11 @@ export function packErrorText(t: TFunction, error: unknown): string {
   const problem = problemOf(error);
   const code = problem.code;
   if (code && /^[A-Z0-9-]+$/.test(code)) {
-    const key = `packs.errors.${code}`;
+    const key = `market:packs.errors.${code}`;
     const text = t(key, { defaultValue: '' });
     if (text) return text;
   }
-  if (problem.status === 403) return t('packs.errors.forbidden');
-  if (problem.status === 0) return t('packs.errors.network');
-  return problem.title ?? t('packs.errors.generic');
+  if (problem.status === 403) return t('market:packs.errors.forbidden');
+  if (problem.status === 0) return t('market:packs.errors.network');
+  return problem.title ?? t('market:packs.errors.generic');
 }
