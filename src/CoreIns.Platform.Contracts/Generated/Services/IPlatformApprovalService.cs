@@ -18,7 +18,7 @@ public interface IPlatformApprovalService
     /// <para>Status: full; fully typed from REQ-PLT-004, REQ-PLT-114, REQ-PLT-115, REQ-PLT-116, REQ-PLT-117, REQ-PLT-121 (SL2-PLT). Wave W1.</para>
     /// <para>Exposure: ui; consumers: CLM, MIG, UW.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: PLT-ERR-SELF-APPROVAL (403), PLT-ERR-EDITOR-CANNOT-APPROVE (403), PLT-ERR-CHECKER-MUST-BE-HUMAN (422), PLT-ERR-VALIDATION (400), PLT-ERR-NOT-FOUND (404), PLT-ERR-AUTHORITY-DENIED (403), PLT-ERR-AUTHORITY-REFERRAL-REQUIRED (403), PLT-ERR-APPROVAL-STALE (409), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PLT-ERR-SELF-APPROVAL (403), PLT-ERR-EDITOR-CANNOT-APPROVE (403), PLT-ERR-CHECKER-MUST-BE-HUMAN (422), PLT-ERR-VALIDATION (400), PLT-ERR-NOT-FOUND (404), PLT-ERR-AUTHORITY-DENIED (403), PLT-ERR-AUTHORITY-REFERRAL-REQUIRED (403), PLT-ERR-APPROVAL-STALE (409), PLT-ERR-OWNER-DECIDED (409), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalDecideResponse> DecideAsync(global::CoreIns.Platform.Contracts.Api.ApprovalDecideRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 

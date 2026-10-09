@@ -27,6 +27,44 @@ public sealed class ServicingTaxRealMarketTests
     private static readonly BusinessDate TaxPoint = new(2027, 1, 15);
     private static readonly Guid EntityId = Guid.Parse("0192f0c4-0000-7000-8000-000000000001");
 
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(70, 10.50)]
+    public async Task The_real_market_prices_the_ratings_GR_IPT_charge_for_unchanged_and_changed_premiums(decimal premium, decimal tax)
+    {
+        var delta = Delta("0", premium, ServicingTransactionKind.EndorsementDebit) with { TaxChargeType = "GR-IPT" };
+        var line = (await Service().LinesAsync(Request(delta))).Lines.Single();
+
+        line.TaxChargeType.ShouldBe("GR-IPT");
+        line.Amount.Amount.ShouldBe(tax);
+        line.Rate.ShouldBe(0.15m);
+        line.CalculationRuleId.ShouldBe("tax.ipt.rate.general");
+        line.CalculationRuleVersion.ShouldNotBeNullOrEmpty();
+        line.TreatmentRuleId.ShouldBe("GR-TRT-IPT-ENDORSEMENT-DEBIT");
+        line.LegalStatus.ShouldBe("Unverified"); // the configured rounding rule is weaker than the pending treatment
+        line.Provisional.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task A_zero_premium_still_requires_a_rate_rule()
+    {
+        var delta = Delta("0", 0m, ServicingTransactionKind.EndorsementDebit) with { TaxClass = "missing" };
+
+        var ex = await Should.ThrowAsync<DomainException>(() => Service().LinesAsync(Request(delta)));
+
+        ex.Error.Code.Value.ShouldBe("RAT-ERR-TAX");
+        ex.Error.Detail!.ShouldContain("RuleMissing");
+    }
+
+    [Fact]
+    public async Task Production_refuses_a_pending_treatment_even_when_the_premium_is_unchanged()
+    {
+        var ex = await Should.ThrowAsync<DomainException>(() => Service("Production").LinesAsync(
+            Request(Delta("0", 0m, ServicingTransactionKind.EndorsementDebit))));
+
+        ex.Error.Code.Value.ShouldBe("MKT-ERR-CFG-NOT-SETTLED");
+    }
+
     [Fact]
     public async Task D_SL3_05_a_debit_of_70_00_gets_IPT_10_50_with_APPLY_and_the_real_rule_ids()
     {
@@ -85,7 +123,7 @@ public sealed class ServicingTaxRealMarketTests
 
     private static ServicingDelta Delta(
         string id, decimal amount, ServicingTransactionKind kind, string? source = null, ServicingTaxCategory category = ServicingTaxCategory.Tax) =>
-        new(id, "MTPL", "PREM-MTPL", "IPT", category, "general", new Money(amount, Currency.EUR), TaxPoint, TaxPoint.AddDays(100), kind, source);
+        new(id, "MTPL", "PREM-MTPL", "GR-IPT", category, "general", new Money(amount, Currency.EUR), TaxPoint, TaxPoint.AddDays(100), kind, source);
 
     private static RatingServicingTax Service(string environment = "Development", params PackConfigValue[] extraRows)
     {
