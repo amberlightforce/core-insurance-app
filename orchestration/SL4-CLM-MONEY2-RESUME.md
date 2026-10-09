@@ -62,4 +62,3 @@ Sources read: restart handover, CODEX-TAKEOVER, full MONEY2/common briefs, slice
 PITFALLS, module pattern, PRD07 digest and relevant financial/recovery/authority sections of the full
 `core-insurance-prds/PRD-07-claims-management.md`. Full PRD confirms aggregate recovery balances and
 the exception allowing recovery reserves to remain on closed exposures.
-
