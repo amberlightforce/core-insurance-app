@@ -108,7 +108,7 @@ internal sealed class ApproveContractHandler(
             return RiErrors.Stale("The stored content no longer passes the contract rules.");
         }
 
-        var decided = await DecideAsync(requestId, hash, ApprovalDecideRequest.DecisionValue.Approve, comment: null, cancellationToken).ConfigureAwait(false);
+        var decided = await DecideAsync(contract, requestId, hash, ApprovalDecideRequest.DecisionValue.Approve, comment: null, cancellationToken).ConfigureAwait(false);
         if (decided.IsFailure)
         {
             return decided.Error!;
@@ -121,7 +121,7 @@ internal sealed class ApproveContractHandler(
 
         var now = clock.Now;
         var zone = options.Value.Zone;
-        var actor = context.Actor.ToString();
+        var actor = decided.Value;
 
         // The version first (the seal trigger needs the contract still PendingApproval), then the header.
         version.ApprovedAt = now;
@@ -144,12 +144,24 @@ internal sealed class ApproveContractHandler(
 
         // Activation at the period start (REQ-RI-058): when the period has already started on the Athens calendar, in the
         // same transaction; otherwise the scanner does it at the start.
-        if (version.ValidFrom <= now.ToBusinessDate(zone))
+        var today = now.ToBusinessDate(zone);
+        if (version.ValidFrom <= today)
         {
             var activated = await lifecycle.ActivateAsync(contract, version, content, now, cancellationToken).ConfigureAwait(false);
             if (activated.IsFailure)
             {
                 return activated.Error!;
+            }
+
+            // A treaty entered after its period ended (a late registration) is Active only for an instant: it expires in the
+            // same transaction, so it never lingers as Active, and still answers for the losses of its period.
+            if (version.ValidTo <= today)
+            {
+                var expired = await lifecycle.ExpireAsync(contract, version, now, cancellationToken).ConfigureAwait(false);
+                if (expired.IsFailure)
+                {
+                    return expired.Error!;
+                }
             }
         }
 
@@ -164,7 +176,7 @@ internal sealed class ApproveContractHandler(
         ContractRow contract, ContractVersionRow version, ContractContent content, Guid requestId, Sha256Hash hash, ContractApproveRequest request, string legalEntity,
         CancellationToken cancellationToken)
     {
-        var decided = await DecideAsync(requestId, hash, ApprovalDecideRequest.DecisionValue.Reject, request.Reason, cancellationToken).ConfigureAwait(false);
+        var decided = await DecideAsync(contract, requestId, hash, ApprovalDecideRequest.DecisionValue.Reject, request.Reason, cancellationToken).ConfigureAwait(false);
         if (decided.IsFailure)
         {
             return decided.Error!;
@@ -195,19 +207,43 @@ internal sealed class ApproveContractHandler(
     }
 
     /// <summary>
-    /// PLT decides the request the contract is bound to, with the hash RI computed from the stored rows. PLT's own
-    /// refusals are mapped: the maker / editor rules to <c>RI-ERR-SOD</c> (403), a changed request or hash to
-    /// <c>RI-ERR-STALE</c> (409); an authority refusal is returned as PLT raised it.
+    /// PLT decides the request the contract is bound to, with the hash RI computed from the stored rows; the result is the
+    /// key of the person who decided (the caller). PLT's own refusals are mapped: the maker / editor rules to
+    /// <c>RI-ERR-SOD</c> (403), a changed request or hash to <c>RI-ERR-STALE</c> (409); an authority refusal is returned as
+    /// PLT raised it. The request can also have been decided in the PLT inbox without RI: an approval there is accepted only
+    /// for exactly this hash and a checker who took no part in the contract (the contract is then executed by this call,
+    /// still verified with <c>verifyForExecution</c>); a rejected or withdrawn request cannot be approved but a RETURN
+    /// takes the contract back to Draft.
     /// </summary>
-    private async Task<Result<Unit>> DecideAsync(
-        Guid requestId, Sha256Hash hash, ApprovalDecideRequest.DecisionValue decision, string? comment, CancellationToken cancellationToken)
+    private async Task<Result<string>> DecideAsync(
+        ContractRow contract, Guid requestId, Sha256Hash hash, ApprovalDecideRequest.DecisionValue decision, string? comment, CancellationToken cancellationToken)
     {
+        var self = context.Actor.ToString();
         try
         {
+            var current = await approvals.GetAsync(requestId.ToString("D"), cancellationToken).ConfigureAwait(false);
+            if (current.Request.Status != ApprovalStatus.PendingApproval)
+            {
+                if (decision == ApprovalDecideRequest.DecisionValue.Reject)
+                {
+                    return self;
+                }
+
+                if (current.Request.Status != ApprovalStatus.Approved || current.Request.PayloadHash != hash || current.Decision is not { } decided)
+                {
+                    return RiErrors.Stale($"The approval request is {current.Request.Status}; return the contract to Draft and submit it again.");
+                }
+
+                var checker = $"{decided.Checker.Kind.ToString().ToUpperInvariant()}:{decided.Checker.Id}";
+                return contract.Participants.Contains(checker, StringComparer.Ordinal)
+                    ? RiErrors.Sod("The approval in the PLT inbox was given by someone who took part in the contract (REQ-RI-057).")
+                    : checker;
+            }
+
             await approvals.DecideAsync(
                 new ApprovalDecideRequest { RequestId = requestId, Decision = decision, PayloadHash = hash, Comment = comment },
                 CommandOptions.New(), cancellationToken).ConfigureAwait(false);
-            return Unit.Value;
+            return self;
         }
         catch (DomainException ex) when (ex.Error.Code.Module == ModuleCode.PLT)
         {

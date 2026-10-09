@@ -125,11 +125,18 @@ internal static class ReinsuranceDatabaseSql
             RAISE EXCEPTION 'ri.% rows are append-only (REQ-RI-065, PITFALLS 17)', TG_TABLE_NAME USING ERRCODE = '42501';
         END
         $$;
+
+        CREATE TRIGGER tr_contract_no_truncate BEFORE TRUNCATE ON ri.contract
+            FOR EACH STATEMENT EXECUTE FUNCTION ri.content_append_only();
+        CREATE TRIGGER tr_contract_version_no_truncate BEFORE TRUNCATE ON ri.contract_version
+            FOR EACH STATEMENT EXECUTE FUNCTION ri.content_append_only();
         """ + "\n" + ChildTriggers("CREATE");
 
     /// <summary>Statements run by the migration's Down (before the tables are dropped).</summary>
     public static readonly string Down = ChildTriggers("DROP") + """
 
+        DROP TRIGGER IF EXISTS tr_contract_version_no_truncate ON ri.contract_version;
+        DROP TRIGGER IF EXISTS tr_contract_no_truncate ON ri.contract;
         DROP TRIGGER IF EXISTS tr_contract_version_guard ON ri.contract_version;
         DROP TRIGGER IF EXISTS tr_contract_guard ON ri.contract;
         DROP FUNCTION IF EXISTS ri.content_append_only();

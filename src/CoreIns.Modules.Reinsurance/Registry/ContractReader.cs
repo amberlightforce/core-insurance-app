@@ -101,8 +101,10 @@ internal sealed class ContractReader(
     }
 
     /// <summary>
-    /// <c>ri.Contract.applicable</c>: the Active contracts whose period contains the loss, by Athens business date and
-    /// half-open ([from, to)), and whose scope names both the product and the coverage (REQ-RI-001, -116). A date-form
+    /// <c>ri.Contract.applicable</c>: the contracts in force at the loss, i.e. Active, or Expired once their period has ended
+    /// (a loss that occurred inside the period is still covered when it is notified after the treaty expired), whose period
+    /// contains the loss by Athens business date, half-open ([from, to)), and whose scope names both the product and the
+    /// coverage (REQ-RI-001, -116). Draft, pending and merely approved treaties are never applicable. A date-form
     /// <c>validAt</c> is that Athens day (the end of it, D-SLC-13); an instant is converted to its Athens date; none
     /// means now. Nothing is guessed: an unknown product or coverage matches nothing.
     /// </summary>
@@ -122,11 +124,12 @@ internal sealed class ContractReader(
         var (lossDate, lossInstant) = Resolve(validAt, zone);
         var legalEntity = LegalEntity;
         var active = ContractStateModel.Code(ContractStatus.Active);
+        var expired = ContractStateModel.Code(ContractStatus.Expired);
         var contracts = await (
                 from c in db.Contracts.AsNoTracking()
                 join v in db.Versions.AsNoTracking() on c.ContractId equals v.ContractId
                 join s in db.Sections.AsNoTracking() on new { v.VersionId, Rev = v.ContentRev } equals new { s.VersionId, s.Rev }
-                where c.LegalEntityId == legalEntity && c.Status == active && v.KnownTo == null
+                where c.LegalEntityId == legalEntity && (c.Status == active || c.Status == expired) && v.KnownTo == null
                     && v.ValidFrom <= lossDate && lossDate < v.ValidTo
                     && s.ProductCodes.Contains(productCode) && s.CoverageCodes.Contains(coverageCode)
                 orderby c.ContractNumber

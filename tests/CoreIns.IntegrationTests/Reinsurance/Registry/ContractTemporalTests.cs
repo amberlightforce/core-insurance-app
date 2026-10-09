@@ -67,8 +67,11 @@ public sealed class ContractTemporalTests(PostgresFixture database) : IClassFixt
         (await EventsAsync(slice, "RIContractExpired", id)).ShouldBe(1);
         (await EventsAsync(slice, "RIContractActivated", id)).ShouldBe(1);
 
-        // Only Active contracts are applicable (brief): an expired treaty is not returned, even for a loss inside its period.
-        (await slice.SendAsync(HttpMethod.Get, $"/api/ri/v1/contracts/applicable?productCode={product}&coverageCode=OD&validAt=2026-03-05")).Body!["contracts"]!.AsArray().Count.ShouldBe(0);
+        // An expired treaty still answers for a loss inside its period (notified late), with its status on the view; outside it, no.
+        var late = (await slice.SendAsync(HttpMethod.Get, $"/api/ri/v1/contracts/applicable?productCode={product}&coverageCode=OD&validAt=2026-03-05")).Body!["contracts"]!.AsArray();
+        late.Count.ShouldBe(1);
+        late[0]!["status"]!.GetValue<string>().ShouldBe("EXPIRED");
+        (await slice.SendAsync(HttpMethod.Get, $"/api/ri/v1/contracts/applicable?productCode={product}&coverageCode=OD&validAt=2027-03-05")).Body!["contracts"]!.AsArray().Count.ShouldBe(0);
     }
 
     [Fact]
@@ -99,6 +102,21 @@ public sealed class ContractTemporalTests(PostgresFixture database) : IClassFixt
         (await EventsAsync(slice, "RIContractActivated", id)).ShouldBe(1);
         await slice.ScanAsync();
         (await EventsAsync(slice, "RIContractActivated", id)).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task REQ_RI_058_A_treaty_registered_after_its_period_ended_is_Active_and_Expired_in_one_transaction_and_still_applicable()
+    {
+        var (slice, lead, follow) = await NewSliceAsync(database);
+        await using var _ = slice;
+        var product = NewProduct();
+        var (id, approved) = await slice.ApprovedAsync(Body(product, "OD", lead, follow, from: "2024-01-01", to: "2025-01-01"));
+        approved.Text("contract.status").ShouldBe("EXPIRED");
+        (await EventsAsync(slice, "RIContractActivated", id)).ShouldBe(1);
+        (await EventsAsync(slice, "RIContractExpired", id)).ShouldBe(1);
+        await slice.ScanAsync();
+        (await EventsAsync(slice, "RIContractExpired", id)).ShouldBe(1);
+        (await slice.SendAsync(HttpMethod.Get, $"/api/ri/v1/contracts/applicable?productCode={product}&coverageCode=OD&validAt=2024-06-01")).Body!["contracts"]!.AsArray().Count.ShouldBe(1);
     }
 
     [Fact]

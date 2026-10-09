@@ -183,6 +183,69 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
         edits.Single(r => r.Response.StatusCode != HttpStatusCode.OK).Response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
     }
 
+    private const string InboxRoles = "Staff.ReinsuranceManager,Staff.ClaimsManager";
+
+    private static async Task<(HttpResponseMessage Response, JsonNode? Body)> DecideInInboxAsync(RegistrySlice slice, string id, string user, string decision)
+    {
+        var requestId = await slice.ScalarAsync<string>($"SELECT request_id::text FROM plt.approval_request WHERE object_id = '{id}' ORDER BY requested_at DESC LIMIT 1");
+        var hash = await slice.ScalarAsync<string>($"SELECT payload_hash FROM plt.approval_request WHERE request_id = '{requestId}'");
+        return await slice.SendAsync(
+            HttpMethod.Post, "/api/plt/v1/approval/decide",
+            new { requestId, decision, payloadHash = hash, comment = decision == "Reject" ? "Not like this" : null }, InboxRoles, user);
+    }
+
+    [Fact]
+    public async Task PITFALLS_3_6_A_decision_given_in_the_PLT_inbox_is_executed_by_RI_only_for_a_checker_who_took_no_part()
+    {
+        var (slice, lead, follow) = await NewSliceAsync();
+        await using var _ = slice;
+
+        // Approved in the inbox by an independent manager: any manager's RI approve now executes it, recorded under the real checker.
+        var (id, version, _) = await slice.CreateAsync(Body(NewProduct(), "OD", lead, follow));
+        var submitted = await slice.SubmitAsync(id, version);
+        var (decided, decidedBody) = await DecideInInboxAsync(slice, id, "inbox-mgr", "Approve");
+        decided.StatusCode.ShouldBe(HttpStatusCode.OK, decidedBody?.ToJsonString());
+        (await slice.GetAsync(id)).Text("contract.status").ShouldBe("PENDING_APPROVAL");
+        var (executed, executedBody) = await slice.ApproveAsync(id, submitted, "rimgr2");
+        executed.StatusCode.ShouldBe(HttpStatusCode.OK, executedBody?.ToJsonString());
+        executedBody.Text("contract.status").ShouldBe("ACTIVE");
+        (await slice.ScalarAsync<string>($"SELECT approved_by FROM ri.contract_version WHERE contract_id = '{id}'")).ShouldBe("USER:inbox-mgr");
+
+        // Approved in the inbox by the person who entered the contract: PLT cannot know that editor; RI refuses to execute it.
+        var (id2, version2, _) = await slice.CreateAsync(Body(NewProduct(), "OD", lead, follow), user: "enterer2");
+        var submitted2 = await slice.SubmitAsync(id2, version2, user: "submitter2");
+        (await DecideInInboxAsync(slice, id2, "enterer2", "Approve")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var (refused, refusedBody) = await slice.ApproveAsync(id2, submitted2, "rimgr3");
+        refused.StatusCode.ShouldBe(HttpStatusCode.Forbidden, refusedBody?.ToJsonString());
+        refusedBody.Text("code").ShouldBe("RI-ERR-SOD");
+        (await slice.GetAsync(id2)).Text("contract.status").ShouldBe("PENDING_APPROVAL");
+        (await slice.ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'RIContractActivated' AND aggregate_id = '{id2}'")).ShouldBe(0);
+
+        // It can be returned to Draft and submitted again, which asks PLT for a new decision.
+        var (returned, returnedBody) = await slice.ApproveAsync(id2, submitted2, "rimgr3", "RETURN", "Entered and approved by the same person.");
+        returned.StatusCode.ShouldBe(HttpStatusCode.OK, returnedBody?.ToJsonString());
+        returnedBody.Text("contract.status").ShouldBe("DRAFT");
+    }
+
+    [Fact]
+    public async Task A_request_rejected_in_the_PLT_inbox_cannot_be_approved_by_RI_but_the_contract_can_be_returned()
+    {
+        var (slice, lead, follow) = await NewSliceAsync();
+        await using var _ = slice;
+        var (id, version, _) = await slice.CreateAsync(Body(NewProduct(), "OD", lead, follow));
+        var submitted = await slice.SubmitAsync(id, version);
+        (await DecideInInboxAsync(slice, id, "inbox-mgr", "Reject")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var (approve, approveBody) = await slice.ApproveAsync(id, submitted, "rimgr2");
+        approve.StatusCode.ShouldBe(HttpStatusCode.Conflict, approveBody?.ToJsonString());
+        approveBody.Text("code").ShouldBe("RI-ERR-STALE");
+        (await slice.GetAsync(id)).Text("contract.status").ShouldBe("PENDING_APPROVAL");
+
+        var (returned, returnedBody) = await slice.ApproveAsync(id, submitted, "rimgr2", "RETURN", "Rejected in the inbox.");
+        returned.StatusCode.ShouldBe(HttpStatusCode.OK, returnedBody?.ToJsonString());
+        returnedBody.Text("contract.status").ShouldBe("DRAFT");
+    }
+
     [Fact]
     public async Task REQ_RI_057_A_submitted_or_approved_treaty_cannot_be_edited_or_resubmitted()
     {
