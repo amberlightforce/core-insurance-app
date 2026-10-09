@@ -22,6 +22,30 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
     }
 
     [Fact]
+    public async Task Registry_list_layer_summary_uses_current_revision_and_preserves_money_and_layer_order()
+    {
+        var (slice, lead, follow) = await NewSliceAsync();
+        await using var _ = slice;
+        var (id, version, _) = await slice.CreateAsync(Body(NewProduct(), "OD", lead, follow));
+        var layers = new[]
+        {
+            new { layerNo = 2, attachment = Money("900000.00"), limit = Money("750000.00"), aad = Money("0.00") },
+            new { layerNo = 1, attachment = Money("400000.00"), limit = Money("500000.00"), aad = Money("1000.00") },
+        };
+        var (updated, _) = await slice.SendAsync(HttpMethod.Patch, $"/api/ri/v1/contracts/{id}", new { expectedRecordVersion = version, layers });
+        updated.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var (_, page) = await slice.SendAsync(HttpMethod.Get, "/api/ri/v1/contracts?limit=200");
+        var item = page!["items"]!.AsArray().Single(i => i!["contractId"]!.GetValue<string>() == id)!;
+        item["layers"]!.AsArray().Count.ShouldBe(2);
+        item.Text("layers.0.layerNo").ShouldBe("1");
+        item.Text("layers.0.attachment.amount").ShouldBe("400000.00");
+        item.Text("layers.0.limit.amount").ShouldBe("500000.00");
+        item.Text("layers.0.limit.currency").ShouldBe("EUR");
+        item.Text("layers.1.layerNo").ShouldBe("2");
+        item.Text("layers.1.limit.amount").ShouldBe("750000.00");
+    }
+
+    [Fact]
     public async Task REQ_RI_030_031_032_056_057_058_231_Create_submit_and_approve_by_another_person_activates_the_treaty()
     {
         var (slice, lead, follow) = await NewSliceAsync();

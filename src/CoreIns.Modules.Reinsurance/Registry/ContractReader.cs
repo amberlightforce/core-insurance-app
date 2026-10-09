@@ -1,6 +1,7 @@
 using System.Globalization;
 using CoreIns.Modules.Reinsurance.Contracts.Api;
 using CoreIns.Modules.Reinsurance.Persistence;
+using CoreIns.Platform.Contracts.Common;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Time;
@@ -80,7 +81,13 @@ internal sealed class ContractReader(
                 orderby c.CreatedAt descending, c.ContractId
                 select new { c, v })
             .Skip(offset).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var items = rows.Take(size).Select(r => new ContractListItem
+        var pageRows = rows.Take(size).ToList();
+        var versionIds = pageRows.Select(r => r.v.VersionId).ToArray();
+        // One batched read for the page; previous draft revisions remain append-only and must not leak into the summary.
+        var layers = await db.Layers.AsNoTracking().Where(l => versionIds.Contains(l.VersionId))
+            .OrderBy(l => l.LayerNo).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var byVersion = layers.ToLookup(l => l.VersionId);
+        var items = pageRows.Select(r => new ContractListItem
         {
             ContractId = r.c.ContractId,
             ContractNumber = r.c.ContractNumber,
@@ -91,6 +98,14 @@ internal sealed class ContractReader(
             PlacedPct = ContractSupport.Percent(r.v.PlacedPct),
             Status = ContractSupport.Wire(ContractStateModel.Parse(r.c.Status)),
             RecordVersion = r.c.RecordVersion,
+            Layers = byVersion[r.v.VersionId].Where(l => l.Rev == r.v.ContentRev).Select(l => new RiLayer
+            {
+                LayerNo = l.LayerNo,
+                Attachment = new Money(l.Attachment, Currency.FromCode(l.Currency.Trim())),
+                Limit = new Money(l.LimitAmount, Currency.FromCode(l.Currency.Trim())),
+                Aad = new Money(l.Aad, Currency.FromCode(l.Currency.Trim())),
+                Aal = l.Aal is { } aal ? new Money(aal, Currency.FromCode(l.Currency.Trim())) : null,
+            }).ToList(),
         }).ToList();
         return new ContractListPage
         {
