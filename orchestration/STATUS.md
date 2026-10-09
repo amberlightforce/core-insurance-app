@@ -155,3 +155,11 @@ Plan: `SLICE-PLAN-4.md`. Decisions: D-SL4-01..20. Briefs: `briefs/sl4/` (waves 1
 | GAP-SL3-BIL-VOID | BIL + FIN | REDUCE_PRO_RATA / REVERSE_AS_VOID tax and levy credits are quarantined (`TAX-CREDIT-NOT-SUPPORTED`): needs LA-06/LA-27 reversal mechanics in BIL and a FIN v4 rule. Blocks distance withdrawal (E2E-08) — schedule with slice 6 | waived from SL3-BIL-CREDIT review D3 | deep | gap |
 | FU-CLM-COVERAGE-DECISION | CLM | Register and enforce `CLM.COVERAGE_DECISION` authority on reverify KEEP/ADOPT; apply gained cover via a coverage decision (REQ-CLM-051); consume `TransactionReversed` (REQ-CLM-057); periodic sweep of open claims for missed supersessions (raise-before-claim-commit race); DLQ alerting check for re-verification events | after SL3-CLM-REVERIFY | deep | planned (slice 4 candidate) |
 | LIM-SL5-UW-RACE | UW + POL | Accepted limitation: an editor firing an edit and a decide concurrently could decide before the edit commits (needs a POL-side job lock during decide); approval stays bound to the old fingerprint. Also MINE does one POL `Job.get` per candidate (≤500) — batch when `pol.Job.list` exists | SL5-UW-WB-API re-check | — | accepted |
+
+## Overnight progress log (2026-10-09, orchestrator)
+- **Slice 3 merged (19 PRs):** CONTRACTS #19, E2E-HARNESS #15, PFC-MOTOR11 #18, MKT-TREATMENT #16, POL-ENGINE #17, CMP-CREDIT #25, PLT-SUPPORT #22, RAT-PRORATE #20, POL-TEMPORAL #21, POL-CHANGE #27, BIL-CREDIT #26, CLM-REVERIFY #33, MKT-CALCULATE #36, POL-RENEW #32, FIN-RULES v3 #31, POL-READS #38, UI-POL-FILE #23 (+ terms #41), POL-CANCEL #29 (incl. most of POL-WIRING).
+- **Slice 3 open:** BIL-REFUND #39 (fix round: DB approval-state guard, PLT inbox owner-decided), UI-POL-JOBS #28 + UI-CLM #37 (visual review), UI-BIL #34 (waits for #39), SL3-E2E (building).
+- **Slice 5 merged:** UW-WB-API #30, UI-UW-WB #35 (the «Ανάληψη κινδύνου» workbench). Building: MKT-STATE.
+- **Slice 4:** CONTRACTS #24 merged; RI-ENGINE #40 in re-check; RI-REGISTRY building.
+- **Business questions raised overnight:** D-SL3-23 (Greek IPT rounding per line vs per invoice — servicing IPT refused in Production until confirmed); D-SL4-21 (RI outstanding shown per layer-year only).
+- Every deep review so far found real defects before merge; lessons are PITFALLS 36–48.
