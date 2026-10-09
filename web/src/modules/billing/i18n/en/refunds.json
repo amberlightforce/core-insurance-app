@@ -170,6 +170,16 @@
     "lines": {
       "transactionKind": "Transaction",
       "rule": "Treatment rule"
+    },
+    "payoutMethod": {
+      "SEPA_CT": "SEPA bank transfer"
+    },
+    "legalStatus": {
+      "Unverified": "Unverified",
+      "Open": "Open",
+      "NotRegulatory": "Not regulatory",
+      "Settled": "Settled",
+      "PendingOpinion": "Awaiting legal opinion"
     }
   }
 }

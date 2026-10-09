@@ -14,6 +14,11 @@ import { SimpleTable } from '../../staff/SimpleTable';
 import styles from '../../staff/staff.module.css';
 import type { RefundBreakdownLine, RefundNettingLine, RefundState } from './api';
 
+const transactionKinds: Record<string, string> = {
+  ENDORSEMENT_DEBIT: 'CHANGE',
+  ENDORSEMENT_CREDIT: 'CHANGE',
+};
+
 type DisbursementState = EntityState<'disbursement'>;
 
 /** A refund is paid out as a disbursement, so its lifecycle reads through the disbursement entry of the status map. */
@@ -43,6 +48,22 @@ export function BreakdownTable({
   currency: string;
 }) {
   const { t } = useTranslation('billing');
+  const translatedLines = useMemo(
+    () =>
+      lines.map((line) => ({
+        ...line,
+        chargeCategory: t(`quote:breakdown.category.${line.chargeCategory}`, {
+          defaultValue: line.chargeCategory,
+        }),
+        transactionKind: line.transactionKind
+          ? t(
+              `policy:file.kind.${transactionKinds[line.transactionKind] ?? line.transactionKind}`,
+              { defaultValue: line.transactionKind },
+            )
+          : '',
+      })),
+    [lines, t],
+  );
   const columns = useMemo<DataColumn<RefundBreakdownLine>[]>(
     () => [
       identifierColumn<RefundBreakdownLine>(
@@ -74,13 +95,15 @@ export function BreakdownTable({
           l.provisional === true ? (
             <StatusPill
               semantic="warning"
-              subLabel={t('refunds.breakdown.provisional')}
+              text={t('refunds.breakdown.provisional')}
               announceChanges={false}
             />
           ) : l.legalStatus ? (
-            <span>{l.legalStatus}</span>
+            <span>
+              {t(`refunds.legalStatus.${l.legalStatus}`, { defaultValue: l.legalStatus })}
+            </span>
           ) : null,
-        { size: 200 },
+        { size: 230 },
       ),
       moneyColumn<RefundBreakdownLine>(
         'amount',
@@ -96,7 +119,7 @@ export function BreakdownTable({
     <SimpleTable<RefundBreakdownLine>
       aria-label={t('refunds.breakdown.title')}
       columns={columns}
-      data={lines}
+      data={translatedLines}
       getRowId={(l) =>
         `${l.transactionId}|${l.chargeType}|${l.chargeCategory}|${l.treatmentRuleId ?? ''}|${l.amount.amount}`
       }
