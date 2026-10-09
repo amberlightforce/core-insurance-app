@@ -44,6 +44,8 @@
       "CLM-ERR-NOT-FOUND": "The record was not found.",
       "CLM-ERR-STALE": "The claim changed meanwhile. The details were refreshed: try again.",
       "CLM-ERR-ILLEGAL-TRANSITION": "The action is not allowed in the claim's current state.",
+      "CLM-ERR-SNAPSHOT-MISMATCH": "The policy changed again meanwhile. The claim was refreshed: review the comparison and decide again.",
+      "CLM-ERR-COVERAGE-IN-QUESTION": "A payment cannot be made while cover is in question after a policy change. Decide on the re-verification first.",
       "CLM-ERR-CLOSE-GUARD": "The claim cannot close yet.",
       "CLM-ERR-EXPOSURE-DUPLICATE": "An open exposure already exists for this coverage. Give a reason to add another.",
       "CLM-ERR-SEARCH-CRITERIA": "Enter a claim number or a policy number.",
