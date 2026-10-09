@@ -11,10 +11,15 @@
         "pol.Term.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pol.Snapshot.get": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "pol.Policy.search": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+<<<<<<< HEAD
         "pol.renewal.manage": [ "Staff.Underwriter" ],
         "pol.Renewal.create": [ "Staff.Underwriter" ],
         "pol.Renewal.offer": [ "Staff.Underwriter" ],
         "pol.Renewal.accept": [ "Staff.Underwriter" ],
+=======
+        "pol.cancel": [ "Staff.Underwriter" ],
+        "pol.Cancellation.create": [ "Staff.Underwriter" ],
+>>>>>>> origin/worktree-agent-ab0e71a52a815a5ab
         "pol.PolicyChange.create": [ "Staff.Underwriter" ],
         "pol.change": [ "Staff.Underwriter" ],
         "pol.Job.withdraw": [ "Staff.Underwriter" ]

@@ -1,5 +1,6 @@
 using CoreIns.Modules.Policy.Commands;
 using CoreIns.Modules.Policy.Commands.Renewal;
+using CoreIns.Modules.Policy.Commands.Cancellation;
 using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
@@ -125,6 +126,16 @@ public static class PolicyModule
 
         // UW decides declines; POL marks the job (REQ-POL-156).
         services.AddEventHandler<DeclineIssuedV1, DeclineIssuedHandler>(EventDescriptor.From(DeclineIssuedV1.Descriptor), DeclineIssuedHandler.Name, ModuleCode.POL);
+
+        // SL3-POL-CANCEL: policyholder cancellation now / flat (pol.Cancellation.create; dry run = the refund preview).
+        services.AddScoped<ICancellationRefundMethods, IllustrativeRefundMethods>();
+        // The production IProration is RAT's shared proration behind POL's port (never ReferenceProration, which is test-only, PITFALLS 43).
+        // Replace, so exactly one registration survives next to POL-CHANGE's default.
+        services.AddScoped<RatingProrationAdapter>();
+        services.Replace(ServiceDescriptor.Scoped<IProration>(sp => sp.GetRequiredService<RatingProrationAdapter>()));
+        services.AddScoped<IValidator<CancelPolicy>, CancelPolicyValidator>();
+        services.AddCommandAuditor<CancelPolicy, CancellationCreateResponse, CancelPolicyAuditor>();
+        services.AddCommand<CancelPolicy, CancellationCreateResponse, CancelPolicyHandler>(CommandDescriptor.For("pol.Cancellation.create") with { SupportsDryRun = true });
 
         services.AddErrorDefinitions(Errors);
         return services;
