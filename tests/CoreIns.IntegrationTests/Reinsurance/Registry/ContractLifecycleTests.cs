@@ -115,22 +115,24 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
         (await slice.GetAsync(id)).Text("contract.recordVersion").ShouldBe(version.ToString(CultureInfo.InvariantCulture));
     }
 
-    [Fact]
-    public async Task REQ_RI_030_031_032_056_057_058_231_Create_submit_and_approve_by_another_person_activates_the_treaty()
+    [Theory]
+    [InlineData("riacct", "rimgr")]
+    [InlineData("dev:riacct", "dev:rimgr")]
+    public async Task REQ_RI_030_031_032_056_057_058_231_Create_submit_and_approve_by_another_person_activates_the_treaty(string maker, string manager)
     {
         var (slice, lead, follow) = await NewSliceAsync();
         await using var _ = slice;
         var product = NewProduct();
 
-        var (id, version, created) = await slice.CreateAsync(Body(product, "OD", lead, follow));
+        var (id, version, created) = await slice.CreateAsync(Body(product, "OD", lead, follow), user: maker);
         created.Text("contract.status").ShouldBe("DRAFT");
         created.Text("contract.contractNumber").ShouldMatch("^RIC[0-9]{6}$");
         created.Text("contract.stableTreatyId").ShouldBe(created.Text("contract.contractNumber"));
         created.Text("contract.contractYear").ShouldBe("2026");
-        created.Text("contract.maker").ShouldBe("USER:riacct");
+        created.Text("contract.maker").ShouldBe("USER:" + maker);
         created.Text("contract.participations.0.lead").ShouldBe("true");
 
-        var submitted = await slice.SubmitAsync(id, version);
+        var submitted = await slice.SubmitAsync(id, version, user: maker);
         var detail = await slice.GetAsync(id);
         detail.Text("contract.status").ShouldBe("PENDING_APPROVAL");
         var requestId = detail.Text("contract.approvalRequestId");
@@ -141,7 +143,7 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
         (await slice.ScalarAsync<string>($"SELECT payload_hash FROM plt.approval_request WHERE request_id = '{requestId}'"))
             .ShouldBe(await slice.ScalarAsync<string>($"SELECT content_hash FROM ri.contract_version WHERE contract_id = '{id}'"));
 
-        var (response, approved) = await slice.ApproveAsync(id, submitted);
+        var (response, approved) = await slice.ApproveAsync(id, submitted, user: manager);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, approved?.ToJsonString());
         approved.Text("decision").ShouldBe("APPROVE");
 
@@ -151,7 +153,7 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
         active.Text("contract.activatedAt").ShouldNotBe("null");
         (await slice.ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'RIContractActivated' AND aggregate_id = '{id}'")).ShouldBe(1);
         (await slice.ScalarAsync<string>($"SELECT status FROM plt.approval_request WHERE request_id = '{requestId}'")).ShouldBe("Approved");
-        (await slice.ScalarAsync<string>($"SELECT approved_by FROM ri.contract_version WHERE contract_id = '{id}'")).ShouldBe("USER:rimgr");
+        (await slice.ScalarAsync<string>($"SELECT approved_by FROM ri.contract_version WHERE contract_id = '{id}'")).ShouldBe("USER:" + manager);
 
         // Audit rows for each lifecycle command, with the object and number.
         foreach (var operation in new[] { "ri.Contract.create", "ri.Contract.submit", "ri.Contract.approve" })
