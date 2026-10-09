@@ -85,7 +85,7 @@
       "active": "{entity} · Ενεργή",
       "activeSince": "Ενεργή από",
       "configurationHash": "Hash διαμόρφωσης",
-      "rolledBack": "{entity} · Επαναφέρθηκε",
+      "rolledBack": "{entity} · Αναιρέθηκε η ενεργοποίηση",
       "window": "Παράθυρο ισχύος",
       "hashesIssued": "Hash που εκδόθηκε στο παράθυρο",
       "noHash": "Δεν καταγράφηκε",

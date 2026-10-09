@@ -19,7 +19,11 @@ const claimsRoles = ['Staff.ClaimsHandler', 'Staff.ClaimsManager'] as const;
 const underwritingRoles = ['Staff.UnderwritingManager', 'Platform.Admin'] as const;
 
 /** Roles that manage pack activation (illustrative; permission mkt.Pack.list). */
-const packRoles = ['Platform.ReleaseManager', 'Platform.DesignAuthority', 'Platform.Admin'] as const;
+const packRoles = [
+  'Platform.ReleaseManager',
+  'Platform.DesignAuthority',
+  'Platform.Admin',
+] as const;
 
 /** Default staff navigation (role-configured order arrives with PLT; Part 1 §3.4). */
 export const defaultNavItems: NavItem[] = [
@@ -28,7 +32,12 @@ export const defaultNavItems: NavItem[] = [
   { id: 'parties', to: '/parties' },
   { id: 'policies', to: '/policies' },
   { id: 'underwriting', to: '/underwriting', roles: underwritingRoles },
-  { id: 'policies', to: '/policies/pack-rollback', label: 'packRollback', roles: underwritingRoles },
+  {
+    id: 'policies',
+    to: '/policies/pack-rollback',
+    label: 'packRollback',
+    roles: underwritingRoles,
+  },
   { id: 'claims', to: '/claims', roles: claimsRoles },
   { id: 'billing', to: '/billing' },
   { id: 'reinsurance', to: '/reinsurance' },
