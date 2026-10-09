@@ -69,6 +69,12 @@ const policyRoute = (data: PolicyGetResponse): MockRoute => ({
   respond: () => ({ body: data }),
 });
 
+const catalogueRoute: MockRoute = {
+  method: 'GET',
+  path: `/api/pfc/v1/catalogue/${fx.hash}`,
+  respond: () => ({ body: fx.catalogue }),
+};
+
 const jobRoute: MockRoute = {
   method: 'GET',
   path: `/api/pol/v1/jobs/${jobId}`,
@@ -176,8 +182,7 @@ describe('ServicingPreviewView', () => {
     expect(await screen.findByText('Επιστροφή προς τον πελάτη')).toBeInTheDocument();
     expect(screen.getAllByText('288,63 €').length).toBeGreaterThan(0);
     const prorated = screen.getByRole('grid', { name: 'Αναλογικές γραμμές ασφαλίστρου' });
-    expect(within(prorated).getByText('245 / 365')).toBeInTheDocument();
-    expect(within(prorated).getByText('0.6712')).toBeInTheDocument();
+    expect(within(prorated).getByText('245 / 365 · 0.6712')).toBeInTheDocument();
     const tax = screen.getByRole('grid', { name: 'Γραμμές φόρων' });
     expect(within(tax).getByText('ΦΑΑ: δεν επιστρέφεται')).toBeInTheDocument();
     expect(within(tax).getByText(/Προσωρινό/)).toBeInTheDocument();
@@ -203,6 +208,7 @@ describe('CancellationPage', () => {
 
   const cancelRoutes = (overrides: { bind?: MockRoute['respond'] } = {}): MockRoute[] => [
     policyRoute(policyFx()),
+    catalogueRoute,
     {
       method: 'POST',
       path: '/api/pol/v1/cancellations',
@@ -268,6 +274,8 @@ describe('CancellationPage', () => {
     expect(created?.headers.get('Idempotency-Key')).toBeTruthy();
     expect(api.callsTo('POST', '/api/pol/v1/jobs/quote')[0]?.body).toEqual({ jobId, versionNo: 1 });
     expect(screen.getByText(/ΦΑΑ: δεν επιστρέφεται/)).toBeInTheDocument();
+    expect(screen.getByText('Αστική ευθύνη αυτοκινήτου')).toBeInTheDocument();
+    expect(screen.getByText('Ετήσιο')).toBeInTheDocument();
     await expectNoA11yViolations(container);
 
     await user.click(screen.getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου' }));
@@ -359,6 +367,7 @@ describe('RenewalPage', () => {
     quoteBody: object = { ...fx.quote(), servicingPreview: renewPreview() },
   ): MockRoute[] => [
     policyRoute(policyFx('IN_FORCE', 340)),
+    catalogueRoute,
     {
       method: 'POST',
       path: '/api/pol/v1/renewals',
@@ -407,7 +416,7 @@ describe('RenewalPage', () => {
     expect(screen.getByText(/Χρησιμοποιήστε το Ανανέωση τώρα/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Ανανέωση τώρα' }));
-    expect(await screen.findByText('Ασφάλιστρο ανανέωσης')).toBeInTheDocument();
+    expect(await screen.findByText('Τιμολογήθηκε')).toBeInTheDocument();
     expect(api.callsTo('POST', '/api/pol/v1/renewals')[0]?.body).toEqual({ termId: 'term-1' });
     expect(api.callsTo('POST', '/api/pol/v1/jobs/quote')[0]?.body).toEqual({ jobId, versionNo: 1 });
     expect(screen.getByText('Πρόσθετο ποσό προς είσπραξη από τον πελάτη')).toBeInTheDocument();
@@ -488,6 +497,7 @@ describe('ChangeWorkspacePage', () => {
     overrides: { create?: MockRoute['respond']; preview?: ServicingPreview } = {},
   ): MockRoute[] => [
     policyRoute(policyFx()),
+    catalogueRoute,
     {
       method: 'POST',
       path: '/api/pol/v1/policy-changes',

@@ -17,6 +17,7 @@ import styles from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
 import type { ServicingPreview, ServicingProratedLine, ServicingTaxLine } from './api';
 import { dueOf } from './logic';
+import { useCoverNames } from './useCoverNames';
 
 /** Marks a tax or levy line whose rule is not Settled; it appears wherever the line does. */
 function ProvisionalPill() {
@@ -65,42 +66,44 @@ export function DueBanner({ preview }: { preview: ServicingPreview }) {
  * the prorated premium lines (days, fraction, amount) and the tax lines with the treatment that decided them.
  * A provisional tax line is marked wherever it appears and the banner on top says so once (D-SL3-05).
  */
-export function ServicingPreviewView({ preview }: { preview: ServicingPreview }) {
+export function ServicingPreviewView({
+  preview,
+  artefactHash,
+}: {
+  preview: ServicingPreview;
+  /** Product artefact of the term: its catalogue gives the cover names (the code is the fallback). */
+  artefactHash?: string;
+}) {
   const { t } = useTranslation('policy');
   const fmt = useFormat();
   const currency = preview.totalChange.currency;
+  const coverNames = useCoverNames(artefactHash);
 
   const proratedColumns = useMemo<DataColumn<ServicingProratedLine>[]>(
     () => [
       textColumn<ServicingProratedLine>(
         'cover',
         t('servicing.preview.columns.cover'),
-        (l) => l.coverageCode,
-        { size: 90 },
+        (l) => coverNames.get(l.coverageCode) ?? l.coverageCode,
+        { size: 170 },
       ),
       identifierColumn<ServicingProratedLine>(
         'chargeType',
         t('servicing.preview.columns.charge'),
         (l) => l.chargeType,
-        { size: 120 },
+        { size: 110 },
       ),
       textColumn<ServicingProratedLine>(
         'period',
         t('servicing.preview.columns.period'),
         (l) => `${fmt.date(l.period.from)} – ${fmt.date(l.period.to)}`,
-        { size: 190 },
+        { size: 175 },
       ),
       textColumn<ServicingProratedLine>(
         'days',
         t('servicing.preview.columns.days'),
-        (l) => `${String(l.days)} / ${String(l.termDays)}`,
-        { size: 90 },
-      ),
-      textColumn<ServicingProratedLine>(
-        'fraction',
-        t('servicing.preview.columns.fraction'),
-        (l) => l.fraction,
-        { size: 100 },
+        (l) => `${String(l.days)} / ${String(l.termDays)} · ${l.fraction}`,
+        { size: 160 },
       ),
       moneyColumn<ServicingProratedLine>(
         'amount',
@@ -109,7 +112,7 @@ export function ServicingPreviewView({ preview }: { preview: ServicingPreview })
         { currency },
       ),
     ],
-    [t, fmt, currency],
+    [t, fmt, currency, coverNames],
   );
 
   const taxColumns = useMemo<DataColumn<ServicingTaxLine>[]>(
