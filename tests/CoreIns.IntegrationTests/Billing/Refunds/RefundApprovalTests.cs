@@ -84,7 +84,7 @@ public sealed class RefundApprovalTests(PostgresFixture database) : IClassFixtur
         var (again, againBody) = await _h.DecideAsync(id, "APPROVE", "bob");
         again.StatusCode.ShouldBe(HttpStatusCode.Conflict, againBody?.ToJsonString());
         againBody.Text("code").ShouldBe("BIL-ERR-REFUND-STATE");
-        (await _h.Slice.ScalarAsync<long>("SELECT count(*) FROM bil.disbursement WHERE source_type = 'BIL_REFUND'")).ShouldBe(1);
+        (await _h.Slice.ScalarAsync<long>($"SELECT count(*) FROM bil.disbursement WHERE source_type = 'BIL_REFUND' AND source_id = '{id}'")).ShouldBe(1);
     }
 
     [Fact]

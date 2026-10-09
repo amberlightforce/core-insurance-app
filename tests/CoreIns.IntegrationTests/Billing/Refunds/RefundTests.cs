@@ -173,7 +173,7 @@ public sealed class RefundAutoApprovalTests(PostgresFixture database) : IClassFi
         };
         var twice = await Should.ThrowAsync<CoreIns.Platform.Errors.DomainException>(() => disbursements.RequestAsync(paid, CommandOptions.New(), Ct));
         twice.Error.Code.Value.ShouldBe("BIL-ERR-APPROVAL-MISMATCH");
-        (await _h.Slice.ScalarAsync<long>($"SELECT count(*) FROM bil.disbursement WHERE source_type = 'BIL_REFUND'")).ShouldBe(1);
+        (await _h.Slice.ScalarAsync<long>($"SELECT count(*) FROM bil.disbursement WHERE source_type = 'BIL_REFUND' AND source_id = '{refund.Text("refundId")}'")).ShouldBe(1);
     }
 
     [Fact]
