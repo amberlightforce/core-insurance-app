@@ -58,33 +58,49 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
         string pack, string entityCode, string version, CancellationToken ct)
     {
         if (context.LegalEntity?.Value != entityCode)
+        {
             throw new DomainException(ActivationSupport.Refuse("PACK-NOT-FOUND", "The pack is not available for this legal entity."));
+        }
         var entity = await db.LegalEntities.AsNoTracking().SingleOrDefaultAsync(e => e.Code == entityCode && e.PackId == pack && e.Status == "ACTIVE", ct).ConfigureAwait(false)
             ?? throw new DomainException(ActivationSupport.Refuse("PACK-NOT-FOUND", "The active legal entity does not own this pack."));
         var state = await db.ConfigStates.AsNoTracking().OrderByDescending(s => s.Seq).FirstAsync(ct).ConfigureAwait(false);
         var manifest = ConfigStateManifest.FromJson(JsonNode.Parse(state.Manifest));
-        if (manifest.Hash.ToString() != state.Hash.Trim()) throw new DomainException(ActivationSupport.Refuse("STALE", "The current manifest failed its integrity check."));
+        if (manifest.Hash.ToString() != state.Hash.Trim())
+        {
+            throw new DomainException(ActivationSupport.Refuse("STALE", "The current manifest failed its integrity check."));
+        }
         var current = manifest.Packs.SingleOrDefault(p => p.PackId == pack)
             ?? throw new DomainException(ActivationSupport.Refuse("STALE", "The current manifest does not name this pack."));
         var activeRows = await db.PackActivations.Where(a => a.LegalEntityId == entity.LegalEntityId && a.PackId == pack && a.Status == "ACTIVE").ToListAsync(ct).ConfigureAwait(false);
         if (activeRows.Count != 1 || activeRows[0].Version != current.Version || activeRows[0].ActivatedAt is null || activeRows[0].ResultingHash is null)
+        {
             throw new DomainException(ActivationSupport.Refuse("STALE", "The entity activation and current manifest disagree."));
+        }
         // One manifest is shared by the stamp. Refuse entity-local mutation if it would silently change another entity's pack.
         if (await db.LegalEntities.AnyAsync(e => e.PackId == pack && e.LegalEntityId != entity.LegalEntityId && e.Status == "ACTIVE", ct).ConfigureAwait(false))
+        {
             throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "This slice supports one active legal entity per country pack in a stamp."));
+        }
         var target = await db.PackVersions.AsNoTracking().SingleOrDefaultAsync(v => v.PackId == pack && v.Version == version && v.Status == "Published", ct).ConfigureAwait(false)
             ?? throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "The target version is not Published."));
         if (target.Country != current.Country || PackVersionContent.DigestOf(PackVersionContent.FromJson(JsonNode.Parse(target.Values))).ToString() != target.ContentDigest.Trim())
+        {
             throw new DomainException(ActivationSupport.Refuse("STALE", "The target pack failed its integrity check."));
+        }
         var source = await db.PackVersions.AsNoTracking().SingleAsync(v => v.PackId == pack && v.Version == current.Version, ct).ConfigureAwait(false);
         if (source.ContentDigest.Trim() != current.Digest.ToString())
+        {
             throw new DomainException(ActivationSupport.Refuse("STALE", "The manifest source digest disagrees with the registry."));
+        }
         return (entity, state, manifest, activeRows[0], target);
     }
 
     private async Task<PackActivationPreview> PreviewAsync(PackActivationRow active, PackVersionRow target, bool rollback, Instant now, CancellationToken ct)
     {
-        if (now <= active.ActivatedAt!.Value) throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "Retroactive activation is unsupported."));
+        if (now <= active.ActivatedAt!.Value)
+        {
+            throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "Retroactive activation is unsupported."));
+        }
         var source = await db.PackVersions.AsNoTracking().SingleAsync(v => v.PackId == active.PackId && v.Version == active.Version, ct).ConfigureAwait(false);
         var states = rollback ? await db.ConfigStates.AsNoTracking().Where(s => s.ActivatedAt >= active.ActivatedAt!.Value && s.ActivatedAt < now).OrderBy(s => s.Seq).ToListAsync(ct).ConfigureAwait(false) : [];
         // Each state is checked against the source pack; no unrelated state is attributed to the affected window.
@@ -101,17 +117,29 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
     public async Task<(PackActivationPreview Preview, PackActivationRow? Row)> RequestAsync(string pack, string entity, string version, string reason, bool rollback, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(pack) || string.IsNullOrWhiteSpace(version) || reason is null || reason.Trim().Length < 20 || reason.Length > 128)
+        {
             throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "Pack, version and a reason of 20 to 128 characters are required."));
-        if (context.Actor.Kind != ActorKind.User) throw new DomainException(ActivationSupport.Refuse("SOD-VIOLATION", "A human release manager must request activation."));
+        }
+        if (context.Actor.Kind != ActorKind.User)
+        {
+            throw new DomainException(ActivationSupport.Refuse("SOD-VIOLATION", "A human release manager must request activation."));
+        }
         await LockAsync(ct).ConfigureAwait(false);
         var facts = await FactsAsync(pack, entity, version, ct).ConfigureAwait(false);
         if (facts.Active.Version == version || (rollback && Version.Parse(version) >= Version.Parse(facts.Active.Version)))
+        {
             throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "Rollback requires an earlier version; activation requires a different version."));
+        }
         var now = clock.Now;
         var preview = await PreviewAsync(facts.Active, facts.Target, rollback, now, ct).ConfigureAwait(false);
-        if (context.DryRun) return (preview, null);
+        if (context.DryRun)
+        {
+            return (preview, null);
+        }
         if (await db.PackActivations.AnyAsync(a => a.LegalEntityId == facts.Entity.LegalEntityId && a.PackId == pack && a.Status == "PENDING_APPROVAL", ct).ConfigureAwait(false))
+        {
             throw new DomainException(ActivationSupport.Refuse("STALE", "An activation request is already pending."));
+        }
         var row = new PackActivationRow
         {
             Id = Guid.CreateVersion7(), LegalEntityId = facts.Entity.LegalEntityId, PackId = pack, Version = version,
@@ -139,24 +167,35 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
     public async Task<PackActivationView> DecideAsync(PackActivationDecideRequest request, CancellationToken ct)
     {
         if (!Enum.IsDefined(request.Decision) || request.Reason is null || request.Reason.Trim().Length == 0 || request.Reason.Length > 128)
+        {
             throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "A checker reason of 1 to 128 characters is required."));
+        }
         await LockAsync(ct).ConfigureAwait(false);
         var entity = context.LegalEntity?.Value ?? throw new InvalidOperationException("No authenticated legal entity.");
         var entityRow = await db.LegalEntities.AsNoTracking().SingleAsync(e => e.Code == entity, ct).ConfigureAwait(false);
         var row = await db.PackActivations.SingleOrDefaultAsync(a => a.Id == request.ActivationId && a.LegalEntityId == entityRow.LegalEntityId, ct).ConfigureAwait(false)
             ?? throw new DomainException(ActivationSupport.Refuse("PACK-NOT-FOUND", "The activation does not exist."));
         if (row.Status != "PENDING_APPROVAL" || row.ContentHash is null || row.ParentHash is null || row.TargetDigest is null || row.FromVersion is null || row.SupersedesId is null || row.ApprovalRequestId is null)
+        {
             throw new DomainException(ActivationSupport.Refuse("STALE", "The activation is not pending with complete proof."));
+        }
         var actor = ActivationSupport.Actor(context.Actor);
         var principal = context.OnBehalfOf is { } p ? ActivationSupport.Actor(p) : null;
         if (context.Actor.Kind != ActorKind.User || actor == row.RequestedBy || actor == row.RequestedPrincipal || (principal is not null && (principal == row.RequestedBy || principal == row.RequestedPrincipal)))
+        {
             throw new DomainException(ActivationSupport.Refuse("SOD-VIOLATION", "The checker must be a different human from the maker and maker principal."));
+        }
         var proof = ActivationSupport.Proof(row, entity);
-        if (proof.Hash.ToString() != row.ContentHash.Trim()) throw new DomainException(ActivationSupport.Refuse("SOD-VIOLATION", "Frozen content no longer matches its approval hash."));
+        if (proof.Hash.ToString() != row.ContentHash.Trim())
+        {
+            throw new DomainException(ActivationSupport.Refuse("SOD-VIOLATION", "Frozen content no longer matches its approval hash."));
+        }
         var approve = request.Decision == PackActivationDecideRequest.DecisionValue.Approve;
         var facts = await FactsAsync(row.PackId, entity, row.Version, ct).ConfigureAwait(false);
         if (approve && (facts.State.Hash.Trim() != row.ParentHash.Trim() || facts.Active.Id != row.SupersedesId || facts.Active.Version != row.FromVersion || facts.Target.ContentDigest.Trim() != row.TargetDigest.Trim()))
+        {
             throw new DomainException(ActivationSupport.Refuse("STALE", "The parent state or activation changed; reject and request again."));
+        }
         var now = clock.Now;
         var decision = await approvals.DecideAsync(new ApprovalDecideRequest
         {
@@ -170,7 +209,9 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
             var verified = await approvals.VerifyForExecutionAsync(new ApprovalVerifyForExecutionRequest
             { RequestId = row.ApprovalRequestId.Value, Hash = proof.Hash, Type = ActivationSupport.ApprovalType, ObjectRef = ActivationSupport.Subject(row.Id) }, ct).ConfigureAwait(false);
             if (!verified.Ok || verified.Authority.Type != ActivationSupport.Authority || verified.Authority.Codes?.GetValueOrDefault("pack") != row.PackId || verified.Authority.Codes?.GetValueOrDefault("legalEntity") != entity)
+            {
                 throw new DomainException(ActivationSupport.Refuse("SOD-VIOLATION", "Native PLT proof does not bind the required activation authority."));
+            }
             var packs = facts.Manifest.Packs.Where(p => p.PackId != row.PackId).Append(new ManifestPack(row.PackId, row.Version, proof.TargetDigest, facts.Target.Country!)).ToList();
             var manifest = new ConfigStateManifest(packs, facts.Manifest.CoreDigest, proof.Parent, row.Kind == "ROLLBACK" ? StateCauses.PackRollback : StateCauses.PackActivation);
             var hash = await ConfigStateWriter.AppendAsync(session.Connection, session.Transaction!, manifest, now, row.Id, ct).ConfigureAwait(false);
@@ -181,20 +222,27 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
             row.WindowFrom = preview.Window.Start; row.WindowTo = preview.Window.End; row.HashesIssued = preview.HashesIssued.Select(h => h.ToString()).ToArray();
             var keys = BusinessKeys.Empty.With("stampId", entity).With("packId", PackRegistryService.IdOf(row.PackId).ToString("D"));
             if (row.Kind == "ROLLBACK")
+            {
                 events.Publish(new OutgoingEvent(EventDescriptor.From(PackRolledBackV1.Descriptor), "Stamp", entity, new PackRolledBackV1
                 {
                     PackId = PackRegistryService.IdOf(row.PackId), Pack = row.PackId, LegalEntity = entity, ActivationId = row.Id,
                     FromVersion = row.FromVersion, ToVersion = row.Version, Reason = row.Reason, Window = preview.Window, AffectedWindow = preview.Window,
                     HashesIssued = preview.HashesIssued, HashesInWindow = preview.HashesIssued, ResultingHash = Sha256Hash.Parse(hash.ToString()),
                 }, keys));
+            }
             else
+            {
                 events.Publish(new OutgoingEvent(EventDescriptor.From(PackActivatedV1.Descriptor), "Stamp", entity, new PackActivatedV1
                 {
                     PackId = PackRegistryService.IdOf(row.PackId), Pack = row.PackId, Version = row.Version, LegalEntity = entity, ActivationId = row.Id,
                     ActivatedAt = now, ActivationInstant = now, NewHash = Sha256Hash.Parse(hash.ToString()), ResultingHash = Sha256Hash.Parse(hash.ToString()), SpisRebound = [],
                 }, keys));
+            }
         }
-        else row.Status = "REJECTED";
+        else
+        {
+            row.Status = "REJECTED";
+        }
         row.DecidedBy = actor; row.DecisionReason = request.Reason; row.RecordVersion++;
         await db.SaveChangesAsync(ct).ConfigureAwait(false);
         return ActivationSupport.View(row, entity);

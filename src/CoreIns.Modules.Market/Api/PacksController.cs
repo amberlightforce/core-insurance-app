@@ -57,13 +57,28 @@ internal sealed class PackActivationsController(MarketDbContext db, RequestConte
     {
         var take = Math.Clamp(limit ?? 50, 1, 200);
         var query = Rows();
-        if (legalEntity is not null && legalEntity != context.LegalEntity!.Value.Value) query = query.Where(a => false);
-        if (pack is not null) query = query.Where(a => a.PackId == pack);
-        if (status is not null) query = query.Where(a => a.Status == status);
-        if (kind is not null) query = query.Where(a => a.Kind == kind);
+        if (legalEntity is not null && legalEntity != context.LegalEntity!.Value.Value)
+        {
+            query = query.Where(a => false);
+        }
+        if (pack is not null)
+        {
+            query = query.Where(a => a.PackId == pack);
+        }
+        if (status is not null)
+        {
+            query = query.Where(a => a.Status == status);
+        }
+        if (kind is not null)
+        {
+            query = query.Where(a => a.Kind == kind);
+        }
         if (cursor is not null)
         {
-            if (!Guid.TryParse(cursor, out var after)) return Results.BadRequest();
+            if (!Guid.TryParse(cursor, out var after))
+            {
+                return Results.BadRequest();
+            }
             query = query.Where(a => a.Id.CompareTo(after) < 0);
         }
         var rows = await query.OrderByDescending(a => a.Id).Take(take + 1).ToListAsync(ct).ConfigureAwait(false);
