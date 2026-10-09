@@ -297,7 +297,7 @@ internal sealed partial class RequestDisbursementHandler(
         row.ReleasedAt = now;
         row.ValueDate = valueDate;
         row.ReleaseEntryId = ledger.Post(new EntrySpec(
-            EntryTypes.DisbursementReleased, refund?.BillingAccountId, [new PostingLeg(rule, amount, dimensions)], lineage, "bil.Disbursement.release", row.DisbursementId));
+            EntryTypes.DisbursementReleased, null, [new PostingLeg(rule, amount, dimensions)], lineage, "bil.Disbursement.release", row.DisbursementId));
 
         var outcome = await channel.SubmitAsync(
             new BankInstruction(row.DisbursementId, row.DisbursementNumber, amount, valueDate, row.Method, row.PayeeAccountId), cancellationToken).ConfigureAwait(false);
@@ -339,7 +339,7 @@ internal sealed partial class RequestDisbursementHandler(
         row.State = Codes.Of(machine.FireOrThrow(DisbursementState.Issued, DisbursementTrigger.Clear));
         row.ClearedAt = now;
         row.ClearEntryId = ledger.Post(new EntrySpec(
-            EntryTypes.DisbursementCleared, refund?.BillingAccountId, [new PostingLeg(clearRule, amount, dimensions)], lineage, "bil.Disbursement.clear", row.DisbursementId));
+            EntryTypes.DisbursementCleared, null, [new PostingLeg(clearRule, amount, dimensions)], lineage, "bil.Disbursement.clear", row.DisbursementId));
         events.Publish(new OutgoingEvent(
             EventDescriptor.From(DisbursementClearedV1.Descriptor), "Disbursement", row.DisbursementId.Value.ToString(),
             new DisbursementClearedV1

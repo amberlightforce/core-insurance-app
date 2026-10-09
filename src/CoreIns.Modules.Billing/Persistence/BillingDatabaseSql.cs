@@ -451,7 +451,7 @@ internal static class BillingDatabaseSql
             refund_state text;
             refund_approval text;
             target_item_invoice uuid;
-            target_kind text;
+            target_inv_kind text;
             target_account uuid;
             target_currency text;
         BEGIN
@@ -487,9 +487,9 @@ internal static class BillingDatabaseSql
             ELSIF NEW.target_kind = 'NETTING' THEN
                 SELECT amount, invoice_id INTO limit_amount, target_item_invoice
                     FROM bil.invoice_item WHERE invoice_item_id = NEW.target_invoice_item_id FOR UPDATE;
-                SELECT kind, billing_account_id, currency INTO target_kind, target_account, target_currency
+                SELECT kind, billing_account_id, currency INTO target_inv_kind, target_account, target_currency
                     FROM bil.invoice WHERE invoice_id = NEW.target_invoice_id;
-                IF target_item_invoice IS DISTINCT FROM NEW.target_invoice_id OR target_kind IS DISTINCT FROM 'INVOICE'
+                IF target_item_invoice IS DISTINCT FROM NEW.target_invoice_id OR target_inv_kind IS DISTINCT FROM 'INVOICE'
                    OR target_account IS DISTINCT FROM NEW.billing_account_id OR target_currency IS DISTINCT FROM NEW.currency THEN
                     RAISE EXCEPTION 'netting reaches only an item of an invoice of the same account and currency (REQ-BIL-182)' USING ERRCODE = 'BL001';
                 END IF;

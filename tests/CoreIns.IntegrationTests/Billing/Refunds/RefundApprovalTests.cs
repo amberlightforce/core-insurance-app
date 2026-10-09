@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json.Nodes;
+using CoreIns.IntegrationTests.Bil.Credits;
 using CoreIns.Modules.Billing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -40,7 +41,7 @@ public sealed class RefundApprovalTests(PostgresFixture database) : IClassFixtur
         refund.Text("disbursementId").ShouldBe("null");
         (await _h.CreditOnAccountAsync()).ShouldBe(_h.Credit);
         (await _h.LinesAsync("REFUND_APPROVED")).ShouldBeEmpty();
-        var request = (await _h.Slice.TextsAsync(
+        var request = (await _h.TextsAsync(
             $"""
             SELECT a.approval_type || '|' || a.object_module || '/' || a.object_type || '/' || a.object_id || '|' || a.authority_type || '|' || a.authority_amount::text || '|'
                    || a.authority_codes::text || '|' || a.referral_role
@@ -75,7 +76,7 @@ public sealed class RefundApprovalTests(PostgresFixture database) : IClassFixtur
         body.Text("disbursementId").ShouldBe(view.Text("disbursementId"));
         (await _h.CreditOnAccountAsync()).ShouldBe(0m);
         (await _h.LinesAsync("REFUND_APPROVED")).Count.ShouldBeGreaterThanOrEqualTo(2);
-        (await _h.Slice.TextsAsync($"SELECT approval_evidence_ref FROM bil.disbursement WHERE source_id = '{id}'"))
+        (await _h.TextsAsync($"SELECT approval_evidence_ref FROM bil.disbursement WHERE source_id = '{id}'"))
             .ShouldHaveSingleItem().ShouldStartWith("PLT/ApprovalRequest/");
         await _h.Slice.AllEntriesBalanceAsync();
 
@@ -95,7 +96,7 @@ public sealed class RefundApprovalTests(PostgresFixture database) : IClassFixtur
 
         response.StatusCode.ShouldBe(HttpStatusCode.Conflict, body?.ToJsonString());
         body.Text("code").ShouldBe("BIL-ERR-REFUND-OPEN");
-        body["metadata"]?["existingRefundId"]?.GetValue<string>().ShouldBe(first.Text("refundId"));
+        body!["metadata"]?["existingRefundId"]?.GetValue<string>().ShouldBe(first.Text("refundId"));
         (await _h.Slice.ScalarAsync<long>($"SELECT count(*) FROM bil.refund WHERE billing_account_id = '{_h.AccountId}'")).ShouldBe(1);
     }
 
@@ -224,7 +225,7 @@ public sealed class RefundPayeeChangeTests(PostgresFixture database) : IClassFix
         var refund = await _h.ProposedAsync("carol"); // carol did not touch the payee
 
         refund.Text("state").ShouldBe("PENDING_APPROVAL"); // 500.00 auto limit not exceeded, but the payee changed
-        var codes = await _h.Slice.TextsAsync(
+        var codes = await _h.TextsAsync(
             $"SELECT a.authority_codes::text FROM bil.refund r JOIN plt.approval_request a ON a.request_id = r.approval_request_id WHERE r.refund_id = '{refund.Text("refundId")}'");
         codes.ShouldHaveSingleItem().ShouldContain("\"payeeChanged\": \"true\"");
 

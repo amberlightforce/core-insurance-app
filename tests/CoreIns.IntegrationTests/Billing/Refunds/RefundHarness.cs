@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 using CoreIns.Modules.Billing;
 using CoreIns.IntegrationTests.Bil.Credits;
 using CoreIns.Modules.Party.Contracts;
-using CoreIns.Testing.Contracts;
+using CoreIns.Testing.Contracts.Fakes.Party;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Events;
 using CoreIns.SharedKernel.Identifiers;
@@ -189,6 +189,20 @@ internal sealed class RefundHarness : IAsyncDisposable
         }
 
         return rows;
+    }
+
+    /// <summary>The first column of every row of a query, as text.</summary>
+    public async Task<List<string>> TextsAsync(string sql)
+    {
+        var result = new List<string>();
+        await using var command = Slice.DataSource.CreateCommand(sql);
+        await using var reader = await command.ExecuteReaderAsync(Ct);
+        while (await reader.ReadAsync(Ct))
+        {
+            result.Add(reader.IsDBNull(0) ? string.Empty : reader.GetValue(0).ToString()!);
+        }
+
+        return result;
     }
 
     /// <summary>Rows anywhere in the stores that would expose <paramref name="secret"/> in clear (text, JSON or bytea hex).</summary>

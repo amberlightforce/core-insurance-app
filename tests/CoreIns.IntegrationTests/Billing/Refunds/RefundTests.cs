@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json.Nodes;
+using CoreIns.IntegrationTests.Bil.Credits;
 using CoreIns.Modules.Billing.Contracts;
 using CoreIns.Modules.Billing.Contracts.Api;
 using CoreIns.Platform.Contracts;
@@ -65,7 +66,7 @@ public sealed class RefundAutoApprovalTests(PostgresFixture database) : IClassFi
         await _h.Slice.AllEntriesBalanceAsync();
 
         // The disbursement is the shared service's: source BIL_REFUND from BIL, the refund's own evidence and credit-set reference.
-        var row = await _h.Slice.TextsAsync(
+        var row = await _h.TextsAsync(
             $"SELECT source_module || '|' || source_type || '|' || source_id || '|' || state || '|' || approval_evidence_ref || '|' || (business_ref IS NOT NULL)::text FROM bil.disbursement WHERE source_id = '{id}'");
         row.ShouldBe([$"BIL|BIL_REFUND|{id}|ISSUED|BIL/RefundAuto/{id}|true"], "or CLEARED: the stub debits at once");
     }
