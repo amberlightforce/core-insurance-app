@@ -1513,6 +1513,13 @@ export interface components {
             exposures: components["schemas"]["ExposureView"][];
             claimants: components["schemas"]["ClaimantView"][];
             incidents: components["schemas"]["IncidentView"][];
+            /** @description Present while snapshotStatus is REVERIFICATION_REQUIRED (the ReverificationRequired payload) */
+            pendingReverification?: {
+                oldSnapshotRef: string;
+                newSnapshotRef: string;
+                causeEventId: components["schemas"]["Uuid"];
+                raisedAt?: components["schemas"]["Instant"];
+            };
         };
         /** @description An exposure (REQ-CLM-062) = one coverage × one claimant. */
         ExposureView: {
@@ -1690,21 +1697,34 @@ export interface components {
             /** @description PRD: "decision record" */
             decisionRecord?: components["schemas"]["Unspecified"];
         };
-        /** @description clm.Coverage.reverify request. PRD inputs: "decision, reasons; adopt or keep" */
+        /** @description clm.Coverage.reverify request (REQ-CLM-058). A human decides after ReverificationRequired: KEEP the claim's current snapshot ref, or ADOPT the new one. Never automatic (REQ-CLM-002). PRD inputs: "decision, reasons; adopt or keep". */
         CoverageReverifyRequest: {
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reasons" */
-            reasons?: components["schemas"]["Unspecified"];
-            /** @description PRD: "adopt or keep" (optional) */
-            adopt?: components["schemas"]["Unspecified"];
-            /** @description PRD: "adopt or keep" (optional) */
-            keep?: components["schemas"]["Unspecified"];
-        } & (unknown | unknown);
+            claimId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "KEEP" | "ADOPT";
+            /** @description Reason from the configured list; PRD "reasons" */
+            reasonCode: components["schemas"]["Code"];
+            comment?: components["schemas"]["Text"];
+            /** @description The new snapshot ref the decision was taken against. Required for ADOPT and checked for KEEP when given; if POL superseded again meanwhile the call fails with CLM-ERR-SNAPSHOT-MISMATCH. */
+            expectedNewSnapshotRef?: string;
+        };
         /** @description clm.Coverage.reverify result. PRD outputs: "decision record" */
         CoverageReverifyResponse: {
-            /** @description PRD: "decision record" */
-            decisionRecord?: components["schemas"]["Unspecified"];
+            claimId: components["schemas"]["Uuid"];
+            decisionRecordId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "KEEP" | "ADOPT";
+            /**
+             * @description VERIFIED after the decision (always set)
+             * @enum {string}
+             */
+            snapshotStatus: "PENDING" | "VERIFIED" | "REVERIFICATION_REQUIRED";
+            /** @description The claim's snapshot ref after the decision (the new ref for ADOPT, unchanged for KEEP) */
+            snapshotRef: string;
+            previousSnapshotRef?: string;
+            /** @description True when adoption removed the cover of an exposure; new payments on it are refused until cleared */
+            coverageInQuestion: boolean;
+            decidedAt: components["schemas"]["Instant"];
         };
         /** @description Typed from REQ-CLM-003, REQ-CLM-107. PRD inputs: "transactions". Builds a Draft set: reserve lines are created on first use (REQ-CLM-093), an eroding payment above the open reserve adds a reserve increase to the same set (REQ-CLM-097, auto-adjust on by default) and a FINAL payment proposes the release of the remainder (REQ-CLM-099). With dryRun nothing is stored (preview only). */
         TransactionSetBuildRequest: {
@@ -2424,6 +2444,7 @@ export interface components {
             nextCursor: string | null;
             limit?: number;
         };
+        Text: string;
         /** @description Decimal number as a string (no binary floating point for money or rates). */
         Decimal: string;
         /** @description ISO 4217 alphabetic code. */
@@ -3365,6 +3386,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
