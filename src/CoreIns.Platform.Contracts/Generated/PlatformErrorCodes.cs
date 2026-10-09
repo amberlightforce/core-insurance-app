@@ -64,7 +64,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-AUTHORITY-DENIED (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): plt.Approval.decide.</para>
+    /// <para>Declared by 2 operation(s): bil.Refund.decide, plt.Approval.decide.</para>
     /// </remarks>
     public const string AuthorityDenied = "PLT-ERR-AUTHORITY-DENIED";
 
@@ -230,6 +230,12 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string OutOfOrgScope = "PLT-ERR-OUT-OF-ORG-SCOPE";
 
+    /// <summary>PLT-ERR-OWNER-DECIDED (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.Approval.decide.</para>
+    /// </remarks>
+    public const string OwnerDecided = "PLT-ERR-OWNER-DECIDED";
+
     /// <summary>PLT-ERR-RANGE-EXHAUSTED (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 3 operation(s): plt.Number.next, plt.Number.reserve, plt.Number.void.</para>
@@ -268,7 +274,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-SELF-APPROVAL (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 12 operation(s): pfc.ProductVersion.decideFallback, plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register, rat.RatingArtifact.build, rat.RatingArtifact.cancelSchedule, rat.RatingArtifact.return, rat.RatingArtifact.rollback, rat.RatingArtifact.schedule, rat.RatingArtifact.submit.</para>
+    /// <para>Declared by 13 operation(s): bil.Refund.decide, pfc.ProductVersion.decideFallback, plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register, rat.RatingArtifact.build, rat.RatingArtifact.cancelSchedule, rat.RatingArtifact.return, rat.RatingArtifact.rollback, rat.RatingArtifact.schedule, ….</para>
     /// </remarks>
     public const string SelfApproval = "PLT-ERR-SELF-APPROVAL";
 
@@ -348,7 +354,7 @@ public static class PlatformErrorCodes
     public const string Prefix = "PLT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, OwnerDecided, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -385,6 +391,7 @@ public static class PlatformErrorCodes
         [NotRetryable] = 422,
         [NotRunnable] = 422,
         [OutOfOrgScope] = 403,
+        [OwnerDecided] = 409,
         [RangeExhausted] = 422,
         [RangeTooLarge] = 422,
         [ReplayInProgress] = 409,

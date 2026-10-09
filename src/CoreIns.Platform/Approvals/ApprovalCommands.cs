@@ -27,6 +27,7 @@ internal static class ApprovalErrors
     public const string Stale = "APPROVAL-STALE";
     public const string HashMismatch = "APPROVAL-HASH-MISMATCH";
     public const string SubjectMismatch = "APPROVAL-SUBJECT-MISMATCH";
+    public const string OwnerDecided = "OWNER-DECIDED";
 
     public static DomainError Of(string name, string detail) => DomainError.Of(ModuleCode.PLT, name, detail);
 }

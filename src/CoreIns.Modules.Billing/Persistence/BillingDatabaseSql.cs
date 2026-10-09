@@ -419,6 +419,240 @@ internal static class BillingDatabaseSql
         DELETE FROM bil.ledger_rule WHERE rule_id IN ('BLR-CREDIT-WRITTEN-PREMIUM', 'BLR-CREDIT-WRITTEN-SURCHARGE', 'BLR-CREDIT-WRITTEN-FEE', 'BLR-CREDIT-BILLED');
         """;
 
+    /// <summary>
+    /// SL3-BIL-REFUND: the billing-ledger rules of refunds (REFUND_APPROVED: the credit leaves LA-02 for refunds payable LA-12 when
+    /// the refund is approved, PRD-06 §4.13 step 18; DISBURSEMENT_RELEASED for source BIL_REFUND: LA-12 to disbursements in
+    /// transit LA-13, step 20; the clearing rule is the existing wildcard one) and the database guards:
+    /// <list type="bullet">
+    /// <item>a credit is applied to a refund or netted only for an APPROVED refund (state APPROVED and approval APPROVED or
+    /// NOT_REQUIRED) of the same account, and never above the refund's own credit or netting line, under row locks (BL001);
+    /// netting only reaches an open item of a plain invoice of the same account and currency;</item>
+    /// <item>a refund's content (amount, payee, payee account, lines, participants, hash) is frozen at creation, a Paid or
+    /// Rejected refund is frozen entirely, and the approver can be neither a participant nor the person who changed the payee
+    /// account (REQ-BIL-189) even if the application tried (BL004);</item>
+    /// <item>the lines are append-only; refunds are never deleted.</item>
+    /// </list>
+    /// </summary>
+    public const string Refunds = """
+        INSERT INTO bil.ledger_rule (rule_id, version, event_type, charge_category, bill_mode, jurisdiction, qualifier,
+            debit_account, credit_account, amount_expression, valid_from, valid_to, source) VALUES
+            ('BLR-REFUND-APPROVED', 1, 'REFUND_APPROVED', '*', '*', '*', '*', 'LA-02', 'LA-12', 'AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-181, REQ-BIL-190; PRD-06 §4.13 step 18 (credit balance to refunds payable)'),
+            ('BLR-DISB-RELEASED-REFUND', 1, 'DISBURSEMENT_RELEASED', '*', '*', '*', 'BIL_REFUND', 'LA-12', 'LA-13', 'AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-211 (on release: refunds payable to disbursements in transit)');
+
+        CREATE OR REPLACE FUNCTION bil.guard_credit_application() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        DECLARE
+            credit_amount numeric;
+            credited_item uuid;
+            credit_invoice uuid;
+            limit_amount numeric;
+            used numeric;
+            line_amount numeric;
+            refund_account uuid;
+            refund_state text;
+            refund_approval text;
+            target_item_invoice uuid;
+            target_inv_kind text;
+            target_account uuid;
+            target_currency text;
+        BEGIN
+            SELECT amount, credits_item_id, invoice_id INTO credit_amount, credited_item, credit_invoice
+                FROM bil.invoice_item WHERE invoice_item_id = NEW.credit_item_id FOR UPDATE;
+            IF credit_amount IS NULL OR credited_item IS NULL OR credit_invoice <> NEW.credit_note_id THEN
+                RAISE EXCEPTION 'credit application % is not from an item of credit note %', NEW.credit_application_id, NEW.credit_note_id USING ERRCODE = 'BL001';
+            END IF;
+            SELECT coalesce(sum(amount), 0) INTO used FROM bil.credit_application WHERE credit_item_id = NEW.credit_item_id;
+            IF used + NEW.amount > credit_amount THEN
+                RAISE EXCEPTION 'applications of credit item % would exceed it (REQ-BIL-073)', NEW.credit_item_id USING ERRCODE = 'BL001';
+            END IF;
+
+            IF NEW.target_kind IN ('REFUND', 'NETTING') THEN
+                SELECT billing_account_id, state, approval_state INTO refund_account, refund_state, refund_approval
+                    FROM bil.refund WHERE refund_id = NEW.refund_id FOR UPDATE;
+                IF refund_account IS DISTINCT FROM NEW.billing_account_id OR refund_state IS DISTINCT FROM 'APPROVED'
+                   OR refund_approval NOT IN ('APPROVED', 'NOT_REQUIRED') THEN
+                    RAISE EXCEPTION 'credit is applied to refund % only when it is approved (REQ-BIL-188)', NEW.refund_id USING ERRCODE = 'BL001';
+                END IF;
+            END IF;
+
+            IF NEW.target_kind = 'INVOICE_ITEM' THEN
+                IF NEW.target_invoice_item_id IS DISTINCT FROM credited_item THEN
+                    RAISE EXCEPTION 'a credit offsets only the invoice item it credits (REQ-BIL-073)' USING ERRCODE = 'BL001';
+                END IF;
+                SELECT amount INTO limit_amount FROM bil.invoice_item WHERE invoice_item_id = NEW.target_invoice_item_id FOR UPDATE;
+                SELECT coalesce(sum(amount), 0) INTO used FROM bil.allocation WHERE invoice_item_id = NEW.target_invoice_item_id;
+                used := used + coalesce((SELECT sum(amount) FROM bil.credit_application WHERE target_invoice_item_id = NEW.target_invoice_item_id), 0);
+                IF used + NEW.amount > limit_amount THEN
+                    RAISE EXCEPTION 'credit applications on invoice item % would exceed it (REQ-BIL-130)', NEW.target_invoice_item_id USING ERRCODE = 'BL001';
+                END IF;
+            ELSIF NEW.target_kind = 'NETTING' THEN
+                SELECT amount, invoice_id INTO limit_amount, target_item_invoice
+                    FROM bil.invoice_item WHERE invoice_item_id = NEW.target_invoice_item_id FOR UPDATE;
+                SELECT kind, billing_account_id, currency INTO target_inv_kind, target_account, target_currency
+                    FROM bil.invoice WHERE invoice_id = NEW.target_invoice_id;
+                IF target_item_invoice IS DISTINCT FROM NEW.target_invoice_id OR target_inv_kind IS DISTINCT FROM 'INVOICE'
+                   OR target_account IS DISTINCT FROM NEW.billing_account_id OR target_currency IS DISTINCT FROM NEW.currency THEN
+                    RAISE EXCEPTION 'netting reaches only an item of an invoice of the same account and currency (REQ-BIL-182)' USING ERRCODE = 'BL001';
+                END IF;
+                SELECT coalesce(sum(amount), 0) INTO used FROM bil.allocation WHERE invoice_item_id = NEW.target_invoice_item_id;
+                used := used + coalesce((SELECT sum(amount) FROM bil.credit_application WHERE target_invoice_item_id = NEW.target_invoice_item_id), 0);
+                IF used + NEW.amount > limit_amount THEN
+                    RAISE EXCEPTION 'credit applications on invoice item % would exceed it (REQ-BIL-130)', NEW.target_invoice_item_id USING ERRCODE = 'BL001';
+                END IF;
+                SELECT amount INTO line_amount FROM bil.refund_netting
+                    WHERE refund_id = NEW.refund_id AND credit_item_id = NEW.credit_item_id AND target_invoice_item_id = NEW.target_invoice_item_id;
+                SELECT coalesce(sum(amount), 0) INTO used FROM bil.credit_application
+                    WHERE refund_id = NEW.refund_id AND credit_item_id = NEW.credit_item_id AND target_invoice_item_id = NEW.target_invoice_item_id;
+                IF line_amount IS NULL OR used + NEW.amount > line_amount THEN
+                    RAISE EXCEPTION 'netting of refund % exceeds its netting line', NEW.refund_id USING ERRCODE = 'BL001';
+                END IF;
+            ELSIF NEW.target_kind = 'REFUND' THEN
+                SELECT amount INTO line_amount FROM bil.refund_credit WHERE refund_id = NEW.refund_id AND credit_item_id = NEW.credit_item_id;
+                SELECT coalesce(sum(amount), 0) INTO used FROM bil.credit_application
+                    WHERE refund_id = NEW.refund_id AND credit_item_id = NEW.credit_item_id AND target_kind = 'REFUND';
+                IF line_amount IS NULL OR used + NEW.amount > line_amount THEN
+                    RAISE EXCEPTION 'refund % pays out more of credit item % than its line', NEW.refund_id, NEW.credit_item_id USING ERRCODE = 'BL001';
+                END IF;
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE FUNCTION bil.freeze_refund() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF (NEW.refund_id, NEW.legal_entity_id, NEW.jurisdiction, NEW.billing_account_id, NEW.amount, NEW.currency, NEW.payee_party_id, NEW.payee_account_id,
+                NEW.payee_changed, NEW.payee_account_changed_by, NEW.payout_method, NEW.reason_code, NEW.selected_credit_notes, NEW.credit_set_key,
+                NEW.resubmits_refund_id, NEW.participants, NEW.requested_by, NEW.approval_content_hash, NEW.proposed_at)
+               IS DISTINCT FROM
+               (OLD.refund_id, OLD.legal_entity_id, OLD.jurisdiction, OLD.billing_account_id, OLD.amount, OLD.currency, OLD.payee_party_id, OLD.payee_account_id,
+                OLD.payee_changed, OLD.payee_account_changed_by, OLD.payout_method, OLD.reason_code, OLD.selected_credit_notes, OLD.credit_set_key,
+                OLD.resubmits_refund_id, OLD.participants, OLD.requested_by, OLD.approval_content_hash, OLD.proposed_at) THEN
+                RAISE LOG 'SECURITY: change of frozen refund % columns refused for role %', OLD.refund_id, current_user;
+                RAISE EXCEPTION 'bil.refund amount, payee and lines are frozen once proposed; a rejected refund is resubmitted as a new one' USING ERRCODE = 'BL004';
+            END IF;
+            IF OLD.state IN ('PAID', 'REJECTED') AND NEW.state IS DISTINCT FROM OLD.state THEN
+                RAISE EXCEPTION 'refund % is %, which is final', OLD.refund_id, OLD.state USING ERRCODE = 'BL004';
+            END IF;
+            -- The approval state only moves PENDING -> APPROVED/REJECTED, and only with the approval request that was made for it.
+            -- NOT_REQUIRED exists from INSERT only (bil.guard_refund_insert); it is never reached by an update.
+            IF NEW.approval_state IS DISTINCT FROM OLD.approval_state THEN
+                IF OLD.approval_state <> 'PENDING' OR NEW.approval_state NOT IN ('APPROVED', 'REJECTED') OR OLD.approval_request_id IS NULL THEN
+                    RAISE LOG 'SECURITY: refund % approval state change % -> % refused for role %', OLD.refund_id, OLD.approval_state, NEW.approval_state, current_user;
+                    RAISE EXCEPTION 'refund approval state moves only from PENDING to APPROVED or REJECTED, through its approval request (REQ-BIL-188)' USING ERRCODE = 'BL004';
+                END IF;
+            END IF;
+            IF NEW.state = 'APPROVED' AND OLD.state IS DISTINCT FROM 'APPROVED' THEN
+                IF OLD.state <> 'PENDING_APPROVAL' OR NEW.approval_state <> 'APPROVED' THEN
+                    RAISE LOG 'SECURITY: refund % moved to APPROVED from % with approval % refused for role %', OLD.refund_id, OLD.state, NEW.approval_state, current_user;
+                    RAISE EXCEPTION 'a pending refund becomes APPROVED only with an approved approval (REQ-BIL-188)' USING ERRCODE = 'BL004';
+                END IF;
+            END IF;
+            IF NEW.state = 'REJECTED' AND (OLD.state <> 'PENDING_APPROVAL' OR NEW.approval_state <> 'REJECTED') THEN
+                RAISE EXCEPTION 'only a pending refund is rejected, with a rejected approval' USING ERRCODE = 'BL004';
+            END IF;
+            IF OLD.approval_request_id IS NOT NULL AND NEW.approval_request_id IS DISTINCT FROM OLD.approval_request_id THEN
+                RAISE EXCEPTION 'the approval request of refund % is never replaced', OLD.refund_id USING ERRCODE = 'BL004';
+            END IF;
+            IF NEW.approval_state = 'APPROVED' AND (NEW.decided_by IS NULL OR NEW.decided_by = ANY (NEW.participants)
+                                                  OR NEW.decided_by = NEW.payee_account_changed_by) THEN
+                RAISE LOG 'SECURITY: refund % approved by a participant or the payee changer refused', OLD.refund_id;
+                RAISE EXCEPTION 'a refund is approved by neither its requester, an editor nor the person who changed the payee account (REQ-BIL-189)' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_refund_frozen BEFORE UPDATE ON bil.refund FOR EACH ROW EXECUTE FUNCTION bil.freeze_refund();
+
+        -- A refund starts pending (waiting for its approval request) or, only when approval is NOT_REQUIRED, already approved: no approval
+        -- request, an unchanged payee, not a resubmission, and within the hard ceiling of the illustrative auto-approval limit (500.00;
+        -- BIL's configured limit may be lower, never higher; the application checks the configured one first, D-SL3-08).
+        CREATE FUNCTION bil.guard_refund_insert() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF NEW.approval_state = 'NOT_REQUIRED' THEN
+                IF NEW.state <> 'APPROVED' OR NEW.approval_request_id IS NOT NULL OR NEW.payee_changed OR NEW.resubmits_refund_id IS NOT NULL
+                   OR NEW.amount > 500.00 OR NEW.decided_by IS NOT NULL THEN
+                    RAISE LOG 'SECURITY: refund % inserted as NOT_REQUIRED outside the rule refused for role %', NEW.refund_id, current_user;
+                    RAISE EXCEPTION 'approval is not required only for an unchanged payee, within the auto limit, not after a rejection (REQ-BIL-188)' USING ERRCODE = 'BL004';
+                END IF;
+            ELSIF NEW.approval_state <> 'PENDING' OR NEW.state <> 'PENDING_APPROVAL' THEN
+                RAISE EXCEPTION 'a refund starts PENDING_APPROVAL or approved by rule' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_refund_insert_guard BEFORE INSERT ON bil.refund FOR EACH ROW EXECUTE FUNCTION bil.guard_refund_insert();
+        CREATE TRIGGER tr_refund_append_only BEFORE DELETE ON bil.refund FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
+        CREATE TRIGGER tr_refund_credit_append_only BEFORE UPDATE OR DELETE ON bil.refund_credit FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
+        CREATE TRIGGER tr_refund_netting_append_only BEFORE UPDATE OR DELETE ON bil.refund_netting FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
+
+        CREATE OR REPLACE FUNCTION bil.freeze_disbursement() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF (NEW.disbursement_id, NEW.legal_entity_id, NEW.disbursement_number, NEW.source_module, NEW.source_type, NEW.source_id, NEW.claim_id,
+                NEW.payee_party_id, NEW.payee_account_id, NEW.amount, NEW.currency, NEW.method, NEW.approval_evidence_ref, NEW.approval_content_hash, NEW.business_ref)
+               IS DISTINCT FROM
+               (OLD.disbursement_id, OLD.legal_entity_id, OLD.disbursement_number, OLD.source_module, OLD.source_type, OLD.source_id, OLD.claim_id,
+                OLD.payee_party_id, OLD.payee_account_id, OLD.amount, OLD.currency, OLD.method, OLD.approval_evidence_ref, OLD.approval_content_hash, OLD.business_ref) THEN
+                RAISE LOG 'SECURITY: change of frozen disbursement % columns refused for role %', OLD.disbursement_id, current_user;
+                RAISE EXCEPTION 'bil.disbursement amounts, payee, source and number are frozen once written' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+        """;
+
+    public const string RefundsDown = """
+        DELETE FROM bil.ledger_rule WHERE rule_id IN ('BLR-REFUND-APPROVED', 'BLR-DISB-RELEASED-REFUND');
+        DROP FUNCTION IF EXISTS bil.freeze_refund() CASCADE;
+        DROP FUNCTION IF EXISTS bil.guard_refund_insert() CASCADE;
+
+        CREATE OR REPLACE FUNCTION bil.freeze_disbursement() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF (NEW.disbursement_id, NEW.legal_entity_id, NEW.disbursement_number, NEW.source_module, NEW.source_type, NEW.source_id, NEW.claim_id,
+                NEW.payee_party_id, NEW.payee_account_id, NEW.amount, NEW.currency, NEW.method, NEW.approval_evidence_ref, NEW.approval_content_hash)
+               IS DISTINCT FROM
+               (OLD.disbursement_id, OLD.legal_entity_id, OLD.disbursement_number, OLD.source_module, OLD.source_type, OLD.source_id, OLD.claim_id,
+                OLD.payee_party_id, OLD.payee_account_id, OLD.amount, OLD.currency, OLD.method, OLD.approval_evidence_ref, OLD.approval_content_hash) THEN
+                RAISE LOG 'SECURITY: change of frozen disbursement % columns refused for role %', OLD.disbursement_id, current_user;
+                RAISE EXCEPTION 'bil.disbursement amounts, payee, source and number are frozen once written' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE OR REPLACE FUNCTION bil.guard_credit_application() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        DECLARE
+            credit_amount numeric;
+            credited_item uuid;
+            credit_invoice uuid;
+            limit_amount numeric;
+            used numeric;
+        BEGIN
+            SELECT amount, credits_item_id, invoice_id INTO credit_amount, credited_item, credit_invoice
+                FROM bil.invoice_item WHERE invoice_item_id = NEW.credit_item_id FOR UPDATE;
+            IF credit_amount IS NULL OR credited_item IS NULL OR credit_invoice <> NEW.credit_note_id THEN
+                RAISE EXCEPTION 'credit application % is not from an item of credit note %', NEW.credit_application_id, NEW.credit_note_id USING ERRCODE = 'BL001';
+            END IF;
+            SELECT coalesce(sum(amount), 0) INTO used FROM bil.credit_application WHERE credit_item_id = NEW.credit_item_id;
+            IF used + NEW.amount > credit_amount THEN
+                RAISE EXCEPTION 'applications of credit item % would exceed it (REQ-BIL-073)', NEW.credit_item_id USING ERRCODE = 'BL001';
+            END IF;
+            IF NEW.target_kind = 'INVOICE_ITEM' THEN
+                IF NEW.target_invoice_item_id IS DISTINCT FROM credited_item THEN
+                    RAISE EXCEPTION 'a credit offsets only the invoice item it credits (REQ-BIL-073)' USING ERRCODE = 'BL001';
+                END IF;
+                SELECT amount INTO limit_amount FROM bil.invoice_item WHERE invoice_item_id = NEW.target_invoice_item_id FOR UPDATE;
+                SELECT coalesce(sum(amount), 0) INTO used FROM bil.allocation WHERE invoice_item_id = NEW.target_invoice_item_id;
+                used := used + coalesce((SELECT sum(amount) FROM bil.credit_application WHERE target_invoice_item_id = NEW.target_invoice_item_id), 0);
+                IF used + NEW.amount > limit_amount THEN
+                    RAISE EXCEPTION 'credit applications on invoice item % would exceed it (REQ-BIL-130)', NEW.target_invoice_item_id USING ERRCODE = 'BL001';
+                END IF;
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+        """;
+
     public const string SealDown = """
         DROP TRIGGER IF EXISTS tr_invoice_append_only ON bil.invoice;
         DROP TRIGGER IF EXISTS tr_invoice_item_append_only ON bil.invoice_item;
