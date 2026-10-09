@@ -22,6 +22,15 @@ internal static class EntryTypes
     /// <summary>IPT written-not-yet-due → IPT payable at the due date (liability point DUE, PRD-06 §4.13, LA-27 → LA-06).</summary>
     public const string IptDue = "IPT_DUE";
 
+    /// <summary>
+    /// Written state of a credit (negative delta) reversed: premium or fee clearing → written unbilled (PRD-06 §4.13 step 16,
+    /// REQ-BIL-073). Never posts tax or levy: a tax or levy credit has no rule and is quarantined (D-SL3-05/06).
+    /// </summary>
+    public const string CreditWritten = "CREDIT_WRITTEN";
+
+    /// <summary>A credit note billed: written unbilled → billed receivable credited (PRD-06 §4.13 step 17, REQ-BIL-074, REQ-BIL-091).</summary>
+    public const string CreditBilled = "CREDIT_BILLED";
+
     /// <summary>Cash received into unapplied cash (REQ-BIL-126, REQ-BIL-131).</summary>
     public const string Received = "RECEIVED";
 
@@ -69,6 +78,8 @@ internal static class RuleQualifiers
 internal static class ChargeCategories
 {
     public const string Tax = "TAX";
+
+    public const string Levy = "LEVY";
 }
 
 /// <summary>Debit or credit.</summary>
@@ -137,6 +148,15 @@ internal sealed record LineDimensions
     public string? SourceId { get; init; }
 
     public ClaimId? ClaimId { get; init; }
+
+    /// <summary>Transaction kind code of the POL transaction (MKT TaxTransactionKind); set on servicing entries, null otherwise (contract LedgerDimensions).</summary>
+    public string? TransactionKind { get; init; }
+
+    /// <summary>Cancellation source; set on lines of cancellation-sourced entries, null otherwise.</summary>
+    public string? CancellationSource { get; init; }
+
+    /// <summary>Treatment rule of a tax or levy line of a servicing entry, null otherwise.</summary>
+    public string? TreatmentRuleId { get; init; }
 }
 
 /// <summary>One leg to post: an amount under a rule, with the line dimensions.</summary>

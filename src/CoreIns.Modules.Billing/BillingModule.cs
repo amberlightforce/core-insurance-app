@@ -51,7 +51,7 @@ public static class BillingModule
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.billing_account, {Schema}.plan_instance, {Schema}.charge, {Schema}.invoice, {Schema}.invoice_item, {Schema}.receipt, {Schema}.intake_exception TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.payee_account, {Schema}.disbursement TO {appRole}",
-                $"GRANT SELECT, INSERT ON {Schema}.allocation, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -79,6 +79,12 @@ public static class BillingModule
         services.AddCommandAuditor<AttachTerm, IntakeOutcome, AttachTermAuditor>();
         services.AddCommand<AttachTerm, IntakeOutcome, AttachTermHandler>(
             CommandDescriptor.For("bil.BillingAccount.attachTerm") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddCommandAuditor<StopTermBilling, IntakeOutcome, StopTermBillingAuditor>();
+        services.AddCommand<StopTermBilling, IntakeOutcome, StopTermBillingHandler>(
+            CommandDescriptor.For("bil.Term.stopBilling") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddCommandAuditor<AttachRenewalTerm, IntakeOutcome, AttachRenewalTermAuditor>();
+        services.AddCommand<AttachRenewalTerm, IntakeOutcome, AttachRenewalTermHandler>(
+            CommandDescriptor.For("bil.BillingAccount.attachRenewalTerm") with { RequiresIdempotencyKey = false, Idempotent = false });
         services.AddCommandAuditor<RecordFiscalOutcome, int, RecordFiscalOutcomeAuditor>();
         services.AddCommand<RecordFiscalOutcome, int, RecordFiscalOutcomeHandler>(
             CommandDescriptor.For("bil.Invoice.recordFiscal") with { RequiresIdempotencyKey = false, Idempotent = false });
@@ -109,6 +115,10 @@ public static class BillingModule
         services.AddEventHandler<ChargeDeltaEmittedV1, ChargeDeltaEmittedHandler>(
             EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), ChargeDeltaEmittedHandler.Name, ModuleCode.BIL);
         services.AddEventHandler<PolicyBoundV1, PolicyBoundHandler>(EventDescriptor.From(PolicyBoundV1.Descriptor), PolicyBoundHandler.Name, ModuleCode.BIL);
+        services.AddEventHandler<PolicyCancelledV1, PolicyCancelledHandler>(
+            EventDescriptor.From(PolicyCancelledV1.Descriptor), PolicyCancelledHandler.Name, ModuleCode.BIL);
+        services.AddEventHandler<RenewalBoundV1, RenewalBoundHandler>(
+            EventDescriptor.From(RenewalBoundV1.Descriptor), RenewalBoundHandler.Name, ModuleCode.BIL);
         services.AddEventHandler<FiscalDocRegisteredV1, FiscalDocRegisteredHandler>(
             EventDescriptor.From(FiscalDocRegisteredV1.Descriptor), FiscalDocRegisteredHandler.Name, ModuleCode.BIL);
         services.AddEventHandler<FiscalDocRejectedV1, FiscalDocRejectedHandler>(

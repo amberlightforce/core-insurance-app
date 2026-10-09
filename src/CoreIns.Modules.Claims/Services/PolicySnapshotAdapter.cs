@@ -17,7 +17,21 @@ namespace CoreIns.Modules.Claims.Services;
 /// </summary>
 internal sealed partial class PolicySnapshotAdapter(IServiceProvider services, ILogger<PolicySnapshotAdapter> logger) : ICoverageSource
 {
-    public async Task<SnapshotRead> ReadAsync(Guid policyId, Instant lossAt, Instant knownAt, CancellationToken cancellationToken)
+    public Task<SnapshotRead> ReadAsync(Guid policyId, Instant lossAt, Instant knownAt, CancellationToken cancellationToken) =>
+        CallAsync(
+            (snapshots, ct) => snapshots.GetAsync(validAt: ValidAt.From(lossAt), knownAt: knownAt, policyId: new PolicyId(policyId), cancellationToken: ct),
+            policyId,
+            cancellationToken);
+
+    /// <summary>
+    /// <c>pol.Snapshot.get(snapshotRef)</c>: the immutable content of the stored reference plus the live supersession
+    /// metadata (D-SL3-03 c). The ref is passed exactly as stored; no knownAt is ever given with it (PITFALLS 13).
+    /// </summary>
+    public Task<SnapshotRead> ReadByRefAsync(string snapshotRef, CancellationToken cancellationToken) =>
+        CallAsync((snapshots, ct) => snapshots.GetAsync(snapshotRef: snapshotRef, cancellationToken: ct), null, cancellationToken);
+
+    private async Task<SnapshotRead> CallAsync(
+        Func<IPolicySnapshotService, CancellationToken, Task<SnapshotGetResponse>> call, Guid? requestedPolicyId, CancellationToken cancellationToken)
     {
         // Resolved per call: a deployment without POL still starts and FNOL answers 503.
         var snapshots = services.GetService<IPolicySnapshotService>();
@@ -29,8 +43,7 @@ internal sealed partial class PolicySnapshotAdapter(IServiceProvider services, I
         SnapshotGetResponse response;
         try
         {
-            response = await snapshots.GetAsync(
-                validAt: ValidAt.From(lossAt), knownAt: knownAt, policyId: new PolicyId(policyId), cancellationToken: cancellationToken).ConfigureAwait(false);
+            response = await call(snapshots, cancellationToken).ConfigureAwait(false);
         }
         catch (DomainException ex) when (ex.Error.Code.Module == ModuleCode.POL && ex.Error.Code.Name is "NOT-FOUND" or "VALIDATION")
         {
@@ -48,11 +61,11 @@ internal sealed partial class PolicySnapshotAdapter(IServiceProvider services, I
             return SnapshotRead.Unavailable("POL did not answer.");
         }
 
-        return Map(response, policyId);
+        return Map(response, requestedPolicyId);
     }
 
     /// <summary>Maps the typed snapshot; a reference without text or for another policy than asked is unverified.</summary>
-    internal static SnapshotRead Map(SnapshotGetResponse response, Guid requestedPolicyId)
+    internal static SnapshotRead Map(SnapshotGetResponse response, Guid? requestedPolicyId)
     {
         ArgumentNullException.ThrowIfNull(response);
         if (string.IsNullOrWhiteSpace(response.SnapshotRef) || response.Policy is null)
@@ -60,7 +73,7 @@ internal sealed partial class PolicySnapshotAdapter(IServiceProvider services, I
             return SnapshotRead.Unverified("The POL snapshot has no reference or no policy facts.");
         }
 
-        if (response.Policy.PolicyId.Value != requestedPolicyId)
+        if (requestedPolicyId is { } asked && response.Policy.PolicyId.Value != asked)
         {
             return SnapshotRead.Unverified("POL answered for another policy than the one asked.");
         }
@@ -80,7 +93,8 @@ internal sealed partial class PolicySnapshotAdapter(IServiceProvider services, I
             response.Policy.InsuredPartyId,
             content?.Segment.SegmentId.Value,
             [.. (content?.Coverages ?? []).Where(c => c.Selected).Select(c => c.CoverageCode).Distinct(StringComparer.Ordinal)],
-            content?.Term.TermId.Value));
+            content?.Term.TermId.Value,
+            response.Supersession is { } supersession ? new SnapshotSupersessionFacts(supersession.Superseded, supersession.SuccessorRef) : null));
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "pol.Snapshot.get failed with {Code}")]
