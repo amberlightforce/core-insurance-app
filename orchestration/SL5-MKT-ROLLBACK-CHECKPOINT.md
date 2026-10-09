@@ -1,6 +1,6 @@
-# SL5-MKT-ROLLBACK source checkpoint — 9 October 2026
+# SL5-MKT-ROLLBACK source checkpoint ï¿½ 9 October 2026
 
-Status: **unvalidated WIP**, native gates blocked by full C drive. Do not merge or count this package completed.
+Status: **partially validated WIP**. Release compilation and two pure proof tests pass; database gates remain blocked by unavailable Docker. Do not merge or count this package completed.
 Branch: codex/sl5-market-rollback. Preserved prior bda60af proof commit and original MarketDbContext WIP in recovery/2026-10-09-market-resume.
 Latest main dependencies merged locally: PLT50, RI48, PFC49.
 
@@ -33,4 +33,12 @@ REST: POST /api/mkt/v1/packs/rollback; POST /api/mkt/v1/packs/schedule-activatio
 
 Pitfalls considered: 3/4/5 approval binding and participants; 10 fail closed; 12 full consumer fields; 15 state lock; 17 history; 21 additive contracts; 34 preservation; 40 transaction lock; 41 genesis backcompat; 47 transition guard; 48 owner-decided type. None are claimed proven until gates run.
 
-Source tests map: REQ-MKT-137 hash-dimension test, REQ-MKT-136 full-key diff test; REQ-MKT-137/138 native API rollback workflow; REQ-MKT-003 frozen history; REQ-MKT-139 immediate execution window. These test sources are unrun.
+Source tests map: REQ-MKT-137 hash-dimension test and REQ-MKT-136 full-key diff test passed (2/2). The key assertion now checks all nine shipped treatment keys explicitly. REQ-MKT-137/138 native API rollback workflow, REQ-MKT-003 frozen history, and REQ-MKT-139 immediate execution window remain unvalidated: their Testcontainers fixtures could not connect to Docker.
+
+## Bounded native validation update
+
+- Release integration-project build: zero warnings and errors; .logs/resume-market-proof-build-final.log.
+- PackActivationProofTests: 2/2 passed; .logs/resume-market-proof-tests-final.log.
+- Earlier Market/Packs attempt could not initialize four database fixtures because Docker daemon pipes were unavailable. This provides no behavioral evidence for those API tests.
+- EF regeneration, database security/temporal assertions, ContractGen checks, independent review and exact-head CI remain required.
+
