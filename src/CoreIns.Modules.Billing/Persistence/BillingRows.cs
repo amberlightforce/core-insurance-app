@@ -514,6 +514,9 @@ internal sealed class CreditApplicationRow
 
     public Guid? TargetInvoiceItemId { get; set; }
 
+    /// <summary>The refund a <see cref="CreditApplicationTargets.Refund"/> or <see cref="CreditApplicationTargets.Netting"/> application belongs to (REQ-BIL-182).</summary>
+    public RefundId? RefundId { get; set; }
+
     public decimal Amount { get; set; }
 
     public string Currency { get; set; } = string.Empty;
@@ -528,6 +531,12 @@ internal static class CreditApplicationTargets
 {
     /// <summary>The open balance of an invoice item (the original invoice, REQ-BIL-073).</summary>
     public const string InvoiceItem = "INVOICE_ITEM";
+
+    /// <summary>Credit paid out by an approved refund (SL3-BIL-REFUND, REQ-BIL-181); no target item.</summary>
+    public const string Refund = "REFUND";
+
+    /// <summary>Credit netted against an open invoice item of another term or document of the account before refunding (REQ-BIL-182).</summary>
+    public const string Netting = "NETTING";
 }
 
 /// <summary>An intake exception (quarantined delta, blocked set, unsupported plan, failed fiscal request).</summary>
@@ -548,4 +557,130 @@ internal sealed class IntakeExceptionRow
     public Guid? SourceEventId { get; set; }
 
     public Instant RaisedAt { get; set; }
+}
+
+/// <summary>
+/// A policy refund (REQ-BIL-007, -181…-191): proposed from the remaining credit of a billing account, approved by rule or by
+/// a second person under <c>BIL.REFUND</c> authority on the refund total, then paid through the disbursement service
+/// (source BIL_REFUND). The amount, payee and lines are frozen once the refund is approved (trigger); a rejected refund is
+/// never reopened (a resubmission is a new refund pointing back to it, so a rejection cannot be laundered, PITFALLS 6).
+/// </summary>
+internal sealed class RefundRow
+{
+    public RefundId RefundId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string Jurisdiction { get; set; } = string.Empty;
+
+    public BillingAccountId BillingAccountId { get; set; }
+
+    public string State { get; set; } = string.Empty;
+
+    public string ApprovalState { get; set; } = string.Empty;
+
+    public decimal Amount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+
+    public PartyId PayeePartyId { get; set; }
+
+    public Guid PayeeAccountId { get; set; }
+
+    /// <summary>True when the payee account replaced an earlier account of the party (REQ-BIL-188 dimension payeeChanged).</summary>
+    public bool PayeeChanged { get; set; }
+
+    /// <summary>Actor who registered the payee account used (REQ-BIL-189: the person who changed the payee cannot approve).</summary>
+    public string PayeeAccountChangedBy { get; set; } = string.Empty;
+
+    public string PayoutMethod { get; set; } = string.Empty;
+
+    public string ReasonCode { get; set; } = string.Empty;
+
+    public string? Comment { get; set; }
+
+    /// <summary>The credit notes the requester selected (null = all credit of the account).</summary>
+    public Guid[]? SelectedCreditNotes { get; set; }
+
+    /// <summary>The business reference of the credit paid out: SHA-256 over the sorted credit item ids and amounts (duplicate key of the disbursement).</summary>
+    public string CreditSetKey { get; set; } = string.Empty;
+
+    /// <summary>The refund this one resubmits after a rejection; such a refund is always approved by a second person.</summary>
+    public RefundId? ResubmitsRefundId { get; set; }
+
+    /// <summary>Everyone who took part in making this refund: the requester, resubmitters and (inherited) editors (REQ-BIL-189).</summary>
+    public string[] Participants { get; set; } = [];
+
+    /// <summary>The actor who requested or last resubmitted it (the maker of the approval request).</summary>
+    public string RequestedBy { get; set; } = string.Empty;
+
+    public Guid? ApprovalRequestId { get; set; }
+
+    public string? ApprovalContentHash { get; set; }
+
+    public string? DecidedBy { get; set; }
+
+    public Instant? DecidedAt { get; set; }
+
+    public string? DecisionComment { get; set; }
+
+    public DisbursementId? DisbursementId { get; set; }
+
+    public Guid? ApprovedEntryId { get; set; }
+
+    public Instant ProposedAt { get; set; }
+
+    public Instant? PaidAt { get; set; }
+
+    public int RecordVersion { get; set; }
+}
+
+/// <summary>A credit item (of a credit note) a refund pays out, with the amount (append-only; the breakdown of REQ-BIL-184).</summary>
+internal sealed class RefundCreditRow
+{
+    public Guid RefundCreditId { get; set; }
+
+    public RefundId RefundId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public InvoiceId CreditNoteId { get; set; }
+
+    public Guid CreditItemId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public PolicyTransactionId TransactionId { get; set; }
+
+    public string ChargeType { get; set; } = string.Empty;
+
+    public string ChargeCategory { get; set; } = string.Empty;
+
+    public decimal Amount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+}
+
+/// <summary>A credit netted against an open invoice item before the refund (append-only, REQ-BIL-182).</summary>
+internal sealed class RefundNettingRow
+{
+    public Guid RefundNettingId { get; set; }
+
+    public RefundId RefundId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public InvoiceId CreditNoteId { get; set; }
+
+    public Guid CreditItemId { get; set; }
+
+    public InvoiceId TargetInvoiceId { get; set; }
+
+    public Guid TargetInvoiceItemId { get; set; }
+
+    public decimal Amount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
 }

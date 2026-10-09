@@ -33,7 +33,7 @@ public sealed class SupportAuthorityTests
     private static ConfiguredAuthorityService Service(AuthorityOptions options) =>
         new(new AuthorityTypeRegistry(SupportAuthorityTypes.Definitions), Options.Create(options), new ManualClock(Now));
 
-    private static Task<AuthorityCheckResult> RefundAsync(ConfiguredAuthorityService service, string role, string amount, string actor = "u1") =>
+    private static Task<AuthorityCheckResult> RefundAsync(ConfiguredAuthorityService service, string role, string amount, string actor = "u1", bool payeeChanged = false) =>
         service.CheckAsync(
             new AuthorityCheckRequest(
                 ActorRef.User(actor),
@@ -43,7 +43,8 @@ public sealed class SupportAuthorityTests
                 {
                     [SupportAuthorityTypes.AmountDimension] = DimensionValue.Of(new Money(decimal.Parse(amount, System.Globalization.CultureInfo.InvariantCulture), Currency.FromCode("EUR"))),
                     [SupportAuthorityTypes.CurrencyDimension] = DimensionValue.OfCodes("EUR"),
-                    [SupportAuthorityTypes.PayeeChangedDimension] = DimensionValue.Of(false),
+                    [SupportAuthorityTypes.PayeeChangedDimension] = DimensionValue.OfCodes(SupportAuthorityTypes.PayeeChangedCode(payeeChanged)),
+                    [SupportAuthorityTypes.ReasonDimension] = DimensionValue.OfCodes("CUSTOMER_REQUEST"),
                 },
                 null,
                 Now),
@@ -114,6 +115,54 @@ public sealed class SupportAuthorityTests
         }
     }
 
+    [Theory]
+    [InlineData("Staff.Billing", "10.00", AuthorityDecision.Refer)]
+    [InlineData("Staff.Billing", "500.00", AuthorityDecision.Refer)]
+    [InlineData("Staff.BillingManager", "10.00", AuthorityDecision.Allow)]
+    [InlineData("Staff.BillingManager", "5000.00", AuthorityDecision.Allow)]
+    [InlineData("Staff.BillingManager", "5000.01", AuthorityDecision.Deny)]
+    public async Task A_changed_payee_refers_the_clerk_up_to_the_billing_manager_at_any_amount(string role, string amount, AuthorityDecision expected)
+    {
+        var service = Service(RealOptions(new Environment("Development")));
+
+        var check = await RefundAsync(service, role, amount, payeeChanged: true);
+
+        check.Decision.ShouldBe(expected, $"{role} {amount}: {check.ReasonCode}");
+        if (role == "Staff.Billing")
+        {
+            check.ReasonCode.ShouldBe("PAYEECHANGED_NOT_ALLOWED");
+            check.ReferralTargets.ShouldContain(t => t.Id == "Staff.BillingManager");
+        }
+    }
+
+    [Fact]
+    public async Task The_payeeChanged_dimension_travels_as_a_code_so_plt_approval_can_carry_and_recheck_it()
+    {
+        var registry = new AuthorityTypeRegistry(SupportAuthorityTypes.Definitions);
+        registry.TryGet(SupportAuthorityTypes.Refund, out var refund).ShouldBeTrue();
+        refund.Dimensions.ShouldContain(new AuthorityDimensionDefinition("payeeChanged", DimensionKind.Code));
+        refund.Dimensions.ShouldContain(new AuthorityDimensionDefinition("reason", DimensionKind.Code));
+
+        // The dimension as plt.Approval re-checks it at decide time: money amount plus code dimensions only.
+        var service = Service(RealOptions(new Environment("Development")));
+        var dimensions = ApprovalDimensionsForTest("true");
+        var asManager = await service.CheckAsync(
+            new AuthorityCheckRequest(ActorRef.User("mgr"), ["Staff.BillingManager"], SupportAuthorityTypes.Refund, dimensions, null, Now), TestContext.Current.CancellationToken);
+        asManager.Decision.ShouldBe(AuthorityDecision.Allow);
+        var asClerk = await service.CheckAsync(
+            new AuthorityCheckRequest(ActorRef.User("clerk"), ["Staff.Billing"], SupportAuthorityTypes.Refund, dimensions, null, Now), TestContext.Current.CancellationToken);
+        asClerk.Decision.ShouldBe(AuthorityDecision.Refer);
+        await Task.CompletedTask;
+    }
+
+    private static Dictionary<string, DimensionValue> ApprovalDimensionsForTest(string payeeChanged) => new()
+    {
+        ["amount"] = DimensionValue.Of(new Money(100m, Currency.FromCode("EUR"))),
+        ["currency"] = DimensionValue.OfCodes("EUR"),
+        ["payeeChanged"] = DimensionValue.OfCodes(payeeChanged),
+        ["reason"] = DimensionValue.OfCodes("CUSTOMER_REQUEST"),
+    };
+
     [Fact]
     public void The_two_authority_types_are_registered_with_their_dimensions()
     {
@@ -121,7 +170,7 @@ public sealed class SupportAuthorityTests
 
         registry.TryGet(SupportAuthorityTypes.Refund, out var refund).ShouldBeTrue();
         refund.OwningModule.ShouldBe(ModuleCode.BIL);
-        refund.Dimensions.Select(d => d.Name).ShouldBe(["amount", "currency", "payeeChanged"]);
+        refund.Dimensions.Select(d => d.Name).ShouldBe(["amount", "currency", "payeeChanged", "reason"]);
         registry.TryGet(SupportAuthorityTypes.EffectiveDateOverride, out var overrideType).ShouldBeTrue();
         overrideType.OwningModule.ShouldBe(ModuleCode.POL);
         overrideType.Dimensions.Select(d => d.Name).ShouldBe(["product", "transactionType", "days"]);
