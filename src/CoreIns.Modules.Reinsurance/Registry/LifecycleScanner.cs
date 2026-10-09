@@ -1,6 +1,7 @@
 using CoreIns.Modules.Reinsurance.Persistence;
 using CoreIns.Platform.Audit;
 using CoreIns.Platform.Commands;
+using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Events;
 using CoreIns.Platform.Time;
@@ -140,7 +141,7 @@ internal sealed partial class LifecycleScanner(
         var scope = scopes.CreateAsyncScope();
         await using (scope.ConfigureAwait(false))
         {
-            Prepare(scope.ServiceProvider, legalEntity, jurisdiction);
+            await PrepareAsync(scope.ServiceProvider, legalEntity, jurisdiction, cancellationToken).ConfigureAwait(false);
             var db = scope.ServiceProvider.GetRequiredService<ReinsuranceDbContext>();
             var legalEntityId = scope.ServiceProvider.GetRequiredService<ILegalEntityDirectory>().Resolve(legalEntity);
             due = await (
@@ -161,7 +162,7 @@ internal sealed partial class LifecycleScanner(
                 var inner = scopes.CreateAsyncScope();
                 await using (inner.ConfigureAwait(false))
                 {
-                    Prepare(inner.ServiceProvider, legalEntity, jurisdiction);
+                    await PrepareAsync(inner.ServiceProvider, legalEntity, jurisdiction, cancellationToken).ConfigureAwait(false);
                     var handler = inner.ServiceProvider.GetRequiredService<ICommandHandler<ApplyDueLifecycle, string>>();
                     var result = await handler.HandleAsync(new ApplyDueLifecycle(id), cancellationToken).ConfigureAwait(false);
                     if (result.IsSuccess && result.Value is LifecycleOutcome.Activated or LifecycleOutcome.Expired or LifecycleOutcome.ActivatedAndExpired)
@@ -183,13 +184,16 @@ internal sealed partial class LifecycleScanner(
         return changed;
     }
 
-    private static void Prepare(IServiceProvider services, LegalEntityCode legalEntity, Jurisdiction jurisdiction)
+    private static async Task PrepareAsync(IServiceProvider services, LegalEntityCode legalEntity, Jurisdiction jurisdiction, CancellationToken cancellationToken)
     {
         var context = services.GetRequiredService<RequestContext>();
         context.Actor = ActorRef.Service(ActorId);
         context.LegalEntity = legalEntity;
         context.Jurisdiction = jurisdiction;
         context.Origin = EventOrigin.Live;
+
+        // Events need the configuration hash in force (the HTTP middleware pins it for a request; a job pins it here).
+        context.ConfigurationHash = await services.GetRequiredService<IConfigurationResolver>().CurrentHashAsync(null, cancellationToken).ConfigureAwait(false);
     }
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Reinsurance lifecycle scan failed for contract {ContractId}: {Reason}")]

@@ -3,7 +3,7 @@ using CoreIns.SharedKernel.StateMachines;
 
 namespace CoreIns.Modules.Reinsurance.Registry;
 
-/// <summary>Contract status (PRD-08 §3 state machine, REQ-RI-056). Closed is reserved for the later close / commutation work.</summary>
+/// <summary>Contract status (PRD-08 §3 state machine, REQ-RI-056). CLOSED (close / commutation) belongs to a later work package and is not a state of this machine yet.</summary>
 internal enum ContractStatus
 {
     Draft,
@@ -11,7 +11,6 @@ internal enum ContractStatus
     Approved,
     Active,
     Expired,
-    Closed,
 }
 
 /// <summary>Triggers of <see cref="ContractStatus"/>.</summary>
@@ -35,7 +34,7 @@ internal static class ContractStateModel
             .Permit(ContractStatus.PendingApproval, ContractTrigger.Approve, ContractStatus.Approved)
             .Permit(ContractStatus.Approved, ContractTrigger.Activate, ContractStatus.Active)
             .Permit(ContractStatus.Active, ContractTrigger.Expire, ContractStatus.Expired)
-            .Terminal(ContractStatus.Expired, ContractStatus.Closed)
+            .Terminal(ContractStatus.Expired)
             .Build();
 
     /// <summary>The wire / column code: <c>PENDING_APPROVAL</c>.</summary>

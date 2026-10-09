@@ -119,6 +119,16 @@ internal static class ContractSupport
     public static bool IsUniqueViolation(DbUpdateException exception, string constraint) =>
         exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } pg && pg.ConstraintName == constraint;
 
+    /// <summary>Amounts as stored (NUMERIC scale 4) read back with trailing zeros stripped but at least two decimals, like a request.</summary>
+    internal static decimal Amount(decimal value)
+    {
+        var stripped = value / 1.0000000000000000000000000000m;
+        return stripped.Scale < 2 ? stripped + 0.00m : stripped;
+    }
+
+    /// <summary>Percentages as stored (NUMERIC scale 6) read back with trailing zeros stripped.</summary>
+    internal static decimal Percent(decimal value) => value / 1.0000000000000000000000000000m;
+
     /// <summary>The contract view (RiContractView) of the stored aggregate.</summary>
     public static RiContractView ToView(ContractRow contract, ContractVersionRow version, ContractContent content, string legalEntity, TimeZoneInfo zone)
     {
@@ -145,20 +155,20 @@ internal static class ContractSupport
                 .. content.Layers.OrderBy(l => l.LayerNo).Select(l => new RiLayer
                 {
                     LayerNo = l.LayerNo,
-                    Attachment = new Money(l.Attachment, eur),
-                    Limit = new Money(l.Limit, eur),
-                    Aad = new Money(l.Aad, eur),
-                    Aal = l.Aal is { } aal ? new Money(aal, eur) : null,
+                    Attachment = new Money(Amount(l.Attachment), eur),
+                    Limit = new Money(Amount(l.Limit), eur),
+                    Aad = new Money(Amount(l.Aad), eur),
+                    Aal = l.Aal is { } aal ? new Money(Amount(aal), eur) : null,
                 }),
             ],
             Participations =
             [
                 .. content.Lines.OrderByDescending(l => l.Lead).ThenBy(l => l.ReinsurerPartyId).Select(l => new RiParticipationView
                 {
-                    ReinsurerPartyId = new PartyId(l.ReinsurerPartyId), BrokerPartyId = l.BrokerPartyId, SignedLinePct = l.SignedLinePct, Lead = l.Lead,
+                    ReinsurerPartyId = new PartyId(l.ReinsurerPartyId), BrokerPartyId = l.BrokerPartyId, SignedLinePct = Percent(l.SignedLinePct), Lead = l.Lead,
                 }),
             ],
-            PlacedPct = content.PlacedPct,
+            PlacedPct = Percent(content.PlacedPct),
             Status = Wire(ContractStateModel.Parse(contract.Status)),
             VersionNo = version.VersionNo,
             ValidFrom = StartOf(version.ValidFrom, zone),
@@ -178,7 +188,6 @@ internal static class ContractSupport
         ContractStatus.Approved => RiContractStatus.Approved,
         ContractStatus.Active => RiContractStatus.Active,
         ContractStatus.Expired => RiContractStatus.Expired,
-        ContractStatus.Closed => RiContractStatus.Closed,
         _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
     };
 }

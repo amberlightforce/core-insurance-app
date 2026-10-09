@@ -62,7 +62,8 @@ internal sealed class ContractReader(
 
         if (status is { } wanted)
         {
-            var code = ContractStateModel.Code(Status(wanted));
+            // CLOSED belongs to a later work package: nothing is in that status yet, but the filter is valid.
+            var code = wanted == RiContractStatus.Closed ? "CLOSED" : ContractStateModel.Code(Status(wanted));
             query = query.Where(c => c.Status == code);
         }
 
@@ -87,7 +88,7 @@ internal sealed class ContractReader(
             ContractYear = r.c.ContractYear,
             Currency = Currency.FromCode(r.c.Currency.Trim()),
             Period = DateRange.Of(r.v.ValidFrom, r.v.ValidTo),
-            PlacedPct = r.v.PlacedPct,
+            PlacedPct = ContractSupport.Percent(r.v.PlacedPct),
             Status = ContractSupport.Wire(ContractStateModel.Parse(r.c.Status)),
             RecordVersion = r.c.RecordVersion,
         }).ToList();
@@ -167,7 +168,7 @@ internal sealed class ContractReader(
         RiContractStatus.Approved => ContractStatus.Approved,
         RiContractStatus.Active => ContractStatus.Active,
         RiContractStatus.Expired => ContractStatus.Expired,
-        RiContractStatus.Closed => ContractStatus.Closed,
+        RiContractStatus.Closed => throw new ArgumentOutOfRangeException(nameof(status), status, "CLOSED is not a state of the slice-4 machine."),
         _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
     };
 }
