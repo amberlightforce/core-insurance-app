@@ -32,6 +32,16 @@ internal sealed class PolicyOptions
     /// </summary>
     public bool AllowMissingDraftValidation { get; set; }
 
+    /// <summary>
+    /// Seconds a command waits for the policy's write lock (D-SL3-03) before it fails with <c>POL-ERR-STALE</c> (409). Writers of
+    /// one policy are serialised; the loser waits this long and then reports "changed meanwhile" instead of a server error.
+    /// </summary>
+    [Range(1, 120)]
+    public int LockWaitSeconds { get; set; } = 5;
+
+    /// <summary>The policy write-lock wait.</summary>
+    public TimeSpan LockWait => TimeSpan.FromSeconds(LockWaitSeconds);
+
     /// <summary>The configured zone.</summary>
     public TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
 

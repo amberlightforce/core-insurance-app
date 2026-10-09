@@ -161,3 +161,28 @@ Every append-only ledger (BIL sub-ledger, FIN journals, later CLM, RI, commissio
   UPDATE/DELETE/TRUNCATE (refused), an unbalanced entry (refused at commit), and the role's privileges.
 - Amount and number columns of the documents the ledger refers to (invoices, items, receipts) are frozen by triggers too;
   only states move.
+
+## Record time and the policy watermark (POL, D-SL3-03)
+
+Bitemporal modules that must answer "as known at T" repeatably cannot stamp record time with a plain clock: a slow writer
+or a replica with a lagging clock commits rows "in the past" of a reader that already answered. POL's rule, reusable by any
+module with the same need:
+
+- **Watermark.** `pol.policy.last_recorded_at` is the record time of the last command that wrote for the policy. It moves
+  forward only (trigger), and the policy row is frozen otherwise (`tr_policy_frozen`).
+- **Writers: lock, then stamp.** A command first calls `PolicyWriteLock.AcquireAsync` (`SELECT ... FOR UPDATE` on the policy
+  row, then `t = max(IClock.Now, last_recorded_at + 1 µs)` truncated to microseconds, stored as the new watermark in the same
+  transaction). Every row it writes uses that one `t`: record-period starts, transactions, charge lines and the closing
+  `recorded_to`. A new policy's insert is its own lock (`ForNewPolicy`). The loser of a race waits `Policy:LockWaitSeconds`
+  and then gets `POL-ERR-STALE` (409), never a 500.
+- **The database enforces it.** `pol.require_stamp` refuses an insert whose record time is not the policy's current
+  watermark; `pol.only_close_record_period` closes a record period only at the watermark (not at the database clock).
+- **Readers take no lock.** Effective knownAt = `min(requested or now, committed watermark)`, carried in snapshot
+  references. Anything committed later is stamped above the watermark, so an answer cannot change, whatever the clock skew
+  between replicas. A reference above the watermark was never issued and is refused as forged.
+- **Supersession is live metadata outside the hashed content** (`PolicySnapshots.GetDetailedAsync`): the content hash at
+  (validAt, current watermark) is compared with the reference's; a new segment id with identical content is not superseded.
+- **Tests:** concurrent writers, a reader during an uncommitted write, a writer whose clock is behind the watermark, a forged
+  reference, and every trigger connected as the `app` role (`tests/CoreIns.IntegrationTests/Policy/Temporal`).
+
+Review round (D1, D4): the database requires that a record row's policy was locked and stamped in the same transaction (the pol.policy trigger leaves a transaction-local mark that pol.require_stamp and pol.only_close_record_period check), and the watermark may not run more than a day plus the Development dev clock offset (plt.dev_clock) ahead of the database clock (pol.assert_watermark_cap).
