@@ -35,18 +35,18 @@ public sealed class PackRegistryApiTests(PostgresFixture database) : IClassFixtu
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body!["items"]!.AsArray().Count.ShouldBe(1);
-        var pack = body["items"]![0]!["packVersionActivation"]!;
-        pack["packId"]!.GetValue<string>().ShouldBe("gr");
-        pack["country"]!.GetValue<string>().ShouldBe("GR");
-        pack["versionInForce"]!.GetValue<string>().ShouldBe("0.2.0");
+        var pack = body["items"]![0]!;
+        pack["pack"]!.GetValue<string>().ShouldBe("gr");
+        pack["scope"]!.GetValue<string>().ShouldBe("COUNTRY");
+        pack["packId"]!.GetValue<string>().Length.ShouldBe(36);
         pack["versions"]!.AsArray().Select(v => v!["version"]!.GetValue<string>()).ShouldBe(["0.1.0", "0.2.0"]);
-        pack["versions"]!.AsArray().ShouldAllBe(v => v!["contentDigest"]!.GetValue<string>().Length == 64 && v["status"]!.GetValue<string>() == "Published");
-        var activation = pack["activations"]!.AsArray().Single()!;
-        activation["kind"]!.GetValue<string>().ShouldBe("ACTIVATE");
-        activation["version"]!.GetValue<string>().ShouldBe("0.2.0");
-        activation["resultingHash"]!.GetValue<string>().ShouldBe(pack["stateHash"]!.GetValue<string>());
+        pack["versions"]!.AsArray().ShouldAllBe(v => v!["contentDigest"]!.GetValue<string>().Length == 64 && v["status"]!.GetValue<string>() == "PUBLISHED");
+        var active = pack["activeVersions"]!.AsArray().Single()!;
+        active["legalEntity"]!.GetValue<string>().ShouldBe("GR-TEST");
+        active["version"]!.GetValue<string>().ShouldBe("0.2.0");
+        active["configurationHash"]!.GetValue<string>().Length.ShouldBe(64);
         body["nextCursor"].ShouldBeNull();
-        body.ToJsonString().ShouldNotContain("\"core\"", Case.Sensitive, "the core defaults are not a pack");
+        body.ToJsonString().ShouldNotContain("\"pack\":\"core\"", Case.Sensitive, "the core defaults are not a pack");
     }
 
     [Fact]
@@ -57,7 +57,15 @@ public sealed class PackRegistryApiTests(PostgresFixture database) : IClassFixtu
         var (core, _) = await SendAsync(_client, HttpMethod.Get, "/api/mkt/v1/packs/core", roles: "Platform.ReleaseManager");
 
         found.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
-        body!["packVersionActivation"]!["packId"]!.GetValue<string>().ShouldBe("gr");
+        body!["pack"]!.GetValue<string>().ShouldBe("gr");
+        var history = body["activationHistory"]!.AsArray().Single()!;
+        history["kind"]!.GetValue<string>().ShouldBe("ACTIVATE");
+        history["status"]!.GetValue<string>().ShouldBe("ACTIVE");
+        history["to"]!.GetValue<string>().ShouldBe("0.2.0");
+        history["requestedBy"]!.GetValue<string>().ShouldBe("system:genesis");
+        var (byId, byIdBody) = await SendAsync(_client, HttpMethod.Get, "/api/mkt/v1/packs/" + body["packId"]!.GetValue<string>(), roles: "Platform.DesignAuthority");
+        byId.StatusCode.ShouldBe(HttpStatusCode.OK);
+        byIdBody!["pack"]!.GetValue<string>().ShouldBe("gr");
         missing.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         problem.Text("code").ShouldBe("MKT-ERR-PACK-NOT-FOUND");
         core.StatusCode.ShouldBe(HttpStatusCode.NotFound);

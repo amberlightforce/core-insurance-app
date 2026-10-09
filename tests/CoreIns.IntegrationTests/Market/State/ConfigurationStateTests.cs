@@ -567,15 +567,15 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         // Born ACTIVE, approved or decided: refused (only the genesis row is born active, and only for the genesis state).
         await Refused(Insert(Guid.NewGuid(), "ACTIVE", decidedBy: "user:checker"));
         await Refused(Insert(Guid.NewGuid(), "ACTIVE", requestedBy: "system:genesis", decidedBy: "system:genesis", kind: "ROLLBACK"));
-        await Refused(Insert(Guid.NewGuid(), "APPROVED"));
+        await Refused(Insert(Guid.NewGuid(), "SCHEDULED"));
         await Refused(Insert(Guid.NewGuid(), "PENDING_APPROVAL", decidedBy: "user:checker"));
 
         await Run(Insert(id, "PENDING_APPROVAL"));
 
         // Approved or activated by the requester, by nobody, or without an approval request: refused.
         await Refused($"UPDATE mkt.pack_activation SET status = 'ACTIVE', decided_by = 'user:maker', approval_request_id = '{approval}', resulting_hash = '{genesis}', activated_at = now() WHERE id = '{id}'");
-        await Refused($"UPDATE mkt.pack_activation SET status = 'APPROVED' WHERE id = '{id}'");
-        await Refused($"UPDATE mkt.pack_activation SET status = 'APPROVED', decided_by = 'user:checker' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET status = 'SCHEDULED' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET status = 'SCHEDULED', decided_by = 'user:checker' WHERE id = '{id}'");
         await Refused($"UPDATE mkt.pack_activation SET status = 'ACTIVE', decided_by = 'user:checker', approval_request_id = '{approval}' WHERE id = '{id}'");
         await Refused($"UPDATE mkt.pack_activation SET status = 'SUPERSEDED' WHERE id = '{id}'");
         await Refused($"UPDATE mkt.pack_activation SET requested_by = 'user:checker' WHERE id = '{id}'");

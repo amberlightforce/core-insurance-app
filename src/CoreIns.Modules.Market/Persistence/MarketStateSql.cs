@@ -10,7 +10,7 @@ namespace CoreIns.Modules.Market.Persistence;
 /// (<c>parent_hash</c> = the hash with the highest <c>seq</c>, the first state has none), and not before the activation instant
 /// of that newest state. So two writers cannot fork the chain and history never runs backwards (PITFALLS 17, 40);</item>
 /// <item><c>pack_activation</c> (written by SL5-MKT-ROLLBACK): never deleted; identity and request frozen; the status only moves
-/// PENDING_APPROVAL → APPROVED / REJECTED / WITHDRAWN / ACTIVE, APPROVED → ACTIVE, ACTIVE → SUPERSEDED; a decision is made by someone other than the
+/// REQUESTED → PENDING_APPROVAL / WITHDRAWN, PENDING_APPROVAL → REJECTED / WITHDRAWN / SCHEDULED / ACTIVE, SCHEDULED → ACTIVE / WITHDRAWN, ACTIVE → SUPERSEDED; a decision is made by someone other than the
 /// requester and an approval or activation names its approval request; the one row born ACTIVE is the genesis activation of the genesis state
 /// (PITFALLS 47).</item>
 /// </list>
@@ -82,7 +82,7 @@ internal static class MarketStateSql
 
             IF TG_OP = 'INSERT' THEN
                 -- A request starts pending, undecided and not yet in force.
-                IF NEW.status = 'PENDING_APPROVAL' AND NEW.decided_by IS NULL AND NEW.resulting_hash IS NULL AND NEW.activated_at IS NULL THEN
+                IF NEW.status IN ('REQUESTED', 'PENDING_APPROVAL') AND NEW.decided_by IS NULL AND NEW.resulting_hash IS NULL AND NEW.activated_at IS NULL THEN
                     RETURN NEW;
                 END IF;
                 -- The one row born active: the genesis activation the release writes for the state it created, never an approval.
@@ -92,7 +92,7 @@ internal static class MarketStateSql
                     RETURN NEW;
                 END IF;
                 RAISE LOG 'SECURITY: mkt.pack_activation inserted as % (kind %) by role % refused', NEW.status, NEW.kind, current_user;
-                RAISE EXCEPTION 'mkt.pack_activation starts PENDING_APPROVAL; only the genesis activation is born ACTIVE' USING ERRCODE = 'restrict_violation';
+                RAISE EXCEPTION 'mkt.pack_activation starts REQUESTED or PENDING_APPROVAL; only the genesis activation is born ACTIVE' USING ERRCODE = 'restrict_violation';
             END IF;
 
             IF (NEW.id, NEW.legal_entity_id, NEW.pack_id, NEW.version, NEW.kind, NEW.requested_by, NEW.created_at)
@@ -107,8 +107,9 @@ internal static class MarketStateSql
                 RAISE EXCEPTION 'mkt.pack_activation decision, approval and result are frozen once written' USING ERRCODE = 'restrict_violation';
             END IF;
             IF NEW.status <> OLD.status AND NOT (
-                   (OLD.status = 'PENDING_APPROVAL' AND NEW.status IN ('APPROVED', 'REJECTED', 'WITHDRAWN', 'ACTIVE'))
-                OR (OLD.status = 'APPROVED' AND NEW.status = 'ACTIVE')
+                   (OLD.status = 'REQUESTED' AND NEW.status IN ('PENDING_APPROVAL', 'WITHDRAWN'))
+                OR (OLD.status = 'PENDING_APPROVAL' AND NEW.status IN ('REJECTED', 'WITHDRAWN', 'SCHEDULED', 'ACTIVE'))
+                OR (OLD.status = 'SCHEDULED' AND NEW.status IN ('ACTIVE', 'WITHDRAWN'))
                 OR (OLD.status = 'ACTIVE' AND NEW.status = 'SUPERSEDED')) THEN
                 RAISE LOG 'SECURITY: mkt.pack_activation % status % -> % refused for role %', OLD.id, OLD.status, NEW.status, current_user;
                 RAISE EXCEPTION 'mkt.pack_activation status % cannot move to %', OLD.status, NEW.status USING ERRCODE = 'restrict_violation';
@@ -117,12 +118,12 @@ internal static class MarketStateSql
                 RAISE EXCEPTION 'mkt.pack_activation is final in status %', OLD.status USING ERRCODE = 'restrict_violation';
             END IF;
             -- Maker-checker and "approved only with an approval" (PITFALLS 47): whoever decides is not the requester, and approving or activating names the approval.
-            IF NEW.status IN ('APPROVED', 'REJECTED', 'ACTIVE') AND OLD.status = 'PENDING_APPROVAL' THEN
+            IF NEW.status IN ('REJECTED', 'SCHEDULED', 'ACTIVE') AND OLD.status = 'PENDING_APPROVAL' THEN
                 IF NEW.decided_by IS NULL OR NEW.decided_by = NEW.requested_by THEN
                     RAISE LOG 'SECURITY: mkt.pack_activation % decided by the requester or by nobody (role %)', OLD.id, current_user;
                     RAISE EXCEPTION 'mkt.pack_activation must be decided by someone other than the requester' USING ERRCODE = 'restrict_violation';
                 END IF;
-                IF NEW.status IN ('APPROVED', 'ACTIVE') AND NEW.approval_request_id IS NULL THEN
+                IF NEW.status IN ('SCHEDULED', 'ACTIVE') AND NEW.approval_request_id IS NULL THEN
                     RAISE EXCEPTION 'mkt.pack_activation cannot be approved without an approval request' USING ERRCODE = 'restrict_violation';
                 END IF;
             END IF;
