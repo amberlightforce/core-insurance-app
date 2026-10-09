@@ -147,6 +147,8 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
         context.Roles = [Manager];
         context.LegalEntity = LegalEntityCode.Parse("GR-TEST");
         context.Jurisdiction = Jurisdiction.Parse("GR");
+        context.IdempotencyKey = IdempotencyKey.New();
+        context.ConfigurationHash = ConfigurationHash.Parse(new string('a', 64));
         var result = await services.GetRequiredService<ICommandHandler<ApproveContract, ContractApproveResponse>>().HandleAsync(
             new ApproveContract(new ContractApproveRequest { ContractId = new RiContractId(Guid.Parse(id)), ExpectedRecordVersion = submitted, Decision = ContractApproveRequest.DecisionValue.Approve }), Ct);
         result.IsFailure.ShouldBeTrue();
