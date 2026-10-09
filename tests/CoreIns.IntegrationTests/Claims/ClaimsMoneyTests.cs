@@ -116,7 +116,7 @@ public sealed class ClaimsMoneyTests(PostgresFixture database) : IClassFixture<P
 
         // Above the manager's limit: DENY (D-SL2-03).
         var big = await ClaimAsync();
-        var (built, build) = await _money.BuildAsync(big, [Reserve(big, 50000.01m)]);
+        var (built, build) = await _money.BuildAsync(big, [Reserve(big, 1000000.01m)]);
         built.StatusCode.ShouldBe(HttpStatusCode.OK);
         var (denied, deny) = await _money.SubmitAsync(build.Text("setId"));
         denied.StatusCode.ShouldBe(HttpStatusCode.Forbidden, deny?.ToJsonString());

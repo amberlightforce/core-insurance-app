@@ -62,6 +62,6 @@ internal sealed record SetContent(
         var payment = t.ClaimPaymentId is { } id ? Payments.Single(p => p.ClaimPaymentId == id) : null;
         return new CanonicalTransaction(
             t.TxnId, t.TxnNumber, t.Kind, KeyOf(t), t.Amount, t.Eroding, t.PaymentType, t.ClaimPaymentId?.Value,
-            payment?.PayeePartyId, payment?.PayeeAccountId, t.ReasonCode, t.Proposed);
+            payment?.PayeePartyId, payment?.PayeeAccountId, t.ReasonCode, t.Proposed, t.RecoveryId);
     });
 }

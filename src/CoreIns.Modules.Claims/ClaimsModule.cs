@@ -62,6 +62,7 @@ public static class ClaimsModule
 
                 // Re-verification (SL3-CLM-REVERIFY): raised by the consumers, decided once, never deleted.
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.reverification TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.recovery, {Schema}.fs_case, {Schema}.fs_statement, {Schema}.fs_statement_line TO {appRole}",
             ]),
     ];
 
@@ -84,6 +85,8 @@ public static class ClaimsModule
         // Claim financials (SL2-CLM-MONEY): derived balances, the set lifecycle and the close guard over them (REQ-CLM-072/073).
         services.AddScoped<FinancialsReader>();
         services.AddScoped<SetLifecycle>();
+        services.AddScoped<IClaimFinancialEngine, ClaimFinancialEngine>();
+        services.TryAddScoped<IClaimFinancialEvidenceSource, UnavailableClaimFinancialEvidenceSource>();
         services.TryAddScoped<IClaimFinancialGuard, DerivedClaimFinancials>();
 
         services.AddScoped<IValidator<BuildTransactionSet>, BuildTransactionSetValidator>();

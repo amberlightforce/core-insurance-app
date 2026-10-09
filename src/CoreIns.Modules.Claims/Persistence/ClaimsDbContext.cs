@@ -37,6 +37,11 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
 
     public DbSet<ReverificationRow> Reverifications => Set<ReverificationRow>();
 
+    public DbSet<RecoveryRow> Recoveries => Set<RecoveryRow>();
+    public DbSet<FsCaseRow> FsCases => Set<FsCaseRow>();
+    public DbSet<FsStatementRow> FsStatements => Set<FsStatementRow>();
+    public DbSet<FsStatementLineRow> FsStatementLines => Set<FsStatementLineRow>();
+
     protected override string Schema => ClaimsModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -57,11 +62,19 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
                 table.HasCheckConstraint("ck_claim_notice_after_loss", "notice_on >= loss_date");
                 table.HasCheckConstraint("ck_claim_exposure_sequence", "last_exposure_sequence >= 0");
                 table.HasCheckConstraint("ck_claim_transaction_sequence", "last_transaction_sequence >= 0");
+                table.HasCheckConstraint("ck_claim_fault_pct", "fault_insured_pct IS NULL OR fault_insured_pct BETWEEN 0 AND 100");
+                table.HasCheckConstraint("ck_claim_vehicle_count", "vehicle_count IS NULL OR vehicle_count >= 1");
             });
             entity.HasKey(e => e.ClaimId).HasName("pk_claim");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
             MapCommon(entity);
             entity.Property(e => e.ClaimNumber).HasColumnName("claim_number");
+            entity.Property(e => e.FaultInsuredPct).HasColumnName("fault_insured_pct").HasColumnType("numeric(5,2)");
+            entity.Property(e => e.FaultSource).HasColumnName("fault_source");
+            entity.Property(e => e.CounterpartyInsurerPartyId).HasColumnName("counterparty_insurer_party_id");
+            entity.Property(e => e.JointAccidentReport).HasColumnName("joint_accident_report");
+            entity.Property(e => e.VehicleCount).HasColumnName("vehicle_count");
+            entity.Property(e => e.AccidentInGreece).HasColumnName("accident_in_greece");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
             entity.Property(e => e.PolicyNumber).HasColumnName("policy_number");
             entity.Property(e => e.InsuredPartyId).HasColumnName("insured_party_id");
@@ -177,6 +190,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             MapCommon(entity);
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
             entity.Property(e => e.ExposureNumber).HasColumnName("exposure_number");
+            entity.Property(e => e.StatutoryClocks).HasColumnName("statutory_clocks").HasDefaultValue("NOT_TRACKED");
             entity.Property(e => e.Sequence).HasColumnName("sequence");
             entity.Property(e => e.Kind).HasColumnName("kind");
             entity.Property(e => e.CoverageCode).HasColumnName("coverage_code");
@@ -203,6 +217,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
 
         MapFinancials(modelBuilder);
         ReverificationModel.Map(modelBuilder);
+        RecoveryModel.Map(modelBuilder);
     }
 
     private static void MapFinancials(ModelBuilder modelBuilder) => ClaimsFinancialModel.Map(modelBuilder);

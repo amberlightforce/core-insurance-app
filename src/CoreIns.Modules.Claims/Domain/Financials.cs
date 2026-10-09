@@ -144,7 +144,8 @@ internal sealed record CanonicalTransaction(
     PartyId? PayeePartyId,
     Guid? PayeeAccountId,
     string? ReasonCode,
-    bool Proposed);
+    bool Proposed,
+    RecoveryId? RecoveryId = null);
 
 /// <summary>
 /// Content and basis hashes of a transaction set. The content hash (REQ-CLM-109) is SHA-256 over the RFC 8785 canonical
@@ -179,6 +180,7 @@ internal static class SetHashing
             Add(node, "payeePartyId", t.PayeePartyId?.Value.ToString("D"));
             Add(node, "payeeAccountId", t.PayeeAccountId?.ToString("D"));
             Add(node, "reasonCode", t.ReasonCode);
+            Add(node, "recoveryId", t.RecoveryId?.Value.ToString("D"));
             items.Add(node);
         }
 

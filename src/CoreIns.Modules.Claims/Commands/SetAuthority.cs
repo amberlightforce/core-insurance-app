@@ -40,6 +40,7 @@ internal static class SetAuthority
         var result = new List<AuthorityRequirement>();
         var reserve = Codes.Of(TransactionKind.Reserve);
         var payment = Codes.Of(TransactionKind.Payment);
+        var recoveryReserve = Codes.Of(TransactionKind.RecoveryReserve);
         string CostTypeOf(FinancialTransactionRow t) => content.Lines[t.ReserveLineId].CostType;
 
         foreach (var exposure in content.Transactions.Where(t => t.Kind == reserve).GroupBy(t => t.ExposureId))
@@ -60,6 +61,21 @@ internal static class SetAuthority
         foreach (var decrease in content.Transactions.Where(t => t.Kind == reserve && t.Amount < 0m && !t.Proposed))
         {
             result.Add(new AuthorityRequirement(ClaimsAuthorityTypes.Reserve, CostTypeOf(decrease), -decrease.Amount, decrease.Currency, "RESERVE_DECREASE"));
+        }
+
+        foreach (var exposure in content.Transactions.Where(t => t.Kind == recoveryReserve).GroupBy(t => t.ExposureId))
+        {
+            var total = claimLines.Where(l => l.ExposureId == exposure.Key).Sum(l => approved.GetValueOrDefault(l.ReserveLineId).OpenRecoveryReserve)
+                + exposure.Sum(t => t.Amount);
+            foreach (var costType in exposure.GroupBy(CostTypeOf).Where(g => g.Sum(t => t.Amount) > 0m))
+            {
+                result.Add(new AuthorityRequirement(ClaimsAuthorityTypes.Reserve, costType.Key, total, costType.First().Currency, "EXPOSURE_TOTAL_RECOVERY_RESERVE"));
+            }
+
+            foreach (var decrease in exposure.Where(t => t.Amount < 0m && !t.Proposed))
+            {
+                result.Add(new AuthorityRequirement(ClaimsAuthorityTypes.Reserve, CostTypeOf(decrease), -decrease.Amount, decrease.Currency, "RESERVE_DECREASE"));
+            }
         }
 
         var paidBefore = claimLines.Sum(l => approved.GetValueOrDefault(l.ReserveLineId).Paid);
@@ -84,4 +100,10 @@ internal static class SetAuthority
     };
 
     public static Money MoneyOf(AuthorityRequirement requirement) => ClaimMoney.Of(requirement.Amount, requirement.Currency);
+
+    // BR-CLM-010: even a manager's own authority cannot remove four-eyes for a large-loss set.
+    public static AuthorityCheckResult RequireFourEyes(AuthorityRequirement requirement, AuthorityCheckResult check) =>
+        check.Decision == AuthorityDecision.Allow && requirement.Amount > 50000m
+            ? check with { Decision = AuthorityDecision.Refer, ReasonCode = "FOUR_EYES_REQUIRED", ReferralTargets = [new ReferralTarget("ROLE", "Staff.ClaimsManager")] }
+            : check;
 }

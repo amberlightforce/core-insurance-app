@@ -61,9 +61,13 @@ internal sealed class SubmitTransactionSetHandler(
 
         var claim = (await ClaimSupport.LoadAsync(db, legalEntity, claimId, cancellationToken).ConfigureAwait(false))!;
         var set = (await FinancialSupport.LockSetAsync(db, legalEntity, setId, cancellationToken).ConfigureAwait(false))!;
+        if (set.EvidenceRef is not null && context.Actor != ActorRef.Service("clm-financial-engine"))
+        {
+            return DomainError.Of(ModuleCode.CLM, "NOT-AVAILABLE", "System sets may only be submitted by the evidence engine.");
+        }
         if (set.Status != Codes.Of(SetStatus.Draft))
         {
-            return DomainError.Of(ModuleCode.CLM, "ILLEGAL-TRANSITION", $"The set is {set.Status}; only a Draft set can be submitted.");
+            return FinancialSupport.Stale($"The set is {set.Status}; only a Draft set can be submitted.");
         }
 
         var content = await FinancialSupport.ContentAsync(db, set, cancellationToken).ConfigureAwait(false);
@@ -86,8 +90,13 @@ internal sealed class SubmitTransactionSetHandler(
         foreach (var requirement in SetAuthority.Requirements(content, claimLines, approved))
         {
             var check = await authority.CheckAsync(
-                new AuthorityCheckRequest(context.Actor, context.Roles, requirement.Type, SetAuthority.Dimensions(requirement), ClaimApprovals.SetSubject(set.SetId), now),
+                new AuthorityCheckRequest(context.Actor, set.EvidenceRef is null ? context.Roles : ["Staff.ClaimsManager"], requirement.Type, SetAuthority.Dimensions(requirement), ClaimApprovals.SetSubject(set.SetId), now),
                 cancellationToken).ConfigureAwait(false);
+            check = SetAuthority.RequireFourEyes(requirement, check);
+            if (set.EvidenceRef is not null && check.Decision == AuthorityDecision.Allow)
+            {
+                check = check with { Decision = AuthorityDecision.Refer, ReasonCode = "SYSTEM_SET_REQUIRES_APPROVER", ReferralTargets = [new ReferralTarget("ROLE", "Staff.ClaimsManager")] };
+            }
             context.AuthorityChecks.Add(check);
             checks.Add((requirement, check));
         }
@@ -161,31 +170,27 @@ internal sealed class SubmitTransactionSetHandler(
             p.Status = Codes.Of(PaymentStatus.Pending);
         }
 
-        var diff = JsonSerializer.SerializeToElement(new
+        var diff = JsonSerializer.SerializeToElement(new ApprovalDiff
         {
-            setId = set.SetId.Value,
-            claimId = claim.ClaimId.Value,
-            claimNumber = claim.ClaimNumber.Value,
-            contentHash = set.ContentHash,
-            transactions = content.Transactions.Select(t => new
+            ContentHash = Sha256Hash.Parse(set.ContentHash),
+            Lines = [.. content.Transactions.GroupBy(t => (t.ReserveLineId, t.Kind, t.RecoveryId)).Select(g =>
             {
-                txnNumber = t.TxnNumber, kind = t.Kind, line = content.KeyOf(t).ToString(), amount = SetHashing.Fixed(t.Amount), t.ReasonCode, t.Proposed,
-            }),
-            lines = content.Lines.Values.Select(l =>
-            {
-                var before = approved.GetValueOrDefault(l.ReserveLineId);
-                var after = content.Transactions.Where(t => t.ReserveLineId == l.ReserveLineId)
+                var line = content.Lines[g.Key.ReserveLineId];
+                var before = approved.GetValueOrDefault(line.ReserveLineId);
+                var after = content.Transactions.Where(t => t.ReserveLineId == line.ReserveLineId)
                     .Aggregate(before, (a, t) => a.Apply(Codes.Parse<TransactionKind>(t.Kind), t.Amount, t.Eroding ?? false));
-                return new
+                var recovery = g.Key.Kind == Codes.Of(TransactionKind.RecoveryReserve) || g.Key.Kind == Codes.Of(TransactionKind.Recovery);
+                return new ApprovalDiffLine
                 {
-                    line = SetLifecycle.Key(l).ToString(),
-                    openReserveBefore = SetHashing.Fixed(before.OpenReserve), openReserveAfter = SetHashing.Fixed(after.OpenReserve),
-                    paidBefore = SetHashing.Fixed(before.Paid), paidAfter = SetHashing.Fixed(after.Paid),
+                    Kind = Codes.Map<TransactionKind, ApprovalDiffLine.KindValue>(Codes.Parse<TransactionKind>(g.Key.Kind)),
+                    ExposureId = line.ExposureId, CostType = line.CostType, CostCategory = line.CostCategory, RecoveryId = g.Key.RecoveryId,
+                    Before = ClaimMoney.Of(recovery ? before.OpenRecoveryReserve : before.OpenReserve, line.Currency),
+                    After = ClaimMoney.Of(recovery ? after.OpenRecoveryReserve : after.OpenReserve, line.Currency),
+                    PaidBefore = ClaimMoney.Of(before.Paid, line.Currency), PaidAfter = ClaimMoney.Of(after.Paid, line.Currency),
+                    Delta = ClaimMoney.Of(g.Sum(t => t.Amount), line.Currency),
                 };
-            }),
-            authority = referred.Select(r => new { type = r.Requirement.Type.Value, r.Requirement.CostType, r.Requirement.Basis, amount = SetHashing.Fixed(r.Requirement.Amount) }),
-        });
-
+            })],
+        }, JsonSerializerOptions.Web);
         var rows = new List<SetApprovalRow>();
         var payment = content.Payments.SingleOrDefault();
         var now = clock.Now;
