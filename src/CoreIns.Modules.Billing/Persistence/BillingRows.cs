@@ -67,6 +67,15 @@ internal sealed class PlanInstanceRow
     public long SourceSequence { get; set; }
 
     public Instant CreatedAt { get; set; }
+
+    /// <summary>The expiring term this renewal term continues (<c>RenewalBound.predecessorTermId</c>); null for a new-business term.</summary>
+    public PolicyTermId? PredecessorTermId { get; set; }
+
+    /// <summary>Effective date of the term's cancellation (<c>PolicyCancelled</c>): the planned items from this date are stopped (REQ-BIL-074).</summary>
+    public BusinessDate? CancelledEffective { get; set; }
+
+    /// <summary>Cancellation source of the term's cancellation (shared code list, REQ-POL-205).</summary>
+    public string? CancellationSource { get; set; }
 }
 
 /// <summary>A consumed POL charge delta, frozen as received (REQ-BIL-002, REQ-BIL-067); <see cref="Status"/> moves.</summary>
@@ -131,6 +140,18 @@ internal sealed class ChargeRow
     public bool Provisional { get; set; }
 
     public Guid? WrittenEntryId { get; set; }
+
+    /// <summary>Transaction kind of the POL transaction (MKT TaxTransactionKind code); null only on a pre-slice-3 delta (legacy new business).</summary>
+    public string? TransactionKind { get; set; }
+
+    /// <summary>Cancellation source of a CANCELLATION or VOID transaction.</summary>
+    public string? CancellationSource { get; set; }
+
+    /// <summary>MKT treatment rule that decided a tax or levy line of a servicing transaction.</summary>
+    public string? TreatmentRuleId { get; set; }
+
+    /// <summary>Version of <see cref="TreatmentRuleId"/>.</summary>
+    public string? TreatmentRuleVersion { get; set; }
 }
 
 /// <summary>An invoice — a non-fiscal payment demand (D3, REQ-BIL-086, REQ-BIL-087).</summary>
@@ -184,6 +205,9 @@ internal sealed class InvoiceRow
 
     public string[] FiscalRejectionCodes { get; set; } = [];
 
+    /// <summary>For a CREDIT_NOTE, the invoice it corrects (REQ-BIL-091); null for an INVOICE.</summary>
+    public InvoiceId? OriginalInvoiceId { get; set; }
+
     public Instant CreatedAt { get; set; }
 
     public string CreatedBy { get; set; } = string.Empty;
@@ -235,6 +259,18 @@ internal sealed class InvoiceItemRow
     public string State { get; set; } = string.Empty;
 
     public int LineNo { get; set; }
+
+    /// <summary>Carried from the charge: the POL transaction kind (servicing items; null on a legacy new-business item).</summary>
+    public string? TransactionKind { get; set; }
+
+    /// <summary>Carried from the charge: the cancellation source of a cancellation item.</summary>
+    public string? CancellationSource { get; set; }
+
+    /// <summary>Carried from the charge: the treatment rule of a tax or levy item on a servicing transaction.</summary>
+    public string? TreatmentRuleId { get; set; }
+
+    /// <summary>For an item of a credit note, the original invoice item it credits; null on an invoice item.</summary>
+    public Guid? CreditsItemId { get; set; }
 }
 
 /// <summary>A receipt — an incoming payment (REQ-BIL-126).</summary>
@@ -442,6 +478,56 @@ internal sealed class LedgerLineRow
     public string? SourceId { get; set; }
 
     public ClaimId? ClaimId { get; set; }
+
+    /// <summary>Transaction kind dimension (servicing entries, always set there).</summary>
+    public string? TransactionKind { get; set; }
+
+    /// <summary>Cancellation source dimension (cancellation-sourced entries, always set there).</summary>
+    public string? CancellationSource { get; set; }
+
+    /// <summary>Treatment rule dimension (tax and levy lines of servicing entries, always set there).</summary>
+    public string? TreatmentRuleId { get; set; }
+}
+
+/// <summary>
+/// A credit note item's credit used against an invoice item (REQ-BIL-073): the credit note offsets the original invoice's
+/// open balance. Append-only; Σ per credit item ≤ the credit item and Σ with the cash allocations ≤ the invoice item are
+/// enforced by the database. No ledger entry: the credit is already in LA-02 through CREDIT_BILLED. The credit that is
+/// left unapplied is the account's credit balance (<see cref="CreditApplicationTargets"/> lists the uses a refund adds).
+/// </summary>
+internal sealed class CreditApplicationRow
+{
+    public Guid CreditApplicationId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public BillingAccountId BillingAccountId { get; set; }
+
+    public InvoiceId CreditNoteId { get; set; }
+
+    public Guid CreditItemId { get; set; }
+
+    /// <summary>What the credit went to: <see cref="CreditApplicationTargets.InvoiceItem"/> now; SL3-BIL-REFUND adds its own.</summary>
+    public string TargetKind { get; set; } = string.Empty;
+
+    public InvoiceId? TargetInvoiceId { get; set; }
+
+    public Guid? TargetInvoiceItemId { get; set; }
+
+    public decimal Amount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+
+    public string Actor { get; set; } = string.Empty;
+
+    public Instant RecordedAt { get; set; }
+}
+
+/// <summary>Targets a credit can be applied to.</summary>
+internal static class CreditApplicationTargets
+{
+    /// <summary>The open balance of an invoice item (the original invoice, REQ-BIL-073).</summary>
+    public const string InvoiceItem = "INVOICE_ITEM";
 }
 
 /// <summary>An intake exception (quarantined delta, blocked set, unsupported plan, failed fiscal request).</summary>

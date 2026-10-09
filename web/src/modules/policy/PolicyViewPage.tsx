@@ -130,16 +130,12 @@ function PolicyDetails({
           <>
             {status ? <TermStatusPill state={status} /> : null}
             {renewal ? (
-              <StatusPill
-                semantic="info"
-                subLabel={t('file.renewalPending')}
-                announceChanges={false}
-              />
+              <StatusPill semantic="info" text={t('file.renewalPending')} announceChanges={false} />
             ) : null}
             {superseded ? (
               <StatusPill
                 semantic="stale"
-                subLabel={t('file.superseded.badge')}
+                text={t('file.superseded.badge')}
                 announceChanges={false}
               />
             ) : null}
@@ -189,6 +185,11 @@ function PolicyDetails({
             count={groups.reduce((n, g) => n + g.policy.transactions.length, 0)}
           >
             <TransactionHistory policyId={policy.policyId} groups={[...groups].reverse()} />
+          </Section>
+          <Section title={t('invoices.title')}>
+            <QueryView query={invoices}>
+              {(page) => <InvoiceTable items={page.items} label={t('invoices.title')} compact />}
+            </QueryView>
           </Section>
           <div className={styles.grid}>
             <Section title={t('term.title')} family={status === 'IN_FORCE' ? 'success' : 'brand'}>
@@ -285,11 +286,6 @@ function PolicyDetails({
               />
             </Section>
           ) : null}
-          <Section title={t('invoices.title')}>
-            <QueryView query={invoices}>
-              {(page) => <InvoiceTable items={page.items} label={t('invoices.title')} />}
-            </QueryView>
-          </Section>
         </div>
       </div>
     </>

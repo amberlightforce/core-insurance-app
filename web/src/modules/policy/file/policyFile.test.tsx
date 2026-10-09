@@ -221,7 +221,7 @@ describe('Policy file (SL3-UI-POL-FILE)', () => {
     const term1List = await within(groups).findByRole('list', { name: 'Συναλλαγές όρου 1' });
     const rows = within(term1List).getAllByRole('listitem');
     expect(rows.map((r) => /#(\d)/.exec(r.textContent)?.[1])).toEqual(['3', '2', '1']);
-    expect(within(nth(rows, 0)).getByText('Αλλαγή')).toBeInTheDocument();
+    expect(within(nth(rows, 0)).getByText('Τροποποίηση')).toBeInTheDocument();
     expect(within(nth(rows, 2)).getByText('Νέα παραγωγή')).toBeInTheDocument();
     const term2List = within(groups).getByRole('list', { name: 'Συναλλαγές όρου 2' });
     expect(within(term2List).getByText('Ανανέωση')).toBeInTheDocument();
@@ -277,6 +277,14 @@ describe('Policy file (SL3-UI-POL-FILE)', () => {
     expect(
       within(premium).getByRole('button', { name: /Άνοιγμα τιμολογίου INV000000003/ }),
     ).toBeInTheDocument();
+  });
+
+  it('never shows a raw key when the invoice has no fiscal status', async () => {
+    const invoice = { ...fx.invoice().invoice, policyTermId: term1Id };
+    mockApi(routes({ invoices: { items: [{ invoice }], nextCursor: null, limit: 50 } }));
+    view();
+    await screen.findByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' });
+    expect(document.body.textContent).not.toMatch(/fiscal\.status/);
   });
 
   it('hides the action bar without the servicing permission', async () => {

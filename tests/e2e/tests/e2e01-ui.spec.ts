@@ -44,14 +44,14 @@ async function go(page: Page, url: string): Promise<void> {
 }
 
 /** Dev sign-in page: pick the user with the mouse (not the keyboard), sign in. */
-async function signInAs(page: Page, name: RegExp | string): Promise<void> {
+async function signInAs(page: Page, name: string): Promise<void> {
   await go(page, '/dev/sign-in');
   const signOut = page.getByRole('button', { name: 'Αποσύνδεση' });
   const picker = page.getByRole('button', { name: /Χρήστης/ });
   await expect(signOut.or(picker)).toBeVisible();
   if (await signOut.isVisible()) await signOut.click();
   await picker.click();
-  await page.getByRole('option', { name }).click(); // the mouse must select the option (rough edge b)
+  await page.getByRole('option', { name, exact: true }).click(); // the mouse must select the option (rough edge b)
   await page.getByRole('button', { name: 'Σύνδεση', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Συνδεθήκατε ως' })).toBeVisible();
 }
@@ -207,7 +207,7 @@ test('E2E-01 through the staff screens', async ({ page }) => {
   await expect(page.getByText('Φόρτωση…')).toHaveCount(0);
 
   // ---- Billing: the invoice, the stub fiscal MARK, the exact payment, PAID.
-  await signInAs(page, /Billing|Χρέωση|billing/i);
+  await signInAs(page, 'Dev Billing Clerk (synthetic)');
   await go(page, policyUrl);
   await page.getByRole('grid', { name: 'Τιμολόγια ασφαλιστηρίου' }).getByText(/^INV\d+/).first().dblclick();
   await expect(page.getByRole('heading', { level: 1, name: /^Τιμολόγιο INV/ })).toBeVisible();
@@ -221,7 +221,7 @@ test('E2E-01 through the staff screens', async ({ page }) => {
   await expect(page.getByText('Εξοφλήθηκε').first()).toBeVisible({ timeout: 60_000 });
 
   // ---- Finance: the policy's journals, every one balanced.
-  await signInAs(page, /Finance|Λογιστ|finance/i);
+  await signInAs(page, 'Dev Finance Accountant (synthetic)');
   await go(page, `/finance/journals/policy/${policyNumber}`);
   await expect(page.getByRole('heading', { level: 1, name: new RegExp(policyNumber) })).toBeVisible();
   await expect(page.getByText('Ισοσκελισμένη').first()).toBeVisible({ timeout: 60_000 });

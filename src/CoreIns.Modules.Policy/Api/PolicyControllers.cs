@@ -28,6 +28,7 @@ internal static class PolicyPermissions
     public const string JobGet = "pol.Job.get";
     public const string PolicyGet = "pol.Policy.get";
     public const string TermGet = "pol.Term.get";
+    public const string TermTimeline = "pol.Term.timeline";
     public const string SnapshotGet = "pol.Snapshot.get";
     public const string PolicySearch = "pol.Policy.search";
 }
@@ -101,11 +102,13 @@ internal sealed class PoliciesController : ControllerBase
             return HttpResults.Problem(PolicyQueryContext.BadTime(), HttpContext);
         }
 
-        var response = Guid.TryParse(id, out var policyId)
-            ? await reader.GetPolicyAsync(PolicyQueryContext.LegalEntity(services), PolicyQueryContext.LegalEntityCode(services), policyId, valid, known, cancellationToken)
+        var answered = Guid.TryParse(id, out var policyId)
+            ? await reader.GetPolicyEffectiveAsync(PolicyQueryContext.LegalEntity(services), PolicyQueryContext.LegalEntityCode(services), policyId, valid, known, cancellationToken)
                 .ConfigureAwait(false)
             : null;
-        return response is null ? HttpResults.Problem(JobSupport.NotFound("policy"), HttpContext) : Results.Ok(response);
+        return answered is not var (response, effectiveKnownAt)
+            ? HttpResults.Problem(JobSupport.NotFound("policy"), HttpContext)
+            : Results.Ok(response with { EffectiveKnownAt = effectiveKnownAt });
     }
 
     /// <summary>pol.Term.get as of validAt / knownAt.</summary>
@@ -124,6 +127,31 @@ internal sealed class PoliciesController : ControllerBase
             ? await reader.GetTermAsync(PolicyQueryContext.LegalEntity(services), PolicyQueryContext.LegalEntityCode(services), termId, valid, known, cancellationToken)
                 .ConfigureAwait(false)
             : null;
+        return response is null ? HttpResults.Problem(JobSupport.NotFound("term"), HttpContext) : Results.Ok(response);
+    }
+
+    /// <summary>pol.Term.timeline: the term's transactions in sequence order as of validAt / knownAt (knownAt clamped to the watermark).</summary>
+    [HttpGet("terms/timeline")]
+    [Authorize(Policy = PolicyPermissions.TermTimeline)]
+    public async Task<IResult> GetTimelineAsync(
+        [FromQuery] string? policyId, [FromQuery] string? termId, [FromQuery] string? validAt, [FromQuery] string? knownAt,
+        [FromServices] PolicyReader reader, CancellationToken cancellationToken)
+    {
+        var services = HttpContext.RequestServices;
+        if (!PolicyQueryContext.TryTime(services, validAt, knownAt, out var valid, out var known))
+        {
+            return HttpResults.Problem(PolicyQueryContext.BadTime(), HttpContext);
+        }
+
+        Guid? term = null;
+        var termValid = termId is null || (Guid.TryParse(termId, out var parsedTerm) && (term = parsedTerm) is not null);
+        if (!Guid.TryParse(policyId, out var policy) || !termValid)
+        {
+            return HttpResults.Problem(DomainError.Of(ModuleCode.POL, "VALIDATION", "policyId (and termId, when given) must be UUIDs."), HttpContext);
+        }
+
+        var response = await reader.TimelineAsync(
+            PolicyQueryContext.LegalEntity(services), PolicyQueryContext.LegalEntityCode(services), policy, term, valid, known, cancellationToken).ConfigureAwait(false);
         return response is null ? HttpResults.Problem(JobSupport.NotFound("term"), HttpContext) : Results.Ok(response);
     }
 }

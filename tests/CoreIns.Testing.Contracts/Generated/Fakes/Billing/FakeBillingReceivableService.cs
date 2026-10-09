@@ -14,5 +14,11 @@ public sealed class FakeBillingReceivableService : global::CoreIns.Testing.Contr
     {
     }
     /// <inheritdoc />
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.ReceivableGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Billing.Contracts.Api.ReceivableGetResponse>("bil.Receivable.get", [id], cancellationToken);
+
+    /// <inheritdoc />
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.ReceivableListPage> ListAsync(global::CoreIns.SharedKernel.Identifiers.BillingAccountId? billingAccountId = null, global::CoreIns.SharedKernel.Identifiers.PartyId? counterpartyPartyId = null, global::CoreIns.SharedKernel.Identifiers.ClaimId? claimId = null, global::System.Guid? recoveryId = null, string? statementRef = null, string? paymentReference = null, global::CoreIns.Modules.Billing.Contracts.Api.ReceivableSourceType? sourceType = null, global::CoreIns.Modules.Billing.Contracts.Api.ReceivableStatus? status = null, string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Billing.Contracts.Api.ReceivableListPage>("bil.Receivable.list", [billingAccountId, counterpartyPartyId, claimId, recoveryId, statementRef, paymentReference, sourceType, status, cursor, limit], cancellationToken);
+
+    /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.ReceivableRegisterResponse> RegisterAsync(global::CoreIns.Modules.Billing.Contracts.Api.ReceivableRegisterRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Billing.Contracts.Api.ReceivableRegisterResponse>("bil.Receivable.register", [request, options], cancellationToken);
 }

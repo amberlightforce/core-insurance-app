@@ -58,7 +58,7 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): ri.Programme.get, ri.Programme.list.</para>
+    /// <para>Declared by 8 operation(s): ri.Contract.approve, ri.Contract.create, ri.Contract.get, ri.Contract.submit, ri.Contract.update, ri.Programme.get, ri.Programme.list, ri.Recovery.trace.</para>
     /// </remarks>
     public const string NotFound = "RI-ERR-NOT-FOUND";
 
@@ -118,13 +118,31 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-SIGNED-LINES (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): ri.Participation.add, ri.Participation.list, ri.Participation.replace.</para>
+    /// <para>Declared by 6 operation(s): ri.Contract.create, ri.Contract.submit, ri.Contract.update, ri.Participation.add, ri.Participation.list, ri.Participation.replace.</para>
     /// </remarks>
     public const string SignedLines = "RI-ERR-SIGNED-LINES";
 
+    /// <summary>RI-ERR-SOD (HTTP 403).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): ri.Contract.approve.</para>
+    /// </remarks>
+    public const string Sod = "RI-ERR-SOD";
+
+    /// <summary>RI-ERR-STALE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): ri.Contract.approve, ri.Contract.submit, ri.Contract.update.</para>
+    /// </remarks>
+    public const string Stale = "RI-ERR-STALE";
+
+    /// <summary>RI-ERR-STATE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): ri.Contract.approve, ri.Contract.submit, ri.Contract.update.</para>
+    /// </remarks>
+    public const string State = "RI-ERR-STATE";
+
     /// <summary>RI-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 14 operation(s): ri.Contract.approve, ri.Contract.close, ri.Contract.commute, ri.Contract.create, ri.Contract.endorse, ri.Contract.expire, ri.Contract.submit, ri.Contract.update, ri.Programme.approve, ri.Programme.create, ri.Programme.renew, ri.Programme.return, ….</para>
+    /// <para>Declared by 16 operation(s): ri.Contract.applicable, ri.Contract.approve, ri.Contract.close, ri.Contract.commute, ri.Contract.create, ri.Contract.endorse, ri.Contract.expire, ri.Contract.submit, ri.Contract.update, ri.Programme.approve, ri.Programme.create, ri.Programme.renew, ….</para>
     /// </remarks>
     public const string Validation = "RI-ERR-VALIDATION";
 
@@ -132,7 +150,7 @@ public static class ReinsuranceErrorCodes
     public const string Prefix = "RI-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ApprovalRequired, Authority, ContractClosed, Deadline, ExceptionsOpen, Format, IdempotencyMismatch, ImportValidation, NotFound, Overlap, PartyBlocked, ReconBreak, ReinsurerId, ReversalBlocked, SanctionsHold, SchemeUnknown, Security, SharesOver100, SignedLines, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ApprovalRequired, Authority, ContractClosed, Deadline, ExceptionsOpen, Format, IdempotencyMismatch, ImportValidation, NotFound, Overlap, PartyBlocked, ReconBreak, ReinsurerId, ReversalBlocked, SanctionsHold, SchemeUnknown, Security, SharesOver100, SignedLines, Sod, Stale, State, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -156,6 +174,9 @@ public static class ReinsuranceErrorCodes
         [Security] = 422,
         [SharesOver100] = 422,
         [SignedLines] = 422,
+        [Sod] = 403,
+        [Stale] = 409,
+        [State] = 422,
         [Validation] = 422,
     };
 }

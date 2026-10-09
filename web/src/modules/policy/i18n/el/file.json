@@ -38,7 +38,7 @@
     },
     "kind": {
       "NEW_BUSINESS": "Νέα παραγωγή",
-      "CHANGE": "Αλλαγή",
+      "CHANGE": "Τροποποίηση",
       "CANCELLATION": "Ακύρωση",
       "RENEWAL": "Ανανέωση",
       "OTHER": "Άλλη συναλλαγή"

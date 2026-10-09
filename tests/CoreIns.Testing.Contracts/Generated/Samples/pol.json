@@ -229,6 +229,144 @@
         "provisional": true
       }
     },
+    "pol.Job.get": {
+      "job": {
+        "jobId": "0192412a-7147-72d6-8bd0-65a0a260a543",
+        "jobNumber": "SAMPLE-000001",
+        "jobType": "SAMPLE_CODE",
+        "state": "DRAFT",
+        "referred": true,
+        "policyId": "01922526-969a-7de0-8454-5e83541c28c0",
+        "policyNumber": "SAMPLE-000001",
+        "policyholderPartyId": "019239db-1071-77e0-8059-89fbb1143c9e",
+        "accountId": "01921e53-75d5-7c16-8ab2-af4377a8d881",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "1.0",
+        "channel": "SAMPLE_CODE",
+        "producerCode": "SAMPLE_CODE",
+        "quoteType": "QUICK",
+        "effectiveAt": "2026-10-07T09:00:00Z",
+        "expirationAt": "2026-10-07T09:00:00Z",
+        "currency": "EUR",
+        "currentVersionNo": 1,
+        "transactionId": "0192da16-070c-745b-8b41-fad5d8478d02",
+        "versions": [
+          {
+            "quoteId": "01920d03-4eff-7ac1-8694-44fd11c30888",
+            "versionNo": 1,
+            "state": "DRAFT",
+            "draftVersion": 1,
+            "riskTree": {
+              "vehicles": [
+                {
+                  "locator": "Sample text",
+                  "plate": "Sample text",
+                  "plateNormalised": "Sample text",
+                  "vin": "Sample text",
+                  "make": "Sample text",
+                  "model": "Sample text",
+                  "firstRegistrationYear": 1900,
+                  "engineCapacityCc": 1,
+                  "use": "SAMPLE_CODE",
+                  "value": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  },
+                  "fields": {
+                    "note": "sample"
+                  }
+                }
+              ],
+              "drivers": [
+                {
+                  "locator": "Sample text",
+                  "partyId": "01920969-871e-7e9d-81a9-2b09378cafec",
+                  "driverType": "MAIN",
+                  "yearFirstLicensed": 1900,
+                  "vehicleLocator": "Sample text",
+                  "usagePercent": 1,
+                  "claimsLast5Years": 1,
+                  "fields": {
+                    "note": "sample"
+                  }
+                }
+              ],
+              "coverages": [
+                {
+                  "coverageCode": "SAMPLE_CODE",
+                  "elementLocator": "Sample text",
+                  "selected": true,
+                  "options": {
+                    "note": "sample"
+                  }
+                }
+              ],
+              "questionSets": [
+                {
+                  "questionSetCode": "SAMPLE_CODE",
+                  "questionSetVersion": "Sample text",
+                  "answers": {
+                    "note": "sample"
+                  }
+                }
+              ]
+            },
+            "premium": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "taxes": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "total": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "charges": [
+              {
+                "chargeId": "0192a495-1790-78bd-8732-229acfc912aa",
+                "transactionId": "0192b659-ced3-7e80-88dd-177e9d2a776e",
+                "elementLocator": "Sample text",
+                "coverageCode": "SAMPLE_CODE",
+                "chargeType": "SAMPLE_CODE",
+                "chargeCategory": "SAMPLE_CODE",
+                "annualRate": "12.50",
+                "amount": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                },
+                "legalStatus": "SAMPLE_CODE",
+                "provisional": true,
+                "transactionKind": "NEW_BUSINESS",
+                "cancellationSource": "Policyholder",
+                "treatmentAction": "APPLY",
+                "treatmentRuleId": "SAMPLE_CODE",
+                "treatmentRuleVersion": "SAMPLE_CODE"
+              }
+            ],
+            "issues": [
+              {
+                "issueId": "0192b53b-9703-753f-801d-0eb1a1282017",
+                "issueType": "SAMPLE_CODE",
+                "severity": "SAMPLE_CODE",
+                "blockingPoint": "PRE_QUOTE",
+                "issueKey": "sample",
+                "lane": "SAMPLE_CODE",
+                "explanationKeys": [
+                  "sample"
+                ],
+                "approvalStatus": "SAMPLE_CODE"
+              }
+            ],
+            "worksheetId": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "quotedAt": "2026-10-07T09:00:00Z",
+            "validUntil": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      }
+    },
     "pol.Job.list": {
       "items": [
         {
@@ -600,7 +738,28 @@
           "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ],
-      "effectiveKnownAt": "2026-10-07T09:00:00Z"
+      "effectiveKnownAt": "2026-10-07T09:00:00Z",
+      "terms": [
+        {
+          "termId": "01925efd-91fb-7f99-8f58-39296146bf45",
+          "termNumber": 1,
+          "period": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "state": "SCHEDULED",
+          "productVersion": "1.0",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "currency": "EUR",
+          "producerCode": "SAMPLE_CODE",
+          "paymentPlanRef": "Sample text",
+          "writtenDate": "2026-10-07",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "pol.Policy.getMany": {
       "policies": "unspecified"
@@ -785,6 +944,7 @@
       },
       "acceptanceMode": "SAMPLE_CODE",
       "deadline": "2026-10-07T09:00:00Z",
+      "referred": true,
       "servicingPreview": {
         "annualBefore": {
           "amount": "120.50",
@@ -1147,7 +1307,8 @@
           "treatmentRuleId": "SAMPLE_CODE",
           "treatmentRuleVersion": "SAMPLE_CODE"
         }
-      ]
+      ],
+      "effectiveKnownAt": "2026-10-07T09:00:00Z"
     },
     "pol.Term.timeline": {
       "policy": {
@@ -2391,7 +2552,28 @@
           "treatmentRuleVersion": "SAMPLE_CODE"
         }
       ],
-      "effectiveKnownAt": "2026-10-07T09:00:00Z"
+      "effectiveKnownAt": "2026-10-07T09:00:00Z",
+      "terms": [
+        {
+          "termId": "0192f0d2-cffc-7815-8ba0-61039165e526",
+          "termNumber": 1,
+          "period": {
+            "from": "2026-01-01T00:00:00Z",
+            "to": "2027-01-01T00:00:00Z"
+          },
+          "state": "SCHEDULED",
+          "productVersion": "1.0",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "currency": "EUR",
+          "producerCode": "SAMPLE_CODE",
+          "paymentPlanRef": "Sample text",
+          "writtenDate": "2026-10-07",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "PolicyMoveExecuteRequest": {
       "policyIds": [
@@ -2754,6 +2936,7 @@
       },
       "acceptanceMode": "SAMPLE_CODE",
       "deadline": "2026-10-07T09:00:00Z",
+      "referred": true,
       "servicingPreview": {
         "annualBefore": {
           "amount": "120.50",
@@ -3440,7 +3623,8 @@
           "treatmentRuleId": "SAMPLE_CODE",
           "treatmentRuleVersion": "SAMPLE_CODE"
         }
-      ]
+      ],
+      "effectiveKnownAt": "2026-10-07T09:00:00Z"
     },
     "TermTimelineResponse": {
       "policy": {

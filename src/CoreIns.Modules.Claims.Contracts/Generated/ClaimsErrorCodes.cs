@@ -8,9 +8,15 @@ namespace CoreIns.Modules.Claims.Contracts;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public static class ClaimsErrorCodes
 {
+    /// <summary>CLM-ERR-ALLOCATION (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 4 operation(s): clm.FriendlySettlement.approveNet, clm.FriendlySettlement.importStatement, clm.Recovery.demand, clm.TransactionSet.build.</para>
+    /// </remarks>
+    public const string Allocation = "CLM-ERR-ALLOCATION";
+
     /// <summary>CLM-ERR-AUTHORITY (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): clm.Coverage.decide, clm.Coverage.reverify, clm.Redress.request, clm.TransactionSet.submit.</para>
+    /// <para>Declared by 8 operation(s): clm.Coverage.decide, clm.Coverage.reverify, clm.FriendlySettlement.approveNet, clm.Payment.reissue, clm.Recovery.create, clm.Recovery.writeOff, clm.Redress.request, clm.TransactionSet.submit.</para>
     /// </remarks>
     public const string Authority = "CLM-ERR-AUTHORITY";
 
@@ -32,9 +38,15 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string ContactProhibited = "CLM-ERR-CONTACT-PROHIBITED";
 
+    /// <summary>CLM-ERR-COVERAGE-IN-QUESTION (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.TransactionSet.build.</para>
+    /// </remarks>
+    public const string CoverageInQuestion = "CLM-ERR-COVERAGE-IN-QUESTION";
+
     /// <summary>CLM-ERR-DEPENDENCY-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): clm.Fnol.submit, clm.Fnol.validate.</para>
+    /// <para>Declared by 4 operation(s): clm.Fnol.submit, clm.Fnol.validate, clm.FriendlySettlement.approveNet, clm.Recovery.demand.</para>
     /// </remarks>
     public const string DependencyUnavailable = "CLM-ERR-DEPENDENCY-UNAVAILABLE";
 
@@ -68,6 +80,12 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string FnolConsent = "CLM-ERR-FNOL-CONSENT";
 
+    /// <summary>CLM-ERR-FS-DISABLED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 5 operation(s): clm.FriendlySettlement.approveNet, clm.FriendlySettlement.evaluate, clm.FriendlySettlement.importStatement, clm.FriendlySettlement.openOwnSettlement, clm.FriendlySettlement.submit.</para>
+    /// </remarks>
+    public const string FsDisabled = "CLM-ERR-FS-DISABLED";
+
     /// <summary>CLM-ERR-HELD (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 4 operation(s): clm.Dsar.export, clm.Dsar.purge, clm.Dsar.rectify, clm.Dsar.restrict.</para>
@@ -76,13 +94,13 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 46 operation(s): clm.Certificate.assemble, clm.Certificate.issue, clm.Certificate.request, clm.Claim.close, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Conversation.schedule, clm.Conversation.send, clm.Coverage.decide, clm.Coverage.reverify, clm.Dsar.export, ….</para>
+    /// <para>Declared by 55 operation(s): clm.Certificate.assemble, clm.Certificate.issue, clm.Certificate.request, clm.Claim.close, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Conversation.schedule, clm.Conversation.send, clm.Coverage.decide, clm.Coverage.reverify, clm.Dsar.export, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "CLM-ERR-IDEMPOTENCY-MISMATCH";
 
     /// <summary>CLM-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 9 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.create, clm.TransactionSet.build, clm.TransactionSet.submit.</para>
+    /// <para>Declared by 14 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.create, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.openOwnSettlement, clm.FriendlySettlement.submit, clm.Payment.reissue, clm.Payment.void, ….</para>
     /// </remarks>
     public const string IllegalTransition = "CLM-ERR-ILLEGAL-TRANSITION";
 
@@ -104,6 +122,12 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string LossDate = "CLM-ERR-LOSS-DATE";
 
+    /// <summary>CLM-ERR-MTPL-CLOCKS-REQUIRED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.Exposure.create.</para>
+    /// </remarks>
+    public const string MtplClocksRequired = "CLM-ERR-MTPL-CLOCKS-REQUIRED";
+
     /// <summary>CLM-ERR-NO-CONSENT (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 3 operation(s): clm.Conversation.list, clm.Conversation.schedule, clm.Conversation.send.</para>
@@ -112,7 +136,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 12 operation(s): clm.Claim.close, clm.Claim.get, clm.Coverage.reverify, clm.Exposure.create, clm.Financials.get, clm.Fnol.get, clm.PayeeAccount.capture, clm.PayeeAccount.list, clm.Payment.list, clm.TransactionSet.build, clm.TransactionSet.get, clm.TransactionSet.submit.</para>
+    /// <para>Declared by 28 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.create, clm.Financials.get, clm.Fnol.get, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.evaluate, clm.FriendlySettlement.get, clm.FriendlySettlement.getStatement, clm.FriendlySettlement.openOwnSettlement, ….</para>
     /// </remarks>
     public const string NotFound = "CLM-ERR-NOT-FOUND";
 
@@ -152,6 +176,12 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string PolicyUnverified = "CLM-ERR-POLICY-UNVERIFIED";
 
+    /// <summary>CLM-ERR-RECOVERY-STATE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 4 operation(s): clm.Recovery.demand, clm.Recovery.recordMilestone, clm.Recovery.writeOff, clm.TransactionSet.build.</para>
+    /// </remarks>
+    public const string RecoveryState = "CLM-ERR-RECOVERY-STATE";
+
     /// <summary>CLM-ERR-RESERVE-REASON (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 5 operation(s): clm.TransactionSet.approve, clm.TransactionSet.build, clm.TransactionSet.reject, clm.TransactionSet.return, clm.TransactionSet.submit.</para>
@@ -190,41 +220,51 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): clm.TransactionSet.approve, clm.TransactionSet.build, clm.TransactionSet.reject, clm.TransactionSet.return, clm.TransactionSet.submit.</para>
+    /// <para>Declared by 6 operation(s): clm.FriendlySettlement.approveNet, clm.TransactionSet.approve, clm.TransactionSet.build, clm.TransactionSet.reject, clm.TransactionSet.return, clm.TransactionSet.submit.</para>
     /// </remarks>
     public const string Sod = "CLM-ERR-SOD";
 
     /// <summary>CLM-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): clm.Claim.close, clm.Exposure.create.</para>
+    /// <para>Declared by 9 operation(s): clm.Claim.close, clm.Claim.update, clm.Exposure.create, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.openOwnSettlement, clm.FriendlySettlement.submit, clm.Recovery.demand, clm.Recovery.recordMilestone, clm.Recovery.writeOff.</para>
     /// </remarks>
     public const string Stale = "CLM-ERR-STALE";
+
+    /// <summary>CLM-ERR-VALIDATION (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 7 operation(s): clm.Claim.update, clm.FriendlySettlement.evaluate, clm.FriendlySettlement.importStatement, clm.Recovery.create, clm.Recovery.demand, clm.Recovery.recordMilestone, clm.Recovery.writeOff.</para>
+    /// </remarks>
+    public const string Validation = "CLM-ERR-VALIDATION";
 
     /// <summary>The code prefix of this module.</summary>
     public const string Prefix = "CLM-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Authority, CertRequester, CloseGuard, ContactProhibited, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CertRequester, CloseGuard, ContactProhibited, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
     {
+        [Allocation] = 422,
         [Authority] = 403,
         [CertRequester] = 422,
         [CloseGuard] = 422,
         [ContactProhibited] = 422,
+        [CoverageInQuestion] = 422,
         [DependencyUnavailable] = 503,
         [DuplicateCandidates] = 409,
         [DuplicatePayment] = 409,
         [ExposureDuplicate] = 409,
         [Fnol001] = 422,
         [FnolConsent] = 422,
+        [FsDisabled] = 422,
         [Held] = 422,
         [IdempotencyMismatch] = 409,
         [IllegalTransition] = 422,
         [ImportValidation] = 422,
         [InvoiceDuplicate] = 409,
         [LossDate] = 422,
+        [MtplClocksRequired] = 422,
         [NoConsent] = 422,
         [NotFound] = 404,
         [NotPayable] = 422,
@@ -233,6 +273,7 @@ public static class ClaimsErrorCodes
         [PayeeNotOnClaim] = 422,
         [PaymentExceedsReserve] = 422,
         [PolicyUnverified] = 422,
+        [RecoveryState] = 422,
         [ReserveReason] = 422,
         [ReverseLiveActivity] = 422,
         [SearchCriteria] = 422,
@@ -241,5 +282,6 @@ public static class ClaimsErrorCodes
         [SnapshotMismatch] = 409,
         [Sod] = 403,
         [Stale] = 409,
+        [Validation] = 422,
     };
 }

@@ -139,22 +139,23 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
 
     public async Task InsertEvaluationAsync(
         Guid evaluationId, Guid legalEntity, Guid jobId, string checkpoint, CompiledRuleSet ruleSet, string snapshotRef, string? snapshotHash,
-        string outcome, string lane, string trace, string actor, IReadOnlyList<string> jobParticipants, string? producerCode, CancellationToken cancellationToken)
+        string outcome, string lane, string trace, string actor, IReadOnlyList<string> jobParticipants, string? producerCode, string? facts,
+        CancellationToken cancellationToken)
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await connection.ExecuteAsync(new CommandDefinition(
             """
-            INSERT INTO uw.evaluation (evaluation_id, legal_entity_id, job_id, checkpoint, rule_set_code, rule_set_version, rule_set_hash, snapshot_ref, snapshot_hash, outcome, lane, trace, created_at, created_by, job_participants, producer_code)
-            VALUES (@evaluationId, @legalEntity, @jobId, @checkpoint, @code, @version, @hash, @snapshotRef, @snapshotHash, @outcome, @lane, @trace::jsonb, @now, @actor, @participants, @producerCode)
+            INSERT INTO uw.evaluation (evaluation_id, legal_entity_id, job_id, checkpoint, rule_set_code, rule_set_version, rule_set_hash, snapshot_ref, snapshot_hash, outcome, lane, trace, created_at, created_by, job_participants, producer_code, facts)
+            VALUES (@evaluationId, @legalEntity, @jobId, @checkpoint, @code, @version, @hash, @snapshotRef, @snapshotHash, @outcome, @lane, @trace::jsonb, @now, @actor, @participants, @producerCode, @facts::jsonb)
             """,
             new
             {
                 evaluationId, legalEntity, jobId, checkpoint, code = ruleSet.Dto.Code, version = ruleSet.Dto.Version, hash = ruleSet.Hash, snapshotRef, snapshotHash,
-                outcome, lane, trace, now = clock.Now.ToUtcDateTime(), actor, participants = jobParticipants.ToArray(), producerCode,
+                outcome, lane, trace, now = clock.Now.ToUtcDateTime(), actor, participants = jobParticipants.ToArray(), producerCode, facts,
             }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 
-    private const string IssueColumns =
+    internal const string IssueColumns =
         """
         i.issue_id AS IssueId, i.job_id AS JobId, i.issue_type AS IssueType, i.issue_key AS IssueKey, i.blocking_point AS BlockingPoint,
         i.severity AS Severity, i.lane AS Lane, i.status AS Status, i.rule_id AS RuleId, i.message_en AS MessageEn, i.message_el AS MessageEl,
@@ -216,19 +217,22 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
     }
 
     /// <summary>
-    /// Everyone who may not decide the job's issues (SOD-UW-02 / BR-UW-013): whoever ran an evaluation for it, and the
-    /// actors POL reported as having created, edited, quoted or bound it.
+    /// Who worked on each job (SOD-UW-02 / BR-UW-013) as the job's evaluations recorded it: whoever ran an evaluation (quoted or
+    /// bound), the actors POL reported (creator first, editors, quoters) and the producer codes. One query for all the jobs.
     /// </summary>
-    public async Task<IReadOnlyList<string>> EvaluatorsAsync(Guid legalEntity, Guid jobId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyDictionary<Guid, JobParticipation>> ParticipationAsync(
+        Guid legalEntity, IReadOnlyCollection<Guid> jobIds, CancellationToken cancellationToken)
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        return (await connection.QueryAsync<string>(new CommandDefinition(
+        var rows = await connection.QueryAsync<ParticipationRow>(new CommandDefinition(
             """
-            SELECT created_by FROM uw.evaluation WHERE legal_entity_id = @legalEntity AND job_id = @jobId
-             UNION
-            SELECT unnest(job_participants) FROM uw.evaluation WHERE legal_entity_id = @legalEntity AND job_id = @jobId
+            SELECT job_id AS JobId, created_by AS CreatedBy, job_participants AS JobParticipants, producer_code AS ProducerCode, snapshot_ref AS SnapshotRef
+              FROM uw.evaluation
+             WHERE legal_entity_id = @legalEntity AND job_id = ANY(@jobIds)
+             ORDER BY created_at, evaluation_id
             """,
-            new { legalEntity, jobId }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
+            new { legalEntity, jobIds = jobIds.ToArray() }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        return rows.GroupBy(r => r.JobId).ToDictionary(g => g.Key, g => JobParticipation.From(g));
     }
 
     /// <summary>The distinct jobs of the given issues, in id order (read without locks, before the job locks are taken).</summary>

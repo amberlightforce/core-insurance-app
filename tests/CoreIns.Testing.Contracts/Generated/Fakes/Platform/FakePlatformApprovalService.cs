@@ -24,4 +24,7 @@ public sealed class FakePlatformApprovalService : global::CoreIns.Testing.Contra
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalVerifyForExecutionResponse> VerifyForExecutionAsync(global::CoreIns.Platform.Contracts.Api.ApprovalVerifyForExecutionRequest request, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Platform.Contracts.Api.ApprovalVerifyForExecutionResponse>("plt.Approval.verifyForExecution", [request], cancellationToken);
+
+    /// <inheritdoc />
+    public global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ApprovalWithdrawResponse> WithdrawAsync(global::CoreIns.Platform.Contracts.Api.ApprovalWithdrawRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Platform.Contracts.Api.ApprovalWithdrawResponse>("plt.Approval.withdraw", [request, options], cancellationToken);
 }

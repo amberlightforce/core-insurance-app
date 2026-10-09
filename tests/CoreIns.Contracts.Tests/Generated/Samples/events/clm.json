@@ -913,7 +913,14 @@
       "clearingValue": {
         "amount": "120.50",
         "currency": "EUR"
-      }
+      },
+      "claimId": "01924872-d014-77d7-8729-e10f2a236600",
+      "clearingReference": "Sample text",
+      "clearingValueBasis": "SAMPLE_CODE",
+      "ruleId": "SAMPLE_CODE",
+      "ruleVersion": "Sample text",
+      "legalStatus": "SAMPLE_CODE",
+      "provisional": true
     }
   },
   {
@@ -948,7 +955,14 @@
       "clearingValue": {
         "amount": "120.50",
         "currency": "EUR"
-      }
+      },
+      "claimId": null,
+      "clearingReference": null,
+      "clearingValueBasis": null,
+      "ruleId": null,
+      "ruleVersion": null,
+      "legalStatus": null,
+      "provisional": null
     }
   },
   {
@@ -1027,7 +1041,8 @@
       "disbursementId": "0192522e-a680-7692-887a-68de0fc63e06",
       "exGratia": true,
       "complaintRef": "Sample text",
-      "accountingDate": "2026-10-07"
+      "accountingDate": "2026-10-07",
+      "fsStatementId": "0192d2df-b6c8-78a9-83b6-2cea5e7161a1"
     }
   },
   {
@@ -1106,7 +1121,8 @@
       "disbursementId": "0192b838-9ffd-7380-8139-6f6e768e9ca7",
       "exGratia": true,
       "complaintRef": null,
-      "accountingDate": null
+      "accountingDate": null,
+      "fsStatementId": null
     }
   },
   {
@@ -1140,7 +1156,47 @@
       "reversalTransactionIds": [
         "0192a709-449e-7382-80d5-aa682066507a"
       ],
-      "reason": "VOIDED"
+      "reason": "VOIDED",
+      "claimId": "01923b19-beaf-77ae-87f3-27d6178a0875",
+      "lines": [
+        {
+          "lineKey": "Sample text",
+          "amount": {
+            "transaction": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "functional": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "group": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          },
+          "reserveLineId": "019279d2-e4ca-7e51-8f19-51785de158f1",
+          "exposureId": "01922904-a800-7eac-8c0c-4d4543e81ddf",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "eroding": true
+        }
+      ],
+      "amount": {
+        "transaction": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "functional": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "group": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "method": "SAMPLE_CODE"
     }
   },
   {
@@ -1174,7 +1230,10 @@
       "reversalTransactionIds": [
         "01921ed2-5914-768e-83ef-59f9b01db081"
       ],
-      "reason": "VOIDED"
+      "reason": "VOIDED",
+      "claimId": null,
+      "amount": null,
+      "method": null
     }
   },
   {
@@ -1237,9 +1296,19 @@
               "amount": "120.50",
               "currency": "EUR"
             }
-          }
+          },
+          "reserveLineId": "01924f79-c288-7133-8b9e-f4a9a8a732eb",
+          "exposureId": "0192e8d2-7483-7acc-8686-6e21057b4c87",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "eroding": true
         }
-      ]
+      ],
+      "claimId": "0192b842-608b-7982-85b6-029380571d42",
+      "accountingDate": "2026-10-07",
+      "receivableId": "0192b05c-9017-7265-8c5f-40bed8c41f53",
+      "fsStatementId": "0192f2aa-fe21-7190-8199-b39c287a23fd",
+      "evidenceRef": "Sample text"
     }
   },
   {
@@ -1302,9 +1371,19 @@
               "amount": "120.50",
               "currency": "EUR"
             }
-          }
+          },
+          "reserveLineId": "01925635-edff-7cb8-8fb3-33553fc7459d",
+          "exposureId": "0192ebc2-e130-7ac9-8da2-dc9c983ba147",
+          "costType": "SAMPLE_CODE",
+          "costCategory": "SAMPLE_CODE",
+          "eroding": true
         }
-      ]
+      ],
+      "claimId": null,
+      "accountingDate": null,
+      "receivableId": null,
+      "fsStatementId": null,
+      "evidenceRef": null
     }
   },
   {
@@ -1380,7 +1459,8 @@
       "ifrs17GroupRef": "Sample text",
       "catCode": "SAMPLE_CODE",
       "handlingSegment": "SAMPLE_CODE",
-      "accountingDate": "2026-10-07"
+      "accountingDate": "2026-10-07",
+      "recoveryId": "019259d7-e8f6-7570-8ebd-ac691778877f"
     }
   },
   {
@@ -1456,7 +1536,8 @@
       "ifrs17GroupRef": null,
       "catCode": null,
       "handlingSegment": "SAMPLE_CODE",
-      "accountingDate": null
+      "accountingDate": null,
+      "recoveryId": null
     }
   },
   {

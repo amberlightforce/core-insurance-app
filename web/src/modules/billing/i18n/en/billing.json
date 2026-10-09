@@ -44,6 +44,7 @@
   "fiscal": {
     "title": "Fiscal document",
     "stub": "Stub",
+    "stubShort": "Stub",
     "stubTitle": "Stub fiscal document",
     "stubBody": "At this stage the document comes from a simulation and has not been transmitted to the tax authority (AADE). Its number and registration mark (MARK) have no fiscal effect.",
     "statusLabel": "Status",

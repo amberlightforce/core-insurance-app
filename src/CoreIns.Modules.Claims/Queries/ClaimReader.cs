@@ -64,8 +64,26 @@ internal sealed class ClaimReader(DbSession session, ClaimProtection protection,
               FROM clm.incident WHERE claim_id = @claim ORDER BY created_at, incident_id
             """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
 
+        // REQ-CLM-057/058: while a re-verification is open the view carries the latest demand (old and new ref) for the UI.
+        var pending = record.SnapshotStatus == Codes.Of(SnapshotStatus.ReverificationRequired)
+            ? await connection.QueryFirstOrDefaultAsync<PendingRecord>(new CommandDefinition(
+                """
+                SELECT old_snapshot_ref AS OldSnapshotRef, new_snapshot_ref AS NewSnapshotRef, cause_event_id AS CauseEventId, raised_at AS RaisedAt
+                  FROM clm.reverification WHERE claim_id = @claim AND status = 'OPEN' ORDER BY raised_at DESC, reverification_id DESC LIMIT 1
+                """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)
+            : null;
+
         return new ClaimView
         {
+            PendingReverification = pending is null
+                ? null
+                : new ClaimView.PendingReverificationDetail
+                {
+                    OldSnapshotRef = pending.OldSnapshotRef,
+                    NewSnapshotRef = pending.NewSnapshotRef,
+                    CauseEventId = pending.CauseEventId,
+                    RaisedAt = Instant.FromUtcDateTime(pending.RaisedAt),
+                },
             Summary = Summary(record),
             LegalEntity = legalEntityCode,
             Jurisdiction = record.Jurisdiction,
@@ -363,6 +381,17 @@ internal sealed class ClaimReader(DbSession session, ClaimProtection protection,
         public string? DuplicateReason { get; set; }
 
         public DateTime CreatedAt { get; set; }
+    }
+
+    private sealed class PendingRecord
+    {
+        public string OldSnapshotRef { get; set; } = string.Empty;
+
+        public string NewSnapshotRef { get; set; } = string.Empty;
+
+        public Guid CauseEventId { get; set; }
+
+        public DateTime RaisedAt { get; set; }
     }
 
     private sealed class TextRecord
