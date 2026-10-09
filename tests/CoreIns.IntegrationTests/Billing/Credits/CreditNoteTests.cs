@@ -210,6 +210,7 @@ public sealed class CreditNoteTests(PostgresFixture database) : IClassFixture<Po
     [InlineData("provisional", "PROVISIONAL-FLAG-MISMATCH")]
     [InlineData("missing", "TREATMENT-RULE-MISSING")]
     [InlineData("reduce", "TAX-CREDIT-NOT-SUPPORTED")]
+    [InlineData("insurer", "TREATMENT-MISMATCH")]
     public async Task REQ_BIL_079_every_other_disagreement_fails_closed(string mutation, string reason)
     {
         var s = await CreditScenario.BilledAsync(_slice);
@@ -227,6 +228,11 @@ public sealed class CreditNoteTests(PostgresFixture database) : IClassFixture<Po
                 break;
             case "missing":
                 _treatment.Override = _ => throw new SpiException(new SpiError(SpiErrorCategory.RuleMissing, "RULE_MISSING"), "none");
+                break;
+            case "insurer":
+                _treatment.Override = _ => TreatmentAction.InsurerBears; // customer credit without reducing the authority liability: not bookable
+                amount = -3m;
+                rule = "GR-TRT-IPT-OTHER";
                 break;
             default:
                 _treatment.Override = _ => TreatmentAction.ReduceProRata; // the treatment would reduce IPT: the slice has no mechanics, so it fails closed
@@ -335,26 +341,7 @@ public sealed class CreditNoteTests(PostgresFixture database) : IClassFixture<Po
         var term2 = Guid.CreateVersion7();
         var transaction = Guid.CreateVersion7();
 
-        var renewal = s.Bound with
-        {
-            EventId = EventId.New(),
-            EventType = EventTypeName.Parse("RenewalBound"),
-            Payload = new JsonObject
-            {
-                ["newTermId"] = term2.ToString(),
-                ["newTermNumber"] = 2,
-                ["transactionId"] = transaction.ToString(),
-                ["productCode"] = s.Bound.Payload["productCode"]!.GetValue<string>(),
-                ["productVersion"] = s.Bound.Payload["productVersion"]!.DeepClone(),
-                ["artefactHash"] = s.Bound.Payload["artefactHash"]!.GetValue<string>(),
-                ["producerOfRecord"] = "DIRECT",
-                ["predecessorTermId"] = s.Policy.TermId,
-            },
-            BusinessKeys = s.Bound.BusinessKeys.With("transactionId", transaction.ToString()).With("newTermId", term2.ToString()),
-        };
-        (await _slice.InvokeAsync("BIL.RenewalBound.AttachTerm", renewal)).ShouldBeTrue();
-        (await _slice.ScalarAsync<string>($"SELECT billing_account_id::text FROM bil.plan_instance WHERE term_id = '{term2}'")).ShouldBe(s.AccountId);
-        (await _slice.ScalarAsync<string>($"SELECT predecessor_term_id::text FROM bil.plan_instance WHERE term_id = '{term2}'")).ShouldBe(s.Policy.TermId);
+        var renewal = RenewalEnvelope(s, term2, transaction);
 
         // Term 2's charges: a renewal term is NEW_BUSINESS; same lines, shifted one year.
         var (set, _, _) = s.ServicingSet("NEW_BUSINESS", null, 1m, taxAmount: 0m, term: term2);
@@ -369,7 +356,11 @@ public sealed class CreditNoteTests(PostgresFixture database) : IClassFixture<Po
             }
         }
 
-        await s.DeliverAsync(set);
+        await s.DeliverAsync(set); // the term period is read from these deltas, so they come first
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE term_id = '{term2}'")).ShouldBe(0);
+        (await _slice.InvokeAsync("BIL.RenewalBound.AttachTerm", renewal)).ShouldBeTrue();
+        (await _slice.ScalarAsync<string>($"SELECT billing_account_id::text FROM bil.plan_instance WHERE term_id = '{term2}'")).ShouldBe(s.AccountId);
+        (await _slice.ScalarAsync<string>($"SELECT predecessor_term_id::text FROM bil.plan_instance WHERE term_id = '{term2}'")).ShouldBe(s.Policy.TermId);
         var invoice2 = await _slice.ScalarAsync<string>($"SELECT invoice_id::text FROM bil.invoice WHERE term_id = '{term2}' AND kind = 'INVOICE'");
         invoice2.ShouldNotBeNullOrEmpty();
         (await _slice.ScalarAsync<string>($"SELECT billing_account_id::text FROM bil.invoice WHERE invoice_id = '{invoice2}'")).ShouldBe(s.AccountId);
@@ -462,6 +453,126 @@ public sealed class CreditNoteTests(PostgresFixture database) : IClassFixture<Po
         (await _slice.ScalarAsync<string>($"SELECT quarantine_reason FROM bil.charge WHERE transaction_id = '{debitTx}' AND charge_category <> 'TAX' LIMIT 1")).ShouldBe("TERM-CANCELLED");
 
     }
+
+    [Fact]
+    public async Task D5_a_renewal_whose_charges_do_not_start_where_the_expiring_term_ends_is_not_attached()
+    {
+        var s = await CreditScenario.BilledAsync(_slice);
+        var term2 = Guid.CreateVersion7();
+        var (set, _, _) = s.ServicingSet("NEW_BUSINESS", null, 1m, term: term2);
+        var wrongStart = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(3);
+        foreach (var e in set)
+        {
+            ((JsonObject)e.Payload)["validPeriod"] = new JsonObject { ["from"] = wrongStart.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), ["to"] = wrongStart.AddYears(1).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) };
+        }
+
+        await s.DeliverAsync(set);
+        (await _slice.InvokeAsync("BIL.RenewalBound.AttachTerm", RenewalEnvelope(s, term2, Guid.CreateVersion7()))).ShouldBeTrue();
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.plan_instance WHERE term_id = '{term2}'")).ShouldBe(0);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.intake_exception WHERE kind = 'BIL-RENEWAL-PERIOD' AND subject = '{term2}'")).ShouldBe(1);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE term_id = '{term2}'")).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task D1_a_positive_premium_under_a_credit_only_kind_is_quarantined_and_nothing_is_billed()
+    {
+        var s = await CreditScenario.BilledAsync(_slice);
+        var (set, _, transaction) = s.ServicingSet("CANCELLATION", "Policyholder", factor: 0.3m);
+        await s.DeliverAsync(set);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.charge WHERE transaction_id = '{transaction}' AND quarantine_reason = 'KIND-AMOUNT-MISMATCH'")).ShouldBeGreaterThan(0);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE transaction_id = '{transaction}'")).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task D2_a_delta_without_a_kind_is_accepted_only_as_the_bind_of_a_term_that_is_not_cancelled()
+    {
+        var s = await CreditScenario.BilledAsync(_slice);
+
+        // A later transaction without a kind is not new business: refused.
+        var (later, _, laterTx) = s.ServicingSet("ENDORSEMENT_DEBIT", null, 0.2m);
+        foreach (var e in later)
+        {
+            ((JsonObject)e.Payload).Remove("transactionKind");
+        }
+
+        await s.DeliverAsync(later);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.charge WHERE transaction_id = '{laterTx}' AND quarantine_reason = 'TRANSACTION-KIND-MISSING'")).ShouldBeGreaterThan(0);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE transaction_id = '{laterTx}'")).ShouldBe(0);
+
+        // After the cancellation even that is refused as a cancelled term.
+        await _slice.InvokeAsync("BIL.PolicyCancelled.StopBilling", s.Cancelled(Guid.CreateVersion7()));
+        var (after, _, afterTx) = s.ServicingSet("ENDORSEMENT_DEBIT", null, 0.2m);
+        foreach (var e in after)
+        {
+            ((JsonObject)e.Payload).Remove("transactionKind");
+        }
+
+        await s.DeliverAsync(after);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.charge WHERE transaction_id = '{afterTx}' AND quarantine_reason = 'TERM-CANCELLED'")).ShouldBeGreaterThan(0);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE transaction_id = '{afterTx}'")).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task D4_one_delta_set_is_one_kind_a_new_business_IPT_line_inside_an_endorsement_credit_is_refused()
+    {
+        var s = await CreditScenario.BilledAsync(_slice);
+        var (set, _, transaction) = s.ServicingSet("ENDORSEMENT_CREDIT", null, -0.2m);
+        var tax = set.First(e => CreditScenario.CategoryOf(e) == CreditScenario.TaxCategory);
+        var payload = (JsonObject)tax.Payload;
+        payload["transactionKind"] = "NEW_BUSINESS";
+        payload["treatmentRuleId"] = "GR-TRT-IPT-NEW-BUSINESS";
+        payload["netAmount"] = new JsonObject { ["amount"] = "5.00", ["currency"] = "EUR" };
+        await s.DeliverAsync(set);
+
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.charge WHERE transaction_id = '{transaction}' AND quarantine_reason = 'SET-KIND-MISMATCH'")).ShouldBeGreaterThan(0);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE transaction_id = '{transaction}'")).ShouldBe(0);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.ledger_entry e JOIN bil.ledger_line l ON l.entry_id = e.entry_id WHERE l.transaction_id = '{transaction}' AND e.entry_type LIKE 'CREDIT%'")).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task D7_a_credit_that_offsets_every_item_of_an_unpaid_invoice_reverses_it()
+    {
+        var s = await CreditScenario.BilledAsync(_slice);
+        var first = s.Deltas.First(d => CreditScenario.CategoryOf(d) != CreditScenario.TaxCategory);
+        bool OnlyFirst(JsonObject p) => p["chargeId"]!.GetValue<string>() == first.Payload["chargeId"]!.GetValue<string>();
+
+        // A premium-only mid-term debit (no IPT line), then the same amount credited back: invoice 2 is offset in full.
+        var (debit, _, debitTx) = s.ServicingSet("ENDORSEMENT_DEBIT", null, 0.1m, choose: OnlyFirst);
+        await s.DeliverAsync(debit);
+        var (credit, _, _) = s.ServicingSet("ENDORSEMENT_CREDIT", null, -0.1m, choose: OnlyFirst);
+        await s.DeliverAsync(credit);
+
+        var documents = await s.DocumentsAsync();
+        var second = documents.Single(d => d.Text("invoice.transactionId") == debitTx.ToString());
+        second.Text("invoice.state").ShouldBe("REVERSED");
+        Money(second["invoice"]!["open"]).ShouldBe(0m);
+        second["invoiceItems"]!.AsArray().ShouldAllBe(i => i!["state"]!.GetValue<string>() == "SETTLED");
+        documents.Single(d => d.Text("invoice.invoiceId") == s.InvoiceId).Text("invoice.state").ShouldBe("DUE");
+
+        // D6: the InvoiceIssued event of the credit note names the invoice it corrects.
+        await _slice.DrainAsync();
+        var issued = (await _slice.EnvelopesAsync(s.AccountId, "InvoiceIssued")).Single(e => e.Payload["kind"]!.GetValue<string>() == "CREDIT_NOTE");
+        issued.Payload["originalInvoiceId"]!.GetValue<string>().ShouldBe(second.Text("invoice.invoiceId"));
+        issued.BusinessKeys["originalInvoiceId"].ShouldBe(second.Text("invoice.invoiceId"));
+    }
+
+    private static EventEnvelope RenewalEnvelope(CreditScenario s, Guid term2, Guid transaction) => s.Bound with
+    {
+        EventId = EventId.New(),
+        EventType = EventTypeName.Parse("RenewalBound"),
+        Payload = new JsonObject
+        {
+            ["newTermId"] = term2.ToString(),
+            ["newTermNumber"] = 2,
+            ["transactionId"] = transaction.ToString(),
+            ["productCode"] = s.Bound.Payload["productCode"]!.GetValue<string>(),
+            ["productVersion"] = s.Bound.Payload["productVersion"]!.DeepClone(),
+            ["artefactHash"] = s.Bound.Payload["artefactHash"]!.GetValue<string>(),
+            ["producerOfRecord"] = "DIRECT",
+            ["predecessorTermId"] = s.Policy.TermId,
+        },
+        BusinessKeys = s.Bound.BusinessKeys.With("transactionId", transaction.ToString()).With("newTermId", term2.ToString()),
+    };
 
     private static string IptPayableSql(string account) =>
         $"SELECT coalesce(sum(CASE side WHEN 'CREDIT' THEN amount ELSE -amount END), 0) FROM bil.ledger_line WHERE billing_account_id = '{account}' AND account_code = 'LA-06'";

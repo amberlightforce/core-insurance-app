@@ -136,6 +136,13 @@ internal sealed class TermBilling(
         }
 
         reason ??= ServicingReason(charge, plan);
+        if (reason is null && await db.Charges.AnyAsync(
+                c => c.SetId == charge.SetId && c.ChargeId != charge.ChargeId && (c.TransactionKind != charge.TransactionKind || c.CancellationSource != charge.CancellationSource),
+                cancellationToken).ConfigureAwait(false))
+        {
+            reason = QuarantineReasons.SetKindMismatch; // one delta set is one POL transaction: one kind, one cancellation source
+        }
+
         if (reason is not null)
         {
             await QuarantineAsync(charge, reason, cancellationToken).ConfigureAwait(false);
@@ -513,7 +520,14 @@ internal sealed class TermBilling(
         var kind = charge.TransactionKind;
         if (kind is null)
         {
-            return charge.Amount < 0m ? QuarantineReasons.TransactionKindMissing : null;
+            // POL sets the kind on every delta. A delta without one is accepted only as legacy new business: a charge of the
+            // term's own bind transaction on a term that is not cancelled. Anything else fails closed (PITFALLS 10, 12).
+            if (plan.CancelledEffective is not null)
+            {
+                return QuarantineReasons.TermCancelled;
+            }
+
+            return charge.Amount >= 0m && charge.TransactionId == plan.BoundTransactionId ? null : QuarantineReasons.TransactionKindMissing;
         }
 
         if (!TransactionKinds.IsAccepted(kind))
@@ -521,9 +535,9 @@ internal sealed class TermBilling(
             return QuarantineReasons.TransactionKindUnsupported;
         }
 
-        if (charge.Amount < 0m && !TransactionKinds.AllowsCredit(kind))
+        if ((charge.Amount < 0m && !TransactionKinds.AllowsCredit(kind)) || (charge.Amount > 0m && TransactionKinds.AllowsCredit(kind)))
         {
-            return QuarantineReasons.KindAmountMismatch;
+            return QuarantineReasons.KindAmountMismatch; // a credit-only kind never carries a charge, a charging kind never a credit
         }
 
         if (TransactionKinds.NeedsCancellationSource(kind) && string.IsNullOrWhiteSpace(charge.CancellationSource))
@@ -783,6 +797,7 @@ internal sealed class TermBilling(
                     DueDate = note.DueDate,
                     Method = note.Method,
                     FiscalTriggerRef = note.FiscalDocumentId?.Value.ToString("D"),
+                    OriginalInvoiceId = original.InvoiceId.Value,
                 },
                 keys) { OccurredAt = now });
             notes++;

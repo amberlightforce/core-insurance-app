@@ -51,6 +51,7 @@ internal sealed class FakeTaxCalculator : ITaxCalculator
             TreatmentAction.Apply => (CustomerCredit.None, AuthorityLiability.NotReduce, FiscalDocumentTreatment.None),
             TreatmentAction.KeepNotReduced => (CustomerCredit.None, AuthorityLiability.NotReduce, FiscalDocumentTreatment.None),
             TreatmentAction.ReduceProRata => (CustomerCredit.ProRata, AuthorityLiability.Reduce, FiscalDocumentTreatment.None),
+            TreatmentAction.InsurerBears => (CustomerCredit.Full, AuthorityLiability.NotReduce, FiscalDocumentTreatment.None),
             _ => (CustomerCredit.Full, AuthorityLiability.Reduce, FiscalDocumentTreatment.CreditNote),
         };
         return ValueTask.FromResult(new TaxTreatmentResult
