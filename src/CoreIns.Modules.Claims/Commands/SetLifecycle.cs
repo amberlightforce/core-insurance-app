@@ -51,6 +51,13 @@ internal sealed partial class SetLifecycle(
             return "An exposure of the set is not open any more.";
         }
 
+        // A re-verification adoption may have removed the cover of an exposure after the set was built (REQ-CLM-058).
+        var paidExposures = content.Payments.Select(p => p.ExposureId).ToHashSet();
+        if (exposures.Any(e => paidExposures.Contains(e.ExposureId) && CoverageGuard.IsInQuestion(claim, e)))
+        {
+            return "The cover of an exposure of the set is in question.";
+        }
+
         var contentHash = SetHashing.Content(content.Set.SetId, claim.ClaimId, content.Canonical());
         if (contentHash.Value != content.Set.ContentHash)
         {

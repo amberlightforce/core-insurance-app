@@ -21,6 +21,8 @@ internal static class UnderwritingPermissions
     public const string BlockingStatus = "uw.Issue.blockingStatus";
     public const string List = "uw.Issue.list";
     public const string Decide = "uw.Issue.decide";
+    public const string ReferralList = "uw.Referral.list";
+    public const string ReferralGet = "uw.Referral.get";
 }
 
 /// <summary>REST facade of <c>uw.Rules.evaluate</c>, <c>uw.Issue.blockingStatus</c>, <c>uw.Issue.list</c> and <c>uw.Issue.decide</c>.</summary>
@@ -99,6 +101,43 @@ internal sealed class UnderwritingController : ControllerBase
         [FromBody] IssueDecideRequest request, [FromServices] ICommandHandler<DecideIssues, IssueDecideResponse> handler, CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(new DecideIssues(request), cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Referral.list: the referral workbench queue (one row per referred job) with the queue counts.</summary>
+    [HttpGet("referrals")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralList)]
+    public async Task<IResult> ListReferralsAsync(
+        [FromQuery] string? queue, [FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] ReferralQueries queries, CancellationToken cancellationToken)
+    {
+        ReferralQueueCode? code = null;
+        if (queue is not null)
+        {
+            code = queue switch
+            {
+                "OPEN" => ReferralQueueCode.Open,
+                "APPROVED_TODAY" => ReferralQueueCode.ApprovedToday,
+                "REJECTED" => ReferralQueueCode.Rejected,
+                "DECIDED_BY_ME_TODAY" => ReferralQueueCode.DecidedByMeToday,
+                "MINE" => ReferralQueueCode.Mine,
+                _ => null,
+            };
+            if (code is null)
+            {
+                return Problem(DomainError.Of(ModuleCode.UW, "VALIDATION", "queue must be OPEN, APPROVED_TODAY, REJECTED, DECIDED_BY_ME_TODAY or MINE."), HttpContext);
+            }
+        }
+
+        var result = await queries.ListAsync(code, cursor, limit, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Referral.get: one referred job (by its POL job id) with the quote header, risk facts and every issue.</summary>
+    [HttpGet("referrals/{id}")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralGet)]
+    public async Task<IResult> GetReferralAsync(string id, [FromServices] ReferralQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.GetAsync(id, cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
     }
 

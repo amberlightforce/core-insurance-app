@@ -1049,6 +1049,114 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.ReverificationRow", b =>
+                {
+                    b.Property<Guid>("ReverificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("reverification_id");
+
+                    b.Property<Guid>("CauseEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cause_event_id");
+
+                    b.Property<string>("CauseEventType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("cause_event_type");
+
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<byte[]>("CommentEncrypted")
+                        .HasColumnType("bytea")
+                        .HasColumnName("comment_encrypted");
+
+                    b.Property<bool?>("CoverageInQuestion")
+                        .HasColumnType("boolean")
+                        .HasColumnName("coverage_in_question");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("NewSnapshotRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("new_snapshot_ref");
+
+                    b.Property<string>("OldSnapshotRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("old_snapshot_ref");
+
+                    b.Property<DateTime>("RaisedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("raised_at");
+
+                    b.Property<string>("ReasonCode")
+                        .HasColumnType("text")
+                        .HasColumnName("reason_code");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("ReverificationId")
+                        .HasName("pk_reverification");
+
+                    b.HasIndex("ClaimId", "CauseEventId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_reverification_claim_cause");
+
+                    b.HasIndex("ClaimId", "Status")
+                        .HasDatabaseName("ix_reverification_claim_status");
+
+                    b.ToTable("reverification", "clm", t =>
+                        {
+                            t.HasCheckConstraint("ck_reverification_decided_shape", "(status = 'OPEN') = (decided_at IS NULL)");
+
+                            t.HasCheckConstraint("ck_reverification_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                            t.HasCheckConstraint("ck_reverification_reason", "status = 'OPEN' OR reason_code IS NOT NULL");
+
+                            t.HasCheckConstraint("ck_reverification_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_reverification_refs", "old_snapshot_ref <> new_snapshot_ref");
+
+                            t.HasCheckConstraint("ck_reverification_status", "status IN ('OPEN', 'KEPT', 'ADOPTED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.SetApprovalRow", b =>
                 {
                     b.Property<Guid>("ApprovalRequestId")
@@ -1443,6 +1551,16 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_reserve_line_exposure");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.ReverificationRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Claims.Persistence.ClaimRow", null)
+                        .WithMany()
+                        .HasForeignKey("ClaimId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_reverification_claim");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.SetApprovalRow", b =>
