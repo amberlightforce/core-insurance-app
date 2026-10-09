@@ -24,7 +24,7 @@ test('E2E-03 staff cancellation and refund proposal reach the paid refund', asyn
   await expect(page.getByText('Επιστροφή προς τον πελάτη', { exact: true })).toBeVisible();
   await expect(page.getByText('ΦΑΑ: δεν επιστρέφεται', { exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου', exact: true }).click();
-  const dialog = page.getByRole('dialog');
+  const dialog = page.getByRole('alertdialog');
   await expect(dialog.getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου', exact: true })).toBeDisabled();
   await dialog.getByRole('checkbox').focus();
   await dialog.getByRole('checkbox').press('Space');
