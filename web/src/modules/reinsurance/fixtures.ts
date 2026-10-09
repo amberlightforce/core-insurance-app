@@ -35,6 +35,6 @@ export const treaty: ContractView = {
   status: 'DRAFT',
   versionNo: 1,
   recordVersion: 4,
-  maker: 'USER:maker',
+  maker: 'USER:dev:maker',
   createdAt: '2026-10-09T09:00:00Z',
 };

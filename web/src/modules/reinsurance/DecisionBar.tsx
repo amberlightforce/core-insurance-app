@@ -44,7 +44,8 @@ export function DecisionBar({ contract }: { contract: ContractView }) {
   const mutation = mode === 'submit' ? submit : decide;
   const pending = submit.isPending || decide.isPending;
 
-  const isEnterer = contract.maker === `USER:${user.id}`;
+  const actorIsKnown = user.actorKey !== '' && !!contract.maker;
+  const isEnterer = actorIsKnown && contract.maker === user.actorKey;
   const isManager = hasRole(user.roles, managerRole);
   const isAccountant = hasRole(user.roles, accountantRole) || hasRole(user.roles, 'Platform.Admin');
 
@@ -190,11 +191,15 @@ export function DecisionBar({ contract }: { contract: ContractView }) {
     return <p className="ds-caption">{t(`decision.final.${contract.status}`)}</p>;
   }
 
-  if (isEnterer) {
+  if (isEnterer || !actorIsKnown) {
     return (
       <div className={styles.sodNote}>
-        <Banner variant="info" live="none" title={t('decision.sodTitle')}>
-          {t('decision.sodBody')}
+        <Banner
+          variant="info"
+          live="none"
+          title={t(actorIsKnown ? 'decision.sodTitle' : 'decision.unknownActorTitle')}
+        >
+          {t(actorIsKnown ? 'decision.sodBody' : 'decision.unknownActorBody')}
         </Banner>
       </div>
     );

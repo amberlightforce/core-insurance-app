@@ -190,6 +190,8 @@
     "draftReadOnly": "The treaty is a draft and has not been submitted yet.",
     "pendingHelp": "Entered by {maker}. Approve it, or return it with a reason.",
     "managerOnly": "The treaty is waiting for approval by a reinsurance manager.",
+    "unknownActorTitle": "Identity verification is required",
+    "unknownActorBody": "Your authenticated actor identity or the maker identity is unavailable. This request remains read-only. Sign in again; the server requires a checker who did not enter or edit the treaty.",
     "sodTitle": "You cannot approve your own entry",
     "sodBody": "You entered this treaty. Another reinsurance manager must review it (separation of duties).",
     "approve": "Approve…",
