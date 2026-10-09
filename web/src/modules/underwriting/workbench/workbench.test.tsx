@@ -114,7 +114,7 @@ function view(
         issueKey: `${reason.issueType}:x`,
         ruleId: reason.ruleId,
         severity: 'REFER',
-        blockingPoint: 'BIND',
+        blockingPoint: 'PRE_BIND',
         lane: 'UW',
         status: 'Open',
         recordVersion: 3,

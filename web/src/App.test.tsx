@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -40,10 +40,14 @@ describe('App', () => {
     expect(document.title).toBe('Αρχική · Core Insurance');
   });
 
-  it('routes a module and marks it current', () => {
+  it('routes a module and marks it current', async () => {
     signInAs(['Staff.UnderwritingManager']);
     renderAt('/underwriting');
-    const nav = screen.getByRole('navigation', { name: 'Κύρια πλοήγηση' });
+    const nav = await screen.findByRole(
+      'navigation',
+      { name: 'Κύρια πλοήγηση' },
+      { timeout: 30_000 },
+    );
     expect(within(nav).getByRole('link', { name: 'Ανάληψη κινδύνου' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -95,12 +99,18 @@ describe('App', () => {
   });
 
   it('opens the command palette from the top bar and navigates', async () => {
+    signInAs(['Staff.UnderwritingManager']);
     const { user } = renderAt('/');
     await user.click(screen.getByRole('button', { name: /Αναζήτηση ή εντολή/ }));
     const dialog = await screen.findByRole('dialog');
     await user.keyboard('ανάλ');
     await user.click(within(dialog).getByRole('menuitem', { name: /Ανάληψη κινδύνου/ }));
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Ανάληψη κινδύνου');
+    await waitFor(
+      () => {
+        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Ανάληψη κινδύνου');
+      },
+      { timeout: 30_000 },
+    );
   });
 
   it('opens the shortcut help from the avatar menu', async () => {

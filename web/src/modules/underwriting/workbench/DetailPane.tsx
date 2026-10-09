@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import {
   Button,
+  cx,
   EmptyState,
   ErrorState,
   KeyValueList,
@@ -269,7 +270,7 @@ export function DetailPane({ jobRef }: DetailPaneProps) {
   const reasonsByIssue = new Map(summary.reasons.map((reason) => [reason.issueId, reason]));
 
   return (
-    <div className={`${styles.sheet} ${styles.detail}`}>
+    <div className={cx(styles.sheet, styles.detail)}>
       <div className={styles.detailHead}>
         <PageHeader
           overline={t('detail.overline', {
