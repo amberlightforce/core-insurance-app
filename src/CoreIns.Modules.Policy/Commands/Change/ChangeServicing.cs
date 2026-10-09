@@ -57,6 +57,7 @@ internal sealed class ChangeEngineFactory(
     Dependency<IProductArtifactService> artifacts,
     Dependency<IMarketRoundingService> rounding,
     IProration proration,
+    IServicingTax servicingTax,
     RequestContext context)
 {
     public async Task<Result<ChangeEngine>> CreateAsync(PolicyTermRow term, Instant validAt, TimeZoneInfo zone, CancellationToken cancellationToken)
@@ -74,6 +75,7 @@ internal sealed class ChangeEngineFactory(
             return rule.Error!;
         }
 
+        (servicingTax as IBoundServicingTax)?.Bind(term.ArtefactHash);
         // The production proration (RAT behind POL's port) is told which term and pinned artefact it prorates for; test doubles are not bound.
         (proration as Cancellation.IBoundProration)?.Bind(
             term.ArtefactHash, ConfigurationHash.Parse(term.ConfigurationHash),
