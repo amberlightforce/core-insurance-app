@@ -97,8 +97,7 @@ test('staff change edits the vehicle, previews and explicitly applies the change
   await go(page, `/policies/${policy.policyId}/change`);
   await page.getByRole('button', { name: /Επόμενο/ }).click();
   await page.getByRole('textbox', { name: /Αξία οχήματος/ }).fill('20000');
-  const postcode = page.getByRole('textbox', { name: /Ταχυδρομικός κώδικας στάθμευσης/ });
-  if (await postcode.isVisible()) await postcode.fill('11526');
+
   await page.getByRole('button', { name: /Επόμενο/ }).click();
   await page.getByRole('button', { name: 'Υπολογισμός προεπισκόπησης ασφαλίστρου', exact: true }).click();
   await expect(page.getByText('Πρόσθετο ποσό προς είσπραξη από τον πελάτη', { exact: true })).toBeVisible();
