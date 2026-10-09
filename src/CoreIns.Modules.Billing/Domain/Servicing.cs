@@ -86,6 +86,7 @@ internal static class QuarantineReasons
     public const string TransactionKindMissing = "TRANSACTION-KIND-MISSING";
     public const string TransactionKindUnsupported = "TRANSACTION-KIND-UNSUPPORTED";
     public const string KindAmountMismatch = "KIND-AMOUNT-MISMATCH";
+    public const string SetKindMismatch = "SET-KIND-MISMATCH";
     public const string CancellationSourceMissing = "CANCELLATION-SOURCE-MISSING";
     public const string TermCancelled = "TERM-CANCELLED";
     public const string TreatmentUnavailable = "TREATMENT-UNAVAILABLE";
@@ -118,13 +119,28 @@ internal static class TreatmentCheck
     {
         ArgumentNullException.ThrowIfNull(result);
 
-        // What the treatment lets the customer be credited decides the sign: APPLY charges, NONE credits nothing, the rest credit.
-        var followsTreatment = result.Action switch
+        // The result must be consistent in itself (the three detail fields follow the action, PRD-17 section 9.4.4).
+        var consistent = result.Action switch
         {
-            TreatmentAction.Apply => amount >= 0m,
-            TreatmentAction.KeepNotReduced => amount == 0m,
-            TreatmentAction.ReduceProRata or TreatmentAction.ReverseAsVoid or TreatmentAction.InsurerBears => amount <= 0m,
+            TreatmentAction.Apply or TreatmentAction.KeepNotReduced =>
+                result.CustomerCredit == CustomerCredit.None && result.AuthorityLiability == AuthorityLiability.NotReduce && result.FiscalDocument == FiscalDocumentTreatment.None,
+            TreatmentAction.ReduceProRata =>
+                result.CustomerCredit == CustomerCredit.ProRata && result.AuthorityLiability == AuthorityLiability.Reduce && result.FiscalDocument == FiscalDocumentTreatment.None,
+            TreatmentAction.ReverseAsVoid =>
+                result.CustomerCredit == CustomerCredit.Full && result.AuthorityLiability == AuthorityLiability.Reduce && result.FiscalDocument == FiscalDocumentTreatment.CreditNote,
+            TreatmentAction.InsurerBears =>
+                result.CustomerCredit == CustomerCredit.Full && result.AuthorityLiability == AuthorityLiability.NotReduce && result.FiscalDocument == FiscalDocumentTreatment.None,
             _ => false,
+        };
+
+        // The delta must follow customerCredit (what the customer is credited), authorityLiability (a credit to the customer
+        // reduces what is owed to the authority; otherwise it would be the insurer's cost, which BIL does not book) and
+        // fiscalDocument (a credit-note treatment never goes with a charge). A charge is only ever APPLY.
+        var followsTreatment = consistent && amount switch
+        {
+            > 0m => result.Action == TreatmentAction.Apply && result.FiscalDocument != FiscalDocumentTreatment.CreditNote,
+            < 0m => result.CustomerCredit != CustomerCredit.None && result.AuthorityLiability == AuthorityLiability.Reduce,
+            _ => true,
         };
         if (!followsTreatment)
         {

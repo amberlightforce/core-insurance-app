@@ -83,6 +83,7 @@ internal static class ExceptionKinds
     public const string PlanUnsupported = "BIL-PLAN-UNSUPPORTED";
     public const string FiscalRequestFailed = "BIL-FISCAL-REQUEST-FAILED";
     public const string FiscalRejected = "CMP-FISCAL-REJECTED";
+    public const string RenewalPeriod = "BIL-RENEWAL-PERIOD";
 }
 
 /// <summary>Receipt channels and methods served by SL-BIL.</summary>

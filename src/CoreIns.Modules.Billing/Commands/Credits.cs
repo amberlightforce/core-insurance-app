@@ -72,8 +72,9 @@ internal sealed class StopTermBillingAuditor : ICommandAuditor<StopTermBilling, 
 /// <c>bil.BillingAccount.attachRenewalTerm</c> (internal, from <c>pol.RenewalBound</c>, REQ-BIL-002 subset): attaches term
 /// n+1 to the billing account of the expiring term it continues (the payer comes from the account, never from the event)
 /// with the same plan and method, then lets the term progress, so its charges are invoiced like a new bind. The event
-/// carries no term period: the renewal term starts where the expiring one ends and runs one year (annual motor terms);
-/// charges outside that period are quarantined (PERIOD-OUTSIDE-TERM), so a different period fails closed.
+/// carries no term period, so it is taken from the renewal term's own charge deltas: they must all share one valid period
+/// that starts where the expiring term ends. A mismatch is refused with an exception record and the term stays unattached
+/// (its charges stay Received, nothing is billed); deltas that have not arrived yet make the event retry.
 /// Idempotent on the term id.
 /// </summary>
 internal sealed record AttachRenewalTerm(RenewalBoundV1 Bound, PolicyId PolicyId, EventSource Source) : ICommand<IntakeOutcome>;
@@ -105,6 +106,21 @@ internal sealed class AttachRenewalTermHandler(
             throw new InvalidOperationException($"Billing account {account.AccountNumber} is {account.Status}; the renewal term is not attached.");
         }
 
+        var periods = (await db.Charges.Where(c => c.TermId == bound.NewTermId).Select(c => new { c.ValidFrom, c.ValidTo }).ToListAsync(cancellationToken)
+            .ConfigureAwait(false)).Select(c => (c.ValidFrom, c.ValidTo)).Distinct().ToList();
+        if (periods.Count == 0)
+        {
+            throw new InvalidOperationException($"RenewalBound for term {bound.NewTermId.Value}: its charge deltas have not arrived, the term period is unknown; retried.");
+        }
+
+        if (periods.Count != 1 || periods[0].ValidTo is not { } termEnd || periods[0].ValidFrom != predecessor.TermTo || termEnd <= periods[0].ValidFrom)
+        {
+            await billing.RaiseAsync(ExceptionKinds.RenewalPeriod, bound.NewTermId.Value.ToString(), "PERIOD-MISMATCH",
+                "The renewal charges do not share one term period starting where the expiring term ends; the term is not attached and nothing is billed.", cancellationToken)
+                .ConfigureAwait(false);
+            return new IntakeOutcome(false, 0);
+        }
+
         var now = clock.Now;
         db.PlanInstances.Add(new PlanInstanceRow
         {
@@ -122,8 +138,8 @@ internal sealed class AttachRenewalTermHandler(
             PlanCode = predecessor.PlanCode,
             BillMode = predecessor.BillMode,
             Method = predecessor.Method,
-            TermFrom = predecessor.TermTo,
-            TermTo = predecessor.TermTo.AddYears(1),
+            TermFrom = periods[0].ValidFrom,
+            TermTo = termEnd,
             SourceEventId = command.Source.EventId,
             SourceSequence = command.Source.AggregateSequence,
             CreatedAt = now,

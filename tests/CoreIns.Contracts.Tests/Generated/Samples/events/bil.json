@@ -1492,6 +1492,7 @@
       ],
       "dueDate": "2026-10-07",
       "method": "SAMPLE_CODE",
+      "originalInvoiceId": "0192d735-6545-7f6e-8879-fea2a6fcdfe6",
       "fiscalTriggerRef": "Sample text"
     }
   },
