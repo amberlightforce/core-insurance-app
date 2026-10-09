@@ -11,13 +11,16 @@
         "pol.Term.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pol.Snapshot.get": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "pol.Policy.search": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "pol.cancel": [ "Staff.Underwriter" ],
+        "pol.Cancellation.create": [ "Staff.Underwriter" ],
         "pol.renewal.manage": [ "Staff.Underwriter" ],
         "pol.Renewal.create": [ "Staff.Underwriter" ],
         "pol.Renewal.offer": [ "Staff.Underwriter" ],
         "pol.Renewal.accept": [ "Staff.Underwriter" ],
         "pol.PolicyChange.create": [ "Staff.Underwriter" ],
         "pol.change": [ "Staff.Underwriter" ],
-        "pol.Job.withdraw": [ "Staff.Underwriter" ]
+        "pol.Job.withdraw": [ "Staff.Underwriter" ],
+        "pol.Term.timeline": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Platform.Admin" ]
       }
     }
   }
