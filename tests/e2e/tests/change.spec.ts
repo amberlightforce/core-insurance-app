@@ -153,11 +153,12 @@ test('change: an open claim on the changed cover gets ReverificationRequired and
     const read = await call(request, claimsUser, 'GET', `/api/clm/v1/claims/${claimId}`);
     expect(read.status, read.text).toBe(200);
     const claim = (read.body['claim'] ?? read.body) as Json;
-    return claim['snapshotStatus'] === 'REVERIFICATION_REQUIRED' ? { claim, body: read.body } : undefined;
+    const summary = claim['summary'] as Json;
+    return summary['snapshotStatus'] === 'REVERIFICATION_REQUIRED' ? { claim, summary } : undefined;
   });
   const claim = pending.claim;
-  expect(claim['snapshotRef'], 'REQ-CLM-002: the claim keeps its old ref until a human adopts').toBe(oldRef);
-  const demand = (claim['pendingReverification'] ?? pending.body['pendingReverification']) as Json;
+  expect(pending.summary['snapshotRef'], 'REQ-CLM-002: the claim keeps its old ref until a human adopts').toBe(oldRef);
+  const demand = claim['pendingReverification'] as Json;
   expect(demand['oldSnapshotRef']).toBe(oldRef);
   expect(demand['newSnapshotRef']).toBeTruthy();
   expect(demand['newSnapshotRef']).not.toBe(oldRef);
