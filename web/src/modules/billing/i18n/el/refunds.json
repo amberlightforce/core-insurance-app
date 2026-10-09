@@ -170,6 +170,16 @@
     "lines": {
       "transactionKind": "Συναλλαγή",
       "rule": "Κανόνας μεταχείρισης"
+    },
+    "payoutMethod": {
+      "SEPA_CT": "Τραπεζική μεταφορά SEPA"
+    },
+    "legalStatus": {
+      "Unverified": "Δεν έχει επαληθευτεί",
+      "Open": "Ανοιχτό",
+      "NotRegulatory": "Δεν είναι ρυθμιστικό",
+      "Settled": "Οριστικοποιημένο",
+      "PendingOpinion": "Εκκρεμεί γνωμοδότηση"
     }
   }
 }

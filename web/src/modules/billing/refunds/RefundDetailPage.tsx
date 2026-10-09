@@ -258,7 +258,9 @@ function RefundDetails({ refund }: { refund: RefundView }) {
                 {
                   id: 'method',
                   label: t('refunds.detail.payoutMethod'),
-                  value: refund.payoutMethod,
+                  value: t(`refunds.payoutMethod.${refund.payoutMethod}`, {
+                    defaultValue: refund.payoutMethod,
+                  }),
                   kind: 'mono',
                 },
                 {

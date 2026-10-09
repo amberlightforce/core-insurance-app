@@ -194,6 +194,10 @@ describe('RefundDetailPage', () => {
     expect(within(breakdown).getByText('PREM-MTPL')).toBeInTheDocument();
     expect(within(breakdown).getByText('TAX-REFUND-PRORATA')).toBeInTheDocument();
     expect(within(breakdown).getByText(/Προσωρινό/)).toBeInTheDocument();
+    expect(within(breakdown).getByText('Ασφάλιστρο')).toBeInTheDocument();
+    expect(within(breakdown).getAllByText('Ακύρωση')).toHaveLength(2);
+    expect(screen.getByText('Τραπεζική μεταφορά SEPA')).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/SEPA_CT|CANCELLATION|PREMIUM/);
     expect(screen.getByRole('grid', { name: 'Συμψηφισμός' })).toBeInTheDocument();
     expect(container.textContent).not.toContain(iban);
     await expectNoA11yViolations(container);
