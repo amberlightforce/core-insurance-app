@@ -46,6 +46,8 @@ internal sealed class RequestApprovalValidator : AbstractValidator<RequestApprov
         RuleFor(c => c.Request.Type).NotEmpty().MaximumLength(128).When(c => c.Request is not null);
         RuleFor(c => c.Request.ReferralRole).NotEmpty().MaximumLength(128).When(c => c.Request is not null);
         RuleFor(c => c.Request.Reason).MaximumLength(1024).When(c => c.Request is not null);
+        RuleForEach(c => c.Request.Editors).NotEmpty().MaximumLength(256)
+            .Matches("^(USER|SERVICE|AI_AGENT):[^\\s]+$").When(c => c.Request?.Editors is not null);
         RuleFor(c => c.Request.Authority).NotNull().When(c => c.Request is not null);
         RuleFor(c => c.Request.Authority.Type).NotEmpty().When(c => c.Request?.Authority is not null);
         RuleFor(c => c.Request.Authority)
@@ -130,12 +132,15 @@ internal sealed class RequestApprovalHandler(
         var now = clock.Now;
         var maker = context.Actor;
 
-        var editors = new List<string>();
+        var editors = new List<string>(request.Editors ?? []);
         var existing = await ApprovalStore.LockPendingAsync(connection, transaction, legalEntity, request.Type, request.ObjectRef, cancellationToken)
             .ConfigureAwait(false);
         if (existing is not null)
         {
-            if (existing.PayloadHash == request.PayloadHash)
+            // An identical hash can still name newly discovered participants. Supersede instead of silently dropping
+            // them; inherited maker/editor keys can never be removed by a later owning-module request.
+            if (existing.PayloadHash == request.PayloadHash
+                && editors.All(e => existing.Editors.Contains(e, StringComparer.Ordinal) || existing.MakerKeys.Contains(e, StringComparer.Ordinal)))
             {
                 return new ApprovalRequestResponse { Request = existing.ToView() };
             }
@@ -444,6 +449,7 @@ internal sealed class PlatformApprovalService(
     RequestContext context,
     ICommandHandler<RequestApproval, ApprovalRequestResponse> request,
     ICommandHandler<DecideApproval, ApprovalDecideResponse> decide,
+    ICommandHandler<WithdrawApproval, ApprovalWithdrawResponse> withdraw,
     ApprovalQueries queries) : IPlatformApprovalService
 {
     public async Task<ApprovalRequestResponse> RequestAsync(ApprovalRequestRequest request1, CommandOptions options, CancellationToken cancellationToken = default)
@@ -472,12 +478,16 @@ internal sealed class PlatformApprovalService(
     public Task<ApprovalVerifyForExecutionResponse> VerifyForExecutionAsync(ApprovalVerifyForExecutionRequest request1, CancellationToken cancellationToken = default) =>
         queries.VerifyForExecutionAsync(request1, cancellationToken);
 
-    /// <summary>
-    /// Contract placeholder (SL4-CONTRACTS, D-SL4-14): <c>plt.Approval.withdraw</c> is typed in the contract but its
-    /// behaviour is built by SL4-PLT. Until then the call fails closed rather than silently doing nothing.
-    /// </summary>
-    public Task<ApprovalWithdrawResponse> WithdrawAsync(ApprovalWithdrawRequest request1, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw new NotSupportedException("plt.Approval.withdraw is built by SL4-PLT.");
+    public async Task<ApprovalWithdrawResponse> WithdrawAsync(ApprovalWithdrawRequest request1, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        // Capture the outer registered owner before the nested PLT command stamps its own identity.
+        var callerModule = context.CurrentCommandModule;
+        using (context.Use(options.IdempotencyKey, options.DryRun))
+        {
+            return Unwrap(await withdraw.HandleAsync(new WithdrawApproval(request1, callerModule), cancellationToken).ConfigureAwait(false));
+        }
+    }
 
     private static T Unwrap<T>(Result<T> result) => result.IsSuccess ? result.Value : throw new DomainException(result.Error);
 }
