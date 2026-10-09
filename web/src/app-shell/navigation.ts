@@ -11,13 +11,16 @@ export interface NavItem {
 /** Roles that work claims (dev users `claims` and `claimsmgr`). */
 const claimsRoles = ['Staff.ClaimsHandler', 'Staff.ClaimsManager'] as const;
 
+/** Roles that work underwriting referrals (permission uw.Referral.list; dev users `uwsenior`, `superuser`). */
+const underwritingRoles = ['Staff.UnderwritingManager', 'Platform.Admin'] as const;
+
 /** Default staff navigation (role-configured order arrives with PLT; Part 1 §3.4). */
 export const defaultNavItems: NavItem[] = [
   { id: 'home', to: '/' },
   { id: 'work', to: '/work' },
   { id: 'parties', to: '/parties' },
   { id: 'policies', to: '/policies' },
-  { id: 'underwriting', to: '/underwriting' },
+  { id: 'underwriting', to: '/underwriting', roles: underwritingRoles },
   { id: 'claims', to: '/claims', roles: claimsRoles },
   { id: 'billing', to: '/billing' },
   { id: 'reinsurance', to: '/reinsurance' },
