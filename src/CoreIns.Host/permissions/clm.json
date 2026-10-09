@@ -11,6 +11,7 @@
         "clm.Exposure.create": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.TransactionSet.build": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.TransactionSet.submit": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.TransactionSet.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
         "clm.TransactionSet.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Financials.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Payment.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
@@ -24,6 +25,10 @@
       // Never presented as approved limits; "Illustrative": true grants are ignored in Production (fail closed: DENY).
       // The exact limit is allowed; one cent above refers to the next role (four eyes); above the manager's limit, DENY.
       "Grants": [
+        { "Id": "clm-recovery-writeoff-illustrative", "Role": "Staff.RecoverySpecialist", "Type": "CLM.RECOVERY_WRITEOFF", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ] },
+        { "Id": "clm-manager-writeoff-illustrative", "Role": "Staff.ClaimsManager", "Type": "CLM.RECOVERY_WRITEOFF", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "50000.00", "Currency": "EUR" } ] },
+        { "Id": "clm-recovery-fsnet-illustrative", "Role": "Staff.RecoverySpecialist", "Type": "CLM.FS_NET_SETTLEMENT", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "50000.00", "Currency": "EUR" } ] },
+        { "Id": "clm-manager-fsnet-illustrative", "Role": "Staff.ClaimsManager", "Type": "CLM.FS_NET_SETTLEMENT", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ] },
         {
           "Id": "clm-handler-reserve-illustrative", "Role": "Staff.ClaimsHandler", "Type": "CLM.RESERVE", "Illustrative": true,
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
@@ -34,11 +39,11 @@
         },
         {
           "Id": "clm-manager-reserve-illustrative", "Role": "Staff.ClaimsManager", "Type": "CLM.RESERVE", "Illustrative": true,
-          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "50000.00", "Currency": "EUR" } ]
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
         },
         {
           "Id": "clm-manager-payment-illustrative", "Role": "Staff.ClaimsManager", "Type": "CLM.PAYMENT", "Illustrative": true,
-          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "50000.00", "Currency": "EUR" } ]
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
         }
       ]
     }

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CoreIns.Modules.Claims.Contracts.Api;
 using CoreIns.Modules.Claims.Contracts.Events;
 using CoreIns.Modules.Claims.Domain;
@@ -10,6 +11,7 @@ using CoreIns.Platform.Events;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
+using CoreIns.SharedKernel.Json;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,12 +73,23 @@ internal sealed class CloseClaimHandler(
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var positions = await financials.PositionsAsync(claim.ClaimId, [.. open.Select(e => e.ExposureId)], cancellationToken).ConfigureAwait(false);
         var blocking = CloseGuard.Blocking(positions);
-        if (blocking.Count > 0)
+        var recoveries = await db.Recoveries.AsNoTracking().Where(r => r.ClaimId == claim.ClaimId && r.Status != "CLOSED" && r.Status != "WRITTEN_OFF").ToListAsync(cancellationToken).ConfigureAwait(false);
+        if (blocking.Count > 0 || recoveries.Count > 0)
         {
             var numbers = open.ToDictionary(e => e.ExposureId, e => e.ExposureNumber.Value);
+            var guards = blocking.SelectMany(b => b.Reasons.Select(r => (Code: r, Exposure: (ExposureId?)b.Exposure)))
+                .Concat(recoveries.Select(r => (Code: "OPEN_RECOVERY", Exposure: r.ExposureId)))
+                .GroupBy(g => g.Code).Select(g => new CloseGuardError
+                {
+                    Code = g.Key, ExposureIds = [.. g.Where(x => x.Exposure is not null).Select(x => x.Exposure!.Value).Distinct()],
+                }).ToList();
+            var metadata = blocking.ToDictionary(b => numbers[b.Exposure], b => string.Join(",", b.Reasons), StringComparer.Ordinal);
+            metadata["closeGuardErrors"] = JsonSerializer.Serialize(guards, SharedKernelJson.Options);
             return new DomainError(ErrorCode.For(ModuleCode.CLM, "CLOSE-GUARD"), "An exposure has an open reserve or a pending payment; release or settle it first.")
             {
-                Metadata = blocking.ToDictionary(b => numbers[b.Exposure], b => string.Join(",", b.Reasons), StringComparer.Ordinal),
+                Metadata = metadata,
+                FieldErrors = [.. blocking.SelectMany(b => b.Reasons.Select(r => new FieldError($"exposures[{b.Exposure.Value:D}]", r, r))),
+                    .. recoveries.Select(r => new FieldError(r.ExposureId is { } e ? $"exposures[{e.Value:D}]" : "claim", "OPEN_RECOVERY", "OPEN_RECOVERY"))],
             };
         }
 

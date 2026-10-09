@@ -78,7 +78,7 @@ internal sealed partial class ApplyApprovalDecisionHandler(
         if (command.Decision != Approved)
         {
             row.Status = "REJECTED";
-            lifecycle.Reject(claim, content, command.Decision == "REJECTED" ? FinancialReasons.ApproverRejected : FinancialReasons.Withdrawn);
+            await lifecycle.RejectAsync(claim, content, command.Decision == "REJECTED" ? FinancialReasons.ApproverRejected : FinancialReasons.Withdrawn, cancellationToken).ConfigureAwait(false);
             return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Rejected));
         }
 
@@ -96,14 +96,14 @@ internal sealed partial class ApplyApprovalDecisionHandler(
         if (await lifecycle.RevalidateAsync(claim, content, cancellationToken).ConfigureAwait(false) is { } stale)
         {
             LogStale(logger, set.SetId.Value, stale);
-            lifecycle.Reject(claim, content, FinancialReasons.SetStale);
+            await lifecycle.RejectAsync(claim, content, FinancialReasons.SetStale, cancellationToken).ConfigureAwait(false);
             return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Rejected));
         }
 
         if (await VerifyAsync(claim, set, content, rows, cancellationToken).ConfigureAwait(false) is { } mismatch)
         {
             LogMismatch(logger, set.SetId.Value, mismatch);
-            lifecycle.Reject(claim, content, FinancialReasons.ApprovalMismatch);
+            await lifecycle.RejectAsync(claim, content, FinancialReasons.ApprovalMismatch, cancellationToken).ConfigureAwait(false);
             return new ApprovalOutcome(set.SetId.Value, Codes.Of(SetStatus.Rejected));
         }
 

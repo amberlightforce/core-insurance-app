@@ -48,7 +48,21 @@ internal sealed partial class SetLifecycle(
         var exposures = await db.Exposures.AsNoTracking().Where(e => exposureIds.Contains(e.ExposureId)).ToListAsync(cancellationToken).ConfigureAwait(false);
         if (exposures.Any(e => e.Status != ClaimStates.Open))
         {
-            return "An exposure of the set is not open any more.";
+            var closed = exposures.Where(e => e.Status != ClaimStates.Open).Select(e => e.ExposureId).ToHashSet();
+            if (content.Transactions.Any(t => closed.Contains(t.ExposureId) && t.Kind != Codes.Of(TransactionKind.RecoveryReserve)))
+            {
+                return "An exposure of the set is not open any more.";
+            }
+        }
+
+        foreach (var transaction in content.Transactions.Where(t => t.RecoveryId is not null))
+        {
+            if (!await db.Recoveries.AnyAsync(r => r.RecoveryId == transaction.RecoveryId && r.ClaimId == claim.ClaimId
+                    && r.LegalEntityId == claim.LegalEntityId && (r.ExposureId == null || r.ExposureId == transaction.ExposureId)
+                    && r.Status != "CLOSED" && r.Status != "WRITTEN_OFF", cancellationToken).ConfigureAwait(false))
+            {
+                return "A recovery of the set is no longer open on this claim and exposure.";
+            }
         }
 
         // A re-verification adoption may have removed the cover of an exposure after the set was built (REQ-CLM-058).
@@ -112,17 +126,23 @@ internal sealed partial class SetLifecycle(
         }
 
         var claimKey = claim.ClaimId.Value.ToString();
-        var reserves = content.Transactions.Where(t => t.Kind == Codes.Of(TransactionKind.Reserve)).ToList();
+        var reserves = content.Transactions.Where(t => t.Kind == Codes.Of(TransactionKind.Reserve) || t.Kind == Codes.Of(TransactionKind.RecoveryReserve)).ToList();
         var paymentsTotal = content.Transactions.Where(t => t.Kind == Codes.Of(TransactionKind.Payment)).Sum(t => t.Amount);
         List<KindTotal> totals = [];
         if (reserves.Count > 0)
         {
-            totals.Add(new KindTotal { Kind = Codes.Of(TransactionKind.Reserve), Amount = ClaimMoney.Eur(reserves.Sum(t => t.Amount)) });
+            totals.AddRange(reserves.GroupBy(t => t.Kind).Select(g => new KindTotal { Kind = g.Key, Amount = ClaimMoney.Eur(g.Sum(t => t.Amount)) }));
         }
 
         if (paymentsTotal != 0m)
         {
             totals.Add(new KindTotal { Kind = Codes.Of(TransactionKind.Payment), Amount = ClaimMoney.Eur(paymentsTotal) });
+        }
+
+        var recoveryTransactions = content.Transactions.Where(t => t.Kind == Codes.Of(TransactionKind.Recovery)).ToList();
+        if (recoveryTransactions.Count > 0)
+        {
+            totals.Add(new KindTotal { Kind = Codes.Of(TransactionKind.Recovery), Amount = ClaimMoney.Eur(recoveryTransactions.Sum(t => t.Amount)) });
         }
 
         events.Publish(new OutgoingEvent(
@@ -141,11 +161,11 @@ internal sealed partial class SetLifecycle(
             BusinessKeys.Empty.With("claimId", claimKey).With("setId", set.SetId.Value.ToString())));
 
         // One ReserveChanged per reserve-line delta (REQ-CLM-005); newOpenAmount is the line's open reserve after the whole set.
-        foreach (var group in reserves.GroupBy(t => t.ReserveLineId).OrderBy(g => g.Min(t => t.Sequence)))
+        foreach (var group in reserves.GroupBy(t => (t.ReserveLineId, t.Kind, t.RecoveryId)).OrderBy(g => g.Min(t => t.Sequence)))
         {
-            var line = content.Lines[group.Key];
-            var after = content.Transactions.Where(t => t.ReserveLineId == group.Key)
-                .Aggregate(before.GetValueOrDefault(group.Key), (a, t) => a.Apply(Codes.Parse<TransactionKind>(t.Kind), t.Amount, t.Eroding ?? false));
+            var line = content.Lines[group.Key.ReserveLineId];
+            var after = content.Transactions.Where(t => t.ReserveLineId == group.Key.ReserveLineId)
+                .Aggregate(before.GetValueOrDefault(group.Key.ReserveLineId), (a, t) => a.Apply(Codes.Parse<TransactionKind>(t.Kind), t.Amount, t.Eroding ?? false));
             var delta = group.Sum(t => t.Amount);
             if (delta == 0m)
             {
@@ -162,9 +182,10 @@ internal sealed partial class SetLifecycle(
                     ExposureId = line.ExposureId,
                     ReserveLineId = line.ReserveLineId.Value,
                     ReserveLine = new ReserveLineKey { CostType = line.CostType, Category = line.CostCategory },
-                    Kind = ReserveChangedV1.KindValue.Reserve,
+                    Kind = group.Key.Kind == Codes.Of(TransactionKind.RecoveryReserve) ? ReserveChangedV1.KindValue.RecoveryReserve : ReserveChangedV1.KindValue.Reserve,
+                    RecoveryId = group.Key.RecoveryId,
                     Delta = Three(delta, line.Currency),
-                    NewOpenAmount = Three(after.OpenReserve, line.Currency),
+                    NewOpenAmount = Three(group.Key.Kind == Codes.Of(TransactionKind.RecoveryReserve) ? after.OpenRecoveryReserve : after.OpenReserve, line.Currency),
                     SetId = set.SetId.Value,
                     AccidentDate = claim.LossDate,
                     PolicyTermId = claim.PolicyTermId ?? throw new InvalidOperationException("A claim with financials has a policy term."),
@@ -179,9 +200,38 @@ internal sealed partial class SetLifecycle(
                     .With("setId", set.SetId.Value.ToString()).With("policyTermId", claim.PolicyTermId.Value.Value.ToString())));
         }
 
+        foreach (var group in recoveryTransactions.GroupBy(t => t.RecoveryId))
+        {
+            if (group.Key is not { } recoveryId || string.IsNullOrWhiteSpace(set.EvidenceRef))
+            {
+                throw new DomainException(DomainError.Of(ModuleCode.CLM, "NOT-AVAILABLE", "Recovery transactions need authoritative evidence and a recovery."));
+            }
+
+            var recovery = await db.Recoveries.AsNoTracking().SingleAsync(r => r.RecoveryId == recoveryId && r.ClaimId == claim.ClaimId
+                && r.LegalEntityId == claim.LegalEntityId, cancellationToken).ConfigureAwait(false);
+            if ((recovery.Type == "FRIENDLY_SETTLEMENT" && recovery.FsStatementId is null)
+                || (recovery.Type != "FRIENDLY_SETTLEMENT" && recovery.ReceivableId is null))
+            {
+                throw new DomainException(DomainError.Of(ModuleCode.CLM, "NOT-AVAILABLE", "Recovery settlement provenance is unavailable."));
+            }
+
+            events.Publish(new OutgoingEvent(EventDescriptor.From(RecoveryRecordedV1.Descriptor), ClaimEvents.AggregateType, claimKey,
+                new RecoveryRecordedV1
+                {
+                    ClaimId = claim.ClaimId, RecoveryId = recoveryId, RecoveryType = recovery.Type, CounterpartyPartyId = recovery.CounterpartyPartyId,
+                    Amount = Three(group.Sum(t => t.Amount), recovery.Currency), AccountingDate = accountingDate,
+                    ReceivableId = recovery.ReceivableId, FsStatementId = recovery.FsStatementId, EvidenceRef = set.EvidenceRef,
+                    AllocationByLine = [.. group.Select(t => new ClaimPaymentLine
+                    {
+                        LineKey = t.TxnId.ToString("D"), Amount = Three(t.Amount, t.Currency), ReserveLineId = t.ReserveLineId.Value,
+                        ExposureId = t.ExposureId, CostType = content.Lines[t.ReserveLineId].CostType, CostCategory = content.Lines[t.ReserveLineId].CostCategory,
+                    })],
+                }, BusinessKeys.Empty.With("claimId", claimKey).With("recoveryId", recoveryId.Value.ToString("D"))));
+        }
+
         if (!context.DryRun)
         {
-            foreach (var payment in content.Payments)
+            foreach (var payment in content.Payments.Where(p => p.Method != "CLEARING"))
             {
                 await RequestDisbursementAsync(claim, set, payment, cancellationToken).ConfigureAwait(false);
             }
@@ -189,7 +239,7 @@ internal sealed partial class SetLifecycle(
     }
 
     /// <summary>Rejects the set (reason code), its payments with it, and publishes <c>TransactionSetRejected</c>.</summary>
-    public void Reject(ClaimRow claim, SetContent content, string reason)
+    public async Task RejectAsync(ClaimRow claim, SetContent content, string reason, CancellationToken cancellationToken)
     {
         var now = clock.Now;
         var set = content.Set;
@@ -198,6 +248,33 @@ internal sealed partial class SetLifecycle(
         set.DecidedAt = now;
         set.UpdatedAt = now;
         set.RecordVersion++;
+        var siblings = await db.SetApprovals.Where(a => a.SetId == set.SetId && a.Status == "PENDING").ToListAsync(cancellationToken).ConfigureAwait(false);
+        var approvals = services.GetRequiredService<CoreIns.Platform.Contracts.IPlatformApprovalService>();
+        foreach (var sibling in siblings.Where(a => a.Status == "PENDING"))
+        {
+            var platform = await approvals.GetAsync(sibling.ApprovalRequestId.ToString("D"), cancellationToken).ConfigureAwait(false);
+            if (platform.Request.Status == CoreIns.Platform.Contracts.Api.ApprovalStatus.PendingApproval)
+            {
+                try
+                {
+                    await approvals.WithdrawAsync(new CoreIns.Platform.Contracts.Api.ApprovalWithdrawRequest
+                    {
+                        ApprovalRequestId = new ApprovalRequestId(sibling.ApprovalRequestId), Reason = reason,
+                    }, CommandOptions.New(), cancellationToken).ConfigureAwait(false);
+                }
+                catch (DomainException ex) when (ex.Error.Code.Value == "PLT-ERR-APPROVAL-STALE")
+                {
+                    var current = await approvals.GetAsync(sibling.ApprovalRequestId.ToString("D"), cancellationToken).ConfigureAwait(false);
+                    if (current.Request.Status == CoreIns.Platform.Contracts.Api.ApprovalStatus.PendingApproval)
+                    {
+                        throw;
+                    }
+                }
+            }
+            sibling.Status = "REJECTED";
+            sibling.DecidedAt = now;
+            sibling.RecordVersion++;
+        }
         foreach (var payment in content.Payments)
         {
             payment.Status = Codes.Of(PaymentStatus.Rejected);
