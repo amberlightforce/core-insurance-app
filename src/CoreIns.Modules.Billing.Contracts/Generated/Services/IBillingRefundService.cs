@@ -18,7 +18,7 @@ public interface IBillingRefundService
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: WRK.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: BIL-ERR-NO-CREDIT (422), PLT-ERR-SOD (403), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409), BIL-ERR-NOT-FOUND (404), BIL-ERR-REFUND-STATE (409).</para>
+    /// <para>Errors: BIL-ERR-NO-CREDIT (422), PLT-ERR-SOD (403), PLT-ERR-AUTHORITY (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409), BIL-ERR-NOT-FOUND (404), BIL-ERR-REFUND-STATE (409), BIL-ERR-SOD (403), PLT-ERR-SELF-APPROVAL (403), BIL-ERR-STALE (409), BIL-ERR-REFUND-OPEN (409), BIL-ERR-PAYEE-UNVERIFIED (422), BIL-ERR-APPROVAL-MISMATCH (422), BIL-ERR-COOLING-OFF (409), BIL-ERR-PAYEE-BLOCKED (409), PLT-ERR-AUTHORITY-DENIED (403).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.RefundDecideResponse> DecideAsync(global::CoreIns.Modules.Billing.Contracts.Api.RefundDecideRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 

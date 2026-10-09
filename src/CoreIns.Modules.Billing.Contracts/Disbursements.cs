@@ -20,6 +20,12 @@ public static class DisbursementCodes
 
     /// <summary>Payee account purpose used for claim payments (REQ-BIL-343).</summary>
     public const string ClaimPaymentPurpose = "CLAIM_PAYMENT";
+
+    /// <summary>Source type of a policy refund (calling module BIL itself; evidence: the refund's own approval, D-SL3-14).</summary>
+    public const string RefundPayment = "BIL_REFUND";
+
+    /// <summary>Payee account purpose used for policy refunds (REQ-BIL-186, REQ-BIL-343).</summary>
+    public const string RefundPurpose = "REFUND";
 }
 
 /// <summary>
@@ -68,7 +74,19 @@ public static class DisbursementApproval
     /// <summary>The subject type of that approval.</summary>
     public const string ClaimPaymentSubjectType = "ClaimPayment";
 
+    /// <summary>The approval type BIL requests for a refund above the auto-approval limit or to a changed payee (D-SL3-14).</summary>
+    public const string RefundType = "BIL.REFUND";
+
+    /// <summary>The subject type of that approval.</summary>
+    public const string RefundSubjectType = "Refund";
+
+    /// <summary>Evidence of a refund approved by rule (within the auto-approval limit, unchanged payee): <c>BIL/RefundAuto/{refundId}</c>.</summary>
+    public const string RefundAutoEvidencePrefix = "BIL/RefundAuto/";
+
     private const string EvidencePrefix = "PLT/ApprovalRequest/";
+
+    /// <summary>The approval subject of a refund (its source id is the refund id in "D" format).</summary>
+    public static ObjectRef RefundSubject(string sourceId) => new(ModuleCode.BIL, RefundSubjectType, sourceId);
 
     /// <summary>The approval subject of a claim payment (its source id is the CLM claim payment id).</summary>
     public static ObjectRef ClaimPaymentSubject(string sourceId) => new(ModuleCode.CLM, ClaimPaymentSubjectType, sourceId);

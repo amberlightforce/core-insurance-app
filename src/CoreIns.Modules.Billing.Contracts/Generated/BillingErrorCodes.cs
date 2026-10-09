@@ -16,7 +16,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-APPROVAL-MISMATCH (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void.</para>
+    /// <para>Declared by 6 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Refund.decide.</para>
     /// </remarks>
     public const string ApprovalMismatch = "BIL-ERR-APPROVAL-MISMATCH";
 
@@ -40,7 +40,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-COOLING-OFF (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): bil.Disbursement.request.</para>
+    /// <para>Declared by 2 operation(s): bil.Disbursement.request, bil.Refund.decide.</para>
     /// </remarks>
     public const string CoolingOff = "BIL-ERR-COOLING-OFF";
 
@@ -190,13 +190,13 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-PAYEE-BLOCKED (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void.</para>
+    /// <para>Declared by 6 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Refund.decide.</para>
     /// </remarks>
     public const string PayeeBlocked = "BIL-ERR-PAYEE-BLOCKED";
 
     /// <summary>BIL-ERR-PAYEE-UNVERIFIED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): bil.Refund.propose, bil.Refund.resubmit.</para>
+    /// <para>Declared by 3 operation(s): bil.Refund.decide, bil.Refund.propose, bil.Refund.resubmit.</para>
     /// </remarks>
     public const string PayeeUnverified = "BIL-ERR-PAYEE-UNVERIFIED";
 
@@ -226,7 +226,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-REFUND-OPEN (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): bil.Refund.propose.</para>
+    /// <para>Declared by 2 operation(s): bil.Refund.decide, bil.Refund.propose.</para>
     /// </remarks>
     public const string RefundOpen = "BIL-ERR-REFUND-OPEN";
 
@@ -244,7 +244,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): bil.Disbursement.approveRelease, bil.Disbursement.stop, bil.Disbursement.void.</para>
+    /// <para>Declared by 4 operation(s): bil.Disbursement.approveRelease, bil.Disbursement.stop, bil.Disbursement.void, bil.Refund.decide.</para>
     /// </remarks>
     public const string Sod = "BIL-ERR-SOD";
 
@@ -256,7 +256,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): bil.Allocation.allocate, bil.Disbursement.approveRelease.</para>
+    /// <para>Declared by 3 operation(s): bil.Allocation.allocate, bil.Disbursement.approveRelease, bil.Refund.decide.</para>
     /// </remarks>
     public const string Stale = "BIL-ERR-STALE";
 
