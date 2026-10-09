@@ -19,13 +19,13 @@ namespace CoreIns.IntegrationTests.Product.Fallback;
 /// <summary>
 /// SL5-PFC-FALLBACK (REQ-PFC-213, -033, -166, -178; D-SL5-09) on PostgreSQL 17 through the real Host with the shiftable clock:
 /// MOTOR-GR 1.0 and 1.1 are imported, 1.1 is declared defective, and 1.2 (a copy of 1.0) is published by maker-checker.
-/// Maker <c>rm-1</c> (Platform.ReleaseManager); checkers <c>da-1</c>, <c>da-2</c> (Platform.DesignAuthority).
+/// Maker <c>dev:releasemgr</c> (Platform.ReleaseManager); checkers <c>dev:designauth</c>, <c>da-2</c> (Platform.DesignAuthority).
 /// </summary>
 public sealed class FallbackTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncLifetime
 {
-    private const string Maker = "rm-1";
+    private const string Maker = "dev:releasemgr";
     private const string MakerRole = "Platform.ReleaseManager";
-    private const string Checker = "da-1";
+    private const string Checker = "dev:designauth";
     private const string Checker2 = "da-2";
     private const string CheckerRole = "Platform.DesignAuthority";
     private const string Reason = "MOTOR-GR 1.1 day count defect found in production testing";
@@ -302,7 +302,7 @@ public sealed class FallbackTests(PostgresFixture database) : IClassFixture<Post
         // An AI or service actor (a different identity) acting on behalf of the maker.
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<RequestContext>();
-        context.Actor = ActorRef.User("da-1");
+        context.Actor = ActorRef.User(Checker);
         context.OnBehalfOf = ActorRef.User(Maker);
         context.Roles = [CheckerRole];
         context.LegalEntity = LegalEntityCode.Parse("GR-TEST");
