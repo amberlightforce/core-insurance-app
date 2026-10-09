@@ -2,6 +2,7 @@ using System.Globalization;
 using CoreIns.Modules.Market.Contracts.Spi;
 using CoreIns.Modules.Market.Domain;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Results;
@@ -15,10 +16,32 @@ namespace CoreIns.Modules.Market.Services;
 /// and Production refuses a non-Settled row (D-REG-02, D-SLC-09) through the same gate as the configuration resolver.
 /// <c>calculate</c> (SL3-MKT-CALCULATE) prices IPT from the configured rate rows.
 /// </summary>
-internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalculator
+internal sealed class MarketTaxCalculator(ConfigurationEngine engine, RequestContext? context = null) : ITaxCalculator
 {
-    public ValueTask<TaxCalculationResult> CalculateAsync(TaxCalculationRequest request, CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(Calculate(request));
+    /// <summary>
+    /// The state both operations price under (REQ-MKT-048, REQ-MKT-051): the request's <c>ConfigurationHash</c>, else the hash pinned for the unit of work
+    /// (so a command that captured H1 completes under H1 even when a pack is activated meanwhile), else the current state. The result is stamped with it.
+    /// </summary>
+    private async ValueTask<ConfigurationCatalogue> StateAsync(string? requested, CancellationToken cancellationToken) =>
+        await engine.StateAsync(ParseHash(requested), null, context?.ConfigurationHash, cancellationToken).ConfigureAwait(false);
+
+    private static ConfigurationHash? ParseHash(string? text) =>
+        text is null ? null
+        : ConfigurationHash.TryParse(text, out var hash) ? hash
+        : throw Validation("CONFIGURATION_HASH_INVALID", nameof(TaxTreatmentRequest.ConfigurationHash));
+
+    public async ValueTask<TaxCalculationResult> CalculateAsync(TaxCalculationRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Calculate(await StateAsync(request.ConfigurationHash, cancellationToken).ConfigureAwait(false), request);
+    }
+
+    /// <summary>Calculates under the fixed state of an engine built over one catalogue (tests); the SPI entry point is <see cref="CalculateAsync"/>.</summary>
+    internal TaxCalculationResult Calculate(TaxCalculationRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Calculate(engine.FixedState(ParseHash(request.ConfigurationHash), null), request);
+    }
 
     /// <summary>
     /// <c>calculate</c> (REQ-MKT-332, PRD-17 7.5): IPT = base x <c>tax.ipt.rate.&lt;taxClass&gt;</c> at the tax point, exact multiply (refused on
@@ -27,7 +50,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
     /// is <c>RULE_MISSING</c>. The line's legal status is the weaker of the rate and the rounding rule, and Production refuses anything not exactly
     /// Settled (PITFALLS 36). The sign follows the treatment action: a credit base only for ReduceProRata or ReverseAsVoid.
     /// </summary>
-    internal TaxCalculationResult Calculate(TaxCalculationRequest request)
+    internal TaxCalculationResult Calculate(ConfigurationCatalogue catalogue, TaxCalculationRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
         if (request.ChargeLines is null || request.ChargeLines.Count == 0)
@@ -54,13 +77,13 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
         var lines = new List<TaxLine>(request.ChargeLines.Count);
         foreach (var line in request.ChargeLines)
         {
-            lines.Add(CalculateLine(request, action, line));
+            lines.Add(CalculateLine(catalogue, request, action, line));
         }
 
         return new TaxCalculationResult(lines, []);
     }
 
-    private TaxLine CalculateLine(TaxCalculationRequest request, TreatmentAction action, TaxChargeLine line)
+    private TaxLine CalculateLine(ConfigurationCatalogue catalogue, TaxCalculationRequest request, TreatmentAction action, TaxChargeLine line)
     {
         if (string.IsNullOrWhiteSpace(line.TaxClass))
         {
@@ -97,7 +120,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
 
         // The jurisdiction's currency roles (cur.transaction, cur.functional): a line in any other currency is refused.
         var roles = CurrencyRoleKeys
-            .Select(k => engine.Catalogue.Find(k, request.RiskJurisdiction, at))
+            .Select(k => catalogue.Find(k, request.RiskJurisdiction, at))
             .Where(e => e is not null)
             .Select(e => e!.Value)
             .ToList();
@@ -113,7 +136,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
 
         var taxClass = line.TaxClass.Trim().ToLowerInvariant();
         var key = IptRatePrefix + taxClass;
-        var entry = ConfigKeys.Find(key) is null ? null : engine.Catalogue.Find(key, request.RiskJurisdiction, at);
+        var entry = ConfigKeys.Find(key) is null ? null : catalogue.Find(key, request.RiskJurisdiction, at);
         if (entry is null)
         {
             throw RuleMissing($"No IPT rate {key} in {request.RiskJurisdiction} on {request.TaxPointDate:yyyy-MM-dd}; the core holds no default (fail closed).");
@@ -123,7 +146,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
         ConfigEntry? roundingEntry = null;
         foreach (var candidate in new[] { ConfigKeys.RoundingTaxPrefix + taxClass, ConfigKeys.RoundingPrefix + "tax.line", ConfigKeys.RoundingDefault })
         {
-            if (ConfigKeys.Find(candidate) is not null && engine.Catalogue.Find(candidate, request.RiskJurisdiction, at) is { } found)
+            if (ConfigKeys.Find(candidate) is not null && catalogue.Find(candidate, request.RiskJurisdiction, at) is { } found)
             {
                 roundingEntry = found;
                 break;
@@ -191,7 +214,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
             RuleVersion = entry.VersionId.ToString(),
             LegalSourceRef = $"{entry.SourceRef}; rounding {roundingEntry.Key} ({roundingEntry.LegalStatus})",
             LegalStatus = weakest.LegalStatus,
-            ConfigurationHash = engine.Catalogue.Hash.Hash.ToString(),
+            ConfigurationHash = catalogue.Hash.Hash.ToString(),
         };
     }
 
@@ -202,10 +225,20 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
     private static SpiException RuleMissing(string message) =>
         new(new SpiError(SpiErrorCategory.RuleMissing, "RULE_MISSING"), message);
 
-    public ValueTask<TaxTreatmentResult> TreatmentAsync(TaxTreatmentRequest request, CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(Treatment(request));
+    public async ValueTask<TaxTreatmentResult> TreatmentAsync(TaxTreatmentRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Treatment(await StateAsync(request.ConfigurationHash, cancellationToken).ConfigureAwait(false), request);
+    }
 
+    /// <summary>Treatment under the fixed state of an engine built over one catalogue (tests); the SPI entry point is <see cref="TreatmentAsync"/>.</summary>
     internal TaxTreatmentResult Treatment(TaxTreatmentRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Treatment(engine.FixedState(ParseHash(request.ConfigurationHash), null), request);
+    }
+
+    internal TaxTreatmentResult Treatment(ConfigurationCatalogue catalogue, TaxTreatmentRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
         if (!Enum.IsDefined(request.TransactionKind) || !Enum.IsDefined(request.Category))
@@ -243,7 +276,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
         }
 
         var key = TaxTreatmentRules.Key(request.Category, request.TransactionKind, source);
-        var entry = engine.Catalogue.Find(key, request.RiskJurisdiction, new BusinessDate(request.TaxPointDate));
+        var entry = catalogue.Find(key, request.RiskJurisdiction, new BusinessDate(request.TaxPointDate));
         if (entry is null)
         {
             throw new SpiException(
@@ -271,7 +304,7 @@ internal sealed class MarketTaxCalculator(ConfigurationEngine engine) : ITaxCalc
             RuleVersion = row.RuleVersion,
             LegalStatus = entry.LegalStatus == LegalStatus.Settled ? TreatmentLegalStatus.Settled : TreatmentLegalStatus.Pending,
             LegalSourceRef = entry.SourceRef,
-            ConfigurationHash = engine.Catalogue.Hash.Hash.ToString(),
+            ConfigurationHash = catalogue.Hash.Hash.ToString(),
         };
     }
 

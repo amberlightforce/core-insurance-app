@@ -59,35 +59,72 @@ internal sealed record ConfigEntry(
     public bool IsSettled => LegalStatus is LegalStatus.Settled or LegalStatus.NotRegulatory;
 }
 
+/// <summary>The content a state is built from: its manifest, the core defaults and the content of every pack version it names.</summary>
+/// <param name="Manifest">The state manifest.</param>
+/// <param name="Core">The core defaults.</param>
+/// <param name="Packs">One content record per pack version in the manifest.</param>
+internal sealed record CatalogueState(ConfigStateManifest Manifest, PackVersionContent Core, IReadOnlyList<PackVersionContent> Packs)
+{
+    /// <summary>The genesis state of the shipped sources: the newest version of each (D-SL5-06).</summary>
+    public static CatalogueState Genesis(IEnumerable<IPackConfigurationSource> sources)
+    {
+        ArgumentNullException.ThrowIfNull(sources);
+        var packs = sources.Select(s => PackVersionContent.Of(s.PackId, s.PackVersion, s.Country, s.Values)).ToList();
+        return new CatalogueState(ConfigStateManifest.Genesis(packs, CoreDefaults.Content.Digest), CoreDefaults.Content, packs);
+    }
+}
+
 /// <summary>
-/// The configuration state of the stamp: core defaults (L0) plus the country-layer values (L3) of every bound pack source,
-/// validated against the key registry. Immutable; the hash is SHA-256 over the RFC 8785 canonical JSON of the manifest of
-/// all value versions (REQ-MKT-046), so it is independent of registration order and changes with any value or pack version.
-/// Layers L1, L2, L4 and L5 hold no values in the slice.
+/// One configuration state (REQ-MKT-046, D-SL5-06): core defaults (L0) plus the country-layer values (L3) of the pack versions the
+/// state manifest names, validated against the key registry. Immutable once built, so it can be cached by hash for ever; the hash is
+/// the hash of the state manifest (<see cref="ConfigStateManifest"/>), independent of registration order and changing with any pack
+/// version, digest, core digest or parent. Layers L1, L2, L4 and L5 hold no values in the slice.
 /// </summary>
 internal sealed class ConfigurationCatalogue
 {
     private readonly List<ConfigEntry> _entries = [];
 
+    /// <summary>Builds the genesis state of <paramref name="sources"/> (the newest version of each), active from <paramref name="activatedAt"/>.</summary>
     public ConfigurationCatalogue(IEnumerable<IPackConfigurationSource> sources, Instant activatedAt)
+        : this(CatalogueState.Genesis(sources), activatedAt)
     {
-        ArgumentNullException.ThrowIfNull(sources);
+    }
+
+    /// <summary>Builds the state described by <paramref name="state"/>; every digest the manifest names must match the content given.</summary>
+    public ConfigurationCatalogue(CatalogueState state, Instant activatedAt)
+    {
+        ArgumentNullException.ThrowIfNull(state);
         ActivatedAt = activatedAt;
-        foreach (var core in CoreDefaults.Values)
+        Manifest = state.Manifest;
+        Hash = state.Manifest.Hash;
+        if (state.Core.Digest != state.Manifest.CoreDigest || PackVersionContent.DigestOf(state.Core.Values) != state.Manifest.CoreDigest)
+        {
+            throw new InvalidOperationException("The core defaults do not match the core digest of the state manifest.");
+        }
+
+        foreach (var core in state.Core.Values)
         {
             Add(core, ConfigEntry.CoreNode, packId: null, packVersion: null);
         }
 
-        foreach (var source in sources)
+        foreach (var named in state.Manifest.Packs)
         {
-            foreach (var value in source.Values)
+            var content = state.Packs.SingleOrDefault(p => p.PackId == named.PackId && p.Version == named.Version)
+                ?? throw new InvalidOperationException($"Pack version {named.PackId}@{named.Version} named by the state manifest is not registered.");
+            if (content.Digest != named.Digest || PackVersionContent.DigestOf(content.Values) != named.Digest)
             {
-                Add(value, "country:" + source.Country, source.PackId, source.PackVersion);
+                throw new InvalidOperationException($"Pack version {named.PackId}@{named.Version} does not match the content digest of the state manifest.");
+            }
+
+            foreach (var value in content.Values)
+            {
+                Add(value, "country:" + named.Country, named.PackId, named.Version);
             }
         }
-
-        Hash = ComputeHash();
     }
+
+    /// <summary>The manifest this state was built from.</summary>
+    public ConfigStateManifest Manifest { get; }
 
     public Instant ActivatedAt { get; }
 
@@ -160,32 +197,6 @@ internal sealed class ConfigurationCatalogue
             return false;
         }
     }
-
-    private ConfigurationHash ComputeHash()
-    {
-        var manifest = new JsonArray();
-        foreach (var e in _entries
-                     .OrderBy(e => e.Key, StringComparer.Ordinal)
-                     .ThenBy(e => e.Node, StringComparer.Ordinal)
-                     .ThenBy(e => e.ValidFrom?.ToString(), StringComparer.Ordinal))
-        {
-            manifest.Add(new JsonObject
-            {
-                ["key"] = e.Key,
-                ["node"] = e.Node,
-                ["type"] = e.Type.ToString(),
-                ["value"] = e.Value,
-                ["legalStatus"] = e.LegalStatus.ToString(),
-                ["sourceRef"] = e.SourceRef,
-                ["motorPath"] = e.MotorPath,
-                ["validFrom"] = e.ValidFrom?.ToString(),
-                ["validTo"] = e.ValidTo?.ToString(),
-                ["pack"] = e.PackId is null ? null : $"{e.PackId}@{e.PackVersion}",
-            });
-        }
-
-        return new ConfigurationHash(CanonicalJson.Hash(new JsonObject { ["manifestVersion"] = "1", ["values"] = manifest }));
-    }
 }
 
 /// <summary>
@@ -195,6 +206,15 @@ internal sealed class ConfigurationCatalogue
 /// </summary>
 internal static class CoreDefaults
 {
+    /// <summary>Id under which the core defaults are registered in <c>mkt.pack_version</c> (not a country pack).</summary>
+    public const string PackId = "core";
+
+    /// <summary>
+    /// Version of the core defaults. They are code, but a state records their digest and must be able to rebuild them (REQ-MKT-048):
+    /// changing any default below without bumping this version fails the startup digest check.
+    /// </summary>
+    public const string Version = "1.0.0";
+
     private const string RoundingJson = """{"mode":"HALF_UP","scale":null,"level":"LINE"}""";
 
     public static IReadOnlyList<PackConfigValue> Values { get; } =
@@ -218,4 +238,7 @@ internal static class CoreDefaults
             "PRD-17 section 7.6 / REQ-MKT-194 core default: round per line, tax on the rounded base, round-then-sum, remainder to the first instalment",
             MotorPath: false),
     ];
+
+    /// <summary>The core defaults as a registrable version (declared after <see cref="Values"/>: static initialisers run in order).</summary>
+    public static PackVersionContent Content { get; } = PackVersionContent.Of(PackId, Version, null, Values);
 }

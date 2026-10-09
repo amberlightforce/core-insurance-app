@@ -85,7 +85,11 @@ public sealed class RequestContextMiddleware(RequestDelegate next)
 
         context.DryRun = IsTrue(http.Request.Query["dryRun"]) || IsTrue(http.Request.Headers[PlatformHeaders.DryRun]);
         context.Channel = http.Request.Headers[PlatformHeaders.Channel] is { Count: 1 } channel ? channel.ToString() : "STAFF";
-        context.ConfigurationHash = await configuration.CurrentHashAsync(null, http.RequestAborted).ConfigureAwait(false);
+        // Liveness/readiness must be able to report an unavailable database. They execute no business unit of work.
+        if (!http.Request.Path.Equals(new PathString("/health/live")) && !http.Request.Path.Equals(new PathString("/health/ready")))
+        {
+            context.ConfigurationHash = await configuration.CurrentHashAsync(null, http.RequestAborted).ConfigureAwait(false);
+        }
         await next(http).ConfigureAwait(false);
     }
 
