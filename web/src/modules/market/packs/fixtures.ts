@@ -27,7 +27,7 @@ export const pendingActivation: PackActivationView = {
   to: '0.1.0',
   status: 'PENDING_APPROVAL',
   reason: 'Synthetic recovery validation reason',
-  requestedBy: 'USER:releasemgr',
+  requestedBy: 'USER:dev:releasemgr',
   decidedBy: null,
   approvalRequestId: null,
   activatedAt: null,

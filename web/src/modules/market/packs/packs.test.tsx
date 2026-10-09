@@ -1,16 +1,22 @@
 import { screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '../../../i18n';
-import { mockApi, renderScreen } from '../../../test/mockApi';
+import { mockApi, problem, renderScreen } from '../../../test/mockApi';
 import { expectNoA11yViolations } from '../../../test/axe';
 import { ActivationPage } from './ActivationPage';
 import { ActivationDialog } from './ActivationDialog';
 import { PackDetailPage } from './PackDetailPage';
 import { PackRegistryPage } from './PackRegistryPage';
+import { RequirePackRole } from './RequirePackRole';
 import * as fx from './fixtures';
 
 const session = vi.hoisted(() => ({
-  user: { id: 'designauth', name: 'Synthetic checker', roles: ['Platform.DesignAuthority'] },
+  user: {
+    id: 'designauth',
+    actorKey: 'USER:dev:designauth',
+    name: 'Synthetic checker',
+    roles: ['Platform.DesignAuthority'],
+  },
 }));
 vi.mock('../../../dev-auth/devAuth', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../dev-auth/devAuth')>()),
@@ -20,6 +26,7 @@ vi.setConfig({ testTimeout: 60_000 });
 beforeEach(async () => {
   session.user = {
     id: 'designauth',
+    actorKey: 'USER:dev:designauth',
     name: 'Synthetic checker',
     roles: ['Platform.DesignAuthority'],
   };
@@ -28,6 +35,35 @@ beforeEach(async () => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('pack lifecycle and decisions', () => {
+  it('shows loading then a request failure with retry', async () => {
+    let finish: (() => void) | undefined;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/mkt/v1/packs',
+        respond: async () => {
+          await pending;
+          return problem(500, 'MKT-ERR-UNAVAILABLE', 'Synthetic registry unavailable');
+        },
+      },
+    ]);
+    renderScreen(<PackRegistryPage />, { path: '/admin/packs', url: '/admin/packs' });
+    expect(screen.getAllByText('Loading…').length).toBeGreaterThan(0);
+    finish?.();
+    await screen.findByText('Synthetic registry unavailable');
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+
+  it('guards the pack route for an unrelated role without an API request', async () => {
+    session.user.roles = ['Staff.ClaimsHandler'];
+    const api = mockApi([]);
+    renderScreen(<RequirePackRole />, { path: '/admin/packs', url: '/admin/packs' });
+    expect(screen.getByText('No permission')).toBeInTheDocument();
+    expect(api.calls).toHaveLength(0);
+  });
   it('requires a valid reason and the exact dry-run preview before a real request', async () => {
     const api = mockApi([
       {
@@ -59,20 +95,32 @@ describe('pack lifecycle and decisions', () => {
     await user.click(await screen.findByRole('option', { name: /0.1.0/ }));
     const reason = screen.getByRole('textbox', { name: /Reason/ });
     await user.type(reason, 'Too short');
-    expect(screen.getByRole('button', { name: 'Preview' })).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByRole('button', { name: 'Submit request' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Preview' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+    expect(screen.getByRole('button', { name: 'Submit request' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     await user.clear(reason);
     await user.type(reason, 'Synthetic correction reason');
     await user.click(screen.getByRole('button', { name: 'Preview' }));
-    await screen.findByText('Key changes');
+    await screen.findByText(/^Key changes/);
     expect(api.calls[0]?.url.searchParams.get('dryRun')).toBe('true');
     expect(api.calls).toHaveLength(1);
     expect(screen.getAllByText(/tax.treatment.rule.synthetic_/)).toHaveLength(8);
     await user.type(reason, ' updated');
-    expect(screen.getByRole('button', { name: 'Submit request' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Submit request' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     await user.click(screen.getByRole('button', { name: 'Preview' }));
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Submit request' })).not.toHaveAttribute('aria-disabled', 'true'),
+      expect(screen.getByRole('button', { name: 'Submit request' })).not.toHaveAttribute(
+        'aria-disabled',
+        'true',
+      ),
     );
     await user.click(screen.getByRole('button', { name: 'Submit request' }));
     await waitFor(() => expect(submitted).toHaveBeenCalledWith(fx.activationId));
@@ -103,7 +151,7 @@ describe('pack lifecycle and decisions', () => {
     await expectNoA11yViolations(container);
   });
 
-  it.each(['USER:designauth', 'designauth', 'SERVICE:worker'])(
+  it.each(['USER:dev:designauth', 'designauth', 'SERVICE:worker'])(
     'keeps maker or unverified actor %s read-only',
     async (requestedBy) => {
       const api = mockApi([
@@ -122,6 +170,23 @@ describe('pack lifecycle and decisions', () => {
       expect(api.callsTo('POST', '/api/mkt/v1/pack-activations/decide')).toHaveLength(0);
     },
   );
+
+  it('keeps a checker without a server actor key read-only', async () => {
+    session.user.actorKey = '';
+    mockApi([
+      {
+        method: 'GET',
+        path: `/api/mkt/v1/pack-activations/${fx.activationId}`,
+        respond: () => ({ body: fx.pendingActivation }),
+      },
+    ]);
+    renderScreen(<ActivationPage />, {
+      path: '/admin/packs/:packId/activations/:activationId',
+      url: `/admin/packs/${fx.packId}/activations/${fx.activationId}`,
+    });
+    await screen.findByText(/maker identity could not be verified/);
+    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+  });
 
   it('requires a decision reason and sends one explicit checker approval', async () => {
     const api = mockApi([

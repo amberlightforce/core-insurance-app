@@ -122,8 +122,8 @@ function ActivationDetail({
   const caller = useCaller();
   const pending = isPending(activation);
   // The maker sees the request read-only. The server also refuses the maker's principal (PITFALLS 3-6).
-  const isMaker = caller.id !== '' && activation.requestedBy === `USER:${caller.id}`;
-  const makerIsKnown = /^USER:[^\s:]+$/.test(activation.requestedBy);
+  const isMaker = caller.actorKey !== '' && activation.requestedBy === caller.actorKey;
+  const makerIsKnown = caller.actorKey !== '' && /^USER:\S+$/.test(activation.requestedBy);
   const kind = t(`packs.kind.${activation.kind}`);
 
   return (

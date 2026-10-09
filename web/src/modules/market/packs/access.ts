@@ -5,6 +5,7 @@ const viewerRoles = ['Platform.ReleaseManager', 'Platform.DesignAuthority', 'Pla
 
 export interface Caller {
   id: string;
+  actorKey: string;
   name: string;
   /** May request an activation or rollback (maker: Platform.ReleaseManager). */
   canRequest: boolean;
@@ -19,6 +20,7 @@ export function useCaller(): Caller {
   const roles = user?.roles ?? [];
   return {
     id: user?.id ?? '',
+    actorKey: user?.actorKey ?? '',
     name: user?.name ?? '',
     canRequest: roles.includes('Platform.ReleaseManager'),
     canDecide: roles.includes('Platform.DesignAuthority'),
