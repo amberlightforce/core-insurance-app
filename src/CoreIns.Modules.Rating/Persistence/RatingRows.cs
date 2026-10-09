@@ -53,6 +53,10 @@ internal sealed class RatingArtifactRow
 /// <summary><c>rat.rate_activation</c>: which artefact is live for a product version from a date (REQ-RAT-064).</summary>
 internal sealed class RateActivationRow
 {
+    public string? FallbackSourceVersion { get; set; }
+
+    public Guid? SourceEventId { get; set; }
+
     public Guid ActivationId { get; set; }
 
     public string ArtefactHash { get; set; } = string.Empty;
