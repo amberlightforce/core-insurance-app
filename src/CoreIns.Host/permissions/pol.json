@@ -17,7 +17,8 @@
         "pol.Renewal.accept": [ "Staff.Underwriter" ],
         "pol.PolicyChange.create": [ "Staff.Underwriter" ],
         "pol.change": [ "Staff.Underwriter" ],
-        "pol.Job.withdraw": [ "Staff.Underwriter" ]
+        "pol.Job.withdraw": [ "Staff.Underwriter" ],
+        "pol.Term.timeline": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Platform.Admin" ]
       }
     }
   }

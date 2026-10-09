@@ -81,8 +81,10 @@ internal sealed partial class PolicyReader(DbSession session)
             content = (null, null, nearestContent.Transactions, nearestContent.Charges);
         }
 
+        var terms = await TermsAsync(args, cancellationToken).ConfigureAwait(false);
         return new PolicyGetResponse
         {
+            Terms = [.. terms.Select(t => Term(t, validAt))],
             Policy = View(policy, nearest, validAt, legalEntityCode),
             Term = nearest is null ? null : Term(nearest, validAt),
             Segment = content.Segment,
@@ -111,7 +113,7 @@ internal sealed partial class PolicyReader(DbSession session)
 
         var knownAt = EffectiveKnownAt(requestedKnownAt, watermark);
         var response = await ReadTermAsync(legalEntity, legalEntityCode, termId, validAt, knownAt, cancellationToken).ConfigureAwait(false);
-        return response is null ? null : (response, knownAt);
+        return response is null ? null : (response with { EffectiveKnownAt = knownAt }, knownAt);
     }
 
     private async Task<TermGetResponse?> ReadTermAsync(LegalEntityId legalEntity, string legalEntityCode, Guid termId, Instant validAt, Instant knownAt, CancellationToken cancellationToken)
